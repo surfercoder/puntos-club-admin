@@ -22,8 +22,28 @@ export default async function AddressListPage() {
 
   return (
     <div className="space-y-6">
+      {/* Breadcrumb Navigation */}
+      <nav className="flex" aria-label="Breadcrumb">
+        <ol className="inline-flex items-center space-x-1 md:space-x-3">
+          <li className="inline-flex items-center">
+            <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-blue-600">
+              Dashboard
+            </Link>
+          </li>
+          <li>
+            <div className="flex items-center">
+              <span className="mx-2 text-gray-400">/</span>
+              <span className="text-sm font-medium text-gray-900">Addresses</span>
+            </div>
+          </li>
+        </ol>
+      </nav>
+      
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Addresses</h1>
+        <div>
+          <h1 className="text-2xl font-bold">Addresses</h1>
+          <p className="text-muted-foreground">Manage all addresses in your system</p>
+        </div>
         <Button asChild>
           <Link href="/dashboard/address/create">+ New Address</Link>
         </Button>
