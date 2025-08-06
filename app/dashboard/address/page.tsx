@@ -48,7 +48,7 @@ export default async function AddressListPage() {
           <Link href="/dashboard/address/create">+ New Address</Link>
         </Button>
       </div>
-      <div className="overflow-x-auto">
+      <div className="border rounded-lg">
         <Table>
           <TableHeader>
             <TableRow>

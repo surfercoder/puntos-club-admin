@@ -12,6 +12,7 @@ import { AddressSchema } from '@/schemas/address.schema';
 import { toast } from "sonner"
 import { useRouter } from 'next/navigation';
 import { useEffect } from 'react';
+import Link from 'next/link';
 
 export default function AddressForm({ address }: { address?: Address }) {
   // State
@@ -104,7 +105,7 @@ export default function AddressForm({ address }: { address?: Address }) {
       </div>
       <div className="flex gap-2">
         <Button asChild variant="secondary" className="w-full" type="button">
-          <a href="/dashboard/address">Cancel</a>
+          <Link href="/dashboard/address">Cancel</Link>
         </Button>
         <Button type="submit" className="w-full" disabled={pending}>
           {address ? 'Update' : 'Create'}

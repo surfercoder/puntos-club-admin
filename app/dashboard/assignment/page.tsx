@@ -56,7 +56,7 @@ export default async function AssignmentListPage() {
         </Button>
       </div>
 
-      <div className="overflow-x-auto">
+      <div className="border rounded-lg">
         <Table>
           <TableHeader>
             <TableRow>

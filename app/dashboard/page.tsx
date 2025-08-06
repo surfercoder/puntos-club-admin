@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Award } from "lucide-react";
+import { MapPin, Award, Users, Building2 } from "lucide-react";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -27,6 +27,20 @@ export default async function DashboardPage() {
       description: "Manage point assignments for beneficiaries",
       icon: Award,
       href: "/dashboard/assignment",
+      count: null,
+    },
+    {
+      name: "Beneficiary",
+      description: "Manage beneficiaries and their information",
+      icon: Users,
+      href: "/dashboard/beneficiary",
+      count: null,
+    },
+    {
+      name: "Branch",
+      description: "Manage branches and locations",
+      icon: Building2,
+      href: "/dashboard/branch",
       count: null,
     },
     // Future entities can be added here

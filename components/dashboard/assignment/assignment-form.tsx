@@ -14,6 +14,7 @@ import { AssignmentSchema } from '@/schemas/assignment.schema';
 import { toast } from "sonner"
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
+import Link from 'next/link';
 
 export default function AssignmentForm({ assignment }: { assignment?: Assignment }) {
   // State
@@ -189,7 +190,7 @@ export default function AssignmentForm({ assignment }: { assignment?: Assignment
 
       <div className="flex gap-2">
         <Button asChild variant="secondary" className="w-full" type="button">
-          <a href="/dashboard/assignment">Cancel</a>
+          <Link href="/dashboard/assignment">Cancel</Link>
         </Button>
         <Button type="submit" className="w-full" disabled={pending}>
           {assignment ? 'Update' : 'Create'}
