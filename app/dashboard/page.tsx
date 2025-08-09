@@ -3,7 +3,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Award, Users, Building2 } from "lucide-react";
+import { MapPin, Award, Users, Building2, Building, Tag, CheckCircle } from "lucide-react";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -41,6 +41,27 @@ export default async function DashboardPage() {
       description: "Manage branches and locations",
       icon: Building2,
       href: "/dashboard/branch",
+      count: null,
+    },
+    {
+      name: "Organization",
+      description: "Manage organizations and their details",
+      icon: Building,
+      href: "/dashboard/organization",
+      count: null,
+    },
+    {
+      name: "Category",
+      description: "Manage product categories and classifications",
+      icon: Tag,
+      href: "/dashboard/category",
+      count: null,
+    },
+    {
+      name: "Status",
+      description: "Manage order statuses and workflow states",
+      icon: CheckCircle,
+      href: "/dashboard/status",
       count: null,
     },
     // Future entities can be added here

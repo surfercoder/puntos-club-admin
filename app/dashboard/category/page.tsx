@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
-import { BranchWithRelations } from '@/types/branch';
-import DeleteModal from '@/components/dashboard/branch/delete-modal';
+import { Category } from '@/types/category';
+import DeleteModal from '@/components/dashboard/category/delete-modal';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import {
@@ -13,18 +13,12 @@ import {
   TableCell,
 } from '@/components/ui/table';
 
-export default async function BranchListPage() {
+export default async function CategoryListPage() {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('branch')
-    .select(`
-      *,
-      organization:organization_id(name),
-      address:address_id(street, city)
-    `);
+  const { data, error } = await supabase.from('category').select('*').order('name');
 
   if (error) {
-    return <div>Error fetching branches</div>;
+    return <div>Error fetching categories</div>;
   }
 
   return (
@@ -40,7 +34,7 @@ export default async function BranchListPage() {
           <li>
             <div className="flex items-center">
               <span className="mx-2 text-gray-400">/</span>
-              <span className="text-sm font-medium text-gray-900">Branches</span>
+              <span className="text-sm font-medium text-gray-900">Categories</span>
             </div>
           </li>
         </ol>
@@ -48,11 +42,11 @@ export default async function BranchListPage() {
       
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Branches</h1>
-          <p className="text-muted-foreground">Manage all branches in your system</p>
+          <h1 className="text-2xl font-bold">Categories</h1>
+          <p className="text-muted-foreground">Manage product categories in your system</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/branch/create">+ New Branch</Link>
+          <Link href="/dashboard/category/create">+ New Category</Link>
         </Button>
       </div>
 
@@ -61,47 +55,38 @@ export default async function BranchListPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Organization</TableHead>
-              <TableHead>Code</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Address</TableHead>
+              <TableHead>Description</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data && data.length > 0 ? (
-              data.map((branch: BranchWithRelations) => (
-                <TableRow key={branch.id}>
-                  <TableCell className="font-medium">{branch.name}</TableCell>
-                  <TableCell>{branch.organization?.name || 'N/A'}</TableCell>
-                  <TableCell>{branch.code || 'N/A'}</TableCell>
-                  <TableCell>{branch.phone || 'N/A'}</TableCell>
-                  <TableCell>
-                    {branch.address 
-                      ? `${branch.address.street}, ${branch.address.city}`
-                      : 'N/A'
-                    }
+              data.map((category: Category) => (
+                <TableRow key={category.id}>
+                  <TableCell className="font-medium">
+                    {category.name}
                   </TableCell>
+                  <TableCell>{category.description || 'N/A'}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      branch.active 
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      category.active 
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {branch.active ? 'Active' : 'Inactive'}
+                      {category.active ? 'Active' : 'Inactive'}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button variant="secondary" size="sm" asChild>
-                        <Link href={`/dashboard/branch/edit/${branch.id}`}>
+                        <Link href={`/dashboard/category/edit/${category.id}`}>
                           <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
                       <DeleteModal 
-                        branchId={branch.id}
-                        branchName={branch.name}
+                        categoryId={category.id}
+                        categoryName={category.name}
                       />
                     </div>
                   </TableCell>
@@ -109,7 +94,7 @@ export default async function BranchListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-4">No branches found.</TableCell>
+                <TableCell colSpan={4} className="text-center py-4">No categories found.</TableCell>
               </TableRow>
             )}
           </TableBody>

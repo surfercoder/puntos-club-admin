@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Beneficiary } from '@/types/beneficiary';
 import DeleteModal from '@/components/dashboard/beneficiary/delete-modal';
 import { Button } from '@/components/ui/button';
+import { Pencil } from 'lucide-react';
 import {
   Table,
   TableHeader,
@@ -81,9 +82,9 @@ export default async function BeneficiaryListPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Button variant="outline" size="sm" asChild>
+                      <Button variant="secondary" size="sm" asChild>
                         <Link href={`/dashboard/beneficiary/edit/${beneficiary.id}`}>
-                          Edit
+                          <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
                       <DeleteModal 

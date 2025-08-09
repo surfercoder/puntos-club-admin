@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { AssignmentWithRelations } from '@/types/assignment';
 import DeleteModal from '@/components/dashboard/assignment/delete-modal';
 import { Button } from '@/components/ui/button';
+import { Pencil } from 'lucide-react';
 import {
   Table,
   TableHeader,
@@ -93,7 +94,9 @@ export default async function AssignmentListPage() {
                   </TableCell>
                   <TableCell className="flex gap-2">
                     <Button asChild size="sm" variant="secondary">
-                      <Link href={`/dashboard/assignment/edit/${assignment.id}`}>Edit</Link>
+                      <Link href={`/dashboard/assignment/edit/${assignment.id}`}>
+                        <Pencil className="h-4 w-4" />
+                      </Link>
                     </Button>
                     <DeleteModal id={assignment.id} />
                   </TableCell>

@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Address } from '@/types/address';
 import DeleteModal from '@/components/dashboard/address/delete-modal';
 import { Button } from '@/components/ui/button';
+import { Pencil } from 'lucide-react';
 import {
   Table,
   TableHeader,
@@ -71,7 +72,9 @@ export default async function AddressListPage() {
                   <TableCell>{address.zip_code}</TableCell>
                   <TableCell className="flex gap-2">
                     <Button asChild size="sm" variant="secondary">
-                      <Link href={`/dashboard/address/edit/${address.id}`}>Edit</Link>
+                      <Link href={`/dashboard/address/edit/${address.id}`}>
+                        <Pencil className="h-4 w-4" />
+                      </Link>
                     </Button>
                     <DeleteModal id={Number(address.id)} />
                   </TableCell>

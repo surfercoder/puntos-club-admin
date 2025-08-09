@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
-import { BranchWithRelations } from '@/types/branch';
-import DeleteModal from '@/components/dashboard/branch/delete-modal';
+import { Organization } from '@/types/organization';
+import DeleteModal from '@/components/dashboard/organization/delete-modal';
 import { Button } from '@/components/ui/button';
 import { Pencil } from 'lucide-react';
 import {
@@ -13,18 +13,12 @@ import {
   TableCell,
 } from '@/components/ui/table';
 
-export default async function BranchListPage() {
+export default async function OrganizationListPage() {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('branch')
-    .select(`
-      *,
-      organization:organization_id(name),
-      address:address_id(street, city)
-    `);
+  const { data, error } = await supabase.from('organization').select('*').order('name');
 
   if (error) {
-    return <div>Error fetching branches</div>;
+    return <div>Error fetching organizations</div>;
   }
 
   return (
@@ -40,7 +34,7 @@ export default async function BranchListPage() {
           <li>
             <div className="flex items-center">
               <span className="mx-2 text-gray-400">/</span>
-              <span className="text-sm font-medium text-gray-900">Branches</span>
+              <span className="text-sm font-medium text-gray-900">Organizations</span>
             </div>
           </li>
         </ol>
@@ -48,11 +42,11 @@ export default async function BranchListPage() {
       
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Branches</h1>
-          <p className="text-muted-foreground">Manage all branches in your system</p>
+          <h1 className="text-2xl font-bold">Organizations</h1>
+          <p className="text-muted-foreground">Manage all organizations in your system</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/branch/create">+ New Branch</Link>
+          <Link href="/dashboard/organization/create">+ New Organization</Link>
         </Button>
       </div>
 
@@ -61,47 +55,34 @@ export default async function BranchListPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
-              <TableHead>Organization</TableHead>
-              <TableHead>Code</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Address</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead>Business Name</TableHead>
+              <TableHead>Tax ID</TableHead>
+              <TableHead>Creation Date</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data && data.length > 0 ? (
-              data.map((branch: BranchWithRelations) => (
-                <TableRow key={branch.id}>
-                  <TableCell className="font-medium">{branch.name}</TableCell>
-                  <TableCell>{branch.organization?.name || 'N/A'}</TableCell>
-                  <TableCell>{branch.code || 'N/A'}</TableCell>
-                  <TableCell>{branch.phone || 'N/A'}</TableCell>
-                  <TableCell>
-                    {branch.address 
-                      ? `${branch.address.street}, ${branch.address.city}`
-                      : 'N/A'
-                    }
+              data.map((organization: Organization) => (
+                <TableRow key={organization.id}>
+                  <TableCell className="font-medium">
+                    {organization.name}
                   </TableCell>
+                  <TableCell>{organization.business_name || 'N/A'}</TableCell>
+                  <TableCell>{organization.tax_id || 'N/A'}</TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      branch.active 
-                        ? 'bg-green-100 text-green-800' 
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {branch.active ? 'Active' : 'Inactive'}
-                    </span>
+                    {new Date(organization.creation_date).toLocaleDateString()}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button variant="secondary" size="sm" asChild>
-                        <Link href={`/dashboard/branch/edit/${branch.id}`}>
+                        <Link href={`/dashboard/organization/edit/${organization.id}`}>
                           <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
                       <DeleteModal 
-                        branchId={branch.id}
-                        branchName={branch.name}
+                        organizationId={organization.id}
+                        organizationName={organization.name}
                       />
                     </div>
                   </TableCell>
@@ -109,7 +90,7 @@ export default async function BranchListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-4">No branches found.</TableCell>
+                <TableCell colSpan={5} className="text-center py-4">No organizations found.</TableCell>
               </TableRow>
             )}
           </TableBody>
