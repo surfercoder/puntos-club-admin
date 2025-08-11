@@ -23,12 +23,12 @@ export async function categoryFormAction(
     result = await createCategory(input as any);
   }
 
-  if (result.error) {
-    if ('fieldErrors' in result.error) {
+  if (result.error || !result.data) {
+    if (result.error && 'fieldErrors' in result.error && result.error.fieldErrors) {
       // Convert string errors to string array format
       const fieldErrors: Record<string, string[]> = {};
       Object.entries(result.error.fieldErrors).forEach(([key, value]) => {
-        fieldErrors[key] = [value];
+        fieldErrors[key] = Array.isArray(value) ? value : [value as string];
       });
       return {
         ...EMPTY_ACTION_STATE,

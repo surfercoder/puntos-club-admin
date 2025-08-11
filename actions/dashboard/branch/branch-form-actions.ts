@@ -14,7 +14,7 @@ export async function branchFormAction(
   
   const input: BranchInput = {
     organization_id: formData.get('organization_id') as string,
-    address_id: addressId === 'none' ? null : addressId,
+    address_id: addressId === 'none' || addressId === '' ? null : addressId,
     name: formData.get('name') as string,
     code: formData.get('code') as string || null,
     phone: formData.get('phone') as string || null,
@@ -28,12 +28,16 @@ export async function branchFormAction(
     result = await createBranch(input as any);
   }
 
-  if (result.error) {
-    if ('fieldErrors' in result.error) {
+  if (result.error || !result.data) {
+    if (result.error && 'fieldErrors' in result.error) {
       // Convert string errors to string array format
       const fieldErrors: Record<string, string[]> = {};
       Object.entries(result.error.fieldErrors).forEach(([key, value]) => {
-        fieldErrors[key] = [value];
+        if (Array.isArray(value)) {
+          fieldErrors[key] = value;
+        } else {
+          fieldErrors[key] = [value];
+        }
       });
       return {
         ...EMPTY_ACTION_STATE,

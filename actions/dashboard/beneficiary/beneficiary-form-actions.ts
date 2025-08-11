@@ -26,12 +26,16 @@ export async function beneficiaryFormAction(
     result = await createBeneficiary(input as any);
   }
 
-  if (result.error) {
-    if ('fieldErrors' in result.error) {
+  if (result.error || !result.data) {
+    if (result.error && 'fieldErrors' in result.error) {
       // Convert string errors to string array format
       const fieldErrors: Record<string, string[]> = {};
       Object.entries(result.error.fieldErrors).forEach(([key, value]) => {
-        fieldErrors[key] = [value];
+        if (Array.isArray(value)) {
+          fieldErrors[key] = value;
+        } else {
+          fieldErrors[key] = [value];
+        }
       });
       return {
         ...EMPTY_ACTION_STATE,

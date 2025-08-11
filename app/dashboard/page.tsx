@@ -3,7 +3,23 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { MapPin, Award, Users, Building2, Building, Tag, CheckCircle } from "lucide-react";
+import { 
+  MapPin, 
+  Award, 
+  Users, 
+  Building2, 
+  Building, 
+  Tag, 
+  CheckCircle, 
+  Package, 
+  Layers, 
+  ShoppingCart, 
+  UserCheck, 
+  History, 
+  Gift, 
+  Package2, 
+  Shield 
+} from "lucide-react";
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -64,21 +80,62 @@ export default async function DashboardPage() {
       href: "/dashboard/status",
       count: null,
     },
-    // Future entities can be added here
-    // {
-    //   name: "Users",
-    //   description: "Manage user accounts and permissions",
-    //   icon: Users,
-    //   href: "/dashboard/users",
-    //   count: null,
-    // },
-    // {
-    //   name: "Products",
-    //   description: "Manage your product catalog",
-    //   icon: Package,
-    //   href: "/dashboard/products",
-    //   count: null,
-    // },
+    {
+      name: "Product",
+      description: "Manage your product catalog and inventory",
+      icon: Package,
+      href: "/dashboard/product",
+      count: null,
+    },
+    {
+      name: "Subcategory",
+      description: "Manage product subcategories and classifications",
+      icon: Layers,
+      href: "/dashboard/subcategory",
+      count: null,
+    },
+    {
+      name: "App Order",
+      description: "Manage application orders and tracking",
+      icon: ShoppingCart,
+      href: "/dashboard/app_order",
+      count: null,
+    },
+    {
+      name: "App User",
+      description: "Manage application users and accounts",
+      icon: UserCheck,
+      href: "/dashboard/app_user",
+      count: null,
+    },
+    {
+      name: "History",
+      description: "View and manage order history and changes",
+      icon: History,
+      href: "/dashboard/history",
+      count: null,
+    },
+    {
+      name: "Redemption",
+      description: "Manage product redemptions and rewards",
+      icon: Gift,
+      href: "/dashboard/redemption",
+      count: null,
+    },
+    {
+      name: "Stock",
+      description: "Manage inventory stock levels and availability",
+      icon: Package2,
+      href: "/dashboard/stock",
+      count: null,
+    },
+    {
+      name: "User Permission",
+      description: "Manage user permissions and access control",
+      icon: Shield,
+      href: "/dashboard/user_permission",
+      count: null,
+    },
   ];
 
   return (
