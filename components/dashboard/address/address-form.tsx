@@ -54,7 +54,7 @@ export default function AddressForm({ address }: { address?: Address }) {
           id="street"
           name="street"
           defaultValue={address?.street ?? ''}
-          aria-invalid={!!actionState.fieldErrors.street}
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.street}
           aria-describedby="street-error"
         />
         <FieldError actionState={validation ?? actionState} name="street" />
@@ -65,7 +65,7 @@ export default function AddressForm({ address }: { address?: Address }) {
           id="number"
           name="number"
           defaultValue={address?.number ?? ''}
-          aria-invalid={!!actionState.fieldErrors.number}
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.number}
           aria-describedby="number-error"
         />
         <FieldError actionState={validation ?? actionState} name="number" />
@@ -76,7 +76,7 @@ export default function AddressForm({ address }: { address?: Address }) {
           id="city"
           name="city"
           defaultValue={address?.city ?? ''}
-          aria-invalid={!!actionState.fieldErrors.city}
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.city}
           aria-describedby="city-error"
         />
         <FieldError actionState={validation ?? actionState} name="city" />
@@ -87,7 +87,7 @@ export default function AddressForm({ address }: { address?: Address }) {
           id="state"
           name="state"
           defaultValue={address?.state ?? ''}
-          aria-invalid={!!actionState.fieldErrors.state}
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.state}
           aria-describedby="state-error"
         />
         <FieldError actionState={validation ?? actionState} name="state" />
@@ -98,7 +98,7 @@ export default function AddressForm({ address }: { address?: Address }) {
           id="zip_code"
           name="zip_code"
           defaultValue={address?.zip_code ?? ''}
-          aria-invalid={!!actionState.fieldErrors.zip_code}
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.zip_code}
           aria-describedby="zip_code-error"
         />
         <FieldError actionState={validation ?? actionState} name="zip_code" />

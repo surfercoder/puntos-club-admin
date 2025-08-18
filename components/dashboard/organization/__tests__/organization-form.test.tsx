@@ -57,7 +57,15 @@ jest.mock('@/components/ui/button', () => ({
 }));
 
 jest.mock('@/components/ui/input', () => ({
-  Input: (props: Record<string, unknown>) => React.createElement('input', { type: 'text', ...props }),
+  Input: (props: Record<string, unknown>) => {
+    const { className, ...otherProps } = props;
+    return React.createElement('input', { 
+      type: 'text',
+      'aria-invalid': 'false',
+      ...otherProps,
+      className
+    });
+  },
 }));
 
 jest.mock('@/components/ui/label', () => ({
@@ -249,6 +257,44 @@ describe('OrganizationForm', () => {
 
       // Form submission functionality works, which is what we're testing
       expect(submitButton).toBeInTheDocument();
+    });
+  });
+
+  describe('Accessibility', () => {
+    it('has proper aria attributes for form fields', async () => {
+      useActionState.mockReturnValue([
+        { 
+          message: '', 
+          fieldErrors: { 
+            name: ['Name error'],
+            business_name: ['Business name error']
+          } 
+        },
+        jest.fn(),
+        false,
+      ]);
+
+      render(<OrganizationForm />);
+
+      const nameInput = screen.getByLabelText(/^name$/i);
+      const businessNameInput = screen.getByLabelText(/business name/i);
+
+      expect(nameInput).toHaveAttribute('aria-invalid', 'true');
+      expect(nameInput).toHaveAttribute('aria-describedby', 'name-error');
+      expect(businessNameInput).toHaveAttribute('aria-invalid', 'true');
+      expect(businessNameInput).toHaveAttribute('aria-describedby', 'business_name-error');
+    });
+
+    it('has proper aria attributes when no errors', async () => {
+      render(<OrganizationForm />);
+
+      const nameInput = screen.getByLabelText(/^name$/i);
+      const businessNameInput = screen.getByLabelText(/business name/i);
+      const taxIdInput = screen.getByLabelText(/tax id/i);
+
+      expect(nameInput).toHaveAttribute('aria-invalid', 'false');
+      expect(businessNameInput).toHaveAttribute('aria-invalid', 'false');
+      expect(taxIdInput).toHaveAttribute('aria-invalid', 'false');
     });
   });
 });

@@ -58,6 +58,8 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
           type="text"
           defaultValue={beneficiary?.first_name ?? ''}
           placeholder="Enter first name"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.first_name}
+          aria-describedby="first_name-error"
         />
         <FieldError actionState={validation ?? actionState} name="first_name" />
       </div>
@@ -70,6 +72,8 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
           type="text"
           defaultValue={beneficiary?.last_name ?? ''}
           placeholder="Enter last name"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.last_name}
+          aria-describedby="last_name-error"
         />
         <FieldError actionState={validation ?? actionState} name="last_name" />
       </div>
@@ -82,6 +86,8 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
           type="email"
           defaultValue={beneficiary?.email ?? ''}
           placeholder="Enter email address"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.email}
+          aria-describedby="email-error"
         />
         <FieldError actionState={validation ?? actionState} name="email" />
       </div>
@@ -94,6 +100,8 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
           type="tel"
           defaultValue={beneficiary?.phone ?? ''}
           placeholder="Enter phone number"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.phone}
+          aria-describedby="phone-error"
         />
         <FieldError actionState={validation ?? actionState} name="phone" />
       </div>
@@ -106,6 +114,8 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
           type="text"
           defaultValue={beneficiary?.document_id ?? ''}
           placeholder="Enter document ID"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.document_id}
+          aria-describedby="document_id-error"
         />
         <FieldError actionState={validation ?? actionState} name="document_id" />
       </div>
@@ -120,6 +130,8 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
           step="1"
           defaultValue={beneficiary?.available_points ?? 0}
           placeholder="Enter available points"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.available_points}
+          aria-describedby="available_points-error"
         />
         <FieldError actionState={validation ?? actionState} name="available_points" />
       </div>

@@ -57,7 +57,15 @@ jest.mock('@/components/ui/button', () => ({
 }));
 
 jest.mock('@/components/ui/input', () => ({
-  Input: (props: Record<string, unknown>) => React.createElement('input', { type: 'text', ...props }),
+  Input: (props: Record<string, unknown>) => {
+    const { className, ...otherProps } = props;
+    return React.createElement('input', { 
+      type: 'text',
+      'aria-invalid': 'false',
+      ...otherProps,
+      className
+    });
+  },
 }));
 
 jest.mock('@/components/ui/label', () => ({
@@ -65,7 +73,14 @@ jest.mock('@/components/ui/label', () => ({
 }));
 
 jest.mock('@/components/ui/textarea', () => ({
-  Textarea: (props: Record<string, unknown>) => React.createElement('textarea', props),
+  Textarea: (props: Record<string, unknown>) => {
+    const { className, ...otherProps } = props;
+    return React.createElement('textarea', { 
+      'aria-invalid': 'false',
+      ...otherProps,
+      className
+    });
+  },
 }));
 
 jest.mock('@/components/ui/field-error', () => ({
@@ -320,6 +335,46 @@ describe('StatusForm', () => {
       expect(screen.getByLabelText(/^name$/i)).toHaveAttribute('type', 'text');
       expect(screen.getByLabelText(/order number/i)).toHaveAttribute('type', 'number');
       expect(screen.getByLabelText(/is terminal status/i)).toHaveAttribute('type', 'checkbox');
+    });
+
+    it('has proper aria attributes for form fields', async () => {
+      useActionState.mockReturnValue([
+        { 
+          message: '', 
+          fieldErrors: { 
+            name: ['Name error'],
+            description: ['Description error'],
+            order_num: ['Order error']
+          } 
+        },
+        jest.fn(),
+        false,
+      ]);
+
+      render(<StatusForm />);
+
+      const nameInput = screen.getByLabelText(/^name$/i);
+      const descriptionInput = screen.getByLabelText(/description/i);
+      const orderInput = screen.getByLabelText(/order number/i);
+
+      expect(nameInput).toHaveAttribute('aria-invalid', 'true');
+      expect(nameInput).toHaveAttribute('aria-describedby', 'name-error');
+      expect(descriptionInput).toHaveAttribute('aria-invalid', 'true');
+      expect(descriptionInput).toHaveAttribute('aria-describedby', 'description-error');
+      expect(orderInput).toHaveAttribute('aria-invalid', 'true');
+      expect(orderInput).toHaveAttribute('aria-describedby', 'order_num-error');
+    });
+
+    it('has proper aria attributes when no errors', async () => {
+      render(<StatusForm />);
+
+      const nameInput = screen.getByLabelText(/^name$/i);
+      const descriptionInput = screen.getByLabelText(/description/i);
+      const orderInput = screen.getByLabelText(/order number/i);
+
+      expect(nameInput).toHaveAttribute('aria-invalid', 'false');
+      expect(descriptionInput).toHaveAttribute('aria-invalid', 'false');
+      expect(orderInput).toHaveAttribute('aria-invalid', 'false');
     });
   });
 });

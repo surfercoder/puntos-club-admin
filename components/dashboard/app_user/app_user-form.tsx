@@ -116,6 +116,8 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
           type="text"
           defaultValue={appUser?.first_name ?? ''}
           placeholder="Enter first name (optional)"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.first_name}
+          aria-describedby="first_name-error"
         />
         <FieldError actionState={validation ?? actionState} name="first_name" />
       </div>
@@ -128,6 +130,8 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
           type="text"
           defaultValue={appUser?.last_name ?? ''}
           placeholder="Enter last name (optional)"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.last_name}
+          aria-describedby="last_name-error"
         />
         <FieldError actionState={validation ?? actionState} name="last_name" />
       </div>
@@ -140,6 +144,8 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
           type="email"
           defaultValue={appUser?.email ?? ''}
           placeholder="Enter email (optional)"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.email}
+          aria-describedby="email-error"
         />
         <FieldError actionState={validation ?? actionState} name="email" />
       </div>
@@ -152,6 +158,8 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
           type="text"
           defaultValue={appUser?.username ?? ''}
           placeholder="Enter username (optional)"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.username}
+          aria-describedby="username-error"
         />
         <FieldError actionState={validation ?? actionState} name="username" />
       </div>
@@ -163,6 +171,8 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
           name="password"
           type="password"
           placeholder="Enter password (optional)"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.password}
+          aria-describedby="password-error"
         />
         <FieldError actionState={validation ?? actionState} name="password" />
       </div>

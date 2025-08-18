@@ -152,6 +152,8 @@ export default function HistoryForm({ history }: HistoryFormProps) {
           name="change_date"
           type="date"
           defaultValue={history?.change_date ? formatDateForInput(history.change_date) : ''}
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.change_date}
+          aria-describedby="change_date-error"
         />
         <FieldError actionState={validation ?? actionState} name="change_date" />
       </div>
@@ -164,6 +166,8 @@ export default function HistoryForm({ history }: HistoryFormProps) {
           defaultValue={history?.observations ?? ''}
           placeholder="Enter observations (optional)"
           rows={3}
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.observations}
+          aria-describedby="observations-error"
         />
         <FieldError actionState={validation ?? actionState} name="observations" />
       </div>

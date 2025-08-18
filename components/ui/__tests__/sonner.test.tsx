@@ -1,12 +1,17 @@
+import React from 'react';
 import { render } from '@testing-library/react';
-import { Toaster } from '../sonner';
+import { useTheme } from 'next-themes';
 
 // Mock next-themes
 jest.mock('next-themes', () => ({
-  useTheme: () => ({
+  useTheme: jest.fn(() => ({
     theme: 'light'
-  })
+  }))
 }));
+
+import { Toaster } from '../sonner';
+
+const mockUseTheme = useTheme as jest.MockedFunction<typeof useTheme>;
 
 // Mock sonner
 jest.mock('sonner', () => ({
@@ -53,23 +58,25 @@ describe('Toaster', () => {
 
   it('should handle dark theme', () => {
     // Mock useTheme to return dark theme
-    jest.mock('next-themes', () => ({
-      useTheme: () => ({
-        theme: 'dark'
-      })
-    }));
+    mockUseTheme.mockReturnValueOnce({
+      theme: 'dark'
+    });
 
     const { getByTestId } = render(<Toaster />);
     
     const toaster = getByTestId('sonner-toaster');
-    expect(toaster).toBeInTheDocument();
+    expect(toaster).toHaveAttribute('data-theme', 'dark');
   });
 
   it('should handle system theme as fallback', () => {
-    // The mocked theme defaults to 'light', so this test verifies the mock is working
+    // Mock useTheme to return undefined theme, which should fallback to 'system'
+    mockUseTheme.mockReturnValueOnce({
+      theme: undefined
+    });
+
     const { getByTestId } = render(<Toaster />);
     
     const toaster = getByTestId('sonner-toaster');
-    expect(toaster).toHaveAttribute('data-theme', 'light');
+    expect(toaster).toHaveAttribute('data-theme', 'system');
   });
 });

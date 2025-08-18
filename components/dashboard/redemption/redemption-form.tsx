@@ -190,6 +190,8 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
           min="0"
           defaultValue={redemption?.points_used ?? 0}
           placeholder="Enter points used"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.points_used}
+          aria-describedby="points_used-error"
         />
         <FieldError actionState={validation ?? actionState} name="points_used" />
       </div>
@@ -203,6 +205,8 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
           min="0"
           defaultValue={redemption?.quantity ?? 0}
           placeholder="Enter quantity"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.quantity}
+          aria-describedby="quantity-error"
         />
         <FieldError actionState={validation ?? actionState} name="quantity" />
       </div>
@@ -214,6 +218,8 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
           name="redemption_date"
           type="date"
           defaultValue={redemption?.redemption_date ? formatDateForInput(redemption.redemption_date) : ''}
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.redemption_date}
+          aria-describedby="redemption_date-error"
         />
         <FieldError actionState={validation ?? actionState} name="redemption_date" />
       </div>

@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import {
   Select,
@@ -5,6 +6,11 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue,
+  SelectLabel,
+  SelectSeparator,
+  SelectScrollUpButton,
+  SelectScrollDownButton,
+  SelectGroup,
 } from '../select';
 
 describe('Select Components', () => {
@@ -219,6 +225,48 @@ describe('Select Components', () => {
 
       const content = screen.getByRole('listbox');
       expect(content).toHaveClass('custom-content');
+    });
+  });
+
+  describe('Additional Select Components', () => {
+    it('renders SelectSeparator, SelectLabel, SelectScrollUpButton and SelectScrollDownButton', () => {
+      const { container } = render(
+        <Select defaultOpen>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectScrollUpButton />
+            <SelectGroup>
+              <SelectLabel>Select Label</SelectLabel>
+              <SelectItem value="option1">Option 1</SelectItem>
+            </SelectGroup>
+            <SelectSeparator />
+            <SelectItem value="option2">Option 2</SelectItem>
+            <SelectScrollDownButton />
+          </SelectContent>
+        </Select>
+      );
+
+      expect(screen.getByText('Select Label')).toBeInTheDocument();
+      expect(container).toBeInTheDocument();
+    });
+
+    it('renders SelectGroup', () => {
+      const { container } = render(
+        <Select defaultOpen>
+          <SelectTrigger>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectGroup>
+              <SelectItem value="option1">Option 1</SelectItem>
+            </SelectGroup>
+          </SelectContent>
+        </Select>
+      );
+
+      expect(container).toBeInTheDocument();
     });
   });
 });

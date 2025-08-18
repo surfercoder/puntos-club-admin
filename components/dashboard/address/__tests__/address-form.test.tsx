@@ -57,7 +57,15 @@ jest.mock('@/components/ui/button', () => ({
 }));
 
 jest.mock('@/components/ui/input', () => ({
-  Input: (props: Record<string, unknown>) => React.createElement('input', { type: 'text', ...props }),
+  Input: (props: Record<string, unknown>) => {
+    const { className, ...otherProps } = props;
+    return React.createElement('input', { 
+      type: 'text',
+      'aria-invalid': 'false',
+      ...otherProps,
+      className
+    });
+  },
 }));
 
 jest.mock('@/components/ui/label', () => ({

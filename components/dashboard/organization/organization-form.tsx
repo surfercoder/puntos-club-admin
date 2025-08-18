@@ -59,6 +59,8 @@ export default function OrganizationForm({ organization }: OrganizationFormProps
           type="text"
           defaultValue={organization?.name ?? ''}
           placeholder="Enter organization name"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.name}
+          aria-describedby="name-error"
         />
         <FieldError actionState={validation ?? actionState} name="name" />
       </div>
@@ -71,6 +73,8 @@ export default function OrganizationForm({ organization }: OrganizationFormProps
           type="text"
           defaultValue={organization?.business_name ?? ''}
           placeholder="Enter business name (optional)"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.business_name}
+          aria-describedby="business_name-error"
         />
         <FieldError actionState={validation ?? actionState} name="business_name" />
       </div>
@@ -83,6 +87,8 @@ export default function OrganizationForm({ organization }: OrganizationFormProps
           type="text"
           defaultValue={organization?.tax_id ?? ''}
           placeholder="Enter tax ID (optional)"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.tax_id}
+          aria-describedby="tax_id-error"
         />
         <FieldError actionState={validation ?? actionState} name="tax_id" />
       </div>

@@ -67,6 +67,8 @@ export default function CategoryForm({ category }: CategoryFormProps) {
           type="text"
           defaultValue={category?.name ?? ''}
           placeholder="Enter category name"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.name}
+          aria-describedby="name-error"
         />
         <FieldError actionState={validation ?? actionState} name="name" />
       </div>
@@ -79,6 +81,8 @@ export default function CategoryForm({ category }: CategoryFormProps) {
           defaultValue={category?.description ?? ''}
           placeholder="Enter category description (optional)"
           rows={3}
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.description}
+          aria-describedby="description-error"
         />
         <FieldError actionState={validation ?? actionState} name="description" />
       </div>

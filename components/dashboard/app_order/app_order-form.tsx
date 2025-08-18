@@ -74,6 +74,8 @@ export default function AppOrderForm({ appOrder }: AppOrderFormProps) {
           type="text"
           defaultValue={appOrder?.order_number ?? ''}
           placeholder="Enter order number"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.order_number}
+          aria-describedby="order_number-error"
         />
         <FieldError actionState={validation ?? actionState} name="order_number" />
       </div>
@@ -85,6 +87,8 @@ export default function AppOrderForm({ appOrder }: AppOrderFormProps) {
           name="creation_date"
           type="date"
           defaultValue={appOrder?.creation_date ? formatDateForInput(appOrder.creation_date) : ''}
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.creation_date}
+          aria-describedby="creation_date-error"
         />
         <FieldError actionState={validation ?? actionState} name="creation_date" />
       </div>
@@ -98,6 +102,8 @@ export default function AppOrderForm({ appOrder }: AppOrderFormProps) {
           min="0"
           defaultValue={appOrder?.total_points ?? 0}
           placeholder="Enter total points"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.total_points}
+          aria-describedby="total_points-error"
         />
         <FieldError actionState={validation ?? actionState} name="total_points" />
       </div>
@@ -110,6 +116,8 @@ export default function AppOrderForm({ appOrder }: AppOrderFormProps) {
           defaultValue={appOrder?.observations ?? ''}
           placeholder="Enter observations (optional)"
           rows={3}
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.observations}
+          aria-describedby="observations-error"
         />
         <FieldError actionState={validation ?? actionState} name="observations" />
       </div>

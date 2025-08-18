@@ -68,6 +68,8 @@ export default function StatusForm({ status }: StatusFormProps) {
           type="text"
           defaultValue={status?.name ?? ''}
           placeholder="Enter status name"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.name}
+          aria-describedby="name-error"
         />
         <FieldError actionState={validation ?? actionState} name="name" />
       </div>
@@ -80,6 +82,8 @@ export default function StatusForm({ status }: StatusFormProps) {
           defaultValue={status?.description ?? ''}
           placeholder="Enter status description (optional)"
           rows={3}
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.description}
+          aria-describedby="description-error"
         />
         <FieldError actionState={validation ?? actionState} name="description" />
       </div>
@@ -92,6 +96,8 @@ export default function StatusForm({ status }: StatusFormProps) {
           type="number"
           defaultValue={status?.order_num ?? 0}
           placeholder="Enter order number"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.order_num}
+          aria-describedby="order_num-error"
         />
         <FieldError actionState={validation ?? actionState} name="order_num" />
       </div>
