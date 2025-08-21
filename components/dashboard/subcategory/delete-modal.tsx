@@ -1,11 +1,12 @@
 "use client";
 
+import { Trash2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { toast } from 'sonner';
+
 import { deleteSubcategory } from '@/actions/dashboard/subcategory/actions';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 
 interface DeleteModalProps {
   subcategoryId: string;
@@ -38,9 +39,9 @@ export default function DeleteModal({ subcategoryId, subcategoryName }: DeleteMo
   if (!isOpen) {
     return (
       <Button
-        variant="destructive"
-        size="sm"
         onClick={() => setIsOpen(true)}
+        size="sm"
+        variant="destructive"
       >
         <Trash2 className="h-4 w-4" />
       </Button>
@@ -56,16 +57,16 @@ export default function DeleteModal({ subcategoryId, subcategoryName }: DeleteMo
         </p>
         <div className="flex gap-3 justify-center">
           <Button
-            variant="outline"
-            onClick={() => setIsOpen(false)}
             disabled={isDeleting}
+            onClick={() => setIsOpen(false)}
+            variant="outline"
           >
             Cancel
           </Button>
           <Button
-            variant="destructive"
-            onClick={handleDelete}
             disabled={isDeleting}
+            onClick={handleDelete}
+            variant="destructive"
           >
             {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>

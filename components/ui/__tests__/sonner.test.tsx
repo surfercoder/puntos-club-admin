@@ -1,6 +1,6 @@
-import React from 'react';
 import { render } from '@testing-library/react';
 import { useTheme } from 'next-themes';
+import React from 'react';
 
 // Mock next-themes
 jest.mock('next-themes', () => ({
@@ -17,9 +17,9 @@ const mockUseTheme = useTheme as jest.MockedFunction<typeof useTheme>;
 jest.mock('sonner', () => ({
   Toaster: ({ theme, className, style, ...props }: Record<string, unknown> & { theme?: string; className?: string; style?: React.CSSProperties }) => (
     <div 
+      className={className}
       data-testid="sonner-toaster"
       data-theme={theme}
-      className={className}
       style={style}
       {...props}
     />

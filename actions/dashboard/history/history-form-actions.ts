@@ -1,8 +1,10 @@
 "use server";
 
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import type { HistoryInput } from '@/schemas/history.schema';
+
 import { createHistory, updateHistory } from './actions';
-import { HistoryInput } from '@/schemas/history.schema';
-import { ActionState, EMPTY_ACTION_STATE } from '@/lib/error-handler';
 
 export async function historyFormAction(
   prevState: ActionState,

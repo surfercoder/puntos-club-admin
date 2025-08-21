@@ -1,8 +1,10 @@
 "use server";
 
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import type { BranchInput } from '@/schemas/branch.schema';
+
 import { createBranch, updateBranch } from './actions';
-import { BranchInput } from '@/schemas/branch.schema';
-import { ActionState, EMPTY_ACTION_STATE } from '@/lib/error-handler';
 
 export async function branchFormAction(
   prevState: ActionState,

@@ -1,6 +1,7 @@
-import { organizationFormAction } from '../organization-form-actions';
-import { createOrganization, updateOrganization } from '../actions';
 import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+
+import { createOrganization, updateOrganization } from '../actions';
+import { organizationFormAction } from '../organization-form-actions';
 
 // Mock the actions
 jest.mock('../actions');

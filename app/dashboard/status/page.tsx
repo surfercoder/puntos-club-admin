@@ -1,9 +1,8 @@
-import { createClient } from '@/lib/supabase/server';
+import { Pencil } from 'lucide-react';
 import Link from 'next/link';
-import { Status } from '@/types/status';
+
 import DeleteModal from '@/components/dashboard/status/delete-modal';
 import { Button } from '@/components/ui/button';
-import { Pencil } from 'lucide-react';
 import {
   Table,
   TableHeader,
@@ -12,6 +11,8 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
+import { createClient } from '@/lib/supabase/server';
+import type { Status } from '@/types/status';
 
 export default async function StatusListPage() {
   const supabase = await createClient();
@@ -24,10 +25,10 @@ export default async function StatusListPage() {
   return (
     <div className="space-y-6">
       {/* Breadcrumb Navigation */}
-      <nav className="flex" aria-label="Breadcrumb">
+      <nav aria-label="Breadcrumb" className="flex">
         <ol className="inline-flex items-center space-x-1 md:space-x-3">
           <li className="inline-flex items-center">
-            <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-blue-600">
+            <Link className="text-sm font-medium text-gray-500 hover:text-blue-600" href="/dashboard">
               Dashboard
             </Link>
           </li>
@@ -83,7 +84,7 @@ export default async function StatusListPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Button variant="secondary" size="sm" asChild>
+                      <Button asChild size="sm" variant="secondary">
                         <Link href={`/dashboard/status/edit/${status.id}`}>
                           <Pencil className="h-4 w-4" />
                         </Link>
@@ -98,7 +99,7 @@ export default async function StatusListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4">No statuses found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={5}>No statuses found.</TableCell>
               </TableRow>
             )}
           </TableBody>

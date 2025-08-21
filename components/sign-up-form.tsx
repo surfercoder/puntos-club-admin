@@ -1,7 +1,9 @@
 "use client";
 
-import { cn } from "@/lib/utils";
-import { createClient } from "@/lib/supabase/client";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -12,9 +14,8 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { cn } from "@/lib/utils";
 
 export function SignUpForm({
   className,
@@ -47,7 +48,7 @@ export function SignUpForm({
           emailRedirectTo: `${window.location.origin}/dashboard`,
         },
       });
-      if (error) throw error;
+      if (error) {throw error;}
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
@@ -70,11 +71,11 @@ export function SignUpForm({
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
-                  type="email"
+                  onChange={(e) => setEmail(e.target.value)}
                   placeholder="m@example.com"
                   required
+                  type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
               <div className="grid gap-2">
@@ -83,10 +84,10 @@ export function SignUpForm({
                 </div>
                 <Input
                   id="password"
-                  type="password"
-                  required
-                  value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  required
+                  type="password"
+                  value={password}
                 />
               </div>
               <div className="grid gap-2">
@@ -95,20 +96,20 @@ export function SignUpForm({
                 </div>
                 <Input
                   id="repeat-password"
-                  type="password"
-                  required
-                  value={repeatPassword}
                   onChange={(e) => setRepeatPassword(e.target.value)}
+                  required
+                  type="password"
+                  value={repeatPassword}
                 />
               </div>
               {error && <p className="text-sm text-red-500">{error}</p>}
-              <Button type="submit" className="w-full" disabled={isLoading}>
+              <Button className="w-full" disabled={isLoading} type="submit">
                 {isLoading ? "Creating an account..." : "Sign up"}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
               Already have an account?{" "}
-              <Link href="/auth/login" className="underline underline-offset-4">
+              <Link className="underline underline-offset-4" href="/auth/login">
                 Login
               </Link>
             </div>

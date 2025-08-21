@@ -1,5 +1,6 @@
+import type { Category } from '@/types/category'
+
 import { createCategory, updateCategory, deleteCategory, getCategories, getCategory } from '../actions'
-import { Category } from '@/types/category'
 
 // Mock Supabase server
 const mockSupabaseClient = {

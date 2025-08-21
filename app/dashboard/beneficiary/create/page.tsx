@@ -1,5 +1,4 @@
 import BeneficiaryForm from '@/components/dashboard/beneficiary/beneficiary-form';
-
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 export default function CreateBeneficiaryPage() {

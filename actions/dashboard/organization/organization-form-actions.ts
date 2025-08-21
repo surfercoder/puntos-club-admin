@@ -1,8 +1,10 @@
 "use server";
 
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import type { OrganizationInput } from '@/schemas/organization.schema';
+
 import { createOrganization, updateOrganization } from './actions';
-import { OrganizationInput } from '@/schemas/organization.schema';
-import { ActionState, EMPTY_ACTION_STATE } from '@/lib/error-handler';
 
 export async function organizationFormAction(
   prevState: ActionState,

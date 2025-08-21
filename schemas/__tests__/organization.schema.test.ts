@@ -1,4 +1,5 @@
-import { OrganizationSchema, OrganizationInput, Organization } from '../organization.schema';
+import type { OrganizationInput, Organization } from '../organization.schema';
+import { OrganizationSchema } from '../organization.schema';
 
 describe('OrganizationSchema', () => {
   describe('valid inputs', () => {

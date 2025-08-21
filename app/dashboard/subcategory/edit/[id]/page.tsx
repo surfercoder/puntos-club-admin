@@ -1,8 +1,8 @@
-import { createClient } from '@/lib/supabase/server';
-import SubcategoryForm from '@/components/dashboard/subcategory/subcategory-form';
 import { notFound } from 'next/navigation';
 
+import SubcategoryForm from '@/components/dashboard/subcategory/subcategory-form';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/server';
 
 export default async function EditSubcategoryPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
@@ -13,7 +13,7 @@ export default async function EditSubcategoryPage({ params }: { params: Promise<
     return <div>Error fetching subcategory</div>;
   }
 
-  if (!data) notFound();
+  if (!data) {notFound();}
 
   return (
     <div className="max-w-xl mx-auto">

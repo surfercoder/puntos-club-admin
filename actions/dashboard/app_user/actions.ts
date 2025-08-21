@@ -1,8 +1,8 @@
 "use server";
 
 import { createClient } from '@/lib/supabase/server';
-import { AppUser } from '@/types/app_user';
 import { AppUserSchema } from '@/schemas/app_user.schema';
+import type { AppUser } from '@/types/app_user';
 
 export async function createAppUser(input: AppUser) {
   const parsed = AppUserSchema.safeParse(input);
@@ -10,7 +10,7 @@ export async function createAppUser(input: AppUser) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };
@@ -28,7 +28,7 @@ export async function updateAppUser(id: string, input: AppUser) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };

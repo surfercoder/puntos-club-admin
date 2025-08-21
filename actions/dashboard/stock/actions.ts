@@ -1,8 +1,8 @@
 "use server";
 
 import { createClient } from '@/lib/supabase/server';
-import { Stock } from '@/types/stock';
 import { StockSchema } from '@/schemas/stock.schema';
+import type { Stock } from '@/types/stock';
 
 export async function createStock(input: Stock) {
   const parsed = StockSchema.safeParse(input);
@@ -10,7 +10,7 @@ export async function createStock(input: Stock) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };
@@ -28,7 +28,7 @@ export async function updateStock(id: string, input: Stock) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };

@@ -1,8 +1,8 @@
 "use server";
 
 import { createClient } from '@/lib/supabase/server';
-import { Redemption } from '@/types/redemption';
 import { RedemptionSchema } from '@/schemas/redemption.schema';
+import type { Redemption } from '@/types/redemption';
 
 export async function createRedemption(input: Redemption) {
   const parsed = RedemptionSchema.safeParse(input);
@@ -10,7 +10,7 @@ export async function createRedemption(input: Redemption) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };
@@ -28,7 +28,7 @@ export async function updateRedemption(id: string, input: Redemption) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };

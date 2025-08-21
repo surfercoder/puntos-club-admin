@@ -1,18 +1,20 @@
 "use client";
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
+import { toast } from "sonner";
+
 import { appOrderFormAction } from '@/actions/dashboard/app_order/app_order-form-actions';
 import { Button } from '@/components/ui/button';
+import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { ActionState, EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
-import FieldError from '@/components/ui/field-error';
-import { AppOrder } from '@/types/app_order';
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { AppOrderSchema } from '@/schemas/app_order.schema';
-import { toast } from "sonner";
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import type { AppOrder } from '@/types/app_order';
 
 interface AppOrderFormProps {
   appOrder?: AppOrder;
@@ -58,24 +60,24 @@ export default function AppOrderForm({ appOrder }: AppOrderFormProps) {
 
   // Format date for input (YYYY-MM-DD)
   const formatDateForInput = (dateString: string) => {
-    if (!dateString) return '';
+    if (!dateString) {return '';}
     return new Date(dateString).toISOString().split('T')[0];
   };
 
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
-      {appOrder?.id && <input type="hidden" name="id" value={appOrder.id} />}
+      {appOrder?.id && <input name="id" type="hidden" value={appOrder.id} />}
       
       <div>
         <Label htmlFor="order_number">Order Number</Label>
         <Input
+          aria-describedby="order_number-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.order_number}
+          defaultValue={appOrder?.order_number ?? ''}
           id="order_number"
           name="order_number"
-          type="text"
-          defaultValue={appOrder?.order_number ?? ''}
           placeholder="Enter order number"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.order_number}
-          aria-describedby="order_number-error"
+          type="text"
         />
         <FieldError actionState={validation ?? actionState} name="order_number" />
       </div>
@@ -83,12 +85,12 @@ export default function AppOrderForm({ appOrder }: AppOrderFormProps) {
       <div>
         <Label htmlFor="creation_date">Creation Date</Label>
         <Input
+          aria-describedby="creation_date-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.creation_date}
+          defaultValue={appOrder?.creation_date ? formatDateForInput(appOrder.creation_date) : ''}
           id="creation_date"
           name="creation_date"
           type="date"
-          defaultValue={appOrder?.creation_date ? formatDateForInput(appOrder.creation_date) : ''}
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.creation_date}
-          aria-describedby="creation_date-error"
         />
         <FieldError actionState={validation ?? actionState} name="creation_date" />
       </div>
@@ -96,14 +98,14 @@ export default function AppOrderForm({ appOrder }: AppOrderFormProps) {
       <div>
         <Label htmlFor="total_points">Total Points</Label>
         <Input
-          id="total_points"
-          name="total_points"
-          type="number"
-          min="0"
-          defaultValue={appOrder?.total_points ?? 0}
-          placeholder="Enter total points"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.total_points}
           aria-describedby="total_points-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.total_points}
+          defaultValue={appOrder?.total_points ?? 0}
+          id="total_points"
+          min="0"
+          name="total_points"
+          placeholder="Enter total points"
+          type="number"
         />
         <FieldError actionState={validation ?? actionState} name="total_points" />
       </div>
@@ -111,22 +113,22 @@ export default function AppOrderForm({ appOrder }: AppOrderFormProps) {
       <div>
         <Label htmlFor="observations">Observations</Label>
         <Textarea
+          aria-describedby="observations-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.observations}
+          defaultValue={appOrder?.observations ?? ''}
           id="observations"
           name="observations"
-          defaultValue={appOrder?.observations ?? ''}
           placeholder="Enter observations (optional)"
           rows={3}
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.observations}
-          aria-describedby="observations-error"
         />
         <FieldError actionState={validation ?? actionState} name="observations" />
       </div>
 
       <div className="flex gap-2">
-        <Button asChild variant="secondary" className="w-full" type="button">
+        <Button asChild className="w-full" type="button" variant="secondary">
           <Link href="/dashboard/app_order">Cancel</Link>
         </Button>
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button className="w-full" disabled={pending} type="submit">
           {appOrder ? 'Update' : 'Create'}
         </Button>
       </div>

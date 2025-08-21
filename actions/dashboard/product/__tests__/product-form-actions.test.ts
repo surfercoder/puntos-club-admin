@@ -1,6 +1,7 @@
-import { productFormAction } from '../product-form-actions';
-import { createProduct, updateProduct } from '../actions';
 import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+
+import { createProduct, updateProduct } from '../actions';
+import { productFormAction } from '../product-form-actions';
 
 // Mock the actions
 jest.mock('../actions');

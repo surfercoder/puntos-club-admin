@@ -1,4 +1,5 @@
-import { StatusSchema, StatusInput, Status } from '../status.schema';
+import type { StatusInput} from '../status.schema';
+import { StatusSchema } from '../status.schema';
 
 describe('StatusSchema', () => {
   describe('valid inputs', () => {

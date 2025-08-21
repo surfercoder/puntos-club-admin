@@ -1,4 +1,5 @@
-import { SubcategorySchema, SubcategoryInput, Subcategory } from '../subcategory.schema';
+import type { SubcategoryInput, Subcategory } from '../subcategory.schema';
+import { SubcategorySchema } from '../subcategory.schema';
 
 describe('SubcategorySchema', () => {
   describe('valid inputs', () => {

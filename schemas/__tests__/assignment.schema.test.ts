@@ -1,4 +1,5 @@
-import { AssignmentSchema, AssignmentInput, Assignment } from '../assignment.schema';
+import type { AssignmentInput} from '../assignment.schema';
+import { AssignmentSchema } from '../assignment.schema';
 
 describe('AssignmentSchema', () => {
   describe('valid inputs', () => {

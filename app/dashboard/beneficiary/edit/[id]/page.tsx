@@ -1,8 +1,8 @@
-import { createClient } from '@/lib/supabase/server';
-import BeneficiaryForm from '@/components/dashboard/beneficiary/beneficiary-form';
 import { notFound } from 'next/navigation';
 
+import BeneficiaryForm from '@/components/dashboard/beneficiary/beneficiary-form';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/server';
 
 export default async function EditBeneficiaryPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
@@ -13,7 +13,9 @@ export default async function EditBeneficiaryPage({ params }: { params: Promise<
     return <div>Error fetching beneficiary</div>;
   }
 
-  if (!data) notFound();
+  if (!data) {
+    notFound();
+  }
 
   return (
     <div className="max-w-xl mx-auto">

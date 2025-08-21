@@ -1,6 +1,7 @@
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { toast } from 'sonner';
 
 // Mock all dependencies
 const mockRouter = { 
@@ -36,11 +37,9 @@ jest.mock('@/components/ui/button', () => ({
 jest.mock('lucide-react', () => ({
   Trash2: ({ className }: { className?: string }) =>
     React.createElement('svg', { 'data-testid': 'trash-icon', className }, 'Trash2'),
-}));
+}));import { deleteRedemption } from '@/actions/dashboard/redemption/actions';
 
 import DeleteModal from '../delete-modal';
-import { toast } from 'sonner';
-import { deleteRedemption } from '@/actions/dashboard/redemption/actions';
 
 describe('Redemption DeleteModal', () => {
   beforeEach(() => {
@@ -50,7 +49,7 @@ describe('Redemption DeleteModal', () => {
 
   describe('Initial State', () => {
     it('renders delete button when modal is closed', () => {
-      render(<DeleteModal redemptionId="1" redemptionDescription="Product A - User B" />);
+      render(<DeleteModal redemptionDescription="Product A - User B" redemptionId="1" />);
 
       const deleteButton = screen.getByRole('button');
       expect(deleteButton).toHaveAttribute('data-variant', 'destructive');
@@ -59,7 +58,7 @@ describe('Redemption DeleteModal', () => {
     });
 
     it('does not render modal content initially', () => {
-      render(<DeleteModal redemptionId="1" redemptionDescription="Product A - User B" />);
+      render(<DeleteModal redemptionDescription="Product A - User B" redemptionId="1" />);
 
       expect(screen.queryByText('Delete Redemption')).not.toBeInTheDocument();
       expect(screen.queryByText('Are you sure you want to delete')).not.toBeInTheDocument();
@@ -70,7 +69,7 @@ describe('Redemption DeleteModal', () => {
     it('opens modal when delete button is clicked', async () => {
       const user = userEvent.setup();
       
-      render(<DeleteModal redemptionId="1" redemptionDescription="Product A - User B" />);
+      render(<DeleteModal redemptionDescription="Product A - User B" redemptionId="1" />);
 
       const deleteButton = screen.getByRole('button');
       await user.click(deleteButton);
@@ -82,7 +81,7 @@ describe('Redemption DeleteModal', () => {
   describe('Modal Content', () => {
     beforeEach(async () => {
       const user = userEvent.setup();
-      render(<DeleteModal redemptionId="1" redemptionDescription="Product A - User B" />);
+      render(<DeleteModal redemptionDescription="Product A - User B" redemptionId="1" />);
       const deleteButton = screen.getByRole('button');
       await user.click(deleteButton);
     });
@@ -112,7 +111,7 @@ describe('Redemption DeleteModal', () => {
     it('closes modal when cancel button is clicked', async () => {
       const user = userEvent.setup();
       
-      render(<DeleteModal redemptionId="1" redemptionDescription="Product A - User B" />);
+      render(<DeleteModal redemptionDescription="Product A - User B" redemptionId="1" />);
 
       // Open modal
       const deleteButton = screen.getByRole('button');
@@ -129,7 +128,7 @@ describe('Redemption DeleteModal', () => {
     it('calls deleteRedemption when delete button is clicked', async () => {
       const user = userEvent.setup();
       
-      render(<DeleteModal redemptionId="1" redemptionDescription="Product A - User B" />);
+      render(<DeleteModal redemptionDescription="Product A - User B" redemptionId="1" />);
 
       // Open modal
       const deleteButton = screen.getByRole('button');
@@ -148,7 +147,7 @@ describe('Redemption DeleteModal', () => {
       (deleteRedemption as jest.Mock).mockResolvedValue({ error: null });
       const user = userEvent.setup();
       
-      render(<DeleteModal redemptionId="1" redemptionDescription="Product A - User B" />);
+      render(<DeleteModal redemptionDescription="Product A - User B" redemptionId="1" />);
 
       // Open modal
       const deleteButton = screen.getByRole('button');
@@ -170,7 +169,7 @@ describe('Redemption DeleteModal', () => {
       (deleteRedemption as jest.Mock).mockResolvedValue({ error: 'Delete failed' });
       const user = userEvent.setup();
       
-      render(<DeleteModal redemptionId="1" redemptionDescription="Product A - User B" />);
+      render(<DeleteModal redemptionDescription="Product A - User B" redemptionId="1" />);
 
       // Open modal
       const deleteButton = screen.getByRole('button');
@@ -189,7 +188,7 @@ describe('Redemption DeleteModal', () => {
       (deleteRedemption as jest.Mock).mockRejectedValue(new Error('Network error'));
       const user = userEvent.setup();
       
-      render(<DeleteModal redemptionId="1" redemptionDescription="Product A - User B" />);
+      render(<DeleteModal redemptionDescription="Product A - User B" redemptionId="1" />);
 
       // Open modal
       const deleteButton = screen.getByRole('button');
@@ -216,7 +215,7 @@ describe('Redemption DeleteModal', () => {
 
       const user = userEvent.setup();
       
-      render(<DeleteModal redemptionId="1" redemptionDescription="Product A - User B" />);
+      render(<DeleteModal redemptionDescription="Product A - User B" redemptionId="1" />);
 
       // Open modal
       const deleteButton = screen.getByRole('button');
@@ -243,7 +242,7 @@ describe('Redemption DeleteModal', () => {
     it('uses redemptionId for delete operation', async () => {
       const user = userEvent.setup();
       
-      render(<DeleteModal redemptionId="test-redemption-123" redemptionDescription="Product A - User B" />);
+      render(<DeleteModal redemptionDescription="Product A - User B" redemptionId="test-redemption-123" />);
 
       // Open modal
       const deleteButton = screen.getByRole('button');
@@ -259,7 +258,7 @@ describe('Redemption DeleteModal', () => {
     it('displays redemptionDescription in confirmation message', async () => {
       const user = userEvent.setup();
       
-      render(<DeleteModal redemptionId="1" redemptionDescription="Special Product - Special User" />);
+      render(<DeleteModal redemptionDescription="Special Product - Special User" redemptionId="1" />);
 
       // Open modal
       const deleteButton = screen.getByRole('button');

@@ -1,6 +1,6 @@
-import type { Subcategory } from './subcategory';
-import type { Stock } from './stock';
 import type { Redemption } from './redemption';
+import type { Stock } from './stock';
+import type { Subcategory } from './subcategory';
 
 export type Product = {
   id: string;

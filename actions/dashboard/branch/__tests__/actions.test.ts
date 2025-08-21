@@ -1,6 +1,7 @@
-import { createBranch, updateBranch, deleteBranch } from '../actions';
 import { createClient } from '@/lib/supabase/server';
 import { BranchSchema } from '@/schemas/branch.schema';
+
+import { createBranch, updateBranch, deleteBranch } from '../actions';
 
 // Mock the supabase server client
 jest.mock('@/lib/supabase/server');

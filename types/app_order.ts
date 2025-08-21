@@ -1,5 +1,5 @@
-import type { Redemption } from './redemption';
 import type { History } from './history';
+import type { Redemption } from './redemption';
 
 export type AppOrder = {
   id: string;

@@ -2,9 +2,10 @@
  * @jest-environment jsdom
  */
 
-import React from 'react';
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
+import React from 'react';
+
 import { Button, buttonVariants } from '../button'
 
 describe('components/ui/button', () => {
@@ -121,7 +122,7 @@ describe('components/ui/button', () => {
     })
 
     it('should combine variant and size classes correctly', () => {
-      render(<Button variant="outline" size="sm">Combined</Button>)
+      render(<Button size="sm" variant="outline">Combined</Button>)
       const button = screen.getByRole('button')
       expect(button).toHaveClass('border', 'border-gray-300', 'bg-white', 'h-8', 'px-3')
     })

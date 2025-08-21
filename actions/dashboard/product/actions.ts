@@ -1,8 +1,8 @@
 "use server";
 
 import { createClient } from '@/lib/supabase/server';
-import { Product } from '@/types/product';
 import { ProductSchema } from '@/schemas/product.schema';
+import type { Product } from '@/types/product';
 
 export async function createProduct(input: Product) {
   const parsed = ProductSchema.safeParse(input);
@@ -10,7 +10,7 @@ export async function createProduct(input: Product) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };
@@ -28,7 +28,7 @@ export async function updateProduct(id: string, input: Product) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };

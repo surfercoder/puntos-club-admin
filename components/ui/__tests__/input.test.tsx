@@ -1,6 +1,7 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+
 import { Input } from '../input';
 
 describe('Input', () => {
@@ -96,14 +97,13 @@ describe('Input', () => {
     it('should accept and forward standard input attributes', () => {
       render(
         <Input
-          placeholder="Enter text here"
-          value="test value"
+          data-testid="custom-input"
           id="test-input"
           name="testInput"
+          placeholder="Enter text here"
           readOnly
           required
-          autoFocus
-          data-testid="custom-input"
+          value="test value"
         />
       );
       
@@ -142,7 +142,7 @@ describe('Input', () => {
       ];
 
       inputTypes.forEach(({ type }) => {
-        const { rerender } = render(<Input type={type as React.HTMLInputTypeAttribute} data-testid={`input-${type}`} />);
+        const { rerender } = render(<Input data-testid={`input-${type}`} type={type as React.HTMLInputTypeAttribute} />);
         
         const input = screen.getByTestId(`input-${type}`);
         expect(input).toHaveAttribute('type', type);
@@ -152,7 +152,7 @@ describe('Input', () => {
     });
 
     it('should handle min and max attributes for number inputs', () => {
-      render(<Input type="number" min={0} max={100} step={5} />);
+      render(<Input max={100} min={0} step={5} type="number" />);
       
       const input = screen.getByRole('spinbutton');
       expect(input).toHaveAttribute('min', '0');
@@ -184,7 +184,7 @@ describe('Input', () => {
       const user = userEvent.setup();
       const handleChange = jest.fn();
       
-      render(<Input value="initial" onChange={handleChange} />);
+      render(<Input onChange={handleChange} value="initial" />);
       
       const input = screen.getByRole('textbox');
       expect(input).toHaveValue('initial');
@@ -213,7 +213,7 @@ describe('Input', () => {
       const handleFocus = jest.fn();
       const handleBlur = jest.fn();
       
-      render(<Input onFocus={handleFocus} onBlur={handleBlur} />);
+      render(<Input onBlur={handleBlur} onFocus={handleFocus} />);
       
       const input = screen.getByRole('textbox');
       
@@ -241,7 +241,7 @@ describe('Input', () => {
 
     it('should not accept input when disabled', async () => {
       const user = userEvent.setup();
-      render(<Input disabled defaultValue="disabled input" />);
+      render(<Input defaultValue="disabled input" disabled />);
       
       const input = screen.getByRole('textbox');
       
@@ -254,7 +254,7 @@ describe('Input', () => {
 
     it('should not accept input when readOnly', async () => {
       const user = userEvent.setup();
-      render(<Input readOnly defaultValue="readonly input" />);
+      render(<Input defaultValue="readonly input" readOnly />);
       
       const input = screen.getByRole('textbox');
       
@@ -303,7 +303,7 @@ describe('Input', () => {
     });
 
     it('should support aria-invalid for error states', () => {
-      render(<Input aria-invalid="true" aria-describedby="error-message" />);
+      render(<Input aria-describedby="error-message" aria-invalid="true" />);
       
       const input = screen.getByRole('textbox');
       expect(input).toHaveAttribute('aria-invalid', 'true');
@@ -335,7 +335,7 @@ describe('Input', () => {
     });
 
     it('should apply file-specific classes', () => {
-      render(<Input type="file" data-testid="file-input" />);
+      render(<Input data-testid="file-input" type="file" />);
       
       const input = screen.getByTestId('file-input');
       
@@ -348,7 +348,7 @@ describe('Input', () => {
     });
 
     it('should handle multiple file selection', () => {
-      render(<Input type="file" multiple accept=".jpg,.png,.pdf" data-testid="file-input" />);
+      render(<Input accept=".jpg,.png,.pdf" data-testid="file-input" multiple type="file" />);
       
       const input = screen.getByTestId('file-input');
       expect(input).toHaveAttribute('multiple');
@@ -362,7 +362,7 @@ describe('Input', () => {
       
       render(
         <form onSubmit={handleSubmit}>
-          <Input name="username" defaultValue="testuser" />
+          <Input defaultValue="testuser" name="username" />
           <button type="submit">Submit</button>
         </form>
       );
@@ -380,7 +380,7 @@ describe('Input', () => {
     it('should participate in form validation', () => {
       render(
         <form>
-          <Input required minLength={3} maxLength={20} />
+          <Input maxLength={20} minLength={3} required />
         </form>
       );
       
@@ -397,7 +397,7 @@ describe('Input', () => {
     });
 
     it('should handle empty string values', () => {
-      render(<Input value="" placeholder="Empty value" />);
+      render(<Input placeholder="Empty value" value="" />);
       
       const input = screen.getByRole('textbox');
       expect(input).toHaveValue('');

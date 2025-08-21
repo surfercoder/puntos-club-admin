@@ -1,6 +1,7 @@
-import { branchFormAction } from '../branch-form-actions';
-import { createBranch, updateBranch } from '../actions';
 import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+
+import { createBranch, updateBranch } from '../actions';
+import { branchFormAction } from '../branch-form-actions';
 
 // Mock the actions
 jest.mock('../actions');

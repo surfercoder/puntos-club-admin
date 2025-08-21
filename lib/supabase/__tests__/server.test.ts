@@ -1,6 +1,7 @@
-import { createClient } from '../server';
 import { createServerClient } from '@supabase/ssr';
 import { cookies } from 'next/headers';
+
+import { createClient } from '../server';
 
 jest.mock('@supabase/ssr');
 jest.mock('next/headers');

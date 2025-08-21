@@ -1,8 +1,8 @@
 "use server";
 
 import { createClient } from '@/lib/supabase/server';
-import { History } from '@/types/history';
 import { HistorySchema } from '@/schemas/history.schema';
+import type { History } from '@/types/history';
 
 export async function createHistory(input: History) {
   const parsed = HistorySchema.safeParse(input);
@@ -10,7 +10,7 @@ export async function createHistory(input: History) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };
@@ -28,7 +28,7 @@ export async function updateHistory(id: string, input: History) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };

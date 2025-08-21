@@ -1,6 +1,7 @@
-import { appUserFormAction } from '../app_user-form-actions';
-import { createAppUser, updateAppUser } from '../actions';
 import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+
+import { createAppUser, updateAppUser } from '../actions';
+import { appUserFormAction } from '../app_user-form-actions';
 
 // Mock the actions
 jest.mock('../actions');

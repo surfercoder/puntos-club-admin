@@ -1,19 +1,21 @@
 "use client";
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
+import { toast } from "sonner";
+
 import { redemptionFormAction } from '@/actions/dashboard/redemption/redemption-form-actions';
 import { Button } from '@/components/ui/button';
+import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ActionState, EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
-import FieldError from '@/components/ui/field-error';
-import { Redemption } from '@/types/redemption';
-import { RedemptionSchema } from '@/schemas/redemption.schema';
-import { toast } from "sonner";
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { createClient } from '@/lib/supabase/client';
+import { RedemptionSchema } from '@/schemas/redemption.schema';
+import type { Redemption } from '@/types/redemption';
 
 interface RedemptionFormProps {
   redemption?: Redemption;
@@ -85,7 +87,7 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
 
   // Format date for input
   const formatDateForInput = (dateString: string) => {
-    if (!dateString) return '';
+    if (!dateString) {return '';}
     return new Date(dateString).toISOString().split('T')[0];
   };
 
@@ -125,11 +127,11 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
 
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
-      {redemption?.id && <input type="hidden" name="id" value={redemption.id} />}
+      {redemption?.id && <input name="id" type="hidden" value={redemption.id} />}
       
       <div>
         <Label htmlFor="beneficiary_id">Beneficiary</Label>
-        <Select value={selectedBeneficiary} onValueChange={setSelectedBeneficiary} name="beneficiary_id">
+        <Select name="beneficiary_id" onValueChange={setSelectedBeneficiary} value={selectedBeneficiary}>
           <SelectTrigger>
             <SelectValue placeholder="Select a beneficiary" />
           </SelectTrigger>
@@ -148,7 +150,7 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
 
       <div>
         <Label htmlFor="product_id">Product (Optional)</Label>
-        <Select value={selectedProduct} onValueChange={setSelectedProduct} name="product_id">
+        <Select name="product_id" onValueChange={setSelectedProduct} value={selectedProduct}>
           <SelectTrigger>
             <SelectValue placeholder="Select a product (optional)" />
           </SelectTrigger>
@@ -166,7 +168,7 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
 
       <div>
         <Label htmlFor="order_id">Order</Label>
-        <Select value={selectedOrder} onValueChange={setSelectedOrder} name="order_id">
+        <Select name="order_id" onValueChange={setSelectedOrder} value={selectedOrder}>
           <SelectTrigger>
             <SelectValue placeholder="Select an order" />
           </SelectTrigger>
@@ -184,14 +186,14 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
       <div>
         <Label htmlFor="points_used">Points Used</Label>
         <Input
-          id="points_used"
-          name="points_used"
-          type="number"
-          min="0"
-          defaultValue={redemption?.points_used ?? 0}
-          placeholder="Enter points used"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.points_used}
           aria-describedby="points_used-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.points_used}
+          defaultValue={redemption?.points_used ?? 0}
+          id="points_used"
+          min="0"
+          name="points_used"
+          placeholder="Enter points used"
+          type="number"
         />
         <FieldError actionState={validation ?? actionState} name="points_used" />
       </div>
@@ -199,14 +201,14 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
       <div>
         <Label htmlFor="quantity">Quantity</Label>
         <Input
-          id="quantity"
-          name="quantity"
-          type="number"
-          min="0"
-          defaultValue={redemption?.quantity ?? 0}
-          placeholder="Enter quantity"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.quantity}
           aria-describedby="quantity-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.quantity}
+          defaultValue={redemption?.quantity ?? 0}
+          id="quantity"
+          min="0"
+          name="quantity"
+          placeholder="Enter quantity"
+          type="number"
         />
         <FieldError actionState={validation ?? actionState} name="quantity" />
       </div>
@@ -214,21 +216,21 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
       <div>
         <Label htmlFor="redemption_date">Redemption Date</Label>
         <Input
+          aria-describedby="redemption_date-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.redemption_date}
+          defaultValue={redemption?.redemption_date ? formatDateForInput(redemption.redemption_date) : ''}
           id="redemption_date"
           name="redemption_date"
           type="date"
-          defaultValue={redemption?.redemption_date ? formatDateForInput(redemption.redemption_date) : ''}
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.redemption_date}
-          aria-describedby="redemption_date-error"
         />
         <FieldError actionState={validation ?? actionState} name="redemption_date" />
       </div>
 
       <div className="flex gap-2">
-        <Button asChild variant="secondary" className="w-full" type="button">
+        <Button asChild className="w-full" type="button" variant="secondary">
           <Link href="/dashboard/redemption">Cancel</Link>
         </Button>
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button className="w-full" disabled={pending} type="submit">
           {redemption ? 'Update' : 'Create'}
         </Button>
       </div>

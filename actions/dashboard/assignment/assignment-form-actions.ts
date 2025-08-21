@@ -1,10 +1,12 @@
 'use server';
 
-import { AssignmentSchema } from '@/schemas/assignment.schema';
+import { revalidatePath } from 'next/cache';
+
 import { createAssignment, updateAssignment } from '@/actions/dashboard/assignment/actions';
 import { fromErrorToActionState, toActionState } from '@/lib/error-handler';
-import { Assignment } from '@/types/assignment';
-import { revalidatePath } from 'next/cache';
+import { AssignmentSchema } from '@/schemas/assignment.schema';
+import type { Assignment } from '@/types/assignment';
+
 
 export async function assignmentFormAction(_prevState: any, formData: FormData) {
   try {

@@ -1,8 +1,10 @@
 "use server";
 
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import type { UserPermissionInput } from '@/schemas/user_permission.schema';
+
 import { createUserPermission, updateUserPermission } from './actions';
-import { UserPermissionInput } from '@/schemas/user_permission.schema';
-import { ActionState, EMPTY_ACTION_STATE } from '@/lib/error-handler';
 
 export async function userPermissionFormAction(
   prevState: ActionState,

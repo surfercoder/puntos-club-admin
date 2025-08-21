@@ -1,20 +1,22 @@
 "use client";
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
+import { toast } from "sonner";
+
 import { productFormAction } from '@/actions/dashboard/product/product-form-actions';
 import { Button } from '@/components/ui/button';
+import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ActionState, EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
-import FieldError from '@/components/ui/field-error';
-import { Product } from '@/types/product';
-import { ProductSchema } from '@/schemas/product.schema';
-import { toast } from "sonner";
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { Textarea } from '@/components/ui/textarea';
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { createClient } from '@/lib/supabase/client';
+import { ProductSchema } from '@/schemas/product.schema';
+import type { Product } from '@/types/product';
 
 interface ProductFormProps {
   product?: Product;
@@ -90,11 +92,11 @@ export default function ProductForm({ product }: ProductFormProps) {
 
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
-      {product?.id && <input type="hidden" name="id" value={product.id} />}
+      {product?.id && <input name="id" type="hidden" value={product.id} />}
       
       <div>
         <Label htmlFor="subcategory_id">Subcategory</Label>
-        <Select value={selectedSubcategory} onValueChange={setSelectedSubcategory} name="subcategory_id">
+        <Select name="subcategory_id" onValueChange={setSelectedSubcategory} value={selectedSubcategory}>
           <SelectTrigger>
             <SelectValue placeholder="Select a subcategory" />
           </SelectTrigger>
@@ -112,11 +114,11 @@ export default function ProductForm({ product }: ProductFormProps) {
       <div>
         <Label htmlFor="name">Name</Label>
         <Input
+          defaultValue={product?.name ?? ''}
           id="name"
           name="name"
-          type="text"
-          defaultValue={product?.name ?? ''}
           placeholder="Enter product name"
+          type="text"
         />
         <FieldError actionState={validation ?? actionState} name="name" />
       </div>
@@ -124,9 +126,9 @@ export default function ProductForm({ product }: ProductFormProps) {
       <div>
         <Label htmlFor="description">Description</Label>
         <Textarea
+          defaultValue={product?.description ?? ''}
           id="description"
           name="description"
-          defaultValue={product?.description ?? ''}
           placeholder="Enter product description (optional)"
           rows={3}
         />
@@ -136,33 +138,33 @@ export default function ProductForm({ product }: ProductFormProps) {
       <div>
         <Label htmlFor="required_points">Required Points</Label>
         <Input
-          id="required_points"
-          name="required_points"
-          type="number"
-          min="0"
           defaultValue={product?.required_points ?? 0}
+          id="required_points"
+          min="0"
+          name="required_points"
           placeholder="Enter required points"
+          type="number"
         />
         <FieldError actionState={validation ?? actionState} name="required_points" />
       </div>
 
       <div className="flex items-center space-x-2">
         <input
-          type="checkbox"
+          className="rounded border-gray-300"
+          defaultChecked={product?.active ?? true}
           id="active"
           name="active"
-          defaultChecked={product?.active ?? true}
-          className="rounded border-gray-300"
+          type="checkbox"
         />
         <Label htmlFor="active">Active</Label>
         <FieldError actionState={validation ?? actionState} name="active" />
       </div>
 
       <div className="flex gap-2">
-        <Button asChild variant="secondary" className="w-full" type="button">
+        <Button asChild className="w-full" type="button" variant="secondary">
           <Link href="/dashboard/product">Cancel</Link>
         </Button>
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button className="w-full" disabled={pending} type="submit">
           {product ? 'Update' : 'Create'}
         </Button>
       </div>

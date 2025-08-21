@@ -1,10 +1,12 @@
 'use server';
 
-import { AddressSchema } from '@/schemas/address.schema';
+import { revalidatePath } from 'next/cache';
+
 import { createAddress, updateAddress } from '@/actions/dashboard/address/actions';
 import { fromErrorToActionState, toActionState } from '@/lib/error-handler';
-import { Address } from '@/types/address';
-import { revalidatePath } from 'next/cache';
+import { AddressSchema } from '@/schemas/address.schema';
+import type { Address } from '@/types/address';
+
 
 export async function addressFormAction(_prevState: any, formData: FormData) {
   try {

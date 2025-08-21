@@ -1,9 +1,8 @@
-import { createClient } from '@/lib/supabase/server';
+import { Pencil } from 'lucide-react';
 import Link from 'next/link';
-import { Subcategory } from '@/types/subcategory';
+
 import DeleteModal from '@/components/dashboard/subcategory/delete-modal';
 import { Button } from '@/components/ui/button';
-import { Pencil } from 'lucide-react';
 import {
   Table,
   TableHeader,
@@ -12,6 +11,8 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
+import { createClient } from '@/lib/supabase/server';
+import type { Subcategory } from '@/types/subcategory';
 
 export default async function SubcategoryListPage() {
   const supabase = await createClient();
@@ -24,10 +25,10 @@ export default async function SubcategoryListPage() {
   return (
     <div className="space-y-6">
       {/* Breadcrumb Navigation */}
-      <nav className="flex" aria-label="Breadcrumb">
+      <nav aria-label="Breadcrumb" className="flex">
         <ol className="inline-flex items-center space-x-1 md:space-x-3">
           <li className="inline-flex items-center">
-            <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-blue-600">
+            <Link className="text-sm font-medium text-gray-500 hover:text-blue-600" href="/dashboard">
               Dashboard
             </Link>
           </li>
@@ -79,7 +80,7 @@ export default async function SubcategoryListPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Button variant="secondary" size="sm" asChild>
+                      <Button asChild size="sm" variant="secondary">
                         <Link href={`/dashboard/subcategory/edit/${subcategory.id}`}>
                           <Pencil className="h-4 w-4" />
                         </Link>
@@ -94,7 +95,7 @@ export default async function SubcategoryListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="text-center py-4">No subcategories found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={4}>No subcategories found.</TableCell>
               </TableRow>
             )}
           </TableBody>

@@ -1,8 +1,10 @@
 "use server";
 
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import type { StockInput } from '@/schemas/stock.schema';
+
 import { createStock, updateStock } from './actions';
-import { StockInput } from '@/schemas/stock.schema';
-import { ActionState, EMPTY_ACTION_STATE } from '@/lib/error-handler';
 
 export async function stockFormAction(
   prevState: ActionState,

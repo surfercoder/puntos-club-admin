@@ -1,6 +1,7 @@
-import { categoryFormAction } from '../category-form-actions';
-import { createCategory, updateCategory } from '../actions';
 import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+
+import { createCategory, updateCategory } from '../actions';
+import { categoryFormAction } from '../category-form-actions';
 
 // Mock the actions
 jest.mock('../actions');

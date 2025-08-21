@@ -1,8 +1,10 @@
 "use server";
 
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import type { RedemptionInput } from '@/schemas/redemption.schema';
+
 import { createRedemption, updateRedemption } from './actions';
-import { RedemptionInput } from '@/schemas/redemption.schema';
-import { ActionState, EMPTY_ACTION_STATE } from '@/lib/error-handler';
 
 export async function redemptionFormAction(
   prevState: ActionState,

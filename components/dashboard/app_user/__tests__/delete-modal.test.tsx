@@ -1,8 +1,11 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
-import DeleteModal from '../delete-modal';
+import React from 'react';
+
 import { deleteAppUser } from '@/actions/dashboard/app_user/actions';
+
+import DeleteModal from '../delete-modal';
+
 
 // Mock dependencies
 jest.mock('next/navigation', () => ({

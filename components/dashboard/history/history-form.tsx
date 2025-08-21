@@ -1,20 +1,22 @@
 "use client";
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
+import { toast } from "sonner";
+
 import { historyFormAction } from '@/actions/dashboard/history/history-form-actions';
 import { Button } from '@/components/ui/button';
+import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ActionState, EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
-import FieldError from '@/components/ui/field-error';
-import { History } from '@/types/history';
-import { HistorySchema } from '@/schemas/history.schema';
-import { toast } from "sonner";
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { Textarea } from '@/components/ui/textarea';
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { createClient } from '@/lib/supabase/client';
+import { HistorySchema } from '@/schemas/history.schema';
+import type { History } from '@/types/history';
 
 interface HistoryFormProps {
   history?: History;
@@ -73,7 +75,7 @@ export default function HistoryForm({ history }: HistoryFormProps) {
 
   // Format date for input (YYYY-MM-DD)
   const formatDateForInput = (dateString: string) => {
-    if (!dateString) return '';
+    if (!dateString) {return '';}
     return new Date(dateString).toISOString().split('T')[0];
   };
 
@@ -108,11 +110,11 @@ export default function HistoryForm({ history }: HistoryFormProps) {
 
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
-      {history?.id && <input type="hidden" name="id" value={history.id} />}
+      {history?.id && <input name="id" type="hidden" value={history.id} />}
       
       <div>
         <Label htmlFor="order_id">Order</Label>
-        <Select value={selectedOrder} onValueChange={setSelectedOrder} name="order_id">
+        <Select name="order_id" onValueChange={setSelectedOrder} value={selectedOrder}>
           <SelectTrigger>
             <SelectValue placeholder="Select an order" />
           </SelectTrigger>
@@ -129,7 +131,7 @@ export default function HistoryForm({ history }: HistoryFormProps) {
 
       <div>
         <Label htmlFor="status_id">Status (Optional)</Label>
-        <Select value={selectedStatus} onValueChange={setSelectedStatus} name="status_id">
+        <Select name="status_id" onValueChange={setSelectedStatus} value={selectedStatus}>
           <SelectTrigger>
             <SelectValue placeholder="Select a status (optional)" />
           </SelectTrigger>
@@ -148,12 +150,12 @@ export default function HistoryForm({ history }: HistoryFormProps) {
       <div>
         <Label htmlFor="change_date">Change Date</Label>
         <Input
+          aria-describedby="change_date-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.change_date}
+          defaultValue={history?.change_date ? formatDateForInput(history.change_date) : ''}
           id="change_date"
           name="change_date"
           type="date"
-          defaultValue={history?.change_date ? formatDateForInput(history.change_date) : ''}
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.change_date}
-          aria-describedby="change_date-error"
         />
         <FieldError actionState={validation ?? actionState} name="change_date" />
       </div>
@@ -161,22 +163,22 @@ export default function HistoryForm({ history }: HistoryFormProps) {
       <div>
         <Label htmlFor="observations">Observations</Label>
         <Textarea
+          aria-describedby="observations-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.observations}
+          defaultValue={history?.observations ?? ''}
           id="observations"
           name="observations"
-          defaultValue={history?.observations ?? ''}
           placeholder="Enter observations (optional)"
           rows={3}
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.observations}
-          aria-describedby="observations-error"
         />
         <FieldError actionState={validation ?? actionState} name="observations" />
       </div>
 
       <div className="flex gap-2">
-        <Button asChild variant="secondary" className="w-full" type="button">
+        <Button asChild className="w-full" type="button" variant="secondary">
           <Link href="/dashboard/history">Cancel</Link>
         </Button>
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button className="w-full" disabled={pending} type="submit">
           {history ? 'Update' : 'Create'}
         </Button>
       </div>

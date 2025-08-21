@@ -1,8 +1,8 @@
-import { createClient } from '@/lib/supabase/server';
-import AssignmentForm from '@/components/dashboard/assignment/assignment-form';
 import { notFound } from 'next/navigation';
 
+import AssignmentForm from '@/components/dashboard/assignment/assignment-form';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/server';
 
 export default async function EditAssignmentPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
@@ -13,7 +13,9 @@ export default async function EditAssignmentPage({ params }: { params: Promise<{
     return <div>Error fetching assignment</div>;
   }
 
-  if (!data) notFound();
+  if (!data) {
+    notFound();
+  }
 
   return (
     <div className="max-w-xl mx-auto">

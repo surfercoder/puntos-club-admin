@@ -1,8 +1,10 @@
 "use server";
 
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import type { CategoryInput } from '@/schemas/category.schema';
+
 import { createCategory, updateCategory } from './actions';
-import { CategoryInput } from '@/schemas/category.schema';
-import { ActionState, EMPTY_ACTION_STATE } from '@/lib/error-handler';
 
 export async function categoryFormAction(
   prevState: ActionState,

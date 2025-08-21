@@ -1,8 +1,8 @@
 "use server";
 
 import { createClient } from '@/lib/supabase/server';
-import { UserPermission } from '@/types/user_permission';
 import { UserPermissionSchema } from '@/schemas/user_permission.schema';
+import type { UserPermission } from '@/types/user_permission';
 
 export async function createUserPermission(input: UserPermission) {
   const parsed = UserPermissionSchema.safeParse(input);
@@ -10,7 +10,7 @@ export async function createUserPermission(input: UserPermission) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };
@@ -28,7 +28,7 @@ export async function updateUserPermission(id: string, input: UserPermission) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };

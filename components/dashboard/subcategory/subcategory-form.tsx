@@ -1,20 +1,22 @@
 "use client";
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
+import { toast } from "sonner";
+
 import { subcategoryFormAction } from '@/actions/dashboard/subcategory/subcategory-form-actions';
 import { Button } from '@/components/ui/button';
+import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ActionState, EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
-import FieldError from '@/components/ui/field-error';
-import { Subcategory } from '@/types/subcategory';
-import { SubcategorySchema } from '@/schemas/subcategory.schema';
-import { toast } from "sonner";
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import { Textarea } from '@/components/ui/textarea';
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { createClient } from '@/lib/supabase/client';
+import { SubcategorySchema } from '@/schemas/subcategory.schema';
+import type { Subcategory } from '@/types/subcategory';
 
 interface SubcategoryFormProps {
   subcategory?: Subcategory;
@@ -89,11 +91,11 @@ export default function SubcategoryForm({ subcategory }: SubcategoryFormProps) {
 
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
-      {subcategory?.id && <input type="hidden" name="id" value={subcategory.id} />}
+      {subcategory?.id && <input name="id" type="hidden" value={subcategory.id} />}
       
       <div>
         <Label htmlFor="category_id">Category</Label>
-        <Select value={selectedCategory} onValueChange={setSelectedCategory} name="category_id">
+        <Select name="category_id" onValueChange={setSelectedCategory} value={selectedCategory}>
           <SelectTrigger>
             <SelectValue placeholder="Select a category" />
           </SelectTrigger>
@@ -111,11 +113,11 @@ export default function SubcategoryForm({ subcategory }: SubcategoryFormProps) {
       <div>
         <Label htmlFor="name">Name</Label>
         <Input
+          defaultValue={subcategory?.name ?? ''}
           id="name"
           name="name"
-          type="text"
-          defaultValue={subcategory?.name ?? ''}
           placeholder="Enter subcategory name"
+          type="text"
         />
         <FieldError actionState={validation ?? actionState} name="name" />
       </div>
@@ -123,9 +125,9 @@ export default function SubcategoryForm({ subcategory }: SubcategoryFormProps) {
       <div>
         <Label htmlFor="description">Description</Label>
         <Textarea
+          defaultValue={subcategory?.description ?? ''}
           id="description"
           name="description"
-          defaultValue={subcategory?.description ?? ''}
           placeholder="Enter subcategory description (optional)"
           rows={3}
         />
@@ -134,21 +136,21 @@ export default function SubcategoryForm({ subcategory }: SubcategoryFormProps) {
 
       <div className="flex items-center space-x-2">
         <input
-          type="checkbox"
+          className="rounded border-gray-300"
+          defaultChecked={subcategory?.active ?? true}
           id="active"
           name="active"
-          defaultChecked={subcategory?.active ?? true}
-          className="rounded border-gray-300"
+          type="checkbox"
         />
         <Label htmlFor="active">Active</Label>
         <FieldError actionState={validation ?? actionState} name="active" />
       </div>
 
       <div className="flex gap-2">
-        <Button asChild variant="secondary" className="w-full" type="button">
+        <Button asChild className="w-full" type="button" variant="secondary">
           <Link href="/dashboard/subcategory">Cancel</Link>
         </Button>
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button className="w-full" disabled={pending} type="submit">
           {subcategory ? 'Update' : 'Create'}
         </Button>
       </div>

@@ -1,4 +1,5 @@
-import { BranchSchema, BranchInput, Branch } from '../branch.schema';
+import type { BranchInput, Branch } from '../branch.schema';
+import { BranchSchema } from '../branch.schema';
 
 describe('BranchSchema', () => {
   describe('valid inputs', () => {

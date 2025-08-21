@@ -1,8 +1,8 @@
 "use server";
 
 import { createClient } from '@/lib/supabase/server';
-import { Beneficiary } from '@/types/beneficiary';
 import { BeneficiarySchema } from '@/schemas/beneficiary.schema';
+import type { Beneficiary } from '@/types/beneficiary';
 
 export async function createBeneficiary(input: Beneficiary) {
   const parsed = BeneficiarySchema.safeParse(input);
@@ -10,7 +10,7 @@ export async function createBeneficiary(input: Beneficiary) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };
@@ -28,7 +28,7 @@ export async function updateBeneficiary(id: string, input: Beneficiary) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };

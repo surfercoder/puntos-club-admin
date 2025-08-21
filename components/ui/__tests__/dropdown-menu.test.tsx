@@ -1,5 +1,6 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import React from 'react';
+
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -200,7 +201,7 @@ describe('DropdownMenu Components', () => {
         <DropdownMenu defaultOpen>
           <DropdownMenuTrigger>Trigger</DropdownMenuTrigger>
           <DropdownMenuContent>
-            <DropdownMenuRadioGroup value="option1" onValueChange={onValueChange}>
+            <DropdownMenuRadioGroup onValueChange={onValueChange} value="option1">
               <DropdownMenuRadioItem value="option1">Option 1</DropdownMenuRadioItem>
               <DropdownMenuRadioItem value="option2">Option 2</DropdownMenuRadioItem>
             </DropdownMenuRadioGroup>

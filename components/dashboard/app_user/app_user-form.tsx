@@ -1,19 +1,21 @@
 "use client";
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
+import { toast } from "sonner";
+
 import { appUserFormAction } from '@/actions/dashboard/app_user/app_user-form-actions';
 import { Button } from '@/components/ui/button';
+import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ActionState, EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
-import FieldError from '@/components/ui/field-error';
-import { AppUser } from '@/types/app_user';
-import { AppUserSchema } from '@/schemas/app_user.schema';
-import { toast } from "sonner";
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { createClient } from '@/lib/supabase/client';
+import { AppUserSchema } from '@/schemas/app_user.schema';
+import type { AppUser } from '@/types/app_user';
 
 interface AppUserFormProps {
   appUser?: AppUser;
@@ -89,11 +91,11 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
 
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
-      {appUser?.id && <input type="hidden" name="id" value={appUser.id} />}
+      {appUser?.id && <input name="id" type="hidden" value={appUser.id} />}
       
       <div>
         <Label htmlFor="organization_id">Organization</Label>
-        <Select value={selectedOrganization} onValueChange={setSelectedOrganization} name="organization_id">
+        <Select name="organization_id" onValueChange={setSelectedOrganization} value={selectedOrganization}>
           <SelectTrigger>
             <SelectValue placeholder="Select an organization" />
           </SelectTrigger>
@@ -111,13 +113,13 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
       <div>
         <Label htmlFor="first_name">First Name</Label>
         <Input
+          aria-describedby="first_name-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.first_name}
+          defaultValue={appUser?.first_name ?? ''}
           id="first_name"
           name="first_name"
-          type="text"
-          defaultValue={appUser?.first_name ?? ''}
           placeholder="Enter first name (optional)"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.first_name}
-          aria-describedby="first_name-error"
+          type="text"
         />
         <FieldError actionState={validation ?? actionState} name="first_name" />
       </div>
@@ -125,13 +127,13 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
       <div>
         <Label htmlFor="last_name">Last Name</Label>
         <Input
+          aria-describedby="last_name-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.last_name}
+          defaultValue={appUser?.last_name ?? ''}
           id="last_name"
           name="last_name"
-          type="text"
-          defaultValue={appUser?.last_name ?? ''}
           placeholder="Enter last name (optional)"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.last_name}
-          aria-describedby="last_name-error"
+          type="text"
         />
         <FieldError actionState={validation ?? actionState} name="last_name" />
       </div>
@@ -139,13 +141,13 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
       <div>
         <Label htmlFor="email">Email</Label>
         <Input
+          aria-describedby="email-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.email}
+          defaultValue={appUser?.email ?? ''}
           id="email"
           name="email"
-          type="email"
-          defaultValue={appUser?.email ?? ''}
           placeholder="Enter email (optional)"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.email}
-          aria-describedby="email-error"
+          type="email"
         />
         <FieldError actionState={validation ?? actionState} name="email" />
       </div>
@@ -153,13 +155,13 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
       <div>
         <Label htmlFor="username">Username</Label>
         <Input
+          aria-describedby="username-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.username}
+          defaultValue={appUser?.username ?? ''}
           id="username"
           name="username"
-          type="text"
-          defaultValue={appUser?.username ?? ''}
           placeholder="Enter username (optional)"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.username}
-          aria-describedby="username-error"
+          type="text"
         />
         <FieldError actionState={validation ?? actionState} name="username" />
       </div>
@@ -167,33 +169,33 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
       <div>
         <Label htmlFor="password">Password</Label>
         <Input
+          aria-describedby="password-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.password}
           id="password"
           name="password"
-          type="password"
           placeholder="Enter password (optional)"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.password}
-          aria-describedby="password-error"
+          type="password"
         />
         <FieldError actionState={validation ?? actionState} name="password" />
       </div>
 
       <div className="flex items-center space-x-2">
         <input
-          type="checkbox"
+          className="rounded border-gray-300"
+          defaultChecked={appUser?.active ?? true}
           id="active"
           name="active"
-          defaultChecked={appUser?.active ?? true}
-          className="rounded border-gray-300"
+          type="checkbox"
         />
         <Label htmlFor="active">Active</Label>
         <FieldError actionState={validation ?? actionState} name="active" />
       </div>
 
       <div className="flex gap-2">
-        <Button asChild variant="secondary" className="w-full" type="button">
+        <Button asChild className="w-full" type="button" variant="secondary">
           <Link href="/dashboard/app_user">Cancel</Link>
         </Button>
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button className="w-full" disabled={pending} type="submit">
           {appUser ? 'Update' : 'Create'}
         </Button>
       </div>

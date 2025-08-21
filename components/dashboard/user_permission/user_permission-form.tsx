@@ -1,19 +1,21 @@
 "use client";
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
+import { toast } from "sonner";
+
 import { userPermissionFormAction } from '@/actions/dashboard/user_permission/user_permission-form-actions';
 import { Button } from '@/components/ui/button';
+import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ActionState, EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
-import FieldError from '@/components/ui/field-error';
-import { UserPermission } from '@/types/user_permission';
-import { UserPermissionSchema } from '@/schemas/user_permission.schema';
-import { toast } from "sonner";
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { createClient } from '@/lib/supabase/client';
+import { UserPermissionSchema } from '@/schemas/user_permission.schema';
+import type { UserPermission } from '@/types/user_permission';
 
 interface UserPermissionFormProps {
   userPermission?: UserPermission;
@@ -74,7 +76,7 @@ export default function UserPermissionForm({ userPermission }: UserPermissionFor
 
   // Format date for input
   const formatDateForInput = (dateString: string) => {
-    if (!dateString) return '';
+    if (!dateString) {return '';}
     return new Date(dateString).toISOString().split('T')[0];
   };
 
@@ -109,11 +111,11 @@ export default function UserPermissionForm({ userPermission }: UserPermissionFor
 
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
-      {userPermission?.id && <input type="hidden" name="id" value={userPermission.id} />}
+      {userPermission?.id && <input name="id" type="hidden" value={userPermission.id} />}
       
       <div>
         <Label htmlFor="user_id">User</Label>
-        <Select value={selectedUser} onValueChange={setSelectedUser} name="user_id">
+        <Select name="user_id" onValueChange={setSelectedUser} value={selectedUser}>
           <SelectTrigger>
             <SelectValue placeholder="Select a user" />
           </SelectTrigger>
@@ -132,7 +134,7 @@ export default function UserPermissionForm({ userPermission }: UserPermissionFor
 
       <div>
         <Label htmlFor="branch_id">Branch</Label>
-        <Select value={selectedBranch} onValueChange={setSelectedBranch} name="branch_id">
+        <Select name="branch_id" onValueChange={setSelectedBranch} value={selectedBranch}>
           <SelectTrigger>
             <SelectValue placeholder="Select a branch" />
           </SelectTrigger>
@@ -150,11 +152,11 @@ export default function UserPermissionForm({ userPermission }: UserPermissionFor
       <div>
         <Label htmlFor="action">Action</Label>
         <Input
+          defaultValue={userPermission?.action ?? ''}
           id="action"
           name="action"
-          type="text"
-          defaultValue={userPermission?.action ?? ''}
           placeholder="Enter permitted action (e.g., 'read', 'write', 'admin')"
+          type="text"
         />
         <FieldError actionState={validation ?? actionState} name="action" />
       </div>
@@ -162,19 +164,19 @@ export default function UserPermissionForm({ userPermission }: UserPermissionFor
       <div>
         <Label htmlFor="assignment_date">Assignment Date</Label>
         <Input
+          defaultValue={userPermission?.assignment_date ? formatDateForInput(userPermission.assignment_date) : ''}
           id="assignment_date"
           name="assignment_date"
           type="date"
-          defaultValue={userPermission?.assignment_date ? formatDateForInput(userPermission.assignment_date) : ''}
         />
         <FieldError actionState={validation ?? actionState} name="assignment_date" />
       </div>
 
       <div className="flex gap-2">
-        <Button asChild variant="secondary" className="w-full" type="button">
+        <Button asChild className="w-full" type="button" variant="secondary">
           <Link href="/dashboard/user_permission">Cancel</Link>
         </Button>
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button className="w-full" disabled={pending} type="submit">
           {userPermission ? 'Update' : 'Create'}
         </Button>
       </div>

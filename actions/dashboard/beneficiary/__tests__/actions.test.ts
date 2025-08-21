@@ -1,6 +1,7 @@
-import { createBeneficiary, updateBeneficiary, deleteBeneficiary } from '../actions';
 import { createClient } from '@/lib/supabase/server';
 import { BeneficiarySchema } from '@/schemas/beneficiary.schema';
+
+import { createBeneficiary, updateBeneficiary, deleteBeneficiary } from '../actions';
 
 // Mock the supabase server client
 jest.mock('@/lib/supabase/server');

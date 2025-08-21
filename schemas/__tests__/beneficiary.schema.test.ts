@@ -1,4 +1,5 @@
-import { BeneficiarySchema, BeneficiaryInput, Beneficiary } from '../beneficiary.schema';
+import type { BeneficiaryInput, Beneficiary } from '../beneficiary.schema';
+import { BeneficiarySchema } from '../beneficiary.schema';
 
 describe('BeneficiarySchema', () => {
   describe('valid inputs', () => {

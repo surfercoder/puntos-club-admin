@@ -1,5 +1,4 @@
 import StatusForm from '@/components/dashboard/status/status-form';
-
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 export default function CreateStatusPage() {

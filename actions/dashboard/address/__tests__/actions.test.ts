@@ -1,6 +1,7 @@
-import { createAddress, updateAddress, deleteAddress } from '../actions';
 import { createClient } from '@/lib/supabase/server';
 import { AddressSchema } from '@/schemas/address.schema';
+
+import { createAddress, updateAddress, deleteAddress } from '../actions';
 
 // Mock the supabase server client
 jest.mock('@/lib/supabase/server');

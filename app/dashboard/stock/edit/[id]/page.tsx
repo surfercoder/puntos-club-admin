@@ -1,8 +1,8 @@
-import { createClient } from '@/lib/supabase/server';
-import StockForm from '@/components/dashboard/stock/stock-form';
 import { notFound } from 'next/navigation';
 
+import StockForm from '@/components/dashboard/stock/stock-form';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/server';
 
 export default async function EditStockPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
@@ -13,7 +13,7 @@ export default async function EditStockPage({ params }: { params: Promise<{ id: 
     return <div>Error fetching stock record</div>;
   }
 
-  if (!data) notFound();
+  if (!data) {notFound();}
 
   return (
     <div className="max-w-xl mx-auto">

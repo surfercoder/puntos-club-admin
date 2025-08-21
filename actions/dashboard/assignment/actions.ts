@@ -1,8 +1,8 @@
 "use server";
 
 import { createClient } from '@/lib/supabase/server';
-import { Assignment } from '@/types/assignment';
 import { AssignmentSchema } from '@/schemas/assignment.schema';
+import type { Assignment } from '@/types/assignment';
 
 export async function createAssignment(input: Assignment) {
   const parsed = AssignmentSchema.safeParse(input);
@@ -10,7 +10,7 @@ export async function createAssignment(input: Assignment) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };
@@ -28,7 +28,7 @@ export async function updateAssignment(id: string, input: Assignment) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };

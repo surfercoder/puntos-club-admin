@@ -1,6 +1,12 @@
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { useRouter } from 'next/navigation';
+import React from 'react';
+import { toast } from 'sonner';
+
+import { deleteAppOrder } from '@/actions/dashboard/app_order/actions';
+
+import DeleteModal from '../delete-modal';
 
 // Mock dependencies
 jest.mock('next/navigation', () => ({
@@ -33,10 +39,6 @@ jest.mock('lucide-react', () => ({
   Trash2: ({ className }: { className?: string }) => React.createElement('span', { className, 'data-testid': 'trash-icon' }, 'Trash'),
 }));
 
-import DeleteModal from '../delete-modal';
-import { deleteAppOrder } from '@/actions/dashboard/app_order/actions';
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 
 const mockDeleteAppOrder = deleteAppOrder as jest.MockedFunction<typeof deleteAppOrder>;
 const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>;

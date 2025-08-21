@@ -1,4 +1,5 @@
-import { ProductSchema, ProductInput, Product } from '../product.schema';
+import type { ProductInput, Product } from '../product.schema';
+import { ProductSchema } from '../product.schema';
 
 describe('ProductSchema', () => {
   describe('valid inputs', () => {

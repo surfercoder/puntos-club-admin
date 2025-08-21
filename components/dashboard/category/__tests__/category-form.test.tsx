@@ -1,6 +1,7 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import React, { useActionState } from 'react';
 import { toast } from 'sonner';
+
 import CategoryForm from '../category-form';
 
 // Mock all dependencies with simple implementations
@@ -87,7 +88,7 @@ jest.mock('@/components/ui/field-error', () => ({
   __esModule: true,
   default: ({ actionState, name }: { actionState: { fieldErrors?: Record<string, string[]> }; name: string }) => {
     const message = actionState?.fieldErrors?.[name]?.[0];
-    if (!message) return null;
+    if (!message) {return null;}
     return React.createElement('span', { 
       'data-testid': `field-error-${name}`, 
       className: 'text-red-500 text-xs' 
@@ -102,7 +103,6 @@ jest.mock('next/link', () => ({
   },
 }));
 
-import { useActionState } from 'react';
 
 const mockUseActionState = useActionState as jest.MockedFunction<typeof useActionState>;
 

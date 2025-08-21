@@ -1,5 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
 import { createServerClient } from '@supabase/ssr';
+import type { NextRequest} from 'next/server';
+import { NextResponse } from 'next/server';
+
 import { updateSession } from '../middleware';
 
 // Mock dependencies

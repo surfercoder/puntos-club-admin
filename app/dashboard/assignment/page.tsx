@@ -1,9 +1,8 @@
-import { createClient } from '@/lib/supabase/server';
+import { Pencil } from 'lucide-react';
 import Link from 'next/link';
-import { AssignmentWithRelations } from '@/types/assignment';
+
 import DeleteModal from '@/components/dashboard/assignment/delete-modal';
 import { Button } from '@/components/ui/button';
-import { Pencil } from 'lucide-react';
 import {
   Table,
   TableHeader,
@@ -12,6 +11,8 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
+import { createClient } from '@/lib/supabase/server';
+import type { AssignmentWithRelations } from '@/types/assignment';
 
 export default async function AssignmentListPage() {
   const supabase = await createClient();
@@ -31,10 +32,10 @@ export default async function AssignmentListPage() {
   return (
     <div className="space-y-6">
       {/* Breadcrumb Navigation */}
-      <nav className="flex" aria-label="Breadcrumb">
+      <nav aria-label="Breadcrumb" className="flex">
         <ol className="inline-flex items-center space-x-1 md:space-x-3">
           <li className="inline-flex items-center">
-            <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-blue-600">
+            <Link className="text-sm font-medium text-gray-500 hover:text-blue-600" href="/dashboard">
               Dashboard
             </Link>
           </li>
@@ -104,7 +105,7 @@ export default async function AssignmentListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="text-center py-4">No assignments found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={7}>No assignments found.</TableCell>
               </TableRow>
             )}
           </TableBody>

@@ -1,4 +1,5 @@
-import { AddressSchema, AddressInput, Address } from '../address.schema';
+import type { AddressInput, Address } from '../address.schema';
+import { AddressSchema } from '../address.schema';
 
 describe('AddressSchema', () => {
   describe('valid inputs', () => {

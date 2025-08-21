@@ -1,4 +1,5 @@
-import { AppUserSchema, AppUserInput, AppUser } from '../app_user.schema';
+import type { AppUserInput, AppUser } from '../app_user.schema';
+import { AppUserSchema } from '../app_user.schema';
 
 describe('AppUserSchema', () => {
   describe('valid inputs', () => {

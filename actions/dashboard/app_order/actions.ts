@@ -1,8 +1,8 @@
 "use server";
 
 import { createClient } from '@/lib/supabase/server';
-import { AppOrder } from '@/types/app_order';
 import { AppOrderSchema } from '@/schemas/app_order.schema';
+import type { AppOrder } from '@/types/app_order';
 
 export async function createAppOrder(input: AppOrder) {
   const parsed = AppOrderSchema.safeParse(input);
@@ -10,7 +10,7 @@ export async function createAppOrder(input: AppOrder) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };
@@ -28,7 +28,7 @@ export async function updateAppOrder(id: string, input: AppOrder) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };

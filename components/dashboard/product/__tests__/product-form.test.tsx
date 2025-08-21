@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import React, { useActionState } from 'react';
+import { toast } from 'sonner';
 
 // Mock all dependencies with simple implementations
 jest.mock('next/navigation', () => ({
@@ -90,8 +91,8 @@ jest.mock('@/components/ui/select', () => ({
       'data-testid': `select-${name}`,
       'data-value': value,
       id: name,
-      name: name,
-      value: value,
+      name,
+      value,
       onChange: () => onValueChange?.('1'),
     }, [
       React.createElement('option', { value: '', disabled: true, key: 'placeholder' }, 'Select a subcategory'),
@@ -109,7 +110,7 @@ jest.mock('@/components/ui/field-error', () => ({
   __esModule: true,
   default: ({ actionState, name }: { actionState: { fieldErrors?: Record<string, string[]> }; name: string }) => {
     const message = actionState?.fieldErrors?.[name]?.[0];
-    if (!message) return null;
+    if (!message) {return null;}
     return React.createElement('span', { 
       'data-testid': `field-error-${name}`, 
       className: 'text-red-500 text-xs' 
@@ -122,12 +123,8 @@ jest.mock('next/link', () => ({
   default: ({ children, href, ...props }: Record<string, unknown> & { children: React.ReactNode; href: string }) => {
     return React.createElement('a', { href, ...props }, children);
   },
-}));
+}));import ProductForm from '../product-form';
 
-import ProductForm from '../product-form';
-
-import { useActionState } from 'react';
-import { toast } from 'sonner';
 
 describe('ProductForm', () => {
   beforeEach(() => {

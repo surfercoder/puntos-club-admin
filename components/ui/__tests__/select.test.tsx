@@ -1,5 +1,6 @@
-import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import React from 'react';
+
 import {
   Select,
   SelectContent,
@@ -150,7 +151,7 @@ describe('Select Components', () => {
   describe('SelectItem', () => {
     it('should render select items with check icon when selected', () => {
       render(
-        <Select defaultValue="option1" defaultOpen>
+        <Select defaultOpen defaultValue="option1">
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
@@ -173,7 +174,7 @@ describe('Select Components', () => {
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="option1" className="custom-item">
+            <SelectItem className="custom-item" value="option1">
               Option 1
             </SelectItem>
           </SelectContent>
@@ -195,7 +196,7 @@ describe('Select Components', () => {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="option1">Option 1</SelectItem>
-            <SelectItem value="option2" disabled>
+            <SelectItem disabled value="option2">
               Option 2 (Disabled)
             </SelectItem>
           </SelectContent>

@@ -1,4 +1,5 @@
-import { AppOrderSchema, AppOrderInput, AppOrder } from '../app_order.schema';
+import type { AppOrderInput} from '../app_order.schema';
+import { AppOrderSchema } from '../app_order.schema';
 
 describe('AppOrderSchema', () => {
   describe('valid inputs', () => {

@@ -1,3 +1,6 @@
+import { createClient } from '@/lib/supabase/server';
+import { AppUserSchema } from '@/schemas/app_user.schema';
+
 import { 
   createAppUser, 
   updateAppUser, 
@@ -5,8 +8,6 @@ import {
   getAppUsers, 
   getAppUser 
 } from '../actions';
-import { createClient } from '@/lib/supabase/server';
-import { AppUserSchema } from '@/schemas/app_user.schema';
 
 // Mock the supabase server client
 jest.mock('@/lib/supabase/server');

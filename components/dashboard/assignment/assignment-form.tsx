@@ -1,20 +1,23 @@
 'use client';
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
-import { Assignment } from '@/types/assignment';
+import { toast } from "sonner"
+
 import { assignmentFormAction } from '@/actions/dashboard/assignment/assignment-form-actions';
 import { Button } from '@/components/ui/button';
+import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ActionState, EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
-import FieldError from '@/components/ui/field-error';
-import { AssignmentSchema } from '@/schemas/assignment.schema';
-import { toast } from "sonner"
-import { useRouter } from 'next/navigation';
+import { Textarea } from '@/components/ui/textarea';
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { createClient } from '@/lib/supabase/client';
-import Link from 'next/link';
+import { AssignmentSchema } from '@/schemas/assignment.schema';
+import type { Assignment } from '@/types/assignment';
+
 
 export default function AssignmentForm({ assignment }: { assignment?: Assignment }) {
   // State
@@ -38,9 +41,9 @@ export default function AssignmentForm({ assignment }: { assignment?: Assignment
           supabase.from('app_user').select('id, first_name, last_name')
         ]);
 
-        if (branchesRes.data) setBranches(branchesRes.data);
-        if (beneficiariesRes.data) setBeneficiaries(beneficiariesRes.data);
-        if (usersRes.data) setUsers(usersRes.data);
+        if (branchesRes.data) {setBranches(branchesRes.data);}
+        if (beneficiariesRes.data) {setBeneficiaries(beneficiariesRes.data);}
+        if (usersRes.data) {setUsers(usersRes.data);}
       } catch (error) {
         console.error('Error loading data:', error);
       }
@@ -80,11 +83,11 @@ export default function AssignmentForm({ assignment }: { assignment?: Assignment
   // Render
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
-      {assignment?.id && <input type="hidden" name="id" value={String(assignment.id)} />}
+      {assignment?.id && <input name="id" type="hidden" value={String(assignment.id)} />}
       
       <div className="space-y-2">
         <Label htmlFor="branch_id">Branch</Label>
-        <Select name="branch_id" defaultValue={assignment?.branch_id ?? ''}>
+        <Select defaultValue={assignment?.branch_id ?? ''} name="branch_id">
           <SelectTrigger>
             <SelectValue placeholder="Select a branch" />
           </SelectTrigger>
@@ -101,7 +104,7 @@ export default function AssignmentForm({ assignment }: { assignment?: Assignment
 
       <div className="space-y-2">
         <Label htmlFor="beneficiary_id">Beneficiary</Label>
-        <Select name="beneficiary_id" defaultValue={assignment?.beneficiary_id ?? ''}>
+        <Select defaultValue={assignment?.beneficiary_id ?? ''} name="beneficiary_id">
           <SelectTrigger>
             <SelectValue placeholder="Select a beneficiary" />
           </SelectTrigger>
@@ -118,7 +121,7 @@ export default function AssignmentForm({ assignment }: { assignment?: Assignment
 
       <div className="space-y-2">
         <Label htmlFor="user_id">Assigned By (Optional)</Label>
-        <Select name="user_id" defaultValue={assignment?.user_id ?? 'system'}>
+        <Select defaultValue={assignment?.user_id ?? 'system'} name="user_id">
           <SelectTrigger>
             <SelectValue placeholder="Select a user (optional)" />
           </SelectTrigger>
@@ -137,13 +140,13 @@ export default function AssignmentForm({ assignment }: { assignment?: Assignment
       <div className="space-y-2">
         <Label htmlFor="points">Points</Label>
         <Input
+          aria-describedby="points-error"
+          aria-invalid={!!actionState.fieldErrors.points}
+          defaultValue={assignment?.points ?? ''}
           id="points"
+          min="1"
           name="points"
           type="number"
-          min="1"
-          defaultValue={assignment?.points ?? ''}
-          aria-invalid={!!actionState.fieldErrors.points}
-          aria-describedby="points-error"
         />
         <FieldError actionState={validation ?? actionState} name="points" />
       </div>
@@ -151,11 +154,11 @@ export default function AssignmentForm({ assignment }: { assignment?: Assignment
       <div className="space-y-2">
         <Label htmlFor="reason">Reason (Optional)</Label>
         <Input
+          aria-describedby="reason-error"
+          aria-invalid={!!actionState.fieldErrors.reason}
+          defaultValue={assignment?.reason ?? ''}
           id="reason"
           name="reason"
-          defaultValue={assignment?.reason ?? ''}
-          aria-invalid={!!actionState.fieldErrors.reason}
-          aria-describedby="reason-error"
           placeholder="Reason for point assignment"
         />
         <FieldError actionState={validation ?? actionState} name="reason" />
@@ -164,12 +167,12 @@ export default function AssignmentForm({ assignment }: { assignment?: Assignment
       <div className="space-y-2">
         <Label htmlFor="assignment_date">Assignment Date</Label>
         <Input
+          aria-describedby="assignment_date-error"
+          aria-invalid={!!actionState.fieldErrors.assignment_date}
+          defaultValue={assignment?.assignment_date ? new Date(assignment.assignment_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}
           id="assignment_date"
           name="assignment_date"
           type="date"
-          defaultValue={assignment?.assignment_date ? new Date(assignment.assignment_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]}
-          aria-invalid={!!actionState.fieldErrors.assignment_date}
-          aria-describedby="assignment_date-error"
         />
         <FieldError actionState={validation ?? actionState} name="assignment_date" />
       </div>
@@ -177,11 +180,11 @@ export default function AssignmentForm({ assignment }: { assignment?: Assignment
       <div className="space-y-2">
         <Label htmlFor="observations">Observations (Optional)</Label>
         <Textarea
+          aria-describedby="observations-error"
+          aria-invalid={!!actionState.fieldErrors.observations}
+          defaultValue={assignment?.observations ?? ''}
           id="observations"
           name="observations"
-          defaultValue={assignment?.observations ?? ''}
-          aria-invalid={!!actionState.fieldErrors.observations}
-          aria-describedby="observations-error"
           placeholder="Additional observations or notes"
           rows={3}
         />
@@ -189,10 +192,10 @@ export default function AssignmentForm({ assignment }: { assignment?: Assignment
       </div>
 
       <div className="flex gap-2">
-        <Button asChild variant="secondary" className="w-full" type="button">
+        <Button asChild className="w-full" type="button" variant="secondary">
           <Link href="/dashboard/assignment">Cancel</Link>
         </Button>
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button className="w-full" disabled={pending} type="submit">
           {assignment ? 'Update' : 'Create'}
         </Button>
       </div>

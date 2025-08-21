@@ -1,7 +1,9 @@
 'use client';
-import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+
 import { deleteAddress } from '@/actions/dashboard/address/actions';
+import { Button } from '@/components/ui/button';
 import {
   Dialog,
   DialogTrigger,
@@ -11,7 +13,6 @@ import {
   DialogDescription,
   DialogFooter,
 } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
 
 export default function DeleteModal({ id }: { id: number }) {
   const [open, setOpen] = useState(false);
@@ -27,9 +28,9 @@ export default function DeleteModal({ id }: { id: number }) {
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button variant="destructive" size="sm">Delete</Button>
+        <Button size="sm" variant="destructive">Delete</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
@@ -39,10 +40,10 @@ export default function DeleteModal({ id }: { id: number }) {
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex gap-2 justify-end">
-          <Button variant="secondary" onClick={() => setOpen(false)} disabled={loading} type="button">
+          <Button disabled={loading} onClick={() => setOpen(false)} type="button" variant="secondary">
             Cancel
           </Button>
-          <Button variant="destructive" onClick={handleDelete} disabled={loading} type="button">
+          <Button disabled={loading} onClick={handleDelete} type="button" variant="destructive">
             {loading ? 'Deleting...' : 'Delete'}
           </Button>
         </DialogFooter>

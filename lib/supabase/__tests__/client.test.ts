@@ -1,5 +1,6 @@
-import { createClient } from '../client';
 import { createBrowserClient } from '@supabase/ssr';
+
+import { createClient } from '../client';
 
 jest.mock('@supabase/ssr');
 

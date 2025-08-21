@@ -1,17 +1,18 @@
-import { createClient } from '@/lib/supabase/server';
+import { Pencil } from 'lucide-react';
 import Link from 'next/link';
-import { AppOrder } from '@/types/app_order';
+
 import DeleteModal from '@/components/dashboard/app_order/delete-modal';
 import { Button } from '@/components/ui/button';
-import { Pencil } from 'lucide-react';
 import {
   Table,
-  TableHeader,
-  TableRow,
-  TableHead,
   TableBody,
   TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
 } from '@/components/ui/table';
+import { createClient } from '@/lib/supabase/server';
+import type { AppOrder } from '@/types/app_order';
 
 export default async function AppOrderListPage() {
   const supabase = await createClient();
@@ -24,10 +25,10 @@ export default async function AppOrderListPage() {
   return (
     <div className="space-y-6">
       {/* Breadcrumb Navigation */}
-      <nav className="flex" aria-label="Breadcrumb">
+      <nav aria-label="Breadcrumb" className="flex">
         <ol className="inline-flex items-center space-x-1 md:space-x-3">
           <li className="inline-flex items-center">
-            <Link href="/dashboard" className="text-sm font-medium text-gray-500 hover:text-blue-600">
+            <Link className="text-sm font-medium text-gray-500 hover:text-blue-600" href="/dashboard">
               Dashboard
             </Link>
           </li>
@@ -75,7 +76,7 @@ export default async function AppOrderListPage() {
                   <TableCell>{order.observations || 'N/A'}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Button variant="secondary" size="sm" asChild>
+                      <Button asChild size="sm" variant="secondary">
                         <Link href={`/dashboard/app_order/edit/${order.id}`}>
                           <Pencil className="h-4 w-4" />
                         </Link>
@@ -90,7 +91,7 @@ export default async function AppOrderListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={5} className="text-center py-4">No orders found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={5}>No orders found.</TableCell>
               </TableRow>
             )}
           </TableBody>

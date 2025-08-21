@@ -1,6 +1,6 @@
-import type { Branch } from './branch';
-import type { Beneficiary } from './beneficiary';
 import type { AppUser } from './app_user';
+import type { Beneficiary } from './beneficiary';
+import type { Branch } from './branch';
 
 export type Assignment = {
   id: string;

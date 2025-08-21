@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 // Mock all dependencies
 jest.mock('next/navigation', () => ({
@@ -29,13 +30,9 @@ jest.mock('@/components/ui/button', () => ({
 jest.mock('lucide-react', () => ({
   Trash2: ({ className }: { className?: string }) =>
     React.createElement('svg', { 'data-testid': 'trash-icon', className }, 'Trash2'),
-}));
+}));import { deleteUserPermission } from '@/actions/dashboard/user_permission/actions';
 
 import DeleteModal from '../delete-modal';
-
-import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
-import { deleteUserPermission } from '@/actions/dashboard/user_permission/actions';
 
 const mockRouter = { refresh: jest.fn() };
 const mockUseRouter = useRouter as jest.MockedFunction<typeof useRouter>;
@@ -50,7 +47,7 @@ describe('UserPermission DeleteModal', () => {
 
   describe('Initial State', () => {
     it('renders delete button when modal is closed', () => {
-      render(<DeleteModal userPermissionId="1" userPermissionDescription="John Doe - Admin Access" />);
+      render(<DeleteModal userPermissionDescription="John Doe - Admin Access" userPermissionId="1" />);
 
       const deleteButton = screen.getByRole('button');
       expect(deleteButton).toHaveAttribute('data-variant', 'destructive');
@@ -59,7 +56,7 @@ describe('UserPermission DeleteModal', () => {
     });
 
     it('does not render modal content initially', () => {
-      render(<DeleteModal userPermissionId="1" userPermissionDescription="John Doe - Admin Access" />);
+      render(<DeleteModal userPermissionDescription="John Doe - Admin Access" userPermissionId="1" />);
 
       expect(screen.queryByText('Delete User Permission')).not.toBeInTheDocument();
       expect(screen.queryByText('Are you sure you want to delete')).not.toBeInTheDocument();
@@ -70,7 +67,7 @@ describe('UserPermission DeleteModal', () => {
     it('opens modal when delete button is clicked', async () => {
       const user = userEvent.setup();
       
-      render(<DeleteModal userPermissionId="1" userPermissionDescription="John Doe - Admin Access" />);
+      render(<DeleteModal userPermissionDescription="John Doe - Admin Access" userPermissionId="1" />);
 
       const deleteButton = screen.getByRole('button');
       await user.click(deleteButton);
@@ -86,7 +83,7 @@ describe('UserPermission DeleteModal', () => {
 
     it('renders modal content when open', async () => {
       const user = userEvent.setup();
-      render(<DeleteModal userPermissionId="1" userPermissionDescription="John Doe - Admin Access" />);
+      render(<DeleteModal userPermissionDescription="John Doe - Admin Access" userPermissionId="1" />);
 
       const deleteButton = screen.getByRole('button');
       await user.click(deleteButton);
@@ -99,7 +96,7 @@ describe('UserPermission DeleteModal', () => {
 
     it('renders cancel and delete buttons in modal', async () => {
       const user = userEvent.setup();
-      render(<DeleteModal userPermissionId="1" userPermissionDescription="John Doe - Admin Access" />);
+      render(<DeleteModal userPermissionDescription="John Doe - Admin Access" userPermissionId="1" />);
 
       const deleteButton = screen.getByRole('button');
       await user.click(deleteButton);
@@ -110,7 +107,7 @@ describe('UserPermission DeleteModal', () => {
 
     it('has proper modal styling', async () => {
       const user = userEvent.setup();
-      render(<DeleteModal userPermissionId="1" userPermissionDescription="John Doe - Admin Access" />);
+      render(<DeleteModal userPermissionDescription="John Doe - Admin Access" userPermissionId="1" />);
 
       const deleteButton = screen.getByRole('button');
       await user.click(deleteButton);
@@ -131,7 +128,7 @@ describe('UserPermission DeleteModal', () => {
     it('closes modal when cancel button is clicked', async () => {
       const user = userEvent.setup();
       
-      render(<DeleteModal userPermissionId="1" userPermissionDescription="John Doe - Admin Access" />);
+      render(<DeleteModal userPermissionDescription="John Doe - Admin Access" userPermissionId="1" />);
 
       // First open modal
       const deleteButton = screen.getByRole('button');
@@ -147,7 +144,7 @@ describe('UserPermission DeleteModal', () => {
     it('calls deleteUserPermission when delete button is clicked', async () => {
       const user = userEvent.setup();
       
-      render(<DeleteModal userPermissionId="1" userPermissionDescription="John Doe - Admin Access" />);
+      render(<DeleteModal userPermissionDescription="John Doe - Admin Access" userPermissionId="1" />);
 
       // First open modal
       const triggerButton = screen.getByRole('button');
@@ -169,7 +166,7 @@ describe('UserPermission DeleteModal', () => {
     it('shows success toast and refreshes router on successful delete', async () => {
       const user = userEvent.setup();
       
-      render(<DeleteModal userPermissionId="1" userPermissionDescription="John Doe - Admin Access" />);
+      render(<DeleteModal userPermissionDescription="John Doe - Admin Access" userPermissionId="1" />);
 
       // First open modal
       const triggerButton = screen.getByRole('button');
@@ -195,7 +192,7 @@ describe('UserPermission DeleteModal', () => {
       const user = userEvent.setup();
       deleteUserPermission.mockResolvedValue({ error: 'Delete failed' });
       
-      render(<DeleteModal userPermissionId="1" userPermissionDescription="John Doe - Admin Access" />);
+      render(<DeleteModal userPermissionDescription="John Doe - Admin Access" userPermissionId="1" />);
 
       // First open modal
       const triggerButton = screen.getByRole('button');
@@ -214,7 +211,7 @@ describe('UserPermission DeleteModal', () => {
       const user = userEvent.setup();
       deleteUserPermission.mockRejectedValue(new Error('Network error'));
       
-      render(<DeleteModal userPermissionId="1" userPermissionDescription="John Doe - Admin Access" />);
+      render(<DeleteModal userPermissionDescription="John Doe - Admin Access" userPermissionId="1" />);
 
       // First open modal
       const triggerButton = screen.getByRole('button');
@@ -244,7 +241,7 @@ describe('UserPermission DeleteModal', () => {
       });
       mockDeleteUserPermission.mockReturnValue(deletePromise);
       
-      render(<DeleteModal userPermissionId="1" userPermissionDescription="John Doe - Admin Access" />);
+      render(<DeleteModal userPermissionDescription="John Doe - Admin Access" userPermissionId="1" />);
 
       // First open modal
       const triggerButton = screen.getByRole('button');
@@ -269,7 +266,7 @@ describe('UserPermission DeleteModal', () => {
       });
       mockDeleteUserPermission.mockReturnValue(deletePromise);
       
-      render(<DeleteModal userPermissionId="1" userPermissionDescription="John Doe - Admin Access" />);
+      render(<DeleteModal userPermissionDescription="John Doe - Admin Access" userPermissionId="1" />);
 
       // First open modal
       const triggerButton = screen.getByRole('button');
@@ -292,7 +289,7 @@ describe('UserPermission DeleteModal', () => {
 
   describe('State Management', () => {
     it('manages isOpen state correctly', () => {
-      render(<DeleteModal userPermissionId="1" userPermissionDescription="John Doe - Admin Access" />);
+      render(<DeleteModal userPermissionDescription="John Doe - Admin Access" userPermissionId="1" />);
       
       // State management works with real useState
     });
@@ -303,7 +300,7 @@ describe('UserPermission DeleteModal', () => {
 
       const user = userEvent.setup();
       
-      render(<DeleteModal userPermissionId="test-perm-123" userPermissionDescription="John Doe - Admin Access" />);
+      render(<DeleteModal userPermissionDescription="John Doe - Admin Access" userPermissionId="test-perm-123" />);
 
       // First open modal
       const triggerButton = screen.getByRole('button');
@@ -319,7 +316,7 @@ describe('UserPermission DeleteModal', () => {
     it('displays permissionDescription in confirmation message', async () => {
       const user = userEvent.setup();
       
-      render(<DeleteModal userPermissionId="1" userPermissionDescription="Jane Smith - Read Access" />);
+      render(<DeleteModal userPermissionDescription="Jane Smith - Read Access" userPermissionId="1" />);
 
       // First open modal
       const deleteButton = screen.getByRole('button');

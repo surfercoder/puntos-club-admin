@@ -1,8 +1,10 @@
 "use server";
 
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import type { SubcategoryInput } from '@/schemas/subcategory.schema';
+
 import { createSubcategory, updateSubcategory } from './actions';
-import { SubcategoryInput } from '@/schemas/subcategory.schema';
-import { ActionState, EMPTY_ACTION_STATE } from '@/lib/error-handler';
 
 export async function subcategoryFormAction(
   prevState: ActionState,

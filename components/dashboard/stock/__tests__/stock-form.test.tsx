@@ -1,6 +1,11 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import React from 'react';
+import React, { useActionState } from 'react';
+import { toast } from 'sonner';
+
+import { createClient } from '@/lib/supabase/client';
+
+import StockForm from '../stock-form';
 
 // Mock all dependencies with simple implementations
 jest.mock('next/navigation', () => ({
@@ -100,7 +105,7 @@ jest.mock('@/components/ui/field-error', () => ({
   __esModule: true,
   default: ({ actionState, name }: { actionState: { fieldErrors?: Record<string, string[]> }; name: string }) => {
     const message = actionState?.fieldErrors?.[name]?.[0];
-    if (!message) return null;
+    if (!message) {return null;}
     return React.createElement('span', { 
       'data-testid': `field-error-${name}`, 
       className: 'text-red-500 text-xs' 
@@ -115,14 +120,7 @@ jest.mock('next/link', () => ({
   },
 }));
 
-import StockForm from '../stock-form';
 
-import { useActionState } from 'react';
-import { toast } from 'sonner';
-import { createClient } from '@/lib/supabase/client';
-
-// Get the mocked functions from the jest.mock('react') call
-import * as React from 'react';
 
 describe('StockForm', () => {
   

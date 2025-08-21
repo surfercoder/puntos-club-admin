@@ -1,8 +1,10 @@
 "use server";
 
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import type { StatusInput } from '@/schemas/status.schema';
+
 import { createStatus, updateStatus } from './actions';
-import { StatusInput } from '@/schemas/status.schema';
-import { ActionState, EMPTY_ACTION_STATE } from '@/lib/error-handler';
 
 export async function statusFormAction(
   prevState: ActionState,

@@ -1,18 +1,15 @@
 "use client";
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
+import { toast } from "sonner";
+
 import { branchFormAction } from '@/actions/dashboard/branch/branch-form-actions';
 import { Button } from '@/components/ui/button';
+import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ActionState, EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
-import FieldError from '@/components/ui/field-error';
-import { Branch } from '@/types/branch';
-import { BranchSchema } from '@/schemas/branch.schema';
-import { toast } from "sonner";
-import { useRouter } from 'next/navigation';
-import { createClient } from '@/lib/supabase/client';
-import Link from 'next/link';
 import {
   Select,
   SelectContent,
@@ -20,6 +17,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import { createClient } from '@/lib/supabase/client';
+import { BranchSchema } from '@/schemas/branch.schema';
+import type { Branch } from '@/types/branch';
 
 interface BranchFormProps {
   branch?: Branch;
@@ -53,8 +55,8 @@ export default function BranchForm({ branch }: BranchFormProps) {
           supabase.from('address').select('id, street, city'),
         ]);
 
-        if (organizationsRes.data) setOrganizations(organizationsRes.data);
-        if (addressesRes.data) setAddresses(addressesRes.data);
+        if (organizationsRes.data) {setOrganizations(organizationsRes.data);}
+        if (addressesRes.data) {setAddresses(addressesRes.data);}
       } catch (error) {
         console.error('Error fetching data:', error);
       }
@@ -78,23 +80,23 @@ export default function BranchForm({ branch }: BranchFormProps) {
 
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
-      {branch?.id && <input type="hidden" name="id" value={branch.id} />}
+      {branch?.id && <input name="id" type="hidden" value={branch.id} />}
 
       <div>
         <Label htmlFor="name">Branch Name</Label>
         <Input
+          defaultValue={branch?.name ?? ''}
           id="name"
           name="name"
-          type="text"
-          defaultValue={branch?.name ?? ''}
           placeholder="Enter branch name"
+          type="text"
         />
         <FieldError actionState={validation ?? actionState} name="name" />
       </div>
 
       <div>
         <Label htmlFor="organization_id">Organization</Label>
-        <Select name="organization_id" defaultValue={branch?.organization_id ?? ''}>
+        <Select defaultValue={branch?.organization_id ?? ''} name="organization_id">
           <SelectTrigger>
             <SelectValue placeholder="Select an organization" />
           </SelectTrigger>
@@ -111,7 +113,7 @@ export default function BranchForm({ branch }: BranchFormProps) {
 
       <div>
         <Label htmlFor="address_id">Address (Optional)</Label>
-        <Select name="address_id" defaultValue={branch?.address_id ?? 'none'}>
+        <Select defaultValue={branch?.address_id ?? 'none'} name="address_id">
           <SelectTrigger>
             <SelectValue placeholder="Select an address" />
           </SelectTrigger>
@@ -130,11 +132,11 @@ export default function BranchForm({ branch }: BranchFormProps) {
       <div>
         <Label htmlFor="code">Branch Code</Label>
         <Input
+          defaultValue={branch?.code ?? ''}
           id="code"
           name="code"
-          type="text"
-          defaultValue={branch?.code ?? ''}
           placeholder="Enter branch code (optional)"
+          type="text"
         />
         <FieldError actionState={validation ?? actionState} name="code" />
       </div>
@@ -142,18 +144,18 @@ export default function BranchForm({ branch }: BranchFormProps) {
       <div>
         <Label htmlFor="phone">Phone</Label>
         <Input
+          defaultValue={branch?.phone ?? ''}
           id="phone"
           name="phone"
-          type="tel"
-          defaultValue={branch?.phone ?? ''}
           placeholder="Enter phone number (optional)"
+          type="tel"
         />
         <FieldError actionState={validation ?? actionState} name="phone" />
       </div>
 
       <div>
         <Label htmlFor="active">Status</Label>
-        <Select name="active" defaultValue={branch?.active !== false ? 'true' : 'false'}>
+        <Select defaultValue={branch?.active !== false ? 'true' : 'false'} name="active">
           <SelectTrigger>
             <SelectValue placeholder="Select status" />
           </SelectTrigger>
@@ -166,10 +168,10 @@ export default function BranchForm({ branch }: BranchFormProps) {
       </div>
 
       <div className="flex gap-2">
-        <Button asChild variant="secondary" className="w-full" type="button">
+        <Button asChild className="w-full" type="button" variant="secondary">
           <Link href="/dashboard/branch">Cancel</Link>
         </Button>
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button className="w-full" disabled={pending} type="submit">
           {branch ? 'Update' : 'Create'}
         </Button>
       </div>

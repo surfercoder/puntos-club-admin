@@ -1,5 +1,6 @@
-import React from 'react';
 import { render, screen } from '@testing-library/react';
+import React from 'react';
+
 import {
   Card,
   CardHeader,
@@ -53,11 +54,11 @@ describe('Card Components', () => {
     it('should accept and forward HTML div attributes', () => {
       render(
         <Card
-          id="test-card"
-          data-testid="custom-card"
-          role="article"
           aria-label="Product card"
+          data-testid="custom-card"
+          id="test-card"
           onClick={() => {}}
+          role="article"
         >
           Clickable card
         </Card>
@@ -340,10 +341,10 @@ describe('Card Components', () => {
     it('should support ARIA attributes', () => {
       render(
         <Card
-          role="article"
-          aria-label="Product information"
           aria-describedby="product-desc"
+          aria-label="Product information"
           data-testid="accessible-card"
+          role="article"
         >
           <CardHeader>
             <CardTitle id="product-title">iPhone 14</CardTitle>
@@ -372,15 +373,15 @@ describe('Card Components', () => {
       
       render(
         <Card
-          tabIndex={0}
-          role="button"
+          data-testid="interactive-card"
           onClick={handleClick}
           onKeyDown={(e) => {
             if (e.key === 'Enter' || e.key === ' ') {
               handleClick();
             }
           }}
-          data-testid="interactive-card"
+          role="button"
+          tabIndex={0}
         >
           <CardContent>Clickable card content</CardContent>
         </Card>
@@ -399,9 +400,9 @@ describe('Card Components', () => {
     it('should handle empty children gracefully', () => {
       render(
         <Card data-testid="card-with-empty">
-          <CardHeader></CardHeader>
-          <CardContent></CardContent>
-          <CardFooter></CardFooter>
+          <CardHeader />
+          <CardContent />
+          <CardFooter />
         </Card>
       );
       

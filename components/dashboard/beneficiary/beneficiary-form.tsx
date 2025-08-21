@@ -1,17 +1,19 @@
 "use client";
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
+import { toast } from "sonner";
+
 import { beneficiaryFormAction } from '@/actions/dashboard/beneficiary/beneficiary-form-actions';
 import { Button } from '@/components/ui/button';
+import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ActionState, EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
-import FieldError from '@/components/ui/field-error';
-import { Beneficiary } from '@/types/beneficiary';
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { BeneficiarySchema } from '@/schemas/beneficiary.schema';
-import { toast } from "sonner";
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import type { Beneficiary } from '@/types/beneficiary';
 
 interface BeneficiaryFormProps {
   beneficiary?: Beneficiary;
@@ -49,17 +51,17 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
 
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
-      {beneficiary?.id && <input type="hidden" name="id" value={beneficiary.id} />}
+      {beneficiary?.id && <input name="id" type="hidden" value={beneficiary.id} />}
       <div>
         <Label htmlFor="first_name">First Name</Label>
         <Input
+          aria-describedby="first_name-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.first_name}
+          defaultValue={beneficiary?.first_name ?? ''}
           id="first_name"
           name="first_name"
-          type="text"
-          defaultValue={beneficiary?.first_name ?? ''}
           placeholder="Enter first name"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.first_name}
-          aria-describedby="first_name-error"
+          type="text"
         />
         <FieldError actionState={validation ?? actionState} name="first_name" />
       </div>
@@ -67,13 +69,13 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
       <div>
         <Label htmlFor="last_name">Last Name</Label>
         <Input
+          aria-describedby="last_name-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.last_name}
+          defaultValue={beneficiary?.last_name ?? ''}
           id="last_name"
           name="last_name"
-          type="text"
-          defaultValue={beneficiary?.last_name ?? ''}
           placeholder="Enter last name"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.last_name}
-          aria-describedby="last_name-error"
+          type="text"
         />
         <FieldError actionState={validation ?? actionState} name="last_name" />
       </div>
@@ -81,13 +83,13 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
       <div>
         <Label htmlFor="email">Email</Label>
         <Input
+          aria-describedby="email-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.email}
+          defaultValue={beneficiary?.email ?? ''}
           id="email"
           name="email"
-          type="email"
-          defaultValue={beneficiary?.email ?? ''}
           placeholder="Enter email address"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.email}
-          aria-describedby="email-error"
+          type="email"
         />
         <FieldError actionState={validation ?? actionState} name="email" />
       </div>
@@ -95,13 +97,13 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
       <div>
         <Label htmlFor="phone">Phone</Label>
         <Input
+          aria-describedby="phone-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.phone}
+          defaultValue={beneficiary?.phone ?? ''}
           id="phone"
           name="phone"
-          type="tel"
-          defaultValue={beneficiary?.phone ?? ''}
           placeholder="Enter phone number"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.phone}
-          aria-describedby="phone-error"
+          type="tel"
         />
         <FieldError actionState={validation ?? actionState} name="phone" />
       </div>
@@ -109,13 +111,13 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
       <div>
         <Label htmlFor="document_id">Document ID</Label>
         <Input
+          aria-describedby="document_id-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.document_id}
+          defaultValue={beneficiary?.document_id ?? ''}
           id="document_id"
           name="document_id"
-          type="text"
-          defaultValue={beneficiary?.document_id ?? ''}
           placeholder="Enter document ID"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.document_id}
-          aria-describedby="document_id-error"
+          type="text"
         />
         <FieldError actionState={validation ?? actionState} name="document_id" />
       </div>
@@ -123,24 +125,24 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
       <div>
         <Label htmlFor="available_points">Available Points</Label>
         <Input
-          id="available_points"
-          name="available_points"
-          type="number"
-          min="0"
-          step="1"
-          defaultValue={beneficiary?.available_points ?? 0}
-          placeholder="Enter available points"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.available_points}
           aria-describedby="available_points-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.available_points}
+          defaultValue={beneficiary?.available_points ?? 0}
+          id="available_points"
+          min="0"
+          name="available_points"
+          placeholder="Enter available points"
+          step="1"
+          type="number"
         />
         <FieldError actionState={validation ?? actionState} name="available_points" />
       </div>
 
       <div className="flex gap-2">
-        <Button asChild variant="secondary" className="w-full" type="button">
+        <Button asChild className="w-full" type="button" variant="secondary">
           <Link href="/dashboard/beneficiary">Cancel</Link>
         </Button>
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button className="w-full" disabled={pending} type="submit">
           {beneficiary ? 'Update' : 'Create'}
         </Button>
       </div>

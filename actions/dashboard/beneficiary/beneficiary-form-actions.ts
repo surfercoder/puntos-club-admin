@@ -1,8 +1,10 @@
 "use server";
 
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import type { BeneficiaryInput } from '@/schemas/beneficiary.schema';
+
 import { createBeneficiary, updateBeneficiary } from './actions';
-import { BeneficiaryInput } from '@/schemas/beneficiary.schema';
-import { ActionState, EMPTY_ACTION_STATE } from '@/lib/error-handler';
 
 export async function beneficiaryFormAction(
   prevState: ActionState,

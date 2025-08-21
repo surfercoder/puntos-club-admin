@@ -1,8 +1,11 @@
-import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { useRouter } from 'next/navigation';
-import DeleteModal from '../delete-modal';
+import React from 'react';
+
 import { deleteHistory } from '@/actions/dashboard/history/actions';
+
+import DeleteModal from '../delete-modal';
+
 
 // Mock dependencies
 jest.mock('next/navigation', () => ({
@@ -55,7 +58,7 @@ describe('DeleteModal (History)', () => {
   });
 
   it('should render delete button when modal is closed', () => {
-    render(<DeleteModal historyId="1" historyDescription="Order status change" />);
+    render(<DeleteModal historyDescription="Order status change" historyId="1" />);
 
     const deleteButton = screen.getByRole('button');
     expect(deleteButton).toBeInTheDocument();
@@ -64,7 +67,7 @@ describe('DeleteModal (History)', () => {
   });
 
   it('should open modal when delete button is clicked', () => {
-    render(<DeleteModal historyId="1" historyDescription="Order status change" />);
+    render(<DeleteModal historyDescription="Order status change" historyId="1" />);
 
     const deleteButton = screen.getByRole('button');
     fireEvent.click(deleteButton);
@@ -78,7 +81,7 @@ describe('DeleteModal (History)', () => {
   });
 
   it('should close modal when cancel button is clicked', () => {
-    render(<DeleteModal historyId="1" historyDescription="Order status change" />);
+    render(<DeleteModal historyDescription="Order status change" historyId="1" />);
 
     // Open modal
     const deleteButton = screen.getByRole('button');
@@ -95,7 +98,7 @@ describe('DeleteModal (History)', () => {
   it('should successfully delete history record', async () => {
     mockDeleteHistory.mockResolvedValue({ error: null });
 
-    render(<DeleteModal historyId="1" historyDescription="Order status change" />);
+    render(<DeleteModal historyDescription="Order status change" historyId="1" />);
 
     // Open modal
     const deleteButton = screen.getByRole('button');
@@ -115,7 +118,7 @@ describe('DeleteModal (History)', () => {
   it('should handle delete error with error result', async () => {
     mockDeleteHistory.mockResolvedValue({ error: 'Failed to delete' });
 
-    render(<DeleteModal historyId="1" historyDescription="Order status change" />);
+    render(<DeleteModal historyDescription="Order status change" historyId="1" />);
 
     // Open modal
     const deleteButton = screen.getByRole('button');
@@ -134,7 +137,7 @@ describe('DeleteModal (History)', () => {
   it('should handle delete exception', async () => {
     mockDeleteHistory.mockRejectedValue(new Error('Network error'));
 
-    render(<DeleteModal historyId="1" historyDescription="Order status change" />);
+    render(<DeleteModal historyDescription="Order status change" historyId="1" />);
 
     // Open modal
     const deleteButton = screen.getByRole('button');
@@ -156,7 +159,7 @@ describe('DeleteModal (History)', () => {
       () => new Promise(resolve => setTimeout(() => resolve({ error: null }), 100))
     );
 
-    render(<DeleteModal historyId="1" historyDescription="Order status change" />);
+    render(<DeleteModal historyDescription="Order status change" historyId="1" />);
 
     // Open modal
     const deleteButton = screen.getByRole('button');
@@ -180,7 +183,7 @@ describe('DeleteModal (History)', () => {
 
   it('should handle string id correctly', () => {
     const testId = "history-123";
-    render(<DeleteModal historyId={testId} historyDescription="Test record" />);
+    render(<DeleteModal historyDescription="Test record" historyId={testId} />);
 
     const deleteButton = screen.getByRole('button');
     fireEvent.click(deleteButton);
@@ -194,7 +197,7 @@ describe('DeleteModal (History)', () => {
   it('should close modal after successful deletion', async () => {
     mockDeleteHistory.mockResolvedValue({ error: null });
 
-    render(<DeleteModal historyId="1" historyDescription="Order status change" />);
+    render(<DeleteModal historyDescription="Order status change" historyId="1" />);
 
     // Open modal
     const deleteButton = screen.getByRole('button');
@@ -215,7 +218,7 @@ describe('DeleteModal (History)', () => {
 
   it('should display history description in confirmation message', () => {
     const testDescription = "Test History Description";
-    render(<DeleteModal historyId="1" historyDescription={testDescription} />);
+    render(<DeleteModal historyDescription={testDescription} historyId="1" />);
 
     const deleteButton = screen.getByRole('button');
     fireEvent.click(deleteButton);
@@ -227,7 +230,7 @@ describe('DeleteModal (History)', () => {
   it('should close modal after deletion failure', async () => {
     mockDeleteHistory.mockResolvedValue({ error: 'Failed to delete' });
 
-    render(<DeleteModal historyId="1" historyDescription="Order status change" />);
+    render(<DeleteModal historyDescription="Order status change" historyId="1" />);
 
     // Open modal
     const deleteButton = screen.getByRole('button');

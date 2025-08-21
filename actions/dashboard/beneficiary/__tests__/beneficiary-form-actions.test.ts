@@ -1,6 +1,7 @@
-import { beneficiaryFormAction } from '../beneficiary-form-actions';
-import { createBeneficiary, updateBeneficiary } from '../actions';
 import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+
+import { createBeneficiary, updateBeneficiary } from '../actions';
+import { beneficiaryFormAction } from '../beneficiary-form-actions';
 
 // Mock the actions
 jest.mock('../actions');

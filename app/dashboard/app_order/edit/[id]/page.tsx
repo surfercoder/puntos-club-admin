@@ -1,8 +1,8 @@
-import { createClient } from '@/lib/supabase/server';
-import AppOrderForm from '@/components/dashboard/app_order/app_order-form';
 import { notFound } from 'next/navigation';
 
+import AppOrderForm from '@/components/dashboard/app_order/app_order-form';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { createClient } from '@/lib/supabase/server';
 
 export default async function EditAppOrderPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = await createClient();
@@ -13,7 +13,9 @@ export default async function EditAppOrderPage({ params }: { params: Promise<{ i
     return <div>Error fetching order</div>;
   }
 
-  if (!data) notFound();
+  if (!data) {
+    notFound();
+  }
 
   return (
     <div className="max-w-xl mx-auto">

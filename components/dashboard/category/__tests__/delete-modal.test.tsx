@@ -1,6 +1,7 @@
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
+import { toast } from 'sonner';
 
 // Mock all dependencies
 const mockRouter = { 
@@ -36,11 +37,9 @@ jest.mock('@/components/ui/button', () => ({
 jest.mock('lucide-react', () => ({
   Trash2: ({ className }: { className?: string }) =>
     React.createElement('svg', { 'data-testid': 'trash-icon', className }, 'Trash2'),
-}));
+}));import { deleteCategory } from '@/actions/dashboard/category/actions';
 
 import DeleteModal from '../delete-modal';
-import { toast } from 'sonner';
-import { deleteCategory } from '@/actions/dashboard/category/actions';
 
 describe('Category DeleteModal', () => {
   beforeEach(() => {

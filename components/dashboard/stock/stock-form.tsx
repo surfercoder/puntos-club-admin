@@ -1,19 +1,21 @@
 "use client";
 
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
+import { toast } from "sonner";
+
 import { stockFormAction } from '@/actions/dashboard/stock/stock-form-actions';
 import { Button } from '@/components/ui/button';
+import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ActionState, EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
-import FieldError from '@/components/ui/field-error';
-import { Stock } from '@/types/stock';
-import { StockSchema } from '@/schemas/stock.schema';
-import { toast } from "sonner";
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { createClient } from '@/lib/supabase/client';
+import { StockSchema } from '@/schemas/stock.schema';
+import type { Stock } from '@/types/stock';
 
 interface StockFormProps {
   stock?: Stock;
@@ -72,7 +74,7 @@ export default function StockForm({ stock }: StockFormProps) {
 
   // Format date for input
   const formatDateForInput = (dateString: string) => {
-    if (!dateString) return '';
+    if (!dateString) {return '';}
     return new Date(dateString).toISOString().split('T')[0];
   };
 
@@ -108,11 +110,11 @@ export default function StockForm({ stock }: StockFormProps) {
 
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
-      {stock?.id && <input type="hidden" name="id" value={stock.id} />}
+      {stock?.id && <input name="id" type="hidden" value={stock.id} />}
       
       <div>
         <Label htmlFor="branch_id">Branch</Label>
-        <Select value={selectedBranch} onValueChange={setSelectedBranch} name="branch_id">
+        <Select name="branch_id" onValueChange={setSelectedBranch} value={selectedBranch}>
           <SelectTrigger>
             <SelectValue placeholder="Select a branch" />
           </SelectTrigger>
@@ -129,7 +131,7 @@ export default function StockForm({ stock }: StockFormProps) {
 
       <div>
         <Label htmlFor="product_id">Product</Label>
-        <Select value={selectedProduct} onValueChange={setSelectedProduct} name="product_id">
+        <Select name="product_id" onValueChange={setSelectedProduct} value={selectedProduct}>
           <SelectTrigger>
             <SelectValue placeholder="Select a product" />
           </SelectTrigger>
@@ -147,12 +149,12 @@ export default function StockForm({ stock }: StockFormProps) {
       <div>
         <Label htmlFor="quantity">Current Quantity</Label>
         <Input
-          id="quantity"
-          name="quantity"
-          type="number"
-          min="0"
           defaultValue={stock?.quantity ?? 0}
+          id="quantity"
+          min="0"
+          name="quantity"
           placeholder="Enter current quantity"
+          type="number"
         />
         <FieldError actionState={validation ?? actionState} name="quantity" />
       </div>
@@ -160,12 +162,12 @@ export default function StockForm({ stock }: StockFormProps) {
       <div>
         <Label htmlFor="minimum_quantity">Minimum Quantity</Label>
         <Input
-          id="minimum_quantity"
-          name="minimum_quantity"
-          type="number"
-          min="0"
           defaultValue={stock?.minimum_quantity ?? 0}
+          id="minimum_quantity"
+          min="0"
+          name="minimum_quantity"
           placeholder="Enter minimum quantity threshold"
+          type="number"
         />
         <FieldError actionState={validation ?? actionState} name="minimum_quantity" />
       </div>
@@ -173,19 +175,19 @@ export default function StockForm({ stock }: StockFormProps) {
       <div>
         <Label htmlFor="last_updated">Last Updated</Label>
         <Input
+          defaultValue={stock?.last_updated ? formatDateForInput(stock.last_updated) : ''}
           id="last_updated"
           name="last_updated"
           type="date"
-          defaultValue={stock?.last_updated ? formatDateForInput(stock.last_updated) : ''}
         />
         <FieldError actionState={validation ?? actionState} name="last_updated" />
       </div>
 
       <div className="flex gap-2">
-        <Button asChild variant="secondary" className="w-full" type="button">
+        <Button asChild className="w-full" type="button" variant="secondary">
           <Link href="/dashboard/stock">Cancel</Link>
         </Button>
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button className="w-full" disabled={pending} type="submit">
           {stock ? 'Update' : 'Create'}
         </Button>
       </div>

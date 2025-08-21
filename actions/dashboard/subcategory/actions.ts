@@ -1,8 +1,8 @@
 "use server";
 
 import { createClient } from '@/lib/supabase/server';
-import { Subcategory } from '@/types/subcategory';
 import { SubcategorySchema } from '@/schemas/subcategory.schema';
+import type { Subcategory } from '@/types/subcategory';
 
 export async function createSubcategory(input: Subcategory) {
   const parsed = SubcategorySchema.safeParse(input);
@@ -10,7 +10,7 @@ export async function createSubcategory(input: Subcategory) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };
@@ -28,7 +28,7 @@ export async function updateSubcategory(id: string, input: Subcategory) {
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
     parsed.error.issues.forEach(err => {
-      if (err.path[0]) fieldErrors[err.path[0] as string] = err.message;
+      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
     });
 
     return { error: { fieldErrors } };

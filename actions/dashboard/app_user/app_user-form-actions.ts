@@ -1,8 +1,10 @@
 "use server";
 
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import type { AppUserInput } from '@/schemas/app_user.schema';
+
 import { createAppUser, updateAppUser } from './actions';
-import { AppUserInput } from '@/schemas/app_user.schema';
-import { ActionState, EMPTY_ACTION_STATE } from '@/lib/error-handler';
 
 export async function appUserFormAction(
   prevState: ActionState,

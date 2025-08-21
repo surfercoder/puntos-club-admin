@@ -1,7 +1,7 @@
-import type { Organization } from './organization';
 import type { Address } from './address';
-import type { Stock } from './stock';
 import type { Assignment } from './assignment';
+import type { Organization } from './organization';
+import type { Stock } from './stock';
 
 export type Branch = {
   id: string;

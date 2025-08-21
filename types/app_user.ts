@@ -1,6 +1,6 @@
+import type { Assignment } from './assignment';
 import type { Organization } from './organization';
 import type { UserPermission } from './user_permission';
-import type { Assignment } from './assignment';
 
 export type AppUser = {
   id: string;

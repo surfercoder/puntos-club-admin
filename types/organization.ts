@@ -1,5 +1,5 @@
-import type { Branch } from './branch';
 import type { AppUser } from './app_user';
+import type { Branch } from './branch';
 
 export type Organization = {
   id: string;

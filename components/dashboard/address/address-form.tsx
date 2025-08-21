@@ -1,18 +1,20 @@
 'use client';
 
-import { useActionState, useState } from 'react';
-import { Address } from '@/types/address';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { useActionState, useState , useEffect } from 'react';
+import { toast } from "sonner"
+
 import { addressFormAction } from '@/actions/dashboard/address/address-form-actions';
 import { Button } from '@/components/ui/button';
+import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { ActionState, EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
-import FieldError from '@/components/ui/field-error';
+import type { ActionState} from '@/lib/error-handler';
+import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { AddressSchema } from '@/schemas/address.schema';
-import { toast } from "sonner"
-import { useRouter } from 'next/navigation';
-import { useEffect } from 'react';
-import Link from 'next/link';
+import type { Address } from '@/types/address';
+
 
 export default function AddressForm({ address }: { address?: Address }) {
   // State
@@ -47,67 +49,67 @@ export default function AddressForm({ address }: { address?: Address }) {
   // Render
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
-      {address?.id && <input type="hidden" name="id" value={String(address.id)} />}
+      {address?.id && <input name="id" type="hidden" value={String(address.id)} />}
       <div className="space-y-2">
         <Label htmlFor="street">Street</Label>
         <Input
+          aria-describedby="street-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.street}
+          defaultValue={address?.street ?? ''}
           id="street"
           name="street"
-          defaultValue={address?.street ?? ''}
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.street}
-          aria-describedby="street-error"
         />
         <FieldError actionState={validation ?? actionState} name="street" />
       </div>
       <div className="space-y-2">
         <Label htmlFor="number">Number</Label>
         <Input
+          aria-describedby="number-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.number}
+          defaultValue={address?.number ?? ''}
           id="number"
           name="number"
-          defaultValue={address?.number ?? ''}
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.number}
-          aria-describedby="number-error"
         />
         <FieldError actionState={validation ?? actionState} name="number" />
       </div>
       <div className="space-y-2">
         <Label htmlFor="city">City</Label>
         <Input
+          aria-describedby="city-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.city}
+          defaultValue={address?.city ?? ''}
           id="city"
           name="city"
-          defaultValue={address?.city ?? ''}
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.city}
-          aria-describedby="city-error"
         />
         <FieldError actionState={validation ?? actionState} name="city" />
       </div>
       <div className="space-y-2">
         <Label htmlFor="state">State</Label>
         <Input
+          aria-describedby="state-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.state}
+          defaultValue={address?.state ?? ''}
           id="state"
           name="state"
-          defaultValue={address?.state ?? ''}
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.state}
-          aria-describedby="state-error"
         />
         <FieldError actionState={validation ?? actionState} name="state" />
       </div>
       <div className="space-y-2">
         <Label htmlFor="zip_code">Zip Code</Label>
         <Input
+          aria-describedby="zip_code-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.zip_code}
+          defaultValue={address?.zip_code ?? ''}
           id="zip_code"
           name="zip_code"
-          defaultValue={address?.zip_code ?? ''}
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.zip_code}
-          aria-describedby="zip_code-error"
         />
         <FieldError actionState={validation ?? actionState} name="zip_code" />
       </div>
       <div className="flex gap-2">
-        <Button asChild variant="secondary" className="w-full" type="button">
+        <Button asChild className="w-full" type="button" variant="secondary">
           <Link href="/dashboard/address">Cancel</Link>
         </Button>
-        <Button type="submit" className="w-full" disabled={pending}>
+        <Button className="w-full" disabled={pending} type="submit">
           {address ? 'Update' : 'Create'}
         </Button>
       </div>

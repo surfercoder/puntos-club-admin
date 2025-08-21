@@ -1,5 +1,4 @@
 import StockForm from '@/components/dashboard/stock/stock-form';
-
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
 export default function CreateStockPage() {
