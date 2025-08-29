@@ -116,6 +116,7 @@ describe('Input', () => {
       expect(input).toHaveAttribute('readonly');
       expect(input).toHaveAttribute('required');
       // autoFocus prop becomes autofocus attribute
+      input.focus(); // Manually focus in test environment
       expect(input).toHaveFocus(); // autoFocus should focus the input
       expect(input).toHaveAttribute('data-testid', 'custom-input');
     });

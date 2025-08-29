@@ -1,7 +1,7 @@
 {
   "private": true,
   "scripts": {
-    "checks": "npm run lint && npm run test && npm run build",
+    "checks": "npm run lint && npm run test && npm run e2e && npm run build",
     "dev": "next dev --turbopack",
     "build": "next build",
     "start": "next start",

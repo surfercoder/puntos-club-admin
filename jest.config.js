@@ -58,6 +58,13 @@ const config = {
     '**/*.(test|spec).(js|jsx|ts|tsx)',
   ],
   
+  // Ignore patterns
+  testPathIgnorePatterns: [
+    '<rootDir>/.next/',
+    '<rootDir>/node_modules/',
+    '<rootDir>/e2e/',
+  ],
+  
   // Transform configuration
   transform: {
     '^.+\\.(js|jsx|ts|tsx)$': ['babel-jest', { presets: ['next/babel'] }],

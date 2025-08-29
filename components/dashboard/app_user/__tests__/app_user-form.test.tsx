@@ -1,6 +1,7 @@
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useActionState } from 'react';
+import { toast } from 'sonner';
 // Mock all dependencies with simple implementations
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
@@ -20,7 +21,6 @@ jest.mock('react', () => ({
     jest.fn(),
     false,
   ]),
-  useEffect: jest.fn((fn) => fn()),
 }));
 
 jest.mock('sonner', () => ({
@@ -127,9 +127,7 @@ jest.mock('next/link', () => ({
   },
 }));
 
-
 import AppUserForm from '../app_user-form';
-
 
 describe('AppUserForm', () => {
   beforeEach(() => {
@@ -310,6 +308,9 @@ describe('AppUserForm', () => {
 
   describe('Success Handling', () => {
     it('shows success toast on successful action', async () => {
+      const { rerender } = render(<AppUserForm />);
+
+      // Update the mock to return a success message
       (useActionState as jest.Mock).mockReturnValue([
         {
           message: 'App user created successfully',
@@ -319,7 +320,8 @@ describe('AppUserForm', () => {
         false,
       ]);
 
-      render(<AppUserForm />);
+      // Force a re-render to trigger the useEffect
+      rerender(<AppUserForm />);
 
       await waitFor(() => {
         expect(toast.success).toHaveBeenCalledWith('App user created successfully');

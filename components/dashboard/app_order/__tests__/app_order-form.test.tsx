@@ -1,6 +1,7 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useActionState } from 'react';
+import { toast } from 'sonner';
 // Mock all dependencies with simple implementations
 jest.mock('next/navigation', () => ({
   useRouter: () => ({
