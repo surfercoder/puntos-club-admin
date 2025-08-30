@@ -20,9 +20,9 @@ export async function categoryFormAction(
 
   let result;
   if (id) {
-    result = await updateCategory(id, input as any);
+    result = await updateCategory(id, input);
   } else {
-    result = await createCategory(input as any);
+    result = await createCategory(input);
   }
 
   if (result.error || !result.data) {

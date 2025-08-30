@@ -22,9 +22,9 @@ export async function productFormAction(
 
   let result;
   if (id) {
-    result = await updateProduct(id, input as any);
+    result = await updateProduct(id, input);
   } else {
-    result = await createProduct(input as any);
+    result = await createProduct(input);
   }
 
   if (result.error || !result.data) {

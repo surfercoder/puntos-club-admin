@@ -21,9 +21,9 @@ export async function subcategoryFormAction(
 
   let result;
   if (id) {
-    result = await updateSubcategory(id, input as any);
+    result = await updateSubcategory(id, input);
   } else {
-    result = await createSubcategory(input as any);
+    result = await createSubcategory(input);
   }
 
   if (result.error) {

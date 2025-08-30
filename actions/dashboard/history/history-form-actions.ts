@@ -21,9 +21,9 @@ export async function historyFormAction(
 
   let result;
   if (id) {
-    result = await updateHistory(id, input as any);
+    result = await updateHistory(id, input);
   } else {
-    result = await createHistory(input as any);
+    result = await createHistory(input);
   }
 
   if (result.error) {

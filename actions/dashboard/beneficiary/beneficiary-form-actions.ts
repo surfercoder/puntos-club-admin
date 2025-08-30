@@ -23,9 +23,9 @@ export async function beneficiaryFormAction(
 
   let result;
   if (id) {
-    result = await updateBeneficiary(id, input as any);
+    result = await updateBeneficiary(id, input);
   } else {
-    result = await createBeneficiary(input as any);
+    result = await createBeneficiary(input);
   }
 
   if (result.error || !result.data) {

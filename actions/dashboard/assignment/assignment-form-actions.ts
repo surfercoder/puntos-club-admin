@@ -3,12 +3,12 @@
 import { revalidatePath } from 'next/cache';
 
 import { createAssignment, updateAssignment } from '@/actions/dashboard/assignment/actions';
-import { fromErrorToActionState, toActionState } from '@/lib/error-handler';
+import { fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
 import { AssignmentSchema } from '@/schemas/assignment.schema';
 import type { Assignment } from '@/types/assignment';
 
 
-export async function assignmentFormAction(_prevState: any, formData: FormData) {
+export async function assignmentFormAction(_prevState: ActionState, formData: FormData) {
   try {
     const formObject = Object.fromEntries(formData);
     

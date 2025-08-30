@@ -22,9 +22,9 @@ export async function stockFormAction(
 
   let result;
   if (id) {
-    result = await updateStock(id, input as any);
+    result = await updateStock(id, input);
   } else {
-    result = await createStock(input as any);
+    result = await createStock(input);
   }
 
   if (result.error) {

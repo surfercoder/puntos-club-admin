@@ -20,9 +20,9 @@ export async function organizationFormAction(
 
   let result;
   if (id) {
-    result = await updateOrganization(id, input as any);
+    result = await updateOrganization(id, input);
   } else {
-    result = await createOrganization(input as any);
+    result = await createOrganization(input);
   }
 
   if (result.error || !result.data) {

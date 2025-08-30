@@ -25,9 +25,9 @@ export async function branchFormAction(
 
   let result;
   if (id) {
-    result = await updateBranch(id, input as any);
+    result = await updateBranch(id, input);
   } else {
-    result = await createBranch(input as any);
+    result = await createBranch(input);
   }
 
   if (result.error || !result.data) {

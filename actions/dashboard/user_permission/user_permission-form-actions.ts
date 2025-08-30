@@ -21,9 +21,9 @@ export async function userPermissionFormAction(
 
   let result;
   if (id) {
-    result = await updateUserPermission(id, input as any);
+    result = await updateUserPermission(id, input);
   } else {
-    result = await createUserPermission(input as any);
+    result = await createUserPermission(input);
   }
 
   if (result.error) {

@@ -3,12 +3,12 @@
 import { revalidatePath } from 'next/cache';
 
 import { createAddress, updateAddress } from '@/actions/dashboard/address/actions';
-import { fromErrorToActionState, toActionState } from '@/lib/error-handler';
+import { fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
 import { AddressSchema } from '@/schemas/address.schema';
 import type { Address } from '@/types/address';
 
 
-export async function addressFormAction(_prevState: any, formData: FormData) {
+export async function addressFormAction(_prevState: ActionState, formData: FormData) {
   try {
     const parsed = AddressSchema.safeParse(Object.fromEntries(formData));
 

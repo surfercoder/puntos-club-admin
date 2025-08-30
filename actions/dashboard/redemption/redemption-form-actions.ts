@@ -23,9 +23,9 @@ export async function redemptionFormAction(
 
   let result;
   if (id) {
-    result = await updateRedemption(id, input as any);
+    result = await updateRedemption(id, input);
   } else {
-    result = await createRedemption(input as any);
+    result = await createRedemption(input);
   }
 
   if (result.error) {

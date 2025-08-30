@@ -21,9 +21,9 @@ export async function appOrderFormAction(
 
   let result;
   if (id) {
-    result = await updateAppOrder(id, input as any);
+    result = await updateAppOrder(id, input);
   } else {
-    result = await createAppOrder(input as any);
+    result = await createAppOrder(input);
   }
 
   if (result.error) {

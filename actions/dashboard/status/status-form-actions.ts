@@ -21,9 +21,9 @@ export async function statusFormAction(
 
   let result;
   if (id) {
-    result = await updateStatus(id, input as any);
+    result = await updateStatus(id, input);
   } else {
-    result = await createStatus(input as any);
+    result = await createStatus(input);
   }
 
   if (result.error || !result.data) {

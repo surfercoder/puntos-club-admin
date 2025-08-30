@@ -24,9 +24,9 @@ export async function appUserFormAction(
 
   let result;
   if (id) {
-    result = await updateAppUser(id, input as any);
+    result = await updateAppUser(id, input);
   } else {
-    result = await createAppUser(input as any);
+    result = await createAppUser(input);
   }
 
   if (result.error || !result.data) {
