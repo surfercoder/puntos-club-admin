@@ -1,51 +1,31 @@
-"use server";
+'use server';
 
-import type { ActionState} from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
-import type { UserPermissionInput } from '@/schemas/user_permission.schema';
+import { revalidatePath } from 'next/cache';
 
-import { createUserPermission, updateUserPermission } from './actions';
+import { createUserPermission, updateUserPermission } from '@/actions/dashboard/user_permission/actions';
+import { fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
+import { UserPermissionSchema } from '@/schemas/user_permission.schema';
+import type { UserPermission } from '@/types/user_permission';
 
-export async function userPermissionFormAction(
-  prevState: ActionState,
-  formData: FormData
-): Promise<ActionState> {
-  const id = formData.get('id') as string;
-  
-  const input: UserPermissionInput = {
-    user_id: formData.get('user_id') as string,
-    branch_id: formData.get('branch_id') as string,
-    action: formData.get('action') as string,
-    assignment_date: formData.get('assignment_date') as string,
-  };
+export async function userPermissionFormAction(_prevState: ActionState, formData: FormData) {
+  try {
+    const parsed = UserPermissionSchema.safeParse(Object.fromEntries(formData));
 
-  let result;
-  if (id) {
-    result = await updateUserPermission(id, input);
-  } else {
-    result = await createUserPermission(input);
-  }
-
-  if (result.error) {
-    if ('fieldErrors' in result.error) {
-      // Convert string errors to string array format
-      const fieldErrors: Record<string, string[]> = {};
-      Object.entries(result.error.fieldErrors).forEach(([key, value]) => {
-        fieldErrors[key] = [value];
-      });
-      return {
-        ...EMPTY_ACTION_STATE,
-        fieldErrors,
-      };
+    if (!parsed.success) {
+      return fromErrorToActionState(parsed.error);
     }
-    return {
-      ...EMPTY_ACTION_STATE,
-      message: 'An error occurred while saving the user permission.',
-    };
-  }
 
-  return {
-    ...EMPTY_ACTION_STATE,
-    message: id ? 'User permission updated successfully!' : 'User permission created successfully!',
-  };
+    if (formData.get('id')) {
+      await updateUserPermission(String(formData.get('id')), parsed.data as UserPermission);
+    } else {
+      await createUserPermission(parsed.data as UserPermission);
+    }
+
+    // Revalidate the user permission list page
+    revalidatePath('/dashboard/user_permission');
+
+    return toActionState(formData.get('id') ? 'User permission updated successfully!' : 'User permission created successfully!');
+  } catch (error) {
+    return fromErrorToActionState(error);
+  }
 }

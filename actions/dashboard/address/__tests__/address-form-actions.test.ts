@@ -71,7 +71,7 @@ describe('addressFormAction', () => {
       });
 
       expect(mockCreateAddress).toHaveBeenCalledWith(parsedData);
-      expect(mockRevalidatePath).toHaveBeenCalledWith('/address');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/address');
       expect(mockToActionState).toHaveBeenCalledWith('Address created successfully!');
       expect(result).toEqual(expectedSuccessState);
     });
@@ -205,7 +205,7 @@ describe('addressFormAction', () => {
       });
 
       expect(mockUpdateAddress).toHaveBeenCalledWith(Number(addressId), parsedData);
-      expect(mockRevalidatePath).toHaveBeenCalledWith('/address');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/address');
       expect(mockToActionState).toHaveBeenCalledWith('Address updated successfully!');
       expect(result).toEqual(expectedSuccessState);
     });
@@ -378,7 +378,7 @@ describe('addressFormAction', () => {
 
       await addressFormAction(prevState, formData);
 
-      expect(mockRevalidatePath).toHaveBeenCalledWith('/address');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/address');
     });
 
     it('should revalidate path on successful update', async () => {
@@ -394,7 +394,7 @@ describe('addressFormAction', () => {
 
       await addressFormAction(prevState, formData);
 
-      expect(mockRevalidatePath).toHaveBeenCalledWith('/address');
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/address');
     });
 
     it('should not revalidate path on validation error', async () => {

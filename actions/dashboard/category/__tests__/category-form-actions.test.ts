@@ -1,376 +1,360 @@
-import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import { revalidatePath } from 'next/cache';
+
+import { fromErrorToActionState, toActionState } from '@/lib/error-handler';
+import { CategorySchema } from '@/schemas/category.schema';
 
 import { createCategory, updateCategory } from '../actions';
 import { categoryFormAction } from '../category-form-actions';
 
-// Mock the actions
+// Mock the dependencies
 jest.mock('../actions');
+jest.mock('@/lib/error-handler');
+jest.mock('@/schemas/category.schema', () => ({
+  CategorySchema: {
+    safeParse: jest.fn(),
+  },
+}));
+jest.mock('next/cache');
+
 const mockCreateCategory = createCategory as jest.MockedFunction<typeof createCategory>;
 const mockUpdateCategory = updateCategory as jest.MockedFunction<typeof updateCategory>;
+const mockFromErrorToActionState = fromErrorToActionState as jest.MockedFunction<typeof fromErrorToActionState>;
+const mockToActionState = toActionState as jest.MockedFunction<typeof toActionState>;
+const mockRevalidatePath = revalidatePath as jest.MockedFunction<typeof revalidatePath>;
+
+const mockCategorySchema = CategorySchema as jest.Mocked<typeof CategorySchema>;
 
 describe('categoryFormAction', () => {
   let formData: FormData;
-  let prevState = EMPTY_ACTION_STATE;
+  const prevState = {} as any; // Not used in this implementation
 
   beforeEach(() => {
     jest.clearAllMocks();
     formData = new FormData();
-    prevState = EMPTY_ACTION_STATE;
   });
 
   describe('creating new category', () => {
     beforeEach(() => {
       formData.append('name', 'Test Category');
       formData.append('description', 'Test description');
-      formData.append('active', 'on'); // checkbox is 'on' when checked
+      formData.append('active', 'true');
     });
 
     it('should create category successfully', async () => {
-      const mockCreatedCategory = {
-        id: '1',
+      const parsedData = {
         name: 'Test Category',
         description: 'Test description',
         active: true,
       };
 
-      mockCreateCategory.mockResolvedValue({
-        data: mockCreatedCategory,
-        error: null,
+      mockCategorySchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
       });
+
+      const expectedSuccessState = { message: 'Category created successfully!' };
+      mockToActionState.mockReturnValue(expectedSuccessState);
 
       const result = await categoryFormAction(prevState, formData);
 
-      expect(mockCreateCategory).toHaveBeenCalledWith({
+      expect(mockCategorySchema.safeParse).toHaveBeenCalledWith({
         name: 'Test Category',
         description: 'Test description',
-        active: true,
+        active: 'true',
       });
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'Category created successfully!',
-      });
+      expect(mockCreateCategory).toHaveBeenCalledWith(parsedData);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/category');
+      expect(mockToActionState).toHaveBeenCalledWith('Category created successfully!');
+      expect(result).toEqual(expectedSuccessState);
     });
 
-    it('should handle creation with null description', async () => {
-      const formDataWithoutDesc = new FormData();
-      formDataWithoutDesc.append('name', 'Test Category');
-      formDataWithoutDesc.append('active', 'on');
+    it('should handle validation errors from schema', async () => {
+      const validationError = {
+        errors: [
+          { path: ['name'], message: 'Name is required' },
+        ],
+      };
 
-      mockCreateCategory.mockResolvedValue({
-        data: { id: '1', name: 'Test Category', active: true },
-        error: null,
+      mockCategorySchema.safeParse.mockReturnValue({
+        success: false,
+        error: validationError,
       });
 
-      const result = await categoryFormAction(prevState, formDataWithoutDesc);
-
-      expect(mockCreateCategory).toHaveBeenCalledWith({
-        name: 'Test Category',
-        description: null,
-        active: true,
-      });
-
-      expect(result.message).toBe('Category created successfully!');
-    });
-
-    it('should handle unchecked active checkbox', async () => {
-      const formDataInactive = new FormData();
-      formDataInactive.append('name', 'Test Category');
-      formDataInactive.append('description', 'Test description');
-      // No 'active' field means checkbox is unchecked
-
-      mockCreateCategory.mockResolvedValue({
-        data: { id: '1', name: 'Test Category', active: false },
-        error: null,
-      });
-
-      const result = await categoryFormAction(prevState, formDataInactive);
-
-      expect(mockCreateCategory).toHaveBeenCalledWith({
-        name: 'Test Category',
-        description: 'Test description',
-        active: false,
-      });
-    });
-
-    it('should handle field validation errors from create action', async () => {
-      mockCreateCategory.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            name: 'Name is required',
-            description: 'Description must be a string',
-          },
-        },
-      });
+      const expectedErrorState = { fieldErrors: { name: ['Name is required'] } };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
 
       const result = await categoryFormAction(prevState, formData);
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        fieldErrors: {
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(validationError);
+      expect(mockCreateCategory).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedErrorState);
+    });
+
+    it('should handle missing required fields', async () => {
+      const emptyFormData = new FormData();
+      
+      const validationError = {
+        errors: [
+          { path: ['name'], message: 'Name is required' },
+        ],
+      };
+
+      mockCategorySchema.safeParse.mockReturnValue({
+        success: false,
+        error: validationError,
+      });
+
+      const expectedErrorState = { 
+        fieldErrors: { 
           name: ['Name is required'],
-          description: ['Description must be a string'],
-        },
-      });
+        } 
+      };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
+
+      const result = await categoryFormAction(prevState, emptyFormData);
+
+      expect(mockCategorySchema.safeParse).toHaveBeenCalledWith({});
+      expect(result).toEqual(expectedErrorState);
     });
 
-    it('should handle general errors from create action', async () => {
-      mockCreateCategory.mockResolvedValue({
-        data: null,
-        error: { message: 'Database connection failed' },
+    it('should handle database errors during creation', async () => {
+      const parsedData = {
+        name: 'Test Category',
+        description: 'Test description',
+        active: true,
+      };
+
+      mockCategorySchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
       });
+
+      const dbError = new Error('Database connection failed');
+      mockCreateCategory.mockRejectedValue(dbError);
+
+      const expectedErrorState = { message: 'Database error occurred' };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
 
       const result = await categoryFormAction(prevState, formData);
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the category.',
-      });
+      expect(mockCreateCategory).toHaveBeenCalledWith(parsedData);
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(dbError);
+      expect(mockRevalidatePath).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedErrorState);
     });
   });
 
   describe('updating existing category', () => {
-    const categoryId = 'category-1';
+    const categoryId = '123';
 
     beforeEach(() => {
       formData.append('id', categoryId);
       formData.append('name', 'Updated Category');
       formData.append('description', 'Updated description');
-      formData.append('active', 'on');
+      formData.append('active', 'true');
     });
 
     it('should update category successfully', async () => {
-      const mockUpdatedCategory = {
+      const parsedData = {
         id: categoryId,
         name: 'Updated Category',
         description: 'Updated description',
         active: true,
       };
 
-      mockUpdateCategory.mockResolvedValue({
-        data: mockUpdatedCategory,
-        error: null,
+      mockCategorySchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
       });
+
+      const expectedSuccessState = { message: 'Category updated successfully!' };
+      mockToActionState.mockReturnValue(expectedSuccessState);
 
       const result = await categoryFormAction(prevState, formData);
 
-      expect(mockUpdateCategory).toHaveBeenCalledWith(categoryId, {
+      expect(mockCategorySchema.safeParse).toHaveBeenCalledWith({
+        id: categoryId,
+        name: 'Updated Category',
+        description: 'Updated description',
+        active: 'true',
+      });
+
+      expect(mockUpdateCategory).toHaveBeenCalledWith(categoryId, parsedData);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/category');
+      expect(mockToActionState).toHaveBeenCalledWith('Category updated successfully!');
+      expect(result).toEqual(expectedSuccessState);
+    });
+
+    it('should handle validation errors during update', async () => {
+      const validationError = {
+        errors: [
+          { path: ['name'], message: 'Name cannot be empty' },
+        ],
+      };
+
+      mockCategorySchema.safeParse.mockReturnValue({
+        success: false,
+        error: validationError,
+      });
+
+      const expectedErrorState = { fieldErrors: { name: ['Name cannot be empty'] } };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
+
+      const result = await categoryFormAction(prevState, formData);
+
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(validationError);
+      expect(mockUpdateCategory).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedErrorState);
+    });
+
+    it('should handle database errors during update', async () => {
+      const parsedData = {
+        id: categoryId,
         name: 'Updated Category',
         description: 'Updated description',
         active: true,
+      };
+
+      mockCategorySchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
       });
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'Category updated successfully!',
-      });
-    });
+      const dbError = new Error('Update failed');
+      mockUpdateCategory.mockRejectedValue(dbError);
 
-    it('should handle update with empty description', async () => {
-      const formDataEmptyDesc = new FormData();
-      formDataEmptyDesc.append('id', categoryId);
-      formDataEmptyDesc.append('name', 'Updated Category');
-      formDataEmptyDesc.append('description', ''); // Empty string should become null
-      formDataEmptyDesc.append('active', 'on');
-
-      mockUpdateCategory.mockResolvedValue({
-        data: { id: categoryId, name: 'Updated Category', active: true },
-        error: null,
-      });
-
-      const result = await categoryFormAction(prevState, formDataEmptyDesc);
-
-      expect(mockUpdateCategory).toHaveBeenCalledWith(categoryId, {
-        name: 'Updated Category',
-        description: null,
-        active: true,
-      });
-
-      expect(result.message).toBe('Category updated successfully!');
-    });
-
-    it('should handle field validation errors from update action', async () => {
-      mockUpdateCategory.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            name: 'Name cannot be empty',
-          },
-        },
-      });
+      const expectedErrorState = { message: 'Update error occurred' };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
 
       const result = await categoryFormAction(prevState, formData);
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        fieldErrors: {
-          name: ['Name cannot be empty'],
-        },
-      });
-    });
-
-    it('should handle general errors from update action', async () => {
-      mockUpdateCategory.mockResolvedValue({
-        data: null,
-        error: { message: 'Update failed' },
-      });
-
-      const result = await categoryFormAction(prevState, formData);
-
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the category.',
-      });
+      expect(mockUpdateCategory).toHaveBeenCalledWith(categoryId, parsedData);
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(dbError);
+      expect(mockRevalidatePath).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedErrorState);
     });
   });
 
   describe('form data handling', () => {
-    it('should handle missing form fields gracefully', async () => {
-      const emptyFormData = new FormData();
+    it('should convert FormData to object correctly', async () => {
+      formData.append('name', 'Test Category');
+      formData.append('description', 'Test description');
+      formData.append('active', 'true');
+      formData.append('extra_field', 'ignored'); // Extra fields should be included
 
-      mockCreateCategory.mockResolvedValue({
-        data: { id: '1' },
-        error: null,
+      mockCategorySchema.safeParse.mockReturnValue({
+        success: true,
+        data: {},
       });
 
-      const result = await categoryFormAction(prevState, emptyFormData);
-
-      expect(mockCreateCategory).toHaveBeenCalledWith({
-        name: null, // Missing fields become null
-        description: null,
-        active: false,
-      });
-    });
-
-    it('should handle form fields with whitespace', async () => {
-      formData.append('name', '  Test Category  ');
-      formData.append('description', '  Test description  ');
-
-      mockCreateCategory.mockResolvedValue({
-        data: { id: '1' },
-        error: null,
-      });
+      mockToActionState.mockReturnValue({ message: 'Success' });
 
       await categoryFormAction(prevState, formData);
 
-      expect(mockCreateCategory).toHaveBeenCalledWith({
-        name: '  Test Category  ', // Whitespace is preserved
-        description: '  Test description  ',
-        active: false,
+      expect(mockCategorySchema.safeParse).toHaveBeenCalledWith({
+        name: 'Test Category',
+        description: 'Test description',
+        active: 'true',
+        extra_field: 'ignored', // FormData entries are all passed to schema
       });
     });
 
-    it('should handle checkbox variations', async () => {
-      // Test different checkbox values
-      const testCases = [
-        { value: 'on', expected: true },
-        { value: 'true', expected: false }, // Only 'on' is truthy for checkboxes
-        { value: '1', expected: false },
-        { value: '', expected: false },
-      ];
+    it('should handle form data with whitespace', async () => {
+      formData.append('name', '  Test Category  ');
+      formData.append('description', '  Test description  ');
 
-      for (const testCase of testCases) {
-        const testFormData = new FormData();
-        testFormData.append('name', 'Test');
-        testFormData.append('active', testCase.value);
+      mockCategorySchema.safeParse.mockReturnValue({
+        success: true,
+        data: {},
+      });
 
-        mockCreateCategory.mockClear();
-        mockCreateCategory.mockResolvedValue({
-          data: { id: '1' },
-          error: null,
-        });
+      mockToActionState.mockReturnValue({ message: 'Success' });
 
-        await categoryFormAction(prevState, testFormData);
+      await categoryFormAction(prevState, formData);
 
-        expect(mockCreateCategory).toHaveBeenCalledWith({
-          name: 'Test',
-          description: null,
-          active: testCase.expected,
-        });
-      }
+      expect(mockCategorySchema.safeParse).toHaveBeenCalledWith({
+        name: '  Test Category  ', // Whitespace preserved
+        description: '  Test description  ',
+      });
+    });
+
+    it('should handle empty form data', async () => {
+      const emptyFormData = new FormData();
+
+      mockCategorySchema.safeParse.mockReturnValue({
+        success: false,
+        error: { errors: [] },
+      });
+
+      mockFromErrorToActionState.mockReturnValue({ fieldErrors: {} });
+
+      await categoryFormAction(prevState, emptyFormData);
+
+      expect(mockCategorySchema.safeParse).toHaveBeenCalledWith({});
     });
   });
 
-  describe('error handling edge cases', () => {
+  describe('revalidation behavior', () => {
     beforeEach(() => {
       formData.append('name', 'Test Category');
     });
 
-    it('should handle undefined error object', async () => {
-      mockCreateCategory.mockResolvedValue({
-        data: null,
-        error: undefined as any,
+    it('should revalidate path on successful creation', async () => {
+      mockCategorySchema.safeParse.mockReturnValue({
+        success: true,
+        data: {},
       });
 
-      const result = await categoryFormAction(prevState, formData);
+      mockCreateCategory.mockResolvedValue(undefined);
+      mockToActionState.mockReturnValue({ message: 'Success' });
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the category.',
-      });
+      await categoryFormAction(prevState, formData);
+
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/category');
     });
 
-    it('should handle error without fieldErrors property', async () => {
-      mockCreateCategory.mockResolvedValue({
-        data: null,
-        error: { someOtherProperty: 'value' } as any,
+    it('should revalidate path on successful update', async () => {
+      formData.append('id', '123');
+
+      mockCategorySchema.safeParse.mockReturnValue({
+        success: true,
+        data: { id: '123' },
       });
 
-      const result = await categoryFormAction(prevState, formData);
+      mockUpdateCategory.mockResolvedValue(undefined);
+      mockToActionState.mockReturnValue({ message: 'Success' });
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the category.',
-      });
+      await categoryFormAction(prevState, formData);
+
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/category');
     });
 
-    it('should handle fieldErrors with mixed string and array values', async () => {
-      mockCreateCategory.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            name: 'Single string error',
-            description: ['Array error 1', 'Array error 2'],
-          },
-        },
+    it('should not revalidate path on validation error', async () => {
+      mockCategorySchema.safeParse.mockReturnValue({
+        success: false,
+        error: { errors: [] },
       });
 
-      const result = await categoryFormAction(prevState, formData);
+      mockFromErrorToActionState.mockReturnValue({ fieldErrors: {} });
 
-      expect(result.fieldErrors).toEqual({
-        name: ['Single string error'],
-        description: ['Array error 1', 'Array error 2'], // Arrays are preserved as-is
-      });
-    });
-  });
+      await categoryFormAction(prevState, formData);
 
-  describe('async behavior', () => {
-    it('should handle async errors from actions', async () => {
-      mockCreateCategory.mockRejectedValue(new Error('Network error'));
-
-      formData.append('name', 'Test Category');
-
-      await expect(categoryFormAction(prevState, formData)).rejects.toThrow('Network error');
+      expect(mockRevalidatePath).not.toHaveBeenCalled();
     });
 
-    it('should handle slow responses', async () => {
-      const slowResponse = new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            data: { id: '1', name: 'Test Category' },
-            error: null,
-          });
-        }, 100);
+    it('should not revalidate path on database error', async () => {
+      mockCategorySchema.safeParse.mockReturnValue({
+        success: true,
+        data: {},
       });
 
-      mockCreateCategory.mockReturnValue(slowResponse as any);
+      mockCreateCategory.mockRejectedValue(new Error('DB Error'));
+      mockFromErrorToActionState.mockReturnValue({ message: 'Error' });
 
-      formData.append('name', 'Test Category');
+      await categoryFormAction(prevState, formData);
 
-      const result = await categoryFormAction(prevState, formData);
-
-      expect(result.message).toBe('Category created successfully!');
+      expect(mockRevalidatePath).not.toHaveBeenCalled();
     });
   });
 });

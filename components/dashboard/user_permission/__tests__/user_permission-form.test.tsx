@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useActionState } from 'react';
 import { toast } from 'sonner';
@@ -26,7 +26,11 @@ jest.mock('react', () => ({
     jest.fn(),
     false,
   ]),
-  useEffect: jest.fn((fn) => fn()),
+  useEffect: jest.fn((fn) => {
+    act(() => {
+      fn();
+    });
+  }),
   useState: jest.fn((initial) => [initial, jest.fn()]),
 }));
 

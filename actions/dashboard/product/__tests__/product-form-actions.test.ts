@@ -1,21 +1,36 @@
-import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import { revalidatePath } from 'next/cache';
+
+import { fromErrorToActionState, toActionState } from '@/lib/error-handler';
+import { ProductSchema } from '@/schemas/product.schema';
 
 import { createProduct, updateProduct } from '../actions';
 import { productFormAction } from '../product-form-actions';
 
-// Mock the actions
+// Mock the dependencies
 jest.mock('../actions');
+jest.mock('@/lib/error-handler');
+jest.mock('@/schemas/product.schema', () => ({
+  ProductSchema: {
+    safeParse: jest.fn(),
+  },
+}));
+jest.mock('next/cache');
+
 const mockCreateProduct = createProduct as jest.MockedFunction<typeof createProduct>;
 const mockUpdateProduct = updateProduct as jest.MockedFunction<typeof updateProduct>;
+const mockFromErrorToActionState = fromErrorToActionState as jest.MockedFunction<typeof fromErrorToActionState>;
+const mockToActionState = toActionState as jest.MockedFunction<typeof toActionState>;
+const mockRevalidatePath = revalidatePath as jest.MockedFunction<typeof revalidatePath>;
+
+const mockProductSchema = ProductSchema as jest.Mocked<typeof ProductSchema>;
 
 describe('productFormAction', () => {
   let formData: FormData;
-  let prevState = EMPTY_ACTION_STATE;
+  const prevState = {} as any; // Not used in this implementation
 
   beforeEach(() => {
     jest.clearAllMocks();
     formData = new FormData();
-    prevState = EMPTY_ACTION_STATE;
   });
 
   describe('creating new product', () => {
@@ -24,12 +39,11 @@ describe('productFormAction', () => {
       formData.append('name', 'Test Product');
       formData.append('description', 'Test description');
       formData.append('required_points', '100');
-      formData.append('active', 'on'); // checkbox is 'on' when checked
+      formData.append('active', 'true');
     });
 
     it('should create product successfully', async () => {
-      const mockCreatedProduct = {
-        id: '1',
+      const parsedData = {
         subcategory_id: 'subcat-1',
         name: 'Test Product',
         description: 'Test description',
@@ -37,160 +51,113 @@ describe('productFormAction', () => {
         active: true,
       };
 
-      mockCreateProduct.mockResolvedValue({
-        data: mockCreatedProduct,
-        error: null,
+      mockProductSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
       });
+
+      const expectedSuccessState = { message: 'Product created successfully!' };
+      mockToActionState.mockReturnValue(expectedSuccessState);
 
       const result = await productFormAction(prevState, formData);
 
-      expect(mockCreateProduct).toHaveBeenCalledWith({
+      expect(mockProductSchema.safeParse).toHaveBeenCalledWith({
+        subcategory_id: 'subcat-1',
+        name: 'Test Product',
+        description: 'Test description',
+        required_points: '100',
+        active: 'true',
+      });
+
+      expect(mockCreateProduct).toHaveBeenCalledWith(parsedData);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/product');
+      expect(mockToActionState).toHaveBeenCalledWith('Product created successfully!');
+      expect(result).toEqual(expectedSuccessState);
+    });
+
+    it('should handle validation errors from schema', async () => {
+      const validationError = {
+        errors: [
+          { path: ['subcategory_id'], message: 'Subcategory is required' },
+          { path: ['name'], message: 'Name is required' },
+        ],
+      };
+
+      mockProductSchema.safeParse.mockReturnValue({
+        success: false,
+        error: validationError,
+      });
+
+      const expectedErrorState = { fieldErrors: { subcategory_id: ['Subcategory is required'] } };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
+
+      const result = await productFormAction(prevState, formData);
+
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(validationError);
+      expect(mockCreateProduct).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedErrorState);
+    });
+
+    it('should handle missing required fields', async () => {
+      const emptyFormData = new FormData();
+      
+      const validationError = {
+        errors: [
+          { path: ['subcategory_id'], message: 'Subcategory is required' },
+          { path: ['name'], message: 'Name is required' },
+        ],
+      };
+
+      mockProductSchema.safeParse.mockReturnValue({
+        success: false,
+        error: validationError,
+      });
+
+      const expectedErrorState = { 
+        fieldErrors: { 
+          subcategory_id: ['Subcategory is required'],
+          name: ['Name is required'],
+        } 
+      };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
+
+      const result = await productFormAction(prevState, emptyFormData);
+
+      expect(mockProductSchema.safeParse).toHaveBeenCalledWith({});
+      expect(result).toEqual(expectedErrorState);
+    });
+
+    it('should handle database errors during creation', async () => {
+      const parsedData = {
         subcategory_id: 'subcat-1',
         name: 'Test Product',
         description: 'Test description',
         required_points: 100,
         active: true,
+      };
+
+      mockProductSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
       });
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'Product created successfully!',
-      });
-    });
+      const dbError = new Error('Database connection failed');
+      mockCreateProduct.mockRejectedValue(dbError);
 
-    it('should handle creation with null description', async () => {
-      const formDataWithoutDesc = new FormData();
-      formDataWithoutDesc.append('subcategory_id', 'subcat-1');
-      formDataWithoutDesc.append('name', 'Test Product');
-      formDataWithoutDesc.append('required_points', '50');
-      formDataWithoutDesc.append('active', 'on');
-
-      mockCreateProduct.mockResolvedValue({
-        data: { id: '1', name: 'Test Product', active: true },
-        error: null,
-      });
-
-      const result = await productFormAction(prevState, formDataWithoutDesc);
-
-      expect(mockCreateProduct).toHaveBeenCalledWith({
-        subcategory_id: 'subcat-1',
-        name: 'Test Product',
-        description: null,
-        required_points: 50,
-        active: true,
-      });
-
-      expect(result.message).toBe('Product created successfully!');
-    });
-
-    it('should handle unchecked active checkbox', async () => {
-      const formDataInactive = new FormData();
-      formDataInactive.append('subcategory_id', 'subcat-1');
-      formDataInactive.append('name', 'Test Product');
-      formDataInactive.append('description', 'Test description');
-      formDataInactive.append('required_points', '75');
-      // No 'active' field means checkbox is unchecked
-
-      mockCreateProduct.mockResolvedValue({
-        data: { id: '1', name: 'Test Product', active: false },
-        error: null,
-      });
-
-      const result = await productFormAction(prevState, formDataInactive);
-
-      expect(mockCreateProduct).toHaveBeenCalledWith({
-        subcategory_id: 'subcat-1',
-        name: 'Test Product',
-        description: 'Test description',
-        required_points: 75,
-        active: false,
-      });
-    });
-
-    it('should handle invalid required_points input', async () => {
-      const formDataInvalidPoints = new FormData();
-      formDataInvalidPoints.append('subcategory_id', 'subcat-1');
-      formDataInvalidPoints.append('name', 'Test Product');
-      formDataInvalidPoints.append('required_points', 'not-a-number');
-
-      mockCreateProduct.mockResolvedValue({
-        data: { id: '1', name: 'Test Product' },
-        error: null,
-      });
-
-      const result = await productFormAction(prevState, formDataInvalidPoints);
-
-      expect(mockCreateProduct).toHaveBeenCalledWith({
-        subcategory_id: 'subcat-1',
-        name: 'Test Product',
-        description: null,
-        required_points: 0, // parseInt fallback
-        active: false,
-      });
-    });
-
-    it('should handle missing required_points field', async () => {
-      const formDataMissingPoints = new FormData();
-      formDataMissingPoints.append('subcategory_id', 'subcat-1');
-      formDataMissingPoints.append('name', 'Test Product');
-
-      mockCreateProduct.mockResolvedValue({
-        data: { id: '1', name: 'Test Product' },
-        error: null,
-      });
-
-      const result = await productFormAction(prevState, formDataMissingPoints);
-
-      expect(mockCreateProduct).toHaveBeenCalledWith({
-        subcategory_id: 'subcat-1',
-        name: 'Test Product',
-        description: null,
-        required_points: 0, // Default fallback
-        active: false,
-      });
-    });
-
-    it('should handle field validation errors from create action', async () => {
-      mockCreateProduct.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            subcategory_id: 'Subcategory is required',
-            name: 'Name is required',
-            required_points: 'Points must be non-negative',
-          },
-        },
-      });
+      const expectedErrorState = { message: 'Database error occurred' };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
 
       const result = await productFormAction(prevState, formData);
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        fieldErrors: {
-          subcategory_id: ['Subcategory is required'],
-          name: ['Name is required'],
-          required_points: ['Points must be non-negative'],
-        },
-      });
-    });
-
-    it('should handle general errors from create action', async () => {
-      mockCreateProduct.mockResolvedValue({
-        data: null,
-        error: { message: 'Database connection failed' },
-      });
-
-      const result = await productFormAction(prevState, formData);
-
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the product.',
-      });
+      expect(mockCreateProduct).toHaveBeenCalledWith(parsedData);
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(dbError);
+      expect(mockRevalidatePath).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedErrorState);
     });
   });
 
   describe('updating existing product', () => {
-    const productId = 'product-1';
+    const productId = '123';
 
     beforeEach(() => {
       formData.append('id', productId);
@@ -198,11 +165,11 @@ describe('productFormAction', () => {
       formData.append('name', 'Updated Product');
       formData.append('description', 'Updated description');
       formData.append('required_points', '150');
-      formData.append('active', 'on');
+      formData.append('active', 'true');
     });
 
     it('should update product successfully', async () => {
-      const mockUpdatedProduct = {
+      const parsedData = {
         id: productId,
         subcategory_id: 'subcat-2',
         name: 'Updated Product',
@@ -211,358 +178,210 @@ describe('productFormAction', () => {
         active: true,
       };
 
-      mockUpdateProduct.mockResolvedValue({
-        data: mockUpdatedProduct,
-        error: null,
+      mockProductSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
       });
+
+      const expectedSuccessState = { message: 'Product updated successfully!' };
+      mockToActionState.mockReturnValue(expectedSuccessState);
 
       const result = await productFormAction(prevState, formData);
 
-      expect(mockUpdateProduct).toHaveBeenCalledWith(productId, {
+      expect(mockProductSchema.safeParse).toHaveBeenCalledWith({
+        id: productId,
+        subcategory_id: 'subcat-2',
+        name: 'Updated Product',
+        description: 'Updated description',
+        required_points: '150',
+        active: 'true',
+      });
+
+      expect(mockUpdateProduct).toHaveBeenCalledWith(productId, parsedData);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/product');
+      expect(mockToActionState).toHaveBeenCalledWith('Product updated successfully!');
+      expect(result).toEqual(expectedSuccessState);
+    });
+
+    it('should handle validation errors during update', async () => {
+      const validationError = {
+        errors: [
+          { path: ['name'], message: 'Name cannot be empty' },
+        ],
+      };
+
+      mockProductSchema.safeParse.mockReturnValue({
+        success: false,
+        error: validationError,
+      });
+
+      const expectedErrorState = { fieldErrors: { name: ['Name cannot be empty'] } };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
+
+      const result = await productFormAction(prevState, formData);
+
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(validationError);
+      expect(mockUpdateProduct).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedErrorState);
+    });
+
+    it('should handle database errors during update', async () => {
+      const parsedData = {
+        id: productId,
         subcategory_id: 'subcat-2',
         name: 'Updated Product',
         description: 'Updated description',
         required_points: 150,
         active: true,
+      };
+
+      mockProductSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
       });
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'Product updated successfully!',
-      });
-    });
+      const dbError = new Error('Update failed');
+      mockUpdateProduct.mockRejectedValue(dbError);
 
-    it('should handle update with empty description', async () => {
-      const formDataEmptyDesc = new FormData();
-      formDataEmptyDesc.append('id', productId);
-      formDataEmptyDesc.append('subcategory_id', 'subcat-2');
-      formDataEmptyDesc.append('name', 'Updated Product');
-      formDataEmptyDesc.append('description', ''); // Empty string should become null
-      formDataEmptyDesc.append('required_points', '200');
-      formDataEmptyDesc.append('active', 'on');
-
-      mockUpdateProduct.mockResolvedValue({
-        data: { id: productId, name: 'Updated Product', active: true },
-        error: null,
-      });
-
-      const result = await productFormAction(prevState, formDataEmptyDesc);
-
-      expect(mockUpdateProduct).toHaveBeenCalledWith(productId, {
-        subcategory_id: 'subcat-2',
-        name: 'Updated Product',
-        description: null,
-        required_points: 200,
-        active: true,
-      });
-
-      expect(result.message).toBe('Product updated successfully!');
-    });
-
-    it('should handle field validation errors from update action', async () => {
-      mockUpdateProduct.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            name: 'Name cannot be empty',
-            required_points: 'Points must be a positive integer',
-          },
-        },
-      });
+      const expectedErrorState = { message: 'Update error occurred' };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
 
       const result = await productFormAction(prevState, formData);
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        fieldErrors: {
-          name: ['Name cannot be empty'],
-          required_points: ['Points must be a positive integer'],
-        },
-      });
-    });
-
-    it('should handle general errors from update action', async () => {
-      mockUpdateProduct.mockResolvedValue({
-        data: null,
-        error: { message: 'Update failed' },
-      });
-
-      const result = await productFormAction(prevState, formData);
-
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the product.',
-      });
+      expect(mockUpdateProduct).toHaveBeenCalledWith(productId, parsedData);
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(dbError);
+      expect(mockRevalidatePath).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedErrorState);
     });
   });
 
   describe('form data handling', () => {
-    it('should handle missing form fields gracefully', async () => {
-      const emptyFormData = new FormData();
+    it('should convert FormData to object correctly', async () => {
+      formData.append('subcategory_id', 'subcat-1');
+      formData.append('name', 'Test Product');
+      formData.append('description', 'Test description');
+      formData.append('required_points', '100');
+      formData.append('active', 'true');
+      formData.append('extra_field', 'ignored'); // Extra fields should be included
 
-      mockCreateProduct.mockResolvedValue({
-        data: { id: '1' },
-        error: null,
+      mockProductSchema.safeParse.mockReturnValue({
+        success: true,
+        data: {},
       });
 
-      const result = await productFormAction(prevState, emptyFormData);
-
-      expect(mockCreateProduct).toHaveBeenCalledWith({
-        subcategory_id: null, // Missing fields become null
-        name: null,
-        description: null,
-        required_points: 0,
-        active: false,
-      });
-    });
-
-    it('should handle form fields with whitespace', async () => {
-      formData.append('subcategory_id', '  subcat-1  ');
-      formData.append('name', '  Test Product  ');
-      formData.append('description', '  Test description  ');
-      formData.append('required_points', '  100  '); // Whitespace around numbers
-
-      mockCreateProduct.mockResolvedValue({
-        data: { id: '1' },
-        error: null,
-      });
+      mockToActionState.mockReturnValue({ message: 'Success' });
 
       await productFormAction(prevState, formData);
 
-      expect(mockCreateProduct).toHaveBeenCalledWith({
-        subcategory_id: '  subcat-1  ', // Whitespace is preserved for strings
-        name: '  Test Product  ',
-        description: '  Test description  ',
-        required_points: 100, // parseInt handles whitespace
-        active: false,
+      expect(mockProductSchema.safeParse).toHaveBeenCalledWith({
+        subcategory_id: 'subcat-1',
+        name: 'Test Product',
+        description: 'Test description',
+        required_points: '100',
+        active: 'true',
+        extra_field: 'ignored', // FormData entries are all passed to schema
       });
     });
 
-    it('should handle checkbox variations', async () => {
-      // Test different checkbox values
-      const testCases = [
-        { value: 'on', expected: true },
-        { value: 'true', expected: false }, // Only 'on' is truthy for checkboxes
-        { value: '1', expected: false },
-        { value: '', expected: false },
-      ];
+    it('should handle form data with whitespace', async () => {
+      formData.append('name', '  Test Product  ');
+      formData.append('subcategory_id', '  subcat-1  ');
+      formData.append('required_points', '  100  ');
 
-      for (const testCase of testCases) {
-        const testFormData = new FormData();
-        testFormData.append('subcategory_id', 'subcat-1');
-        testFormData.append('name', 'Test');
-        testFormData.append('required_points', '50');
-        testFormData.append('active', testCase.value);
+      mockProductSchema.safeParse.mockReturnValue({
+        success: true,
+        data: {},
+      });
 
-        mockCreateProduct.mockClear();
-        mockCreateProduct.mockResolvedValue({
-          data: { id: '1' },
-          error: null,
-        });
+      mockToActionState.mockReturnValue({ message: 'Success' });
 
-        await productFormAction(prevState, testFormData);
+      await productFormAction(prevState, formData);
 
-        expect(mockCreateProduct).toHaveBeenCalledWith({
-          subcategory_id: 'subcat-1',
-          name: 'Test',
-          description: null,
-          required_points: 50,
-          active: testCase.expected,
-        });
-      }
+      expect(mockProductSchema.safeParse).toHaveBeenCalledWith({
+        name: '  Test Product  ', // Whitespace preserved
+        subcategory_id: '  subcat-1  ',
+        required_points: '  100  ',
+      });
     });
 
-    it('should handle various required_points formats', async () => {
-      const pointsTestCases = [
-        { input: '0', expected: 0 },
-        { input: '100', expected: 100 },
-        { input: '999999', expected: 999999 },
-        { input: '0.5', expected: 0 }, // parseInt truncates decimals
-        { input: '100.9', expected: 100 },
-        { input: 'abc', expected: 0 }, // Non-numeric falls back to 0
-        { input: '-50', expected: -50 }, // Negative numbers allowed by parseInt
-        { input: '', expected: 0 }, // Empty string fallback
-      ];
+    it('should handle empty form data', async () => {
+      const emptyFormData = new FormData();
 
-      for (const testCase of pointsTestCases) {
-        const testFormData = new FormData();
-        testFormData.append('subcategory_id', 'subcat-1');
-        testFormData.append('name', 'Test Product');
-        testFormData.append('required_points', testCase.input);
+      mockProductSchema.safeParse.mockReturnValue({
+        success: false,
+        error: { errors: [] },
+      });
 
-        mockCreateProduct.mockClear();
-        mockCreateProduct.mockResolvedValue({
-          data: { id: '1' },
-          error: null,
-        });
+      mockFromErrorToActionState.mockReturnValue({ fieldErrors: {} });
 
-        await productFormAction(prevState, testFormData);
+      await productFormAction(prevState, emptyFormData);
 
-        expect(mockCreateProduct).toHaveBeenCalledWith({
-          subcategory_id: 'subcat-1',
-          name: 'Test Product',
-          description: null,
-          required_points: testCase.expected,
-          active: false,
-        });
-      }
+      expect(mockProductSchema.safeParse).toHaveBeenCalledWith({});
     });
   });
 
-  describe('error handling edge cases', () => {
+  describe('revalidation behavior', () => {
     beforeEach(() => {
       formData.append('subcategory_id', 'subcat-1');
       formData.append('name', 'Test Product');
       formData.append('required_points', '100');
     });
 
-    it('should handle undefined error object', async () => {
-      mockCreateProduct.mockResolvedValue({
-        data: null,
-        error: undefined as any,
+    it('should revalidate path on successful creation', async () => {
+      mockProductSchema.safeParse.mockReturnValue({
+        success: true,
+        data: {},
       });
 
-      const result = await productFormAction(prevState, formData);
+      mockCreateProduct.mockResolvedValue(undefined);
+      mockToActionState.mockReturnValue({ message: 'Success' });
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the product.',
-      });
+      await productFormAction(prevState, formData);
+
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/product');
     });
 
-    it('should handle error without fieldErrors property', async () => {
-      mockCreateProduct.mockResolvedValue({
-        data: null,
-        error: { someOtherProperty: 'value' } as any,
+    it('should revalidate path on successful update', async () => {
+      formData.append('id', '123');
+
+      mockProductSchema.safeParse.mockReturnValue({
+        success: true,
+        data: { id: '123' },
       });
 
-      const result = await productFormAction(prevState, formData);
+      mockUpdateProduct.mockResolvedValue(undefined);
+      mockToActionState.mockReturnValue({ message: 'Success' });
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the product.',
-      });
+      await productFormAction(prevState, formData);
+
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/product');
     });
 
-    it('should handle fieldErrors with mixed string and array values', async () => {
-      mockCreateProduct.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            name: 'Single string error',
-            description: ['Array error 1', 'Array error 2'],
-          },
-        },
+    it('should not revalidate path on validation error', async () => {
+      mockProductSchema.safeParse.mockReturnValue({
+        success: false,
+        error: { errors: [] },
       });
 
-      const result = await productFormAction(prevState, formData);
+      mockFromErrorToActionState.mockReturnValue({ fieldErrors: {} });
 
-      expect(result.fieldErrors).toEqual({
-        name: ['Single string error'],
-        description: ['Array error 1', 'Array error 2'], // Arrays are preserved as-is
-      });
-    });
-  });
+      await productFormAction(prevState, formData);
 
-  describe('async behavior', () => {
-    it('should handle async errors from actions', async () => {
-      mockCreateProduct.mockRejectedValue(new Error('Network error'));
-
-      formData.append('subcategory_id', 'subcat-1');
-      formData.append('name', 'Test Product');
-      formData.append('required_points', '100');
-
-      await expect(productFormAction(prevState, formData)).rejects.toThrow('Network error');
+      expect(mockRevalidatePath).not.toHaveBeenCalled();
     });
 
-    it('should handle slow responses', async () => {
-      const slowResponse = new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            data: { id: '1', name: 'Test Product' },
-            error: null,
-          });
-        }, 100);
+    it('should not revalidate path on database error', async () => {
+      mockProductSchema.safeParse.mockReturnValue({
+        success: true,
+        data: {},
       });
 
-      mockCreateProduct.mockReturnValue(slowResponse as any);
+      mockCreateProduct.mockRejectedValue(new Error('DB Error'));
+      mockFromErrorToActionState.mockReturnValue({ message: 'Error' });
 
-      formData.append('subcategory_id', 'subcat-1');
-      formData.append('name', 'Test Product');
-      formData.append('required_points', '100');
+      await productFormAction(prevState, formData);
 
-      const result = await productFormAction(prevState, formData);
-
-      expect(result.message).toBe('Product created successfully!');
-    });
-  });
-
-  describe('integration scenarios', () => {
-    it('should handle complete product creation workflow', async () => {
-      // Full product with all fields
-      const completeFormData = new FormData();
-      completeFormData.append('subcategory_id', 'electronics-123');
-      completeFormData.append('name', 'iPhone 15 Pro');
-      completeFormData.append('description', 'Latest iPhone with advanced features');
-      completeFormData.append('required_points', '50000');
-      completeFormData.append('active', 'on');
-
-      const expectedProduct = {
-        id: 'product-xyz-123',
-        subcategory_id: 'electronics-123',
-        name: 'iPhone 15 Pro',
-        description: 'Latest iPhone with advanced features',
-        required_points: 50000,
-        active: true,
-        creation_date: '2024-01-01T00:00:00Z',
-      };
-
-      mockCreateProduct.mockResolvedValue({
-        data: expectedProduct,
-        error: null,
-      });
-
-      const result = await productFormAction(prevState, completeFormData);
-
-      expect(mockCreateProduct).toHaveBeenCalledWith({
-        subcategory_id: 'electronics-123',
-        name: 'iPhone 15 Pro',
-        description: 'Latest iPhone with advanced features',
-        required_points: 50000,
-        active: true,
-      });
-
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'Product created successfully!',
-      });
-    });
-
-    it('should handle product update workflow with partial data', async () => {
-      const productId = 'existing-product-123';
-      const updateFormData = new FormData();
-      updateFormData.append('id', productId);
-      updateFormData.append('subcategory_id', 'electronics-123');
-      updateFormData.append('name', 'iPhone 15 Pro Max'); // Updated name
-      updateFormData.append('required_points', '60000'); // Updated points
-      // No description or active field - should use defaults
-
-      mockUpdateProduct.mockResolvedValue({
-        data: { id: productId, name: 'iPhone 15 Pro Max' },
-        error: null,
-      });
-
-      const result = await productFormAction(prevState, updateFormData);
-
-      expect(mockUpdateProduct).toHaveBeenCalledWith(productId, {
-        subcategory_id: 'electronics-123',
-        name: 'iPhone 15 Pro Max',
-        description: null, // No description provided
-        required_points: 60000,
-        active: false, // Checkbox not checked
-      });
-
-      expect(result.message).toBe('Product updated successfully!');
+      expect(mockRevalidatePath).not.toHaveBeenCalled();
     });
   });
 });

@@ -1,52 +1,31 @@
-"use server";
+'use server';
 
-import type { ActionState} from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
-import type { ProductInput } from '@/schemas/product.schema';
+import { revalidatePath } from 'next/cache';
 
-import { createProduct, updateProduct } from './actions';
+import { createProduct, updateProduct } from '@/actions/dashboard/product/actions';
+import { fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
+import { ProductSchema } from '@/schemas/product.schema';
+import type { Product } from '@/types/product';
 
-export async function productFormAction(
-  prevState: ActionState,
-  formData: FormData
-): Promise<ActionState> {
-  const id = formData.get('id') as string;
-  
-  const input: ProductInput = {
-    subcategory_id: formData.get('subcategory_id') as string,
-    name: formData.get('name') as string,
-    description: formData.get('description') as string || null,
-    required_points: parseInt(formData.get('required_points') as string) || 0,
-    active: formData.get('active') === 'on',
-  };
+export async function productFormAction(_prevState: ActionState, formData: FormData) {
+  try {
+    const parsed = ProductSchema.safeParse(Object.fromEntries(formData));
 
-  let result;
-  if (id) {
-    result = await updateProduct(id, input);
-  } else {
-    result = await createProduct(input);
-  }
-
-  if (result.error || !result.data) {
-    if (result.error && 'fieldErrors' in result.error && result.error.fieldErrors) {
-      // Convert string errors to string array format
-      const fieldErrors: Record<string, string[]> = {};
-      Object.entries(result.error.fieldErrors).forEach(([key, value]) => {
-        fieldErrors[key] = Array.isArray(value) ? value : [value as string];
-      });
-      return {
-        ...EMPTY_ACTION_STATE,
-        fieldErrors,
-      };
+    if (!parsed.success) {
+      return fromErrorToActionState(parsed.error);
     }
-    return {
-      ...EMPTY_ACTION_STATE,
-      message: 'An error occurred while saving the product.',
-    };
-  }
 
-  return {
-    ...EMPTY_ACTION_STATE,
-    message: id ? 'Product updated successfully!' : 'Product created successfully!',
-  };
+    if (formData.get('id')) {
+      await updateProduct(String(formData.get('id')), parsed.data as Product);
+    } else {
+      await createProduct(parsed.data as Product);
+    }
+
+    // Revalidate the product list page
+    revalidatePath('/dashboard/product');
+
+    return toActionState(formData.get('id') ? 'Product updated successfully!' : 'Product created successfully!');
+  } catch (error) {
+    return fromErrorToActionState(error);
+  }
 }

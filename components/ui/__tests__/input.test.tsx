@@ -398,7 +398,7 @@ describe('Input', () => {
     });
 
     it('should handle empty string values', () => {
-      render(<Input placeholder="Empty value" value="" />);
+      render(<Input placeholder="Empty value" readOnly value="" />);
       
       const input = screen.getByRole('textbox');
       expect(input).toHaveValue('');

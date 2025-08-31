@@ -23,7 +23,7 @@ export async function addressFormAction(_prevState: ActionState, formData: FormD
     }
 
     // Revalidate the address list page
-    revalidatePath('/address');
+    revalidatePath('/dashboard/address');
 
     return toActionState(formData.get('id') ? 'Address updated successfully!' : 'Address created successfully!');
   } catch (error) {

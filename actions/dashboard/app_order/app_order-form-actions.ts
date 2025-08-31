@@ -1,51 +1,31 @@
 "use server";
 
-import type { ActionState} from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
-import type { AppOrderInput } from '@/schemas/app_order.schema';
+import { revalidatePath } from 'next/cache';
 
-import { createAppOrder, updateAppOrder } from './actions';
+import { createAppOrder, updateAppOrder } from '@/actions/dashboard/app_order/actions';
+import { fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
+import { AppOrderSchema } from '@/schemas/app_order.schema';
+import type { AppOrder } from '@/types/app_order';
 
-export async function appOrderFormAction(
-  prevState: ActionState,
-  formData: FormData
-): Promise<ActionState> {
-  const id = formData.get('id') as string;
-  
-  const input: AppOrderInput = {
-    order_number: formData.get('order_number') as string,
-    creation_date: formData.get('creation_date') as string,
-    total_points: parseInt(formData.get('total_points') as string) || 0,
-    observations: formData.get('observations') as string || null,
-  };
+export async function appOrderFormAction(_prevState: ActionState, formData: FormData) {
+  try {
+    const parsed = AppOrderSchema.safeParse(Object.fromEntries(formData));
 
-  let result;
-  if (id) {
-    result = await updateAppOrder(id, input);
-  } else {
-    result = await createAppOrder(input);
-  }
-
-  if (result.error) {
-    if ('fieldErrors' in result.error) {
-      // Convert string errors to string array format
-      const fieldErrors: Record<string, string[]> = {};
-      Object.entries(result.error.fieldErrors).forEach(([key, value]) => {
-        fieldErrors[key] = [value];
-      });
-      return {
-        ...EMPTY_ACTION_STATE,
-        fieldErrors,
-      };
+    if (!parsed.success) {
+      return fromErrorToActionState(parsed.error);
     }
-    return {
-      ...EMPTY_ACTION_STATE,
-      message: 'An error occurred while saving the order.',
-    };
-  }
 
-  return {
-    ...EMPTY_ACTION_STATE,
-    message: id ? 'Order updated successfully!' : 'Order created successfully!',
-  };
+    if (formData.get('id')) {
+      await updateAppOrder(formData.get('id') as string, parsed.data as AppOrder);
+    } else {
+      await createAppOrder(parsed.data as AppOrder);
+    }
+
+    // Revalidate the app order list page
+    revalidatePath('/dashboard/app_order');
+
+    return toActionState(formData.get('id') ? 'App Order updated successfully!' : 'App Order created successfully!');
+  } catch (error) {
+    return fromErrorToActionState(error);
+  }
 }

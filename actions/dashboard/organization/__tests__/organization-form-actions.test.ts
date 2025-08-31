@@ -1,21 +1,36 @@
-import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import { revalidatePath } from 'next/cache';
+
+import { fromErrorToActionState, toActionState } from '@/lib/error-handler';
+import { OrganizationSchema } from '@/schemas/organization.schema';
 
 import { createOrganization, updateOrganization } from '../actions';
 import { organizationFormAction } from '../organization-form-actions';
 
-// Mock the actions
+// Mock the dependencies
 jest.mock('../actions');
+jest.mock('@/lib/error-handler');
+jest.mock('@/schemas/organization.schema', () => ({
+  OrganizationSchema: {
+    safeParse: jest.fn(),
+  },
+}));
+jest.mock('next/cache');
+
 const mockCreateOrganization = createOrganization as jest.MockedFunction<typeof createOrganization>;
 const mockUpdateOrganization = updateOrganization as jest.MockedFunction<typeof updateOrganization>;
+const mockFromErrorToActionState = fromErrorToActionState as jest.MockedFunction<typeof fromErrorToActionState>;
+const mockToActionState = toActionState as jest.MockedFunction<typeof toActionState>;
+const mockRevalidatePath = revalidatePath as jest.MockedFunction<typeof revalidatePath>;
+
+const mockOrganizationSchema = OrganizationSchema as jest.Mocked<typeof OrganizationSchema>;
 
 describe('organizationFormAction', () => {
   let formData: FormData;
-  let prevState = EMPTY_ACTION_STATE;
+  const prevState = {} as any; // Not used in this implementation
 
   beforeEach(() => {
     jest.clearAllMocks();
     formData = new FormData();
-    prevState = EMPTY_ACTION_STATE;
   });
 
   describe('creating new organization', () => {
@@ -26,133 +41,112 @@ describe('organizationFormAction', () => {
     });
 
     it('should create organization successfully', async () => {
-      const mockCreatedOrganization = {
-        id: '1',
+      const parsedData = {
         name: 'Test Organization',
         business_name: 'Test Business Name',
         tax_id: '12345678',
       };
 
-      mockCreateOrganization.mockResolvedValue({
-        data: mockCreatedOrganization,
-        error: null,
+      mockOrganizationSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
       });
+
+      const expectedSuccessState = { message: 'Organization created successfully!' };
+      mockToActionState.mockReturnValue(expectedSuccessState);
 
       const result = await organizationFormAction(prevState, formData);
 
-      expect(mockCreateOrganization).toHaveBeenCalledWith({
+      expect(mockOrganizationSchema.safeParse).toHaveBeenCalledWith({
         name: 'Test Organization',
         business_name: 'Test Business Name',
         tax_id: '12345678',
       });
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'Organization created successfully!',
-      });
+      expect(mockCreateOrganization).toHaveBeenCalledWith(parsedData);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/organization');
+      expect(mockToActionState).toHaveBeenCalledWith('Organization created successfully!');
+      expect(result).toEqual(expectedSuccessState);
     });
 
-    it('should handle creation with null business_name', async () => {
-      const formDataWithoutBusinessName = new FormData();
-      formDataWithoutBusinessName.append('name', 'Test Organization');
-      formDataWithoutBusinessName.append('tax_id', '12345678');
+    it('should handle validation errors from schema', async () => {
+      const validationError = {
+        errors: [
+          { path: ['name'], message: 'Name is required' },
+        ],
+      };
 
-      mockCreateOrganization.mockResolvedValue({
-        data: { id: '1', name: 'Test Organization', tax_id: '12345678' },
-        error: null,
+      mockOrganizationSchema.safeParse.mockReturnValue({
+        success: false,
+        error: validationError,
       });
 
-      const result = await organizationFormAction(prevState, formDataWithoutBusinessName);
-
-      expect(mockCreateOrganization).toHaveBeenCalledWith({
-        name: 'Test Organization',
-        business_name: null,
-        tax_id: '12345678',
-      });
-
-      expect(result.message).toBe('Organization created successfully!');
-    });
-
-    it('should handle creation with null tax_id', async () => {
-      const formDataWithoutTaxId = new FormData();
-      formDataWithoutTaxId.append('name', 'Test Organization');
-      formDataWithoutTaxId.append('business_name', 'Test Business Name');
-
-      mockCreateOrganization.mockResolvedValue({
-        data: { id: '1', name: 'Test Organization', business_name: 'Test Business Name' },
-        error: null,
-      });
-
-      const result = await organizationFormAction(prevState, formDataWithoutTaxId);
-
-      expect(mockCreateOrganization).toHaveBeenCalledWith({
-        name: 'Test Organization',
-        business_name: 'Test Business Name',
-        tax_id: null,
-      });
-
-      expect(result.message).toBe('Organization created successfully!');
-    });
-
-    it('should handle creation with empty string fields converted to null', async () => {
-      const formDataWithEmptyStrings = new FormData();
-      formDataWithEmptyStrings.append('name', 'Test Organization');
-      formDataWithEmptyStrings.append('business_name', '');
-      formDataWithEmptyStrings.append('tax_id', '');
-
-      mockCreateOrganization.mockResolvedValue({
-        data: { id: '1', name: 'Test Organization' },
-        error: null,
-      });
-
-      const result = await organizationFormAction(prevState, formDataWithEmptyStrings);
-
-      expect(mockCreateOrganization).toHaveBeenCalledWith({
-        name: 'Test Organization',
-        business_name: null,
-        tax_id: null,
-      });
-    });
-
-    it('should handle field validation errors from create action', async () => {
-      mockCreateOrganization.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            name: 'Name is required',
-            tax_id: 'Invalid tax ID format',
-          },
-        },
-      });
+      const expectedErrorState = { fieldErrors: { name: ['Name is required'] } };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
 
       const result = await organizationFormAction(prevState, formData);
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        fieldErrors: {
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(validationError);
+      expect(mockCreateOrganization).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedErrorState);
+    });
+
+    it('should handle missing required fields', async () => {
+      const emptyFormData = new FormData();
+      
+      const validationError = {
+        errors: [
+          { path: ['name'], message: 'Name is required' },
+        ],
+      };
+
+      mockOrganizationSchema.safeParse.mockReturnValue({
+        success: false,
+        error: validationError,
+      });
+
+      const expectedErrorState = { 
+        fieldErrors: { 
           name: ['Name is required'],
-          tax_id: ['Invalid tax ID format'],
-        },
-      });
+        } 
+      };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
+
+      const result = await organizationFormAction(prevState, emptyFormData);
+
+      expect(mockOrganizationSchema.safeParse).toHaveBeenCalledWith({});
+      expect(result).toEqual(expectedErrorState);
     });
 
-    it('should handle general errors from create action', async () => {
-      mockCreateOrganization.mockResolvedValue({
-        data: null,
-        error: { message: 'Database connection failed' },
+    it('should handle database errors during creation', async () => {
+      const parsedData = {
+        name: 'Test Organization',
+        business_name: 'Test Business Name',
+        tax_id: '12345678',
+      };
+
+      mockOrganizationSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
       });
+
+      const dbError = new Error('Database connection failed');
+      mockCreateOrganization.mockRejectedValue(dbError);
+
+      const expectedErrorState = { message: 'Database error occurred' };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
 
       const result = await organizationFormAction(prevState, formData);
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the organization.',
-      });
+      expect(mockCreateOrganization).toHaveBeenCalledWith(parsedData);
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(dbError);
+      expect(mockRevalidatePath).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedErrorState);
     });
   });
 
   describe('updating existing organization', () => {
-    const organizationId = 'org-1';
+    const organizationId = '123';
 
     beforeEach(() => {
       formData.append('id', organizationId);
@@ -162,236 +156,205 @@ describe('organizationFormAction', () => {
     });
 
     it('should update organization successfully', async () => {
-      const mockUpdatedOrganization = {
+      const parsedData = {
         id: organizationId,
         name: 'Updated Organization',
         business_name: 'Updated Business Name',
         tax_id: '87654321',
       };
 
-      mockUpdateOrganization.mockResolvedValue({
-        data: mockUpdatedOrganization,
-        error: null,
+      mockOrganizationSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
       });
+
+      const expectedSuccessState = { message: 'Organization updated successfully!' };
+      mockToActionState.mockReturnValue(expectedSuccessState);
 
       const result = await organizationFormAction(prevState, formData);
 
-      expect(mockUpdateOrganization).toHaveBeenCalledWith(organizationId, {
+      expect(mockOrganizationSchema.safeParse).toHaveBeenCalledWith({
+        id: organizationId,
         name: 'Updated Organization',
         business_name: 'Updated Business Name',
         tax_id: '87654321',
       });
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'Organization updated successfully!',
-      });
+      expect(mockUpdateOrganization).toHaveBeenCalledWith(organizationId, parsedData);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/organization');
+      expect(mockToActionState).toHaveBeenCalledWith('Organization updated successfully!');
+      expect(result).toEqual(expectedSuccessState);
     });
 
-    it('should handle update with null optional fields', async () => {
-      const formDataPartial = new FormData();
-      formDataPartial.append('id', organizationId);
-      formDataPartial.append('name', 'Updated Organization');
-      // No business_name or tax_id
+    it('should handle validation errors during update', async () => {
+      const validationError = {
+        errors: [
+          { path: ['name'], message: 'Name cannot be empty' },
+        ],
+      };
 
-      mockUpdateOrganization.mockResolvedValue({
-        data: { id: organizationId, name: 'Updated Organization' },
-        error: null,
+      mockOrganizationSchema.safeParse.mockReturnValue({
+        success: false,
+        error: validationError,
       });
 
-      const result = await organizationFormAction(prevState, formDataPartial);
+      const expectedErrorState = { fieldErrors: { name: ['Name cannot be empty'] } };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
 
-      expect(mockUpdateOrganization).toHaveBeenCalledWith(organizationId, {
+      const result = await organizationFormAction(prevState, formData);
+
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(validationError);
+      expect(mockUpdateOrganization).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedErrorState);
+    });
+
+    it('should handle database errors during update', async () => {
+      const parsedData = {
+        id: organizationId,
         name: 'Updated Organization',
-        business_name: null,
-        tax_id: null,
+        business_name: 'Updated Business Name',
+        tax_id: '87654321',
+      };
+
+      mockOrganizationSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
       });
 
-      expect(result.message).toBe('Organization updated successfully!');
-    });
+      const dbError = new Error('Update failed');
+      mockUpdateOrganization.mockRejectedValue(dbError);
 
-    it('should handle field validation errors from update action', async () => {
-      mockUpdateOrganization.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            name: 'Name cannot be empty',
-            business_name: 'Business name too long',
-          },
-        },
-      });
+      const expectedErrorState = { message: 'Update error occurred' };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
 
       const result = await organizationFormAction(prevState, formData);
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        fieldErrors: {
-          name: ['Name cannot be empty'],
-          business_name: ['Business name too long'],
-        },
-      });
-    });
-
-    it('should handle general errors from update action', async () => {
-      mockUpdateOrganization.mockResolvedValue({
-        data: null,
-        error: { message: 'Update failed' },
-      });
-
-      const result = await organizationFormAction(prevState, formData);
-
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the organization.',
-      });
+      expect(mockUpdateOrganization).toHaveBeenCalledWith(organizationId, parsedData);
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(dbError);
+      expect(mockRevalidatePath).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedErrorState);
     });
   });
 
   describe('form data handling', () => {
-    it('should handle missing form fields gracefully', async () => {
-      const emptyFormData = new FormData();
+    it('should convert FormData to object correctly', async () => {
+      formData.append('name', 'Test Organization');
+      formData.append('business_name', 'Test Business Name');
+      formData.append('tax_id', '12345678');
+      formData.append('extra_field', 'ignored'); // Extra fields should be included
 
-      mockCreateOrganization.mockResolvedValue({
-        data: { id: '1' },
-        error: null,
+      mockOrganizationSchema.safeParse.mockReturnValue({
+        success: true,
+        data: {},
       });
 
-      const result = await organizationFormAction(prevState, emptyFormData);
-
-      expect(mockCreateOrganization).toHaveBeenCalledWith({
-        name: null, // Missing fields become null
-        business_name: null,
-        tax_id: null,
-      });
-    });
-
-    it('should handle form fields with whitespace', async () => {
-      formData.append('name', '  Test Organization  ');
-      formData.append('business_name', '  Test Business  ');
-      formData.append('tax_id', '  12345678  ');
-
-      mockCreateOrganization.mockResolvedValue({
-        data: { id: '1' },
-        error: null,
-      });
+      mockToActionState.mockReturnValue({ message: 'Success' });
 
       await organizationFormAction(prevState, formData);
 
-      expect(mockCreateOrganization).toHaveBeenCalledWith({
-        name: '  Test Organization  ', // Whitespace is preserved
-        business_name: '  Test Business  ',
-        tax_id: '  12345678  ',
+      expect(mockOrganizationSchema.safeParse).toHaveBeenCalledWith({
+        name: 'Test Organization',
+        business_name: 'Test Business Name',
+        tax_id: '12345678',
+        extra_field: 'ignored', // FormData entries are all passed to schema
       });
     });
 
-    it('should handle empty string conversion to null', async () => {
-      const testCases = [
-        { value: '', expected: null },
-        { value: '   ', expected: '   ' }, // Only empty string becomes null, not whitespace
-        { value: 'valid', expected: 'valid' },
-      ];
+    it('should handle form data with whitespace', async () => {
+      formData.append('name', '  Test Organization  ');
+      formData.append('business_name', '  Test Business Name  ');
 
-      for (const testCase of testCases) {
-        const testFormData = new FormData();
-        testFormData.append('name', 'Test Organization');
-        testFormData.append('business_name', testCase.value);
+      mockOrganizationSchema.safeParse.mockReturnValue({
+        success: true,
+        data: {},
+      });
 
-        mockCreateOrganization.mockClear();
-        mockCreateOrganization.mockResolvedValue({
-          data: { id: '1' },
-          error: null,
-        });
+      mockToActionState.mockReturnValue({ message: 'Success' });
 
-        await organizationFormAction(prevState, testFormData);
+      await organizationFormAction(prevState, formData);
 
-        expect(mockCreateOrganization).toHaveBeenCalledWith({
-          name: 'Test Organization',
-          business_name: testCase.expected,
-          tax_id: null,
-        });
-      }
+      expect(mockOrganizationSchema.safeParse).toHaveBeenCalledWith({
+        name: '  Test Organization  ', // Whitespace preserved
+        business_name: '  Test Business Name  ',
+      });
+    });
+
+    it('should handle empty form data', async () => {
+      const emptyFormData = new FormData();
+
+      mockOrganizationSchema.safeParse.mockReturnValue({
+        success: false,
+        error: { errors: [] },
+      });
+
+      mockFromErrorToActionState.mockReturnValue({ fieldErrors: {} });
+
+      await organizationFormAction(prevState, emptyFormData);
+
+      expect(mockOrganizationSchema.safeParse).toHaveBeenCalledWith({});
     });
   });
 
-  describe('error handling edge cases', () => {
+  describe('revalidation behavior', () => {
     beforeEach(() => {
       formData.append('name', 'Test Organization');
     });
 
-    it('should handle undefined error object', async () => {
-      mockCreateOrganization.mockResolvedValue({
-        data: null,
-        error: undefined as any,
+    it('should revalidate path on successful creation', async () => {
+      mockOrganizationSchema.safeParse.mockReturnValue({
+        success: true,
+        data: {},
       });
 
-      const result = await organizationFormAction(prevState, formData);
+      mockCreateOrganization.mockResolvedValue(undefined);
+      mockToActionState.mockReturnValue({ message: 'Success' });
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the organization.',
-      });
+      await organizationFormAction(prevState, formData);
+
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/organization');
     });
 
-    it('should handle error without fieldErrors property', async () => {
-      mockCreateOrganization.mockResolvedValue({
-        data: null,
-        error: { someOtherProperty: 'value' } as any,
+    it('should revalidate path on successful update', async () => {
+      formData.append('id', '123');
+
+      mockOrganizationSchema.safeParse.mockReturnValue({
+        success: true,
+        data: { id: '123' },
       });
 
-      const result = await organizationFormAction(prevState, formData);
+      mockUpdateOrganization.mockResolvedValue(undefined);
+      mockToActionState.mockReturnValue({ message: 'Success' });
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the organization.',
-      });
+      await organizationFormAction(prevState, formData);
+
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/organization');
     });
 
-    it('should handle fieldErrors with mixed string and array values', async () => {
-      mockCreateOrganization.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            name: 'Single string error',
-            business_name: ['Array error 1', 'Array error 2'],
-          },
-        },
+    it('should not revalidate path on validation error', async () => {
+      mockOrganizationSchema.safeParse.mockReturnValue({
+        success: false,
+        error: { errors: [] },
       });
 
-      const result = await organizationFormAction(prevState, formData);
+      mockFromErrorToActionState.mockReturnValue({ fieldErrors: {} });
 
-      expect(result.fieldErrors).toEqual({
-        name: ['Single string error'],
-        business_name: ['Array error 1', 'Array error 2'], // Arrays are preserved as-is
-      });
-    });
-  });
+      await organizationFormAction(prevState, formData);
 
-  describe('async behavior', () => {
-    it('should handle async errors from actions', async () => {
-      mockCreateOrganization.mockRejectedValue(new Error('Network error'));
-
-      formData.append('name', 'Test Organization');
-
-      await expect(organizationFormAction(prevState, formData)).rejects.toThrow('Network error');
+      expect(mockRevalidatePath).not.toHaveBeenCalled();
     });
 
-    it('should handle slow responses', async () => {
-      const slowResponse = new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            data: { id: '1', name: 'Test Organization' },
-            error: null,
-          });
-        }, 100);
+    it('should not revalidate path on database error', async () => {
+      mockOrganizationSchema.safeParse.mockReturnValue({
+        success: true,
+        data: {},
       });
 
-      mockCreateOrganization.mockReturnValue(slowResponse as any);
+      mockCreateOrganization.mockRejectedValue(new Error('DB Error'));
+      mockFromErrorToActionState.mockReturnValue({ message: 'Error' });
 
-      formData.append('name', 'Test Organization');
+      await organizationFormAction(prevState, formData);
 
-      const result = await organizationFormAction(prevState, formData);
-
-      expect(result.message).toBe('Organization created successfully!');
+      expect(mockRevalidatePath).not.toHaveBeenCalled();
     });
   });
 });

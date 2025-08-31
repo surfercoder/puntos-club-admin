@@ -80,9 +80,12 @@ describe('middleware', () => {
   });
 
   describe('updateSession', () => {
-    it('should return response when env vars are not set', async () => {
-      // This test is covered by the main flow - when hasEnvVars is true
-      // the createServerClient will be called and the normal flow will execute
+    it('should return response when env vars are set', async () => {
+      // Set environment variables for this test
+      process.env.NEXT_PUBLIC_SUPABASE_URL = 'https://test.supabase.co';
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY = 'test-anon-key';
+      
+      // When hasEnvVars is true, the createServerClient will be called and the normal flow will execute
       mockSupabase.auth.getUser.mockResolvedValue({
         data: { user: { id: 'user-1' } }
       });

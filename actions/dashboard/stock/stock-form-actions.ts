@@ -1,52 +1,31 @@
-"use server";
+'use server';
 
-import type { ActionState} from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
-import type { StockInput } from '@/schemas/stock.schema';
+import { revalidatePath } from 'next/cache';
 
-import { createStock, updateStock } from './actions';
+import { createStock, updateStock } from '@/actions/dashboard/stock/actions';
+import { fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
+import { StockSchema } from '@/schemas/stock.schema';
+import type { Stock } from '@/types/stock';
 
-export async function stockFormAction(
-  prevState: ActionState,
-  formData: FormData
-): Promise<ActionState> {
-  const id = formData.get('id') as string;
-  
-  const input: StockInput = {
-    branch_id: formData.get('branch_id') as string,
-    product_id: formData.get('product_id') as string,
-    quantity: parseInt(formData.get('quantity') as string) || 0,
-    minimum_quantity: parseInt(formData.get('minimum_quantity') as string) || 0,
-    last_updated: formData.get('last_updated') as string,
-  };
+export async function stockFormAction(_prevState: ActionState, formData: FormData) {
+  try {
+    const parsed = StockSchema.safeParse(Object.fromEntries(formData));
 
-  let result;
-  if (id) {
-    result = await updateStock(id, input);
-  } else {
-    result = await createStock(input);
-  }
-
-  if (result.error) {
-    if ('fieldErrors' in result.error) {
-      // Convert string errors to string array format
-      const fieldErrors: Record<string, string[]> = {};
-      Object.entries(result.error.fieldErrors).forEach(([key, value]) => {
-        fieldErrors[key] = [value];
-      });
-      return {
-        ...EMPTY_ACTION_STATE,
-        fieldErrors,
-      };
+    if (!parsed.success) {
+      return fromErrorToActionState(parsed.error);
     }
-    return {
-      ...EMPTY_ACTION_STATE,
-      message: 'An error occurred while saving the stock.',
-    };
-  }
 
-  return {
-    ...EMPTY_ACTION_STATE,
-    message: id ? 'Stock updated successfully!' : 'Stock created successfully!',
-  };
+    if (formData.get('id')) {
+      await updateStock(String(formData.get('id')), parsed.data as Stock);
+    } else {
+      await createStock(parsed.data as Stock);
+    }
+
+    // Revalidate the stock list page
+    revalidatePath('/dashboard/stock');
+
+    return toActionState(formData.get('id') ? 'Stock updated successfully!' : 'Stock created successfully!');
+  } catch (error) {
+    return fromErrorToActionState(error);
+  }
 }

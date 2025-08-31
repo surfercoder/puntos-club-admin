@@ -1,51 +1,31 @@
-"use server";
+'use server';
 
-import type { ActionState} from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
-import type { HistoryInput } from '@/schemas/history.schema';
+import { revalidatePath } from 'next/cache';
 
-import { createHistory, updateHistory } from './actions';
+import { createHistory, updateHistory } from '@/actions/dashboard/history/actions';
+import { fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
+import { HistorySchema } from '@/schemas/history.schema';
+import type { History } from '@/types/history';
 
-export async function historyFormAction(
-  prevState: ActionState,
-  formData: FormData
-): Promise<ActionState> {
-  const id = formData.get('id') as string;
-  
-  const input: HistoryInput = {
-    order_id: formData.get('order_id') as string,
-    status_id: formData.get('status_id') as string || null,
-    change_date: formData.get('change_date') as string,
-    observations: formData.get('observations') as string || null,
-  };
+export async function historyFormAction(_prevState: ActionState, formData: FormData) {
+  try {
+    const parsed = HistorySchema.safeParse(Object.fromEntries(formData));
 
-  let result;
-  if (id) {
-    result = await updateHistory(id, input);
-  } else {
-    result = await createHistory(input);
-  }
-
-  if (result.error) {
-    if ('fieldErrors' in result.error) {
-      // Convert string errors to string array format
-      const fieldErrors: Record<string, string[]> = {};
-      Object.entries(result.error.fieldErrors).forEach(([key, value]) => {
-        fieldErrors[key] = [value];
-      });
-      return {
-        ...EMPTY_ACTION_STATE,
-        fieldErrors,
-      };
+    if (!parsed.success) {
+      return fromErrorToActionState(parsed.error);
     }
-    return {
-      ...EMPTY_ACTION_STATE,
-      message: 'An error occurred while saving the history.',
-    };
-  }
 
-  return {
-    ...EMPTY_ACTION_STATE,
-    message: id ? 'History updated successfully!' : 'History created successfully!',
-  };
+    if (formData.get('id')) {
+      await updateHistory(String(formData.get('id')), parsed.data as History);
+    } else {
+      await createHistory(parsed.data as History);
+    }
+
+    // Revalidate the history list page
+    revalidatePath('/dashboard/history');
+
+    return toActionState(formData.get('id') ? 'History updated successfully!' : 'History created successfully!');
+  } catch (error) {
+    return fromErrorToActionState(error);
+  }
 }

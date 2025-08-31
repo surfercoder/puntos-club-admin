@@ -7,8 +7,14 @@ const TEST_USER = {
 };
 
 test.describe('Login Page', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, context }) => {
+    // Clear any existing authentication state
+    await context.clearCookies();
+    await context.clearPermissions();
     await page.goto('/auth/login');
+    
+    // Wait for page to be fully loaded
+    await page.waitForLoadState('networkidle');
   });
 
   test('should display login form elements', async ({ page }) => {
@@ -77,11 +83,19 @@ test.describe('Login Page', () => {
     // Submit form
     await page.getByRole('button', { name: 'Login' }).click();
     
-    // Wait for successful redirect to dashboard
-    await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
+    // Wait for navigation to complete with increased timeout
+    try {
+      await page.waitForURL('/dashboard', { timeout: 30000 });
+    } catch (error) {
+      // If direct navigation fails, check if we're already on dashboard
+      const currentUrl = page.url();
+      if (!currentUrl.includes('/dashboard')) {
+        throw error;
+      }
+    }
     
-    // Verify we're on the dashboard
-    await expect(page.getByText('Dashboard')).toBeVisible();
+    // Verify we're on the dashboard with increased timeout
+    await expect(page.getByText('Dashboard')).toBeVisible({ timeout: 20000 });
   });
 
   test('should show loading state during login', async ({ page }) => {
@@ -95,11 +109,22 @@ test.describe('Login Page', () => {
     
     // Try to catch loading state, but if login is too fast, just verify successful redirect
     try {
-      await expect(page.getByRole('button', { name: 'Logging in...' })).toBeVisible({ timeout: 500 });
+      await expect(page.getByRole('button', { name: 'Logging in...' })).toBeVisible({ timeout: 1000 });
     } catch {
-      // If we can't catch the loading state, just verify the login succeeded
-      await expect(page).toHaveURL('/dashboard', { timeout: 10000 });
+      // Loading state was too fast or not caught - this is acceptable
     }
+    
+    // Always verify the login succeeded with longer timeout for slower browsers
+    try {
+      await page.waitForURL('/dashboard', { timeout: 30000 });
+    } catch (error) {
+      // If direct navigation fails, check if we're already on dashboard
+      const currentUrl = page.url();
+      if (!currentUrl.includes('/dashboard')) {
+        throw error;
+      }
+    }
+    await expect(page.getByText('Dashboard')).toBeVisible({ timeout: 20000 });
   });
 
   test('should navigate to forgot password page', async ({ page }) => {

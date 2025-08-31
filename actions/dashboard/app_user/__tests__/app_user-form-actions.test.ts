@@ -1,12 +1,28 @@
-import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import { revalidatePath } from 'next/cache';
+
+import { fromErrorToActionState, toActionState, EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import { AppUserSchema } from '@/schemas/app_user.schema';
 
 import { createAppUser, updateAppUser } from '../actions';
 import { appUserFormAction } from '../app_user-form-actions';
 
-// Mock the actions
+// Mock the dependencies
 jest.mock('../actions');
+jest.mock('@/lib/error-handler');
+jest.mock('@/schemas/app_user.schema', () => ({
+  AppUserSchema: {
+    safeParse: jest.fn(),
+  },
+}));
+jest.mock('next/cache');
+
 const mockCreateAppUser = createAppUser as jest.MockedFunction<typeof createAppUser>;
 const mockUpdateAppUser = updateAppUser as jest.MockedFunction<typeof updateAppUser>;
+const mockFromErrorToActionState = fromErrorToActionState as jest.MockedFunction<typeof fromErrorToActionState>;
+const mockToActionState = toActionState as jest.MockedFunction<typeof toActionState>;
+const mockRevalidatePath = revalidatePath as jest.MockedFunction<typeof revalidatePath>;
+
+const mockAppUserSchema = AppUserSchema as jest.Mocked<typeof AppUserSchema>;
 
 describe('appUserFormAction', () => {
   let formData: FormData;
@@ -14,6 +30,7 @@ describe('appUserFormAction', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.resetAllMocks();
     formData = new FormData();
     prevState = EMPTY_ACTION_STATE;
   });
@@ -30,63 +47,42 @@ describe('appUserFormAction', () => {
     });
 
     it('should create app user successfully', async () => {
-      const mockCreatedUser = {
-        id: '1',
+      const parsedData = {
         organization_id: 'org-1',
         first_name: 'John',
         last_name: 'Doe',
         email: 'john.doe@example.com',
         username: 'johndoe',
         password: 'securepassword123',
-        active: true,
+        active: true, // Schema converts 'on' to boolean
       };
 
-      mockCreateAppUser.mockResolvedValue({
-        data: mockCreatedUser,
-        error: null,
-      });
+      mockAppUserSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
+      } as any);
+
+      const successActionState = {
+        ...EMPTY_ACTION_STATE,
+        message: 'App User created successfully!',
+      };
+      mockToActionState.mockReturnValue(successActionState);
 
       const result = await appUserFormAction(prevState, formData);
 
-      expect(mockCreateAppUser).toHaveBeenCalledWith({
+      expect(mockAppUserSchema.safeParse).toHaveBeenCalledWith({
         organization_id: 'org-1',
         first_name: 'John',
         last_name: 'Doe',
         email: 'john.doe@example.com',
         username: 'johndoe',
         password: 'securepassword123',
-        active: true,
+        active: 'on',
       });
-
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'User created successfully!',
-      });
-    });
-
-    it('should handle creation with null optional fields', async () => {
-      const formDataMinimal = new FormData();
-      formDataMinimal.append('organization_id', 'org-1');
-      formDataMinimal.append('active', 'on');
-
-      mockCreateAppUser.mockResolvedValue({
-        data: { id: '1', organization_id: 'org-1', active: true },
-        error: null,
-      });
-
-      const result = await appUserFormAction(prevState, formDataMinimal);
-
-      expect(mockCreateAppUser).toHaveBeenCalledWith({
-        organization_id: 'org-1',
-        first_name: null,
-        last_name: null,
-        email: null,
-        username: null,
-        password: null,
-        active: true,
-      });
-
-      expect(result.message).toBe('User created successfully!');
+      expect(mockCreateAppUser).toHaveBeenCalledWith(parsedData);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/app_user');
+      expect(mockToActionState).toHaveBeenCalledWith('App User created successfully!');
+      expect(result).toEqual(successActionState);
     });
 
     it('should handle unchecked active checkbox', async () => {
@@ -97,90 +93,92 @@ describe('appUserFormAction', () => {
       formDataInactive.append('email', 'jane.smith@example.com');
       // No 'active' field means checkbox is unchecked
 
-      mockCreateAppUser.mockResolvedValue({
-        data: { id: '1', first_name: 'Jane', active: false },
-        error: null,
-      });
-
-      const result = await appUserFormAction(prevState, formDataInactive);
-
-      expect(mockCreateAppUser).toHaveBeenCalledWith({
+      const parsedData = {
         organization_id: 'org-1',
         first_name: 'Jane',
         last_name: 'Smith',
         email: 'jane.smith@example.com',
-        username: null,
-        password: null,
-        active: false,
-      });
-    });
+        active: false, // Schema default
+      };
 
-    it('should handle empty string fields conversion to null', async () => {
-      const formDataWithEmptyStrings = new FormData();
-      formDataWithEmptyStrings.append('organization_id', 'org-1');
-      formDataWithEmptyStrings.append('first_name', ''); // Empty string should become null
-      formDataWithEmptyStrings.append('last_name', '');
-      formDataWithEmptyStrings.append('email', '');
-      formDataWithEmptyStrings.append('username', '');
-      formDataWithEmptyStrings.append('password', '');
-      formDataWithEmptyStrings.append('active', 'on');
+      mockAppUserSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
+      } as any);
 
-      mockCreateAppUser.mockResolvedValue({
-        data: { id: '1', organization_id: 'org-1', active: true },
-        error: null,
-      });
+      const successActionState = {
+        ...EMPTY_ACTION_STATE,
+        message: 'App User created successfully!',
+      };
+      mockToActionState.mockReturnValue(successActionState);
 
-      const result = await appUserFormAction(prevState, formDataWithEmptyStrings);
+      const result = await appUserFormAction(prevState, formDataInactive);
 
-      expect(mockCreateAppUser).toHaveBeenCalledWith({
+      expect(mockAppUserSchema.safeParse).toHaveBeenCalledWith({
         organization_id: 'org-1',
-        first_name: null,
-        last_name: null,
-        email: null,
-        username: null,
-        password: null,
-        active: true,
+        first_name: 'Jane',
+        last_name: 'Smith',
+        email: 'jane.smith@example.com',
       });
-
-      expect(result.message).toBe('User created successfully!');
+      expect(mockCreateAppUser).toHaveBeenCalledWith(parsedData);
+      expect(result).toEqual(successActionState);
     });
 
-    it('should handle field validation errors from create action', async () => {
-      mockCreateAppUser.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            organization_id: 'Organization is required',
-            email: 'Invalid email format',
-            username: 'Username already exists',
-          },
-        },
-      });
+    it('should handle schema validation errors', async () => {
+      const validationError = {
+        errors: [
+          { path: ['organization_id'], message: 'Organization is required' },
+          { path: ['email'], message: 'Invalid email format' },
+          { path: ['username'], message: 'Username already exists' },
+        ],
+      };
 
-      const result = await appUserFormAction(prevState, formData);
+      mockAppUserSchema.safeParse.mockReturnValue({
+        success: false,
+        error: validationError,
+      } as any);
 
-      expect(result).toEqual({
+      const errorActionState = {
         ...EMPTY_ACTION_STATE,
         fieldErrors: {
           organization_id: ['Organization is required'],
           email: ['Invalid email format'],
           username: ['Username already exists'],
         },
-      });
-    });
-
-    it('should handle general errors from create action', async () => {
-      mockCreateAppUser.mockResolvedValue({
-        data: null,
-        error: { message: 'Database connection failed' },
-      });
+      };
+      mockFromErrorToActionState.mockReturnValue(errorActionState);
 
       const result = await appUserFormAction(prevState, formData);
 
-      expect(result).toEqual({
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(validationError);
+      expect(result).toEqual(errorActionState);
+    });
+
+    it('should handle runtime errors', async () => {
+      const parsedData = {
+        organization_id: 'org-1',
+        first_name: 'John',
+        active: true,
+      };
+
+      mockAppUserSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
+      } as any);
+
+      const runtimeError = new Error('Database connection failed');
+      mockCreateAppUser.mockRejectedValue(runtimeError);
+
+      const errorActionState = {
         ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the user.',
-      });
+        message: 'An error occurred while saving the app user.',
+      };
+      mockFromErrorToActionState.mockReturnValue(errorActionState);
+
+      const result = await appUserFormAction(prevState, formData);
+
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(runtimeError);
+      expect(result).toEqual(errorActionState);
     });
   });
 
@@ -199,7 +197,7 @@ describe('appUserFormAction', () => {
     });
 
     it('should update app user successfully', async () => {
-      const mockUpdatedUser = {
+      const parsedData = {
         id: userId,
         organization_id: 'org-2',
         first_name: 'Jane',
@@ -210,393 +208,154 @@ describe('appUserFormAction', () => {
         active: true,
       };
 
-      mockUpdateAppUser.mockResolvedValue({
-        data: mockUpdatedUser,
-        error: null,
-      });
+      mockAppUserSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
+      } as any);
+
+      const successActionState = {
+        ...EMPTY_ACTION_STATE,
+        message: 'App User updated successfully!',
+      };
+      mockToActionState.mockReturnValue(successActionState);
 
       const result = await appUserFormAction(prevState, formData);
 
-      expect(mockUpdateAppUser).toHaveBeenCalledWith(userId, {
+      expect(mockAppUserSchema.safeParse).toHaveBeenCalledWith({
+        id: userId,
         organization_id: 'org-2',
         first_name: 'Jane',
         last_name: 'Smith',
         email: 'jane.smith@example.com',
         username: 'janesmith',
         password: 'newpassword456',
-        active: true,
+        active: 'on',
       });
-
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'User updated successfully!',
-      });
+      expect(mockUpdateAppUser).toHaveBeenCalledWith(userId, parsedData);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/app_user');
+      expect(mockToActionState).toHaveBeenCalledWith('App User updated successfully!');
+      expect(result).toEqual(successActionState);
     });
 
-    it('should handle update with partial data', async () => {
-      const formDataPartial = new FormData();
-      formDataPartial.append('id', userId);
-      formDataPartial.append('organization_id', 'org-2');
-      formDataPartial.append('first_name', 'UpdatedName');
-      // Other fields missing - should become null
+    it('should handle update validation errors', async () => {
+      const validationError = {
+        errors: [
+          { path: ['email'], message: 'Email is already in use' },
+          { path: ['username'], message: 'Username cannot be empty' },
+        ],
+      };
 
-      mockUpdateAppUser.mockResolvedValue({
-        data: { id: userId, first_name: 'UpdatedName' },
-        error: null,
-      });
+      mockAppUserSchema.safeParse.mockReturnValue({
+        success: false,
+        error: validationError,
+      } as any);
 
-      const result = await appUserFormAction(prevState, formDataPartial);
-
-      expect(mockUpdateAppUser).toHaveBeenCalledWith(userId, {
-        organization_id: 'org-2',
-        first_name: 'UpdatedName',
-        last_name: null,
-        email: null,
-        username: null,
-        password: null,
-        active: false, // Checkbox not checked
-      });
-
-      expect(result.message).toBe('User updated successfully!');
-    });
-
-    it('should handle field validation errors from update action', async () => {
-      mockUpdateAppUser.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            email: 'Email is already in use',
-            username: 'Username cannot be empty',
-          },
-        },
-      });
-
-      const result = await appUserFormAction(prevState, formData);
-
-      expect(result).toEqual({
+      const errorActionState = {
         ...EMPTY_ACTION_STATE,
         fieldErrors: {
           email: ['Email is already in use'],
           username: ['Username cannot be empty'],
         },
-      });
-    });
-
-    it('should handle general errors from update action', async () => {
-      mockUpdateAppUser.mockResolvedValue({
-        data: null,
-        error: { message: 'Update failed' },
-      });
+      };
+      mockFromErrorToActionState.mockReturnValue(errorActionState);
 
       const result = await appUserFormAction(prevState, formData);
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the user.',
-      });
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(validationError);
+      expect(result).toEqual(errorActionState);
     });
   });
 
-  describe('form data handling', () => {
-    it('should handle missing form fields gracefully', async () => {
+  describe('form data processing', () => {
+    it('should handle Object.fromEntries with empty form data', async () => {
       const emptyFormData = new FormData();
 
-      mockCreateAppUser.mockResolvedValue({
-        data: { id: '1' },
-        error: null,
-      });
+      const parsedData = {
+        organization_id: '',
+        active: true, // Schema default for active
+      };
 
-      const result = await appUserFormAction(prevState, emptyFormData);
+      mockAppUserSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
+      } as any);
 
-      expect(mockCreateAppUser).toHaveBeenCalledWith({
-        organization_id: null, // Missing fields become null
-        first_name: null,
-        last_name: null,
-        email: null,
-        username: null,
-        password: null,
-        active: false,
-      });
+      const successActionState = {
+        ...EMPTY_ACTION_STATE,
+        message: 'App User created successfully!',
+      };
+      mockToActionState.mockReturnValue(successActionState);
+
+      await appUserFormAction(prevState, emptyFormData);
+
+      expect(mockAppUserSchema.safeParse).toHaveBeenCalledWith({});
     });
 
-    it('should handle form fields with whitespace', async () => {
-      formData.append('organization_id', '  org-1  ');
-      formData.append('first_name', '  John  ');
-      formData.append('last_name', '  Doe  ');
-      formData.append('email', '  john.doe@example.com  ');
-      formData.append('username', '  johndoe  ');
-      formData.append('password', '  password123  ');
+    it('should handle form data conversion correctly', async () => {
+      const testFormData = new FormData();
+      testFormData.append('organization_id', 'org-1');
+      testFormData.append('first_name', 'Test');
+      testFormData.append('active', 'on'); // checkbox value
 
-      mockCreateAppUser.mockResolvedValue({
-        data: { id: '1' },
-        error: null,
+      const parsedData = {
+        organization_id: 'org-1',
+        first_name: 'Test',
+        active: true, // Schema converts 'on' to boolean
+      };
+
+      mockAppUserSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
+      } as any);
+
+      const successActionState = {
+        ...EMPTY_ACTION_STATE,
+        message: 'App User created successfully!',
+      };
+      mockToActionState.mockReturnValue(successActionState);
+
+      await appUserFormAction(prevState, testFormData);
+
+      expect(mockAppUserSchema.safeParse).toHaveBeenCalledWith({
+        organization_id: 'org-1',
+        first_name: 'Test',
+        active: 'on',
       });
-
-      await appUserFormAction(prevState, formData);
-
-      expect(mockCreateAppUser).toHaveBeenCalledWith({
-        organization_id: '  org-1  ', // Whitespace is preserved
-        first_name: '  John  ',
-        last_name: '  Doe  ',
-        email: '  john.doe@example.com  ',
-        username: '  johndoe  ',
-        password: '  password123  ',
-        active: false,
-      });
-    });
-
-    it('should handle checkbox variations', async () => {
-      // Test different checkbox values
-      const testCases = [
-        { value: 'on', expected: true },
-        { value: 'true', expected: false }, // Only 'on' is truthy for checkboxes
-        { value: '1', expected: false },
-        { value: '', expected: false },
-      ];
-
-      for (const testCase of testCases) {
-        const testFormData = new FormData();
-        testFormData.append('organization_id', 'org-1');
-        testFormData.append('first_name', 'Test');
-        testFormData.append('active', testCase.value);
-
-        mockCreateAppUser.mockClear();
-        mockCreateAppUser.mockResolvedValue({
-          data: { id: '1' },
-          error: null,
-        });
-
-        await appUserFormAction(prevState, testFormData);
-
-        expect(mockCreateAppUser).toHaveBeenCalledWith({
-          organization_id: 'org-1',
-          first_name: 'Test',
-          last_name: null,
-          email: null,
-          username: null,
-          password: null,
-          active: testCase.expected,
-        });
-      }
+      expect(mockCreateAppUser).toHaveBeenCalledWith(parsedData);
     });
 
     it('should handle special characters in form data', async () => {
       const specialFormData = new FormData();
       specialFormData.append('organization_id', 'org-special-éñ');
       specialFormData.append('first_name', 'José María');
-      specialFormData.append('last_name', 'O\'Connor-Smith');
       specialFormData.append('email', 'jose.maria+test@example-domain.com');
-      specialFormData.append('username', 'jose_maria.123');
-      specialFormData.append('password', 'P@ssw0rd!@#$%^&*()');
-      specialFormData.append('active', 'on');
 
-      mockCreateAppUser.mockResolvedValue({
-        data: { id: '1', first_name: 'José María' },
-        error: null,
-      });
-
-      const result = await appUserFormAction(prevState, specialFormData);
-
-      expect(mockCreateAppUser).toHaveBeenCalledWith({
+      const parsedData = {
         organization_id: 'org-special-éñ',
         first_name: 'José María',
-        last_name: 'O\'Connor-Smith',
         email: 'jose.maria+test@example-domain.com',
-        username: 'jose_maria.123',
-        password: 'P@ssw0rd!@#$%^&*()',
-        active: true,
-      });
-
-      expect(result.message).toBe('User created successfully!');
-    });
-  });
-
-  describe('error handling edge cases', () => {
-    beforeEach(() => {
-      formData.append('organization_id', 'org-1');
-      formData.append('first_name', 'Test User');
-    });
-
-    it('should handle undefined error object', async () => {
-      mockCreateAppUser.mockResolvedValue({
-        data: null,
-        error: undefined as any,
-      });
-
-      const result = await appUserFormAction(prevState, formData);
-
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the user.',
-      });
-    });
-
-    it('should handle error without fieldErrors property', async () => {
-      mockCreateAppUser.mockResolvedValue({
-        data: null,
-        error: { someOtherProperty: 'value' } as any,
-      });
-
-      const result = await appUserFormAction(prevState, formData);
-
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the user.',
-      });
-    });
-
-    it('should handle fieldErrors with mixed string and array values', async () => {
-      mockCreateAppUser.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            email: 'Single string error',
-            username: ['Array error 1', 'Array error 2'],
-          },
-        },
-      });
-
-      const result = await appUserFormAction(prevState, formData);
-
-      expect(result.fieldErrors).toEqual({
-        email: ['Single string error'],
-        username: ['Array error 1', 'Array error 2'], // Arrays are preserved as-is
-      });
-    });
-  });
-
-  describe('async behavior', () => {
-    it('should handle async errors from actions', async () => {
-      mockCreateAppUser.mockRejectedValue(new Error('Network error'));
-
-      formData.append('organization_id', 'org-1');
-      formData.append('first_name', 'Test User');
-
-      await expect(appUserFormAction(prevState, formData)).rejects.toThrow('Network error');
-    });
-
-    it('should handle slow responses', async () => {
-      const slowResponse = new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            data: { id: '1', first_name: 'Test User' },
-            error: null,
-          });
-        }, 100);
-      });
-
-      mockCreateAppUser.mockReturnValue(slowResponse as any);
-
-      formData.append('organization_id', 'org-1');
-      formData.append('first_name', 'Test User');
-
-      const result = await appUserFormAction(prevState, formData);
-
-      expect(result.message).toBe('User created successfully!');
-    });
-  });
-
-  describe('integration scenarios', () => {
-    it('should handle complete user creation workflow', async () => {
-      // Full user with all fields
-      const completeFormData = new FormData();
-      completeFormData.append('organization_id', 'enterprise-org-123');
-      completeFormData.append('first_name', 'John');
-      completeFormData.append('last_name', 'Doe');
-      completeFormData.append('email', 'john.doe@enterprise.com');
-      completeFormData.append('username', 'jdoe');
-      completeFormData.append('password', 'SecurePassword123!');
-      completeFormData.append('active', 'on');
-
-      const expectedUser = {
-        id: 'user-xyz-123',
-        organization_id: 'enterprise-org-123',
-        first_name: 'John',
-        last_name: 'Doe',
-        email: 'john.doe@enterprise.com',
-        username: 'jdoe',
-        password: 'SecurePassword123!',
         active: true,
       };
 
-      mockCreateAppUser.mockResolvedValue({
-        data: expectedUser,
-        error: null,
-      });
+      mockAppUserSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
+      } as any);
 
-      const result = await appUserFormAction(prevState, completeFormData);
-
-      expect(mockCreateAppUser).toHaveBeenCalledWith({
-        organization_id: 'enterprise-org-123',
-        first_name: 'John',
-        last_name: 'Doe',
-        email: 'john.doe@enterprise.com',
-        username: 'jdoe',
-        password: 'SecurePassword123!',
-        active: true,
-      });
-
-      expect(result).toEqual({
+      const successActionState = {
         ...EMPTY_ACTION_STATE,
-        message: 'User created successfully!',
+        message: 'App User created successfully!',
+      };
+      mockToActionState.mockReturnValue(successActionState);
+
+      const result = await appUserFormAction(prevState, specialFormData);
+
+      expect(mockAppUserSchema.safeParse).toHaveBeenCalledWith({
+        organization_id: 'org-special-éñ',
+        first_name: 'José María',
+        email: 'jose.maria+test@example-domain.com',
       });
-    });
-
-    it('should handle user update workflow with password change', async () => {
-      const userId = 'existing-user-123';
-      const updateFormData = new FormData();
-      updateFormData.append('id', userId);
-      updateFormData.append('organization_id', 'enterprise-org-123');
-      updateFormData.append('first_name', 'John');
-      updateFormData.append('last_name', 'Doe-Smith'); // Updated name
-      updateFormData.append('email', 'john.doe-smith@enterprise.com'); // Updated email
-      updateFormData.append('username', 'jdsmith'); // Updated username
-      updateFormData.append('password', 'NewSecurePassword456!'); // New password
-      // No active field - should be false
-
-      mockUpdateAppUser.mockResolvedValue({
-        data: { id: userId, last_name: 'Doe-Smith' },
-        error: null,
-      });
-
-      const result = await appUserFormAction(prevState, updateFormData);
-
-      expect(mockUpdateAppUser).toHaveBeenCalledWith(userId, {
-        organization_id: 'enterprise-org-123',
-        first_name: 'John',
-        last_name: 'Doe-Smith',
-        email: 'john.doe-smith@enterprise.com',
-        username: 'jdsmith',
-        password: 'NewSecurePassword456!',
-        active: false, // Checkbox not checked
-      });
-
-      expect(result.message).toBe('User updated successfully!');
-    });
-
-    it('should handle user creation with minimal data', async () => {
-      const minimalFormData = new FormData();
-      minimalFormData.append('organization_id', 'basic-org');
-      minimalFormData.append('active', 'on');
-
-      mockCreateAppUser.mockResolvedValue({
-        data: { id: 'min-user-1', organization_id: 'basic-org', active: true },
-        error: null,
-      });
-
-      const result = await appUserFormAction(prevState, minimalFormData);
-
-      expect(mockCreateAppUser).toHaveBeenCalledWith({
-        organization_id: 'basic-org',
-        first_name: null,
-        last_name: null,
-        email: null,
-        username: null,
-        password: null,
-        active: true,
-      });
-
-      expect(result.message).toBe('User created successfully!');
+      expect(result).toEqual(successActionState);
     });
   });
 });

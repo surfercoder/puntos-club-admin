@@ -1,12 +1,28 @@
-import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import { revalidatePath } from 'next/cache';
+
+import { fromErrorToActionState, toActionState, EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import { BeneficiarySchema } from '@/schemas/beneficiary.schema';
 
 import { createBeneficiary, updateBeneficiary } from '../actions';
 import { beneficiaryFormAction } from '../beneficiary-form-actions';
 
-// Mock the actions
+// Mock the dependencies
 jest.mock('../actions');
+jest.mock('@/lib/error-handler');
+jest.mock('@/schemas/beneficiary.schema', () => ({
+  BeneficiarySchema: {
+    safeParse: jest.fn(),
+  },
+}));
+jest.mock('next/cache');
+
 const mockCreateBeneficiary = createBeneficiary as jest.MockedFunction<typeof createBeneficiary>;
 const mockUpdateBeneficiary = updateBeneficiary as jest.MockedFunction<typeof updateBeneficiary>;
+const mockFromErrorToActionState = fromErrorToActionState as jest.MockedFunction<typeof fromErrorToActionState>;
+const mockToActionState = toActionState as jest.MockedFunction<typeof toActionState>;
+const mockRevalidatePath = revalidatePath as jest.MockedFunction<typeof revalidatePath>;
+
+const mockBeneficiarySchema = BeneficiarySchema as jest.Mocked<typeof BeneficiarySchema>;
 
 describe('beneficiaryFormAction', () => {
   let formData: FormData;
@@ -14,6 +30,7 @@ describe('beneficiaryFormAction', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.resetAllMocks();
     formData = new FormData();
     prevState = EMPTY_ACTION_STATE;
   });
@@ -29,24 +46,29 @@ describe('beneficiaryFormAction', () => {
     });
 
     it('should create beneficiary successfully', async () => {
-      const mockCreatedBeneficiary = {
-        id: '1',
+      const parsedData = {
         first_name: 'John',
         last_name: 'Doe',
         email: 'john.doe@example.com',
         phone: '+1234567890',
         document_id: '12345678',
-        available_points: '100',
+        available_points: 100, // Schema converts to number
       };
 
-      mockCreateBeneficiary.mockResolvedValue({
-        data: mockCreatedBeneficiary,
-        error: null,
-      });
+      mockBeneficiarySchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
+      } as any);
+
+      const successActionState = {
+        ...EMPTY_ACTION_STATE,
+        message: 'Beneficiary created successfully!',
+      };
+      mockToActionState.mockReturnValue(successActionState);
 
       const result = await beneficiaryFormAction(prevState, formData);
 
-      expect(mockCreateBeneficiary).toHaveBeenCalledWith({
+      expect(mockBeneficiarySchema.safeParse).toHaveBeenCalledWith({
         first_name: 'John',
         last_name: 'Doe',
         email: 'john.doe@example.com',
@@ -54,153 +76,66 @@ describe('beneficiaryFormAction', () => {
         document_id: '12345678',
         available_points: '100',
       });
-
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'Beneficiary created successfully!',
-      });
+      expect(mockCreateBeneficiary).toHaveBeenCalledWith(parsedData);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/beneficiary');
+      expect(mockToActionState).toHaveBeenCalledWith('Beneficiary created successfully!');
+      expect(result).toEqual(successActionState);
     });
 
-    it('should handle creation with all null optional fields', async () => {
-      const formDataMinimal = new FormData();
-      // All fields are optional and can be null
+    it('should handle schema validation errors', async () => {
+      const validationError = {
+        errors: [
+          { path: ['email'], message: 'Invalid email format' },
+          { path: ['phone'], message: 'Invalid phone format' },
+          { path: ['document_id'], message: 'Document ID already exists' },
+        ],
+      };
 
-      mockCreateBeneficiary.mockResolvedValue({
-        data: { id: '1' },
-        error: null,
-      });
+      mockBeneficiarySchema.safeParse.mockReturnValue({
+        success: false,
+        error: validationError,
+      } as any);
 
-      const result = await beneficiaryFormAction(prevState, formDataMinimal);
-
-      expect(mockCreateBeneficiary).toHaveBeenCalledWith({
-        first_name: null,
-        last_name: null,
-        email: null,
-        phone: null,
-        document_id: null,
-        available_points: '0', // Default fallback for available_points
-      });
-
-      expect(result.message).toBe('Beneficiary created successfully!');
-    });
-
-    it('should handle creation with empty string fields converted to null', async () => {
-      const formDataEmptyStrings = new FormData();
-      formDataEmptyStrings.append('first_name', '');
-      formDataEmptyStrings.append('last_name', '');
-      formDataEmptyStrings.append('email', '');
-      formDataEmptyStrings.append('phone', '');
-      formDataEmptyStrings.append('document_id', '');
-      formDataEmptyStrings.append('available_points', '');
-
-      mockCreateBeneficiary.mockResolvedValue({
-        data: { id: '1' },
-        error: null,
-      });
-
-      const result = await beneficiaryFormAction(prevState, formDataEmptyStrings);
-
-      expect(mockCreateBeneficiary).toHaveBeenCalledWith({
-        first_name: null, // Empty string converted to null
-        last_name: null,
-        email: null,
-        phone: null,
-        document_id: null,
-        available_points: '0', // Empty string defaults to '0'
-      });
-    });
-
-    it('should handle available_points with various values', async () => {
-      const testCases = [
-        { input: '100', expected: '100' },
-        { input: '0', expected: '0' },
-        { input: '', expected: '0' }, // Empty string defaults to '0'
-        { input: 'invalid', expected: 'invalid' }, // Invalid values are preserved
-      ];
-
-      for (const testCase of testCases) {
-        const testFormData = new FormData();
-        testFormData.append('first_name', 'John');
-        testFormData.append('available_points', testCase.input);
-
-        mockCreateBeneficiary.mockClear();
-        mockCreateBeneficiary.mockResolvedValue({
-          data: { id: '1' },
-          error: null,
-        });
-
-        await beneficiaryFormAction(prevState, testFormData);
-
-        expect(mockCreateBeneficiary).toHaveBeenCalledWith({
-          first_name: 'John',
-          last_name: null,
-          email: null,
-          phone: null,
-          document_id: null,
-          available_points: testCase.expected,
-        });
-      }
-    });
-
-    it('should handle partial data with some fields', async () => {
-      const formDataPartial = new FormData();
-      formDataPartial.append('first_name', 'Jane');
-      formDataPartial.append('email', 'jane@example.com');
-      formDataPartial.append('available_points', '50');
-
-      mockCreateBeneficiary.mockResolvedValue({
-        data: { id: '1', first_name: 'Jane', email: 'jane@example.com' },
-        error: null,
-      });
-
-      const result = await beneficiaryFormAction(prevState, formDataPartial);
-
-      expect(mockCreateBeneficiary).toHaveBeenCalledWith({
-        first_name: 'Jane',
-        last_name: null,
-        email: 'jane@example.com',
-        phone: null,
-        document_id: null,
-        available_points: '50',
-      });
-    });
-
-    it('should handle field validation errors from create action', async () => {
-      mockCreateBeneficiary.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            email: 'Invalid email format',
-            phone: 'Invalid phone format',
-            document_id: 'Document ID already exists',
-          },
-        },
-      });
-
-      const result = await beneficiaryFormAction(prevState, formData);
-
-      expect(result).toEqual({
+      const errorActionState = {
         ...EMPTY_ACTION_STATE,
         fieldErrors: {
           email: ['Invalid email format'],
           phone: ['Invalid phone format'],
           document_id: ['Document ID already exists'],
         },
-      });
-    });
-
-    it('should handle general errors from create action', async () => {
-      mockCreateBeneficiary.mockResolvedValue({
-        data: null,
-        error: { message: 'Database connection failed' },
-      });
+      };
+      mockFromErrorToActionState.mockReturnValue(errorActionState);
 
       const result = await beneficiaryFormAction(prevState, formData);
 
-      expect(result).toEqual({
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(validationError);
+      expect(result).toEqual(errorActionState);
+    });
+
+    it('should handle runtime errors', async () => {
+      const parsedData = {
+        first_name: 'John',
+        available_points: 100,
+      };
+
+      mockBeneficiarySchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
+      } as any);
+
+      const runtimeError = new Error('Database connection failed');
+      mockCreateBeneficiary.mockRejectedValue(runtimeError);
+
+      const errorActionState = {
         ...EMPTY_ACTION_STATE,
         message: 'An error occurred while saving the beneficiary.',
-      });
+      };
+      mockFromErrorToActionState.mockReturnValue(errorActionState);
+
+      const result = await beneficiaryFormAction(prevState, formData);
+
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(runtimeError);
+      expect(result).toEqual(errorActionState);
     });
   });
 
@@ -218,7 +153,30 @@ describe('beneficiaryFormAction', () => {
     });
 
     it('should update beneficiary successfully', async () => {
-      const mockUpdatedBeneficiary = {
+      const parsedData = {
+        id: beneficiaryId,
+        first_name: 'Jane',
+        last_name: 'Smith',
+        email: 'jane.smith@example.com',
+        phone: '+9876543210',
+        document_id: '87654321',
+        available_points: 200, // Schema converts to number
+      };
+
+      mockBeneficiarySchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
+      } as any);
+
+      const successActionState = {
+        ...EMPTY_ACTION_STATE,
+        message: 'Beneficiary updated successfully!',
+      };
+      mockToActionState.mockReturnValue(successActionState);
+
+      const result = await beneficiaryFormAction(prevState, formData);
+
+      expect(mockBeneficiarySchema.safeParse).toHaveBeenCalledWith({
         id: beneficiaryId,
         first_name: 'Jane',
         last_name: 'Smith',
@@ -226,336 +184,127 @@ describe('beneficiaryFormAction', () => {
         phone: '+9876543210',
         document_id: '87654321',
         available_points: '200',
+      });
+      expect(mockUpdateBeneficiary).toHaveBeenCalledWith(beneficiaryId, parsedData);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/beneficiary');
+      expect(mockToActionState).toHaveBeenCalledWith('Beneficiary updated successfully!');
+      expect(result).toEqual(successActionState);
+    });
+
+    it('should handle update validation errors', async () => {
+      const validationError = {
+        errors: [
+          { path: ['first_name'], message: 'First name is required' },
+          { path: ['email'], message: 'Email already exists' },
+        ],
       };
 
-      mockUpdateBeneficiary.mockResolvedValue({
-        data: mockUpdatedBeneficiary,
-        error: null,
-      });
+      mockBeneficiarySchema.safeParse.mockReturnValue({
+        success: false,
+        error: validationError,
+      } as any);
 
-      const result = await beneficiaryFormAction(prevState, formData);
-
-      expect(mockUpdateBeneficiary).toHaveBeenCalledWith(beneficiaryId, {
-        first_name: 'Jane',
-        last_name: 'Smith',
-        email: 'jane.smith@example.com',
-        phone: '+9876543210',
-        document_id: '87654321',
-        available_points: '200',
-      });
-
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'Beneficiary updated successfully!',
-      });
-    });
-
-    it('should handle update with null fields', async () => {
-      const formDataPartial = new FormData();
-      formDataPartial.append('id', beneficiaryId);
-      formDataPartial.append('first_name', 'Jane');
-      // Other fields not provided, should become null
-
-      mockUpdateBeneficiary.mockResolvedValue({
-        data: { id: beneficiaryId, first_name: 'Jane' },
-        error: null,
-      });
-
-      const result = await beneficiaryFormAction(prevState, formDataPartial);
-
-      expect(mockUpdateBeneficiary).toHaveBeenCalledWith(beneficiaryId, {
-        first_name: 'Jane',
-        last_name: null,
-        email: null,
-        phone: null,
-        document_id: null,
-        available_points: '0', // Defaults to '0'
-      });
-
-      expect(result.message).toBe('Beneficiary updated successfully!');
-    });
-
-    it('should handle update with empty strings converted to null', async () => {
-      const formDataEmptyFields = new FormData();
-      formDataEmptyFields.append('id', beneficiaryId);
-      formDataEmptyFields.append('first_name', 'Jane');
-      formDataEmptyFields.append('last_name', ''); // Empty string
-      formDataEmptyFields.append('email', ''); // Empty string
-      formDataEmptyFields.append('available_points', '150');
-
-      mockUpdateBeneficiary.mockResolvedValue({
-        data: { id: beneficiaryId, first_name: 'Jane' },
-        error: null,
-      });
-
-      const result = await beneficiaryFormAction(prevState, formDataEmptyFields);
-
-      expect(mockUpdateBeneficiary).toHaveBeenCalledWith(beneficiaryId, {
-        first_name: 'Jane',
-        last_name: null, // Empty string converted to null
-        email: null, // Empty string converted to null
-        phone: null,
-        document_id: null,
-        available_points: '150',
-      });
-    });
-
-    it('should handle field validation errors from update action', async () => {
-      mockUpdateBeneficiary.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            first_name: 'First name is required',
-            email: 'Email already exists',
-          },
-        },
-      });
-
-      const result = await beneficiaryFormAction(prevState, formData);
-
-      expect(result).toEqual({
+      const errorActionState = {
         ...EMPTY_ACTION_STATE,
         fieldErrors: {
           first_name: ['First name is required'],
           email: ['Email already exists'],
         },
-      });
-    });
-
-    it('should handle general errors from update action', async () => {
-      mockUpdateBeneficiary.mockResolvedValue({
-        data: null,
-        error: { message: 'Update failed' },
-      });
+      };
+      mockFromErrorToActionState.mockReturnValue(errorActionState);
 
       const result = await beneficiaryFormAction(prevState, formData);
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the beneficiary.',
-      });
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(validationError);
+      expect(result).toEqual(errorActionState);
     });
   });
 
-  describe('form data handling', () => {
-    it('should handle missing form fields gracefully', async () => {
+  describe('form data processing', () => {
+    it('should handle Object.fromEntries with empty form data', async () => {
       const emptyFormData = new FormData();
 
-      mockCreateBeneficiary.mockResolvedValue({
-        data: { id: '1' },
-        error: null,
-      });
+      const parsedData = {
+        available_points: 0, // Schema default for available_points
+      };
 
-      const result = await beneficiaryFormAction(prevState, emptyFormData);
+      mockBeneficiarySchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
+      } as any);
 
-      expect(mockCreateBeneficiary).toHaveBeenCalledWith({
-        first_name: null, // Missing fields become null
-        last_name: null,
-        email: null,
-        phone: null,
-        document_id: null,
-        available_points: '0', // Defaults to '0' when missing
-      });
-    });
-
-    it('should handle form fields with whitespace', async () => {
-      formData.append('first_name', '  John  ');
-      formData.append('last_name', '  Doe  ');
-      formData.append('email', '  john@example.com  ');
-      formData.append('phone', '  +1234567890  ');
-
-      mockCreateBeneficiary.mockResolvedValue({
-        data: { id: '1' },
-        error: null,
-      });
-
-      await beneficiaryFormAction(prevState, formData);
-
-      expect(mockCreateBeneficiary).toHaveBeenCalledWith({
-        first_name: '  John  ', // Whitespace is preserved
-        last_name: '  Doe  ',
-        email: '  john@example.com  ',
-        phone: '  +1234567890  ',
-        document_id: null,
-        available_points: '0',
-      });
-    });
-
-    it('should handle empty string vs null conversion correctly', async () => {
-      const testCases = [
-        { value: '', expected: null },
-        { value: '   ', expected: '   ' }, // Only empty string becomes null, not whitespace
-        { value: 'valid', expected: 'valid' },
-        { value: '0', expected: '0' },
-      ];
-
-      for (const testCase of testCases) {
-        const testFormData = new FormData();
-        testFormData.append('first_name', testCase.value);
-        testFormData.append('available_points', '100');
-
-        mockCreateBeneficiary.mockClear();
-        mockCreateBeneficiary.mockResolvedValue({
-          data: { id: '1' },
-          error: null,
-        });
-
-        await beneficiaryFormAction(prevState, testFormData);
-
-        expect(mockCreateBeneficiary).toHaveBeenCalledWith({
-          first_name: testCase.expected,
-          last_name: null,
-          email: null,
-          phone: null,
-          document_id: null,
-          available_points: '100',
-        });
-      }
-    });
-  });
-
-  describe('error handling edge cases', () => {
-    beforeEach(() => {
-      formData.append('first_name', 'John');
-    });
-
-    it('should handle undefined error object', async () => {
-      mockCreateBeneficiary.mockResolvedValue({
-        data: null,
-        error: undefined as any,
-      });
-
-      const result = await beneficiaryFormAction(prevState, formData);
-
-      expect(result).toEqual({
+      const successActionState = {
         ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the beneficiary.',
-      });
+        message: 'Beneficiary created successfully!',
+      };
+      mockToActionState.mockReturnValue(successActionState);
+
+      await beneficiaryFormAction(prevState, emptyFormData);
+
+      expect(mockBeneficiarySchema.safeParse).toHaveBeenCalledWith({});
     });
 
-    it('should handle error without fieldErrors property', async () => {
-      mockCreateBeneficiary.mockResolvedValue({
-        data: null,
-        error: { someOtherProperty: 'value' } as any,
-      });
+    it('should handle form data conversion correctly', async () => {
+      const testFormData = new FormData();
+      testFormData.append('first_name', 'Jane');
+      testFormData.append('email', 'jane@example.com');
+      testFormData.append('available_points', '50');
 
-      const result = await beneficiaryFormAction(prevState, formData);
+      const parsedData = {
+        first_name: 'Jane',
+        email: 'jane@example.com',
+        available_points: 50, // Schema converts string to number
+      };
 
-      expect(result).toEqual({
+      mockBeneficiarySchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
+      } as any);
+
+      const successActionState = {
         ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the beneficiary.',
+        message: 'Beneficiary created successfully!',
+      };
+      mockToActionState.mockReturnValue(successActionState);
+
+      await beneficiaryFormAction(prevState, testFormData);
+
+      expect(mockBeneficiarySchema.safeParse).toHaveBeenCalledWith({
+        first_name: 'Jane',
+        email: 'jane@example.com',
+        available_points: '50',
       });
+      expect(mockCreateBeneficiary).toHaveBeenCalledWith(parsedData);
     });
 
-    it('should handle fieldErrors with mixed string and array values', async () => {
-      mockCreateBeneficiary.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            first_name: 'Single string error',
-            email: ['Array error 1', 'Array error 2'],
-          },
-        },
+    it('should handle invalid available_points processing', async () => {
+      const testFormData = new FormData();
+      testFormData.append('first_name', 'John');
+      testFormData.append('available_points', 'invalid-number');
+
+      const parsedData = {
+        first_name: 'John',
+        available_points: 0, // Schema converts invalid string to 0
+      };
+
+      mockBeneficiarySchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
+      } as any);
+
+      const successActionState = {
+        ...EMPTY_ACTION_STATE,
+        message: 'Beneficiary created successfully!',
+      };
+      mockToActionState.mockReturnValue(successActionState);
+
+      await beneficiaryFormAction(prevState, testFormData);
+
+      expect(mockBeneficiarySchema.safeParse).toHaveBeenCalledWith({
+        first_name: 'John',
+        available_points: 'invalid-number',
       });
-
-      const result = await beneficiaryFormAction(prevState, formData);
-
-      expect(result.fieldErrors).toEqual({
-        first_name: ['Single string error'],
-        email: ['Array error 1', 'Array error 2'], // Arrays are preserved as-is
-      });
-    });
-  });
-
-  describe('async behavior', () => {
-    it('should handle async errors from actions', async () => {
-      mockCreateBeneficiary.mockRejectedValue(new Error('Network error'));
-
-      formData.append('first_name', 'John');
-
-      await expect(beneficiaryFormAction(prevState, formData)).rejects.toThrow('Network error');
-    });
-
-    it('should handle slow responses', async () => {
-      const slowResponse = new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            data: { id: '1', first_name: 'John' },
-            error: null,
-          });
-        }, 100);
-      });
-
-      mockCreateBeneficiary.mockReturnValue(slowResponse as any);
-
-      formData.append('first_name', 'John');
-
-      const result = await beneficiaryFormAction(prevState, formData);
-
-      expect(result.message).toBe('Beneficiary created successfully!');
-    });
-  });
-
-  describe('special field handling', () => {
-    it('should handle available_points string preservation', async () => {
-      const testCases = [
-        '0',
-        '100',
-        '1000.50',
-        'invalid-number', // Invalid values preserved as strings
-      ];
-
-      for (const points of testCases) {
-        const testFormData = new FormData();
-        testFormData.append('first_name', 'John');
-        testFormData.append('available_points', points);
-
-        mockCreateBeneficiary.mockClear();
-        mockCreateBeneficiary.mockResolvedValue({
-          data: { id: '1' },
-          error: null,
-        });
-
-        await beneficiaryFormAction(prevState, testFormData);
-
-        expect(mockCreateBeneficiary).toHaveBeenCalledWith({
-          first_name: 'John',
-          last_name: null,
-          email: null,
-          phone: null,
-          document_id: null,
-          available_points: points, // String value preserved
-        });
-      }
-    });
-
-    it('should handle all optional fields consistently', async () => {
-      // Test that all fields except available_points follow the same null conversion pattern
-      const optionalFields = ['first_name', 'last_name', 'email', 'phone', 'document_id'];
-      
-      for (const field of optionalFields) {
-        const testFormData = new FormData();
-        testFormData.append(field, '');
-
-        mockCreateBeneficiary.mockClear();
-        mockCreateBeneficiary.mockResolvedValue({
-          data: { id: '1' },
-          error: null,
-        });
-
-        await beneficiaryFormAction(prevState, testFormData);
-
-        const expectedInput = {
-          first_name: null,
-          last_name: null,
-          email: null,
-          phone: null,
-          document_id: null,
-          available_points: '0',
-        };
-
-        expect(mockCreateBeneficiary).toHaveBeenCalledWith(expectedInput);
-      }
+      expect(mockCreateBeneficiary).toHaveBeenCalledWith(parsedData);
     });
   });
 });

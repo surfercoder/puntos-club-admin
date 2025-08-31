@@ -1,59 +1,31 @@
 "use server";
 
-import type { ActionState} from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
-import type { BranchInput } from '@/schemas/branch.schema';
+import { revalidatePath } from 'next/cache';
 
-import { createBranch, updateBranch } from './actions';
+import { createBranch, updateBranch } from '@/actions/dashboard/branch/actions';
+import { fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
+import { BranchSchema } from '@/schemas/branch.schema';
+import type { Branch } from '@/types/branch';
 
-export async function branchFormAction(
-  prevState: ActionState,
-  formData: FormData
-): Promise<ActionState> {
-  const id = formData.get('id') as string;
-  
-  const addressId = formData.get('address_id') as string;
-  
-  const input: BranchInput = {
-    organization_id: formData.get('organization_id') as string,
-    address_id: addressId === 'none' || addressId === '' ? null : addressId,
-    name: formData.get('name') as string,
-    code: formData.get('code') as string || null,
-    phone: formData.get('phone') as string || null,
-    active: formData.get('active') === 'true',
-  };
+export async function branchFormAction(_prevState: ActionState, formData: FormData) {
+  try {
+    const parsed = BranchSchema.safeParse(Object.fromEntries(formData));
 
-  let result;
-  if (id) {
-    result = await updateBranch(id, input);
-  } else {
-    result = await createBranch(input);
-  }
-
-  if (result.error || !result.data) {
-    if (result.error && 'fieldErrors' in result.error) {
-      // Convert string errors to string array format
-      const fieldErrors: Record<string, string[]> = {};
-      Object.entries(result.error.fieldErrors).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
-          fieldErrors[key] = value;
-        } else {
-          fieldErrors[key] = [value];
-        }
-      });
-      return {
-        ...EMPTY_ACTION_STATE,
-        fieldErrors,
-      };
+    if (!parsed.success) {
+      return fromErrorToActionState(parsed.error);
     }
-    return {
-      ...EMPTY_ACTION_STATE,
-      message: 'An error occurred while saving the branch.',
-    };
-  }
 
-  return {
-    ...EMPTY_ACTION_STATE,
-    message: id ? 'Branch updated successfully!' : 'Branch created successfully!',
-  };
+    if (formData.get('id')) {
+      await updateBranch(formData.get('id') as string, parsed.data as Branch);
+    } else {
+      await createBranch(parsed.data as Branch);
+    }
+
+    // Revalidate the branch list page
+    revalidatePath('/dashboard/branch');
+
+    return toActionState(formData.get('id') ? 'Branch updated successfully!' : 'Branch created successfully!');
+  } catch (error) {
+    return fromErrorToActionState(error);
+  }
 }

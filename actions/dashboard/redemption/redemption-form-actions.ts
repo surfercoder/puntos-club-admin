@@ -1,53 +1,31 @@
-"use server";
+'use server';
 
-import type { ActionState} from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
-import type { RedemptionInput } from '@/schemas/redemption.schema';
+import { revalidatePath } from 'next/cache';
 
-import { createRedemption, updateRedemption } from './actions';
+import { createRedemption, updateRedemption } from '@/actions/dashboard/redemption/actions';
+import { fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
+import { RedemptionSchema } from '@/schemas/redemption.schema';
+import type { Redemption } from '@/types/redemption';
 
-export async function redemptionFormAction(
-  prevState: ActionState,
-  formData: FormData
-): Promise<ActionState> {
-  const id = formData.get('id') as string;
-  
-  const input: RedemptionInput = {
-    beneficiary_id: formData.get('beneficiary_id') as string,
-    product_id: formData.get('product_id') as string || null,
-    order_id: formData.get('order_id') as string,
-    points_used: parseInt(formData.get('points_used') as string) || 0,
-    quantity: parseInt(formData.get('quantity') as string) || 0,
-    redemption_date: formData.get('redemption_date') as string,
-  };
+export async function redemptionFormAction(_prevState: ActionState, formData: FormData) {
+  try {
+    const parsed = RedemptionSchema.safeParse(Object.fromEntries(formData));
 
-  let result;
-  if (id) {
-    result = await updateRedemption(id, input);
-  } else {
-    result = await createRedemption(input);
-  }
-
-  if (result.error) {
-    if ('fieldErrors' in result.error) {
-      // Convert string errors to string array format
-      const fieldErrors: Record<string, string[]> = {};
-      Object.entries(result.error.fieldErrors).forEach(([key, value]) => {
-        fieldErrors[key] = [value];
-      });
-      return {
-        ...EMPTY_ACTION_STATE,
-        fieldErrors,
-      };
+    if (!parsed.success) {
+      return fromErrorToActionState(parsed.error);
     }
-    return {
-      ...EMPTY_ACTION_STATE,
-      message: 'An error occurred while saving the redemption.',
-    };
-  }
 
-  return {
-    ...EMPTY_ACTION_STATE,
-    message: id ? 'Redemption updated successfully!' : 'Redemption created successfully!',
-  };
+    if (formData.get('id')) {
+      await updateRedemption(String(formData.get('id')), parsed.data as Redemption);
+    } else {
+      await createRedemption(parsed.data as Redemption);
+    }
+
+    // Revalidate the redemption list page
+    revalidatePath('/dashboard/redemption');
+
+    return toActionState(formData.get('id') ? 'Redemption updated successfully!' : 'Redemption created successfully!');
+  } catch (error) {
+    return fromErrorToActionState(error);
+  }
 }

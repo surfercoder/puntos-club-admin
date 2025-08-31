@@ -1,484 +1,376 @@
-import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
+import { revalidatePath } from 'next/cache';
+
+import { fromErrorToActionState, toActionState } from '@/lib/error-handler';
+import { StatusSchema } from '@/schemas/status.schema';
 
 import { createStatus, updateStatus } from '../actions';
 import { statusFormAction } from '../status-form-actions';
 
-// Mock the actions
+// Mock the dependencies
 jest.mock('../actions');
+jest.mock('@/lib/error-handler');
+jest.mock('@/schemas/status.schema', () => ({
+  StatusSchema: {
+    safeParse: jest.fn(),
+  },
+}));
+jest.mock('next/cache');
+
 const mockCreateStatus = createStatus as jest.MockedFunction<typeof createStatus>;
 const mockUpdateStatus = updateStatus as jest.MockedFunction<typeof updateStatus>;
+const mockFromErrorToActionState = fromErrorToActionState as jest.MockedFunction<typeof fromErrorToActionState>;
+const mockToActionState = toActionState as jest.MockedFunction<typeof toActionState>;
+const mockRevalidatePath = revalidatePath as jest.MockedFunction<typeof revalidatePath>;
+
+const mockStatusSchema = StatusSchema as jest.Mocked<typeof StatusSchema>;
 
 describe('statusFormAction', () => {
   let formData: FormData;
-  let prevState = EMPTY_ACTION_STATE;
+  const prevState = {} as any; // Not used in this implementation
 
   beforeEach(() => {
     jest.clearAllMocks();
     formData = new FormData();
-    prevState = EMPTY_ACTION_STATE;
   });
 
   describe('creating new status', () => {
     beforeEach(() => {
       formData.append('name', 'Test Status');
       formData.append('description', 'Test description');
-      formData.append('is_terminal', 'on');
+      formData.append('is_terminal', 'true');
       formData.append('order_num', '5');
     });
 
     it('should create status successfully', async () => {
-      const mockCreatedStatus = {
-        id: '1',
+      const parsedData = {
         name: 'Test Status',
         description: 'Test description',
         is_terminal: true,
         order_num: 5,
       };
 
-      mockCreateStatus.mockResolvedValue({
-        data: mockCreatedStatus,
-        error: null,
+      mockStatusSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
       });
+
+      const expectedSuccessState = { message: 'Status created successfully!' };
+      mockToActionState.mockReturnValue(expectedSuccessState);
 
       const result = await statusFormAction(prevState, formData);
 
-      expect(mockCreateStatus).toHaveBeenCalledWith({
+      expect(mockStatusSchema.safeParse).toHaveBeenCalledWith({
+        name: 'Test Status',
+        description: 'Test description',
+        is_terminal: 'true',
+        order_num: '5',
+      });
+
+      expect(mockCreateStatus).toHaveBeenCalledWith(parsedData);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/status');
+      expect(mockToActionState).toHaveBeenCalledWith('Status created successfully!');
+      expect(result).toEqual(expectedSuccessState);
+    });
+
+    it('should handle validation errors from schema', async () => {
+      const validationError = {
+        errors: [
+          { path: ['name'], message: 'Name is required' },
+          { path: ['order_num'], message: 'Order number must be an integer' },
+        ],
+      };
+
+      mockStatusSchema.safeParse.mockReturnValue({
+        success: false,
+        error: validationError,
+      });
+
+      const expectedErrorState = { fieldErrors: { name: ['Name is required'] } };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
+
+      const result = await statusFormAction(prevState, formData);
+
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(validationError);
+      expect(mockCreateStatus).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedErrorState);
+    });
+
+    it('should handle missing required fields', async () => {
+      const emptyFormData = new FormData();
+      
+      const validationError = {
+        errors: [
+          { path: ['name'], message: 'Name is required' },
+          { path: ['order_num'], message: 'Order number is required' },
+        ],
+      };
+
+      mockStatusSchema.safeParse.mockReturnValue({
+        success: false,
+        error: validationError,
+      });
+
+      const expectedErrorState = { 
+        fieldErrors: { 
+          name: ['Name is required'],
+          order_num: ['Order number is required'],
+        } 
+      };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
+
+      const result = await statusFormAction(prevState, emptyFormData);
+
+      expect(mockStatusSchema.safeParse).toHaveBeenCalledWith({});
+      expect(result).toEqual(expectedErrorState);
+    });
+
+    it('should handle database errors during creation', async () => {
+      const parsedData = {
         name: 'Test Status',
         description: 'Test description',
         is_terminal: true,
         order_num: 5,
+      };
+
+      mockStatusSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
       });
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'Status created successfully!',
-      });
-    });
+      const dbError = new Error('Database connection failed');
+      mockCreateStatus.mockRejectedValue(dbError);
 
-    it('should handle creation with null description', async () => {
-      const formDataWithoutDesc = new FormData();
-      formDataWithoutDesc.append('name', 'Test Status');
-      formDataWithoutDesc.append('is_terminal', 'on');
-      formDataWithoutDesc.append('order_num', '3');
-
-      mockCreateStatus.mockResolvedValue({
-        data: { id: '1', name: 'Test Status', is_terminal: true, order_num: 3 },
-        error: null,
-      });
-
-      const result = await statusFormAction(prevState, formDataWithoutDesc);
-
-      expect(mockCreateStatus).toHaveBeenCalledWith({
-        name: 'Test Status',
-        description: null,
-        is_terminal: true,
-        order_num: 3,
-      });
-
-      expect(result.message).toBe('Status created successfully!');
-    });
-
-    it('should handle unchecked is_terminal checkbox', async () => {
-      const formDataNotTerminal = new FormData();
-      formDataNotTerminal.append('name', 'Test Status');
-      formDataNotTerminal.append('description', 'Test description');
-      formDataNotTerminal.append('order_num', '2');
-      // No 'is_terminal' field means checkbox is unchecked
-
-      mockCreateStatus.mockResolvedValue({
-        data: { id: '1', name: 'Test Status', is_terminal: false, order_num: 2 },
-        error: null,
-      });
-
-      const result = await statusFormAction(prevState, formDataNotTerminal);
-
-      expect(mockCreateStatus).toHaveBeenCalledWith({
-        name: 'Test Status',
-        description: 'Test description',
-        is_terminal: false,
-        order_num: 2,
-      });
-    });
-
-    it('should handle invalid order_num defaulting to 0', async () => {
-      const formDataInvalidOrder = new FormData();
-      formDataInvalidOrder.append('name', 'Test Status');
-      formDataInvalidOrder.append('order_num', 'invalid');
-
-      mockCreateStatus.mockResolvedValue({
-        data: { id: '1', name: 'Test Status', order_num: 0 },
-        error: null,
-      });
-
-      const result = await statusFormAction(prevState, formDataInvalidOrder);
-
-      expect(mockCreateStatus).toHaveBeenCalledWith({
-        name: 'Test Status',
-        description: null,
-        is_terminal: false,
-        order_num: 0,
-      });
-    });
-
-    it('should handle missing order_num defaulting to 0', async () => {
-      const formDataNoOrder = new FormData();
-      formDataNoOrder.append('name', 'Test Status');
-
-      mockCreateStatus.mockResolvedValue({
-        data: { id: '1', name: 'Test Status', order_num: 0 },
-        error: null,
-      });
-
-      const result = await statusFormAction(prevState, formDataNoOrder);
-
-      expect(mockCreateStatus).toHaveBeenCalledWith({
-        name: 'Test Status',
-        description: null,
-        is_terminal: false,
-        order_num: 0,
-      });
-    });
-
-    it('should handle empty string description converted to null', async () => {
-      const formDataEmptyDesc = new FormData();
-      formDataEmptyDesc.append('name', 'Test Status');
-      formDataEmptyDesc.append('description', '');
-      formDataEmptyDesc.append('order_num', '1');
-
-      mockCreateStatus.mockResolvedValue({
-        data: { id: '1', name: 'Test Status' },
-        error: null,
-      });
-
-      const result = await statusFormAction(prevState, formDataEmptyDesc);
-
-      expect(mockCreateStatus).toHaveBeenCalledWith({
-        name: 'Test Status',
-        description: null,
-        is_terminal: false,
-        order_num: 1,
-      });
-    });
-
-    it('should handle field validation errors from create action', async () => {
-      mockCreateStatus.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            name: 'Name is required',
-            order_num: 'Order number must be positive',
-          },
-        },
-      });
+      const expectedErrorState = { message: 'Database error occurred' };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
 
       const result = await statusFormAction(prevState, formData);
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        fieldErrors: {
-          name: ['Name is required'],
-          order_num: ['Order number must be positive'],
-        },
-      });
-    });
-
-    it('should handle general errors from create action', async () => {
-      mockCreateStatus.mockResolvedValue({
-        data: null,
-        error: { message: 'Database connection failed' },
-      });
-
-      const result = await statusFormAction(prevState, formData);
-
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the status.',
-      });
+      expect(mockCreateStatus).toHaveBeenCalledWith(parsedData);
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(dbError);
+      expect(mockRevalidatePath).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedErrorState);
     });
   });
 
   describe('updating existing status', () => {
-    const statusId = 'status-1';
+    const statusId = '123';
 
     beforeEach(() => {
       formData.append('id', statusId);
       formData.append('name', 'Updated Status');
       formData.append('description', 'Updated description');
-      formData.append('is_terminal', 'on');
+      formData.append('is_terminal', 'false');
       formData.append('order_num', '10');
     });
 
     it('should update status successfully', async () => {
-      const mockUpdatedStatus = {
+      const parsedData = {
         id: statusId,
         name: 'Updated Status',
         description: 'Updated description',
-        is_terminal: true,
+        is_terminal: false,
         order_num: 10,
       };
 
-      mockUpdateStatus.mockResolvedValue({
-        data: mockUpdatedStatus,
-        error: null,
+      mockStatusSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
       });
+
+      const expectedSuccessState = { message: 'Status updated successfully!' };
+      mockToActionState.mockReturnValue(expectedSuccessState);
 
       const result = await statusFormAction(prevState, formData);
 
-      expect(mockUpdateStatus).toHaveBeenCalledWith(statusId, {
+      expect(mockStatusSchema.safeParse).toHaveBeenCalledWith({
+        id: statusId,
         name: 'Updated Status',
         description: 'Updated description',
-        is_terminal: true,
-        order_num: 10,
+        is_terminal: 'false',
+        order_num: '10',
       });
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'Status updated successfully!',
-      });
+      expect(mockUpdateStatus).toHaveBeenCalledWith(statusId, parsedData);
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/status');
+      expect(mockToActionState).toHaveBeenCalledWith('Status updated successfully!');
+      expect(result).toEqual(expectedSuccessState);
     });
 
-    it('should handle update with false is_terminal', async () => {
-      const formDataNotTerminal = new FormData();
-      formDataNotTerminal.append('id', statusId);
-      formDataNotTerminal.append('name', 'Updated Status');
-      formDataNotTerminal.append('order_num', '5');
-      // No is_terminal checkbox means false
+    it('should handle validation errors during update', async () => {
+      const validationError = {
+        errors: [
+          { path: ['name'], message: 'Name cannot be empty' },
+        ],
+      };
 
-      mockUpdateStatus.mockResolvedValue({
-        data: { id: statusId, name: 'Updated Status', is_terminal: false },
-        error: null,
+      mockStatusSchema.safeParse.mockReturnValue({
+        success: false,
+        error: validationError,
       });
 
-      const result = await statusFormAction(prevState, formDataNotTerminal);
+      const expectedErrorState = { fieldErrors: { name: ['Name cannot be empty'] } };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
 
-      expect(mockUpdateStatus).toHaveBeenCalledWith(statusId, {
+      const result = await statusFormAction(prevState, formData);
+
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(validationError);
+      expect(mockUpdateStatus).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedErrorState);
+    });
+
+    it('should handle database errors during update', async () => {
+      const parsedData = {
+        id: statusId,
         name: 'Updated Status',
-        description: null,
+        description: 'Updated description',
         is_terminal: false,
-        order_num: 5,
+        order_num: 10,
+      };
+
+      mockStatusSchema.safeParse.mockReturnValue({
+        success: true,
+        data: parsedData,
       });
 
-      expect(result.message).toBe('Status updated successfully!');
-    });
+      const dbError = new Error('Update failed');
+      mockUpdateStatus.mockRejectedValue(dbError);
 
-    it('should handle field validation errors from update action', async () => {
-      mockUpdateStatus.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            name: 'Name cannot be empty',
-            order_num: 'Order number is required',
-          },
-        },
-      });
+      const expectedErrorState = { message: 'Update error occurred' };
+      mockFromErrorToActionState.mockReturnValue(expectedErrorState);
 
       const result = await statusFormAction(prevState, formData);
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        fieldErrors: {
-          name: ['Name cannot be empty'],
-          order_num: ['Order number is required'],
-        },
-      });
-    });
-
-    it('should handle general errors from update action', async () => {
-      mockUpdateStatus.mockResolvedValue({
-        data: null,
-        error: { message: 'Update failed' },
-      });
-
-      const result = await statusFormAction(prevState, formData);
-
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the status.',
-      });
+      expect(mockUpdateStatus).toHaveBeenCalledWith(statusId, parsedData);
+      expect(mockFromErrorToActionState).toHaveBeenCalledWith(dbError);
+      expect(mockRevalidatePath).not.toHaveBeenCalled();
+      expect(result).toEqual(expectedErrorState);
     });
   });
 
   describe('form data handling', () => {
-    it('should handle missing form fields gracefully', async () => {
-      const emptyFormData = new FormData();
+    it('should convert FormData to object correctly', async () => {
+      formData.append('name', 'Test Status');
+      formData.append('description', 'Test description');
+      formData.append('is_terminal', 'true');
+      formData.append('order_num', '5');
+      formData.append('extra_field', 'ignored'); // Extra fields should be included
 
-      mockCreateStatus.mockResolvedValue({
-        data: { id: '1' },
-        error: null,
+      mockStatusSchema.safeParse.mockReturnValue({
+        success: true,
+        data: {},
       });
 
-      const result = await statusFormAction(prevState, emptyFormData);
-
-      expect(mockCreateStatus).toHaveBeenCalledWith({
-        name: null, // Missing fields become null
-        description: null,
-        is_terminal: false,
-        order_num: 0,
-      });
-    });
-
-    it('should handle checkbox variations', async () => {
-      // Test different checkbox values
-      const testCases = [
-        { value: 'on', expected: true },
-        { value: 'true', expected: false }, // Only 'on' is truthy for checkboxes
-        { value: '1', expected: false },
-        { value: '', expected: false },
-      ];
-
-      for (const testCase of testCases) {
-        const testFormData = new FormData();
-        testFormData.append('name', 'Test Status');
-        testFormData.append('is_terminal', testCase.value);
-
-        mockCreateStatus.mockClear();
-        mockCreateStatus.mockResolvedValue({
-          data: { id: '1' },
-          error: null,
-        });
-
-        await statusFormAction(prevState, testFormData);
-
-        expect(mockCreateStatus).toHaveBeenCalledWith({
-          name: 'Test Status',
-          description: null,
-          is_terminal: testCase.expected,
-          order_num: 0,
-        });
-      }
-    });
-
-    it('should handle order_num parsing variations', async () => {
-      const testCases = [
-        { value: '5', expected: 5 },
-        { value: '0', expected: 0 },
-        { value: '-1', expected: -1 },
-        { value: 'abc', expected: 0 },
-        { value: '3.14', expected: 3 }, // parseInt truncates
-        { value: '', expected: 0 },
-      ];
-
-      for (const testCase of testCases) {
-        const testFormData = new FormData();
-        testFormData.append('name', 'Test Status');
-        testFormData.append('order_num', testCase.value);
-
-        mockCreateStatus.mockClear();
-        mockCreateStatus.mockResolvedValue({
-          data: { id: '1' },
-          error: null,
-        });
-
-        await statusFormAction(prevState, testFormData);
-
-        expect(mockCreateStatus).toHaveBeenCalledWith({
-          name: 'Test Status',
-          description: null,
-          is_terminal: false,
-          order_num: testCase.expected,
-        });
-      }
-    });
-
-    it('should handle form fields with whitespace', async () => {
-      formData.append('name', '  Test Status  ');
-      formData.append('description', '  Test description  ');
-
-      mockCreateStatus.mockResolvedValue({
-        data: { id: '1' },
-        error: null,
-      });
+      mockToActionState.mockReturnValue({ message: 'Success' });
 
       await statusFormAction(prevState, formData);
 
-      expect(mockCreateStatus).toHaveBeenCalledWith({
-        name: '  Test Status  ', // Whitespace is preserved
-        description: '  Test description  ',
-        is_terminal: false,
-        order_num: 0,
+      expect(mockStatusSchema.safeParse).toHaveBeenCalledWith({
+        name: 'Test Status',
+        description: 'Test description',
+        is_terminal: 'true',
+        order_num: '5',
+        extra_field: 'ignored', // FormData entries are all passed to schema
       });
+    });
+
+    it('should handle form data with whitespace', async () => {
+      formData.append('name', '  Test Status  ');
+      formData.append('description', '  Test description  ');
+      formData.append('order_num', '  5  ');
+
+      mockStatusSchema.safeParse.mockReturnValue({
+        success: true,
+        data: {},
+      });
+
+      mockToActionState.mockReturnValue({ message: 'Success' });
+
+      await statusFormAction(prevState, formData);
+
+      expect(mockStatusSchema.safeParse).toHaveBeenCalledWith({
+        name: '  Test Status  ', // Whitespace preserved
+        description: '  Test description  ',
+        order_num: '  5  ',
+      });
+    });
+
+    it('should handle empty form data', async () => {
+      const emptyFormData = new FormData();
+
+      mockStatusSchema.safeParse.mockReturnValue({
+        success: false,
+        error: { errors: [] },
+      });
+
+      mockFromErrorToActionState.mockReturnValue({ fieldErrors: {} });
+
+      await statusFormAction(prevState, emptyFormData);
+
+      expect(mockStatusSchema.safeParse).toHaveBeenCalledWith({});
     });
   });
 
-  describe('error handling edge cases', () => {
+  describe('revalidation behavior', () => {
     beforeEach(() => {
       formData.append('name', 'Test Status');
+      formData.append('order_num', '1');
     });
 
-    it('should handle undefined error object', async () => {
-      mockCreateStatus.mockResolvedValue({
-        data: null,
-        error: undefined as any,
+    it('should revalidate path on successful creation', async () => {
+      mockStatusSchema.safeParse.mockReturnValue({
+        success: true,
+        data: {},
       });
 
-      const result = await statusFormAction(prevState, formData);
+      mockCreateStatus.mockResolvedValue(undefined);
+      mockToActionState.mockReturnValue({ message: 'Success' });
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the status.',
-      });
+      await statusFormAction(prevState, formData);
+
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/status');
     });
 
-    it('should handle error without fieldErrors property', async () => {
-      mockCreateStatus.mockResolvedValue({
-        data: null,
-        error: { someOtherProperty: 'value' } as any,
+    it('should revalidate path on successful update', async () => {
+      formData.append('id', '123');
+
+      mockStatusSchema.safeParse.mockReturnValue({
+        success: true,
+        data: { id: '123' },
       });
 
-      const result = await statusFormAction(prevState, formData);
+      mockUpdateStatus.mockResolvedValue(undefined);
+      mockToActionState.mockReturnValue({ message: 'Success' });
 
-      expect(result).toEqual({
-        ...EMPTY_ACTION_STATE,
-        message: 'An error occurred while saving the status.',
-      });
+      await statusFormAction(prevState, formData);
+
+      expect(mockRevalidatePath).toHaveBeenCalledWith('/dashboard/status');
     });
 
-    it('should handle fieldErrors with mixed string and array values', async () => {
-      mockCreateStatus.mockResolvedValue({
-        data: null,
-        error: {
-          fieldErrors: {
-            name: 'Single string error',
-            order_num: ['Array error 1', 'Array error 2'],
-          },
-        },
+    it('should not revalidate path on validation error', async () => {
+      mockStatusSchema.safeParse.mockReturnValue({
+        success: false,
+        error: { errors: [] },
       });
 
-      const result = await statusFormAction(prevState, formData);
+      mockFromErrorToActionState.mockReturnValue({ fieldErrors: {} });
 
-      expect(result.fieldErrors).toEqual({
-        name: ['Single string error'],
-        order_num: ['Array error 1', 'Array error 2'], // Arrays are preserved as-is
-      });
-    });
-  });
+      await statusFormAction(prevState, formData);
 
-  describe('async behavior', () => {
-    it('should handle async errors from actions', async () => {
-      mockCreateStatus.mockRejectedValue(new Error('Network error'));
-
-      formData.append('name', 'Test Status');
-
-      await expect(statusFormAction(prevState, formData)).rejects.toThrow('Network error');
+      expect(mockRevalidatePath).not.toHaveBeenCalled();
     });
 
-    it('should handle slow responses', async () => {
-      const slowResponse = new Promise((resolve) => {
-        setTimeout(() => {
-          resolve({
-            data: { id: '1', name: 'Test Status' },
-            error: null,
-          });
-        }, 100);
+    it('should not revalidate path on database error', async () => {
+      mockStatusSchema.safeParse.mockReturnValue({
+        success: true,
+        data: {},
       });
 
-      mockCreateStatus.mockReturnValue(slowResponse as any);
+      mockCreateStatus.mockRejectedValue(new Error('DB Error'));
+      mockFromErrorToActionState.mockReturnValue({ message: 'Error' });
 
-      formData.append('name', 'Test Status');
+      await statusFormAction(prevState, formData);
 
-      const result = await statusFormAction(prevState, formData);
-
-      expect(result.message).toBe('Status created successfully!');
+      expect(mockRevalidatePath).not.toHaveBeenCalled();
     });
   });
 });

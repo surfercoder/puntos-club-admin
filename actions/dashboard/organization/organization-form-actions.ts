@@ -1,54 +1,31 @@
-"use server";
+'use server';
 
-import type { ActionState} from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE } from '@/lib/error-handler';
-import type { OrganizationInput } from '@/schemas/organization.schema';
+import { revalidatePath } from 'next/cache';
 
-import { createOrganization, updateOrganization } from './actions';
+import { createOrganization, updateOrganization } from '@/actions/dashboard/organization/actions';
+import { fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
+import { OrganizationSchema } from '@/schemas/organization.schema';
+import type { Organization } from '@/types/organization';
 
-export async function organizationFormAction(
-  prevState: ActionState,
-  formData: FormData
-): Promise<ActionState> {
-  const id = formData.get('id') as string;
-  
-  const input: OrganizationInput = {
-    name: formData.get('name') as string,
-    business_name: formData.get('business_name') as string || null,
-    tax_id: formData.get('tax_id') as string || null,
-  };
+export async function organizationFormAction(_prevState: ActionState, formData: FormData) {
+  try {
+    const parsed = OrganizationSchema.safeParse(Object.fromEntries(formData));
 
-  let result;
-  if (id) {
-    result = await updateOrganization(id, input);
-  } else {
-    result = await createOrganization(input);
-  }
-
-  if (result.error || !result.data) {
-    if (result.error && 'fieldErrors' in result.error) {
-      // Convert string errors to string array format
-      const fieldErrors: Record<string, string[]> = {};
-      Object.entries(result.error.fieldErrors).forEach(([key, value]) => {
-        if (Array.isArray(value)) {
-          fieldErrors[key] = value;
-        } else {
-          fieldErrors[key] = [value];
-        }
-      });
-      return {
-        ...EMPTY_ACTION_STATE,
-        fieldErrors,
-      };
+    if (!parsed.success) {
+      return fromErrorToActionState(parsed.error);
     }
-    return {
-      ...EMPTY_ACTION_STATE,
-      message: 'An error occurred while saving the organization.',
-    };
-  }
 
-  return {
-    ...EMPTY_ACTION_STATE,
-    message: id ? 'Organization updated successfully!' : 'Organization created successfully!',
-  };
+    if (formData.get('id')) {
+      await updateOrganization(String(formData.get('id')), parsed.data as Organization);
+    } else {
+      await createOrganization(parsed.data as Organization);
+    }
+
+    // Revalidate the organization list page
+    revalidatePath('/dashboard/organization');
+
+    return toActionState(formData.get('id') ? 'Organization updated successfully!' : 'Organization created successfully!');
+  } catch (error) {
+    return fromErrorToActionState(error);
+  }
 }
