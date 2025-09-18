@@ -18,6 +18,7 @@ import {
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { LogoutButton } from "@/components/logout-button";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { createClient } from "@/lib/supabase/server";
@@ -187,10 +188,15 @@ export default async function DashboardPage() {
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-2">
-              <p><strong>Email:</strong> {data.user.email}</p>
-              <p><strong>User ID:</strong> {data.user.id}</p>
-              <p><strong>Last Sign In:</strong> {data.user.last_sign_in_at ? new Date(data.user.last_sign_in_at).toLocaleString() : 'N/A'}</p>
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <p><strong>Email:</strong> {data.user.email}</p>
+                <p><strong>User ID:</strong> {data.user.id}</p>
+                <p><strong>Last Sign In:</strong> {data.user.last_sign_in_at ? new Date(data.user.last_sign_in_at).toLocaleString() : 'N/A'}</p>
+              </div>
+              <div className="pt-2">
+                <LogoutButton />
+              </div>
             </div>
           </CardContent>
         </Card>

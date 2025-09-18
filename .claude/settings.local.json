@@ -1,0 +1,28 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(mkdir:*)",
+      "Bash(npm install:*)",
+      "Bash(npm test:*)",
+      "Bash(mv:*)",
+      "Bash(touch:*)",
+      "Bash(npm run test:coverage:*)",
+      "Bash(npm run test:*)",
+      "Bash(rm:*)",
+      "Bash(grep:*)",
+      "Bash(npm run lint)",
+      "Bash(npm run build:*)",
+      "Bash(find:*)",
+      "Bash(sed:*)",
+      "Bash(npm run checks:*)",
+      "Bash(npx eslint:*)",
+      "Bash(git checkout:*)",
+      "Bash(node fix-imports.js)",
+      "Bash(npx playwright:*)",
+      "Bash(npm run e2e:*)",
+      "Bash(curl:*)",
+      "Bash(kill:*)"
+    ],
+    "deny": []
+  }
+}

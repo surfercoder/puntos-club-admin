@@ -26,12 +26,6 @@ jest.mock('react', () => ({
     jest.fn(),
     false,
   ]),
-  useEffect: jest.fn((fn) => {
-    act(() => {
-      fn();
-    });
-  }),
-  useState: jest.fn((initial) => [initial, jest.fn()]),
 }));
 
 jest.mock('sonner', () => ({
@@ -58,14 +52,13 @@ jest.mock('@/lib/error-handler', () => ({
 // Mock Supabase client
 jest.mock('@/lib/supabase/client', () => ({
   createClient: jest.fn(() => ({
-    from: jest.fn(() => ({
+    from: jest.fn((table) => ({
       select: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnThis(),
       order: jest.fn().mockResolvedValue({
-        data: [
-          { id: '1', first_name: 'John', last_name: 'Doe', email: 'john@example.com' },
-          { id: '2', name: 'Test Branch' }
-        ],
+        data: table === 'app_user' 
+          ? [{ id: '1', first_name: 'John', last_name: 'Doe', email: 'john@example.com' }]
+          : [{ id: '2', name: 'Test Branch' }],
         error: null,
       }),
     })),
@@ -153,8 +146,10 @@ describe('UserPermissionForm', () => {
   });
 
   describe('Create Mode', () => {
-    it('renders create form with empty fields', () => {
-      render(<UserPermissionForm />);
+    it('renders create form with empty fields', async () => {
+      await act(async () => {
+        render(<UserPermissionForm />);
+      });
 
       expect(screen.getByTestId('select-user_id')).toBeInTheDocument();
       expect(screen.getByTestId('select-branch_id')).toBeInTheDocument();
@@ -163,15 +158,19 @@ describe('UserPermissionForm', () => {
       expect(screen.getByRole('button', { name: /create/i })).toBeInTheDocument();
     });
 
-    it('does not render hidden id field in create mode', () => {
-      render(<UserPermissionForm />);
+    it('does not render hidden id field in create mode', async () => {
+      await act(async () => {
+        render(<UserPermissionForm />);
+      });
       
       const hiddenInput = document.querySelector('input[type="hidden"][name="id"]');
       expect(hiddenInput).not.toBeInTheDocument();
     });
 
-    it('has all required form fields', () => {
-      render(<UserPermissionForm />);
+    it('has all required form fields', async () => {
+      await act(async () => {
+        render(<UserPermissionForm />);
+      });
 
       expect(screen.getByTestId('select-user_id')).toBeInTheDocument();
       expect(screen.getByTestId('select-branch_id')).toBeInTheDocument();
