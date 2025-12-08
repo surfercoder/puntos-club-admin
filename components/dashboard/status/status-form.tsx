@@ -39,19 +39,11 @@ export default function StatusForm({ status }: StatusFormProps) {
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    const formData = new FormData(event.currentTarget);
+    const formData = Object.fromEntries(new FormData(event.currentTarget));
     setValidation(null);
 
-    // Transform form data to match schema expectations
-    const transformedData = {
-      name: formData.get('name') as string,
-      description: formData.get('description') as string || null,
-      is_terminal: formData.get('is_terminal') === 'on',
-      order_num: parseInt(formData.get('order_num') as string) || 0,
-    };
-
     try {
-      StatusSchema.parse(transformedData);
+      StatusSchema.parse(formData);
     } catch (error) {
       setValidation(fromErrorToActionState(error));
       event.preventDefault();

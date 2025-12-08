@@ -93,32 +93,11 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    const formData = new FormData(event.currentTarget);
+    const formData = Object.fromEntries(new FormData(event.currentTarget));
     setValidation(null);
 
-    // Add selected values to form data
-    if (selectedBeneficiary) {
-      formData.set('beneficiary_id', selectedBeneficiary);
-    }
-    if (selectedProduct) {
-      formData.set('product_id', selectedProduct);
-    }
-    if (selectedOrder) {
-      formData.set('order_id', selectedOrder);
-    }
-
-    // Transform form data to match schema expectations
-    const transformedData = {
-      beneficiary_id: formData.get('beneficiary_id') as string,
-      product_id: formData.get('product_id') as string || null,
-      order_id: formData.get('order_id') as string,
-      points_used: parseInt(formData.get('points_used') as string) || 0,
-      quantity: parseInt(formData.get('quantity') as string) || 0,
-      redemption_date: formData.get('redemption_date') as string,
-    };
-
     try {
-      RedemptionSchema.parse(transformedData);
+      RedemptionSchema.parse(formData);
     } catch (error) {
       setValidation(fromErrorToActionState(error));
       event.preventDefault();
@@ -131,7 +110,7 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
       
       <div>
         <Label htmlFor="beneficiary_id">Beneficiary</Label>
-        <Select name="beneficiary_id" onValueChange={setSelectedBeneficiary} value={selectedBeneficiary}>
+        <Select defaultValue={redemption?.beneficiary_id ?? ''} name="beneficiary_id">
           <SelectTrigger>
             <SelectValue placeholder="Select a beneficiary" />
           </SelectTrigger>
@@ -150,7 +129,7 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
 
       <div>
         <Label htmlFor="product_id">Product (Optional)</Label>
-        <Select name="product_id" onValueChange={setSelectedProduct} value={selectedProduct}>
+        <Select defaultValue={redemption?.product_id ?? ''} name="product_id">
           <SelectTrigger>
             <SelectValue placeholder="Select a product (optional)" />
           </SelectTrigger>
@@ -168,7 +147,7 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
 
       <div>
         <Label htmlFor="order_id">Order</Label>
-        <Select name="order_id" onValueChange={setSelectedOrder} value={selectedOrder}>
+        <Select defaultValue={redemption?.order_id ?? ''} name="order_id">
           <SelectTrigger>
             <SelectValue placeholder="Select an order" />
           </SelectTrigger>

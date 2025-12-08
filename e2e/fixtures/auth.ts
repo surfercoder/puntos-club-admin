@@ -1,4 +1,5 @@
-import { test as base, expect, Page } from '@playwright/test';
+import type { Page } from '@playwright/test';
+import { test as base, expect } from '@playwright/test';
 
 // Test credentials - replace with your actual test credentials
 const TEST_USER = {

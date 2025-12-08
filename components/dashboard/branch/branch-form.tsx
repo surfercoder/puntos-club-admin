@@ -148,7 +148,7 @@ export default function BranchForm({ branch }: BranchFormProps) {
           id="phone"
           name="phone"
           placeholder="Enter phone number (optional)"
-          type="tel"
+          type="text"
         />
         <FieldError actionState={validation ?? actionState} name="phone" />
       </div>

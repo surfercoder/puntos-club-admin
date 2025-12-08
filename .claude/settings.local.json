@@ -21,8 +21,15 @@
       "Bash(npx playwright:*)",
       "Bash(npm run e2e:*)",
       "Bash(curl:*)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "Bash(npm run seed:*)",
+      "Bash(tsx scripts/check-database.ts:*)",
+      "Bash(npx tsx:*)"
     ],
     "deny": []
-  }
+  },
+  "enableAllProjectMcpServers": true,
+  "enabledMcpjsonServers": [
+    "supabase"
+  ]
 }

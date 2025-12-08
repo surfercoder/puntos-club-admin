@@ -89,7 +89,7 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
           id="email"
           name="email"
           placeholder="Enter email address"
-          type="email"
+          type="text"
         />
         <FieldError actionState={validation ?? actionState} name="email" />
       </div>
@@ -103,7 +103,7 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
           id="phone"
           name="phone"
           placeholder="Enter phone number"
-          type="tel"
+          type="text"
         />
         <FieldError actionState={validation ?? actionState} name="phone" />
       </div>

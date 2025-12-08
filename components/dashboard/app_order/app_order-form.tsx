@@ -39,19 +39,11 @@ export default function AppOrderForm({ appOrder }: AppOrderFormProps) {
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    const formData = new FormData(event.currentTarget);
+    const formData = Object.fromEntries(new FormData(event.currentTarget));
     setValidation(null);
 
-    // Transform form data to match schema expectations
-    const transformedData = {
-      order_number: formData.get('order_number') as string,
-      creation_date: formData.get('creation_date') as string,
-      total_points: parseInt(formData.get('total_points') as string) || 0,
-      observations: formData.get('observations') as string || null,
-    };
-
     try {
-      AppOrderSchema.parse(transformedData);
+      AppOrderSchema.parse(formData);
     } catch (error) {
       setValidation(fromErrorToActionState(error));
       event.preventDefault();

@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
+import { env } from "../env";
 import { hasEnvVars } from "../utils";
 
 export async function updateSession(request: NextRequest) {
@@ -13,17 +14,9 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    console.error('Missing Supabase environment variables in middleware');
-    return supabaseResponse;
-  }
-
   const supabase = createServerClient(
-    supabaseUrl,
-    supabaseAnonKey,
+    env.NEXT_PUBLIC_SUPABASE_URL,
+    env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
     {
       cookies: {
         getAll() {
@@ -53,6 +46,11 @@ export async function updateSession(request: NextRequest) {
   const {
     data: { user },
   } = await supabase.auth.getUser();
+
+  // Allow API routes to be accessed without authentication (for mobile apps)
+  if (request.nextUrl.pathname.startsWith("/api/")) {
+    return supabaseResponse;
+  }
 
   if (
     request.nextUrl.pathname !== "/" &&

@@ -13,7 +13,8 @@ import {
   History, 
   Gift, 
   Package2, 
-  Shield 
+  Shield,
+  UsersRound
 } from "lucide-react";
 import Link from "next/link";
 import { redirect } from "next/navigation";
@@ -39,7 +40,7 @@ export default async function DashboardPage() {
       description: "Manage addresses for your organization",
       icon: MapPin,
       href: "/dashboard/address",
-      count: null, // We could add count queries here later
+      count: null,
     },
     {
       name: "Assignment",
@@ -139,7 +140,15 @@ export default async function DashboardPage() {
       href: "/dashboard/user_permission",
       count: null,
     },
+    {
+      name: "Users",
+      description: "Manage all users (owners, collaborators, cashiers, beneficiaries)",
+      icon: UsersRound,
+      href: "/dashboard/users",
+      count: null,
+    },
   ];
+
 
   return (
     <div className="space-y-6">
@@ -154,27 +163,27 @@ export default async function DashboardPage() {
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {entities.map((entity) => {
-          const IconComponent = entity.icon;
-          return (
-            <Card key={entity.name} className="hover:shadow-lg transition-shadow">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">
-                  {entity.name}
-                </CardTitle>
-                <IconComponent className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <CardDescription className="mb-4">
-                  {entity.description}
-                </CardDescription>
-                <Button asChild className="w-full">
-                  <Link href={entity.href}>
-                    Manage {entity.name}
-                  </Link>
-                </Button>
-              </CardContent>
-            </Card>
-          );
+            const IconComponent = entity.icon;
+            return (
+              <Card key={entity.name} className="hover:shadow-lg transition-shadow">
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                  <CardTitle className="text-sm font-medium">
+                    {entity.name}
+                  </CardTitle>
+                  <IconComponent className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                  <CardDescription className="mb-4">
+                    {entity.description}
+                  </CardDescription>
+                  <Button asChild className="w-full">
+                    <Link href={entity.href}>
+                      Manage {entity.name}
+                    </Link>
+                  </Button>
+                </CardContent>
+              </Card>
+            );
         })}
       </div>
 

@@ -82,27 +82,11 @@ export default function UserPermissionForm({ userPermission }: UserPermissionFor
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    const formData = new FormData(event.currentTarget);
+    const formData = Object.fromEntries(new FormData(event.currentTarget));
     setValidation(null);
 
-    // Add selected values to form data
-    if (selectedUser) {
-      formData.set('user_id', selectedUser);
-    }
-    if (selectedBranch) {
-      formData.set('branch_id', selectedBranch);
-    }
-
-    // Transform form data to match schema expectations
-    const transformedData = {
-      user_id: formData.get('user_id') as string,
-      branch_id: formData.get('branch_id') as string,
-      action: formData.get('action') as string,
-      assignment_date: formData.get('assignment_date') as string,
-    };
-
     try {
-      UserPermissionSchema.parse(transformedData);
+      UserPermissionSchema.parse(formData);
     } catch (error) {
       setValidation(fromErrorToActionState(error));
       event.preventDefault();
@@ -115,7 +99,7 @@ export default function UserPermissionForm({ userPermission }: UserPermissionFor
       
       <div>
         <Label htmlFor="user_id">User</Label>
-        <Select name="user_id" onValueChange={setSelectedUser} value={selectedUser}>
+        <Select defaultValue={userPermission?.user_id ?? ''} name="user_id">
           <SelectTrigger>
             <SelectValue placeholder="Select a user" />
           </SelectTrigger>
@@ -134,7 +118,7 @@ export default function UserPermissionForm({ userPermission }: UserPermissionFor
 
       <div>
         <Label htmlFor="branch_id">Branch</Label>
-        <Select name="branch_id" onValueChange={setSelectedBranch} value={selectedBranch}>
+        <Select defaultValue={userPermission?.branch_id ?? ''} name="branch_id">
           <SelectTrigger>
             <SelectValue placeholder="Select a branch" />
           </SelectTrigger>

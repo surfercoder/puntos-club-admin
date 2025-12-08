@@ -80,28 +80,11 @@ export default function StockForm({ stock }: StockFormProps) {
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    const formData = new FormData(event.currentTarget);
+    const formData = Object.fromEntries(new FormData(event.currentTarget));
     setValidation(null);
 
-    // Add selected values to form data
-    if (selectedBranch) {
-      formData.set('branch_id', selectedBranch);
-    }
-    if (selectedProduct) {
-      formData.set('product_id', selectedProduct);
-    }
-
-    // Transform form data to match schema expectations
-    const transformedData = {
-      branch_id: formData.get('branch_id') as string,
-      product_id: formData.get('product_id') as string,
-      quantity: parseInt(formData.get('quantity') as string) || 0,
-      minimum_quantity: parseInt(formData.get('minimum_quantity') as string) || 0,
-      last_updated: formData.get('last_updated') as string,
-    };
-
     try {
-      StockSchema.parse(transformedData);
+      StockSchema.parse(formData);
     } catch (error) {
       setValidation(fromErrorToActionState(error));
       event.preventDefault();
@@ -114,7 +97,7 @@ export default function StockForm({ stock }: StockFormProps) {
       
       <div>
         <Label htmlFor="branch_id">Branch</Label>
-        <Select name="branch_id" onValueChange={setSelectedBranch} value={selectedBranch}>
+        <Select defaultValue={stock?.branch_id ?? ''} name="branch_id">
           <SelectTrigger>
             <SelectValue placeholder="Select a branch" />
           </SelectTrigger>
@@ -131,7 +114,7 @@ export default function StockForm({ stock }: StockFormProps) {
 
       <div>
         <Label htmlFor="product_id">Product</Label>
-        <Select name="product_id" onValueChange={setSelectedProduct} value={selectedProduct}>
+        <Select defaultValue={stock?.product_id ?? ''} name="product_id">
           <SelectTrigger>
             <SelectValue placeholder="Select a product" />
           </SelectTrigger>

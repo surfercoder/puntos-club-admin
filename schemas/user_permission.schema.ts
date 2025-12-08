@@ -2,9 +2,9 @@ import { z } from 'zod';
 
 export const UserPermissionSchema = z.object({
   id: z.string().optional(),
-  user_id: z.string(),
-  branch_id: z.string(),
-  action: z.string().min(1),
+  user_id: z.string().min(1, 'User is required'),
+  branch_id: z.string().min(1, 'Branch is required'),
+  action: z.string().min(1, 'Action is required'),
   assignment_date: z.string().optional(),
 });
 

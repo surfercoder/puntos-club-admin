@@ -39,18 +39,11 @@ export default function CategoryForm({ category }: CategoryFormProps) {
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    const formData = new FormData(event.currentTarget);
+    const formData = Object.fromEntries(new FormData(event.currentTarget));
     setValidation(null);
 
-    // Transform form data to match schema expectations
-    const transformedData = {
-      name: formData.get('name') as string,
-      description: formData.get('description') as string || null,
-      active: formData.get('active') === 'on',
-    };
-
     try {
-      CategorySchema.parse(transformedData);
+      CategorySchema.parse(formData);
     } catch (error) {
       setValidation(fromErrorToActionState(error));
       event.preventDefault();

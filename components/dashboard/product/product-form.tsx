@@ -65,25 +65,11 @@ export default function ProductForm({ product }: ProductFormProps) {
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    const formData = new FormData(event.currentTarget);
+    const formData = Object.fromEntries(new FormData(event.currentTarget));
     setValidation(null);
 
-    // Add selected subcategory to form data
-    if (selectedSubcategory) {
-      formData.set('subcategory_id', selectedSubcategory);
-    }
-
-    // Transform form data to match schema expectations
-    const transformedData = {
-      subcategory_id: formData.get('subcategory_id') as string,
-      name: formData.get('name') as string,
-      description: formData.get('description') as string || null,
-      required_points: parseInt(formData.get('required_points') as string) || 0,
-      active: formData.get('active') === 'on',
-    };
-
     try {
-      ProductSchema.parse(transformedData);
+      ProductSchema.parse(formData);
     } catch (error) {
       setValidation(fromErrorToActionState(error));
       event.preventDefault();
@@ -96,7 +82,7 @@ export default function ProductForm({ product }: ProductFormProps) {
       
       <div>
         <Label htmlFor="subcategory_id">Subcategory</Label>
-        <Select name="subcategory_id" onValueChange={setSelectedSubcategory} value={selectedSubcategory}>
+        <Select defaultValue={product?.subcategory_id ?? ''} name="subcategory_id">
           <SelectTrigger>
             <SelectValue placeholder="Select a subcategory" />
           </SelectTrigger>

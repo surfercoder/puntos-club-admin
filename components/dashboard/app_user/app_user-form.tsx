@@ -62,27 +62,11 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    const formData = new FormData(event.currentTarget);
+    const formData = Object.fromEntries(new FormData(event.currentTarget));
     setValidation(null);
 
-    // Add selected organization to form data
-    if (selectedOrganization) {
-      formData.set('organization_id', selectedOrganization);
-    }
-
-    // Transform form data to match schema expectations
-    const transformedData = {
-      organization_id: formData.get('organization_id') as string,
-      first_name: formData.get('first_name') as string || null,
-      last_name: formData.get('last_name') as string || null,
-      email: formData.get('email') as string || null,
-      username: formData.get('username') as string || null,
-      password: formData.get('password') as string || null,
-      active: formData.get('active') === 'on',
-    };
-
     try {
-      AppUserSchema.parse(transformedData);
+      AppUserSchema.parse(formData);
     } catch (error) {
       setValidation(fromErrorToActionState(error));
       event.preventDefault();
@@ -95,7 +79,7 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
       
       <div>
         <Label htmlFor="organization_id">Organization</Label>
-        <Select name="organization_id" onValueChange={setSelectedOrganization} value={selectedOrganization}>
+        <Select defaultValue={appUser?.organization_id ?? ''} name="organization_id">
           <SelectTrigger>
             <SelectValue placeholder="Select an organization" />
           </SelectTrigger>
@@ -147,7 +131,7 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
           id="email"
           name="email"
           placeholder="Enter email (optional)"
-          type="email"
+          type="text"
         />
         <FieldError actionState={validation ?? actionState} name="email" />
       </div>

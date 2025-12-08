@@ -81,27 +81,11 @@ export default function HistoryForm({ history }: HistoryFormProps) {
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    const formData = new FormData(event.currentTarget);
+    const formData = Object.fromEntries(new FormData(event.currentTarget));
     setValidation(null);
 
-    // Add selected values to form data
-    if (selectedOrder) {
-      formData.set('order_id', selectedOrder);
-    }
-    if (selectedStatus) {
-      formData.set('status_id', selectedStatus);
-    }
-
-    // Transform form data to match schema expectations
-    const transformedData = {
-      order_id: formData.get('order_id') as string,
-      status_id: formData.get('status_id') as string || null,
-      change_date: formData.get('change_date') as string,
-      observations: formData.get('observations') as string || null,
-    };
-
     try {
-      HistorySchema.parse(transformedData);
+      HistorySchema.parse(formData);
     } catch (error) {
       setValidation(fromErrorToActionState(error));
       event.preventDefault();
@@ -114,7 +98,7 @@ export default function HistoryForm({ history }: HistoryFormProps) {
       
       <div>
         <Label htmlFor="order_id">Order</Label>
-        <Select name="order_id" onValueChange={setSelectedOrder} value={selectedOrder}>
+        <Select defaultValue={history?.order_id ?? ''} name="order_id">
           <SelectTrigger>
             <SelectValue placeholder="Select an order" />
           </SelectTrigger>
@@ -131,7 +115,7 @@ export default function HistoryForm({ history }: HistoryFormProps) {
 
       <div>
         <Label htmlFor="status_id">Status (Optional)</Label>
-        <Select name="status_id" onValueChange={setSelectedStatus} value={selectedStatus}>
+        <Select defaultValue={history?.status_id ?? ''} name="status_id">
           <SelectTrigger>
             <SelectValue placeholder="Select a status (optional)" />
           </SelectTrigger>
