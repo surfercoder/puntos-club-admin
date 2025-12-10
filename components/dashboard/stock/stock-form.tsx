@@ -36,8 +36,6 @@ export default function StockForm({ stock }: StockFormProps) {
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [branches, setBranches] = useState<Branch[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
-  const [selectedBranch, setSelectedBranch] = useState<string>(stock?.branch_id || '');
-  const [selectedProduct, setSelectedProduct] = useState<string>(stock?.product_id || '');
 
   // Utils
   const [actionState, formAction, pending] = useActionState(stockFormAction, EMPTY_ACTION_STATE);

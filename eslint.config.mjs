@@ -55,6 +55,11 @@ export default [
   },
   {
     files: ["*.config.{js,mjs,ts}", "jest.setup.js", "playwright.config.ts"],
+    languageOptions: {
+      globals: {
+        ...globals.jest,
+      },
+    },
     rules: {
       "@typescript-eslint/no-require-imports": "off",
     },

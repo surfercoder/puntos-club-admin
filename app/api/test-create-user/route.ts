@@ -38,7 +38,6 @@ export async function GET() {
       active: true,
     };
     
-    console.log('Attempting to insert test user:', testUser);
     
     const { data: newUser, error } = await supabase
       .from('app_user')
@@ -60,7 +59,6 @@ export async function GET() {
       });
     }
     
-    console.log('User created successfully:', newUser);
     
     // Now verify it was inserted
     const { data: verifyUser, error: verifyError } = await supabase
@@ -75,12 +73,12 @@ export async function GET() {
       verifyUser,
       verifyError
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Unexpected error:', error);
-    return NextResponse.json({ 
+    return NextResponse.json({
       success: false,
-      error: error.message,
-      stack: error.stack
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
     });
   }
 }

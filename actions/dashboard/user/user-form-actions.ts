@@ -10,23 +10,16 @@ import type { User } from '@/types/user';
 export async function userFormAction(_prevState: ActionState, formData: FormData) {
   try {
     const formDataObject = Object.fromEntries(formData);
-    console.log('Form data received:', formDataObject);
-    
     const parsed = UserSchema.safeParse(formDataObject);
 
     if (!parsed.success) {
-      console.error('Validation failed:', parsed.error);
       return fromErrorToActionState(parsed.error);
     }
 
-    console.log('Parsed data:', parsed.data);
-
     if (formData.get('id')) {
-      const result = await updateUser(String(formData.get('id')), parsed.data as User);
-      console.log('Update result:', result);
+      await updateUser(String(formData.get('id')), parsed.data as User);
     } else {
-      const result = await createUser(parsed.data as User);
-      console.log('Create result:', result);
+      await createUser(parsed.data as User);
     }
 
     // Revalidate the user list page

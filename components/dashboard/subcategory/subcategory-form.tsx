@@ -32,7 +32,6 @@ export default function SubcategoryForm({ subcategory }: SubcategoryFormProps) {
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>(subcategory?.category_id || '');
 
   // Utils
   const [actionState, formAction, pending] = useActionState(subcategoryFormAction, EMPTY_ACTION_STATE);

@@ -265,7 +265,7 @@ export async function getAllPurchases(filters?: {
     let filteredData = data;
     if (filters?.organization_id) {
       filteredData = data?.filter(
-        (p: any) => p.branch?.organization_id === filters.organization_id
+        (p: { branch?: { organization_id?: number } }) => p.branch?.organization_id === filters.organization_id
       );
     }
 
@@ -312,7 +312,7 @@ export async function getPurchaseById(purchase_id: number) {
 /**
  * Verify beneficiary by user ID (from QR code)
  */
-export async function verifyBeneficiary(user_id: string) {
+export async function verifyBeneficiary(_user_id: string) {
   try {
     const supabase = await createClient();
 

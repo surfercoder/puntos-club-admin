@@ -21,16 +21,7 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Plus, Pencil, Trash2, Calculator, RefreshCw } from "lucide-react";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 interface PointsRule {
@@ -38,7 +29,7 @@ interface PointsRule {
   name: string;
   description: string;
   rule_type: string;
-  config: any;
+  config: Record<string, unknown>;
   is_active: boolean;
   priority: number;
   display_name: string;
@@ -58,7 +49,6 @@ interface PointsRule {
 const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
 export default function PointsRulesPage() {
-  const router = useRouter();
   const [rules, setRules] = useState<PointsRule[]>([]);
   const [loading, setLoading] = useState(true);
   const [testAmount, setTestAmount] = useState("100");

@@ -4,11 +4,12 @@ import { NextResponse } from "next/server";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     const supabase = await createClient();
-    const beneficiaryId = parseInt(params.id);
+    const { id } = await params;
+    const beneficiaryId = parseInt(id);
 
     if (isNaN(beneficiaryId)) {
       return NextResponse.json(

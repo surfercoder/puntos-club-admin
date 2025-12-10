@@ -37,8 +37,6 @@ export default function HistoryForm({ history }: HistoryFormProps) {
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [orders, setOrders] = useState<AppOrder[]>([]);
   const [statuses, setStatuses] = useState<Status[]>([]);
-  const [selectedOrder, setSelectedOrder] = useState<string>(history?.order_id || '');
-  const [selectedStatus, setSelectedStatus] = useState<string>(history?.status_id || '');
 
   // Utils
   const [actionState, formAction, pending] = useActionState(historyFormAction, EMPTY_ACTION_STATE);

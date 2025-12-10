@@ -7,7 +7,7 @@ export interface PointsRuleInput {
   name: string;
   description?: string;
   rule_type: 'fixed_amount' | 'percentage' | 'fixed_per_item' | 'tiered';
-  config: any; // JSON config based on rule_type
+  config: Record<string, unknown>; // JSON config based on rule_type
   is_active?: boolean;
   priority?: number;
   organization_id?: number;
@@ -169,7 +169,7 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
   try {
     const supabase = await createClient();
 
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
     
     if (input.name !== undefined) updateData.name = input.name;
     if (input.description !== undefined) updateData.description = input.description;

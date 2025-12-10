@@ -38,8 +38,6 @@ export default function UserPermissionForm({ userPermission }: UserPermissionFor
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [users, setUsers] = useState<AppUser[]>([]);
   const [branches, setBranches] = useState<Branch[]>([]);
-  const [selectedUser, setSelectedUser] = useState<string>(userPermission?.user_id || '');
-  const [selectedBranch, setSelectedBranch] = useState<string>(userPermission?.branch_id || '');
 
   // Utils
   const [actionState, formAction, pending] = useActionState(userPermissionFormAction, EMPTY_ACTION_STATE);

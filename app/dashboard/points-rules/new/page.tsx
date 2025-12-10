@@ -51,7 +51,7 @@ export default function NewPointsRulePage() {
     setLoading(true);
 
     // Build config based on rule type
-    let config: any = {};
+    let config: Record<string, unknown> = {};
     switch (formData.rule_type) {
       case "fixed_amount":
         config = { points_per_dollar: parseFloat(formData.points_per_dollar) };
@@ -173,7 +173,7 @@ export default function NewPointsRulePage() {
                 <Label htmlFor="rule_type">Rule Type *</Label>
                 <Select
                   value={formData.rule_type}
-                  onValueChange={(value: any) => setFormData({ ...formData, rule_type: value })}
+                  onValueChange={(value: "fixed_amount" | "percentage" | "fixed_per_item" | "tiered") => setFormData({ ...formData, rule_type: value })}
                 >
                   <SelectTrigger>
                     <SelectValue />

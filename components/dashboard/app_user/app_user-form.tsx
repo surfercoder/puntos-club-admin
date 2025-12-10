@@ -30,7 +30,6 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
-  const [selectedOrganization, setSelectedOrganization] = useState<string>(appUser?.organization_id || '');
 
   // Utils
   const [actionState, formAction, pending] = useActionState(appUserFormAction, EMPTY_ACTION_STATE);

@@ -44,9 +44,6 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
   const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
   const [products, setProducts] = useState<Product[]>([]);
   const [orders, setOrders] = useState<AppOrder[]>([]);
-  const [selectedBeneficiary, setSelectedBeneficiary] = useState<string>(redemption?.beneficiary_id || '');
-  const [selectedProduct, setSelectedProduct] = useState<string>(redemption?.product_id || '');
-  const [selectedOrder, setSelectedOrder] = useState<string>(redemption?.order_id || '');
 
   // Utils
   const [actionState, formAction, pending] = useActionState(redemptionFormAction, EMPTY_ACTION_STATE);

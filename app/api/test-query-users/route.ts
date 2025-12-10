@@ -4,18 +4,14 @@ import { createClient } from '@/lib/supabase/server';
 export async function GET() {
   try {
     const supabase = await createClient();
-    
+
     // Test 1: Simple query without relations
-    console.log('Test 1: Simple query');
     const { data: simpleUsers, error: simpleError } = await supabase
       .from('app_user')
       .select('*')
       .order('created_at', { ascending: false });
-    
-    console.log('Simple query result:', { count: simpleUsers?.length, error: simpleError });
-    
+
     // Test 2: Query with relations (current implementation)
-    console.log('Test 2: Query with relations');
     const { data: relatedUsers, error: relatedError } = await supabase
       .from('app_user')
       .select(`
@@ -24,8 +20,6 @@ export async function GET() {
         role:role_id(id, name, display_name)
       `)
       .order('created_at', { ascending: false });
-    
-    console.log('Related query result:', { count: relatedUsers?.length, error: relatedError });
     
     return NextResponse.json({ 
       simpleQuery: {
@@ -39,11 +33,11 @@ export async function GET() {
         sample: relatedUsers?.[0]
       }
     });
-  } catch (error: any) {
+  } catch (error) {
     console.error('Unexpected error:', error);
-    return NextResponse.json({ 
-      error: error.message,
-      stack: error.stack
+    return NextResponse.json({
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
     });
   }
 }

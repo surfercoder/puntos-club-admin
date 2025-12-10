@@ -4,11 +4,10 @@ import { createClient } from '@/lib/supabase/server';
 export async function GET() {
   try {
     const supabase = await createClient();
-    
+
     // Check RLS status by querying pg_tables
-    const { data: rlsStatus, error: rlsError } = await supabase
-      .rpc('check_rls_status');
-    
+    await supabase.rpc('check_rls_status');
+
     // Alternative: Try to query with and without auth
     const { data: { user: authUser } } = await supabase.auth.getUser();
     
@@ -25,9 +24,9 @@ export async function GET() {
       },
       message: 'RLS is likely enabled if authenticated queries return 0 but direct inserts work'
     });
-  } catch (error: any) {
-    return NextResponse.json({ 
-      error: error.message
+  } catch (error) {
+    return NextResponse.json({
+      error: error instanceof Error ? error.message : 'Unknown error'
     });
   }
 }

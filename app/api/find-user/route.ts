@@ -47,10 +47,10 @@ export async function GET(request: Request) {
         error: allError
       }
     });
-  } catch (error: any) {
-    return NextResponse.json({ 
-      error: error.message,
-      stack: error.stack
+  } catch (error) {
+    return NextResponse.json({
+      error: error instanceof Error ? error.message : 'Unknown error',
+      stack: error instanceof Error ? error.stack : undefined
     });
   }
 }

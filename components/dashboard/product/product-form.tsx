@@ -32,7 +32,6 @@ export default function ProductForm({ product }: ProductFormProps) {
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string>(product?.subcategory_id || '');
 
   // Utils
   const [actionState, formAction, pending] = useActionState(productFormAction, EMPTY_ACTION_STATE);

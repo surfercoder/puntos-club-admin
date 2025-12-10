@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     // Support both simplified amount and detailed items
     let total_amount: number;
-    let purchaseItems: any[] = [];
+    let purchaseItems: { item_name: string; quantity: number; unit_price: number }[] = [];
 
     if (amount !== undefined && amount !== null) {
       // Simplified mode: just amount
@@ -105,7 +105,7 @@ export async function POST(request: NextRequest) {
       }
       // Calculate total amount
       total_amount = items.reduce(
-        (sum: number, item: any) => sum + item.quantity * item.unit_price,
+        (sum: number, item: { item_name: string; quantity: number; unit_price: number }) => sum + item.quantity * item.unit_price,
         0
       );
       purchaseItems = items;
@@ -154,7 +154,7 @@ export async function POST(request: NextRequest) {
       });
       // Fallback to simple calculation: 2 points per dollar
       points_earned = Math.floor(total_amount * 2);
-      console.log("Using fallback points calculation:", points_earned);
+      console.warn("Using fallback points calculation:", points_earned);
     } else {
       points_earned = pointsData || 0;
     }
@@ -182,7 +182,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Create purchase items with purchase_id
-    const itemsToInsert = purchaseItems.map((item: any) => ({
+    const itemsToInsert = purchaseItems.map((item) => ({
       purchase_id: purchase.id,
       item_name: item.item_name,
       quantity: item.quantity,
