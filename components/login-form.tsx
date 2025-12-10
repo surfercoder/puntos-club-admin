@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { checkAdminPortalAccess } from "@/actions/auth/actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -39,6 +40,14 @@ export function LoginForm({
         password,
       });
       if (error) {throw error;}
+
+      // Check user's role using server action (bypasses RLS issues)
+      const { allowed, error: accessError } = await checkAdminPortalAccess();
+
+      if (!allowed) {
+        throw new Error(accessError || 'No tienes permisos para acceder al portal de administración.');
+      }
+
       // Update this route to redirect to an authenticated route. The user already has an active session.
       router.push("/dashboard");
     } catch (error: unknown) {

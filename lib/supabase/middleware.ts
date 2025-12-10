@@ -64,6 +64,50 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
+  // Check user role for protected routes (dashboard)
+  if (user && request.nextUrl.pathname.startsWith("/dashboard")) {
+    // First try to find by auth_user_id, then fallback to email
+    let appUser = null;
+
+    const { data: userByAuthId } = await supabase
+      .from('app_user')
+      .select('id, auth_user_id, role:role_id(name)')
+      .eq('auth_user_id', user.id)
+      .single();
+
+    if (userByAuthId) {
+      appUser = userByAuthId;
+    } else if (user.email) {
+      // Fallback: try to find by email (for users created before auth_user_id was added)
+      const { data: userByEmail } = await supabase
+        .from('app_user')
+        .select('id, auth_user_id, role:role_id(name)')
+        .eq('email', user.email)
+        .single();
+
+      if (userByEmail) {
+        appUser = userByEmail;
+        // Update the auth_user_id for future requests
+        await supabase
+          .from('app_user')
+          .update({ auth_user_id: user.id })
+          .eq('id', userByEmail.id);
+      }
+    }
+
+    const role = appUser?.role as unknown as { name: string } | null;
+    const roleName = role?.name;
+    const allowedRoles = ['admin', 'owner', 'collaborator'];
+
+    if (!roleName || !allowedRoles.includes(roleName)) {
+      // User is not allowed to access the admin portal - sign them out and redirect
+      await supabase.auth.signOut();
+      const url = request.nextUrl.clone();
+      url.pathname = "/auth/login";
+      return NextResponse.redirect(url);
+    }
+  }
+
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
   // If you're creating a new response object with NextResponse.next() make sure to:
   // 1. Pass the request in it, like so:

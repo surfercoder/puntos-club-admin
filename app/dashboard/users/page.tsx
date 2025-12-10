@@ -71,7 +71,19 @@ export default async function UsersListPage() {
                   </TableCell>
                   <TableCell>{user.email || 'N/A'}</TableCell>
                   <TableCell>
-                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                      user.role?.name === 'admin'
+                        ? 'bg-red-100 text-red-800'
+                        : user.role?.name === 'owner'
+                        ? 'bg-blue-100 text-blue-800'
+                        : user.role?.name === 'collaborator'
+                        ? 'bg-teal-100 text-teal-800'
+                        : user.role?.name === 'cashier'
+                        ? 'bg-orange-100 text-orange-800'
+                        : user.role?.name === 'final_user'
+                        ? 'bg-purple-100 text-purple-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
                       {user.role?.display_name || 'N/A'}
                     </span>
                   </TableCell>

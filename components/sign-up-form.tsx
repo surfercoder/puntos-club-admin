@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { signUpOwner } from "@/actions/auth/actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -14,7 +15,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 export function SignUpForm({
@@ -24,13 +24,15 @@ export function SignUpForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [organizationName, setOrganizationName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
@@ -41,14 +43,19 @@ export function SignUpForm({
     }
 
     try {
-      const { error } = await supabase.auth.signUp({
+      const result = await signUpOwner({
         email,
         password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
-        },
+        firstName: firstName || undefined,
+        lastName: lastName || undefined,
+        organizationName: organizationName || undefined,
       });
-      if (error) {throw error;}
+
+      if (!result.success) {
+        setError(result.error || "An error occurred");
+        return;
+      }
+
       router.push("/auth/sign-up-success");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
@@ -67,6 +74,38 @@ export function SignUpForm({
         <CardContent>
           <form onSubmit={handleSignUp}>
             <div className="flex flex-col gap-6">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="firstName">First Name</Label>
+                  <Input
+                    id="firstName"
+                    onChange={(e) => setFirstName(e.target.value)}
+                    placeholder="John"
+                    type="text"
+                    value={firstName}
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="lastName">Last Name</Label>
+                  <Input
+                    id="lastName"
+                    onChange={(e) => setLastName(e.target.value)}
+                    placeholder="Doe"
+                    type="text"
+                    value={lastName}
+                  />
+                </div>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="organizationName">Organization Name</Label>
+                <Input
+                  id="organizationName"
+                  onChange={(e) => setOrganizationName(e.target.value)}
+                  placeholder="My Business"
+                  type="text"
+                  value={organizationName}
+                />
+              </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>
                 <Input

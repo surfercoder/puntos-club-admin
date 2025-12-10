@@ -42,9 +42,25 @@ DELETE FROM points_rule;
 -- 8. Delete beneficiary-organization relationships
 DELETE FROM beneficiary_organization;
 
+-- 8b. beneficiary_stores and beneficiary_total_points are VIEWS, not tables
+-- They don't store data directly, so no deletion needed
+-- (Data is deleted when underlying tables are cleared)
+
 -- 9. Delete user data
 DELETE FROM beneficiary;
 DELETE FROM app_user;
+
+-- ============================================================================
+-- DELETE SUPABASE AUTH DATA
+-- ============================================================================
+-- Clear all authentication records (order matters due to foreign keys)
+DELETE FROM auth.identities;
+DELETE FROM auth.sessions;
+DELETE FROM auth.refresh_tokens;
+DELETE FROM auth.mfa_factors;
+DELETE FROM auth.mfa_challenges;
+DELETE FROM auth.mfa_amr_claims;
+DELETE FROM auth.users;
 
 -- 10. Delete permission data
 DELETE FROM collaborator_permission;
@@ -61,39 +77,41 @@ DELETE FROM organization;
 -- 13. Delete status data
 DELETE FROM status;
 
--- 14. Keep user_role table (these are system roles, not user data)
--- DELETE FROM user_role; -- COMMENTED OUT - Keep roles for system
+-- 14. user_with_role is a VIEW, not a table
+-- No deletion needed (data is deleted when underlying tables are cleared)
+
+-- 15. Keep user_role table (these are system roles, not user data)
+-- DELETE FROM user_role; -- COMMENTED OUT - Keep roles for system (has 5 records)
 
 -- Re-enable triggers
 SET session_replication_role = 'origin';
 
 -- ============================================================================
--- RESET SEQUENCES (Optional - resets auto-increment IDs to 1)
+-- RESET SEQUENCES (resets auto-increment IDs to 1)
 -- ============================================================================
--- Uncomment the following lines if you want to reset ID sequences
 
--- ALTER SEQUENCE purchase_item_id_seq RESTART WITH 1;
--- ALTER SEQUENCE purchase_id_seq RESTART WITH 1;
--- ALTER SEQUENCE history_id_seq RESTART WITH 1;
--- ALTER SEQUENCE redemption_id_seq RESTART WITH 1;
--- ALTER SEQUENCE app_order_id_seq RESTART WITH 1;
--- ALTER SEQUENCE assignment_id_seq RESTART WITH 1;
--- ALTER SEQUENCE stock_id_seq RESTART WITH 1;
--- ALTER SEQUENCE product_id_seq RESTART WITH 1;
--- ALTER SEQUENCE purchasable_item_id_seq RESTART WITH 1;
--- ALTER SEQUENCE subcategory_id_seq RESTART WITH 1;
--- ALTER SEQUENCE category_id_seq RESTART WITH 1;
--- ALTER SEQUENCE points_rule_id_seq RESTART WITH 1;
--- ALTER SEQUENCE beneficiary_organization_id_seq RESTART WITH 1;
--- ALTER SEQUENCE beneficiary_id_seq RESTART WITH 1;
--- ALTER SEQUENCE app_user_id_seq RESTART WITH 1;
--- ALTER SEQUENCE collaborator_permission_id_seq RESTART WITH 1;
--- ALTER SEQUENCE user_permission_id_seq RESTART WITH 1;
--- ALTER SEQUENCE restricted_collaborator_action_id_seq RESTART WITH 1;
--- ALTER SEQUENCE branch_id_seq RESTART WITH 1;
--- ALTER SEQUENCE address_id_seq RESTART WITH 1;
--- ALTER SEQUENCE organization_id_seq RESTART WITH 1;
--- ALTER SEQUENCE status_id_seq RESTART WITH 1;
+ALTER SEQUENCE purchase_item_id_seq RESTART WITH 1;
+ALTER SEQUENCE purchase_id_seq RESTART WITH 1;
+ALTER SEQUENCE history_id_seq RESTART WITH 1;
+ALTER SEQUENCE redemption_id_seq RESTART WITH 1;
+ALTER SEQUENCE app_order_id_seq RESTART WITH 1;
+ALTER SEQUENCE assignment_id_seq RESTART WITH 1;
+ALTER SEQUENCE stock_id_seq RESTART WITH 1;
+ALTER SEQUENCE product_id_seq RESTART WITH 1;
+ALTER SEQUENCE purchasable_item_id_seq RESTART WITH 1;
+ALTER SEQUENCE subcategory_id_seq RESTART WITH 1;
+ALTER SEQUENCE category_id_seq RESTART WITH 1;
+ALTER SEQUENCE points_rule_id_seq RESTART WITH 1;
+ALTER SEQUENCE beneficiary_organization_id_seq RESTART WITH 1;
+ALTER SEQUENCE beneficiary_id_seq RESTART WITH 1;
+ALTER SEQUENCE app_user_id_seq RESTART WITH 1;
+ALTER SEQUENCE collaborator_permission_id_seq RESTART WITH 1;
+ALTER SEQUENCE user_permission_id_seq RESTART WITH 1;
+ALTER SEQUENCE restricted_collaborator_action_id_seq RESTART WITH 1;
+ALTER SEQUENCE branch_id_seq RESTART WITH 1;
+ALTER SEQUENCE address_id_seq RESTART WITH 1;
+ALTER SEQUENCE organization_id_seq RESTART WITH 1;
+ALTER SEQUENCE status_id_seq RESTART WITH 1;
 
 -- ============================================================================
 -- VERIFICATION QUERIES
@@ -125,6 +143,7 @@ UNION ALL SELECT 'address', COUNT(*) FROM address
 UNION ALL SELECT 'organization', COUNT(*) FROM organization
 UNION ALL SELECT 'status', COUNT(*) FROM status
 UNION ALL SELECT 'user_role', COUNT(*) FROM user_role
+UNION ALL SELECT 'auth.users', COUNT(*) FROM auth.users
 ORDER BY table_name;
 */
 
