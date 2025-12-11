@@ -96,7 +96,7 @@ export default async function UserPermissionListPage() {
                   <TableCell>{userPermission.branch?.name || 'N/A'}</TableCell>
                   <TableCell>{userPermission.action}</TableCell>
                   <TableCell>
-                    {new Date(userPermission.assignment_date).toLocaleDateString()}
+                    {new Date(userPermission.assignment_date).toLocaleDateString('en-US', { timeZone: 'UTC' })}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">

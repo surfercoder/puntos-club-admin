@@ -9,6 +9,7 @@ export * from './category';
 export * from './history';
 export * from './organization';
 export * from './product';
+export * from './purchasable_item';
 export * from './redemption';
 export * from './status';
 export * from './stock';

@@ -91,7 +91,7 @@ export default async function AssignmentListPage() {
                   <TableCell>{assignment.points}</TableCell>
                   <TableCell>{assignment.reason || 'N/A'}</TableCell>
                   <TableCell>
-                    {new Date(assignment.assignment_date).toLocaleDateString()}
+                    {new Date(assignment.assignment_date).toLocaleDateString('en-US', { timeZone: 'UTC' })}
                   </TableCell>
                   <TableCell className="flex gap-2">
                     <Button asChild size="sm" variant="secondary">

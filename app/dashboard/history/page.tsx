@@ -91,7 +91,7 @@ export default async function HistoryListPage() {
                   </TableCell>
                   <TableCell>{history.status?.name || 'N/A'}</TableCell>
                   <TableCell>
-                    {new Date(history.change_date).toLocaleDateString()}
+                    {new Date(history.change_date).toLocaleDateString('en-US', { timeZone: 'UTC' })}
                   </TableCell>
                   <TableCell>{history.observations || 'N/A'}</TableCell>
                   <TableCell className="text-right">
@@ -102,7 +102,7 @@ export default async function HistoryListPage() {
                         </Link>
                       </Button>
                       <DeleteModal 
-                        historyDescription={`${history.app_order?.order_number || 'N/A'} - ${new Date(history.change_date).toLocaleDateString()}`}
+                        historyDescription={`${history.app_order?.order_number || 'N/A'} - ${new Date(history.change_date).toLocaleDateString('en-US', { timeZone: 'UTC' })}`}
                         historyId={history.id}
                       />
                     </div>

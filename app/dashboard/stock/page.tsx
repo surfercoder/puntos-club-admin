@@ -96,7 +96,7 @@ export default async function StockListPage() {
                   <TableCell>{stock.quantity}</TableCell>
                   <TableCell>{stock.minimum_quantity}</TableCell>
                   <TableCell>
-                    {new Date(stock.last_updated).toLocaleDateString()}
+                    {new Date(stock.last_updated).toLocaleDateString('en-US', { timeZone: 'UTC' })}
                   </TableCell>
                   <TableCell>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${

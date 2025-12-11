@@ -72,10 +72,11 @@ export async function checkAdminPortalAccess(): Promise<{
 }
 
 /**
- * Sign up a new admin user (owner) with their organization
- * Creates: 1) Supabase Auth user, 2) Organization, 3) app_user record with owner role
+ * Sign up a new system admin user
+ * Creates: 1) Supabase Auth user, 2) Organization, 3) app_user record with admin role
+ * Note: Only system administrators (partners/builders) should sign up through this flow
  */
-export async function signUpOwner(data: {
+export async function signUpAdmin(data: {
   email: string;
   password: string;
   firstName?: string;
@@ -100,17 +101,17 @@ export async function signUpOwner(data: {
       return { success: false, error: authError?.message || 'Failed to create auth user' };
     }
 
-    // 2. Get the owner role ID
+    // 2. Get the admin role ID
     const { data: roleData, error: roleError } = await adminClient
       .from('user_role')
       .select('id')
-      .eq('name', 'owner')
+      .eq('name', 'admin')
       .single();
 
     if (roleError || !roleData) {
       // Cleanup: delete the auth user if we can't proceed
       await adminClient.auth.admin.deleteUser(authData.user.id);
-      return { success: false, error: 'Failed to get owner role' };
+      return { success: false, error: 'Failed to get admin role' };
     }
 
     // 3. Create the organization

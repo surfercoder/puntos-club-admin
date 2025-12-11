@@ -79,7 +79,7 @@ export default async function BeneficiaryListPage() {
                   <TableCell>{beneficiary.document_id || 'N/A'}</TableCell>
                   <TableCell>{beneficiary.available_points}</TableCell>
                   <TableCell>
-                    {new Date(beneficiary.registration_date).toLocaleDateString()}
+                    {new Date(beneficiary.registration_date).toLocaleDateString('en-US', { timeZone: 'UTC' })}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">

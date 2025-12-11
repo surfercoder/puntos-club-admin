@@ -70,7 +70,7 @@ export default async function AppOrderListPage() {
                     {order.order_number}
                   </TableCell>
                   <TableCell>
-                    {new Date(order.creation_date).toLocaleDateString()}
+                    {new Date(order.creation_date).toLocaleDateString('en-US', { timeZone: 'UTC' })}
                   </TableCell>
                   <TableCell>{order.total_points}</TableCell>
                   <TableCell>{order.observations || 'N/A'}</TableCell>

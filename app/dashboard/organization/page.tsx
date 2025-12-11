@@ -72,7 +72,7 @@ export default async function OrganizationListPage() {
                   <TableCell>{organization.business_name || 'N/A'}</TableCell>
                   <TableCell>{organization.tax_id || 'N/A'}</TableCell>
                   <TableCell>
-                    {new Date(organization.creation_date).toLocaleDateString()}
+                    {new Date(organization.creation_date).toLocaleDateString('en-US', { timeZone: 'UTC' })}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">

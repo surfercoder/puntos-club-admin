@@ -106,7 +106,7 @@ export default async function RedemptionListPage() {
                   <TableCell>{redemption.points_used}</TableCell>
                   <TableCell>{redemption.quantity}</TableCell>
                   <TableCell>
-                    {new Date(redemption.redemption_date).toLocaleDateString()}
+                    {new Date(redemption.redemption_date).toLocaleDateString('en-US', { timeZone: 'UTC' })}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">

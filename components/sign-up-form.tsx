@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { signUpOwner } from "@/actions/auth/actions";
+import { signUpAdmin } from "@/actions/auth/actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -43,7 +43,7 @@ export function SignUpForm({
     }
 
     try {
-      const result = await signUpOwner({
+      const result = await signUpAdmin({
         email,
         password,
         firstName: firstName || undefined,
