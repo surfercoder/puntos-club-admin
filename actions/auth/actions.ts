@@ -73,15 +73,15 @@ export async function checkAdminPortalAccess(): Promise<{
 
 /**
  * Sign up a new system admin user
- * Creates: 1) Supabase Auth user, 2) Organization, 3) app_user record with admin role
+ * Creates: 1) Supabase Auth user, 2) app_user record with admin role
  * Note: Only system administrators (partners/builders) should sign up through this flow
+ * Admin users do NOT belong to any organization - they have full system access
  */
 export async function signUpAdmin(data: {
   email: string;
   password: string;
   firstName?: string;
   lastName?: string;
-  organizationName?: string;
 }): Promise<{ success: boolean; error: string | null }> {
   const adminClient = createAdminClient();
 
@@ -114,37 +114,22 @@ export async function signUpAdmin(data: {
       return { success: false, error: 'Failed to get admin role' };
     }
 
-    // 3. Create the organization
-    const orgName = data.organizationName || `${data.email}'s Organization`;
-    const { data: orgData, error: orgError } = await adminClient
-      .from('organization')
-      .insert({ name: orgName })
-      .select('id')
-      .single();
-
-    if (orgError || !orgData) {
-      // Cleanup: delete the auth user if we can't proceed
-      await adminClient.auth.admin.deleteUser(authData.user.id);
-      return { success: false, error: 'Failed to create organization' };
-    }
-
-    // 4. Create the app_user record linked to auth user and organization
+    // 3. Create the app_user record linked to auth user (no organization for admins)
     const { error: appUserError } = await adminClient
       .from('app_user')
       .insert({
         email: data.email,
         first_name: data.firstName || null,
         last_name: data.lastName || null,
-        organization_id: orgData.id,
+        organization_id: null, // Admin users don't belong to any organization
         role_id: roleData.id,
         auth_user_id: authData.user.id,
         active: true,
       });
 
     if (appUserError) {
-      // Cleanup: delete auth user and organization
+      // Cleanup: delete auth user
       await adminClient.auth.admin.deleteUser(authData.user.id);
-      await adminClient.from('organization').delete().eq('id', orgData.id);
       return { success: false, error: 'Failed to create user profile' };
     }
 

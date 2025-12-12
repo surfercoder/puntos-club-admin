@@ -26,7 +26,6 @@ export function SignUpForm({
   const [repeatPassword, setRepeatPassword] = useState("");
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
-  const [organizationName, setOrganizationName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
@@ -48,7 +47,6 @@ export function SignUpForm({
         password,
         firstName: firstName || undefined,
         lastName: lastName || undefined,
-        organizationName: organizationName || undefined,
       });
 
       if (!result.success) {
@@ -95,16 +93,6 @@ export function SignUpForm({
                     value={lastName}
                   />
                 </div>
-              </div>
-              <div className="grid gap-2">
-                <Label htmlFor="organizationName">Organization Name</Label>
-                <Input
-                  id="organizationName"
-                  onChange={(e) => setOrganizationName(e.target.value)}
-                  placeholder="My Business"
-                  type="text"
-                  value={organizationName}
-                />
               </div>
               <div className="grid gap-2">
                 <Label htmlFor="email">Email</Label>

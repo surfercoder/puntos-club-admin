@@ -194,7 +194,7 @@ export default async function DashboardPage() {
       </div>
 
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {entities.map((entity) => {
+        {[...entities].sort((a, b) => a.name.localeCompare(b.name)).map((entity) => {
             const IconComponent = entity.icon;
             return (
               <Card key={entity.name} className="hover:shadow-lg transition-shadow">
