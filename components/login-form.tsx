@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { checkAdminPortalAccess } from "@/actions/auth/actions";
+import { signInAdminPortal } from "@/actions/auth/actions";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,7 +15,6 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 
 export function LoginForm({
@@ -30,26 +29,21 @@ export function LoginForm({
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    const supabase = createClient();
     setIsLoading(true);
     setError(null);
 
     try {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (error) {throw error;}
+      const result = await signInAdminPortal(email, password);
 
-      // Check user's role using server action (bypasses RLS issues)
-      const { allowed, error: accessError } = await checkAdminPortalAccess();
-
-      if (!allowed) {
-        throw new Error(accessError || 'No tienes permisos para acceder al portal de administración.');
+      if (!result.success) {
+        throw new Error(
+          result.error ||
+            "No tienes permisos para acceder al portal de administración.",
+        );
       }
 
-      // Update this route to redirect to an authenticated route. The user already has an active session.
       router.push("/dashboard");
+      router.refresh();
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

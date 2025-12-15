@@ -13,6 +13,9 @@ export interface PointsRuleInput {
   organization_id?: number;
   branch_id?: number;
   category_id?: number;
+  start_date?: string;
+  end_date?: string;
+  is_default?: boolean;
   valid_from?: string;
   valid_until?: string;
   days_of_week?: number[];
@@ -124,27 +127,46 @@ export async function createPointsRule(input: PointsRuleInput) {
       };
     }
 
+    const normalizedInput: PointsRuleInput = {
+      ...input,
+      ...(input.is_default
+        ? {
+            priority: 0,
+            start_date: undefined,
+            end_date: undefined,
+            valid_from: undefined,
+            valid_until: undefined,
+            days_of_week: undefined,
+            time_start: undefined,
+            time_end: undefined,
+          }
+        : {}),
+    };
+
     const { data, error } = await supabase
       .from("points_rule")
       .insert({
-        name: input.name,
-        description: input.description,
-        rule_type: input.rule_type,
-        config: input.config,
-        is_active: input.is_active ?? true,
-        priority: input.priority ?? 0,
-        organization_id: input.organization_id,
-        branch_id: input.branch_id,
-        category_id: input.category_id,
-        valid_from: input.valid_from,
-        valid_until: input.valid_until,
-        days_of_week: input.days_of_week,
-        time_start: input.time_start,
-        time_end: input.time_end,
-        display_name: input.display_name,
-        display_icon: input.display_icon,
-        display_color: input.display_color,
-        show_in_app: input.show_in_app ?? true,
+        name: normalizedInput.name,
+        description: normalizedInput.description,
+        rule_type: normalizedInput.rule_type,
+        config: normalizedInput.config,
+        is_active: normalizedInput.is_active ?? true,
+        priority: normalizedInput.priority ?? 0,
+        organization_id: normalizedInput.organization_id,
+        branch_id: normalizedInput.branch_id,
+        category_id: normalizedInput.category_id,
+        start_date: normalizedInput.start_date,
+        end_date: normalizedInput.end_date,
+        is_default: normalizedInput.is_default ?? false,
+        valid_from: normalizedInput.valid_from,
+        valid_until: normalizedInput.valid_until,
+        days_of_week: normalizedInput.days_of_week,
+        time_start: normalizedInput.time_start,
+        time_end: normalizedInput.time_end,
+        display_name: normalizedInput.display_name,
+        display_icon: normalizedInput.display_icon,
+        display_color: normalizedInput.display_color,
+        show_in_app: normalizedInput.show_in_app ?? true,
       })
       .select()
       .single();
@@ -170,25 +192,44 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
     const supabase = await createClient();
 
     const updateData: Record<string, unknown> = {};
+
+    const normalizedInput: Partial<PointsRuleInput> = {
+      ...input,
+      ...(input.is_default
+        ? {
+            priority: 0,
+            start_date: undefined,
+            end_date: undefined,
+            valid_from: undefined,
+            valid_until: undefined,
+            days_of_week: undefined,
+            time_start: undefined,
+            time_end: undefined,
+          }
+        : {}),
+    };
     
-    if (input.name !== undefined) updateData.name = input.name;
-    if (input.description !== undefined) updateData.description = input.description;
-    if (input.rule_type !== undefined) updateData.rule_type = input.rule_type;
-    if (input.config !== undefined) updateData.config = input.config;
-    if (input.is_active !== undefined) updateData.is_active = input.is_active;
-    if (input.priority !== undefined) updateData.priority = input.priority;
-    if (input.organization_id !== undefined) updateData.organization_id = input.organization_id;
-    if (input.branch_id !== undefined) updateData.branch_id = input.branch_id;
-    if (input.category_id !== undefined) updateData.category_id = input.category_id;
-    if (input.valid_from !== undefined) updateData.valid_from = input.valid_from;
-    if (input.valid_until !== undefined) updateData.valid_until = input.valid_until;
-    if (input.days_of_week !== undefined) updateData.days_of_week = input.days_of_week;
-    if (input.time_start !== undefined) updateData.time_start = input.time_start;
-    if (input.time_end !== undefined) updateData.time_end = input.time_end;
-    if (input.display_name !== undefined) updateData.display_name = input.display_name;
-    if (input.display_icon !== undefined) updateData.display_icon = input.display_icon;
-    if (input.display_color !== undefined) updateData.display_color = input.display_color;
-    if (input.show_in_app !== undefined) updateData.show_in_app = input.show_in_app;
+    if (normalizedInput.name !== undefined) updateData.name = normalizedInput.name;
+    if (normalizedInput.description !== undefined) updateData.description = normalizedInput.description;
+    if (normalizedInput.rule_type !== undefined) updateData.rule_type = normalizedInput.rule_type;
+    if (normalizedInput.config !== undefined) updateData.config = normalizedInput.config;
+    if (normalizedInput.is_active !== undefined) updateData.is_active = normalizedInput.is_active;
+    if (normalizedInput.priority !== undefined) updateData.priority = normalizedInput.priority;
+    if (normalizedInput.organization_id !== undefined) updateData.organization_id = normalizedInput.organization_id;
+    if (normalizedInput.branch_id !== undefined) updateData.branch_id = normalizedInput.branch_id;
+    if (normalizedInput.category_id !== undefined) updateData.category_id = normalizedInput.category_id;
+    if (normalizedInput.start_date !== undefined) updateData.start_date = normalizedInput.start_date;
+    if (normalizedInput.end_date !== undefined) updateData.end_date = normalizedInput.end_date;
+    if (normalizedInput.is_default !== undefined) updateData.is_default = normalizedInput.is_default;
+    if (normalizedInput.valid_from !== undefined) updateData.valid_from = normalizedInput.valid_from;
+    if (normalizedInput.valid_until !== undefined) updateData.valid_until = normalizedInput.valid_until;
+    if (normalizedInput.days_of_week !== undefined) updateData.days_of_week = normalizedInput.days_of_week;
+    if (normalizedInput.time_start !== undefined) updateData.time_start = normalizedInput.time_start;
+    if (normalizedInput.time_end !== undefined) updateData.time_end = normalizedInput.time_end;
+    if (normalizedInput.display_name !== undefined) updateData.display_name = normalizedInput.display_name;
+    if (normalizedInput.display_icon !== undefined) updateData.display_icon = normalizedInput.display_icon;
+    if (normalizedInput.display_color !== undefined) updateData.display_color = normalizedInput.display_color;
+    if (normalizedInput.show_in_app !== undefined) updateData.show_in_app = normalizedInput.show_in_app;
 
     const { data, error } = await supabase
       .from("points_rule")

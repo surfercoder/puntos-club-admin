@@ -26,7 +26,7 @@ export async function checkAdminPortalAccess(): Promise<{
 
   const { data: userByAuthId } = await supabase
     .from('app_user')
-    .select('id, auth_user_id, email, role:role_id(name)')
+    .select('id, auth_user_id, email, role:user_role(name)')
     .eq('auth_user_id', user.id)
     .single();
 
@@ -36,7 +36,7 @@ export async function checkAdminPortalAccess(): Promise<{
     // Fallback: try to find by email (for users created before auth_user_id was added)
     const { data: userByEmail } = await supabase
       .from('app_user')
-      .select('id, auth_user_id, email, role:role_id(name)')
+      .select('id, auth_user_id, email, role:user_role(name)')
       .eq('email', user.email)
       .single();
 
@@ -69,6 +69,31 @@ export async function checkAdminPortalAccess(): Promise<{
   }
 
   return { allowed: true, role: roleName, error: null };
+}
+
+export async function signInAdminPortal(email: string, password: string): Promise<{
+  success: boolean;
+  role: string | null;
+  error: string | null;
+}> {
+  const supabase = await createClient();
+
+  const { error: signInError } = await supabase.auth.signInWithPassword({
+    email,
+    password,
+  });
+
+  if (signInError) {
+    return { success: false, role: null, error: signInError.message };
+  }
+
+  // After server-side sign-in, cookies are set and we can check portal access.
+  const access = await checkAdminPortalAccess();
+  if (!access.allowed) {
+    return { success: false, role: access.role, error: access.error };
+  }
+
+  return { success: true, role: access.role, error: null };
 }
 
 /**

@@ -17,22 +17,44 @@ export async function getCurrentUser(): Promise<AppUserWithRelations | null> {
     return null;
   }
 
-  // Find the user in app_user table by email
-  // Note: In production, you should link auth.users.id to app_user.user_id (UUID)
-  // For now, we're using email as the link
-  const { data: appUser, error: userError } = await supabase
+  // Prefer linking auth.users.id -> app_user.auth_user_id.
+  // Fallback to email for legacy rows and backfill auth_user_id when found.
+  const select = `
+    *,
+    role:user_role(id, name, display_name, description),
+    organization:organization(id, name)
+  `
+
+  const { data: userByAuthId } = await supabase
     .from('app_user')
-    .select(`
-      *,
-      role:user_role(id, name, display_name, description),
-      organization:organization(id, name, active)
-    `)
-    .eq('email', authData.user.email)
+    .select(select)
+    .eq('auth_user_id', authData.user.id)
     .single();
 
-  if (userError || !appUser) {
+  if (userByAuthId) {
+    return userByAuthId as AppUserWithRelations;
+  }
+
+  const email = authData.user.email;
+  if (!email) {
     return null;
   }
 
-  return appUser as AppUserWithRelations;
+  const { data: userByEmail } = await supabase
+    .from('app_user')
+    .select(select)
+    .eq('email', email)
+    .single();
+
+  if (!userByEmail) {
+    return null;
+  }
+
+  // Best-effort backfill for future lookups.
+  await supabase
+    .from('app_user')
+    .update({ auth_user_id: authData.user.id })
+    .eq('id', userByEmail.id);
+
+  return userByEmail as AppUserWithRelations;
 }

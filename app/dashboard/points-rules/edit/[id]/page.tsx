@@ -40,11 +40,14 @@ export default function EditPointsRulePage() {
     points_per_dollar: "2",
     percentage: "10",
     is_active: true,
+    is_default: false,
     priority: "0",
     display_name: "",
     display_icon: "⭐",
     display_color: "#3B82F6",
     show_in_app: true,
+    start_date: "",
+    end_date: "",
     time_start: "",
     time_end: "",
     days_of_week: [] as number[],
@@ -64,11 +67,14 @@ export default function EditPointsRulePage() {
           points_per_dollar: config?.points_per_dollar?.toString() || config?.points_per_item?.toString() || "2",
           percentage: config?.percentage?.toString() || "10",
           is_active: rule.is_active ?? true,
+          is_default: rule.is_default ?? false,
           priority: rule.priority?.toString() || "0",
           display_name: rule.display_name || "",
           display_icon: rule.display_icon || "⭐",
           display_color: rule.display_color || "#3B82F6",
           show_in_app: rule.show_in_app ?? true,
+          start_date: rule.start_date || "",
+          end_date: rule.end_date || "",
           time_start: rule.time_start || "",
           time_end: rule.time_end || "",
           days_of_week: rule.days_of_week || [],
@@ -106,14 +112,22 @@ export default function EditPointsRulePage() {
       rule_type: formData.rule_type,
       config,
       is_active: formData.is_active,
+      is_default: formData.is_default,
       priority: parseInt(formData.priority),
       display_name: formData.display_name || formData.name,
       display_icon: formData.display_icon,
       display_color: formData.display_color,
-      show_in_app: formData.show_in_app,
-      time_start: formData.time_start || undefined,
-      time_end: formData.time_end || undefined,
-      days_of_week: formData.days_of_week.length > 0 ? formData.days_of_week : undefined,
+      show_in_app: formData.is_default ? false : formData.show_in_app,
+      start_date: formData.is_default ? undefined : (formData.start_date || undefined),
+      end_date: formData.is_default ? undefined : (formData.end_date || undefined),
+      time_start: formData.is_default ? undefined : (formData.time_start || undefined),
+      time_end: formData.is_default ? undefined : (formData.time_end || undefined),
+      days_of_week:
+        formData.is_default
+          ? undefined
+          : formData.days_of_week.length > 0
+            ? formData.days_of_week
+            : undefined,
     });
 
     setLoading(false);
@@ -200,9 +214,35 @@ export default function EditPointsRulePage() {
 
                 <div className="flex items-center space-x-2">
                   <Switch
+                    id="is_default"
+                    checked={formData.is_default}
+                    onCheckedChange={(checked) =>
+                      setFormData({
+                        ...formData,
+                        is_default: checked,
+                        ...(checked
+                          ? {
+                              priority: "0",
+                              start_date: "",
+                              end_date: "",
+                              time_start: "",
+                              time_end: "",
+                              days_of_week: [],
+                              show_in_app: false,
+                            }
+                          : {}),
+                      })
+                    }
+                  />
+                  <Label htmlFor="is_default">Default</Label>
+                </div>
+
+                <div className="flex items-center space-x-2">
+                  <Switch
                     id="show_in_app"
                     checked={formData.show_in_app}
                     onCheckedChange={(checked) => setFormData({ ...formData, show_in_app: checked })}
+                    disabled={formData.is_default}
                   />
                   <Label htmlFor="show_in_app">Show in Mobile App</Label>
                 </div>
@@ -305,12 +345,36 @@ export default function EditPointsRulePage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
+                  <Label htmlFor="start_date">Start Date</Label>
+                  <Input
+                    id="start_date"
+                    type="date"
+                    value={formData.start_date}
+                    onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+                    disabled={formData.is_default}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="end_date">End Date</Label>
+                  <Input
+                    id="end_date"
+                    type="date"
+                    value={formData.end_date}
+                    onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+                    disabled={formData.is_default}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
                   <Label htmlFor="time_start">Start Time</Label>
                   <Input
                     id="time_start"
                     type="time"
                     value={formData.time_start}
                     onChange={(e) => setFormData({ ...formData, time_start: e.target.value })}
+                    disabled={formData.is_default}
                   />
                 </div>
                 <div>
@@ -320,6 +384,7 @@ export default function EditPointsRulePage() {
                     type="time"
                     value={formData.time_end}
                     onChange={(e) => setFormData({ ...formData, time_end: e.target.value })}
+                    disabled={formData.is_default}
                   />
                 </div>
               </div>
@@ -336,6 +401,7 @@ export default function EditPointsRulePage() {
                         id={`day-${day.value}`}
                         checked={formData.days_of_week.includes(day.value)}
                         onCheckedChange={() => toggleDay(day.value)}
+                        disabled={formData.is_default}
                       />
                       <Label htmlFor={`day-${day.value}`} className="font-normal">
                         {day.label}

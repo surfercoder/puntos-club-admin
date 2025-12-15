@@ -31,6 +31,7 @@ interface PointsRule {
   rule_type: string;
   config: Record<string, unknown>;
   is_active: boolean;
+  is_default?: boolean;
   priority: number;
   display_name: string;
   display_icon: string;
@@ -39,6 +40,8 @@ interface PointsRule {
   time_start: string | null;
   time_end: string | null;
   days_of_week: number[] | null;
+  start_date?: string | null;
+  end_date?: string | null;
   valid_from: string | null;
   valid_until: string | null;
   organization: { name: string } | null;
@@ -128,6 +131,16 @@ export default function PointsRulesPage() {
     if (!days || days.length === 0) return "Every day";
     if (days.length === 7) return "Every day";
     return days.map(d => DAY_NAMES[d]).join(", ");
+  };
+
+  const getDateRangeDisplay = (rule: PointsRule) => {
+    if (rule.is_default) return "Always";
+    const start = rule.start_date || null;
+    const end = rule.end_date || null;
+    if (!start && !end) return null;
+    if (start && end) return `${start} → ${end}`;
+    if (start) return `From ${start}`;
+    return `Until ${end}`;
   };
 
   return (
@@ -252,6 +265,9 @@ export default function PointsRulesPage() {
                       <div className="flex items-center gap-2">
                         <span className="text-2xl">{rule.display_icon || "⭐"}</span>
                         <span className="font-medium">{rule.display_name || rule.name}</span>
+                        {rule.is_default && (
+                          <Badge variant="default">Default</Badge>
+                        )}
                       </div>
                     </TableCell>
                     <TableCell>
@@ -270,6 +286,9 @@ export default function PointsRulesPage() {
                     </TableCell>
                     <TableCell>
                       <div className="text-sm">
+                        {getDateRangeDisplay(rule) && (
+                          <div>{getDateRangeDisplay(rule)}</div>
+                        )}
                         <div>{getTimeDisplay(rule)}</div>
                         <div className="text-muted-foreground">{getDaysDisplay(rule.days_of_week)}</div>
                       </div>
