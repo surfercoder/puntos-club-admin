@@ -1,12 +1,13 @@
-import type { Subcategory } from './subcategory';
-
 export type Category = {
-  id: string;
+  id?: string;
+  organization_id?: string;
+  parent_id?: string | null;
   name: string;
   description?: string | null;
   active: boolean;
 };
 
 export type CategoryWithRelations = Category & {
-  subcategories?: Subcategory[];
+  parent?: Category;
+  children?: Category[];
 };

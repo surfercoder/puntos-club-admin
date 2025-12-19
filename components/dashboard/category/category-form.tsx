@@ -10,9 +10,11 @@ import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import type { ActionState} from '@/lib/error-handler';
 import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import { createClient } from '@/lib/supabase/client';
 import { CategorySchema } from '@/schemas/category.schema';
 import type { Category } from '@/types/category';
 
@@ -23,6 +25,41 @@ interface CategoryFormProps {
 export default function CategoryForm({ category }: CategoryFormProps) {
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
+  const [categories, setCategories] = useState<Array<{ id: string; name: string; active: boolean }>>([]);
+
+  useEffect(() => {
+    async function loadCategories() {
+      const supabase = createClient();
+      let query = supabase
+        .from('category')
+        .select('id, name, active')
+        .eq('active', true)
+        .order('name');
+
+      try {
+        const activeOrgId = window.localStorage.getItem('active_org_id');
+        if (activeOrgId) {
+          const orgIdNumber = Number(activeOrgId);
+          if (!Number.isNaN(orgIdNumber)) {
+            query = query.eq('organization_id', orgIdNumber);
+          }
+        }
+      } catch {
+        // ignore
+      }
+
+      if (category?.id) {
+        query = query.neq('id', category.id);
+      }
+
+      const { data } = await query;
+      if (data) {
+        setCategories(data);
+      }
+    }
+
+    loadCategories();
+  }, [category?.id]);
 
   // Utils
   const [actionState, formAction, pending] = useActionState(categoryFormAction, EMPTY_ACTION_STATE);
@@ -53,6 +90,24 @@ export default function CategoryForm({ category }: CategoryFormProps) {
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
       {category?.id && <input name="id" type="hidden" value={category.id} />}
+
+      <div>
+        <Label htmlFor="parent_id">Parent Category</Label>
+        <Select defaultValue={category?.parent_id ?? ''} name="parent_id">
+          <SelectTrigger>
+            <SelectValue placeholder="No parent" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="">No parent</SelectItem>
+            {categories.map((c) => (
+              <SelectItem key={c.id} value={c.id}>
+                {c.name}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        <FieldError actionState={validation ?? actionState} name="parent_id" />
+      </div>
       
       <div>
         <Label htmlFor="name">Name</Label>

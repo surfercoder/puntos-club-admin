@@ -1,5 +1,6 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
 import DeleteModal from '@/components/dashboard/category/delete-modal';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,16 @@ import type { Category } from '@/types/category';
 
 export default async function CategoryListPage() {
   const supabase = await createClient();
-  const { data, error } = await supabase.from('category').select('*').order('name');
+  const cookieStore = await cookies();
+  const activeOrgId = cookieStore.get('active_org_id')?.value;
+  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+
+  let query = supabase.from('category').select('*').order('name');
+  if (activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
+    query = query.eq('organization_id', activeOrgIdNumber);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     return <div>Error fetching categories</div>;
@@ -24,23 +34,6 @@ export default async function CategoryListPage() {
 
   return (
     <div className="space-y-6">
-      {/* Breadcrumb Navigation */}
-      <nav aria-label="Breadcrumb" className="flex">
-        <ol className="inline-flex items-center space-x-1 md:space-x-3">
-          <li className="inline-flex items-center">
-            <Link className="text-sm font-medium text-gray-500 hover:text-blue-600" href="/dashboard">
-              Dashboard
-            </Link>
-          </li>
-          <li>
-            <div className="flex items-center">
-              <span className="mx-2 text-gray-400">/</span>
-              <span className="text-sm font-medium text-gray-900">Categories</span>
-            </div>
-          </li>
-        </ol>
-      </nav>
-      
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Categories</h1>
@@ -63,8 +56,14 @@ export default async function CategoryListPage() {
           </TableHeader>
           <TableBody>
             {data && data.length > 0 ? (
-              data.map((category: Category) => (
-                <TableRow key={category.id}>
+              data.map((category: Category) => {
+                const categoryId = category.id;
+                if (!categoryId) {
+                  return null;
+                }
+
+                return (
+                <TableRow key={categoryId}>
                   <TableCell className="font-medium">
                     {category.name}
                   </TableCell>
@@ -81,18 +80,19 @@ export default async function CategoryListPage() {
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">
-                        <Link href={`/dashboard/category/edit/${category.id}`}>
+                        <Link href={`/dashboard/category/edit/${categoryId}`}>
                           <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
                       <DeleteModal 
-                        categoryId={category.id}
+                        categoryId={categoryId}
                         categoryName={category.name}
                       />
                     </div>
                   </TableCell>
                 </TableRow>
-              ))
+                )
+              })
             ) : (
               <TableRow>
                 <TableCell className="text-center py-4" colSpan={4}>No categories found.</TableCell>

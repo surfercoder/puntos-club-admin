@@ -22,7 +22,7 @@ interface ProductFormProps {
   product?: Product;
 }
 
-interface Subcategory {
+interface Category {
   id: string;
   name: string;
   active: boolean;
@@ -31,26 +31,40 @@ interface Subcategory {
 export default function ProductForm({ product }: ProductFormProps) {
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [subcategories, setSubcategories] = useState<Subcategory[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   // Utils
   const [actionState, formAction, pending] = useActionState(productFormAction, EMPTY_ACTION_STATE);
   const router = useRouter();
 
-  // Load subcategories
+  // Load categories
   useEffect(() => {
-    async function loadSubcategories() {
+    async function loadCategories() {
       const supabase = createClient();
-      const { data } = await supabase
-        .from('subcategory')
+      let query = supabase
+        .from('category')
         .select('id, name, active')
         .eq('active', true)
         .order('name');
+
+      try {
+        const activeOrgId = window.localStorage.getItem('active_org_id');
+        if (activeOrgId) {
+          const orgIdNumber = Number(activeOrgId);
+          if (!Number.isNaN(orgIdNumber)) {
+            query = query.eq('organization_id', orgIdNumber);
+          }
+        }
+      } catch {
+        // ignore
+      }
+
+      const { data } = await query;
       if (data) {
-        setSubcategories(data);
+        setCategories(data);
       }
     }
-    loadSubcategories();
+    loadCategories();
   }, []);
 
   useEffect(() => {
@@ -80,20 +94,20 @@ export default function ProductForm({ product }: ProductFormProps) {
       {product?.id && <input name="id" type="hidden" value={product.id} />}
       
       <div>
-        <Label htmlFor="subcategory_id">Subcategory</Label>
-        <Select defaultValue={product?.subcategory_id ?? ''} name="subcategory_id">
+        <Label htmlFor="category_id">Category</Label>
+        <Select defaultValue={product?.category_id ?? ''} name="category_id">
           <SelectTrigger>
-            <SelectValue placeholder="Select a subcategory" />
+            <SelectValue placeholder="Select a category" />
           </SelectTrigger>
           <SelectContent>
-            {subcategories.map((subcategory) => (
-              <SelectItem key={subcategory.id} value={subcategory.id}>
-                {subcategory.name}
+            {categories.map((category) => (
+              <SelectItem key={category.id} value={category.id}>
+                {category.name}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
-        <FieldError actionState={validation ?? actionState} name="subcategory_id" />
+        <FieldError actionState={validation ?? actionState} name="category_id" />
       </div>
 
       <div>

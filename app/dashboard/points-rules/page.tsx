@@ -144,24 +144,7 @@ export default function PointsRulesPage() {
   };
 
   return (
-    <div className="container mx-auto py-8 px-4">
-      {/* Breadcrumb Navigation */}
-      <nav aria-label="Breadcrumb" className="flex mb-6">
-        <ol className="inline-flex items-center space-x-1 md:space-x-3">
-          <li className="inline-flex items-center">
-            <Link className="text-sm font-medium text-gray-500 hover:text-blue-600" href="/dashboard">
-              Dashboard
-            </Link>
-          </li>
-          <li>
-            <div className="flex items-center">
-              <span className="mx-2 text-gray-400">/</span>
-              <span className="text-sm font-medium text-gray-900">Points Rules</span>
-            </div>
-          </li>
-        </ol>
-      </nav>
-
+    <div className="space-y-6">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold">Points Rules & Special Offers</h1>

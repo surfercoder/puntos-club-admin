@@ -1,5 +1,6 @@
 "use server";
 
+import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 
@@ -34,7 +35,11 @@ export async function getAllPointsRules() {
   try {
     const supabase = await createClient();
 
-    const { data, error } = await supabase
+    const cookieStore = await cookies();
+    const activeOrgId = cookieStore.get("active_org_id")?.value;
+    const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+
+    let query = supabase
       .from("points_rule")
       .select(`
         *,
@@ -44,6 +49,12 @@ export async function getAllPointsRules() {
       `)
       .order("priority", { ascending: false })
       .order("created_at", { ascending: false });
+
+    if (activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
+      query = query.eq("organization_id", activeOrgIdNumber);
+    }
+
+    const { data, error } = await query;
 
     if (error) {
       console.error("Error fetching points rules:", error);
@@ -119,6 +130,10 @@ export async function createPointsRule(input: PointsRuleInput) {
   try {
     const supabase = await createClient();
 
+    const cookieStore = await cookies();
+    const activeOrgId = cookieStore.get("active_org_id")?.value;
+    const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+
     // Validate required fields
     if (!input.name || !input.rule_type || !input.config) {
       return {
@@ -127,8 +142,32 @@ export async function createPointsRule(input: PointsRuleInput) {
       };
     }
 
+    if (!input.branch_id) {
+      return {
+        success: false,
+        error: "Missing required field: branch_id",
+      };
+    }
+
+    const { data: branchData, error: branchError } = await supabase
+      .from("branch")
+      .select("id, organization_id")
+      .eq("id", input.branch_id)
+      .single();
+
+    if (branchError || !branchData) {
+      return { success: false, error: branchError?.message || "Invalid branch" };
+    }
+
+    if (activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
+      if (Number(branchData.organization_id) !== activeOrgIdNumber) {
+        return { success: false, error: "Branch does not belong to active organization" };
+      }
+    }
+
     const normalizedInput: PointsRuleInput = {
       ...input,
+      organization_id: Number(branchData.organization_id),
       ...(input.is_default
         ? {
             priority: 0,
@@ -191,6 +230,10 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
   try {
     const supabase = await createClient();
 
+    const cookieStore = await cookies();
+    const activeOrgId = cookieStore.get("active_org_id")?.value;
+    const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+
     const updateData: Record<string, unknown> = {};
 
     const normalizedInput: Partial<PointsRuleInput> = {
@@ -208,6 +251,26 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
           }
         : {}),
     };
+
+    if (normalizedInput.branch_id === undefined || normalizedInput.branch_id === null) {
+      return { success: false, error: "Missing required field: branch_id" };
+    }
+
+    const { data: branchData, error: branchError } = await supabase
+      .from("branch")
+      .select("id, organization_id")
+      .eq("id", normalizedInput.branch_id)
+      .single();
+
+    if (branchError || !branchData) {
+      return { success: false, error: branchError?.message || "Invalid branch" };
+    }
+
+    if (activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
+      if (Number(branchData.organization_id) !== activeOrgIdNumber) {
+        return { success: false, error: "Branch does not belong to active organization" };
+      }
+    }
     
     if (normalizedInput.name !== undefined) updateData.name = normalizedInput.name;
     if (normalizedInput.description !== undefined) updateData.description = normalizedInput.description;
@@ -215,8 +278,8 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
     if (normalizedInput.config !== undefined) updateData.config = normalizedInput.config;
     if (normalizedInput.is_active !== undefined) updateData.is_active = normalizedInput.is_active;
     if (normalizedInput.priority !== undefined) updateData.priority = normalizedInput.priority;
-    if (normalizedInput.organization_id !== undefined) updateData.organization_id = normalizedInput.organization_id;
-    if (normalizedInput.branch_id !== undefined) updateData.branch_id = normalizedInput.branch_id;
+    updateData.organization_id = Number(branchData.organization_id);
+    updateData.branch_id = normalizedInput.branch_id;
     if (normalizedInput.category_id !== undefined) updateData.category_id = normalizedInput.category_id;
     if (normalizedInput.start_date !== undefined) updateData.start_date = normalizedInput.start_date;
     if (normalizedInput.end_date !== undefined) updateData.end_date = normalizedInput.end_date;

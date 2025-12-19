@@ -13,8 +13,10 @@ export * from './purchasable_item';
 export * from './redemption';
 export * from './status';
 export * from './stock';
-export * from './subcategory';
 export * from './user_permission';
+
+export * from './app_user_organization';
+export * from './beneficiary_organization';
 
 // User role system types
 export * from './user_role';

@@ -1,10 +1,10 @@
 import type { Redemption } from './redemption';
 import type { Stock } from './stock';
-import type { Subcategory } from './subcategory';
+import type { Category } from './category';
 
 export type Product = {
   id: string;
-  subcategory_id: string;
+  category_id: string;
   name: string;
   description?: string | null;
   required_points: number;
@@ -13,7 +13,7 @@ export type Product = {
 };
 
 export type ProductWithRelations = Product & {
-  subcategory?: Subcategory;
+  category?: Category;
   stock?: Stock[];
   redemptions?: Redemption[];
 };

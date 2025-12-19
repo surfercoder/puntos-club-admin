@@ -2,7 +2,6 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
-import type { UserRole } from "@/types/user_role";
 
 /**
  * Get all user roles
@@ -138,4 +137,3 @@ export async function getUsersCountByRole() {
   }
 }
 
-export type { UserRole };

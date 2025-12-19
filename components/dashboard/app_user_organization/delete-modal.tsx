@@ -5,15 +5,15 @@ import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { deleteSubcategory } from '@/actions/dashboard/subcategory/actions';
+import { deleteAppUserOrganization } from '@/actions/dashboard/app_user_organization/actions';
 import { Button } from '@/components/ui/button';
 
 interface DeleteModalProps {
-  subcategoryId: string;
-  subcategoryName: string;
+  appUserOrganizationId: string;
+  appUserOrganizationDescription: string;
 }
 
-export default function DeleteModal({ subcategoryId, subcategoryName }: DeleteModalProps) {
+export default function DeleteModal({ appUserOrganizationId, appUserOrganizationDescription }: DeleteModalProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
@@ -21,11 +21,11 @@ export default function DeleteModal({ subcategoryId, subcategoryName }: DeleteMo
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      const result = await deleteSubcategory(subcategoryId);
+      const result = await deleteAppUserOrganization(appUserOrganizationId);
       if (result.error) {
-        toast.error('Failed to delete subcategory');
+        toast.error('Failed to delete membership');
       } else {
-        toast.success('Subcategory deleted successfully');
+        toast.success('Membership deleted successfully');
         router.refresh();
       }
     } catch {
@@ -38,11 +38,7 @@ export default function DeleteModal({ subcategoryId, subcategoryName }: DeleteMo
 
   if (!isOpen) {
     return (
-      <Button
-        onClick={() => setIsOpen(true)}
-        size="sm"
-        variant="destructive"
-      >
+      <Button onClick={() => setIsOpen(true)} size="sm" variant="destructive">
         <Trash2 className="h-4 w-4" />
       </Button>
     );
@@ -51,23 +47,15 @@ export default function DeleteModal({ subcategoryId, subcategoryName }: DeleteMo
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4 text-center">
-        <h3 className="text-lg font-semibold mb-4">Delete Subcategory</h3>
+        <h3 className="text-lg font-semibold mb-4">Delete Membership</h3>
         <p className="text-gray-600 mb-6">
-          Are you sure you want to delete <strong>{subcategoryName}</strong>? This action cannot be undone.
+          Are you sure you want to delete <strong>{appUserOrganizationDescription}</strong>? This action cannot be undone.
         </p>
         <div className="flex gap-3 justify-center">
-          <Button
-            disabled={isDeleting}
-            onClick={() => setIsOpen(false)}
-            variant="outline"
-          >
+          <Button disabled={isDeleting} onClick={() => setIsOpen(false)} variant="outline">
             Cancel
           </Button>
-          <Button
-            disabled={isDeleting}
-            onClick={handleDelete}
-            variant="destructive"
-          >
+          <Button disabled={isDeleting} onClick={handleDelete} variant="destructive">
             {isDeleting ? 'Deleting...' : 'Delete'}
           </Button>
         </div>

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createPointsRule } from "@/actions/dashboard/points-rules/actions";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
+import { createClient } from "@/lib/supabase/client";
 
 const DAY_OPTIONS = [
   { value: 0, label: "Sunday" },
@@ -29,6 +30,7 @@ const EMOJI_OPTIONS = ["⭐", "🌙", "🎉", "💎", "🔥", "🍽️", "☀️
 export default function NewPointsRulePage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [branches, setBranches] = useState<Array<{ id: string; name: string }>>([]);
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -42,12 +44,44 @@ export default function NewPointsRulePage() {
     display_icon: "⭐",
     display_color: "#3B82F6",
     show_in_app: true,
+    branch_id: "",
     start_date: "",
     end_date: "",
     time_start: "",
     time_end: "",
     days_of_week: [] as number[],
   });
+
+  useEffect(() => {
+    async function loadBranches() {
+      const activeOrgId =
+        typeof document !== "undefined"
+          ? document.cookie
+              .split(";")
+              .map((c) => c.trim())
+              .find((c) => c.startsWith("active_org_id="))
+              ?.split("=")[1]
+          : undefined;
+
+      const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+      if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
+        setBranches([]);
+        return;
+      }
+
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("branch")
+        .select("id, name")
+        .eq("organization_id", activeOrgIdNumber)
+        .eq("active", true)
+        .order("name");
+
+      setBranches((data ?? []) as Array<{ id: string; name: string }>);
+    }
+
+    loadBranches();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -79,6 +113,7 @@ export default function NewPointsRulePage() {
       display_icon: formData.display_icon,
       display_color: formData.display_color,
       show_in_app: formData.is_default ? false : formData.show_in_app,
+      branch_id: formData.branch_id ? Number(formData.branch_id) : undefined,
       start_date: formData.is_default ? undefined : (formData.start_date || undefined),
       end_date: formData.is_default ? undefined : (formData.end_date || undefined),
       time_start: formData.is_default ? undefined : (formData.time_start || undefined),
@@ -205,6 +240,25 @@ export default function NewPointsRulePage() {
             {/* Points Calculation */}
             <div className="space-y-4">
               <h3 className="text-lg font-semibold">Points Calculation</h3>
+
+              <div>
+                <Label htmlFor="branch_id">Branch *</Label>
+                <Select
+                  value={formData.branch_id}
+                  onValueChange={(value) => setFormData({ ...formData, branch_id: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a branch" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {branches.map((b) => (
+                      <SelectItem key={b.id} value={b.id}>
+                        {b.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               
               <div>
                 <Label htmlFor="rule_type">Rule Type *</Label>

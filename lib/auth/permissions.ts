@@ -9,18 +9,21 @@ export type EntityName =
   | 'address'
   | 'assignment'
   | 'beneficiary'
+  | 'beneficiary_organization'
   | 'branch'
   | 'organization'
   | 'category'
   | 'status'
   | 'product'
-  | 'subcategory'
   | 'app_order'
   | 'app_user'
+  | 'app_user_organization'
   | 'history'
   | 'redemption'
   | 'stock'
   | 'user_permission'
+  | 'collaborator_permission'
+  | 'restricted_collaborator_action'
   | 'users'
   | 'points-rules';
 
@@ -44,18 +47,21 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     address: { view: true, create: true, edit: true, delete: true },
     assignment: { view: true, create: true, edit: true, delete: true },
     beneficiary: { view: true, create: true, edit: true, delete: true },
+    beneficiary_organization: { view: true, create: true, edit: true, delete: true },
     branch: { view: true, create: true, edit: true, delete: true },
     organization: { view: true, create: true, edit: true, delete: true },
     category: { view: true, create: true, edit: true, delete: true },
     status: { view: true, create: true, edit: true, delete: true },
     product: { view: true, create: true, edit: true, delete: true },
-    subcategory: { view: true, create: true, edit: true, delete: true },
     app_order: { view: true, create: true, edit: true, delete: true },
     app_user: { view: true, create: true, edit: true, delete: true },
+    app_user_organization: { view: true, create: true, edit: true, delete: true },
     history: { view: true, create: true, edit: true, delete: true },
     redemption: { view: true, create: true, edit: true, delete: true },
     stock: { view: true, create: true, edit: true, delete: true },
     user_permission: { view: true, create: true, edit: true, delete: true },
+    collaborator_permission: { view: true, create: true, edit: true, delete: true },
+    restricted_collaborator_action: { view: true, create: true, edit: true, delete: true },
     users: { view: true, create: true, edit: true, delete: true },
     'points-rules': { view: true, create: true, edit: true, delete: true },
   },
@@ -64,18 +70,21 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     address: { view: true, create: true, edit: true, delete: true },
     assignment: { view: true, create: true, edit: true, delete: true },
     beneficiary: { view: true, create: true, edit: true, delete: true },
+    beneficiary_organization: { view: true, create: true, edit: true, delete: true },
     branch: { view: true, create: true, edit: true, delete: true },
     organization: { view: true, create: false, edit: true, delete: false }, // Can view/edit their org, not create/delete
     category: { view: true, create: true, edit: true, delete: true },
     status: { view: true, create: false, edit: false, delete: false }, // Read-only
     product: { view: true, create: true, edit: true, delete: true },
-    subcategory: { view: true, create: true, edit: true, delete: true },
     app_order: { view: true, create: true, edit: true, delete: true },
     app_user: { view: true, create: true, edit: true, delete: true },
+    app_user_organization: { view: true, create: true, edit: true, delete: true },
     history: { view: true, create: true, edit: true, delete: false },
     redemption: { view: true, create: true, edit: true, delete: true },
     stock: { view: true, create: true, edit: true, delete: true },
     user_permission: { view: true, create: true, edit: true, delete: true },
+    collaborator_permission: { view: true, create: true, edit: true, delete: true },
+    restricted_collaborator_action: { view: true, create: false, edit: false, delete: false },
     users: { view: true, create: true, edit: true, delete: true },
     'points-rules': { view: true, create: true, edit: true, delete: true },
   },
@@ -84,18 +93,21 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     address: { view: true, create: true, edit: true, delete: false },
     assignment: { view: true, create: true, edit: true, delete: false },
     beneficiary: { view: true, create: true, edit: true, delete: false },
+    beneficiary_organization: { view: true, create: false, edit: false, delete: false },
     branch: { view: true, create: false, edit: true, delete: false },
     organization: { view: true, create: false, edit: false, delete: false }, // Read-only
     category: { view: true, create: true, edit: true, delete: false },
     status: { view: true, create: false, edit: false, delete: false }, // Read-only
     product: { view: true, create: true, edit: true, delete: false },
-    subcategory: { view: true, create: true, edit: true, delete: false },
     app_order: { view: true, create: true, edit: true, delete: false },
     app_user: { view: true, create: false, edit: false, delete: false }, // Read-only, cannot manage users
+    app_user_organization: { view: false, create: false, edit: false, delete: false },
     history: { view: true, create: true, edit: false, delete: false },
     redemption: { view: true, create: true, edit: true, delete: false },
     stock: { view: true, create: true, edit: true, delete: false },
     user_permission: { view: false, create: false, edit: false, delete: false }, // No access
+    collaborator_permission: { view: false, create: false, edit: false, delete: false },
+    restricted_collaborator_action: { view: false, create: false, edit: false, delete: false },
     users: { view: true, create: false, edit: false, delete: false }, // Read-only
     'points-rules': { view: true, create: false, edit: true, delete: false },
   },
@@ -104,18 +116,21 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     address: { view: false, create: false, edit: false, delete: false },
     assignment: { view: true, create: true, edit: false, delete: false },
     beneficiary: { view: true, create: true, edit: true, delete: false },
+    beneficiary_organization: { view: true, create: false, edit: false, delete: false },
     branch: { view: true, create: false, edit: false, delete: false }, // Read-only
     organization: { view: false, create: false, edit: false, delete: false },
     category: { view: true, create: false, edit: false, delete: false }, // Read-only
     status: { view: true, create: false, edit: false, delete: false }, // Read-only
     product: { view: true, create: false, edit: false, delete: false }, // Read-only
-    subcategory: { view: true, create: false, edit: false, delete: false }, // Read-only
     app_order: { view: true, create: true, edit: true, delete: false },
     app_user: { view: false, create: false, edit: false, delete: false },
+    app_user_organization: { view: false, create: false, edit: false, delete: false },
     history: { view: true, create: false, edit: false, delete: false }, // Read-only
     redemption: { view: true, create: true, edit: false, delete: false },
     stock: { view: true, create: false, edit: false, delete: false }, // Read-only
     user_permission: { view: false, create: false, edit: false, delete: false },
+    collaborator_permission: { view: false, create: false, edit: false, delete: false },
+    restricted_collaborator_action: { view: false, create: false, edit: false, delete: false },
     users: { view: false, create: false, edit: false, delete: false },
     'points-rules': { view: true, create: false, edit: false, delete: false }, // Read-only
   },
@@ -124,18 +139,21 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     address: { view: false, create: false, edit: false, delete: false },
     assignment: { view: false, create: false, edit: false, delete: false },
     beneficiary: { view: false, create: false, edit: false, delete: false },
+    beneficiary_organization: { view: false, create: false, edit: false, delete: false },
     branch: { view: false, create: false, edit: false, delete: false },
     organization: { view: false, create: false, edit: false, delete: false },
     category: { view: false, create: false, edit: false, delete: false },
     status: { view: false, create: false, edit: false, delete: false },
     product: { view: false, create: false, edit: false, delete: false },
-    subcategory: { view: false, create: false, edit: false, delete: false },
     app_order: { view: false, create: false, edit: false, delete: false },
     app_user: { view: false, create: false, edit: false, delete: false },
+    app_user_organization: { view: false, create: false, edit: false, delete: false },
     history: { view: false, create: false, edit: false, delete: false },
     redemption: { view: false, create: false, edit: false, delete: false },
     stock: { view: false, create: false, edit: false, delete: false },
     user_permission: { view: false, create: false, edit: false, delete: false },
+    collaborator_permission: { view: false, create: false, edit: false, delete: false },
+    restricted_collaborator_action: { view: false, create: false, edit: false, delete: false },
     users: { view: false, create: false, edit: false, delete: false },
     'points-rules': { view: false, create: false, edit: false, delete: false },
   },
