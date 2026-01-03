@@ -1,7 +1,8 @@
 "use client"
 
 import * as React from "react"
-import { ChevronsUpDown } from "lucide-react"
+import { ChevronsUpDown, Plus } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 import {
   DropdownMenu,
@@ -11,6 +12,13 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog"
+import OrganizationForm from "@/components/dashboard/organization/organization-form"
 import {
   SidebarMenu,
   SidebarMenuButton,
@@ -23,17 +31,23 @@ export type OrgSwitcherOrg = {
   name: string
 }
 
+export type OrgSwitcherProps = {
+  orgs: OrgSwitcherOrg[]
+  activeOrgId: string | null
+  onChangeOrg: (orgId: string) => void
+  canAddOrganization?: boolean
+}
+
 export function OrgSwitcher({
   orgs,
   activeOrgId,
   onChangeOrg,
-}: {
-  orgs: OrgSwitcherOrg[]
-  activeOrgId: string | null
-  onChangeOrg: (orgId: string) => void
-}) {
+  canAddOrganization,
+}: OrgSwitcherProps) {
   const { isMobile } = useSidebar()
+  const router = useRouter()
   const activeOrg = orgs.find((o) => o.id === activeOrgId) ?? orgs[0]
+  const [isAddOrgOpen, setIsAddOrgOpen] = React.useState(false)
 
   React.useEffect(() => {
     if (!activeOrgId && orgs[0]) {
@@ -84,13 +98,35 @@ export function OrgSwitcher({
               </DropdownMenuItem>
             ))}
             <DropdownMenuSeparator />
-            <DropdownMenuItem disabled className="gap-2 p-2">
-              <div className="text-muted-foreground font-medium">
-                Multi-tenant: coming soon
-              </div>
-            </DropdownMenuItem>
+            {canAddOrganization ? (
+              <DropdownMenuItem
+                className="gap-2 p-2"
+                onClick={() => setIsAddOrgOpen(true)}
+              >
+                <div className="flex size-6 items-center justify-center rounded-md border">
+                  <Plus className="h-4 w-4" />
+                </div>
+                Add New Organization
+              </DropdownMenuItem>
+            ) : null}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        <Dialog open={isAddOrgOpen} onOpenChange={setIsAddOrgOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Add New Organization</DialogTitle>
+            </DialogHeader>
+            <OrganizationForm
+              onCancel={() => setIsAddOrgOpen(false)}
+              onSuccess={() => {
+                setIsAddOrgOpen(false)
+                router.refresh()
+              }}
+              redirectTo={""}
+            />
+          </DialogContent>
+        </Dialog>
       </SidebarMenuItem>
     </SidebarMenu>
   )

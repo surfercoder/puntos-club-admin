@@ -18,15 +18,13 @@ export default async function EditBranchPage({ params }: { params: Promise<{ id:
   }
 
   return (
-    <div className="max-w-xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle>Edit Branch</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <BranchForm branch={data} />
-        </CardContent>
-      </Card>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Edit Branch</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <BranchForm branch={data} />
+      </CardContent>
+    </Card>
   );
 }

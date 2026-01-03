@@ -122,6 +122,7 @@ export function AppSidebar({
         { title: "Restricted Actions", url: "/dashboard/restricted_collaborator_action", icon: Ban },
         { title: "Status", url: "/dashboard/status", icon: Activity },
         { title: "Stock", url: "/dashboard/stock", icon: Boxes },
+        { title: "Users", url: "/dashboard/users", icon: Users },
       ]
         .slice()
         .sort((a, b) => a.title.localeCompare(b.title))
@@ -210,6 +211,7 @@ export function AppSidebar({
             orgs={orgs}
             activeOrgId={activeOrgId}
             onChangeOrg={onChangeOrg}
+            canAddOrganization={userRole === "owner"}
           />
         )}
       </SidebarHeader>

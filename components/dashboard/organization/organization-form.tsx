@@ -17,9 +17,12 @@ import type { Organization } from '@/types/organization';
 
 interface OrganizationFormProps {
   organization?: Organization;
+  onSuccess?: () => void;
+  onCancel?: () => void;
+  redirectTo?: string;
 }
 
-export default function OrganizationForm({ organization }: OrganizationFormProps) {
+export default function OrganizationForm({ organization, onSuccess, onCancel, redirectTo = "/dashboard/organization" }: OrganizationFormProps) {
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
 
@@ -29,12 +32,26 @@ export default function OrganizationForm({ organization }: OrganizationFormProps
 
   useEffect(() => {
     if (actionState.message) {
+      const hasErrors = Object.values(actionState.fieldErrors ?? {}).some((v) => (v?.length ?? 0) > 0);
+
+      if (hasErrors) {
+        toast.error(actionState.message);
+        return;
+      }
+
       toast.success(actionState.message);
       setTimeout(() => {
-        router.push("/dashboard/organization");
+        if (onSuccess) {
+          onSuccess();
+          return;
+        }
+
+        if (redirectTo) {
+          router.push(redirectTo);
+        }
       }, 500); // Show toast briefly before navigating
     }
-  }, [actionState, router]);
+  }, [actionState, onSuccess, redirectTo, router]);
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -96,9 +113,15 @@ export default function OrganizationForm({ organization }: OrganizationFormProps
       </div>
 
       <div className="flex gap-2">
-        <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/organization">Cancel</Link>
-        </Button>
+        {onCancel ? (
+          <Button className="w-full" type="button" variant="secondary" onClick={onCancel}>
+            Cancel
+          </Button>
+        ) : (
+          <Button asChild className="w-full" type="button" variant="secondary">
+            <Link href="/dashboard/organization">Cancel</Link>
+          </Button>
+        )}
         <Button className="w-full" disabled={pending} type="submit">
           {organization ? 'Update' : 'Create'}
         </Button>

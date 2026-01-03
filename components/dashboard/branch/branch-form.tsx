@@ -10,13 +10,6 @@ import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import type { ActionState} from '@/lib/error-handler';
 import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { createClient } from '@/lib/supabase/client';
@@ -30,8 +23,9 @@ interface BranchFormProps {
 export default function BranchForm({ branch }: BranchFormProps) {
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [organizations, setOrganizations] = useState<{ id: string; name: string }[]>([]);
   const [addresses, setAddresses] = useState<{ id: string; street: string; city: string }[]>([]);
+  const [selectedAddress, setSelectedAddress] = useState<string>(branch?.address_id ?? '');
+  const [isActive, setIsActive] = useState<boolean>(branch?.active ?? true);
 
   // Utils
   const [actionState, formAction, pending] = useActionState(branchFormAction, EMPTY_ACTION_STATE);
@@ -50,12 +44,8 @@ export default function BranchForm({ branch }: BranchFormProps) {
     const fetchData = async () => {
       const supabase = createClient();
       try {
-        const [organizationsRes, addressesRes] = await Promise.all([
-          supabase.from('organization').select('id, name'),
-          supabase.from('address').select('id, street, city'),
-        ]);
+        const addressesRes = await supabase.from('address').select('id, street, city');
 
-        if (organizationsRes.data) {setOrganizations(organizationsRes.data);}
         if (addressesRes.data) {setAddresses(addressesRes.data);}
       } catch (error) {
         console.error('Error fetching data:', error);
@@ -95,37 +85,24 @@ export default function BranchForm({ branch }: BranchFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="organization_id">Organization</Label>
-        <Select defaultValue={branch?.organization_id ?? ''} name="organization_id">
-          <SelectTrigger>
-            <SelectValue placeholder="Select an organization" />
-          </SelectTrigger>
-          <SelectContent>
-            {organizations.map((organization) => (
-              <SelectItem key={organization.id} value={organization.id}>
-                {organization.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <FieldError actionState={validation ?? actionState} name="organization_id" />
-      </div>
-
-      <div>
-        <Label htmlFor="address_id">Address (Optional)</Label>
-        <Select defaultValue={branch?.address_id ?? 'none'} name="address_id">
-          <SelectTrigger>
-            <SelectValue placeholder="Select an address" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="none">No address</SelectItem>
-            {addresses.map((address) => (
-              <SelectItem key={address.id} value={address.id}>
-                {address.street}, {address.city}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Label htmlFor="address_id">Address *</Label>
+        <select
+          id="address_id"
+          name="address_id"
+          value={selectedAddress}
+          onChange={(e) => setSelectedAddress(e.target.value)}
+          className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          aria-describedby="address_id-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.address_id}
+          required
+        >
+          <option value="">Select an address</option>
+          {addresses.map((address) => (
+            <option key={address.id} value={address.id}>
+              {address.street}, {address.city}
+            </option>
+          ))}
+        </select>
         <FieldError actionState={validation ?? actionState} name="address_id" />
       </div>
 
@@ -153,17 +130,21 @@ export default function BranchForm({ branch }: BranchFormProps) {
         <FieldError actionState={validation ?? actionState} name="phone" />
       </div>
 
+      <input name="active" type="hidden" value={isActive.toString()} />
+      
       <div>
         <Label htmlFor="active">Status</Label>
-        <Select defaultValue={branch?.active !== false ? 'true' : 'false'} name="active">
-          <SelectTrigger>
-            <SelectValue placeholder="Select status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="true">Active</SelectItem>
-            <SelectItem value="false">Inactive</SelectItem>
-          </SelectContent>
-        </Select>
+        <select
+          id="active"
+          value={isActive ? 'true' : 'false'}
+          onChange={(e) => setIsActive(e.target.value === 'true')}
+          className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          aria-describedby="active-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.active}
+        >
+          <option value="true">Active</option>
+          <option value="false">Inactive</option>
+        </select>
         <FieldError actionState={validation ?? actionState} name="active" />
       </div>
 

@@ -18,15 +18,13 @@ export default async function EditCategoryPage({ params }: { params: Promise<{ i
   }
 
   return (
-    <div className="max-w-xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle>Edit Category</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <CategoryForm category={data} />
-        </CardContent>
-      </Card>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Edit Category</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <CategoryForm category={data} />
+      </CardContent>
+    </Card>
   );
 }

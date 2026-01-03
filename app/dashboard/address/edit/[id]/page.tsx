@@ -18,15 +18,13 @@ export default async function EditAddressPage({ params }: { params: Promise<{ id
   }
 
   return (
-    <div className="max-w-xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle>Edit Address</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <AddressForm address={data} />
-        </CardContent>
-      </Card>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Edit Address</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <AddressForm address={data} />
+      </CardContent>
+    </Card>
   );
 }

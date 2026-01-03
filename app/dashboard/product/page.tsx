@@ -1,6 +1,7 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
 
+import { getProducts } from '@/actions/dashboard/product/actions';
 import DeleteModal from '@/components/dashboard/product/delete-modal';
 import { Button } from '@/components/ui/button';
 import {
@@ -11,12 +12,10 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
-import { createClient } from '@/lib/supabase/server';
 import type { Product } from '@/types/product';
 
 export default async function ProductListPage() {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from('product').select('*').order('name');
+  const { data, error } = await getProducts();
 
   if (error) {
     return <div>Error fetching products</div>;

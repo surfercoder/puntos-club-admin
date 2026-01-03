@@ -119,7 +119,10 @@ export function DashboardShell({
       // ignore
     })
 
-    // For now we only persist selection. Later we can re-route to org-scoped URLs.
+    // Dispatch custom event to notify components of org change
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('orgChanged', { detail: { orgId } }));
+    }
   }, [portalMode]);
 
   const onLogout = React.useCallback(async () => {

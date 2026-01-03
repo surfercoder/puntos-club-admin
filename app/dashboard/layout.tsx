@@ -33,11 +33,29 @@ export default async function DashboardLayout({
   if (currentUser && (isOwner(currentUser) || isCollaborator(currentUser) || isAdmin(currentUser))) {
     // Temporary multi-tenant scaffold: show all orgs for switcher.
     // Later we’ll scope this list to only orgs the user has access to.
-    const { data: membershipsData } = await supabase
+    let { data: membershipsData } = await supabase
       .from('app_user_organization')
       .select('organization:organization_id(id, name)')
       .eq('app_user_id', currentUser.id)
       .eq('is_active', true)
+
+    if ((!membershipsData || membershipsData.length === 0) && currentUser.organization?.id) {
+      await supabase
+        .from('app_user_organization')
+        .insert({
+          app_user_id: Number(currentUser.id),
+          organization_id: Number(currentUser.organization.id),
+          is_active: true,
+        })
+
+      const refreshed = await supabase
+        .from('app_user_organization')
+        .select('organization:organization_id(id, name)')
+        .eq('app_user_id', currentUser.id)
+        .eq('is_active', true)
+
+      membershipsData = refreshed.data
+    }
 
     const orgs = (membershipsData ?? [])
       .map((m) => {

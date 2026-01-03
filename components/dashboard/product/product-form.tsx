@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import type { ActionState} from '@/lib/error-handler';
 import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
@@ -32,6 +31,7 @@ export default function ProductForm({ product }: ProductFormProps) {
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string>(product?.category_id ?? '');
 
   // Utils
   const [actionState, formAction, pending] = useActionState(productFormAction, EMPTY_ACTION_STATE);
@@ -95,18 +95,22 @@ export default function ProductForm({ product }: ProductFormProps) {
       
       <div>
         <Label htmlFor="category_id">Category</Label>
-        <Select defaultValue={product?.category_id ?? ''} name="category_id">
-          <SelectTrigger>
-            <SelectValue placeholder="Select a category" />
-          </SelectTrigger>
-          <SelectContent>
-            {categories.map((category) => (
-              <SelectItem key={category.id} value={category.id}>
-                {category.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <select
+          id="category_id"
+          name="category_id"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          aria-describedby="category_id-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.category_id}
+        >
+          <option value="">Select a category</option>
+          {categories.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
         <FieldError actionState={validation ?? actionState} name="category_id" />
       </div>
 

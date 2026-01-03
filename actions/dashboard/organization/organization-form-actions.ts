@@ -23,9 +23,11 @@ export async function organizationFormAction(_prevState: ActionState, formData: 
 
     // Revalidate the organization list page
     revalidatePath('/dashboard/organization');
+    revalidatePath('/dashboard');
 
     return toActionState(formData.get('id') ? 'Organization updated successfully!' : 'Organization created successfully!');
   } catch (error) {
-    return fromErrorToActionState(error);
+    const message = error instanceof Error ? error.message : 'An unknown error occurred';
+    return { message, fieldErrors: { _form: [message] } };
   }
 }

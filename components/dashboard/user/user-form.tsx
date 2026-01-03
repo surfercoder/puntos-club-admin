@@ -17,19 +17,28 @@ import { UserSchema } from '@/schemas/user.schema';
 import type { Organization } from '@/types/organization';
 import type { UserWithRelations } from '@/types/user';
 import type { UserRole } from '@/types/user_role';
+import type { AppUserWithRelations } from '@/types/app_user';
+import { isOwner } from '@/lib/auth/roles';
 
 interface UserFormProps {
   user?: UserWithRelations;
   organizations: Organization[];
   roles: UserRole[];
+  currentUser?: AppUserWithRelations;
+  defaultOrgId?: string;
 }
 
-export default function UserForm({ user, organizations, roles }: UserFormProps) {
+export default function UserForm({ user, organizations, roles, currentUser, defaultOrgId }: UserFormProps) {
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [selectedOrg, setSelectedOrg] = useState<string>(user?.organization_id ?? '');
+  const [selectedOrg, setSelectedOrg] = useState<string>(
+    user?.organization_id ?? defaultOrgId ?? ''
+  );
   const [selectedRole, setSelectedRole] = useState<string>(user?.role_id ?? '');
   const [isActive, setIsActive] = useState<boolean>(user?.active ?? true);
+
+  // Check if organization field should be disabled (only when there's exactly one org and it's for owners)
+  const isOrgDisabled = currentUser && isOwner(currentUser) && organizations.length === 1;
 
   // Utils
   const [actionState, formAction, pending] = useActionState(userFormAction, EMPTY_ACTION_STATE);
@@ -80,6 +89,7 @@ export default function UserForm({ user, organizations, roles }: UserFormProps) 
           name="organization_id"
           value={selectedOrg}
           onChange={(e) => setSelectedOrg(e.target.value)}
+          disabled={isOrgDisabled}
           className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           aria-describedby="organization_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.organization_id}
@@ -92,6 +102,11 @@ export default function UserForm({ user, organizations, roles }: UserFormProps) 
           ))}
         </select>
         <FieldError actionState={validation ?? actionState} name="organization_id" />
+        {isOrgDisabled && (
+          <p className="text-sm text-muted-foreground mt-1">
+            You can only create users for your organization
+          </p>
+        )}
       </div>
 
       <div>

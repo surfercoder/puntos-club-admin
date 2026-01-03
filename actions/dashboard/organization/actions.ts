@@ -19,7 +19,48 @@ export async function createOrganization(input: Organization) {
   const supabase = await createClient();
   const { data, error } = await supabase.from('organization').insert([parsed.data]).select().single();
 
-  return { data, error };
+  if (error || !data) {
+    throw new Error(error?.message || 'Failed to create organization');
+  }
+
+  const {
+    data: { user },
+    error: authError,
+  } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    await supabase.from('organization').delete().eq('id', data.id);
+    throw new Error('Not authenticated');
+  }
+
+  const { data: appUserRow, error: appUserError } = await supabase
+    .from('app_user')
+    .select('id')
+    .eq('auth_user_id', user.id)
+    .single();
+
+  if (appUserError || !appUserRow?.id) {
+    await supabase.from('organization').delete().eq('id', data.id);
+    throw new Error('Could not resolve app user for current session');
+  }
+
+  const appUserId = Number(appUserRow.id);
+  const orgId = Number((data as { id: unknown }).id);
+
+  const { error: membershipError } = await supabase
+    .from('app_user_organization')
+    .insert({
+      app_user_id: appUserId,
+      organization_id: orgId,
+      is_active: true,
+    });
+
+  if (membershipError) {
+    await supabase.from('organization').delete().eq('id', data.id);
+    throw new Error(membershipError.message || 'Failed to associate user to organization');
+  }
+
+  return { data, error: null };
 }
 
 export async function updateOrganization(id: string, input: Organization) {
@@ -37,7 +78,11 @@ export async function updateOrganization(id: string, input: Organization) {
   const supabase = await createClient();
   const { data, error } = await supabase.from('organization').update(parsed.data).eq('id', id).select().single();
 
-  return { data, error };
+  if (error || !data) {
+    throw new Error(error?.message || 'Failed to update organization');
+  }
+
+  return { data, error: null };
 }
 
 export async function deleteOrganization(id: string) {

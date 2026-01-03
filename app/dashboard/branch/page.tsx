@@ -1,5 +1,6 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
 import DeleteModal from '@/components/dashboard/branch/delete-modal';
 import { Button } from '@/components/ui/button';
@@ -16,13 +17,23 @@ import type { BranchWithRelations } from '@/types/branch';
 
 export default async function BranchListPage() {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const cookieStore = await cookies();
+  const activeOrgId = cookieStore.get('active_org_id')?.value;
+  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+
+  let query = supabase
     .from('branch')
     .select(`
       *,
       organization:organization_id(name),
       address:address_id(street, city)
     `);
+
+  if (activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
+    query = query.eq('organization_id', activeOrgIdNumber);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     return <div>Error fetching branches</div>;

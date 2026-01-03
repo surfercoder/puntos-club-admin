@@ -250,18 +250,27 @@ export async function deleteUser(id: string, userType: 'app_user' | 'beneficiary
 
 /**
  * Get all users (both app_user and beneficiary)
+ * For admins: returns all users including owners
+ * For owners: returns only cashiers and collaborators from their organization (excluding other owners)
  */
-export async function getAllUsers() {
+export async function getAllUsers(organizationId?: string) {
   const supabase = await createClient();
 
-  // Fetch app_users
-  const { data: appUsers, error: appUsersError } = await supabase
+  // Build query for app_users
+  let appUsersQuery = supabase
     .from('app_user')
     .select(`
       *,
       organization:organization_id(id, name),
       role:role_id(id, name, display_name)
-    `)
+    `);
+
+  // Filter by organization if provided (for owners)
+  if (organizationId) {
+    appUsersQuery = appUsersQuery.eq('organization_id', organizationId);
+  }
+
+  const { data: appUsers, error: appUsersError } = await appUsersQuery
     .order('created_at', { ascending: false });
 
   if (appUsersError) {
@@ -269,24 +278,38 @@ export async function getAllUsers() {
     throw new Error(`Failed to fetch app users: ${appUsersError.message}`);
   }
   
-  // Fetch beneficiaries (they don't have organization_id directly)
-  const { data: beneficiaries, error: beneficiariesError } = await supabase
-    .from('beneficiary')
-    .select(`
-      *,
-      role:role_id(id, name, display_name)
-    `)
-    .order('created_at', { ascending: false });
+  // Filter out owner users only when organizationId is provided (i.e., when called by an owner user)
+  // Admins (no organizationId) should see all users including owners
+  const filteredAppUsers = (appUsers || []).filter(u => {
+    const role = u.role as { id: number; name: string; display_name: string } | null;
+    // If organizationId is provided (owner viewing their org), exclude other owners
+    // If no organizationId (admin viewing all), include everyone
+    return !organizationId || role?.name !== 'owner';
+  });
   
-  if (beneficiariesError) {
-    console.error('Failed to fetch beneficiaries:', beneficiariesError);
-    // Don't throw, just continue with empty beneficiaries array
+  // Fetch beneficiaries (they don't have organization_id directly)
+  // For now, we'll only show beneficiaries to admins
+  let beneficiaries: Array<{ id: number; name: string; email: string; role: { id: number; name: string; display_name: string } | null }> = [];
+  if (!organizationId) {
+    const { data: beneficiariesData, error: beneficiariesError } = await supabase
+      .from('beneficiary')
+      .select(`
+        *,
+        role:role_id(id, name, display_name)
+      `)
+      .order('created_at', { ascending: false });
+    
+    if (beneficiariesError) {
+      console.error('Failed to fetch beneficiaries:', beneficiariesError);
+    } else {
+      beneficiaries = beneficiariesData || [];
+    }
   }
   
   // Combine and add user_type
   const allUsers = [
-    ...(appUsers || []).map(u => ({ ...u, user_type: 'app_user' as const })),
-    ...(beneficiaries || []).map(b => ({ ...b, user_type: 'beneficiary' as const })),
+    ...filteredAppUsers.map(u => ({ ...u, user_type: 'app_user' as const })),
+    ...beneficiaries.map(b => ({ ...b, user_type: 'beneficiary' as const })),
   ];
   
   // Sort by created_at

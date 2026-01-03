@@ -10,7 +10,6 @@ export interface PointsRuleInput {
   rule_type: 'fixed_amount' | 'percentage' | 'fixed_per_item' | 'tiered';
   config: Record<string, unknown>; // JSON config based on rule_type
   is_active?: boolean;
-  priority?: number;
   organization_id?: number;
   branch_id?: number;
   category_id?: number;
@@ -47,7 +46,6 @@ export async function getAllPointsRules() {
         branch:branch(name),
         category:category(name)
       `)
-      .order("priority", { ascending: false })
       .order("created_at", { ascending: false });
 
     if (activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
@@ -79,7 +77,7 @@ export async function getActivePointsRules() {
       .from("points_rule")
       .select("*")
       .eq("is_active", true)
-      .order("priority", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Error fetching active points rules:", error);
@@ -142,24 +140,26 @@ export async function createPointsRule(input: PointsRuleInput) {
       };
     }
 
-    if (!input.branch_id) {
+    // Validate organization_id
+    if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
       return {
         success: false,
-        error: "Missing required field: branch_id",
+        error: "No active organization selected",
       };
     }
 
-    const { data: branchData, error: branchError } = await supabase
-      .from("branch")
-      .select("id, organization_id")
-      .eq("id", input.branch_id)
-      .single();
+    // If branch_id is provided, validate it belongs to the organization
+    if (input.branch_id) {
+      const { data: branchData, error: branchError } = await supabase
+        .from("branch")
+        .select("id, organization_id")
+        .eq("id", input.branch_id)
+        .single();
 
-    if (branchError || !branchData) {
-      return { success: false, error: branchError?.message || "Invalid branch" };
-    }
+      if (branchError || !branchData) {
+        return { success: false, error: branchError?.message || "Invalid branch" };
+      }
 
-    if (activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
       if (Number(branchData.organization_id) !== activeOrgIdNumber) {
         return { success: false, error: "Branch does not belong to active organization" };
       }
@@ -167,10 +167,9 @@ export async function createPointsRule(input: PointsRuleInput) {
 
     const normalizedInput: PointsRuleInput = {
       ...input,
-      organization_id: Number(branchData.organization_id),
+      organization_id: activeOrgIdNumber,
       ...(input.is_default
         ? {
-            priority: 0,
             start_date: undefined,
             end_date: undefined,
             valid_from: undefined,
@@ -190,7 +189,6 @@ export async function createPointsRule(input: PointsRuleInput) {
         rule_type: normalizedInput.rule_type,
         config: normalizedInput.config,
         is_active: normalizedInput.is_active ?? true,
-        priority: normalizedInput.priority ?? 0,
         organization_id: normalizedInput.organization_id,
         branch_id: normalizedInput.branch_id,
         category_id: normalizedInput.category_id,
@@ -236,11 +234,18 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
 
     const updateData: Record<string, unknown> = {};
 
+    // Validate organization_id
+    if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
+      return {
+        success: false,
+        error: "No active organization selected",
+      };
+    }
+
     const normalizedInput: Partial<PointsRuleInput> = {
       ...input,
       ...(input.is_default
         ? {
-            priority: 0,
             start_date: undefined,
             end_date: undefined,
             valid_from: undefined,
@@ -252,21 +257,18 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
         : {}),
     };
 
-    if (normalizedInput.branch_id === undefined || normalizedInput.branch_id === null) {
-      return { success: false, error: "Missing required field: branch_id" };
-    }
+    // If branch_id is provided, validate it belongs to the organization
+    if (normalizedInput.branch_id !== undefined && normalizedInput.branch_id !== null) {
+      const { data: branchData, error: branchError } = await supabase
+        .from("branch")
+        .select("id, organization_id")
+        .eq("id", normalizedInput.branch_id)
+        .single();
 
-    const { data: branchData, error: branchError } = await supabase
-      .from("branch")
-      .select("id, organization_id")
-      .eq("id", normalizedInput.branch_id)
-      .single();
+      if (branchError || !branchData) {
+        return { success: false, error: branchError?.message || "Invalid branch" };
+      }
 
-    if (branchError || !branchData) {
-      return { success: false, error: branchError?.message || "Invalid branch" };
-    }
-
-    if (activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
       if (Number(branchData.organization_id) !== activeOrgIdNumber) {
         return { success: false, error: "Branch does not belong to active organization" };
       }
@@ -277,9 +279,8 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
     if (normalizedInput.rule_type !== undefined) updateData.rule_type = normalizedInput.rule_type;
     if (normalizedInput.config !== undefined) updateData.config = normalizedInput.config;
     if (normalizedInput.is_active !== undefined) updateData.is_active = normalizedInput.is_active;
-    if (normalizedInput.priority !== undefined) updateData.priority = normalizedInput.priority;
-    updateData.organization_id = Number(branchData.organization_id);
-    updateData.branch_id = normalizedInput.branch_id;
+    updateData.organization_id = activeOrgIdNumber;
+    if (normalizedInput.branch_id !== undefined) updateData.branch_id = normalizedInput.branch_id;
     if (normalizedInput.category_id !== undefined) updateData.category_id = normalizedInput.category_id;
     if (normalizedInput.start_date !== undefined) updateData.start_date = normalizedInput.start_date;
     if (normalizedInput.end_date !== undefined) updateData.end_date = normalizedInput.end_date;

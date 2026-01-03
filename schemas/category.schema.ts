@@ -7,9 +7,9 @@ export const CategorySchema = z.object({
     .optional()
     .nullable()
     .or(z.literal(''))
-    .transform((val) => (val === '' ? null : val)),
+    .transform((val) => (val === '' || val === 'null' ? null : val)),
   name: z.string().min(1, 'Name is required'),
-  description: z.string().optional().or(z.literal('')).transform(val => val === '' ? null : val),
+  description: z.string().optional().nullable().or(z.literal('')).transform(val => val === '' || val === null ? null : val),
   active: z.union([z.boolean(), z.string()]).transform(val => {
     if (typeof val === 'boolean') return val;
     return val === 'true' || val === 'on';

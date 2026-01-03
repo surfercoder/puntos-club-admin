@@ -51,7 +51,13 @@ export async function checkAdminPortalAccess(): Promise<{
   }
 
   if (!appUser) {
-    return { allowed: false, role: null, error: 'User not found in app_user table' };
+    // Sign out the user since they don't have access
+    await supabase.auth.signOut();
+    return { 
+      allowed: false, 
+      role: null, 
+      error: 'No tienes permisos para acceder al portal de administración. Solo administradores, propietarios y colaboradores pueden acceder.' 
+    };
   }
 
   const role = appUser.role as unknown as { name: string } | null;

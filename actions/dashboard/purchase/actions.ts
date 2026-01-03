@@ -352,7 +352,7 @@ export async function getActivePointsRules() {
       .from("points_rule")
       .select("*")
       .eq("is_active", true)
-      .order("priority", { ascending: false });
+      .order("created_at", { ascending: false });
 
     if (error) {
       console.error("Error fetching points rules:", error);

@@ -43,7 +43,6 @@ export default function EditPointsRulePage() {
     percentage: "10",
     is_active: true,
     is_default: false,
-    priority: "0",
     display_name: "",
     display_icon: "⭐",
     display_color: "#3B82F6",
@@ -71,12 +70,11 @@ export default function EditPointsRulePage() {
           percentage: config?.percentage?.toString() || "10",
           is_active: rule.is_active ?? true,
           is_default: rule.is_default ?? false,
-          priority: rule.priority?.toString() || "0",
           display_name: rule.display_name || "",
           display_icon: rule.display_icon || "⭐",
           display_color: rule.display_color || "#3B82F6",
           show_in_app: rule.show_in_app ?? true,
-          branch_id: rule.branch_id ? String(rule.branch_id) : "",
+          branch_id: rule.branch_id ? String(rule.branch_id) : "all",
           start_date: rule.start_date || "",
           end_date: rule.end_date || "",
           time_start: rule.time_start || "",
@@ -121,6 +119,17 @@ export default function EditPointsRulePage() {
     }
 
     loadBranches();
+
+    // Listen for organization changes
+    const handleOrgChange = () => {
+      loadBranches();
+      setFormData((prev) => ({ ...prev, branch_id: "" }));
+    };
+
+    window.addEventListener('orgChanged', handleOrgChange);
+    return () => {
+      window.removeEventListener('orgChanged', handleOrgChange);
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -148,12 +157,11 @@ export default function EditPointsRulePage() {
       config,
       is_active: formData.is_active,
       is_default: formData.is_default,
-      priority: parseInt(formData.priority),
       display_name: formData.display_name || formData.name,
       display_icon: formData.display_icon,
       display_color: formData.display_color,
       show_in_app: formData.is_default ? false : formData.show_in_app,
-      branch_id: formData.branch_id ? Number(formData.branch_id) : undefined,
+      branch_id: formData.branch_id && formData.branch_id !== "all" ? Number(formData.branch_id) : undefined,
       start_date: formData.is_default ? undefined : (formData.start_date || undefined),
       end_date: formData.is_default ? undefined : (formData.end_date || undefined),
       time_start: formData.is_default ? undefined : (formData.time_start || undefined),
@@ -258,7 +266,6 @@ export default function EditPointsRulePage() {
                         is_default: checked,
                         ...(checked
                           ? {
-                              priority: "0",
                               start_date: "",
                               end_date: "",
                               time_start: "",
@@ -299,6 +306,7 @@ export default function EditPointsRulePage() {
                     <SelectValue placeholder="Select a branch" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="all">All Branches</SelectItem>
                     {branches.map((b) => (
                       <SelectItem key={b.id} value={b.id}>
                         {b.name}
@@ -378,20 +386,6 @@ export default function EditPointsRulePage() {
                   </p>
                 </div>
               )}
-
-              <div>
-                <Label htmlFor="priority">Priority</Label>
-                <Input
-                  id="priority"
-                  type="number"
-                  value={formData.priority}
-                  onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
-                  placeholder="0"
-                />
-                <p className="text-sm text-muted-foreground mt-1">
-                  Higher priority rules are applied first. Default rule has priority 0.
-                </p>
-              </div>
             </div>
 
             {/* Schedule */}
@@ -495,10 +489,10 @@ export default function EditPointsRulePage() {
                       key={emoji}
                       type="button"
                       onClick={() => setFormData({ ...formData, display_icon: emoji })}
-                      className={`text-2xl p-2 rounded border-2 ${
+                      className={`text-2xl p-2 rounded border-2 transition-all ${
                         formData.display_icon === emoji
-                          ? "border-primary bg-primary/10"
-                          : "border-transparent hover:border-gray-300"
+                          ? "border-primary bg-primary/20 ring-2 ring-primary ring-offset-2 shadow-md scale-110"
+                          : "border-gray-200 hover:border-primary/50 hover:bg-gray-50"
                       }`}
                     >
                       {emoji}

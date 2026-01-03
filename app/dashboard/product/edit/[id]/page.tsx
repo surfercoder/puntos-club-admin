@@ -13,18 +13,16 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
     return <div>Error fetching product</div>;
   }
 
-  if (!data) {notFound();}
+  if (!data) { notFound(); }
 
   return (
-    <div className="max-w-xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle>Edit Product</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <ProductForm product={data} />
-        </CardContent>
-      </Card>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Edit Product</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ProductForm product={data} />
+      </CardContent>
+    </Card>
   );
 }

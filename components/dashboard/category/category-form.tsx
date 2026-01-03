@@ -1,9 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
-import { toast } from "sonner";
 
 import { categoryFormAction } from '@/actions/dashboard/category/category-form-actions';
 import { Button } from '@/components/ui/button';
@@ -63,16 +61,6 @@ export default function CategoryForm({ category }: CategoryFormProps) {
 
   // Utils
   const [actionState, formAction, pending] = useActionState(categoryFormAction, EMPTY_ACTION_STATE);
-  const router = useRouter();
-
-  useEffect(() => {
-    if (actionState.message) {
-      toast.success(actionState.message);
-      setTimeout(() => {
-        router.push("/dashboard/category");
-      }, 500); // Show toast briefly before navigating
-    }
-  }, [actionState, router]);
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -93,12 +81,12 @@ export default function CategoryForm({ category }: CategoryFormProps) {
 
       <div>
         <Label htmlFor="parent_id">Parent Category</Label>
-        <Select defaultValue={category?.parent_id ?? ''} name="parent_id">
+        <Select defaultValue={category?.parent_id ?? 'null'} name="parent_id">
           <SelectTrigger>
             <SelectValue placeholder="No parent" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">No parent</SelectItem>
+            <SelectItem value="null">No parent</SelectItem>
             {categories.map((c) => (
               <SelectItem key={c.id} value={c.id}>
                 {c.name}

@@ -60,6 +60,16 @@ export default function PointsRulesPage() {
 
   useEffect(() => {
     loadRules();
+
+    // Listen for organization changes
+    const handleOrgChange = () => {
+      loadRules();
+    };
+
+    window.addEventListener('orgChanged', handleOrgChange);
+    return () => {
+      window.removeEventListener('orgChanged', handleOrgChange);
+    };
   }, []);
 
   const loadRules = async () => {

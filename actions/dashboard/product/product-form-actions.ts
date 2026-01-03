@@ -9,16 +9,22 @@ import type { Product } from '@/types/product';
 
 export async function productFormAction(_prevState: ActionState, formData: FormData) {
   try {
-    const parsed = ProductSchema.safeParse(Object.fromEntries(formData));
+    const formDataObj = Object.fromEntries(formData);
+    const parsed = ProductSchema.safeParse(formDataObj);
 
     if (!parsed.success) {
       return fromErrorToActionState(parsed.error);
     }
 
+    let result;
     if (formData.get('id')) {
-      await updateProduct(String(formData.get('id')), parsed.data as Product);
+      result = await updateProduct(String(formData.get('id')), parsed.data as Product);
     } else {
-      await createProduct(parsed.data as Product);
+      result = await createProduct(parsed.data as Product);
+    }
+
+    if (result.error) {
+      return fromErrorToActionState(result.error);
     }
 
     // Revalidate the product list page
