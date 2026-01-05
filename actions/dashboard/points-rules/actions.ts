@@ -36,7 +36,8 @@ export async function getAllPointsRules() {
 
     const cookieStore = await cookies();
     const activeOrgId = cookieStore.get("active_org_id")?.value;
-    const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+    const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
+    const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
 
     let query = supabase
       .from("points_rule")
@@ -130,7 +131,8 @@ export async function createPointsRule(input: PointsRuleInput) {
 
     const cookieStore = await cookies();
     const activeOrgId = cookieStore.get("active_org_id")?.value;
-    const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+    const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
+    const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
 
     // Validate required fields
     if (!input.name || !input.rule_type || !input.config) {
@@ -230,7 +232,8 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
 
     const cookieStore = await cookies();
     const activeOrgId = cookieStore.get("active_org_id")?.value;
-    const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+    const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
+    const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
 
     const updateData: Record<string, unknown> = {};
 
@@ -404,9 +407,14 @@ export async function testPointsCalculation(
   try {
     const supabase = await createClient();
 
+    const cookieStore = await cookies();
+    const activeOrgId = cookieStore.get("active_org_id")?.value;
+    const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
+    const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
+
     const { data, error } = await supabase.rpc("calculate_points_for_amount", {
       p_amount: amount,
-      p_organization_id: organizationId || null,
+      p_organization_id: organizationId || activeOrgIdNumber || null,
       p_branch_id: branchId || null,
       p_category_id: categoryId || null,
       p_purchase_time: new Date().toISOString(),

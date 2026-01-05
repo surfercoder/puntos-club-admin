@@ -31,6 +31,7 @@ export async function createUser(user: Partial<User>) {
           first_name: user.first_name,
           last_name: user.last_name,
           username: user.username,
+          role_name: 'staff', // Mark as staff user to prevent automatic beneficiary creation
         },
       });
       
@@ -81,6 +82,45 @@ export async function createUser(user: Partial<User>) {
     userData.registration_date = new Date().toISOString();
   }
   
+  // For app_user types with organization, use the atomic stored procedure
+  if (table === 'app_user' && user.organization_id) {
+    const { data, error } = await supabase.rpc('create_app_user_with_org', {
+      p_email: userData.email as string,
+      p_first_name: userData.first_name as string,
+      p_last_name: userData.last_name as string,
+      p_username: userData.username as string || null,
+      p_organization_id: userData.organization_id as number,
+      p_role_id: userData.role_id as number,
+      p_auth_user_id: authUserId,
+      p_password: userData.password as string || null,
+      p_active: userData.active as boolean,
+    });
+
+    if (error) {
+      console.error('Database RPC error:', {
+        message: error.message,
+        details: error.details,
+        hint: error.hint,
+        code: error.code,
+      });
+      
+      // If RPC fails but auth user was created, clean up the auth user
+      if (authUserId) {
+        try {
+          const adminClient = createAdminClient();
+          await adminClient.auth.admin.deleteUser(authUserId);
+        } catch (cleanupError) {
+          console.error('Failed to clean up auth user:', cleanupError);
+        }
+      }
+      
+      throw new Error(`Failed to create user: ${error.message} (${error.code})`);
+    }
+
+    return data && data.length > 0 ? data[0] : null;
+  }
+
+  // For beneficiary or app_user without organization, use regular insert
   const { data, error } = await supabase
     .from(table)
     .insert(userData)

@@ -21,9 +21,10 @@ export async function createBranch(input: Branch) {
   const supabase = await createClient();
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
+  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
 
-  if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
+  if (!activeOrgIdNumber) {
     return { data: null, error: { message: 'No active organization selected' } };
   }
 
@@ -50,9 +51,10 @@ export async function updateBranch(id: string, input: Branch) {
   const supabase = await createClient();
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
+  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
 
-  if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
+  if (!activeOrgIdNumber) {
     return { data: null, error: { message: 'No active organization selected' } };
   }
 
@@ -74,9 +76,10 @@ export async function deleteBranch(id: string) {
   const supabase = await createClient();
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
+  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
 
-  if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
+  if (!activeOrgIdNumber) {
     return { error: { message: 'No active organization selected' } };
   }
 

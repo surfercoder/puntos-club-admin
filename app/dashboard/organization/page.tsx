@@ -50,7 +50,12 @@ export default async function OrganizationListPage() {
               data.map((organization: Organization) => (
                 <TableRow key={organization.id}>
                   <TableCell className="font-medium">
-                    {organization.name}
+                    <Link 
+                      href={`/dashboard/organization/${organization.id}`}
+                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                      {organization.name}
+                    </Link>
                   </TableCell>
                   <TableCell>{organization.business_name || 'N/A'}</TableCell>
                   <TableCell>{organization.tax_id || 'N/A'}</TableCell>

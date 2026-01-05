@@ -81,12 +81,13 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
       {user?.id && <input name="id" type="hidden" value={user.id} />}
       <input name="user_type" type="hidden" value={getUserType(selectedRole)} />
       <input name="active" type="hidden" value={isActive.toString()} />
+      {isOrgDisabled && <input name="organization_id" type="hidden" value={selectedOrg} />}
       
       <div>
         <Label htmlFor="organization_id">Organization *</Label>
         <select
           id="organization_id"
-          name="organization_id"
+          name={isOrgDisabled ? undefined : "organization_id"}
           value={selectedOrg}
           onChange={(e) => setSelectedOrg(e.target.value)}
           disabled={isOrgDisabled}

@@ -13,18 +13,16 @@ export default async function EditStockPage({ params }: { params: Promise<{ id: 
     return <div>Error fetching stock record</div>;
   }
 
-  if (!data) {notFound();}
+  if (!data) { notFound(); }
 
   return (
-    <div className="max-w-xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle>Edit Stock Record</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <StockForm stock={data} />
-        </CardContent>
-      </Card>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Edit Stock Record</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <StockForm stock={data} />
+      </CardContent>
+    </Card>
   );
 }

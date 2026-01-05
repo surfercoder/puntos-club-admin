@@ -105,3 +105,24 @@ export async function getOrganization(id: string) {
 
   return { data, error };
 }
+
+export async function getOrganizationProducts(organizationId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('product')
+    .select(`
+      *,
+      category:category_id(id, name),
+      stock:stock(
+        id,
+        branch_id,
+        quantity,
+        branch:branch(id, name)
+      )
+    `)
+    .eq('organization_id', organizationId)
+    .eq('active', true)
+    .order('required_points', { ascending: true });
+
+  return { data, error };
+}

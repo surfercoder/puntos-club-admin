@@ -9,7 +9,8 @@ export async function createProduct(input: Product) {
   const supabase = await createClient();
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
+  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
 
   if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
     return { data: null, error: { message: 'Missing active organization' } };
@@ -33,7 +34,8 @@ export async function updateProduct(id: string, input: Product) {
   const supabase = await createClient();
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
+  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
 
   if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
     return { data: null, error: { message: 'Missing active organization' } };
@@ -57,7 +59,8 @@ export async function deleteProduct(id: string) {
   const supabase = await createClient();
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
+  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
 
   if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
     return { error: { message: 'Missing active organization' } };
@@ -76,7 +79,8 @@ export async function getProducts() {
   const supabase = await createClient();
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
+  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
 
   let query = supabase.from('product').select('*').order('name');
   if (activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
@@ -96,7 +100,8 @@ export async function getProduct(id: string) {
   const supabase = await createClient();
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
+  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
 
   let query = supabase.from('product').select('*').eq('id', id);
   if (activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {

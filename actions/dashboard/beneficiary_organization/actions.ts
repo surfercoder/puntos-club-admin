@@ -19,7 +19,7 @@ export async function createBeneficiaryOrganization(input: BeneficiaryOrganizati
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const { data, error: supabaseError } = await supabase
     .from('beneficiary_organization')
     .insert([
       {
@@ -34,7 +34,20 @@ export async function createBeneficiaryOrganization(input: BeneficiaryOrganizati
     .select()
     .single();
 
-  return { data, error };
+  // Normalize Supabase error to match project's custom error shape
+  if (supabaseError) {
+    return {
+      data,
+      error: {
+        message: supabaseError.message,
+        code: supabaseError.code,
+        details: supabaseError.details,
+        hint: supabaseError.hint,
+      },
+    };
+  }
+
+  return { data, error: null };
 }
 
 export async function updateBeneficiaryOrganization(id: string, input: BeneficiaryOrganization) {
@@ -52,7 +65,7 @@ export async function updateBeneficiaryOrganization(id: string, input: Beneficia
   }
 
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const { data, error: supabaseError } = await supabase
     .from('beneficiary_organization')
     .update({
       beneficiary_id: parsed.data.beneficiary_id,
@@ -66,19 +79,44 @@ export async function updateBeneficiaryOrganization(id: string, input: Beneficia
     .select()
     .single();
 
-  return { data, error };
+  // Normalize Supabase error to match project's custom error shape
+  if (supabaseError) {
+    return {
+      data,
+      error: {
+        message: supabaseError.message,
+        code: supabaseError.code,
+        details: supabaseError.details,
+        hint: supabaseError.hint,
+      },
+    };
+  }
+
+  return { data, error: null };
 }
 
 export async function deleteBeneficiaryOrganization(id: string) {
   const supabase = await createClient();
-  const { error } = await supabase.from('beneficiary_organization').delete().eq('id', id);
+  const { error: supabaseError } = await supabase.from('beneficiary_organization').delete().eq('id', id);
 
-  return { error };
+  // Normalize Supabase error to match project's custom error shape
+  if (supabaseError) {
+    return {
+      error: {
+        message: supabaseError.message,
+        code: supabaseError.code,
+        details: supabaseError.details,
+        hint: supabaseError.hint,
+      },
+    };
+  }
+
+  return { error: null };
 }
 
 export async function getBeneficiaryOrganizations() {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const { data, error: supabaseError } = await supabase
     .from('beneficiary_organization')
     .select(`
       *,
@@ -87,16 +125,42 @@ export async function getBeneficiaryOrganizations() {
     `)
     .order('id', { ascending: false });
 
-  return { data, error };
+  // Normalize Supabase error to match project's custom error shape
+  if (supabaseError) {
+    return {
+      data,
+      error: {
+        message: supabaseError.message,
+        code: supabaseError.code,
+        details: supabaseError.details,
+        hint: supabaseError.hint,
+      },
+    };
+  }
+
+  return { data, error: null };
 }
 
 export async function getBeneficiaryOrganization(id: string) {
   const supabase = await createClient();
-  const { data, error } = await supabase
+  const { data, error: supabaseError } = await supabase
     .from('beneficiary_organization')
     .select('*')
     .eq('id', id)
     .single();
 
-  return { data, error };
+  // Normalize Supabase error to match project's custom error shape
+  if (supabaseError) {
+    return {
+      data,
+      error: {
+        message: supabaseError.message,
+        code: supabaseError.code,
+        details: supabaseError.details,
+        hint: supabaseError.hint,
+      },
+    };
+  }
+
+  return { data, error: null };
 }
