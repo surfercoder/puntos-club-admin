@@ -125,6 +125,7 @@ export async function signUpAdmin(data: {
       user_metadata: {
         first_name: data.firstName,
         last_name: data.lastName,
+        role_name: 'admin', // Prevents automatic beneficiary creation by database trigger
       },
     });
 

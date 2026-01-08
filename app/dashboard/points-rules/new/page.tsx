@@ -39,6 +39,7 @@ export default function NewPointsRulePage() {
     percentage: "10",
     is_active: true,
     is_default: false,
+    priority: "0",
     display_name: "",
     display_icon: "⭐",
     display_color: "#3B82F6",
@@ -118,11 +119,12 @@ export default function NewPointsRulePage() {
       config,
       is_active: formData.is_active,
       is_default: formData.is_default,
+      priority: parseInt(formData.priority),
       display_name: formData.display_name || formData.name,
       display_icon: formData.display_icon,
       display_color: formData.display_color,
       show_in_app: formData.is_default ? false : formData.show_in_app,
-      branch_id: formData.branch_id && formData.branch_id !== "all" ? Number(formData.branch_id) : undefined,
+      branch_id: formData.branch_id ? Number(formData.branch_id) : undefined,
       start_date: formData.is_default ? undefined : (formData.start_date || undefined),
       end_date: formData.is_default ? undefined : (formData.end_date || undefined),
       time_start: formData.is_default ? undefined : (formData.time_start || undefined),
@@ -259,7 +261,6 @@ export default function NewPointsRulePage() {
                     <SelectValue placeholder="Select a branch" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="all">All Branches</SelectItem>
                     {branches.map((b) => (
                       <SelectItem key={b.id} value={b.id}>
                         {b.name}
@@ -267,6 +268,22 @@ export default function NewPointsRulePage() {
                     ))}
                   </SelectContent>
                 </Select>
+              </div>
+
+              <div>
+                <Label htmlFor="priority">Priority *</Label>
+                <Input
+                  id="priority"
+                  type="number"
+                  min="0"
+                  value={formData.priority}
+                  onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+                  placeholder="0"
+                  required
+                />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Higher priority rules are applied first when multiple rules match. Use 0 for default rules, higher numbers for special promotions.
+                </p>
               </div>
               
               <div>

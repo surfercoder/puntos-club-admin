@@ -1,5 +1,6 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
 import DeleteModal from '@/components/dashboard/app_order/delete-modal';
 import { Button } from '@/components/ui/button';
@@ -14,13 +15,39 @@ import {
 import { createClient } from '@/lib/supabase/server';
 import type { AppOrder } from '@/types/app_order';
 
+interface AppOrderWithRelations extends AppOrder {
+  redemption?: Array<{
+    product?: {
+      organization_id?: number;
+    } | null;
+  }>;
+}
+
 export default async function AppOrderListPage() {
   const supabase = await createClient();
-  const { data, error } = await supabase.from('app_order').select('*').order('creation_date', { ascending: false });
+  const cookieStore = await cookies();
+  const activeOrgId = cookieStore.get('active_org_id')?.value;
+  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+
+  const { data, error } = await supabase
+    .from('app_order')
+    .select(`
+      *,
+      redemption(
+        product(organization_id)
+      )
+    `)
+    .order('creation_date', { ascending: false });
 
   if (error) {
     return <div>Error fetching orders</div>;
   }
+
+  const filteredData = activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)
+    ? data?.filter((order: AppOrderWithRelations) => 
+        order.redemption?.some(r => r.product?.organization_id === activeOrgIdNumber)
+      )
+    : data;
 
   return (
     <div className="space-y-6">     
@@ -46,8 +73,8 @@ export default async function AppOrderListPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data && data.length > 0 ? (
-              data.map((order: AppOrder) => (
+            {filteredData && filteredData.length > 0 ? (
+              filteredData.map((order: AppOrder) => (
                 <TableRow key={order.id}>
                   <TableCell className="font-medium">
                     {order.order_number}

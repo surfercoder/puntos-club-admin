@@ -1,5 +1,6 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
 import DeleteModal from '@/components/dashboard/stock/delete-modal';
 import { Button } from '@/components/ui/button';
@@ -22,6 +23,7 @@ interface StockWithRelations {
   last_updated: string;
   branch: {
     name: string;
+    organization_id: number;
   };
   product: {
     name: string;
@@ -30,11 +32,15 @@ interface StockWithRelations {
 
 export default async function StockListPage() {
   const supabase = await createClient();
+  const cookieStore = await cookies();
+  const activeOrgId = cookieStore.get('active_org_id')?.value;
+  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+
   const { data, error } = await supabase
     .from('stock')
     .select(`
       *,
-      branch:branch(name),
+      branch:branch(name, organization_id),
       product:product(name)
     `)
     .order('last_updated', { ascending: false });
@@ -42,6 +48,11 @@ export default async function StockListPage() {
   if (error) {
     return <div>Error fetching stock records</div>;
   }
+
+  // Filter by organization through branch relationship
+  const filteredData = activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)
+    ? data?.filter((stock: StockWithRelations) => stock.branch?.organization_id === activeOrgIdNumber)
+    : data;
 
   return (
     <div className="space-y-6">
@@ -69,8 +80,8 @@ export default async function StockListPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data && data.length > 0 ? (
-              data.map((stock: StockWithRelations) => (
+            {filteredData && filteredData.length > 0 ? (
+              filteredData.map((stock: StockWithRelations) => (
                 <TableRow key={stock.id}>
                   <TableCell className="font-medium">
                     {stock.branch?.name || 'N/A'}

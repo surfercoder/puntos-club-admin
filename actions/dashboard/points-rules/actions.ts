@@ -16,6 +16,7 @@ export interface PointsRuleInput {
   start_date?: string;
   end_date?: string;
   is_default?: boolean;
+  priority?: number;
   valid_from?: string;
   valid_until?: string;
   days_of_week?: number[];
@@ -197,6 +198,7 @@ export async function createPointsRule(input: PointsRuleInput) {
         start_date: normalizedInput.start_date,
         end_date: normalizedInput.end_date,
         is_default: normalizedInput.is_default ?? false,
+        priority: normalizedInput.priority ?? 0,
         valid_from: normalizedInput.valid_from,
         valid_until: normalizedInput.valid_until,
         days_of_week: normalizedInput.days_of_week,
@@ -288,6 +290,7 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
     if (normalizedInput.start_date !== undefined) updateData.start_date = normalizedInput.start_date;
     if (normalizedInput.end_date !== undefined) updateData.end_date = normalizedInput.end_date;
     if (normalizedInput.is_default !== undefined) updateData.is_default = normalizedInput.is_default;
+    if (normalizedInput.priority !== undefined) updateData.priority = normalizedInput.priority;
     if (normalizedInput.valid_from !== undefined) updateData.valid_from = normalizedInput.valid_from;
     if (normalizedInput.valid_until !== undefined) updateData.valid_until = normalizedInput.valid_until;
     if (normalizedInput.days_of_week !== undefined) updateData.days_of_week = normalizedInput.days_of_week;

@@ -37,26 +37,31 @@ type User = {
 interface UsersListProps {
   initialUsers: User[];
   isOwner: boolean;
+  isAdmin: boolean;
 }
 
-export function UsersList({ initialUsers, isOwner }: UsersListProps) {
+export function UsersList({ initialUsers, isOwner, isAdmin }: UsersListProps) {
   const [users, setUsers] = useState<User[]>(initialUsers);
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    if (!isOwner) return;
-
     async function fetchUsers() {
       setIsLoading(true);
       try {
-        // Get active org from localStorage (this is what the org switcher uses)
-        const activeOrgId = typeof window !== "undefined"
-          ? window.localStorage.getItem("active_org_id")
-          : null;
-        
-        if (activeOrgId) {
-          const fetchedUsers = await getAllUsers(activeOrgId);
+        if (isAdmin) {
+          // Admins see all users without organization filter
+          const fetchedUsers = await getAllUsers();
           setUsers(fetchedUsers);
+        } else if (isOwner) {
+          // Owners see users from their active organization
+          const activeOrgId = typeof window !== "undefined"
+            ? window.localStorage.getItem("active_org_id")
+            : null;
+          
+          if (activeOrgId) {
+            const fetchedUsers = await getAllUsers(activeOrgId);
+            setUsers(fetchedUsers);
+          }
         }
       } catch (error) {
         console.error('Failed to fetch users:', error);
@@ -65,23 +70,31 @@ export function UsersList({ initialUsers, isOwner }: UsersListProps) {
       }
     }
 
-    // Listen for custom event from org switcher
+    // Listen for custom event from org switcher (only relevant for owners)
     const handleOrgChange = () => {
-      // Small delay to ensure localStorage is updated
-      setTimeout(() => {
-        fetchUsers();
-      }, 100);
+      if (isOwner && !isAdmin) {
+        // Small delay to ensure localStorage is updated
+        setTimeout(() => {
+          fetchUsers();
+        }, 100);
+      }
     };
 
-    window.addEventListener('orgChanged', handleOrgChange);
+    if (isOwner && !isAdmin) {
+      window.addEventListener('orgChanged', handleOrgChange);
+    }
 
     // Fetch on mount to ensure we have the latest
-    fetchUsers();
+    if (isAdmin || isOwner) {
+      fetchUsers();
+    }
 
     return () => {
-      window.removeEventListener('orgChanged', handleOrgChange);
+      if (isOwner && !isAdmin) {
+        window.removeEventListener('orgChanged', handleOrgChange);
+      }
     };
-  }, [isOwner]);
+  }, [isOwner, isAdmin]);
 
   return (
     <div className="border rounded-lg">

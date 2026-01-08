@@ -55,15 +55,20 @@ export default function PointsRulesPage() {
   const [rules, setRules] = useState<PointsRule[]>([]);
   const [loading, setLoading] = useState(true);
   const [testAmount, setTestAmount] = useState("100");
+  const [testBranchId, setTestBranchId] = useState<string>("");
+  const [branches, setBranches] = useState<Array<{ id: string; name: string }>>([]);
   const [testResult, setTestResult] = useState<number | null>(null);
   const [testLoading, setTestLoading] = useState(false);
 
   useEffect(() => {
     loadRules();
+    loadBranches();
 
     // Listen for organization changes
     const handleOrgChange = () => {
       loadRules();
+      loadBranches();
+      setTestBranchId("");
     };
 
     window.addEventListener('orgChanged', handleOrgChange);
@@ -71,6 +76,34 @@ export default function PointsRulesPage() {
       window.removeEventListener('orgChanged', handleOrgChange);
     };
   }, []);
+
+  const loadBranches = async () => {
+    const activeOrgId =
+      typeof document !== "undefined"
+        ? document.cookie
+            .split(";")
+            .map((c) => c.trim())
+            .find((c) => c.startsWith("active_org_id="))
+            ?.split("=")[1]
+        : undefined;
+
+    const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+    if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
+      setBranches([]);
+      return;
+    }
+
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("branch")
+      .select("id, name")
+      .eq("organization_id", activeOrgIdNumber)
+      .eq("active", true)
+      .order("name");
+
+    setBranches((data ?? []) as Array<{ id: string; name: string }>);
+  };
 
   const loadRules = async () => {
     setLoading(true);
@@ -98,8 +131,16 @@ export default function PointsRulesPage() {
   };
 
   const handleTestCalculation = async () => {
+    if (!testBranchId) {
+      alert("Please select a branch");
+      return;
+    }
     setTestLoading(true);
-    const result = await testPointsCalculation(parseFloat(testAmount));
+    const result = await testPointsCalculation(
+      parseFloat(testAmount),
+      undefined,
+      Number(testBranchId)
+    );
     if (result.success) {
       setTestResult(result.points || 0);
     }
@@ -193,6 +234,23 @@ export default function PointsRulesPage() {
                 onChange={(e) => setTestAmount(e.target.value)}
                 placeholder="100.00"
               />
+            </div>
+            <div className="flex-1">
+              <Label htmlFor="test-branch">Branch *</Label>
+              <select
+                id="test-branch"
+                value={testBranchId}
+                onChange={(e) => setTestBranchId(e.target.value)}
+                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                required
+              >
+                <option value="">Select a branch</option>
+                {branches.map((b) => (
+                  <option key={b.id} value={b.id}>
+                    {b.name}
+                  </option>
+                ))}
+              </select>
             </div>
             <Button onClick={handleTestCalculation} disabled={testLoading}>
               {testLoading ? "Calculating..." : "Calculate"}

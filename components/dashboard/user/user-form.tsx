@@ -46,10 +46,18 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
 
   useEffect(() => {
     if (actionState.message) {
-      toast.success(actionState.message);
-      setTimeout(() => {
-        router.push("/dashboard/users");
-      }, 500);
+      // Check if it's an error message (contains "Failed" or "Error")
+      const isError = actionState.message.toLowerCase().includes('failed') || 
+                      actionState.message.toLowerCase().includes('error');
+      
+      if (isError) {
+        toast.error(actionState.message);
+      } else {
+        toast.success(actionState.message);
+        setTimeout(() => {
+          router.push("/dashboard/users");
+        }, 500);
+      }
     }
   }, [actionState, router]);
 

@@ -88,11 +88,11 @@ export async function createUser(user: Partial<User>) {
       p_email: userData.email as string,
       p_first_name: userData.first_name as string,
       p_last_name: userData.last_name as string,
-      p_username: userData.username as string || null,
+      p_username: (userData.username as string) || null,
       p_organization_id: userData.organization_id as number,
       p_role_id: userData.role_id as number,
       p_auth_user_id: authUserId,
-      p_password: userData.password as string || null,
+      p_password: (userData.password as string) || null,
       p_active: userData.active as boolean,
     });
 

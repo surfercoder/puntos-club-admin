@@ -1,5 +1,6 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
 import DeleteModal from '@/components/dashboard/address/delete-modal';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,16 @@ import type { Address } from '@/types/address';
 
 export default async function AddressListPage() {
   const supabase = await createClient();
-  const { data, error } = await supabase.from('address').select('*');
+  const cookieStore = await cookies();
+  const activeOrgId = cookieStore.get('active_org_id')?.value;
+  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+
+  let query = supabase.from('address').select('*').order('street');
+  if (activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
+    query = query.eq('organization_id', activeOrgIdNumber);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     return <div>Error fetching addresses</div>;

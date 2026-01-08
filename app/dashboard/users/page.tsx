@@ -52,6 +52,7 @@ export default async function UsersListPage() {
       <UsersList 
         initialUsers={users} 
         isOwner={isOwner(currentUser)}
+        isAdmin={isAdmin(currentUser)}
       />
     </div>
   );

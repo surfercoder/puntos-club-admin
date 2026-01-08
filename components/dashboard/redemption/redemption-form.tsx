@@ -82,12 +82,6 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
     }
   }, [actionState, router]);
 
-  // Format date for input
-  const formatDateForInput = (dateString: string) => {
-    if (!dateString) {return '';}
-    return new Date(dateString).toISOString().split('T')[0];
-  };
-
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     const formData = Object.fromEntries(new FormData(event.currentTarget));
@@ -187,19 +181,6 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="quantity" />
-      </div>
-
-      <div>
-        <Label htmlFor="redemption_date">Redemption Date</Label>
-        <Input
-          aria-describedby="redemption_date-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.redemption_date}
-          defaultValue={redemption?.redemption_date ? formatDateForInput(redemption.redemption_date) : ''}
-          id="redemption_date"
-          name="redemption_date"
-          type="date"
-        />
-        <FieldError actionState={validation ?? actionState} name="redemption_date" />
       </div>
 
       <div className="flex gap-2">

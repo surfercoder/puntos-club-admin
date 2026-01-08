@@ -1,5 +1,6 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
 import DeleteModal from '@/components/dashboard/redemption/delete-modal';
 import { Button } from '@/components/ui/button';
@@ -28,6 +29,7 @@ interface RedemptionWithRelations {
   };
   product: {
     name: string;
+    organization_id?: number;
   } | null;
   app_order: {
     order_number: string;
@@ -36,12 +38,16 @@ interface RedemptionWithRelations {
 
 export default async function RedemptionListPage() {
   const supabase = await createClient();
+  const cookieStore = await cookies();
+  const activeOrgId = cookieStore.get('active_org_id')?.value;
+  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+
   const { data, error } = await supabase
     .from('redemption')
     .select(`
       *,
       beneficiary:beneficiary(first_name, last_name, email),
-      product:product(name),
+      product:product(name, organization_id),
       app_order:app_order(order_number)
     `)
     .order('redemption_date', { ascending: false });
@@ -49,6 +55,12 @@ export default async function RedemptionListPage() {
   if (error) {
     return <div>Error fetching redemptions</div>;
   }
+
+  const filteredData = activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)
+    ? data?.filter((redemption: RedemptionWithRelations) => 
+        redemption.product?.organization_id === activeOrgIdNumber
+      )
+    : data;
 
   return (
     <div className="space-y-6">      
@@ -76,8 +88,8 @@ export default async function RedemptionListPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data && data.length > 0 ? (
-              data.map((redemption: RedemptionWithRelations) => (
+            {filteredData && filteredData.length > 0 ? (
+              filteredData.map((redemption: RedemptionWithRelations) => (
                 <TableRow key={redemption.id}>
                   <TableCell className="font-medium">
                     {redemption.beneficiary?.first_name || redemption.beneficiary?.last_name 
@@ -89,7 +101,14 @@ export default async function RedemptionListPage() {
                   <TableCell>{redemption.points_used}</TableCell>
                   <TableCell>{redemption.quantity}</TableCell>
                   <TableCell>
-                    {new Date(redemption.redemption_date).toLocaleDateString('en-US', { timeZone: 'UTC' })}
+                    {new Date(redemption.redemption_date).toLocaleString('en-US', { 
+                      year: 'numeric',
+                      month: 'short',
+                      day: 'numeric',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      hour12: true
+                    })}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">

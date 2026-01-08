@@ -15,10 +15,15 @@ export async function redemptionFormAction(_prevState: ActionState, formData: Fo
       return fromErrorToActionState(parsed.error);
     }
 
+    const redemptionData = {
+      ...parsed.data,
+      redemption_date: new Date().toISOString(),
+    };
+
     if (formData.get('id')) {
-      await updateRedemption(String(formData.get('id')), parsed.data as Redemption);
+      await updateRedemption(String(formData.get('id')), redemptionData as Redemption);
     } else {
-      await createRedemption(parsed.data as Redemption);
+      await createRedemption(redemptionData as Redemption);
     }
 
     // Revalidate the redemption list page

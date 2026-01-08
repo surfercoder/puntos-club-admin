@@ -2,6 +2,7 @@
 
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
 
 export interface PurchaseItem {
   item_name: string;
@@ -229,6 +230,9 @@ export async function getAllPurchases(filters?: {
 }) {
   try {
     const supabase = await createClient();
+    const cookieStore = await cookies();
+    const activeOrgId = cookieStore.get('active_org_id')?.value;
+    const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
 
     let query = supabase
       .from("purchase")
@@ -261,11 +265,12 @@ export async function getAllPurchases(filters?: {
       return { success: false, error: error.message };
     }
 
-    // Filter by organization if needed
+    // Filter by organization - use active org ID if no filter provided
+    const orgIdToFilter = filters?.organization_id ?? activeOrgIdNumber;
     let filteredData = data;
-    if (filters?.organization_id) {
+    if (orgIdToFilter && !Number.isNaN(orgIdToFilter)) {
       filteredData = data?.filter(
-        (p: { branch?: { organization_id?: number } }) => p.branch?.organization_id === filters.organization_id
+        (p: { branch?: { organization_id?: number } }) => p.branch?.organization_id === orgIdToFilter
       );
     }
 

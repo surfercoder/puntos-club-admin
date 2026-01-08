@@ -44,7 +44,21 @@ export default function BranchForm({ branch }: BranchFormProps) {
     const fetchData = async () => {
       const supabase = createClient();
       try {
-        const addressesRes = await supabase.from('address').select('id, street, city');
+        const activeOrgId = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('active_org_id='))
+          ?.split('=')[1];
+        
+        let addressQuery = supabase.from('address').select('id, street, city').order('street');
+        
+        if (activeOrgId) {
+          const orgIdNumber = Number(activeOrgId);
+          if (!Number.isNaN(orgIdNumber)) {
+            addressQuery = addressQuery.eq('organization_id', orgIdNumber);
+          }
+        }
+        
+        const addressesRes = await addressQuery;
 
         if (addressesRes.data) {setAddresses(addressesRes.data);}
       } catch (error) {
