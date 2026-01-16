@@ -122,12 +122,6 @@ export default function StockForm({ stock }: StockFormProps) {
     }
   }, [actionState, router]);
 
-  // Format date for input
-  const formatDateForInput = (dateString: string) => {
-    if (!dateString) {return '';}
-    return new Date(dateString).toISOString().split('T')[0];
-  };
-
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     const formData = Object.fromEntries(new FormData(event.currentTarget));
@@ -211,17 +205,6 @@ export default function StockForm({ stock }: StockFormProps) {
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="minimum_quantity" />
-      </div>
-
-      <div>
-        <Label htmlFor="last_updated">Last Updated</Label>
-        <Input
-          defaultValue={stock?.last_updated ? formatDateForInput(stock.last_updated) : ''}
-          id="last_updated"
-          name="last_updated"
-          type="date"
-        />
-        <FieldError actionState={validation ?? actionState} name="last_updated" />
       </div>
 
       <div className="flex gap-2">

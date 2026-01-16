@@ -7,7 +7,6 @@ export type Stock = {
   product_id: string;
   quantity: number;
   minimum_quantity: number;
-  last_updated: string;
 };
 
 export type StockWithRelations = Stock & {

@@ -3,6 +3,7 @@
 import {
   ChevronsUpDown,
   LogOut,
+  User,
 } from "lucide-react"
 
 import {
@@ -24,6 +25,7 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
+import Link from "next/link"
 
 export function NavUser({
   user,
@@ -86,6 +88,12 @@ export function NavUser({
               </div>
             </DropdownMenuLabel>
             <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link href="/dashboard/profile" className="cursor-pointer">
+                <User />
+                Profile
+              </Link>
+            </DropdownMenuItem>
             <DropdownMenuItem
               onClick={() => onLogout?.()}
               className="cursor-pointer"

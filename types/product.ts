@@ -10,6 +10,7 @@ export type Product = {
   required_points: number;
   active: boolean;
   creation_date: string;
+  image_urls?: string[] | null;
 };
 
 export type ProductWithRelations = Product & {

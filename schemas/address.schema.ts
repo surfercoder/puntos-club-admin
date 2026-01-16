@@ -8,6 +8,10 @@ export const AddressSchema = z.object({
   state: z.string().min(1, 'State is required'),
   street: z.string().min(1, 'Street is required'),
   zip_code: z.string().min(1, 'Zip code is required'),
+  country: z.string().optional(),
+  place_id: z.string().optional(),
+  latitude: z.number().optional(),
+  longitude: z.number().optional(),
 });
 
 export type AddressInput = z.input<typeof AddressSchema>;

@@ -103,7 +103,6 @@ export function AppSidebar({
 
     if (isOwnerOrCollaborator) {
       const ownerEntities = [
-        { title: "Addresses", url: "/dashboard/address", icon: MapPin },
         { title: "App Orders", url: "/dashboard/app_order", icon: ClipboardList },
         { title: "Beneficiaries", url: "/dashboard/beneficiary", icon: HandHeart },
         { title: "Branches", url: "/dashboard/branch", icon: Store },

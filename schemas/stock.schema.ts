@@ -12,7 +12,6 @@ export const StockSchema = z.object({
     if (typeof val === 'number') return val;
     return parseInt(val) || 0;
   }),
-  last_updated: z.string().optional(),
 });
 
 export type StockInput = z.input<typeof StockSchema>;

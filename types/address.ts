@@ -8,6 +8,10 @@ export type Address = {
   state: string;
   street: string;
   zip_code: string;
+  country?: string;
+  place_id?: string;
+  latitude?: number;
+  longitude?: number;
 };
 
 export type AddressWithRelations = Address & {

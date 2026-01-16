@@ -6,6 +6,7 @@ export type Organization = {
   name: string;
   business_name?: string | null;
   tax_id?: string | null;
+  logo_url?: string | null;
   creation_date: string; // ISO date string
 };
 

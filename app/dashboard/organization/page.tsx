@@ -1,4 +1,5 @@
 import { Pencil } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 
 import DeleteModal from '@/components/dashboard/organization/delete-modal';
@@ -38,6 +39,7 @@ export default async function OrganizationListPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Logo</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Business Name</TableHead>
               <TableHead>Tax ID</TableHead>
@@ -49,6 +51,21 @@ export default async function OrganizationListPage() {
             {data && data.length > 0 ? (
               data.map((organization: Organization) => (
                 <TableRow key={organization.id}>
+                  <TableCell>
+                    {organization.logo_url ? (
+                      <div className="relative h-10 w-24 overflow-hidden rounded-md bg-muted flex items-center justify-center">
+                        <Image
+                          alt={`${organization.name} logo`}
+                          className="object-contain"
+                          height={40}
+                          src={organization.logo_url}
+                          width={96}
+                        />
+                      </div>
+                    ) : (
+                      <div className="h-10 w-24 rounded-md bg-muted" />
+                    )}
+                  </TableCell>
                   <TableCell className="font-medium">
                     <Link 
                       href={`/dashboard/organization/${organization.id}`}
@@ -79,7 +96,7 @@ export default async function OrganizationListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={5}>No organizations found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>No organizations found.</TableCell>
               </TableRow>
             )}
           </TableBody>

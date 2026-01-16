@@ -57,7 +57,6 @@ export default async function BranchListPage() {
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Organization</TableHead>
-              <TableHead>Code</TableHead>
               <TableHead>Phone</TableHead>
               <TableHead>Address</TableHead>
               <TableHead>Status</TableHead>
@@ -70,7 +69,6 @@ export default async function BranchListPage() {
                 <TableRow key={branch.id}>
                   <TableCell className="font-medium">{branch.name}</TableCell>
                   <TableCell>{branch.organization?.name || 'N/A'}</TableCell>
-                  <TableCell>{branch.code || 'N/A'}</TableCell>
                   <TableCell>{branch.phone || 'N/A'}</TableCell>
                   <TableCell>
                     {branch.address 
@@ -104,7 +102,7 @@ export default async function BranchListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={7}>No branches found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>No branches found.</TableCell>
               </TableRow>
             )}
           </TableBody>

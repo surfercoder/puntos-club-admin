@@ -13,18 +13,16 @@ export default async function EditOrganizationPage({ params }: { params: Promise
     return <div>Error fetching organization</div>;
   }
 
-  if (!data) {notFound();}
+  if (!data) { notFound(); }
 
   return (
-    <div className="max-w-xl mx-auto">
-      <Card>
-        <CardHeader>
-          <CardTitle>Edit Organization</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <OrganizationForm organization={data} />
-        </CardContent>
-      </Card>
-    </div>
+    <Card>
+      <CardHeader>
+        <CardTitle>Edit Organization</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <OrganizationForm organization={data} />
+      </CardContent>
+    </Card>
   );
 }

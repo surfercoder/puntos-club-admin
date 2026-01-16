@@ -121,18 +121,6 @@ export default function BranchForm({ branch }: BranchFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="code">Branch Code</Label>
-        <Input
-          defaultValue={branch?.code ?? ''}
-          id="code"
-          name="code"
-          placeholder="Enter branch code (optional)"
-          type="text"
-        />
-        <FieldError actionState={validation ?? actionState} name="code" />
-      </div>
-
-      <div>
         <Label htmlFor="phone">Phone</Label>
         <Input
           defaultValue={branch?.phone ?? ''}

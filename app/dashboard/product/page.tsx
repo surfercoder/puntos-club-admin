@@ -1,5 +1,6 @@
-import { Pencil } from 'lucide-react';
+import { Pencil, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 import { getProducts } from '@/actions/dashboard/product/actions';
 import DeleteModal from '@/components/dashboard/product/delete-modal';
@@ -37,6 +38,7 @@ export default async function ProductListPage() {
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead>Images</TableHead>
               <TableHead>Name</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Required Points</TableHead>
@@ -48,6 +50,30 @@ export default async function ProductListPage() {
             {data && data.length > 0 ? (
               data.map((product: Product) => (
                 <TableRow key={product.id}>
+                  <TableCell>
+                    <div className="flex gap-1">
+                      {product.image_urls && product.image_urls.length > 0 ? (
+                        product.image_urls.map((url, index) => (
+                          <div
+                            key={index}
+                            className="relative w-12 h-12 rounded border border-gray-200 overflow-hidden bg-gray-50"
+                          >
+                            <Image
+                              src={url}
+                              alt={`${product.name} image ${index + 1}`}
+                              fill
+                              className="object-cover"
+                              sizes="48px"
+                            />
+                          </div>
+                        ))
+                      ) : (
+                        <div className="w-12 h-12 rounded border border-gray-200 bg-gray-50 flex items-center justify-center">
+                          <ImageIcon className="w-5 h-5 text-gray-400" />
+                        </div>
+                      )}
+                    </div>
+                  </TableCell>
                   <TableCell className="font-medium">
                     {product.name}
                   </TableCell>
@@ -79,7 +105,7 @@ export default async function ProductListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={5}>No products found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>No products found.</TableCell>
               </TableRow>
             )}
           </TableBody>

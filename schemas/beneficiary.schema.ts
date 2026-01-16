@@ -18,6 +18,7 @@ export const BeneficiarySchema = z.object({
     z.number().int().min(0).default(0)
   ),
   registration_date: z.string().optional(),
+  address_id: z.string().nullable().optional(),
 });
 
 export type BeneficiaryInput = z.input<typeof BeneficiarySchema>;

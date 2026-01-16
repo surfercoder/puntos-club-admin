@@ -295,7 +295,7 @@ export async function getPurchaseById(purchase_id: number) {
         *,
         beneficiary:beneficiary(first_name, last_name, email, phone),
         cashier:app_user!purchase_cashier_id_fkey(first_name, last_name, email),
-        branch:branch(name, code, organization:organization(name)),
+        branch:branch(name, organization:organization(name)),
         purchase_item(*)
       `
       )

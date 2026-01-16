@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { organizationFormAction } from '@/actions/dashboard/organization/organization-form-actions';
 import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
+import { ImageUpload } from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { ActionState} from '@/lib/error-handler';
@@ -25,6 +26,7 @@ interface OrganizationFormProps {
 export default function OrganizationForm({ organization, onSuccess, onCancel, redirectTo = "/dashboard/organization" }: OrganizationFormProps) {
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
+  const [logoUrl, setLogoUrl] = useState<string | null>(organization?.logo_url ?? null);
 
   // Utils
   const [actionState, formAction, pending] = useActionState(organizationFormAction, EMPTY_ACTION_STATE);
@@ -55,11 +57,17 @@ export default function OrganizationForm({ organization, onSuccess, onCancel, re
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    const formData = Object.fromEntries(new FormData(event.currentTarget));
+    const formData = new FormData(event.currentTarget);
+    
+    if (logoUrl) {
+      formData.set('logo_url', logoUrl);
+    }
+    
+    const formDataObject = Object.fromEntries(formData);
     setValidation(null);
 
     try {
-      OrganizationSchema.parse(formData);
+      OrganizationSchema.parse(formDataObject);
     } catch (error) {
       setValidation(fromErrorToActionState(error));
       event.preventDefault();
@@ -110,6 +118,22 @@ export default function OrganizationForm({ organization, onSuccess, onCancel, re
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="tax_id" />
+      </div>
+
+      <div>
+        <Label htmlFor="logo_url">Organization Logo</Label>
+        <ImageUpload
+          aspectRatio="auto"
+          bucket="organization-logos"
+          disabled={pending}
+          maxHeight={150}
+          maxSizeMB={5}
+          path="logos"
+          value={logoUrl}
+          onChange={setLogoUrl}
+        />
+        <input name="logo_url" type="hidden" value={logoUrl ?? ''} />
+        <FieldError actionState={validation ?? actionState} name="logo_url" />
       </div>
 
       <div className="flex gap-2">

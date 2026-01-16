@@ -3,11 +3,13 @@ import { Geist } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 
 import "./globals.css";
-import { Toaster } from "@/components/ui/sonner"
+import { Toaster } from "@/components/ui/sonner";
+import { GoogleMapsProvider } from "@/components/providers/google-maps-provider";
+import { env } from "@/lib/env";
 
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3000";
+  : "http://localhost:3001";
 
 export const metadata: Metadata = {
   metadataBase: new URL(defaultUrl),
@@ -35,8 +37,10 @@ export default function RootLayout({
           disableTransitionOnChange
           enableSystem
         >
-          {children}
-          <Toaster />
+          <GoogleMapsProvider apiKey={env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
+            {children}
+            <Toaster />
+          </GoogleMapsProvider>
         </ThemeProvider>
       </body>
     </html>

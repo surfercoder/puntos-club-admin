@@ -14,6 +14,7 @@ export const ProductSchema = z.object({
     return val === 'true' || val === 'on';
   }).default(true),
   creation_date: z.string().optional(),
+  image_urls: z.array(z.string()).max(3, 'Maximum 3 images allowed').optional(),
 });
 
 export type ProductInput = z.input<typeof ProductSchema>;

@@ -8,7 +8,6 @@ export type Branch = {
   organization_id: string;
   address_id?: string | null;
   name: string;
-  code?: string | null;
   phone?: string | null;
   active: boolean;
 };

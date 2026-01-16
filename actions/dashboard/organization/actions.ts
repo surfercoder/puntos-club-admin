@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { OrganizationSchema } from '@/schemas/organization.schema';
 import type { Organization } from '@/types/organization';
+import { isAdmin } from '@/lib/auth/roles';
+import { getCurrentUser } from '@/lib/auth/get-current-user';
 
 export async function createOrganization(input: Organization) {
   const parsed = OrganizationSchema.safeParse(input);
@@ -35,7 +37,7 @@ export async function createOrganization(input: Organization) {
 
   const { data: appUserRow, error: appUserError } = await supabase
     .from('app_user')
-    .select('id')
+    .select('id, role:role_id(name)')
     .eq('auth_user_id', user.id)
     .single();
 
@@ -44,20 +46,27 @@ export async function createOrganization(input: Organization) {
     throw new Error('Could not resolve app user for current session');
   }
 
-  const appUserId = Number(appUserRow.id);
-  const orgId = Number((data as { id: unknown }).id);
+  const currentUser = await getCurrentUser();
+  
+  // Only create app_user_organization association for non-admin users
+  // Admins create organizations but don't belong to them
+  // Owners should be associated with their organizations
+  if (currentUser && !isAdmin(currentUser)) {
+    const appUserId = Number(appUserRow.id);
+    const orgId = Number((data as { id: unknown }).id);
 
-  const { error: membershipError } = await supabase
-    .from('app_user_organization')
-    .insert({
-      app_user_id: appUserId,
-      organization_id: orgId,
-      is_active: true,
-    });
+    const { error: membershipError } = await supabase
+      .from('app_user_organization')
+      .insert({
+        app_user_id: appUserId,
+        organization_id: orgId,
+        is_active: true,
+      });
 
-  if (membershipError) {
-    await supabase.from('organization').delete().eq('id', data.id);
-    throw new Error(membershipError.message || 'Failed to associate user to organization');
+    if (membershipError) {
+      await supabase.from('organization').delete().eq('id', data.id);
+      throw new Error(membershipError.message || 'Failed to associate user to organization');
+    }
   }
 
   return { data, error: null };

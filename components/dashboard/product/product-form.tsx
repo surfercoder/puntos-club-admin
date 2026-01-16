@@ -16,6 +16,7 @@ import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler'
 import { createClient } from '@/lib/supabase/client';
 import { ProductSchema } from '@/schemas/product.schema';
 import type { Product } from '@/types/product';
+import ProductImageUpload from './product-image-upload';
 
 interface ProductFormProps {
   product?: Product;
@@ -32,6 +33,7 @@ export default function ProductForm({ product }: ProductFormProps) {
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>(product?.category_id ?? '');
+  const [imageUrls, setImageUrls] = useState<string[]>(product?.image_urls ?? []);
 
   // Utils
   const [actionState, formAction, pending] = useActionState(productFormAction, EMPTY_ACTION_STATE);
@@ -79,10 +81,14 @@ export default function ProductForm({ product }: ProductFormProps) {
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     const formData = Object.fromEntries(new FormData(event.currentTarget));
+    const formDataWithImages = {
+      ...formData,
+      image_urls: imageUrls,
+    };
     setValidation(null);
 
     try {
-      ProductSchema.parse(formData);
+      ProductSchema.parse(formDataWithImages);
     } catch (error) {
       setValidation(fromErrorToActionState(error));
       event.preventDefault();
@@ -92,6 +98,7 @@ export default function ProductForm({ product }: ProductFormProps) {
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
       {product?.id && <input name="id" type="hidden" value={product.id} />}
+      <input name="image_urls" type="hidden" value={JSON.stringify(imageUrls)} />
       
       <div>
         <Label htmlFor="category_id">Category</Label>
@@ -149,6 +156,16 @@ export default function ProductForm({ product }: ProductFormProps) {
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="required_points" />
+      </div>
+
+      <div>
+        <Label>Product Images (up to 3)</Label>
+        <ProductImageUpload
+          productId={product?.id}
+          initialImages={product?.image_urls ?? []}
+          onImagesChange={setImageUrls}
+        />
+        <FieldError actionState={validation ?? actionState} name="image_urls" />
       </div>
 
       <div className="flex items-center space-x-2">

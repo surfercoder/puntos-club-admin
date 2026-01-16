@@ -9,7 +9,17 @@ import type { Product } from '@/types/product';
 
 export async function productFormAction(_prevState: ActionState, formData: FormData) {
   try {
-    const formDataObj = Object.fromEntries(formData);
+    const formDataObj: Record<string, FormDataEntryValue | unknown[]> = Object.fromEntries(formData);
+    
+    // Parse image_urls from JSON string
+    if (formDataObj.image_urls && typeof formDataObj.image_urls === 'string') {
+      try {
+        formDataObj.image_urls = JSON.parse(formDataObj.image_urls) as unknown[];
+      } catch {
+        formDataObj.image_urls = [];
+      }
+    }
+    
     const parsed = ProductSchema.safeParse(formDataObj);
 
     if (!parsed.success) {

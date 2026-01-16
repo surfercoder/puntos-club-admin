@@ -20,7 +20,6 @@ interface StockWithRelations {
   product_id: string;
   quantity: number;
   minimum_quantity: number;
-  last_updated: string;
   branch: {
     name: string;
     organization_id: number;
@@ -42,8 +41,7 @@ export default async function StockListPage() {
       *,
       branch:branch(name, organization_id),
       product:product(name)
-    `)
-    .order('last_updated', { ascending: false });
+    `);
 
   if (error) {
     return <div>Error fetching stock records</div>;
@@ -74,7 +72,6 @@ export default async function StockListPage() {
               <TableHead>Product</TableHead>
               <TableHead>Current Stock</TableHead>
               <TableHead>Minimum Stock</TableHead>
-              <TableHead>Last Updated</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -89,9 +86,6 @@ export default async function StockListPage() {
                   <TableCell>{stock.product?.name || 'N/A'}</TableCell>
                   <TableCell>{stock.quantity}</TableCell>
                   <TableCell>{stock.minimum_quantity}</TableCell>
-                  <TableCell>
-                    {new Date(stock.last_updated).toLocaleDateString('en-US', { timeZone: 'UTC' })}
-                  </TableCell>
                   <TableCell>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                       stock.quantity > stock.minimum_quantity 
@@ -124,7 +118,7 @@ export default async function StockListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={7}>No stock records found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>No stock records found.</TableCell>
               </TableRow>
             )}
           </TableBody>

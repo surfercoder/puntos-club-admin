@@ -114,8 +114,7 @@ export async function getStocks() {
       *,
       branch:branch(name, organization_id),
       product:product(name)
-    `)
-    .order('last_updated', { ascending: false });
+    `);
 
   if (error) {
     return { data: null, error };
