@@ -26,6 +26,7 @@ import {
   PieChart,
   Frame,
   ShoppingCart,
+  Bell,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -107,6 +108,7 @@ export function AppSidebar({
         { title: "Beneficiaries", url: "/dashboard/beneficiary", icon: HandHeart },
         { title: "Branches", url: "/dashboard/branch", icon: Store },
         { title: "Categories", url: "/dashboard/category", icon: Tags },
+        { title: "Notifications", url: "/dashboard/notifications", icon: Bell },
         { title: "Points Rules", url: "/dashboard/points-rules", icon: Star },
         { title: "Product", url: "/dashboard/product", icon: Package },
         { title: "Purchases", url: "/dashboard/purchase", icon: Receipt },
