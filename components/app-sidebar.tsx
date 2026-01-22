@@ -27,6 +27,10 @@ import {
   Frame,
   ShoppingCart,
   Bell,
+  BellRing,
+  Smartphone,
+  UserCheck,
+  Settings,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -83,11 +87,15 @@ export function AppSidebar({
         { title: "Categories", url: "/dashboard/category", icon: Tags },
         { title: "Collaborator Permissions", url: "/dashboard/collaborator_permission", icon: KeyRound },
         { title: "History", url: "/dashboard/history", icon: History },
+        { title: "Notification Limits", url: "/dashboard/organization_notification_limits", icon: Settings },
         { title: "Organizations", url: "/dashboard/organization", icon: Building2 },
         { title: "Points Rules", url: "/dashboard/points-rules", icon: Star },
         { title: "Product", url: "/dashboard/product", icon: Package },
         { title: "Purchasable Items", url: "/dashboard/purchasable-item", icon: ShoppingBag },
         { title: "Purchases", url: "/dashboard/purchase", icon: Receipt },
+        { title: "Push Notification Recipients", url: "/dashboard/push_notification_recipients", icon: UserCheck },
+        { title: "Push Notifications", url: "/dashboard/push_notifications", icon: BellRing },
+        { title: "Push Tokens", url: "/dashboard/push_tokens", icon: Smartphone },
         { title: "Redemptions", url: "/dashboard/redemption", icon: Gift },
         { title: "Restricted Actions", url: "/dashboard/restricted_collaborator_action", icon: Ban },
         { title: "Status", url: "/dashboard/status", icon: Activity },

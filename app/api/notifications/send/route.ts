@@ -119,15 +119,12 @@ export async function POST(request: NextRequest) {
     }
 
     const beneficiaryIds = beneficiaryOrgs.map(bo => bo.beneficiary_id);
-    console.log('Beneficiary IDs:', beneficiaryIds);
 
-    const { data: pushTokens, error: tokensError } = await supabase
+    const { data: pushTokens } = await supabase
       .from("push_tokens")
       .select("*")
       .in("beneficiary_id", beneficiaryIds)
       .eq("is_active", true);
-
-    console.log('Push tokens query result:', { pushTokens, tokensError, beneficiaryIds });
 
     if (!pushTokens || pushTokens.length === 0) {
       await supabase

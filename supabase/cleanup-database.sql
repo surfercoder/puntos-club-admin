@@ -45,7 +45,13 @@ DELETE FROM beneficiary_organization;
 -- They don't store data directly, so no deletion needed
 -- (Data is deleted when underlying tables are cleared)
 
--- 9. Delete user data
+-- 9. Delete notification data
+DELETE FROM push_notification_recipients;
+DELETE FROM push_tokens;
+DELETE FROM push_notifications;
+DELETE FROM notifications;
+
+-- 10. Delete user data
 DELETE FROM beneficiary;
 DELETE FROM app_user;
 DELETE FROM app_user_organization;
@@ -62,19 +68,20 @@ DELETE FROM auth.mfa_challenges;
 DELETE FROM auth.mfa_amr_claims;
 DELETE FROM auth.users;
 
--- 10. Delete permission data
+-- 11. Delete permission and role data
 DELETE FROM collaborator_permission;
 DELETE FROM user_permission;
 DELETE FROM restricted_collaborator_action;
 
--- 11. Delete branch and address data
+-- 12. Delete branch and address data
 DELETE FROM branch;
 DELETE FROM address;
 
--- 12. Delete organization data
+-- 13. Delete organization data
+DELETE FROM organization_notification_limits;
 DELETE FROM organization;
 
--- 13. Delete status data
+-- 14. Delete status data
 DELETE FROM status;
 
 -- Re-enable triggers
@@ -111,35 +118,22 @@ ALTER SEQUENCE points_rule_id_seq RESTART WITH 1;
 ALTER SEQUENCE beneficiary_organization_id_seq RESTART WITH 1;
 ALTER SEQUENCE beneficiary_id_seq RESTART WITH 1;
 ALTER SEQUENCE app_user_id_seq RESTART WITH 1;
+ALTER SEQUENCE app_user_organization_id_seq RESTART WITH 1;
+ALTER SEQUENCE push_notification_recipients_id_seq RESTART WITH 1;
+ALTER SEQUENCE push_tokens_id_seq RESTART WITH 1;
+ALTER SEQUENCE push_notifications_id_seq RESTART WITH 1;
+ALTER SEQUENCE notifications_id_seq RESTART WITH 1;
 ALTER SEQUENCE collaborator_permission_id_seq RESTART WITH 1;
 ALTER SEQUENCE user_permission_id_seq RESTART WITH 1;
 ALTER SEQUENCE restricted_collaborator_action_id_seq RESTART WITH 1;
 ALTER SEQUENCE branch_id_seq RESTART WITH 1;
 ALTER SEQUENCE address_id_seq RESTART WITH 1;
+ALTER SEQUENCE organization_notification_limits_id_seq RESTART WITH 1;
 ALTER SEQUENCE organization_id_seq RESTART WITH 1;
 ALTER SEQUENCE status_id_seq RESTART WITH 1;
-ALTER SEQUENCE app_user_organization_id_seq RESTART WITH 1;
 
-address
-app_order
-app_user
-app_user_organization
-assignment
-beneficiary
-beneficiary_organization
-branch
-category
-collaborator_permission
-history
-organization
-points_rule
-product
-purchasable_item
-purchase
-purchase_item
-redemption
-restricted_collaborator_action
-status
-stock
-user_permission
-user_role
+-- ============================================================================
+-- CLEANUP COMPLETE
+-- ============================================================================
+-- All data has been deleted and sequences have been reset.
+-- The database schema remains intact and ready for fresh data.
