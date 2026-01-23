@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { OrganizationNotificationLimitSchema } from '@/schemas/organization_notification_limit.schema';
 import type { OrganizationNotificationLimit } from '@/types/organization_notification_limit';
 
@@ -16,7 +16,7 @@ export async function createOrganizationNotificationLimit(input: OrganizationNot
     return { error: { fieldErrors } };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data, error } = await supabase.from('organization_notification_limits').insert([parsed.data]).select().single();
 
   return { data, error };
@@ -34,14 +34,14 @@ export async function updateOrganizationNotificationLimit(id: string, input: Org
     return { error: { fieldErrors } };
   }
 
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { data, error } = await supabase.from('organization_notification_limits').update(parsed.data).eq('id', id).select().single();
 
   return { data, error };
 }
 
 export async function deleteOrganizationNotificationLimit(id: string) {
-  const supabase = await createClient();
+  const supabase = createAdminClient();
   const { error } = await supabase.from('organization_notification_limits').delete().eq('id', id);
 
   return { error };

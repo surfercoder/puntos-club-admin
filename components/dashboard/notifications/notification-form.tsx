@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertCircle, Bell, CheckCircle2, Loader2, Send, Smile } from 'lucide-react';
+import { AlertCircle, Bell, CheckCircle2, Loader2, Send, Smile, ShieldAlert, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useRef, useState } from 'react';
 import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
@@ -26,6 +26,12 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
   const [isCreating, setIsCreating] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [isModerating, setIsModerating] = useState(false);
+  const [moderationResult, setModerationResult] = useState<{
+    isApproved: boolean;
+    reasons?: string[];
+    severity?: 'low' | 'medium' | 'high';
+  } | null>(null);
   const bodyTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   const titleCharsLeft = TITLE_MAX_LENGTH - title.length;
@@ -49,24 +55,78 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
     }, 0);
   };
 
-  const handleSaveAndSend = async () => {
+  const handleCheckContent = async () => {
     if (!title.trim() || !body.trim()) {
-      toast.error('Please fill in both title and body');
+      toast.error('Por favor completa el título y el cuerpo');
       return;
     }
 
     if (title.length > TITLE_MAX_LENGTH) {
-      toast.error(`Title must be ${TITLE_MAX_LENGTH} characters or less`);
+      toast.error(`El título debe tener ${TITLE_MAX_LENGTH} caracteres o menos`);
       return;
     }
 
     if (body.length > BODY_MAX_LENGTH) {
-      toast.error(`Body must be ${BODY_MAX_LENGTH} characters or less`);
+      toast.error(`El cuerpo debe tener ${BODY_MAX_LENGTH} caracteres o menos`);
+      return;
+    }
+
+    setIsModerating(true);
+    setModerationResult(null);
+
+    try {
+      const moderateResponse = await fetch('/api/notifications/moderate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ title, body }),
+      });
+
+      const moderateData = await moderateResponse.json();
+
+      if (!moderateResponse.ok) {
+        toast.error(moderateData.error || 'Error al verificar el contenido');
+        setIsModerating(false);
+        return;
+      }
+
+      setModerationResult(moderateData.data);
+      setIsModerating(false);
+
+      if (moderateData.data.isApproved) {
+        toast.success('¡Contenido aprobado! Ahora puedes enviar la notificación.');
+      } else {
+        toast.error('El contenido necesita revisión. Por favor revisa los comentarios.');
+      }
+    } catch (error) {
+      console.error('Moderation error:', error);
+      toast.error('Error al verificar el contenido. Por favor intenta de nuevo.');
+      setIsModerating(false);
+    }
+  };
+
+  const handleSaveAndSend = async () => {
+    if (!title.trim() || !body.trim()) {
+      toast.error('Por favor completa el título y el cuerpo');
+      return;
+    }
+
+    if (title.length > TITLE_MAX_LENGTH) {
+      toast.error(`El título debe tener ${TITLE_MAX_LENGTH} caracteres o menos`);
+      return;
+    }
+
+    if (body.length > BODY_MAX_LENGTH) {
+      toast.error(`El cuerpo debe tener ${BODY_MAX_LENGTH} caracteres o menos`);
       return;
     }
 
     if (!canSend) {
-      toast.error('You have reached your notification limit. Please upgrade your plan or wait.');
+      toast.error('Has alcanzado tu límite de notificaciones. Por favor actualiza tu plan o espera.');
+      return;
+    }
+
+    if (!moderationResult?.isApproved) {
+      toast.error('Por favor verifica el contenido con IA antes de enviar');
       return;
     }
 
@@ -125,6 +185,20 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
 
   const isProcessing = isCreating || isSending;
 
+  const handleContentChange = (field: 'title' | 'body', value: string) => {
+    if (field === 'title') {
+      setTitle(value);
+    } else {
+      setBody(value);
+    }
+    if (moderationResult) {
+      setModerationResult(null);
+    }
+  };
+
+  const isFormValid = title.trim() && body.trim() && titleCharsLeft >= 0 && bodyCharsLeft >= 0;
+  const canSendNotification = isFormValid && canSend && moderationResult?.isApproved && !isProcessing && !isModerating;
+
   return (
     <div className="max-w-2xl space-y-6">
       {limits && (
@@ -172,11 +246,11 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
             id="title"
             type="text"
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
+            onChange={(e) => handleContentChange('title', e.target.value)}
             placeholder="e.g., New rewards available! 🎉"
             maxLength={TITLE_MAX_LENGTH + 50}
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={isProcessing}
+            disabled={isProcessing || isModerating}
           />
           <p className="text-xs text-muted-foreground">
             Keep it short and engaging. Emojis are supported!
@@ -195,18 +269,18 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
               ref={bodyTextareaRef}
               id="body"
               value={body}
-              onChange={(e) => setBody(e.target.value)}
+              onChange={(e) => handleContentChange('body', e.target.value)}
               placeholder="e.g., Check out our new products and earn double points this week! 🌟"
               rows={4}
               maxLength={BODY_MAX_LENGTH + 50}
               className="resize-none pr-12"
-              disabled={isProcessing}
+              disabled={isProcessing || isModerating}
             />
             <button
               type="button"
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
               className="absolute right-2 top-2 p-2 rounded-md hover:bg-gray-100 transition-colors"
-              disabled={isProcessing}
+              disabled={isProcessing || isModerating}
               title="Add emoji"
             >
               <Smile className="h-5 w-5 text-gray-500" />
@@ -254,24 +328,78 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
           </div>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t">
+        {moderationResult && (
+          <div className={`p-4 rounded-lg border ${
+            moderationResult.isApproved 
+              ? 'bg-green-50 border-green-200' 
+              : moderationResult.severity === 'high'
+              ? 'bg-red-50 border-red-200'
+              : moderationResult.severity === 'medium'
+              ? 'bg-orange-50 border-orange-200'
+              : 'bg-yellow-50 border-yellow-200'
+          }`}>
+            <div className="flex items-start gap-3">
+              {moderationResult.isApproved ? (
+                <ShieldCheck className="h-5 w-5 text-green-600 mt-0.5" />
+              ) : (
+                <ShieldAlert className="h-5 w-5 text-red-600 mt-0.5" />
+              )}
+              <div className="flex-1">
+                <h3 className="font-semibold text-sm mb-1">
+                  {moderationResult.isApproved ? 'Contenido Aprobado ✓' : 'El Contenido Necesita Revisión'}
+                </h3>
+                {moderationResult.isApproved ? (
+                  <p className="text-sm text-green-800">
+                    Tu contenido de notificación ha sido revisado y aprobado. Ahora puedes enviarlo a tus beneficiarios.
+                  </p>
+                ) : (
+                  <div className="text-sm space-y-2">
+                    <p className="font-medium text-red-900">Por favor revisa tu contenido por las siguientes razones:</p>
+                    <ul className="list-disc list-inside space-y-1 text-red-800">
+                      {moderationResult.reasons?.map((reason, idx) => (
+                        <li key={idx}>{reason}</li>
+                      ))}
+                    </ul>
+                    <p className="text-xs text-red-700 mt-2">
+                      Recuerda: Las notificaciones solo deben contener información sobre productos, ofertas, promociones y campañas.
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center justify-between pt-4 border-t gap-3">
           <Button
             type="button"
             variant="outline"
             onClick={() => router.push('/dashboard/notifications')}
-            disabled={isProcessing}
+            disabled={isProcessing || isModerating}
           >
             Cancel
           </Button>
-          <Button
-            onClick={handleSaveAndSend}
-            disabled={isProcessing || !canSend || !title.trim() || !body.trim() || titleCharsLeft < 0 || bodyCharsLeft < 0}
-          >
-            {isCreating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            {isSending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-            {!isProcessing && <Send className="h-4 w-4 mr-2" />}
-            {isCreating ? 'Creating...' : isSending ? 'Sending...' : 'Send Notification'}
-          </Button>
+          <div className="flex gap-2">
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={handleCheckContent}
+              disabled={isProcessing || isModerating || !title.trim() || !body.trim() || titleCharsLeft < 0 || bodyCharsLeft < 0}
+            >
+              {isModerating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {!isModerating && <ShieldCheck className="h-4 w-4 mr-2" />}
+              {isModerating ? 'Verificando...' : 'Verificar Contenido con IA'}
+            </Button>
+            <Button
+              onClick={handleSaveAndSend}
+              disabled={!canSendNotification}
+            >
+              {isCreating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {isSending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
+              {!isProcessing && <Send className="h-4 w-4 mr-2" />}
+              {isCreating ? 'Creando...' : isSending ? 'Enviando...' : 'Enviar Notificación'}
+            </Button>
+          </div>
         </div>
       </div>
 
