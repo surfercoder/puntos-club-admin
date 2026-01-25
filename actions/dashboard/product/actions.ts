@@ -3,6 +3,8 @@
 import { cookies } from 'next/headers';
 
 import { createClient } from '@/lib/supabase/server';
+import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { isAdmin } from '@/lib/auth/roles';
 import type { Product } from '@/types/product';
 
 export async function createProduct(input: Product) {
@@ -77,13 +79,17 @@ export async function deleteProduct(id: string) {
 
 export async function getProducts() {
   const supabase = await createClient();
+  const currentUser = await getCurrentUser();
+  const userIsAdmin = isAdmin(currentUser);
+
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
   const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
   const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
 
   let query = supabase.from('product').select('*').order('name');
-  if (activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
+  // Only filter by organization for non-admin users
+  if (!userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
     query = query.eq('organization_id', activeOrgIdNumber);
   }
 

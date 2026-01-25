@@ -1,5 +1,6 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -10,14 +11,33 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export default async function PushNotificationsListPage() {
-  const supabase = await createClient();
-  const { data, error } = await supabase
+  const currentUser = await getCurrentUser();
+  const userIsAdmin = isAdmin(currentUser);
+
+  // Use admin client to bypass RLS for admin users
+  const supabase = userIsAdmin ? createAdminClient() : await createClient();
+
+  const cookieStore = await cookies();
+  const activeOrgId = cookieStore.get('active_org_id')?.value;
+  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+
+  let query = supabase
     .from('push_notifications')
     .select('*, organization:organization_id(name), creator:created_by(first_name, last_name)')
     .order('created_at', { ascending: false });
+
+  // Only filter by organization for non-admin users
+  if (!userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
+    query = query.eq('organization_id', activeOrgIdNumber);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     return <div>Error fetching push notifications</div>;

@@ -1,6 +1,5 @@
 import type { Organization } from './organization';
 import type { AppUser } from './app_user';
-import type { PushNotificationRecipient } from './push_notification_recipient';
 
 export type PushNotificationStatus = 'draft' | 'sending' | 'sent' | 'failed';
 
@@ -22,5 +21,4 @@ export type PushNotification = {
 export type PushNotificationWithRelations = PushNotification & {
   organization?: Organization;
   creator?: AppUser;
-  recipients?: PushNotificationRecipient[];
 };

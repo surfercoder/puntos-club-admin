@@ -1,6 +1,4 @@
-import type { Assignment } from './assignment';
 import type { Organization } from './organization';
-import type { UserPermission } from './user_permission';
 import type { UserRole } from './user_role';
 
 export type AppUser = {
@@ -20,8 +18,6 @@ export type AppUser = {
 
 export type AppUserWithRelations = AppUser & {
   organization?: Organization;
-  user_permissions?: UserPermission[];
-  assignments?: Assignment[];
   role?: UserRole;
   creator?: AppUser;
 };

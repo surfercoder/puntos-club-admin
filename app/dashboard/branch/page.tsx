@@ -12,11 +12,16 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import type { BranchWithRelations } from '@/types/branch';
 
 export default async function BranchListPage() {
   const supabase = await createClient();
+  const currentUser = await getCurrentUser();
+  const userIsAdmin = isAdmin(currentUser);
+
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
   const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
@@ -29,7 +34,8 @@ export default async function BranchListPage() {
       address:address_id(street, city)
     `);
 
-  if (activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
+  // Only filter by organization for non-admin users
+  if (!userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
     query = query.eq('organization_id', activeOrgIdNumber);
   }
 

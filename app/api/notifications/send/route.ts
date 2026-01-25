@@ -139,17 +139,6 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const recipients = pushTokens.map(token => ({
-      push_notification_id: notificationId,
-      beneficiary_id: token.beneficiary_id,
-      push_token_id: token.id,
-      status: 'pending' as const,
-    }));
-
-    await supabase
-      .from("push_notification_recipients")
-      .insert(recipients);
-
     const messages: ExpoPushMessage[] = pushTokens.map(token => ({
       to: token.expo_push_token,
       sound: 'default',
@@ -168,10 +157,10 @@ export async function POST(request: NextRequest) {
 
     for (let i = 0; i < messages.length; i += chunkSize) {
       const chunk = messages.slice(i, i + chunkSize);
-      
+
       try {
         const result = await sendPushNotifications(chunk);
-        
+
         if (result.data) {
           for (let j = 0; j < result.data.length; j++) {
             const ticketResult = result.data[j];
@@ -180,24 +169,8 @@ export async function POST(request: NextRequest) {
 
             if (ticketResult.status === 'ok') {
               sentCount++;
-              await supabase
-                .from("push_notification_recipients")
-                .update({
-                  status: 'sent',
-                  sent_at: new Date().toISOString(),
-                })
-                .eq("push_notification_id", notificationId)
-                .eq("push_token_id", token.id);
             } else {
               failedCount++;
-              await supabase
-                .from("push_notification_recipients")
-                .update({
-                  status: 'failed',
-                  error_message: ticketResult.message || 'Unknown error',
-                })
-                .eq("push_notification_id", notificationId)
-                .eq("push_token_id", token.id);
 
               if (ticketResult.details?.error === 'DeviceNotRegistered') {
                 await supabase

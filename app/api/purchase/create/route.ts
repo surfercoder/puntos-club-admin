@@ -75,7 +75,6 @@ export async function POST(request: NextRequest) {
 
     // Support both simplified amount and detailed items
     let total_amount: number;
-    let purchaseItems: { item_name: string; quantity: number; unit_price: number }[] = [];
 
     if (amount !== undefined && amount !== null) {
       // Simplified mode: just amount
@@ -86,12 +85,6 @@ export async function POST(request: NextRequest) {
           { status: 400 }
         );
       }
-      // Create a generic purchase item
-      purchaseItems = [{
-        item_name: 'Purchase',
-        quantity: 1,
-        unit_price: total_amount,
-      }];
     } else if (items && Array.isArray(items) && items.length > 0) {
       // Detailed mode: items array (backward compatible)
       // Validate all items
@@ -108,7 +101,6 @@ export async function POST(request: NextRequest) {
         (sum: number, item: { item_name: string; quantity: number; unit_price: number }) => sum + item.quantity * item.unit_price,
         0
       );
-      purchaseItems = items;
     } else {
       return NextResponse.json(
         { success: false, error: "Either amount or items array is required" },
@@ -177,30 +169,6 @@ export async function POST(request: NextRequest) {
       console.error("Error creating purchase:", purchaseError);
       return NextResponse.json(
         { success: false, error: "Failed to create purchase" },
-        { status: 500 }
-      );
-    }
-
-    // Create purchase items with purchase_id
-    const itemsToInsert = purchaseItems.map((item) => ({
-      purchase_id: purchase.id,
-      item_name: item.item_name,
-      quantity: item.quantity,
-      unit_price: item.unit_price,
-      subtotal: item.quantity * item.unit_price,
-      points_earned: Math.floor(
-        (item.quantity * item.unit_price * points_earned) / total_amount
-      ),
-    }));
-
-    const { error: itemsError } = await supabase
-      .from("purchase_item")
-      .insert(itemsToInsert);
-
-    if (itemsError) {
-      console.error("Error creating purchase items:", itemsError);
-      return NextResponse.json(
-        { success: false, error: "Failed to create purchase items" },
         { status: 500 }
       );
     }

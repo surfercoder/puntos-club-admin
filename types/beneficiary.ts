@@ -1,4 +1,3 @@
-import type { Assignment } from './assignment';
 import type { Redemption } from './redemption';
 import type { UserRole } from './user_role';
 import type { Address } from './address';
@@ -19,7 +18,6 @@ export type Beneficiary = {
 };
 
 export type BeneficiaryWithRelations = Beneficiary & {
-  assignments?: Assignment[];
   redemptions?: Redemption[];
   role?: UserRole;
   address?: Address;

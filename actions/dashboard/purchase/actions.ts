@@ -3,6 +3,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
+import { getCurrentUser } from "@/lib/auth/get-current-user";
+import { isAdmin } from "@/lib/auth/roles";
 
 export interface PurchaseItem {
   item_name: string;
@@ -127,32 +129,6 @@ export async function createPurchase(
       };
     }
 
-    // Create purchase items
-    const purchaseItems = input.items.map((item) => ({
-      purchase_id: purchase.id,
-      item_name: item.item_name,
-      quantity: item.quantity,
-      unit_price: item.unit_price,
-      subtotal: item.quantity * item.unit_price,
-      points_earned: Math.floor(
-        (item.quantity * item.unit_price * points_earned) / total_amount
-      ),
-    }));
-
-    const { error: itemsError } = await supabase
-      .from("purchase_item")
-      .insert(purchaseItems);
-
-    if (itemsError) {
-      console.error("Error creating purchase items:", itemsError);
-      // Note: Purchase was created but items failed
-      // You might want to implement a rollback mechanism here
-      return {
-        success: false,
-        error: "Failed to create purchase items",
-      };
-    }
-
     // Get updated beneficiary balance
     const { data: beneficiary, error: beneficiaryError } = await supabase
       .from("beneficiary")
@@ -200,8 +176,7 @@ export async function getBeneficiaryPurchases(beneficiary_id: number) {
         `
         *,
         cashier:app_user!purchase_cashier_id_fkey(first_name, last_name),
-        branch:branch(name),
-        purchase_item(*)
+        branch:branch(name)
       `
       )
       .eq("beneficiary_id", beneficiary_id)
@@ -230,6 +205,9 @@ export async function getAllPurchases(filters?: {
 }) {
   try {
     const supabase = await createClient();
+    const currentUser = await getCurrentUser();
+    const userIsAdmin = isAdmin(currentUser);
+
     const cookieStore = await cookies();
     const activeOrgId = cookieStore.get('active_org_id')?.value;
     const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
@@ -265,13 +243,15 @@ export async function getAllPurchases(filters?: {
       return { success: false, error: error.message };
     }
 
-    // Filter by organization - use active org ID if no filter provided
-    const orgIdToFilter = filters?.organization_id ?? activeOrgIdNumber;
+    // Only filter by organization for non-admin users
     let filteredData = data;
-    if (orgIdToFilter && !Number.isNaN(orgIdToFilter)) {
-      filteredData = data?.filter(
-        (p: { branch?: { organization_id?: number } }) => p.branch?.organization_id === orgIdToFilter
-      );
+    if (!userIsAdmin) {
+      const orgIdToFilter = filters?.organization_id ?? activeOrgIdNumber;
+      if (orgIdToFilter && !Number.isNaN(orgIdToFilter)) {
+        filteredData = data?.filter(
+          (p: { branch?: { organization_id?: number } }) => p.branch?.organization_id === orgIdToFilter
+        );
+      }
     }
 
     return { success: true, data: filteredData };
@@ -295,8 +275,7 @@ export async function getPurchaseById(purchase_id: number) {
         *,
         beneficiary:beneficiary(first_name, last_name, email, phone),
         cashier:app_user!purchase_cashier_id_fkey(first_name, last_name, email),
-        branch:branch(name, organization:organization(name)),
-        purchase_item(*)
+        branch:branch(name, organization:organization(name))
       `
       )
       .eq("id", purchase_id)

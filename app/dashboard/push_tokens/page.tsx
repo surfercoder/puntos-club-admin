@@ -10,10 +10,18 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export default async function PushTokensListPage() {
-  const supabase = await createClient();
+  const currentUser = await getCurrentUser();
+  const userIsAdmin = isAdmin(currentUser);
+
+  // Use admin client to bypass RLS for admin users
+  const supabase = userIsAdmin ? createAdminClient() : await createClient();
+
   const { data, error } = await supabase
     .from('push_tokens')
     .select('*, beneficiary:beneficiary_id(first_name, last_name, email)')

@@ -12,17 +12,23 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
+import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import type { Address } from '@/types/address';
 
 export default async function AddressListPage() {
   const supabase = await createClient();
+  const currentUser = await getCurrentUser();
+  const userIsAdmin = isAdmin(currentUser);
+
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
   const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
 
   let query = supabase.from('address').select('*').order('street');
-  if (activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
+  // Only filter by organization for non-admin users
+  if (!userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
     query = query.eq('organization_id', activeOrgIdNumber);
   }
 

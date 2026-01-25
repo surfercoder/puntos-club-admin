@@ -12,7 +12,10 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
+import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 interface RedemptionWithRelations {
   id: string;
@@ -37,7 +40,12 @@ interface RedemptionWithRelations {
 }
 
 export default async function RedemptionListPage() {
-  const supabase = await createClient();
+  const currentUser = await getCurrentUser();
+  const userIsAdmin = isAdmin(currentUser);
+
+  // Use admin client to bypass RLS for admin users
+  const supabase = userIsAdmin ? createAdminClient() : await createClient();
+
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
   const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
@@ -56,8 +64,9 @@ export default async function RedemptionListPage() {
     return <div>Error fetching redemptions</div>;
   }
 
-  const filteredData = activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)
-    ? data?.filter((redemption: RedemptionWithRelations) => 
+  // Only filter by organization for non-admin users
+  const filteredData = !userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)
+    ? data?.filter((redemption: RedemptionWithRelations) =>
         redemption.product?.organization_id === activeOrgIdNumber
       )
     : data;

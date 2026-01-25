@@ -44,17 +44,13 @@ interface Purchase {
   } | null;
 }
 
-interface PurchaseItem {
-  id: number;
-  item_name: string;
-  quantity: number;
-  unit_price: string;
-  subtotal: string;
-  points_earned: number;
-}
-
 interface PurchaseDetails extends Purchase {
-  purchase_item: PurchaseItem[];
+  beneficiary: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone?: string;
+  } | null;
 }
 
 export default function PurchaseListPage() {
@@ -242,38 +238,6 @@ export default function PurchaseListPage() {
                   <p>{selectedPurchase.notes}</p>
                 </div>
               )}
-
-              <div>
-                <h4 className="text-sm font-medium text-muted-foreground mb-2">Items</h4>
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead>Item</TableHead>
-                      <TableHead className="text-right">Qty</TableHead>
-                      <TableHead className="text-right">Unit Price</TableHead>
-                      <TableHead className="text-right">Subtotal</TableHead>
-                      <TableHead className="text-right">Points</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {selectedPurchase.purchase_item?.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell>{item.item_name}</TableCell>
-                        <TableCell className="text-right">{item.quantity}</TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(item.unit_price)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          {formatCurrency(item.subtotal)}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Badge variant="secondary">+{item.points_earned}</Badge>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
 
               <div className="flex justify-between items-center pt-4 border-t">
                 <div>

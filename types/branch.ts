@@ -1,5 +1,4 @@
 import type { Address } from './address';
-import type { Assignment } from './assignment';
 import type { Organization } from './organization';
 import type { Stock } from './stock';
 
@@ -16,5 +15,4 @@ export type BranchWithRelations = Branch & {
   organization?: Organization;
   address?: Address;
   stock?: Stock[];
-  assignments?: Assignment[];
 };

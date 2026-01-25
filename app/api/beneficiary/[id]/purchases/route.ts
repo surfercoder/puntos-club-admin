@@ -38,8 +38,7 @@ export async function GET(
         `
         *,
         cashier:app_user!purchase_cashier_id_fkey(first_name, last_name),
-        branch:branch(name),
-        purchase_item(*)
+        branch:branch(name)
       `
       )
       .eq("beneficiary_id", beneficiaryId)

@@ -12,7 +12,10 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
+import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 interface StockWithRelations {
   id: string;
@@ -30,7 +33,12 @@ interface StockWithRelations {
 }
 
 export default async function StockListPage() {
-  const supabase = await createClient();
+  const currentUser = await getCurrentUser();
+  const userIsAdmin = isAdmin(currentUser);
+
+  // Use admin client to bypass RLS for admin users
+  const supabase = userIsAdmin ? createAdminClient() : await createClient();
+
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
   const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
@@ -47,8 +55,8 @@ export default async function StockListPage() {
     return <div>Error fetching stock records</div>;
   }
 
-  // Filter by organization through branch relationship
-  const filteredData = activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)
+  // Only filter by organization for non-admin users
+  const filteredData = !userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)
     ? data?.filter((stock: StockWithRelations) => stock.branch?.organization_id === activeOrgIdNumber)
     : data;
 

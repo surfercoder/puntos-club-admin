@@ -1,5 +1,6 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { cookies } from 'next/headers';
 
 import DeleteModal from '@/components/dashboard/beneficiary/delete-modal';
 import { Button } from '@/components/ui/button';
@@ -11,12 +12,47 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import type { Beneficiary } from '@/types/beneficiary';
 
 export default async function BeneficiaryListPage() {
   const supabase = await createClient();
-  const { data, error } = await supabase.from('beneficiary').select('*');
+  const currentUser = await getCurrentUser();
+  const userIsAdmin = isAdmin(currentUser);
+
+  const cookieStore = await cookies();
+  const activeOrgId = cookieStore.get('active_org_id')?.value;
+  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+
+  let data: Beneficiary[] | null = null;
+  let error = null;
+
+  // Only filter by organization for non-admin users
+  if (!userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
+    // Filter beneficiaries by organization
+    const result = await supabase
+      .from('beneficiary_organization')
+      .select(`
+        beneficiary:beneficiary_id(*)
+      `)
+      .eq('organization_id', activeOrgIdNumber);
+
+    if (result.error) {
+      error = result.error;
+    } else {
+      // Extract beneficiaries from the join result
+      data = result.data
+        ?.map((item) => item.beneficiary as unknown as Beneficiary | null)
+        .filter((b): b is Beneficiary => b !== null) ?? null;
+    }
+  } else {
+    // Admin users or no active organization selected - show all beneficiaries
+    const result = await supabase.from('beneficiary').select('*');
+    data = result.data;
+    error = result.error;
+  }
 
   if (error) {
     return <div>Error fetching beneficiaries</div>;

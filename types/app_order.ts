@@ -1,4 +1,3 @@
-import type { History } from './history';
 import type { Redemption } from './redemption';
 
 export type AppOrder = {
@@ -11,5 +10,4 @@ export type AppOrder = {
 
 export type AppOrderWithRelations = AppOrder & {
   redemptions?: Redemption[];
-  history?: History[];
 };

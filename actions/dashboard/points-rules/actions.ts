@@ -3,6 +3,8 @@
 import { cookies } from "next/headers";
 import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
+import { getCurrentUser } from "@/lib/auth/get-current-user";
+import { isAdmin } from "@/lib/auth/roles";
 
 export interface PointsRuleInput {
   name: string;
@@ -34,6 +36,8 @@ export interface PointsRuleInput {
 export async function getAllPointsRules() {
   try {
     const supabase = await createClient();
+    const currentUser = await getCurrentUser();
+    const userIsAdmin = isAdmin(currentUser);
 
     const cookieStore = await cookies();
     const activeOrgId = cookieStore.get("active_org_id")?.value;
@@ -50,7 +54,8 @@ export async function getAllPointsRules() {
       `)
       .order("created_at", { ascending: false });
 
-    if (activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
+    // Only filter by organization for non-admin users
+    if (!userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
       query = query.eq("organization_id", activeOrgIdNumber);
     }
 
