@@ -98,7 +98,6 @@ export async function createPurchase(
     );
 
     if (pointsError) {
-      console.error("Error calculating points:", pointsError);
       return {
         success: false,
         error: "Failed to calculate points",
@@ -122,7 +121,6 @@ export async function createPurchase(
       .single();
 
     if (purchaseError || !purchase) {
-      console.error("Error creating purchase:", purchaseError);
       return {
         success: false,
         error: "Failed to create purchase",
@@ -137,7 +135,10 @@ export async function createPurchase(
       .single();
 
     if (beneficiaryError || !beneficiary) {
-      console.error("Error fetching beneficiary:", beneficiaryError);
+      return {
+        success: false,
+        error: "Failed to fetch beneficiary balance",
+      };
     }
 
     // Revalidate relevant paths
@@ -154,8 +155,7 @@ export async function createPurchase(
         beneficiary_new_balance: beneficiary?.available_points || 0,
       },
     };
-  } catch (error) {
-    console.error("Unexpected error creating purchase:", error);
+  } catch (_error) {
     return {
       success: false,
       error: "An unexpected error occurred",
@@ -183,13 +183,11 @@ export async function getBeneficiaryPurchases(beneficiary_id: number) {
       .order("purchase_date", { ascending: false });
 
     if (error) {
-      console.error("Error fetching purchases:", error);
       return { success: false, error: error.message };
     }
 
     return { success: true, data };
-  } catch (error) {
-    console.error("Unexpected error fetching purchases:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }
@@ -239,7 +237,6 @@ export async function getAllPurchases(filters?: {
     const { data, error } = await query;
 
     if (error) {
-      console.error("Error fetching purchases:", error);
       return { success: false, error: error.message };
     }
 
@@ -255,8 +252,7 @@ export async function getAllPurchases(filters?: {
     }
 
     return { success: true, data: filteredData };
-  } catch (error) {
-    console.error("Unexpected error fetching purchases:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }
@@ -282,13 +278,11 @@ export async function getPurchaseById(purchase_id: number) {
       .single();
 
     if (error) {
-      console.error("Error fetching purchase:", error);
       return { success: false, error: error.message };
     }
 
     return { success: true, data };
-  } catch (error) {
-    console.error("Unexpected error fetching purchase:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }
@@ -319,8 +313,7 @@ export async function verifyBeneficiary(_user_id: string) {
     }
 
     return { success: true, data };
-  } catch (error) {
-    console.error("Unexpected error verifying beneficiary:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }
@@ -339,13 +332,11 @@ export async function getActivePointsRules() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching points rules:", error);
       return { success: false, error: error.message };
     }
 
     return { success: true, data };
-  } catch (error) {
-    console.error("Unexpected error fetching points rules:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }

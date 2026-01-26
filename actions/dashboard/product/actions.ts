@@ -95,10 +95,6 @@ export async function getProducts() {
 
   const { data, error } = await query;
 
-  if (error) {
-    console.error('Error fetching products:', error);
-  }
-
   return { data, error };
 }
 

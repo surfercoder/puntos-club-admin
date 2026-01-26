@@ -43,7 +43,7 @@ export default [
       ],
       "no-console": ["warn", { allow: ["warn", "error"] }],
       "prefer-const": "error",
-      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_" }],
+      "@typescript-eslint/no-unused-vars": ["warn", { argsIgnorePattern: "^_", varsIgnorePattern: "^_", caughtErrorsIgnorePattern: "^_" }],
     },
   },
   {

@@ -39,8 +39,6 @@ export async function organizationNotificationLimitFormAction(_prevState: Action
     const parsed = OrganizationNotificationLimitSchema.safeParse(parsedData);
 
     if (!parsed.success) {
-      console.error('Validation error:', parsed.error);
-      console.error('Parsed data:', parsedData);
       return fromErrorToActionState(parsed.error);
     }
 
@@ -53,7 +51,6 @@ export async function organizationNotificationLimitFormAction(_prevState: Action
     }
 
     if (result.error) {
-      console.error('Database error:', result.error);
       // Handle both PostgrestError and custom validation error
       const errorMessage = 'message' in result.error 
         ? result.error.message 

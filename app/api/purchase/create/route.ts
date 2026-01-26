@@ -53,7 +53,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (appUserError || !appUser) {
-      console.error("Error finding app_user for email:", user.email, appUserError);
       return NextResponse.json(
         { success: false, error: "Cashier profile not found. Please contact administrator." },
         { status: 404 }
@@ -137,16 +136,8 @@ export async function POST(request: NextRequest) {
     let points_earned = 0;
     
     if (pointsError) {
-      console.error("Error calculating points:", pointsError);
-      console.error("Parameters:", {
-        p_amount: total_amount,
-        p_organization_id: branch.organization_id,
-        p_branch_id: branch_id,
-        p_category_id: null,
-      });
       // Fallback to simple calculation: 2 points per dollar
       points_earned = Math.floor(total_amount * 2);
-      console.warn("Using fallback points calculation:", points_earned);
     } else {
       points_earned = pointsData || 0;
     }
@@ -166,7 +157,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (purchaseError || !purchase) {
-      console.error("Error creating purchase:", purchaseError);
       return NextResponse.json(
         { success: false, error: "Failed to create purchase" },
         { status: 500 }
@@ -181,7 +171,7 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (beneficiaryError || !beneficiary) {
-      console.error("Error fetching beneficiary:", beneficiaryError);
+      // Continue without balance - non-critical error
     }
 
     return NextResponse.json({
@@ -194,8 +184,7 @@ export async function POST(request: NextRequest) {
         beneficiary_new_balance: beneficiary?.available_points || 0,
       },
     });
-  } catch (error) {
-    console.error("Unexpected error creating purchase:", error);
+  } catch (_error) {
     return NextResponse.json(
       { success: false, error: "An unexpected error occurred" },
       { status: 500 }

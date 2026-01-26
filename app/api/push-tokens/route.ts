@@ -81,7 +81,6 @@ export async function POST(request: NextRequest) {
         .single();
 
       if (error) {
-        console.error("Error updating push token:", error);
         return NextResponse.json(
           { success: false, error: "Failed to update push token" },
           { status: 500 }
@@ -107,7 +106,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Error creating push token:", error);
       return NextResponse.json(
         { success: false, error: "Failed to create push token" },
         { status: 500 }
@@ -118,8 +116,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: newToken,
     });
-  } catch (error) {
-    console.error("Unexpected error:", error);
+  } catch (_error) {
     return NextResponse.json(
       { success: false, error: "An unexpected error occurred" },
       { status: 500 }

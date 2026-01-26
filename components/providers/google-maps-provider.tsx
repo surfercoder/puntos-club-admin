@@ -53,8 +53,7 @@ export const GoogleMapsProvider: React.FC<GoogleMapsProviderProps> = ({ apiKey, 
         setIsLoaded(true);
         setError(null);
       })
-      .catch((err: Error) => {
-        console.error('Error loading Google Maps API:', err);
+      .catch((_err: Error) => {
         setError('Failed to load Google Maps API');
         initialized.current = false;
       });

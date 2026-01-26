@@ -61,8 +61,8 @@ export default function BranchForm({ branch }: BranchFormProps) {
         const addressesRes = await addressQuery;
 
         if (addressesRes.data) {setAddresses(addressesRes.data);}
-      } catch (error) {
-        console.error('Error fetching data:', error);
+      } catch (_error) {
+        // Silently ignore fetch errors
       }
     };
 

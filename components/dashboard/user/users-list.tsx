@@ -63,8 +63,8 @@ export function UsersList({ initialUsers, isOwner, isAdmin }: UsersListProps) {
             setUsers(fetchedUsers);
           }
         }
-      } catch (error) {
-        console.error('Failed to fetch users:', error);
+      } catch (_error) {
+        // Silently ignore fetch errors
       } finally {
         setIsLoading(false);
       }

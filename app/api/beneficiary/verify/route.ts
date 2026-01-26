@@ -70,8 +70,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data,
     });
-  } catch (error) {
-    console.error("Unexpected error verifying beneficiary:", error);
+  } catch (_error) {
     return NextResponse.json(
       { success: false, error: "An unexpected error occurred" },
       { status: 500 }

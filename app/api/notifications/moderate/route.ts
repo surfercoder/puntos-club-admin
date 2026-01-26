@@ -64,7 +64,6 @@ export async function POST(request: NextRequest) {
       data: moderationResult,
     });
   } catch (error) {
-    console.error('Moderation error:', error);
     return NextResponse.json(
       { 
         success: false, 

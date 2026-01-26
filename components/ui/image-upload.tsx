@@ -76,8 +76,7 @@ export function ImageUpload({
       setPreview(publicUrl);
       onChange(publicUrl);
       toast.success('Image uploaded successfully');
-    } catch (error) {
-      console.error('Error uploading image:', error);
+    } catch (_error) {
       toast.error('Failed to upload image');
     } finally {
       setUploading(false);
@@ -102,8 +101,7 @@ export function ImageUpload({
       setPreview(null);
       onChange(null);
       toast.success('Image removed');
-    } catch (error) {
-      console.error('Error removing image:', error);
+    } catch (_error) {
       toast.error('Failed to remove image');
     }
   };

@@ -71,17 +71,7 @@ Si está rechazado, establece isApproved en false, proporciona razones específi
     const result: ModerationResult = JSON.parse(jsonMatch[0]);
 
     return result;
-  } catch (error: unknown) {
-    console.error('Content moderation error:', error);
-    
-    if (error instanceof Anthropic.APIError) {
-      console.error('Anthropic API Error:', {
-        status: error.status,
-        name: error.name,
-        message: error.message,
-      });
-    }
-
+  } catch (_error: unknown) {
     throw new Error('Error al moderar el contenido. Por favor intenta de nuevo.');
   }
 }

@@ -46,7 +46,6 @@ export async function GET() {
       .single();
     
     if (error) {
-      console.error('Insert error:', error);
       return NextResponse.json({ 
         success: false,
         error: {
@@ -74,7 +73,6 @@ export async function GET() {
       verifyError
     });
   } catch (error) {
-    console.error('Unexpected error:', error);
     return NextResponse.json({
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',

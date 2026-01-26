@@ -28,21 +28,6 @@ export function getEnvironmentInfo() {
 
 export function logEnvironmentInfo() {
   const info = getEnvironmentInfo();
-  
-  console.warn('🔍 Environment Check:');
-  console.warn(`📍 Environment: ${info.environment}`);
-  console.warn(`🆔 Project ID: ${info.projectId}`);
-  console.warn(`🌐 Supabase URL: ${info.supabaseUrl}`);
-  console.warn(`🔑 API Key: ${info.keyPreview}`);
-  console.warn(`🏠 Site URL: ${info.siteUrl}`);
-  
-  if (info.isProduction) {
-    console.warn('⚠️  WARNING: Connected to PRODUCTION database!');
-  } else if (info.isTest) {
-    console.warn('✅ Connected to TEST database');
-  } else {
-    console.warn('❓ Unknown environment detected');
-  }
-  
+
   return info;
 }

@@ -181,8 +181,7 @@ export async function POST(request: NextRequest) {
             }
           }
         }
-      } catch (error) {
-        console.error("Error sending chunk:", error);
+      } catch (_error) {
         failedCount += chunk.length;
       }
     }
@@ -207,8 +206,7 @@ export async function POST(request: NextRequest) {
       failed: failedCount,
       total: messages.length,
     });
-  } catch (error) {
-    console.error("Unexpected error:", error);
+  } catch (_error) {
     return NextResponse.json(
       { success: false, error: "An unexpected error occurred" },
       { status: 500 }

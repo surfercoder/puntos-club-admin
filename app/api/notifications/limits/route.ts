@@ -38,7 +38,6 @@ export async function GET(_request: NextRequest) {
       .single();
 
     if (error && error.code !== 'PGRST116') {
-      console.error("Error fetching limits:", error);
       return NextResponse.json(
         { success: false, error: "Failed to fetch limits" },
         { status: 500 }
@@ -75,8 +74,7 @@ export async function GET(_request: NextRequest) {
         can_send_now: canSend,
       },
     });
-  } catch (error) {
-    console.error("Unexpected error:", error);
+  } catch (_error) {
     return NextResponse.json(
       { success: false, error: "An unexpected error occurred" },
       { status: 500 }

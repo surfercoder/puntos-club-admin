@@ -34,7 +34,6 @@ export async function GET() {
       }
     });
   } catch (error) {
-    console.error('Unexpected error:', error);
     return NextResponse.json({
       error: error instanceof Error ? error.message : 'Unknown error',
       stack: error instanceof Error ? error.stack : undefined

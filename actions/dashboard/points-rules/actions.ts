@@ -62,13 +62,11 @@ export async function getAllPointsRules() {
     const { data, error } = await query;
 
     if (error) {
-      console.error("Error fetching points rules:", error);
       return { success: false, error: error.message };
     }
 
     return { success: true, data };
-  } catch (error) {
-    console.error("Unexpected error fetching points rules:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }
@@ -87,13 +85,11 @@ export async function getActivePointsRules() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching active points rules:", error);
       return { success: false, error: error.message };
     }
 
     return { success: true, data };
-  } catch (error) {
-    console.error("Unexpected error fetching active points rules:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }
@@ -117,13 +113,11 @@ export async function getPointsRuleById(id: number) {
       .single();
 
     if (error) {
-      console.error("Error fetching points rule:", error);
       return { success: false, error: error.message };
     }
 
     return { success: true, data };
-  } catch (error) {
-    console.error("Unexpected error fetching points rule:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }
@@ -218,14 +212,12 @@ export async function createPointsRule(input: PointsRuleInput) {
       .single();
 
     if (error) {
-      console.error("Error creating points rule:", error);
       return { success: false, error: error.message };
     }
 
     revalidatePath("/dashboard/points-rules");
     return { success: true, data };
-  } catch (error) {
-    console.error("Unexpected error creating points rule:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }
@@ -314,14 +306,12 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
       .single();
 
     if (error) {
-      console.error("Error updating points rule:", error);
       return { success: false, error: error.message };
     }
 
     revalidatePath("/dashboard/points-rules");
     return { success: true, data };
-  } catch (error) {
-    console.error("Unexpected error updating points rule:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }
@@ -341,14 +331,12 @@ export async function togglePointsRuleStatus(id: number, is_active: boolean) {
       .single();
 
     if (error) {
-      console.error("Error toggling points rule status:", error);
       return { success: false, error: error.message };
     }
 
     revalidatePath("/dashboard/points-rules");
     return { success: true, data };
-  } catch (error) {
-    console.error("Unexpected error toggling points rule status:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }
@@ -366,14 +354,12 @@ export async function deletePointsRule(id: number) {
       .eq("id", id);
 
     if (error) {
-      console.error("Error deleting points rule:", error);
       return { success: false, error: error.message };
     }
 
     revalidatePath("/dashboard/points-rules");
     return { success: true };
-  } catch (error) {
-    console.error("Unexpected error deleting points rule:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }
@@ -392,13 +378,11 @@ export async function getActiveOffers(organizationId?: number, branchId?: number
     });
 
     if (error) {
-      console.error("Error fetching active offers:", error);
       return { success: false, error: error.message };
     }
 
     return { success: true, data };
-  } catch (error) {
-    console.error("Unexpected error fetching active offers:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }
@@ -429,13 +413,11 @@ export async function testPointsCalculation(
     });
 
     if (error) {
-      console.error("Error calculating points:", error);
       return { success: false, error: error.message };
     }
 
     return { success: true, points: data };
-  } catch (error) {
-    console.error("Unexpected error calculating points:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }

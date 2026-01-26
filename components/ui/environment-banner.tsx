@@ -12,7 +12,6 @@ export function EnvironmentBanner() {
     setEnvInfo(info);
     
     // Log to console for debugging
-    console.warn('🔍 Environment Check:', info);
   }, []);
 
   if (!envInfo || envInfo.environment === 'TEST') {

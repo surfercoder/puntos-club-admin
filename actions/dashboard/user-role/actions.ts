@@ -16,13 +16,11 @@ export async function getAllUserRoles() {
       .order("display_name");
 
     if (error) {
-      console.error("Error fetching user roles:", error);
       return { success: false, error: error.message };
     }
 
     return { success: true, data };
-  } catch (error) {
-    console.error("Unexpected error fetching user roles:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }
@@ -41,13 +39,11 @@ export async function getUserRoleById(id: number) {
       .single();
 
     if (error) {
-      console.error("Error fetching user role:", error);
       return { success: false, error: error.message };
     }
 
     return { success: true, data };
-  } catch (error) {
-    console.error("Unexpected error fetching user role:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }
@@ -75,14 +71,12 @@ export async function updateUserRole(
       .single();
 
     if (error) {
-      console.error("Error updating user role:", error);
       return { success: false, error: error.message };
     }
 
     revalidatePath("/dashboard/user-role");
     return { success: true, data };
-  } catch (error) {
-    console.error("Unexpected error updating user role:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }
@@ -101,7 +95,6 @@ export async function getUsersCountByRole() {
       .not("role_id", "is", null);
 
     if (appUserError) {
-      console.error("Error fetching app user counts:", appUserError);
       return { success: false, error: appUserError.message };
     }
 
@@ -111,7 +104,6 @@ export async function getUsersCountByRole() {
       .select("*", { count: "exact", head: true });
 
     if (beneficiaryError) {
-      console.error("Error fetching beneficiary count:", beneficiaryError);
       return { success: false, error: beneficiaryError.message };
     }
 
@@ -131,8 +123,7 @@ export async function getUsersCountByRole() {
         beneficiaryCount: beneficiaryCount || 0,
       },
     };
-  } catch (error) {
-    console.error("Unexpected error fetching user counts:", error);
+  } catch (_error) {
     return { success: false, error: "An unexpected error occurred" };
   }
 }

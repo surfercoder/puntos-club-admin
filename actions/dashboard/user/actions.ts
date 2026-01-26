@@ -18,38 +18,30 @@ export async function createUser(user: Partial<User>) {
   let authUserId: string | null = null;
   
   if (table === 'app_user' && user.email && user.password) {
-    try {
-      const adminClient = createAdminClient();
-      
-      
-      // Create the auth user with admin API
-      const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
-        email: user.email,
-        password: user.password,
-        email_confirm: true, // Auto-confirm email so they can log in immediately
-        user_metadata: {
-          first_name: user.first_name,
-          last_name: user.last_name,
-          username: user.username,
-          role_name: 'staff', // Mark as staff user to prevent automatic beneficiary creation
-        },
-      });
-      
-      if (authError) {
-        console.error('Failed to create auth user:', authError);
-        throw new Error(`Failed to create authentication user: ${authError.message}`);
-      }
-      
-      if (!authData.user) {
-        throw new Error('Auth user creation succeeded but no user data returned');
-      }
-      
-      authUserId = authData.user.id;
-      
-    } catch (error) {
-      console.error('Error creating auth user:', error);
-      throw error;
+    const adminClient = createAdminClient();
+
+    // Create the auth user with admin API
+    const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
+      email: user.email,
+      password: user.password,
+      email_confirm: true, // Auto-confirm email so they can log in immediately
+      user_metadata: {
+        first_name: user.first_name,
+        last_name: user.last_name,
+        username: user.username,
+        role_name: 'staff', // Mark as staff user to prevent automatic beneficiary creation
+      },
+    });
+
+    if (authError) {
+      throw new Error(`Failed to create authentication user: ${authError.message}`);
     }
+
+    if (!authData.user) {
+      throw new Error('Auth user creation succeeded but no user data returned');
+    }
+
+    authUserId = authData.user.id;
   }
   
   // Prepare base data common to both tables
@@ -97,20 +89,13 @@ export async function createUser(user: Partial<User>) {
     });
 
     if (error) {
-      console.error('Database RPC error:', {
-        message: error.message,
-        details: error.details,
-        hint: error.hint,
-        code: error.code,
-      });
-      
       // If RPC fails but auth user was created, clean up the auth user
       if (authUserId) {
         try {
           const adminClient = createAdminClient();
           await adminClient.auth.admin.deleteUser(authUserId);
-        } catch (cleanupError) {
-          console.error('Failed to clean up auth user:', cleanupError);
+        } catch (_cleanupError) {
+          void _cleanupError;
         }
       }
       
@@ -128,20 +113,13 @@ export async function createUser(user: Partial<User>) {
     .single();
 
   if (error) {
-    console.error('Database insert error:', {
-      message: error.message,
-      details: error.details,
-      hint: error.hint,
-      code: error.code,
-    });
-    
     // If database insert fails but auth user was created, clean up the auth user
     if (authUserId) {
       try {
         const adminClient = createAdminClient();
         await adminClient.auth.admin.deleteUser(authUserId);
-      } catch (cleanupError) {
-        console.error('Failed to clean up auth user:', cleanupError);
+      } catch (_cleanupError) {
+        void _cleanupError;
       }
     }
     
@@ -162,36 +140,29 @@ export async function updateUser(id: string, user: Partial<User>) {
   
   // If updating an app_user with a password, update the auth user as well
   if (table === 'app_user' && user.password) {
-    try {
-      // First, get the auth_user_id for this app_user
-      const { data: existingUser, error: fetchError } = await supabase
-        .from('app_user')
-        .select('auth_user_id, email')
-        .eq('id', id)
-        .single();
-      
-      if (fetchError) {
-        console.error('Failed to fetch existing user:', fetchError);
-        throw new Error(`Failed to fetch existing user: ${fetchError.message}`);
-      }
-      
-      // Update the auth user's password if they have an auth_user_id
-      if (existingUser.auth_user_id) {
-        const adminClient = createAdminClient();
+    // First, get the auth_user_id for this app_user
+    const { data: existingUser, error: fetchError } = await supabase
+      .from('app_user')
+      .select('auth_user_id, email')
+      .eq('id', id)
+      .single();
 
-        const { error: authError } = await adminClient.auth.admin.updateUserById(
-          existingUser.auth_user_id,
-          { password: user.password }
-        );
+    if (fetchError) {
+      throw new Error(`Failed to fetch existing user: ${fetchError.message}`);
+    }
 
-        if (authError) {
-          console.error('Failed to update auth user password:', authError);
-          throw new Error(`Failed to update authentication password: ${authError.message}`);
-        }
+    // Update the auth user's password if they have an auth_user_id
+    if (existingUser.auth_user_id) {
+      const adminClient = createAdminClient();
+
+      const { error: authError } = await adminClient.auth.admin.updateUserById(
+        existingUser.auth_user_id,
+        { password: user.password }
+      );
+
+      if (authError) {
+        throw new Error(`Failed to update authentication password: ${authError.message}`);
       }
-    } catch (error) {
-      console.error('Error updating auth user:', error);
-      throw error;
     }
   }
 
@@ -252,7 +223,6 @@ export async function deleteUser(id: string, userType: 'app_user' | 'beneficiary
         .single();
       
       if (fetchError) {
-        console.error('Failed to fetch existing user:', fetchError);
         throw new Error(`Failed to fetch existing user: ${fetchError.message}`);
       }
       
@@ -265,13 +235,12 @@ export async function deleteUser(id: string, userType: 'app_user' | 'beneficiary
         );
 
         if (authError) {
-          console.error('Failed to delete auth user:', authError);
           // Don't throw here - continue with database deletion
           // The CASCADE constraint will handle cleanup
         }
       }
-    } catch (error) {
-      console.error('Error deleting auth user:', error);
+    } catch (_error) {
+      void _error;
       // Don't throw - continue with database deletion
     }
   }
@@ -314,7 +283,6 @@ export async function getAllUsers(organizationId?: string) {
     .order('created_at', { ascending: false });
 
   if (appUsersError) {
-    console.error('Failed to fetch app users:', appUsersError);
     throw new Error(`Failed to fetch app users: ${appUsersError.message}`);
   }
   
@@ -340,10 +308,10 @@ export async function getAllUsers(organizationId?: string) {
       .order('created_at', { ascending: false });
     
     if (beneficiariesError) {
-      console.error('Failed to fetch beneficiaries:', beneficiariesError);
-    } else {
-      beneficiaries = beneficiariesData || [];
+      throw new Error(`Failed to fetch beneficiaries: ${beneficiariesError.message}`);
     }
+
+    beneficiaries = beneficiariesData || [];
   }
   
   // Combine and add user_type

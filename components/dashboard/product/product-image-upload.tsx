@@ -73,10 +73,9 @@ export default function ProductImageUpload({
       setImages(newImages);
       onImagesChange(newImages);
       toast.success(`${uploadedUrls.length} image${uploadedUrls.length !== 1 ? 's' : ''} uploaded successfully`);
-    } catch (error) {
-      console.error('Error uploading images:', error);
+    } catch (_error) {
       toast.error('Failed to upload images');
-      
+
       // Clean up any successfully uploaded images on error
       for (const url of uploadedUrls) {
         const fileName = url.split('/').pop();
@@ -102,8 +101,7 @@ export default function ProductImageUpload({
       setImages(newImages);
       onImagesChange(newImages);
       toast.success('Image removed successfully');
-    } catch (error) {
-      console.error('Error removing image:', error);
+    } catch (_error) {
       toast.error('Failed to remove image');
     }
   };

@@ -44,13 +44,14 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
     const start = textarea.selectionStart;
     const end = textarea.selectionEnd;
     const newBody = body.substring(0, start) + emojiData.emoji + body.substring(end);
-    
-    setBody(newBody);
+
+    const nextBody = newBody.slice(0, BODY_MAX_LENGTH);
+    setBody(nextBody);
     setShowEmojiPicker(false);
     
     setTimeout(() => {
       textarea.focus();
-      const newCursorPos = start + emojiData.emoji.length;
+      const newCursorPos = Math.min(start + emojiData.emoji.length, nextBody.length);
       textarea.setSelectionRange(newCursorPos, newCursorPos);
     }, 0);
   };
@@ -97,8 +98,7 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
       } else {
         toast.error('El contenido necesita revisión. Por favor revisa los comentarios.');
       }
-    } catch (error) {
-      console.error('Moderation error:', error);
+    } catch (_error) {
       toast.error('Error al verificar el contenido. Por favor intenta de nuevo.');
       setIsModerating(false);
     }
@@ -175,8 +175,7 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
         router.push('/dashboard/notifications');
         router.refresh();
       }, 1500);
-    } catch (error) {
-      console.error('Error:', error);
+    } catch (_error) {
       toast.error('An unexpected error occurred');
       setIsCreating(false);
       setIsSending(false);
@@ -187,9 +186,9 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
 
   const handleContentChange = (field: 'title' | 'body', value: string) => {
     if (field === 'title') {
-      setTitle(value);
+      setTitle(value.slice(0, TITLE_MAX_LENGTH));
     } else {
-      setBody(value);
+      setBody(value.slice(0, BODY_MAX_LENGTH));
     }
     if (moderationResult) {
       setModerationResult(null);
@@ -248,7 +247,7 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
             value={title}
             onChange={(e) => handleContentChange('title', e.target.value)}
             placeholder="e.g., New rewards available! 🎉"
-            maxLength={TITLE_MAX_LENGTH + 50}
+            maxLength={TITLE_MAX_LENGTH}
             className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             disabled={isProcessing || isModerating}
           />
@@ -272,7 +271,7 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
               onChange={(e) => handleContentChange('body', e.target.value)}
               placeholder="e.g., Check out our new products and earn double points this week! 🌟"
               rows={4}
-              maxLength={BODY_MAX_LENGTH + 50}
+              maxLength={BODY_MAX_LENGTH}
               className="resize-none pr-12"
               disabled={isProcessing || isModerating}
             />
@@ -314,13 +313,13 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
         <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <Bell className="h-5 w-5 text-blue-600 mt-0.5" />
-            <div className="flex-1 text-sm">
+            <div className="flex-1 text-sm min-w-0">
               <p className="font-semibold text-blue-900 mb-1">Preview</p>
-              <div className="bg-white rounded-lg p-3 shadow-sm border">
-                <p className="font-semibold text-sm mb-1">
+              <div className="bg-white rounded-lg p-3 shadow-sm border min-w-0">
+                <p className="font-semibold text-sm mb-1 whitespace-pre-wrap break-words">
                   {title || 'Your notification title'}
                 </p>
-                <p className="text-sm text-gray-600">
+                <p className="text-sm text-gray-600 whitespace-pre-wrap break-words">
                   {body || 'Your notification message will appear here'}
                 </p>
               </div>

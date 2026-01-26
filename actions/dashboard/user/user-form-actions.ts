@@ -27,7 +27,6 @@ export async function userFormAction(_prevState: ActionState, formData: FormData
 
     return toActionState(formData.get('id') ? 'User updated successfully!' : 'User created successfully!');
   } catch (error) {
-    console.error('Error in userFormAction:', error);
     return fromErrorToActionState(error);
   }
 }

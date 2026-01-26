@@ -46,7 +46,6 @@ export async function GET(_request: NextRequest) {
       .order("created_at", { ascending: false });
 
     if (error) {
-      console.error("Error fetching notifications:", error);
       return NextResponse.json(
         { success: false, error: "Failed to fetch notifications" },
         { status: 500 }
@@ -57,8 +56,7 @@ export async function GET(_request: NextRequest) {
       success: true,
       data: notifications,
     });
-  } catch (error) {
-    console.error("Unexpected error:", error);
+  } catch (_error) {
     return NextResponse.json(
       { success: false, error: "An unexpected error occurred" },
       { status: 500 }
@@ -161,7 +159,6 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (error) {
-      console.error("Error creating notification:", error);
       return NextResponse.json(
         { success: false, error: "Failed to create notification" },
         { status: 500 }
@@ -172,8 +169,7 @@ export async function POST(request: NextRequest) {
       success: true,
       data: notification,
     });
-  } catch (error) {
-    console.error("Unexpected error:", error);
+  } catch (_error) {
     return NextResponse.json(
       { success: false, error: "An unexpected error occurred" },
       { status: 500 }

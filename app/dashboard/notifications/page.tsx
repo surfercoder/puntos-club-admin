@@ -29,7 +29,7 @@ export default async function NotificationsPage() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching notifications:', error);
+    throw new Error('Failed to fetch notifications');
   }
 
   const getStatusBadge = (status: string) => {
