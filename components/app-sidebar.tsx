@@ -194,7 +194,6 @@ export function AppSidebar({
             orgs={orgs}
             activeOrgId={activeOrgId}
             onChangeOrg={onChangeOrg}
-            canAddOrganization={userRole === "owner"}
           />
         )}
       </SidebarHeader>
