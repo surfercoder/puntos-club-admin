@@ -14,12 +14,12 @@ export default function EmailConfirmedPage() {
                 <CheckCircle2 className="h-16 w-16 text-green-500" />
               </div>
               <CardTitle className="text-2xl">
-                Cuenta verificada
+                Cuenta confirmada
               </CardTitle>
             </CardHeader>
             <CardContent className="text-center space-y-4">
               <p className="text-muted-foreground">
-                Tu cuenta ha sido verificada exitosamente. Ya puedes iniciar sesion en la app PuntosClub.
+                Tu cuenta fue confirmada exitosamente. ¡Bienvenido/a a PuntosClub! Ya puedes iniciar sesión y empezar a usar la app.
               </p>
               <Button asChild className="w-full">
                 <Link href="puntosclub://">
