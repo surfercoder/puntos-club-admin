@@ -1,8 +1,8 @@
 'use client';
 
-import { AlertCircle, Bell, CheckCircle2, Loader2, Send, Smile, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { AlertCircle, Bell, CheckCircle2, Loader2, Send, Smile, ShieldAlert, ShieldCheck, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useRef, useState } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
 import { toast } from 'sonner';
 
@@ -32,10 +32,100 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
     reasons?: string[];
     severity?: 'low' | 'medium' | 'high';
   } | null>(null);
+  const [timeRemaining, setTimeRemaining] = useState<string>('');
   const bodyTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   const titleCharsLeft = TITLE_MAX_LENGTH - title.length;
   const bodyCharsLeft = BODY_MAX_LENGTH - body.length;
+
+  const calculateTimeRemaining = () => {
+    if (!limits?.last_notification_sent_at || !limits?.min_hours_between_notifications) {
+      return null;
+    }
+
+    const lastSent = new Date(limits.last_notification_sent_at);
+    const minHours = limits.min_hours_between_notifications;
+    const nextAvailable = new Date(lastSent.getTime() + minHours * 60 * 60 * 1000);
+    const now = new Date();
+    const diff = nextAvailable.getTime() - now.getTime();
+
+    if (diff <= 0) {
+      return null;
+    }
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+    if (hours > 0) {
+      return `${hours}h ${minutes}m ${seconds}s`;
+    } else if (minutes > 0) {
+      return `${minutes}m ${seconds}s`;
+    } else {
+      return `${seconds}s`;
+    }
+  };
+
+  useEffect(() => {
+    if (!canSend && limits?.last_notification_sent_at) {
+      const interval = setInterval(() => {
+        const remaining = calculateTimeRemaining();
+        if (remaining) {
+          setTimeRemaining(remaining);
+        } else {
+          setTimeRemaining('');
+          window.location.reload();
+        }
+      }, 1000);
+
+      return () => clearInterval(interval);
+    }
+  }, [canSend, limits]);
+
+  const getRestrictionReason = () => {
+    if (!limits) return null;
+
+    if (limits.notifications_sent_today >= limits.daily_limit) {
+      return {
+        type: 'daily_limit',
+        message: 'Has alcanzado tu límite diario de notificaciones',
+        detail: `Límite diario: ${limits.daily_limit} notificación(es)`,
+        action: 'Espera hasta mañana o actualiza tu plan para enviar más notificaciones.',
+        resetTime: new Date(limits.reset_daily_at),
+      };
+    }
+
+    if (limits.notifications_sent_this_month >= limits.monthly_limit) {
+      return {
+        type: 'monthly_limit',
+        message: 'Has alcanzado tu límite mensual de notificaciones',
+        detail: `Límite mensual: ${limits.monthly_limit} notificación(es)`,
+        action: 'Espera hasta el próximo mes o actualiza tu plan para enviar más notificaciones.',
+        resetTime: new Date(limits.reset_monthly_at),
+      };
+    }
+
+    if (limits.last_notification_sent_at) {
+      const lastSent = new Date(limits.last_notification_sent_at);
+      const minHours = limits.min_hours_between_notifications;
+      const nextAvailable = new Date(lastSent.getTime() + minHours * 60 * 60 * 1000);
+      const now = new Date();
+
+      if (now < nextAvailable) {
+        return {
+          type: 'time_restriction',
+          message: 'Debes esperar entre notificaciones',
+          detail: `Tiempo mínimo entre notificaciones: ${minHours} hora(s)`,
+          action: 'Espera el tiempo indicado o actualiza tu plan para reducir el tiempo de espera.',
+          nextAvailable,
+        };
+      }
+    }
+
+    return null;
+  };
+
+  const restrictionReason = getRestrictionReason();
 
   const handleEmojiClick = (emojiData: EmojiClickData) => {
     const textarea = bodyTextareaRef.current;
@@ -209,23 +299,90 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
               <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5" />
             )}
             <div className="flex-1">
-              <h3 className="font-semibold text-sm mb-1">
-                {canSend ? 'Ready to Send' : 'Limit Reached'}
+              <h3 className="font-semibold text-sm mb-2">
+                {canSend ? 'Listo para Enviar' : 'Límite Alcanzado'}
               </h3>
-              <div className="text-sm space-y-1">
+              <div className="text-sm space-y-2">
                 <p>
                   <strong>Plan:</strong> {limits.plan_type.charAt(0).toUpperCase() + limits.plan_type.slice(1)}
                 </p>
                 <p>
-                  <strong>Today:</strong> {limits.notifications_sent_today} / {limits.daily_limit} sent
+                  <strong>Hoy:</strong> {limits.notifications_sent_today} / {limits.daily_limit} enviada(s)
                 </p>
                 <p>
-                  <strong>This Month:</strong> {limits.notifications_sent_this_month} / {limits.monthly_limit} sent
+                  <strong>Este Mes:</strong> {limits.notifications_sent_this_month} / {limits.monthly_limit} enviada(s)
                 </p>
                 {limits.last_notification_sent_at && (
                   <p>
-                    <strong>Last Sent:</strong> {new Date(limits.last_notification_sent_at).toLocaleString()}
+                    <strong>Última Enviada:</strong> {new Date(limits.last_notification_sent_at).toLocaleString('es-ES', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit',
+                    })}
                   </p>
+                )}
+
+                {!canSend && restrictionReason && (
+                  <div className="mt-3 pt-3 border-t border-yellow-300">
+                    <div className="flex items-start gap-2 mb-2">
+                      <Clock className="h-4 w-4 text-yellow-700 mt-0.5 flex-shrink-0" />
+                      <div>
+                        <p className="font-semibold text-yellow-900">{restrictionReason.message}</p>
+                        <p className="text-yellow-800 mt-1">{restrictionReason.detail}</p>
+                      </div>
+                    </div>
+                    
+                    {restrictionReason.type === 'time_restriction' && timeRemaining && (
+                      <div className="bg-yellow-100 rounded-md p-2 mt-2">
+                        <p className="text-sm font-mono font-semibold text-yellow-900">
+                          ⏱️ Tiempo restante: {timeRemaining}
+                        </p>
+                        <p className="text-xs text-yellow-700 mt-1">
+                          Próxima notificación disponible: {restrictionReason.nextAvailable?.toLocaleString('es-ES', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                    )}
+
+                    {restrictionReason.type === 'daily_limit' && (
+                      <div className="bg-yellow-100 rounded-md p-2 mt-2">
+                        <p className="text-xs text-yellow-700">
+                          ⏱️ Reinicio diario: {restrictionReason.resetTime?.toLocaleString('es-ES', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                    )}
+
+                    {restrictionReason.type === 'monthly_limit' && (
+                      <div className="bg-yellow-100 rounded-md p-2 mt-2">
+                        <p className="text-xs text-yellow-700">
+                          ⏱️ Reinicio mensual: {restrictionReason.resetTime?.toLocaleString('es-ES', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                          })}
+                        </p>
+                      </div>
+                    )}
+
+                    <p className="text-xs text-yellow-800 mt-2">
+                      💡 <strong>Qué hacer:</strong> {restrictionReason.action}
+                    </p>
+                  </div>
                 )}
               </div>
             </div>
