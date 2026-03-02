@@ -79,49 +79,49 @@ export default function OrganizationForm({ organization, onSuccess, onCancel, re
       {organization?.id && <input name="id" type="hidden" value={organization.id} />}
       
       <div>
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="name">Nombre</Label>
         <Input
           aria-describedby="name-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.name}
           defaultValue={organization?.name ?? ''}
           id="name"
           name="name"
-          placeholder="Enter organization name"
+          placeholder="Ingresa el nombre de la organización"
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="name" />
       </div>
 
       <div>
-        <Label htmlFor="business_name">Business Name</Label>
+        <Label htmlFor="business_name">Razón Social</Label>
         <Input
           aria-describedby="business_name-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.business_name}
           defaultValue={organization?.business_name ?? ''}
           id="business_name"
           name="business_name"
-          placeholder="Enter business name (optional)"
+          placeholder="Ingresa la razón social (opcional)"
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="business_name" />
       </div>
 
       <div>
-        <Label htmlFor="tax_id">Tax ID</Label>
+        <Label htmlFor="tax_id">CUIT / RUT</Label>
         <Input
           aria-describedby="tax_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.tax_id}
           defaultValue={organization?.tax_id ?? ''}
           id="tax_id"
           name="tax_id"
-          placeholder="Enter tax ID (optional)"
+          placeholder="Ingresa el CUIT o RUT (opcional)"
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="tax_id" />
       </div>
 
       <div>
-        <Label htmlFor="logo_url">Organization Logo</Label>
+        <Label htmlFor="logo_url">Logo de la Organización</Label>
         <ImageUpload
           aspectRatio="auto"
           bucket="organization-logos"
@@ -139,15 +139,15 @@ export default function OrganizationForm({ organization, onSuccess, onCancel, re
       <div className="flex gap-2">
         {onCancel ? (
           <Button className="w-full" type="button" variant="secondary" onClick={onCancel}>
-            Cancel
+            Cancelar
           </Button>
         ) : (
           <Button asChild className="w-full" type="button" variant="secondary">
-            <Link href="/dashboard/organization">Cancel</Link>
+            <Link href="/dashboard/organization">Cancelar</Link>
           </Button>
         )}
         <Button className="w-full" disabled={pending} type="submit">
-          {organization ? 'Update' : 'Create'}
+          {organization ? 'Actualizar' : 'Crear'}
         </Button>
       </div>
     </form>

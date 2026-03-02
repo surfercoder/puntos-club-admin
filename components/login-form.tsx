@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { LoginSchema } from "@/schemas/auth.schema";
 
 export function LoginForm({
   className,
@@ -24,28 +25,43 @@ export function LoginForm({
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError(null);
+    setFieldErrors({});
+
+    const result = LoginSchema.safeParse({ email, password });
+
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const field = String(issue.path[0]);
+        if (!errors[field]) errors[field] = issue.message;
+      }
+      setFieldErrors(errors);
+      return;
+    }
+
+    setIsLoading(true);
 
     try {
-      const result = await signInAdminPortal(email, password);
+      const loginResult = await signInAdminPortal(email, password);
 
-      if (!result.success) {
+      if (!loginResult.success) {
         throw new Error(
-          result.error ||
+          loginResult.error ||
             "No tienes permisos para acceder al portal de administración.",
         );
       }
 
       router.push("/dashboard");
       router.refresh();
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Ocurrió un error");
     } finally {
       setIsLoading(false);
     }
@@ -55,47 +71,68 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Login</CardTitle>
+          <CardTitle className="text-2xl">Iniciar sesión</CardTitle>
           <CardDescription>
-            Enter your email below to login to your account
+            Ingresa tu correo electrónico para acceder a tu cuenta
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleLogin}>
+          <form onSubmit={handleLogin} noValidate>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Correo electrónico</Label>
                 <Input
                   id="email"
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="m@example.com"
-                  required
+                  placeholder="m@ejemplo.com"
                   type="email"
                   value={email}
+                  aria-invalid={!!fieldErrors.email}
+                  aria-describedby="email-error"
                 />
+                {fieldErrors.email && (
+                  <p id="email-error" className="text-destructive text-sm">
+                    {fieldErrors.email}
+                  </p>
+                )}
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
+                  <Label htmlFor="password">Contraseña</Label>
                   <Link
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                     href="/auth/forgot-password"
                   >
-                    Forgot your password?
+                    ¿Olvidaste tu contraseña?
                   </Link>
                 </div>
                 <Input
                   id="password"
                   onChange={(e) => setPassword(e.target.value)}
-                  required
                   type="password"
                   value={password}
+                  aria-invalid={!!fieldErrors.password}
+                  aria-describedby="password-error"
                 />
+                {fieldErrors.password && (
+                  <p id="password-error" className="text-destructive text-sm">
+                    {fieldErrors.password}
+                  </p>
+                )}
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              {error && <p className="text-sm text-destructive">{error}</p>}
               <Button className="w-full" disabled={isLoading} type="submit">
-                {isLoading ? "Logging in..." : "Login"}
+                {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
               </Button>
+            </div>
+            <div className="mt-4 text-center text-sm">
+              ¿No tienes una cuenta?{" "}
+              <Link
+                className="underline underline-offset-4"
+                href="/auth/sign-up"
+              >
+                Registrarse
+              </Link>
             </div>
           </form>
         </CardContent>

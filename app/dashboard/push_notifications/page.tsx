@@ -2,6 +2,7 @@ import { Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -40,18 +41,18 @@ export default async function PushNotificationsListPage() {
   const { data, error } = await query;
 
   if (error) {
-    return <div>Error fetching push notifications</div>;
+    return <div>Error al obtener notificaciones push</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Push Notifications</h1>
-          <p className="text-muted-foreground">Manage push notifications sent to beneficiaries</p>
+          <h1 className="text-2xl font-bold">Notificaciones Push</h1>
+          <p className="text-muted-foreground">Administrar notificaciones push enviadas a beneficiarios</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/push_notifications/create">+ New Push Notification</Link>
+          <Link href="/dashboard/push_notifications/create">+ Nueva Notificación Push</Link>
         </Button>
       </div>
 
@@ -59,13 +60,13 @@ export default async function PushNotificationsListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Organization</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Sent Count</TableHead>
-              <TableHead>Failed Count</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Título</TableHead>
+              <TableHead>Organización</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead>Enviadas</TableHead>
+              <TableHead>Fallidas</TableHead>
+              <TableHead>Creado el</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -79,14 +80,14 @@ export default async function PushNotificationsListPage() {
                       : notification.organization?.name || 'N/A'}
                   </TableCell>
                   <TableCell>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      notification.status === 'sent' ? 'bg-green-100 text-green-800' :
-                      notification.status === 'sending' ? 'bg-blue-100 text-blue-800' :
-                      notification.status === 'failed' ? 'bg-red-100 text-red-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                    <Badge variant={
+                      notification.status === 'sent' ? 'default' :
+                      notification.status === 'sending' ? 'outline' :
+                      notification.status === 'failed' ? 'destructive' :
+                      'secondary'
+                    }>
                       {notification.status}
-                    </span>
+                    </Badge>
                   </TableCell>
                   <TableCell>{notification.sent_count}</TableCell>
                   <TableCell>{notification.failed_count}</TableCell>
@@ -106,7 +107,7 @@ export default async function PushNotificationsListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={7}>No push notifications found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={7}>No se encontraron notificaciones push.</TableCell>
               </TableRow>
             )}
           </TableBody>

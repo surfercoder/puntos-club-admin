@@ -100,17 +100,17 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
       {redemption?.id && <input name="id" type="hidden" value={redemption.id} />}
       
       <div>
-        <Label htmlFor="beneficiary_id">Beneficiary</Label>
+        <Label htmlFor="beneficiary_id">Beneficiario</Label>
         <Select defaultValue={redemption?.beneficiary_id ?? ''} name="beneficiary_id">
           <SelectTrigger>
-            <SelectValue placeholder="Select a beneficiary" />
+            <SelectValue placeholder="Seleccionar un beneficiario" />
           </SelectTrigger>
           <SelectContent>
             {beneficiaries.map((beneficiary) => (
               <SelectItem key={beneficiary.id} value={beneficiary.id}>
                 {beneficiary.first_name || beneficiary.last_name 
                   ? `${beneficiary.first_name || ''} ${beneficiary.last_name || ''}`.trim()
-                  : beneficiary.email || 'Unnamed Beneficiary'}
+                  : beneficiary.email || 'Beneficiario sin nombre'}
               </SelectItem>
             ))}
           </SelectContent>
@@ -119,13 +119,13 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="product_id">Product (Optional)</Label>
+        <Label htmlFor="product_id">Producto (Opcional)</Label>
         <Select defaultValue={redemption?.product_id ?? ''} name="product_id">
           <SelectTrigger>
-            <SelectValue placeholder="Select a product (optional)" />
+            <SelectValue placeholder="Seleccionar un producto (opcional)" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">None</SelectItem>
+            <SelectItem value="">Ninguno</SelectItem>
             {products.map((product) => (
               <SelectItem key={product.id} value={product.id}>
                 {product.name}
@@ -137,10 +137,10 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="order_id">Order</Label>
+        <Label htmlFor="order_id">Pedido</Label>
         <Select defaultValue={redemption?.order_id ?? ''} name="order_id">
           <SelectTrigger>
-            <SelectValue placeholder="Select an order" />
+            <SelectValue placeholder="Seleccionar un pedido" />
           </SelectTrigger>
           <SelectContent>
             {orders.map((order) => (
@@ -154,30 +154,28 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="points_used">Points Used</Label>
+        <Label htmlFor="points_used">Puntos Usados</Label>
         <Input
           aria-describedby="points_used-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.points_used}
           defaultValue={redemption?.points_used ?? 0}
           id="points_used"
-          min="0"
           name="points_used"
-          placeholder="Enter points used"
+          placeholder="Ingresa los puntos usados"
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="points_used" />
       </div>
 
       <div>
-        <Label htmlFor="quantity">Quantity</Label>
+        <Label htmlFor="quantity">Cantidad</Label>
         <Input
           aria-describedby="quantity-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.quantity}
           defaultValue={redemption?.quantity ?? 0}
           id="quantity"
-          min="0"
           name="quantity"
-          placeholder="Enter quantity"
+          placeholder="Ingresa la cantidad"
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="quantity" />
@@ -185,10 +183,10 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
 
       <div className="flex gap-2">
         <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/redemption">Cancel</Link>
+          <Link href="/dashboard/redemption">Cancelar</Link>
         </Button>
         <Button className="w-full" disabled={pending} type="submit">
-          {redemption ? 'Update' : 'Create'}
+          {redemption ? 'Actualizar' : 'Crear'}
         </Button>
       </div>
     </form>

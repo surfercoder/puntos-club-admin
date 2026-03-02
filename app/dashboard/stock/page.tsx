@@ -52,7 +52,7 @@ export default async function StockListPage() {
     `);
 
   if (error) {
-    return <div>Error fetching stock records</div>;
+    return <div>Error al obtener registros de stock</div>;
   }
 
   // Only filter by organization for non-admin users
@@ -65,10 +65,10 @@ export default async function StockListPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Stock</h1>
-          <p className="text-muted-foreground">Manage product stock levels in your system</p>
+          <p className="text-muted-foreground">Administrar niveles de stock de productos</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/stock/create">+ New Stock Record</Link>
+          <Link href="/dashboard/stock/create">+ Nuevo Registro de Stock</Link>
         </Button>
       </div>
 
@@ -76,12 +76,12 @@ export default async function StockListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Branch</TableHead>
-              <TableHead>Product</TableHead>
-              <TableHead>Current Stock</TableHead>
-              <TableHead>Minimum Stock</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Sucursal</TableHead>
+              <TableHead>Producto</TableHead>
+              <TableHead>Stock Actual</TableHead>
+              <TableHead>Stock Mínimo</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -103,10 +103,10 @@ export default async function StockListPage() {
                         : 'bg-red-100 text-red-800'
                     }`}>
                       {stock.quantity > stock.minimum_quantity 
-                        ? 'In Stock' 
+                        ? 'En Stock' 
                         : stock.quantity === stock.minimum_quantity
-                        ? 'Low Stock'
-                        : 'Out of Stock'}
+                        ? 'Stock Bajo'
+                        : 'Sin Stock'}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
@@ -126,7 +126,7 @@ export default async function StockListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={6}>No stock records found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>No se encontraron registros de stock.</TableCell>
               </TableRow>
             )}
           </TableBody>

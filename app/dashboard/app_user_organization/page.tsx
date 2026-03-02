@@ -40,18 +40,18 @@ export default async function AppUserOrganizationListPage() {
     .order('id', { ascending: false });
 
   if (error) {
-    return <div>Error fetching app user organizations</div>;
+    return <div>Error al obtener membresías de usuarios</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">App User Organizations</h1>
-          <p className="text-muted-foreground">Manage app user memberships across organizations</p>
+          <h1 className="text-2xl font-bold">Usuarios por Organización</h1>
+          <p className="text-muted-foreground">Administrar membresías de usuarios en organizaciones</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/app_user_organization/create">+ New Membership</Link>
+          <Link href="/dashboard/app_user_organization/create">+ Nueva Membresía</Link>
         </Button>
       </div>
 
@@ -59,10 +59,10 @@ export default async function AppUserOrganizationListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>User</TableHead>
-              <TableHead>Organization</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Usuario</TableHead>
+              <TableHead>Organización</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -75,7 +75,7 @@ export default async function AppUserOrganizationListPage() {
                       : row.app_user?.email || 'N/A'}
                   </TableCell>
                   <TableCell>{row.organization?.name || 'N/A'}</TableCell>
-                  <TableCell>{row.is_active ? 'Active' : 'Inactive'}</TableCell>
+                  <TableCell>{row.is_active ? 'Activo' : 'Inactivo'}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">
@@ -94,7 +94,7 @@ export default async function AppUserOrganizationListPage() {
             ) : (
               <TableRow>
                 <TableCell className="text-center py-4" colSpan={4}>
-                  No memberships found.
+                  No se encontraron membresías.
                 </TableCell>
               </TableRow>
             )}

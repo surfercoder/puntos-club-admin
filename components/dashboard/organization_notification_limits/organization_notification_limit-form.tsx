@@ -94,7 +94,7 @@ export default function OrganizationNotificationLimitForm({
       {organizationNotificationLimit?.id && <input name="id" type="hidden" value={organizationNotificationLimit.id} />}
       
       <div>
-        <Label htmlFor="organization_id">Organization</Label>
+        <Label htmlFor="organization_id">Organización</Label>
         <select
           id="organization_id"
           name="organization_id"
@@ -105,7 +105,7 @@ export default function OrganizationNotificationLimitForm({
           aria-describedby="organization_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.organization_id}
         >
-          <option value="">Select an organization</option>
+          <option value="">Seleccionar una organización</option>
           {organizations.map((org) => (
             <option key={org.id} value={org.id}>
               {org.name}
@@ -116,7 +116,7 @@ export default function OrganizationNotificationLimitForm({
       </div>
 
       <div>
-        <Label htmlFor="plan_type">Plan Type</Label>
+        <Label htmlFor="plan_type">Tipo de Plan</Label>
         <select
           id="plan_type"
           name="plan_type"
@@ -134,52 +134,49 @@ export default function OrganizationNotificationLimitForm({
         <FieldError actionState={validation ?? actionState} name="plan_type" />
         {planLimits && (
           <p className="text-sm text-muted-foreground mt-1">
-            Default limits: {planLimits.daily} daily, {planLimits.monthly} monthly, {planLimits.minHours}h between notifications
+            Límites por defecto: {planLimits.daily} diarias, {planLimits.monthly} mensuales, {planLimits.minHours}h entre notificaciones
           </p>
         )}
       </div>
 
       <div>
-        <Label htmlFor="daily_limit">Daily Limit</Label>
+        <Label htmlFor="daily_limit">Límite Diario</Label>
         <Input
           aria-describedby="daily_limit-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.daily_limit}
           defaultValue={organizationNotificationLimit?.daily_limit ?? planLimits?.daily ?? 1}
           id="daily_limit"
           name="daily_limit"
-          placeholder="Enter daily limit"
+          placeholder="Ingresa el límite diario"
           type="number"
-          min="1"
         />
         <FieldError actionState={validation ?? actionState} name="daily_limit" />
       </div>
 
       <div>
-        <Label htmlFor="monthly_limit">Monthly Limit</Label>
+        <Label htmlFor="monthly_limit">Límite Mensual</Label>
         <Input
           aria-describedby="monthly_limit-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.monthly_limit}
           defaultValue={organizationNotificationLimit?.monthly_limit ?? planLimits?.monthly ?? 5}
           id="monthly_limit"
           name="monthly_limit"
-          placeholder="Enter monthly limit"
+          placeholder="Ingresa el límite mensual"
           type="number"
-          min="1"
         />
         <FieldError actionState={validation ?? actionState} name="monthly_limit" />
       </div>
 
       <div>
-        <Label htmlFor="min_hours_between_notifications">Min Hours Between Notifications</Label>
+        <Label htmlFor="min_hours_between_notifications">Horas Mínimas Entre Notificaciones</Label>
         <Input
           aria-describedby="min_hours_between_notifications-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.min_hours_between_notifications}
           defaultValue={organizationNotificationLimit?.min_hours_between_notifications ?? planLimits?.minHours ?? 24}
           id="min_hours_between_notifications"
           name="min_hours_between_notifications"
-          placeholder="Enter minimum hours between notifications"
+          placeholder="Ingresa las horas mínimas entre notificaciones"
           type="number"
-          min="1"
         />
         <FieldError actionState={validation ?? actionState} name="min_hours_between_notifications" />
       </div>
@@ -187,15 +184,15 @@ export default function OrganizationNotificationLimitForm({
       <div className="flex gap-2">
         {onCancel ? (
           <Button className="w-full" type="button" variant="secondary" onClick={onCancel}>
-            Cancel
+            Cancelar
           </Button>
         ) : (
           <Button asChild className="w-full" type="button" variant="secondary">
-            <Link href="/dashboard/organization_notification_limits">Cancel</Link>
+            <Link href="/dashboard/organization_notification_limits">Cancelar</Link>
           </Button>
         )}
         <Button className="w-full" disabled={pending} type="submit">
-          {organizationNotificationLimit ? 'Update' : 'Create'}
+          {organizationNotificationLimit ? 'Actualizar' : 'Crear'}
         </Button>
       </div>
     </form>

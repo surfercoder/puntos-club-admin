@@ -23,9 +23,9 @@ export default async function ProfilePage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Profile</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Perfil</h1>
         <p className="text-muted-foreground">
-          Manage your account information and preferences
+          Administra tu información personal y preferencias
         </p>
       </div>
       <ProfileForm user={currentUser} />

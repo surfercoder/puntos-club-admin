@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
+import { SignUpSchema } from "@/schemas/auth.schema";
 
 export function SignUpForm({
   className,
@@ -27,36 +28,51 @@ export function SignUpForm({
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
     setError(null);
+    setFieldErrors({});
 
-    if (password !== repeatPassword) {
-      setError("Passwords do not match");
-      setIsLoading(false);
+    const result = SignUpSchema.safeParse({
+      firstName,
+      lastName,
+      email,
+      password,
+      repeatPassword,
+    });
+
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const field = String(issue.path[0]);
+        if (!errors[field]) errors[field] = issue.message;
+      }
+      setFieldErrors(errors);
       return;
     }
 
+    setIsLoading(true);
+
     try {
-      const result = await signUpAdmin({
+      const signUpResult = await signUpAdmin({
         email,
         password,
         firstName: firstName || undefined,
         lastName: lastName || undefined,
       });
 
-      if (!result.success) {
-        setError(result.error || "An error occurred");
+      if (!signUpResult.success) {
+        setError(signUpResult.error || "Ocurrió un error");
         return;
       }
 
       router.push("/auth/sign-up-success");
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Ocurrió un error");
     } finally {
       setIsLoading(false);
     }
@@ -66,78 +82,106 @@ export function SignUpForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Sign up</CardTitle>
-          <CardDescription>Create a new account</CardDescription>
+          <CardTitle className="text-2xl">Registrarse</CardTitle>
+          <CardDescription>Crear una nueva cuenta</CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleSignUp}>
+          <form onSubmit={handleSignUp} noValidate>
             <div className="flex flex-col gap-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="firstName">First Name</Label>
+                  <Label htmlFor="firstName">Nombre</Label>
                   <Input
                     id="firstName"
                     onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="John"
+                    placeholder="Juan"
                     type="text"
                     value={firstName}
+                    aria-invalid={!!fieldErrors.firstName}
+                    aria-describedby="firstName-error"
                   />
+                  {fieldErrors.firstName && (
+                    <p id="firstName-error" className="text-destructive text-sm">
+                      {fieldErrors.firstName}
+                    </p>
+                  )}
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="lastName">Last Name</Label>
+                  <Label htmlFor="lastName">Apellido</Label>
                   <Input
                     id="lastName"
                     onChange={(e) => setLastName(e.target.value)}
-                    placeholder="Doe"
+                    placeholder="García"
                     type="text"
                     value={lastName}
+                    aria-invalid={!!fieldErrors.lastName}
+                    aria-describedby="lastName-error"
                   />
+                  {fieldErrors.lastName && (
+                    <p id="lastName-error" className="text-destructive text-sm">
+                      {fieldErrors.lastName}
+                    </p>
+                  )}
                 </div>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="email">Email</Label>
+                <Label htmlFor="email">Correo electrónico</Label>
                 <Input
                   id="email"
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="m@example.com"
-                  required
+                  placeholder="m@ejemplo.com"
                   type="email"
                   value={email}
+                  aria-invalid={!!fieldErrors.email}
+                  aria-describedby="email-error"
                 />
+                {fieldErrors.email && (
+                  <p id="email-error" className="text-destructive text-sm">
+                    {fieldErrors.email}
+                  </p>
+                )}
               </div>
               <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="password">Password</Label>
-                </div>
+                <Label htmlFor="password">Contraseña</Label>
                 <Input
                   id="password"
                   onChange={(e) => setPassword(e.target.value)}
-                  required
                   type="password"
                   value={password}
+                  aria-invalid={!!fieldErrors.password}
+                  aria-describedby="password-error"
                 />
+                {fieldErrors.password && (
+                  <p id="password-error" className="text-destructive text-sm">
+                    {fieldErrors.password}
+                  </p>
+                )}
               </div>
               <div className="grid gap-2">
-                <div className="flex items-center">
-                  <Label htmlFor="repeat-password">Repeat Password</Label>
-                </div>
+                <Label htmlFor="repeat-password">Repetir contraseña</Label>
                 <Input
                   id="repeat-password"
                   onChange={(e) => setRepeatPassword(e.target.value)}
-                  required
                   type="password"
                   value={repeatPassword}
+                  aria-invalid={!!fieldErrors.repeatPassword}
+                  aria-describedby="repeatPassword-error"
                 />
+                {fieldErrors.repeatPassword && (
+                  <p id="repeatPassword-error" className="text-destructive text-sm">
+                    {fieldErrors.repeatPassword}
+                  </p>
+                )}
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              {error && <p className="text-sm text-destructive">{error}</p>}
               <Button className="w-full" disabled={isLoading} type="submit">
-                {isLoading ? "Creating an account..." : "Sign up"}
+                {isLoading ? "Creando cuenta..." : "Registrarse"}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
-              Already have an account?{" "}
+              ¿Ya tienes una cuenta?{" "}
               <Link className="underline underline-offset-4" href="/auth/login">
-                Login
+                Iniciar sesión
               </Link>
             </div>
           </form>

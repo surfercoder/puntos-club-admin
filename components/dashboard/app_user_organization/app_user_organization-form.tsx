@@ -81,15 +81,15 @@ export default function AppUserOrganizationForm({ appUserOrganization }: AppUser
       {appUserOrganization?.id && <input name="id" type="hidden" value={appUserOrganization.id} />}
 
       <div>
-        <Label htmlFor="app_user_id">User</Label>
+        <Label htmlFor="app_user_id">Usuario</Label>
         <Select defaultValue={appUserOrganization?.app_user_id ?? ''} name="app_user_id">
           <SelectTrigger>
-            <SelectValue placeholder="Select a user" />
+            <SelectValue placeholder="Seleccionar un usuario" />
           </SelectTrigger>
           <SelectContent>
             {users.map((u) => (
               <SelectItem key={u.id} value={u.id}>
-                {u.first_name || u.last_name ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : u.email || 'Unnamed'}
+                {u.first_name || u.last_name ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : u.email || 'Sin nombre'}
               </SelectItem>
             ))}
           </SelectContent>
@@ -98,10 +98,10 @@ export default function AppUserOrganizationForm({ appUserOrganization }: AppUser
       </div>
 
       <div>
-        <Label htmlFor="organization_id">Organization</Label>
+        <Label htmlFor="organization_id">Organización</Label>
         <Select defaultValue={appUserOrganization?.organization_id ?? ''} name="organization_id">
           <SelectTrigger>
-            <SelectValue placeholder="Select an organization" />
+            <SelectValue placeholder="Seleccionar una organización" />
           </SelectTrigger>
           <SelectContent>
             {orgs.map((o) => (
@@ -116,22 +116,22 @@ export default function AppUserOrganizationForm({ appUserOrganization }: AppUser
 
       <div className="flex items-center space-x-2">
         <input
-          className="rounded border-gray-300"
+          className="rounded"
           defaultChecked={appUserOrganization?.is_active ?? true}
           id="is_active"
           name="is_active"
           type="checkbox"
         />
-        <Label htmlFor="is_active">Active</Label>
+        <Label htmlFor="is_active">Activo</Label>
         <FieldError actionState={validation ?? actionState} name="is_active" />
       </div>
 
       <div className="flex gap-2">
         <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/app_user_organization">Cancel</Link>
+          <Link href="/dashboard/app_user_organization">Cancelar</Link>
         </Button>
         <Button className="w-full" disabled={pending} type="submit">
-          {appUserOrganization ? 'Update' : 'Create'}
+          {appUserOrganization ? 'Actualizar' : 'Crear'}
         </Button>
       </div>
     </form>

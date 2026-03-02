@@ -20,18 +20,18 @@ export default async function OrganizationListPage() {
   const { data, error } = await supabase.from('organization').select('*').order('name');
 
   if (error) {
-    return <div>Error fetching organizations</div>;
+    return <div>Error al obtener organizaciones</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Organizations</h1>
-          <p className="text-muted-foreground">Manage all organizations in your system</p>
+          <h1 className="text-2xl font-bold">Organizaciones</h1>
+          <p className="text-muted-foreground">Administrar todas las organizaciones del sistema</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/organization/create">+ New Organization</Link>
+          <Link href="/dashboard/organization/create">+ Nueva Organización</Link>
         </Button>
       </div>
 
@@ -40,11 +40,11 @@ export default async function OrganizationListPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Logo</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Business Name</TableHead>
-              <TableHead>Tax ID</TableHead>
-              <TableHead>Creation Date</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Razón Social</TableHead>
+              <TableHead>CUIT/RUT</TableHead>
+              <TableHead>Fecha de Creación</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -69,7 +69,7 @@ export default async function OrganizationListPage() {
                   <TableCell className="font-medium">
                     <Link 
                       href={`/dashboard/organization/${organization.id}`}
-                      className="text-blue-600 hover:text-blue-800 hover:underline"
+                      className="text-primary hover:text-primary/80 hover:underline"
                     >
                       {organization.name}
                     </Link>
@@ -77,7 +77,7 @@ export default async function OrganizationListPage() {
                   <TableCell>{organization.business_name || 'N/A'}</TableCell>
                   <TableCell>{organization.tax_id || 'N/A'}</TableCell>
                   <TableCell>
-                    {new Date(organization.creation_date).toLocaleDateString('en-US', { timeZone: 'UTC' })}
+                    {new Date(organization.creation_date).toLocaleDateString('es-AR', { timeZone: 'UTC' })}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
@@ -96,7 +96,7 @@ export default async function OrganizationListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={6}>No organizations found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>No se encontraron organizaciones.</TableCell>
               </TableRow>
             )}
           </TableBody>

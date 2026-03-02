@@ -82,15 +82,15 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
       {beneficiaryOrganization?.id && <input name="id" type="hidden" value={beneficiaryOrganization.id} />}
 
       <div>
-        <Label htmlFor="beneficiary_id">Beneficiary</Label>
+        <Label htmlFor="beneficiary_id">Beneficiario</Label>
         <Select defaultValue={beneficiaryOrganization?.beneficiary_id ?? ''} name="beneficiary_id">
           <SelectTrigger>
-            <SelectValue placeholder="Select a beneficiary" />
+            <SelectValue placeholder="Seleccionar un beneficiario" />
           </SelectTrigger>
           <SelectContent>
             {beneficiaries.map((b) => (
               <SelectItem key={b.id} value={b.id}>
-                {b.first_name || b.last_name ? `${b.first_name || ''} ${b.last_name || ''}`.trim() : b.email || 'Unnamed'}
+                {b.first_name || b.last_name ? `${b.first_name || ''} ${b.last_name || ''}`.trim() : b.email || 'Sin nombre'}
               </SelectItem>
             ))}
           </SelectContent>
@@ -99,10 +99,10 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
       </div>
 
       <div>
-        <Label htmlFor="organization_id">Organization</Label>
+        <Label htmlFor="organization_id">Organización</Label>
         <Select defaultValue={beneficiaryOrganization?.organization_id ?? ''} name="organization_id">
           <SelectTrigger>
-            <SelectValue placeholder="Select an organization" />
+            <SelectValue placeholder="Seleccionar una organización" />
           </SelectTrigger>
           <SelectContent>
             {orgs.map((o) => (
@@ -116,41 +116,62 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
       </div>
 
       <div>
-        <Label htmlFor="available_points">Available Points</Label>
-        <Input defaultValue={beneficiaryOrganization?.available_points ?? 0} id="available_points" name="available_points" type="number" />
+        <Label htmlFor="available_points">Puntos Disponibles</Label>
+        <Input
+          aria-describedby="available_points-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.available_points}
+          defaultValue={beneficiaryOrganization?.available_points ?? 0}
+          id="available_points"
+          name="available_points"
+          type="number"
+        />
         <FieldError actionState={validation ?? actionState} name="available_points" />
       </div>
 
       <div>
-        <Label htmlFor="total_points_earned">Total Points Earned</Label>
-        <Input defaultValue={beneficiaryOrganization?.total_points_earned ?? 0} id="total_points_earned" name="total_points_earned" type="number" />
+        <Label htmlFor="total_points_earned">Puntos Totales Acumulados</Label>
+        <Input
+          aria-describedby="total_points_earned-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.total_points_earned}
+          defaultValue={beneficiaryOrganization?.total_points_earned ?? 0}
+          id="total_points_earned"
+          name="total_points_earned"
+          type="number"
+        />
         <FieldError actionState={validation ?? actionState} name="total_points_earned" />
       </div>
 
       <div>
-        <Label htmlFor="total_points_redeemed">Total Points Redeemed</Label>
-        <Input defaultValue={beneficiaryOrganization?.total_points_redeemed ?? 0} id="total_points_redeemed" name="total_points_redeemed" type="number" />
+        <Label htmlFor="total_points_redeemed">Puntos Totales Canjeados</Label>
+        <Input
+          aria-describedby="total_points_redeemed-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.total_points_redeemed}
+          defaultValue={beneficiaryOrganization?.total_points_redeemed ?? 0}
+          id="total_points_redeemed"
+          name="total_points_redeemed"
+          type="number"
+        />
         <FieldError actionState={validation ?? actionState} name="total_points_redeemed" />
       </div>
 
       <div className="flex items-center space-x-2">
         <input
-          className="rounded border-gray-300"
+          className="rounded"
           defaultChecked={beneficiaryOrganization?.is_active ?? true}
           id="is_active"
           name="is_active"
           type="checkbox"
         />
-        <Label htmlFor="is_active">Active</Label>
+        <Label htmlFor="is_active">Activo</Label>
         <FieldError actionState={validation ?? actionState} name="is_active" />
       </div>
 
       <div className="flex gap-2">
         <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/beneficiary_organization">Cancel</Link>
+          <Link href="/dashboard/beneficiary_organization">Cancelar</Link>
         </Button>
         <Button className="w-full" disabled={pending} type="submit">
-          {beneficiaryOrganization ? 'Update' : 'Create'}
+          {beneficiaryOrganization ? 'Actualizar' : 'Crear'}
         </Button>
       </div>
     </form>

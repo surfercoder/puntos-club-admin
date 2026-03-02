@@ -7,6 +7,15 @@ import { toast } from 'sonner';
 
 import { deleteUser } from '@/actions/dashboard/user/actions';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface DeleteModalProps {
   userId: string;
@@ -15,7 +24,7 @@ interface DeleteModalProps {
 }
 
 export default function DeleteModal({ userId, userName, userType }: DeleteModalProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
@@ -23,52 +32,39 @@ export default function DeleteModal({ userId, userName, userType }: DeleteModalP
     setIsDeleting(true);
     try {
       await deleteUser(userId, userType);
-      toast.success('User deleted successfully');
+      toast.success('Usuario eliminado correctamente');
       router.refresh();
+      setOpen(false);
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to delete user');
+      toast.error(error instanceof Error ? error.message : 'Error al eliminar el usuario');
     } finally {
       setIsDeleting(false);
-      setIsOpen(false);
     }
   };
 
-  if (!isOpen) {
-    return (
-      <Button
-        onClick={() => setIsOpen(true)}
-        size="sm"
-        variant="destructive"
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
-    );
-  }
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4 text-center">
-        <h3 className="text-lg font-semibold mb-4">Delete User</h3>
-        <p className="text-gray-600 mb-6">
-          Are you sure you want to delete <strong>{userName}</strong>? This action cannot be undone.
-        </p>
-        <div className="flex gap-3 justify-center">
-          <Button
-            disabled={isDeleting}
-            onClick={() => setIsOpen(false)}
-            variant="outline"
-          >
-            Cancel
+    <Dialog onOpenChange={setOpen} open={open}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="destructive">
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Eliminar Usuario</DialogTitle>
+          <DialogDescription>
+            ¿Estás seguro de que deseas eliminar <strong>{userName}</strong>? Esta acción no se puede deshacer.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button disabled={isDeleting} onClick={() => setOpen(false)} variant="outline">
+            Cancelar
           </Button>
-          <Button
-            disabled={isDeleting}
-            onClick={handleDelete}
-            variant="destructive"
-          >
-            {isDeleting ? 'Deleting...' : 'Delete'}
+          <Button disabled={isDeleting} onClick={handleDelete} variant="destructive">
+            {isDeleting ? 'Eliminando...' : 'Eliminar'}
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

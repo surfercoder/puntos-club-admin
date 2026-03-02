@@ -127,7 +127,7 @@ export default function ProductImageUpload({
             <button
               type="button"
               onClick={() => removeImage(imageUrl, index)}
-              className="absolute top-2 right-2 p-1 bg-red-500 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
             >
               <X className="w-4 h-4" />
             </button>
@@ -135,7 +135,7 @@ export default function ProductImageUpload({
         ))}
 
         {images.length < 3 && (
-          <label className="relative aspect-square rounded-lg border-2 border-dashed border-gray-300 hover:border-gray-400 cursor-pointer flex flex-col items-center justify-center transition-colors">
+          <label className="relative aspect-square rounded-lg border-2 border-dashed border-border hover:border-muted-foreground cursor-pointer flex flex-col items-center justify-center transition-colors">
             <input
               type="file"
               accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
@@ -146,15 +146,15 @@ export default function ProductImageUpload({
             />
             {uploading ? (
               <div className="flex flex-col items-center gap-2">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900" />
-                <span className="text-sm text-gray-500">Uploading...</span>
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground" />
+                <span className="text-sm text-muted-foreground">Uploading...</span>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2">
-                <Upload className="w-8 h-8 text-gray-400" />
-                <span className="text-sm text-gray-500">Upload Images</span>
-                <span className="text-xs text-gray-400">JPEG, PNG, WebP, GIF</span>
-                <span className="text-xs text-gray-400">Max 5MB each</span>
+                <Upload className="w-8 h-8 text-muted-foreground" />
+                <span className="text-sm text-muted-foreground">Upload Images</span>
+                <span className="text-xs text-muted-foreground/70">JPEG, PNG, WebP, GIF</span>
+                <span className="text-xs text-muted-foreground/70">Max 5MB each</span>
               </div>
             )}
           </label>
@@ -162,14 +162,14 @@ export default function ProductImageUpload({
       </div>
 
       {images.length === 0 && (
-        <div className="flex items-center gap-2 text-sm text-gray-500">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <ImageIcon className="w-4 h-4" />
           <span>No images uploaded yet. You can add up to 3 images.</span>
         </div>
       )}
 
       {images.length > 0 && (
-        <p className="text-sm text-gray-500">
+        <p className="text-sm text-muted-foreground">
           {images.length} of 3 images uploaded
         </p>
       )}

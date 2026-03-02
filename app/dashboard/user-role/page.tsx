@@ -39,12 +39,12 @@ const ROLE_ICONS: Record<string, React.ReactNode> = {
   admin: <Shield className="h-4 w-4" />,
 };
 
-const ROLE_COLORS: Record<string, string> = {
-  final_user: "bg-blue-100 text-blue-800",
-  cashier: "bg-green-100 text-green-800",
-  owner: "bg-purple-100 text-purple-800",
-  collaborator: "bg-orange-100 text-orange-800",
-  admin: "bg-red-100 text-red-800",
+const ROLE_COLORS: Record<string, "default" | "secondary" | "outline" | "destructive"> = {
+  final_user: "outline",
+  cashier: "default",
+  owner: "secondary",
+  collaborator: "secondary",
+  admin: "destructive",
 };
 
 export default function UserRolePage() {
@@ -93,7 +93,7 @@ export default function UserRolePage() {
 
   const handleSubmit = async () => {
     if (!editingRole || !formData.display_name) {
-      alert("Display name is required");
+      alert("El nombre a mostrar es requerido");
       return;
     }
 
@@ -110,7 +110,7 @@ export default function UserRolePage() {
       setDialogOpen(false);
       loadData();
     } else {
-      alert(result.error || "Failed to update role");
+      alert(result.error || "No se pudo actualizar el rol");
     }
   };
 
@@ -126,12 +126,12 @@ export default function UserRolePage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">User Roles</h1>
-          <p className="text-muted-foreground">View and manage user role definitions</p>
+          <h1 className="text-2xl font-bold">Roles de Usuario</h1>
+          <p className="text-muted-foreground">Ver y administrar definiciones de roles de usuario</p>
         </div>
         <Button variant="outline" onClick={loadData}>
           <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
+          Actualizar
         </Button>
       </div>
 
@@ -147,7 +147,7 @@ export default function UserRolePage() {
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{getUserCount(role)}</div>
-              <p className="text-xs text-muted-foreground">users</p>
+              <p className="text-xs text-muted-foreground">usuarios</p>
             </CardContent>
           </Card>
         ))}
@@ -155,28 +155,28 @@ export default function UserRolePage() {
 
       <Card>
         <CardHeader>
-          <CardTitle>All Roles</CardTitle>
+          <CardTitle>Todos los Roles</CardTitle>
           <CardDescription>
-            System-defined user roles. You can edit display names and descriptions.
+            Roles definidos por el sistema. Puede editar nombres y descripciones.
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8">Loading roles...</div>
+            <div className="text-center py-8">Cargando roles...</div>
           ) : roles.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No roles found.
+              No se encontraron roles.
             </div>
           ) : (
             <div className="border rounded-lg">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Role Type</TableHead>
-                    <TableHead>Display Name</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead className="text-center">Users</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>Tipo de Rol</TableHead>
+                    <TableHead>Nombre a Mostrar</TableHead>
+                    <TableHead>Descripción</TableHead>
+                    <TableHead className="text-center">Usuarios</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -185,14 +185,14 @@ export default function UserRolePage() {
                       <TableCell>
                         <div className="flex items-center gap-2">
                           {ROLE_ICONS[role.name] || <Users className="h-4 w-4" />}
-                          <Badge className={ROLE_COLORS[role.name] || "bg-gray-100 text-gray-800"}>
+                          <Badge variant={ROLE_COLORS[role.name] ?? "secondary"}>
                             {role.name}
                           </Badge>
                         </div>
                       </TableCell>
                       <TableCell className="font-medium">{role.display_name}</TableCell>
                       <TableCell className="max-w-md">
-                        {role.description || "No description"}
+                        {role.description || "Sin descripción"}
                       </TableCell>
                       <TableCell className="text-center">
                         <Badge variant="secondary">{getUserCount(role)}</Badge>
@@ -219,18 +219,18 @@ export default function UserRolePage() {
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Role</DialogTitle>
+            <DialogTitle>Editar Rol</DialogTitle>
             <DialogDescription>
-              Update the display name and description for this role.
+              Actualiza el nombre y descripción de este rol.
               <br />
               <span className="text-xs text-muted-foreground">
-                Note: The role type ({editingRole?.name}) cannot be changed.
+                Nota: El tipo de rol ({editingRole?.name}) no puede modificarse.
               </span>
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div className="space-y-2">
-              <Label>Role Type</Label>
+              <Label>Tipo de Rol</Label>
               <div className="flex items-center gap-2">
                 {editingRole && ROLE_ICONS[editingRole.name]}
                 <Badge className={editingRole ? ROLE_COLORS[editingRole.name] : ""}>
@@ -239,31 +239,31 @@ export default function UserRolePage() {
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="display_name">Display Name *</Label>
+              <Label htmlFor="display_name">Nombre a Mostrar *</Label>
               <Input
                 id="display_name"
                 value={formData.display_name}
                 onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
-                placeholder="Display name"
+                placeholder="Nombre a mostrar"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="description">Description</Label>
+              <Label htmlFor="description">Descripción</Label>
               <Textarea
                 id="description"
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder="Role description"
+                placeholder="Descripción del rol"
                 rows={3}
               />
             </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setDialogOpen(false)}>
-              Cancel
+              Cancelar
             </Button>
             <Button onClick={handleSubmit} disabled={saving}>
-              {saving ? "Saving..." : "Update"}
+              {saving ? "Guardando..." : "Actualizar"}
             </Button>
           </DialogFooter>
         </DialogContent>

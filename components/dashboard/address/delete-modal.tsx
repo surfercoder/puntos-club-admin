@@ -30,21 +30,21 @@ export default function DeleteModal({ id }: { id: number }) {
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="destructive">Delete</Button>
+        <Button size="sm" variant="destructive">Eliminar</Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Address?</DialogTitle>
+          <DialogTitle>¿Eliminar Dirección?</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete this address? This action cannot be undone.
+            ¿Estás seguro de que deseas eliminar esta dirección? Esta acción no se puede deshacer.
           </DialogDescription>
         </DialogHeader>
         <DialogFooter className="flex gap-2 justify-end">
           <Button disabled={loading} onClick={() => setOpen(false)} type="button" variant="secondary">
-            Cancel
+            Cancelar
           </Button>
           <Button disabled={loading} onClick={handleDelete} type="button" variant="destructive">
-            {loading ? 'Deleting...' : 'Delete'}
+            {loading ? 'Eliminando...' : 'Eliminar'}
           </Button>
         </DialogFooter>
       </DialogContent>

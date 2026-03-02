@@ -6,7 +6,6 @@ import { useRef, useState } from 'react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import { createClient } from '@/lib/supabase/client';
 
 interface ImageUploadProps {
   value?: string | null;
@@ -33,8 +32,8 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(value || null);
+  const [uploadedPath, setUploadedPath] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const supabase = createClient();
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -53,31 +52,28 @@ export function ImageUpload({
     setUploading(true);
 
     try {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
-      const filePath = path ? `${path}/${fileName}` : fileName;
+      const formData = new FormData();
+      formData.append('file', file);
+      formData.append('bucket', bucket);
+      if (path) formData.append('path', path);
 
-      const { data: uploadData, error: uploadError } = await supabase.storage
-        .from(bucket)
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
 
-      if (uploadError) {
-        throw uploadError;
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Upload failed');
       }
 
-      const { data: urlData } = supabase.storage
-        .from(bucket)
-        .getPublicUrl(uploadData.path);
-
-      const publicUrl = urlData.publicUrl;
-      setPreview(publicUrl);
-      onChange(publicUrl);
+      const { url, path: filePath } = await response.json();
+      setPreview(url);
+      setUploadedPath(filePath);
+      onChange(url);
       toast.success('Image uploaded successfully');
-    } catch (_error) {
-      toast.error('Failed to upload image');
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : 'Failed to upload image');
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
@@ -90,15 +86,16 @@ export function ImageUpload({
     if (!preview) return;
 
     try {
-      if (preview.includes(bucket)) {
-        const urlParts = preview.split(`${bucket}/`);
-        if (urlParts.length > 1) {
-          const filePath = urlParts[1];
-          await supabase.storage.from(bucket).remove([filePath]);
-        }
+      if (uploadedPath) {
+        await fetch('/api/upload', {
+          method: 'DELETE',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ bucket, path: uploadedPath }),
+        });
       }
 
       setPreview(null);
+      setUploadedPath(null);
       onChange(null);
       toast.success('Image removed');
     } catch (_error) {
@@ -118,16 +115,19 @@ export function ImageUpload({
       />
 
       {preview ? (
-        <div className="relative w-full max-w-md">
+        <div
+          className="relative inline-block"
+          style={aspectRatio === 'square' ? { width: `${maxHeight}px`, height: `${maxHeight}px` } : undefined}
+        >
           <div 
-            className={`relative w-full overflow-hidden rounded-lg border bg-muted ${
-              aspectRatio === 'square' ? 'aspect-square' : ''
+            className={`relative overflow-hidden rounded-lg border bg-muted ${
+              aspectRatio === 'square' ? 'w-full h-full' : 'w-full max-w-md'
             }`}
             style={aspectRatio === 'auto' ? { maxHeight: `${maxHeight}px` } : undefined}
           >
             <Image
               alt="Preview"
-              className={aspectRatio === 'square' ? 'object-cover' : 'object-contain'}
+              className={aspectRatio === 'square' ? 'object-contain w-full h-full' : 'object-contain'}
               height={maxHeight}
               src={preview}
               style={aspectRatio === 'auto' ? { width: '100%', height: 'auto', maxHeight: `${maxHeight}px` } : undefined}

@@ -1,5 +1,6 @@
 'use client';
 
+import { z } from 'zod';
 import { AlertCircle, Bell, CheckCircle2, Loader2, Send, Smile, ShieldAlert, ShieldCheck, Clock } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useRef, useState, useEffect } from 'react';
@@ -7,6 +8,7 @@ import EmojiPicker, { type EmojiClickData } from 'emoji-picker-react';
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import type { OrganizationNotificationLimit } from '@/types/organization_notification_limit';
@@ -14,18 +16,32 @@ import type { OrganizationNotificationLimit } from '@/types/organization_notific
 const TITLE_MAX_LENGTH = 65;
 const BODY_MAX_LENGTH = 240;
 
+const NotificationSchema = z.object({
+  title: z
+    .string()
+    .min(1, 'El título es requerido')
+    .max(TITLE_MAX_LENGTH, `El título debe tener ${TITLE_MAX_LENGTH} caracteres o menos`),
+  body: z
+    .string()
+    .min(1, 'El mensaje es requerido')
+    .max(BODY_MAX_LENGTH, `El mensaje debe tener ${BODY_MAX_LENGTH} caracteres o menos`),
+});
+
 interface NotificationFormProps {
   limits: OrganizationNotificationLimit | null;
   canSend: boolean | null;
+  organizationId?: number | null;
+  redirectPath?: string;
 }
 
-export default function NotificationForm({ limits, canSend }: NotificationFormProps) {
+export default function NotificationForm({ limits, canSend, organizationId, redirectPath = '/dashboard/notifications' }: NotificationFormProps) {
   const router = useRouter();
   const [title, setTitle] = useState('');
   const [body, setBody] = useState('');
   const [isCreating, setIsCreating] = useState(false);
   const [isSending, setIsSending] = useState(false);
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [showTitleEmojiPicker, setShowTitleEmojiPicker] = useState(false);
   const [isModerating, setIsModerating] = useState(false);
   const [moderationResult, setModerationResult] = useState<{
     isApproved: boolean;
@@ -33,6 +49,7 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
     severity?: 'low' | 'medium' | 'high';
   } | null>(null);
   const [timeRemaining, setTimeRemaining] = useState<string>('');
+  const titleInputRef = useRef<HTMLInputElement>(null);
   const bodyTextareaRef = useRef<HTMLTextAreaElement>(null);
 
   const titleCharsLeft = TITLE_MAX_LENGTH - title.length;
@@ -127,6 +144,26 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
 
   const restrictionReason = getRestrictionReason();
 
+  const handleTitleEmojiClick = (emojiData: EmojiClickData) => {
+    const input = titleInputRef.current;
+    if (!input) return;
+
+    const start = input.selectionStart ?? title.length;
+    const end = input.selectionEnd ?? title.length;
+    const newTitle = title.substring(0, start) + emojiData.emoji + title.substring(end);
+
+    const nextTitle = newTitle.slice(0, TITLE_MAX_LENGTH);
+    setTitle(nextTitle);
+    setShowTitleEmojiPicker(false);
+    if (moderationResult) setModerationResult(null);
+
+    setTimeout(() => {
+      input.focus();
+      const newCursorPos = Math.min(start + emojiData.emoji.length, nextTitle.length);
+      input.setSelectionRange(newCursorPos, newCursorPos);
+    }, 0);
+  };
+
   const handleEmojiClick = (emojiData: EmojiClickData) => {
     const textarea = bodyTextareaRef.current;
     if (!textarea) return;
@@ -147,18 +184,10 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
   };
 
   const handleCheckContent = async () => {
-    if (!title.trim() || !body.trim()) {
-      toast.error('Por favor completa el título y el cuerpo');
-      return;
-    }
+    const validation = NotificationSchema.safeParse({ title: title.trim(), body: body.trim() });
 
-    if (title.length > TITLE_MAX_LENGTH) {
-      toast.error(`El título debe tener ${TITLE_MAX_LENGTH} caracteres o menos`);
-      return;
-    }
-
-    if (body.length > BODY_MAX_LENGTH) {
-      toast.error(`El cuerpo debe tener ${BODY_MAX_LENGTH} caracteres o menos`);
+    if (!validation.success) {
+      toast.error(validation.error.issues[0].message);
       return;
     }
 
@@ -195,18 +224,10 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
   };
 
   const handleSaveAndSend = async () => {
-    if (!title.trim() || !body.trim()) {
-      toast.error('Por favor completa el título y el cuerpo');
-      return;
-    }
+    const validation = NotificationSchema.safeParse({ title: title.trim(), body: body.trim() });
 
-    if (title.length > TITLE_MAX_LENGTH) {
-      toast.error(`El título debe tener ${TITLE_MAX_LENGTH} caracteres o menos`);
-      return;
-    }
-
-    if (body.length > BODY_MAX_LENGTH) {
-      toast.error(`El cuerpo debe tener ${BODY_MAX_LENGTH} caracteres o menos`);
+    if (!validation.success) {
+      toast.error(validation.error.issues[0].message);
       return;
     }
 
@@ -226,13 +247,13 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
       const createResponse = await fetch('/api/notifications', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, body }),
+        body: JSON.stringify({ title, body, ...(organizationId ? { organizationId } : {}) }),
       });
 
       const createData = await createResponse.json();
 
       if (!createResponse.ok) {
-        toast.error(createData.error || 'Failed to create notification');
+        toast.error(createData.error || 'Error al crear la notificación');
         setIsCreating(false);
         return;
       }
@@ -241,7 +262,7 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
       setIsCreating(false);
       setIsSending(true);
 
-      toast.success('Notification created! Sending now...');
+      toast.success('¡Notificación creada! Enviando ahora...');
 
       const sendResponse = await fetch('/api/notifications/send', {
         method: 'POST',
@@ -252,21 +273,21 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
       const sendData = await sendResponse.json();
 
       if (!sendResponse.ok) {
-        toast.error(sendData.error || 'Failed to send notification');
+        toast.error(sendData.error || 'Error al enviar la notificación');
         setIsSending(false);
         return;
       }
 
       toast.success(
-        `Notification sent successfully! ${sendData.sent} sent, ${sendData.failed} failed`
+        `¡Notificación enviada! ${sendData.sent} enviada(s), ${sendData.failed} fallida(s)`
       );
 
       setTimeout(() => {
-        router.push('/dashboard/notifications');
+        router.push(redirectPath);
         router.refresh();
       }, 1500);
     } catch (_error) {
-      toast.error('An unexpected error occurred');
+      toast.error('Ocurrió un error inesperado');
       setIsCreating(false);
       setIsSending(false);
     }
@@ -393,31 +414,68 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
       <div className="space-y-4 border rounded-lg p-6">
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="title">Title *</Label>
-            <span className={`text-sm ${titleCharsLeft < 0 ? 'text-red-500 font-semibold' : 'text-muted-foreground'}`}>
-              {titleCharsLeft} characters left
+            <Label htmlFor="title">Título *</Label>
+            <span id="title-char-count" className={`text-sm ${titleCharsLeft < 0 ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+              {titleCharsLeft} caracteres restantes
             </span>
           </div>
-          <input
-            id="title"
-            type="text"
-            value={title}
-            onChange={(e) => handleContentChange('title', e.target.value)}
-            placeholder="e.g., New rewards available! 🎉"
-            maxLength={TITLE_MAX_LENGTH}
-            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-            disabled={isProcessing || isModerating}
-          />
+          <div className="relative">
+            <Input
+              ref={titleInputRef}
+              id="title"
+              type="text"
+              value={title}
+              onChange={(e) => handleContentChange('title', e.target.value)}
+              placeholder="Ej.: ¡Nuevas recompensas disponibles! 🎉"
+              disabled={isProcessing || isModerating}
+              aria-invalid={title.length > TITLE_MAX_LENGTH}
+              aria-describedby="title-char-count"
+              className="pr-10"
+            />
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon-sm"
+              onClick={() => setShowTitleEmojiPicker(!showTitleEmojiPicker)}
+              className="absolute right-2 top-1/2 -translate-y-1/2"
+              disabled={isProcessing || isModerating}
+              title="Agregar emoji"
+            >
+              <Smile className="h-5 w-5" />
+            </Button>
+            {showTitleEmojiPicker && (
+              <div className="absolute right-0 top-full mt-2 z-50">
+                <div className="relative">
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => setShowTitleEmojiPicker(false)}
+                    className="absolute -top-2 -right-2 bg-background rounded-full shadow-md z-10"
+                  >
+                    <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                  </Button>
+                  <EmojiPicker
+                    onEmojiClick={handleTitleEmojiClick}
+                    width={350}
+                    height={400}
+                  />
+                </div>
+              </div>
+            )}
+          </div>
           <p className="text-xs text-muted-foreground">
-            Keep it short and engaging. Emojis are supported!
+            ¡Sé breve y directo. Se permiten emojis!
           </p>
         </div>
 
         <div className="space-y-2">
           <div className="flex items-center justify-between">
-            <Label htmlFor="body">Message *</Label>
-            <span className={`text-sm ${bodyCharsLeft < 0 ? 'text-red-500 font-semibold' : 'text-muted-foreground'}`}>
-              {bodyCharsLeft} characters left
+            <Label htmlFor="body">Mensaje *</Label>
+            <span id="body-char-count" className={`text-sm ${bodyCharsLeft < 0 ? 'text-destructive font-semibold' : 'text-muted-foreground'}`}>
+              {bodyCharsLeft} caracteres restantes
             </span>
           </div>
           <div className="relative">
@@ -426,33 +484,38 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
               id="body"
               value={body}
               onChange={(e) => handleContentChange('body', e.target.value)}
-              placeholder="e.g., Check out our new products and earn double points this week! 🌟"
+              placeholder="Ej.: ¡Mirá nuestros nuevos productos y ganá el doble de puntos esta semana! 🌟"
               rows={4}
-              maxLength={BODY_MAX_LENGTH}
               className="resize-none pr-12"
               disabled={isProcessing || isModerating}
+              aria-invalid={body.length > BODY_MAX_LENGTH}
+              aria-describedby="body-char-count"
             />
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon-sm"
               onClick={() => setShowEmojiPicker(!showEmojiPicker)}
-              className="absolute right-2 top-2 p-2 rounded-md hover:bg-gray-100 transition-colors"
+              className="absolute right-2 top-2"
               disabled={isProcessing || isModerating}
-              title="Add emoji"
+              title="Agregar emoji"
             >
-              <Smile className="h-5 w-5 text-gray-500" />
-            </button>
+              <Smile className="h-5 w-5" />
+            </Button>
             {showEmojiPicker && (
               <div className="absolute right-0 top-full mt-2 z-50">
                 <div className="relative">
-                  <button
+                  <Button
                     type="button"
+                    variant="ghost"
+                    size="icon-sm"
                     onClick={() => setShowEmojiPicker(false)}
-                    className="absolute -top-2 -right-2 bg-white rounded-full p-1 shadow-md hover:bg-gray-100 z-10"
+                    className="absolute -top-2 -right-2 bg-background rounded-full shadow-md z-10"
                   >
                     <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                     </svg>
-                  </button>
+                  </Button>
                   <EmojiPicker
                     onEmojiClick={handleEmojiClick}
                     width={350}
@@ -467,17 +530,17 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
           </p>
         </div>
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <div className="bg-muted/50 border rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <Bell className="h-5 w-5 text-blue-600 mt-0.5" />
+            <Bell className="h-5 w-5 text-primary mt-0.5" />
             <div className="flex-1 text-sm min-w-0">
-              <p className="font-semibold text-blue-900 mb-1">Preview</p>
-              <div className="bg-white rounded-lg p-3 shadow-sm border min-w-0">
+              <p className="font-semibold text-foreground mb-1">Vista previa</p>
+              <div className="bg-background rounded-lg p-3 shadow-sm border min-w-0">
                 <p className="font-semibold text-sm mb-1 whitespace-pre-wrap break-words">
-                  {title || 'Your notification title'}
+                  {title || 'El título de tu notificación'}
                 </p>
-                <p className="text-sm text-gray-600 whitespace-pre-wrap break-words">
-                  {body || 'Your notification message will appear here'}
+                <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
+                  {body || 'El mensaje de tu notificación aparecerá aquí'}
                 </p>
               </div>
             </div>
@@ -530,10 +593,10 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
           <Button
             type="button"
             variant="outline"
-            onClick={() => router.push('/dashboard/notifications')}
+            onClick={() => router.push(redirectPath)}
             disabled={isProcessing || isModerating}
           >
-            Cancel
+            Cancelar
           </Button>
           <div className="flex gap-2">
             <Button
@@ -559,13 +622,13 @@ export default function NotificationForm({ limits, canSend }: NotificationFormPr
         </div>
       </div>
 
-      <div className="bg-gray-50 border rounded-lg p-4">
-        <h3 className="font-semibold text-sm mb-2">Important Notes</h3>
+      <div className="bg-muted/30 border rounded-lg p-4">
+        <h3 className="font-semibold text-sm mb-2">Notas Importantes</h3>
         <ul className="text-sm space-y-1 text-muted-foreground list-disc list-inside">
-          <li>Notifications will be sent to all active beneficiaries following your organization</li>
-          <li>Character limits ensure compatibility across all devices</li>
-          <li>Once sent, notifications cannot be recalled or edited</li>
-          <li>Beneficiaries must have the PuntosClub app installed to receive notifications</li>
+          <li>Las notificaciones se enviarán a todos los beneficiarios activos que siguen tu organización</li>
+          <li>Los límites de caracteres aseguran compatibilidad en todos los dispositivos</li>
+          <li>Una vez enviadas, las notificaciones no se pueden cancelar ni editar</li>
+          <li>Los beneficiarios deben tener instalada la app PuntosClub para recibir notificaciones</li>
         </ul>
       </div>
     </div>

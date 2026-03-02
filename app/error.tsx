@@ -16,11 +16,11 @@ export default function Error({
 
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-      <h2 className="text-2xl font-bold">Something went wrong!</h2>
+      <h2 className="text-2xl font-bold">¡Algo salió mal!</h2>
       <p className="text-muted-foreground">
-        {error.message || 'An unexpected error occurred'}
+        {error.message || 'Ocurrió un error inesperado'}
       </p>
-      <Button onClick={() => reset()}>Try again</Button>
+      <Button onClick={() => reset()}>Intentar de nuevo</Button>
     </div>
   )
 }

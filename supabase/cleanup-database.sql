@@ -13,48 +13,34 @@ SET session_replication_role = 'replica';
 -- DELETE DATA FROM ALL TABLES (in correct order to respect foreign keys)
 -- ============================================================================
 
--- 1. Delete purchase-related data first (most dependent)
-DELETE FROM purchase_item;
-DELETE FROM purchase;
-
--- 2. Delete redemption and order data
-DELETE FROM history;
+-- 1. Delete most dependent data first
 DELETE FROM redemption;
+DELETE FROM purchase;
 DELETE FROM app_order;
 
--- 3. Delete assignment data
-DELETE FROM assignment;
-
--- 4. Delete stock data
+-- 2. Delete stock data
 DELETE FROM stock;
 
--- 5. Delete product catalog
+-- 3. Delete product catalog
 DELETE FROM product;
-DELETE FROM purchasable_item;
 
--- 6. Delete category structure
+-- 4. Delete category structure
 DELETE FROM category;
 
--- 7. Delete points rules
+-- 5. Delete points rules
 DELETE FROM points_rule;
 
--- 8. Delete beneficiary-organization relationships
+-- 6. Delete beneficiary-organization relationships
 DELETE FROM beneficiary_organization;
 
--- 8b. beneficiary_stores and beneficiary_total_points are VIEWS, not tables
--- They don't store data directly, so no deletion needed
--- (Data is deleted when underlying tables are cleared)
-
--- 9. Delete notification data
-DELETE FROM push_notification_recipients;
+-- 7. Delete notification data
 DELETE FROM push_tokens;
 DELETE FROM push_notifications;
-DELETE FROM notifications;
 
--- 10. Delete user data
+-- 8. Delete user data
 DELETE FROM beneficiary;
-DELETE FROM app_user;
 DELETE FROM app_user_organization;
+DELETE FROM app_user;
 
 -- ============================================================================
 -- DELETE SUPABASE AUTH DATA
@@ -68,21 +54,13 @@ DELETE FROM auth.mfa_challenges;
 DELETE FROM auth.mfa_amr_claims;
 DELETE FROM auth.users;
 
--- 11. Delete permission and role data
-DELETE FROM collaborator_permission;
-DELETE FROM user_permission;
-DELETE FROM restricted_collaborator_action;
-
--- 12. Delete branch and address data
+-- 10. Delete branch and address data
 DELETE FROM branch;
 DELETE FROM address;
 
--- 13. Delete organization data
+-- 11. Delete organization data
 DELETE FROM organization_notification_limits;
 DELETE FROM organization;
-
--- 14. Delete status data
-DELETE FROM status;
 
 -- Re-enable triggers
 SET session_replication_role = 'origin';
@@ -101,36 +79,38 @@ BEGIN
 END $$;
 
 -- ============================================================================
--- RESET SEQUENCES (resets auto-increment IDs to 1)
+-- RESET SEQUENCES (only for tables that use integer sequences)
 -- ============================================================================
 
-ALTER SEQUENCE purchase_item_id_seq RESTART WITH 1;
-ALTER SEQUENCE purchase_id_seq RESTART WITH 1;
-ALTER SEQUENCE history_id_seq RESTART WITH 1;
-ALTER SEQUENCE redemption_id_seq RESTART WITH 1;
-ALTER SEQUENCE app_order_id_seq RESTART WITH 1;
-ALTER SEQUENCE assignment_id_seq RESTART WITH 1;
-ALTER SEQUENCE stock_id_seq RESTART WITH 1;
-ALTER SEQUENCE product_id_seq RESTART WITH 1;
-ALTER SEQUENCE purchasable_item_id_seq RESTART WITH 1;
-ALTER SEQUENCE category_id_seq RESTART WITH 1;
-ALTER SEQUENCE points_rule_id_seq RESTART WITH 1;
-ALTER SEQUENCE beneficiary_organization_id_seq RESTART WITH 1;
-ALTER SEQUENCE beneficiary_id_seq RESTART WITH 1;
-ALTER SEQUENCE app_user_id_seq RESTART WITH 1;
-ALTER SEQUENCE app_user_organization_id_seq RESTART WITH 1;
-ALTER SEQUENCE push_notification_recipients_id_seq RESTART WITH 1;
-ALTER SEQUENCE push_tokens_id_seq RESTART WITH 1;
-ALTER SEQUENCE push_notifications_id_seq RESTART WITH 1;
-ALTER SEQUENCE notifications_id_seq RESTART WITH 1;
-ALTER SEQUENCE collaborator_permission_id_seq RESTART WITH 1;
-ALTER SEQUENCE user_permission_id_seq RESTART WITH 1;
-ALTER SEQUENCE restricted_collaborator_action_id_seq RESTART WITH 1;
-ALTER SEQUENCE branch_id_seq RESTART WITH 1;
-ALTER SEQUENCE address_id_seq RESTART WITH 1;
-ALTER SEQUENCE organization_notification_limits_id_seq RESTART WITH 1;
-ALTER SEQUENCE organization_id_seq RESTART WITH 1;
-ALTER SEQUENCE status_id_seq RESTART WITH 1;
+DO $$
+DECLARE
+  seq_name text;
+  seq_names text[] := ARRAY[
+    'redemption_id_seq',
+    'purchase_id_seq',
+    'app_order_id_seq',
+    'stock_id_seq',
+    'product_id_seq',
+    'category_id_seq',
+    'points_rule_id_seq',
+    'beneficiary_organization_id_seq',
+    'push_tokens_id_seq',
+    'push_notifications_id_seq',
+    'beneficiary_id_seq',
+    'app_user_organization_id_seq',
+    'app_user_id_seq',
+    'branch_id_seq',
+    'address_id_seq',
+    'organization_notification_limits_id_seq',
+    'organization_id_seq'
+  ];
+BEGIN
+  FOREACH seq_name IN ARRAY seq_names LOOP
+    IF EXISTS (SELECT 1 FROM pg_sequences WHERE sequencename = seq_name) THEN
+      EXECUTE format('ALTER SEQUENCE %I RESTART WITH 1', seq_name);
+    END IF;
+  END LOOP;
+END $$;
 
 -- ============================================================================
 -- CLEANUP COMPLETE

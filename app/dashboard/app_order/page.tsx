@@ -45,7 +45,7 @@ export default async function AppOrderListPage() {
     .order('creation_date', { ascending: false });
 
   if (error) {
-    return <div>Error fetching orders</div>;
+    return <div>Error al obtener pedidos</div>;
   }
 
   // Only filter by organization for non-admin users
@@ -59,11 +59,11 @@ export default async function AppOrderListPage() {
     <div className="space-y-6">     
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Orders</h1>
-          <p className="text-muted-foreground">Manage orders in your system</p>
+          <h1 className="text-2xl font-bold">Pedidos</h1>
+          <p className="text-muted-foreground">Administrar pedidos del sistema</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/app_order/create">+ New Order</Link>
+          <Link href="/dashboard/app_order/create">+ Nuevo Pedido</Link>
         </Button>
       </div>
 
@@ -71,11 +71,11 @@ export default async function AppOrderListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Order Number</TableHead>
-              <TableHead>Creation Date</TableHead>
-              <TableHead>Total Points</TableHead>
-              <TableHead>Observations</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Número de Pedido</TableHead>
+              <TableHead>Fecha de Creación</TableHead>
+              <TableHead>Puntos Totales</TableHead>
+              <TableHead>Observaciones</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -86,7 +86,7 @@ export default async function AppOrderListPage() {
                     {order.order_number}
                   </TableCell>
                   <TableCell>
-                    {new Date(order.creation_date).toLocaleDateString('en-US', { timeZone: 'UTC' })}
+                    {new Date(order.creation_date).toLocaleDateString('es-AR', { timeZone: 'UTC' })}
                   </TableCell>
                   <TableCell>{order.total_points}</TableCell>
                   <TableCell>{order.observations || 'N/A'}</TableCell>
@@ -107,7 +107,7 @@ export default async function AppOrderListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={5}>No orders found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={5}>No se encontraron pedidos.</TableCell>
               </TableRow>
             )}
           </TableBody>

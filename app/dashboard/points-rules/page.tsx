@@ -49,7 +49,7 @@ interface PointsRule {
   category: { name: string } | null;
 }
 
-const DAY_NAMES = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+const DAY_NAMES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
 
 export default function PointsRulesPage() {
   const [rules, setRules] = useState<PointsRule[]>([]);
@@ -122,7 +122,7 @@ export default function PointsRulesPage() {
   };
 
   const handleDelete = async (id: number, name: string) => {
-    if (confirm(`Are you sure you want to delete the rule "${name}"?`)) {
+    if (confirm(`¿Estás seguro de que deseas eliminar la regla "${name}"?`)) {
       const result = await deletePointsRule(id);
       if (result.success) {
         loadRules();
@@ -132,7 +132,7 @@ export default function PointsRulesPage() {
 
   const handleTestCalculation = async () => {
     if (!testBranchId) {
-      alert("Please select a branch");
+      alert("Por favor selecciona una sucursal");
       return;
     }
     setTestLoading(true);
@@ -149,10 +149,10 @@ export default function PointsRulesPage() {
 
   const getRuleTypeLabel = (type: string) => {
     const labels: Record<string, string> = {
-      fixed_amount: "Fixed per Dollar",
-      percentage: "Percentage",
-      fixed_per_item: "Fixed per Item",
-      tiered: "Tiered",
+      fixed_amount: "Fijo por compra",
+      percentage: "Porcentaje",
+      fixed_per_item: "Fijo por ítem",
+      tiered: "Escalonado",
     };
     return labels[type] || type;
   };
@@ -167,46 +167,46 @@ export default function PointsRulesPage() {
       case "fixed_per_item":
         return `${config.points_per_item} pts/item`;
       case "tiered":
-        return "Multiple tiers";
+        return "Múltiples niveles";
       default:
         return "N/A";
     }
   };
 
   const getTimeDisplay = (rule: PointsRule) => {
-    if (!rule.time_start && !rule.time_end) return "All day";
+    if (!rule.time_start && !rule.time_end) return "Todo el día";
     return `${rule.time_start?.slice(0, 5) || "00:00"} - ${rule.time_end?.slice(0, 5) || "23:59"}`;
   };
 
   const getDaysDisplay = (days: number[] | null) => {
-    if (!days || days.length === 0) return "Every day";
-    if (days.length === 7) return "Every day";
+    if (!days || days.length === 0) return "Todos los días";
+    if (days.length === 7) return "Todos los días";
     return days.map(d => DAY_NAMES[d]).join(", ");
   };
 
   const getDateRangeDisplay = (rule: PointsRule) => {
-    if (rule.is_default) return "Always";
+    if (rule.is_default) return "Siempre";
     const start = rule.start_date || null;
     const end = rule.end_date || null;
     if (!start && !end) return null;
     if (start && end) return `${start} → ${end}`;
-    if (start) return `From ${start}`;
-    return `Until ${end}`;
+    if (start) return `Desde ${start}`;
+    return `Hasta ${end}`;
   };
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">Points Rules & Special Offers</h1>
+          <h1 className="text-3xl font-bold">Reglas de Puntos y Ofertas Especiales</h1>
           <p className="text-muted-foreground mt-2">
-            Manage how customers earn points from purchases
+            Administrar cómo los clientes acumulan puntos en sus compras
           </p>
         </div>
         <Link href="/dashboard/points-rules/new">
           <Button>
             <Plus className="mr-2 h-4 w-4" />
-            Create Rule
+            Crear Regla
           </Button>
         </Link>
       </div>
@@ -216,16 +216,16 @@ export default function PointsRulesPage() {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calculator className="h-5 w-5" />
-            Points Calculator
+            Calculadora de Puntos
           </CardTitle>
           <CardDescription>
-            Test how many points a purchase would earn with current active rules
+            Prueba cuántos puntos acumularía una compra con las reglas activas actuales
           </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="flex gap-4 items-end">
             <div className="flex-1">
-              <Label htmlFor="test-amount">Purchase Amount ($)</Label>
+              <Label htmlFor="test-amount">Monto de Compra</Label>
               <Input
                 id="test-amount"
                 type="number"
@@ -236,7 +236,7 @@ export default function PointsRulesPage() {
               />
             </div>
             <div className="flex-1">
-              <Label htmlFor="test-branch">Branch *</Label>
+              <Label htmlFor="test-branch">Sucursal *</Label>
               <select
                 id="test-branch"
                 value={testBranchId}
@@ -244,7 +244,7 @@ export default function PointsRulesPage() {
                 className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                 required
               >
-                <option value="">Select a branch</option>
+                <option value="">Seleccionar sucursal</option>
                 {branches.map((b) => (
                   <option key={b.id} value={b.id}>
                     {b.name}
@@ -253,11 +253,11 @@ export default function PointsRulesPage() {
               </select>
             </div>
             <Button onClick={handleTestCalculation} disabled={testLoading}>
-              {testLoading ? "Calculating..." : "Calculate"}
+              {testLoading ? "Calculando..." : "Calcular"}
             </Button>
             {testResult !== null && (
               <div className="px-6 py-3 bg-primary/10 rounded-lg">
-                <div className="text-sm text-muted-foreground">Points Earned</div>
+                <div className="text-sm text-muted-foreground">Puntos obtenidos</div>
                 <div className="text-2xl font-bold text-primary">{testResult}</div>
               </div>
             )}
@@ -269,33 +269,33 @@ export default function PointsRulesPage() {
       <Card>
         <CardHeader>
           <div className="flex justify-between items-center">
-            <CardTitle>All Rules</CardTitle>
+            <CardTitle>Todas las Reglas</CardTitle>
             <Button variant="outline" size="sm" onClick={loadRules}>
               <RefreshCw className="h-4 w-4 mr-2" />
-              Refresh
+              Actualizar
             </Button>
           </div>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8">Loading rules...</div>
+            <div className="text-center py-8">Cargando reglas...</div>
           ) : rules.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No rules found. Create your first rule to get started.
+              No se encontraron reglas. Crea tu primera regla para comenzar.
             </div>
           ) : (
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Display</TableHead>
-                  <TableHead>Name</TableHead>
-                  <TableHead>Type</TableHead>
+                  <TableHead>Estado</TableHead>
+                  <TableHead>Visualización</TableHead>
+                  <TableHead>Nombre</TableHead>
+                  <TableHead>Tipo</TableHead>
                   <TableHead>Config</TableHead>
-                  <TableHead>Schedule</TableHead>
-                  <TableHead>Priority</TableHead>
-                  <TableHead>Show in App</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Horario</TableHead>
+                  <TableHead>Prioridad</TableHead>
+                  <TableHead>Mostrar en App</TableHead>
+                  <TableHead className="text-right">Acciones</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -308,7 +308,7 @@ export default function PointsRulesPage() {
                           onCheckedChange={() => handleToggleStatus(rule.id, rule.is_active)}
                         />
                         <Badge variant={rule.is_active ? "default" : "secondary"}>
-                          {rule.is_active ? "Active" : "Inactive"}
+                          {rule.is_active ? "Activo" : "Inactivo"}
                         </Badge>
                       </div>
                     </TableCell>
@@ -317,7 +317,7 @@ export default function PointsRulesPage() {
                         <span className="text-2xl">{rule.display_icon || "⭐"}</span>
                         <span className="font-medium">{rule.display_name || rule.name}</span>
                         {rule.is_default && (
-                          <Badge variant="default">Default</Badge>
+                          <Badge variant="default">Por defecto</Badge>
                         )}
                       </div>
                     </TableCell>
@@ -351,7 +351,7 @@ export default function PointsRulesPage() {
                       {rule.show_in_app ? (
                         <Badge variant="default">Visible</Badge>
                       ) : (
-                        <Badge variant="outline">Hidden</Badge>
+                        <Badge variant="outline">Oculto</Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-right">

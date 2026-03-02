@@ -61,21 +61,21 @@ export default function AppOrderForm({ appOrder }: AppOrderFormProps) {
       {appOrder?.id && <input name="id" type="hidden" value={appOrder.id} />}
       
       <div>
-        <Label htmlFor="order_number">Order Number</Label>
+        <Label htmlFor="order_number">Número de Pedido</Label>
         <Input
           aria-describedby="order_number-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.order_number}
           defaultValue={appOrder?.order_number ?? ''}
           id="order_number"
           name="order_number"
-          placeholder="Enter order number"
+          placeholder="Ingresa el número de pedido"
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="order_number" />
       </div>
 
       <div>
-        <Label htmlFor="creation_date">Creation Date</Label>
+        <Label htmlFor="creation_date">Fecha de Creación</Label>
         <Input
           aria-describedby="creation_date-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.creation_date}
@@ -88,29 +88,28 @@ export default function AppOrderForm({ appOrder }: AppOrderFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="total_points">Total Points</Label>
+        <Label htmlFor="total_points">Puntos Totales</Label>
         <Input
           aria-describedby="total_points-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.total_points}
           defaultValue={appOrder?.total_points ?? 0}
           id="total_points"
-          min="0"
           name="total_points"
-          placeholder="Enter total points"
+          placeholder="Ingresa los puntos totales"
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="total_points" />
       </div>
 
       <div>
-        <Label htmlFor="observations">Observations</Label>
+        <Label htmlFor="observations">Observaciones</Label>
         <Textarea
           aria-describedby="observations-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.observations}
           defaultValue={appOrder?.observations ?? ''}
           id="observations"
           name="observations"
-          placeholder="Enter observations (optional)"
+          placeholder="Ingresa observaciones (opcional)"
           rows={3}
         />
         <FieldError actionState={validation ?? actionState} name="observations" />
@@ -118,10 +117,10 @@ export default function AppOrderForm({ appOrder }: AppOrderFormProps) {
 
       <div className="flex gap-2">
         <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/app_order">Cancel</Link>
+          <Link href="/dashboard/app_order">Cancelar</Link>
         </Button>
         <Button className="w-full" disabled={pending} type="submit">
-          {appOrder ? 'Update' : 'Create'}
+          {appOrder ? 'Actualizar' : 'Crear'}
         </Button>
       </div>
     </form>

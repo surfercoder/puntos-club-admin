@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -94,6 +95,8 @@ export async function POST(request: NextRequest) {
     }
 
     const role = Array.isArray(appUser.role) ? appUser.role[0] : appUser.role;
+    const userIsAdmin = role?.name === 'admin';
+
     if (!role || !['owner', 'admin'].includes(role.name)) {
       return NextResponse.json(
         { success: false, error: "Only owners and admins can create notifications" },
@@ -102,7 +105,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, body: notificationBody } = body;
+    const { title, body: notificationBody, organizationId: bodyOrgId } = body;
 
     if (!title || !notificationBody) {
       return NextResponse.json(
@@ -125,15 +128,28 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: canSend } = await supabase.rpc('can_send_notification', {
-      org_id: appUser.organization_id,
+    // Admin users can target a specific org via organizationId in the request body
+    const targetOrgId = userIsAdmin && bodyOrgId ? Number(bodyOrgId) : appUser.organization_id;
+
+    if (!targetOrgId) {
+      return NextResponse.json(
+        { success: false, error: "No target organization found" },
+        { status: 400 }
+      );
+    }
+
+    // Use admin client for DB operations when acting on behalf of another org
+    const dbClient = userIsAdmin && bodyOrgId ? createAdminClient() : supabase;
+
+    const { data: canSend } = await dbClient.rpc('can_send_notification', {
+      org_id: targetOrgId,
     });
 
     if (!canSend) {
-      const { data: limits } = await supabase
+      const { data: limits } = await dbClient
         .from('organization_notification_limits')
         .select('*')
-        .eq('organization_id', appUser.organization_id)
+        .eq('organization_id', targetOrgId)
         .single();
 
       return NextResponse.json(
@@ -146,10 +162,10 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: notification, error } = await supabase
+    const { data: notification, error } = await dbClient
       .from("push_notifications")
       .insert({
-        organization_id: appUser.organization_id,
+        organization_id: targetOrgId,
         created_by: appUser.id,
         title,
         body: notificationBody,

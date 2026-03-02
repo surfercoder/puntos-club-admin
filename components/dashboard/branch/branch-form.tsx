@@ -87,19 +87,21 @@ export default function BranchForm({ branch }: BranchFormProps) {
       {branch?.id && <input name="id" type="hidden" value={branch.id} />}
 
       <div>
-        <Label htmlFor="name">Branch Name</Label>
+        <Label htmlFor="name">Nombre de la Sucursal</Label>
         <Input
+          aria-describedby="name-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.name}
           defaultValue={branch?.name ?? ''}
           id="name"
           name="name"
-          placeholder="Enter branch name"
+          placeholder="Ingresa el nombre de la sucursal"
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="name" />
       </div>
 
       <div>
-        <Label htmlFor="address_id">Address *</Label>
+        <Label htmlFor="address_id">Dirección</Label>
         <select
           id="address_id"
           name="address_id"
@@ -108,9 +110,8 @@ export default function BranchForm({ branch }: BranchFormProps) {
           className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           aria-describedby="address_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.address_id}
-          required
         >
-          <option value="">Select an address</option>
+          <option value="">Seleccionar una dirección</option>
           {addresses.map((address) => (
             <option key={address.id} value={address.id}>
               {address.street}, {address.city}
@@ -121,12 +122,12 @@ export default function BranchForm({ branch }: BranchFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="phone">Phone</Label>
+        <Label htmlFor="phone">Teléfono</Label>
         <Input
           defaultValue={branch?.phone ?? ''}
           id="phone"
           name="phone"
-          placeholder="Enter phone number (optional)"
+          placeholder="Ingresa el número de teléfono (opcional)"
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="phone" />
@@ -135,7 +136,7 @@ export default function BranchForm({ branch }: BranchFormProps) {
       <input name="active" type="hidden" value={isActive.toString()} />
       
       <div>
-        <Label htmlFor="active">Status</Label>
+        <Label htmlFor="active">Estado</Label>
         <select
           id="active"
           value={isActive ? 'true' : 'false'}
@@ -144,18 +145,18 @@ export default function BranchForm({ branch }: BranchFormProps) {
           aria-describedby="active-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.active}
         >
-          <option value="true">Active</option>
-          <option value="false">Inactive</option>
+          <option value="true">Activo</option>
+          <option value="false">Inactivo</option>
         </select>
         <FieldError actionState={validation ?? actionState} name="active" />
       </div>
 
       <div className="flex gap-2">
         <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/branch">Cancel</Link>
+          <Link href="/dashboard/branch">Cancelar</Link>
         </Button>
         <Button className="w-full" disabled={pending} type="submit">
-          {branch ? 'Update' : 'Create'}
+          {branch ? 'Actualizar' : 'Crear'}
         </Button>
       </div>
     </form>

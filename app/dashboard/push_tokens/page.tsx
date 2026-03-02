@@ -1,6 +1,7 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -28,18 +29,18 @@ export default async function PushTokensListPage() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    return <div>Error fetching push tokens</div>;
+    return <div>Error al obtener tokens push</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Push Tokens</h1>
-          <p className="text-muted-foreground">Manage device push tokens for beneficiaries</p>
+          <h1 className="text-2xl font-bold">Tokens Push</h1>
+          <p className="text-muted-foreground">Administrar tokens push de dispositivos de beneficiarios</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/push_tokens/create">+ New Push Token</Link>
+          <Link href="/dashboard/push_tokens/create">+ Nuevo Token Push</Link>
         </Button>
       </div>
 
@@ -47,13 +48,13 @@ export default async function PushTokensListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Beneficiary</TableHead>
-              <TableHead>Platform</TableHead>
-              <TableHead>Device ID</TableHead>
+              <TableHead>Beneficiario</TableHead>
+              <TableHead>Plataforma</TableHead>
+              <TableHead>ID de Dispositivo</TableHead>
               <TableHead>Token</TableHead>
-              <TableHead>Active</TableHead>
-              <TableHead>Created At</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Activo</TableHead>
+              <TableHead>Creado el</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -69,11 +70,9 @@ export default async function PushTokensListPage() {
                   <TableCell>{token.device_id || 'N/A'}</TableCell>
                   <TableCell className="max-w-xs truncate">{token.expo_push_token}</TableCell>
                   <TableCell>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      token.is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {token.is_active ? 'Active' : 'Inactive'}
-                    </span>
+                    <Badge variant={token.is_active ? 'default' : 'secondary'}>
+                      {token.is_active ? 'Activo' : 'Inactivo'}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     {new Date(token.created_at).toLocaleString()}
@@ -91,7 +90,7 @@ export default async function PushTokensListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={7}>No push tokens found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={7}>No se encontraron tokens push.</TableCell>
               </TableRow>
             )}
           </TableBody>

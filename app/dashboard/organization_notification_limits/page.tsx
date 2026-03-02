@@ -1,6 +1,7 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -20,18 +21,18 @@ export default async function OrganizationNotificationLimitsListPage() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    return <div>Error fetching organization notification limits</div>;
+    return <div>Error al obtener límites de notificaciones</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Organization Notification Limits</h1>
-          <p className="text-muted-foreground">Manage notification limits and plans for organizations</p>
+          <h1 className="text-2xl font-bold">Límites de Notificaciones</h1>
+          <p className="text-muted-foreground">Administrar límites de notificaciones y planes por organización</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/organization_notification_limits/create">+ New Limit</Link>
+          <Link href="/dashboard/organization_notification_limits/create">+ Nuevo Límite</Link>
         </Button>
       </div>
 
@@ -39,14 +40,14 @@ export default async function OrganizationNotificationLimitsListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Organization</TableHead>
-              <TableHead>Plan Type</TableHead>
-              <TableHead>Daily Limit</TableHead>
-              <TableHead>Monthly Limit</TableHead>
-              <TableHead>Min Hours Between</TableHead>
-              <TableHead>Sent Today</TableHead>
-              <TableHead>Sent This Month</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Organización</TableHead>
+              <TableHead>Tipo de Plan</TableHead>
+              <TableHead>Límite Diario</TableHead>
+              <TableHead>Límite Mensual</TableHead>
+              <TableHead>Horas Mín. Entre Envíos</TableHead>
+              <TableHead>Enviadas Hoy</TableHead>
+              <TableHead>Enviadas Este Mes</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -59,14 +60,14 @@ export default async function OrganizationNotificationLimitsListPage() {
                       : limit.organization?.name || 'N/A'}
                   </TableCell>
                   <TableCell>
-                    <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
-                      limit.plan_type === 'premium' ? 'bg-purple-100 text-purple-800' :
-                      limit.plan_type === 'pro' ? 'bg-blue-100 text-blue-800' :
-                      limit.plan_type === 'light' ? 'bg-green-100 text-green-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
+                    <Badge variant={
+                      limit.plan_type === 'premium' ? 'default' :
+                      limit.plan_type === 'pro' ? 'outline' :
+                      limit.plan_type === 'light' ? 'secondary' :
+                      'secondary'
+                    }>
                       {limit.plan_type}
-                    </span>
+                    </Badge>
                   </TableCell>
                   <TableCell>{limit.daily_limit}</TableCell>
                   <TableCell>{limit.monthly_limit}</TableCell>
@@ -86,7 +87,7 @@ export default async function OrganizationNotificationLimitsListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={8}>No notification limits found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={8}>No se encontraron límites de notificaciones.</TableCell>
               </TableRow>
             )}
           </TableBody>

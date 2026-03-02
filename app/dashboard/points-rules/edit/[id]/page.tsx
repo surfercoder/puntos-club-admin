@@ -16,13 +16,13 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 
 const DAY_OPTIONS = [
-  { value: 0, label: "Sunday" },
-  { value: 1, label: "Monday" },
-  { value: 2, label: "Tuesday" },
-  { value: 3, label: "Wednesday" },
-  { value: 4, label: "Thursday" },
-  { value: 5, label: "Friday" },
-  { value: 6, label: "Saturday" },
+  { value: 0, label: "Domingo" },
+  { value: 1, label: "Lunes" },
+  { value: 2, label: "Martes" },
+  { value: 3, label: "Miércoles" },
+  { value: 4, label: "Jueves" },
+  { value: 5, label: "Viernes" },
+  { value: 6, label: "Sábado" },
 ];
 
 const EMOJI_OPTIONS = ["⭐", "🌙", "🎉", "💎", "🔥", "🍽️", "☀️", "🎁", "💰", "🏆"];
@@ -84,7 +84,7 @@ export default function EditPointsRulePage() {
           days_of_week: rule.days_of_week || [],
         });
       } else {
-        alert("Error loading rule: " + result.error);
+        alert("Error al cargar la regla: " + result.error);
         router.push("/dashboard/points-rules");
       }
       setFetching(false);
@@ -209,42 +209,42 @@ export default function EditPointsRulePage() {
         <Link href="/dashboard/points-rules">
           <Button variant="ghost" size="sm">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Rules
+            Volver a las Reglas
           </Button>
         </Link>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Edit Points Rule</CardTitle>
+          <CardTitle>Editar Regla de Puntos</CardTitle>
           <CardDescription>
-            Modify how customers earn points from purchases
+            Modificar cómo los clientes acumulan puntos en sus compras
           </CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Information */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Basic Information</h3>
+              <h3 className="text-lg font-semibold">Información Básica</h3>
 
               <div>
-                <Label htmlFor="name">Rule Name *</Label>
+                <Label htmlFor="name">Nombre de la Regla *</Label>
                 <Input
                   id="name"
                   value={formData.name}
                   onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                  placeholder="e.g., Night Double Points"
+                  placeholder="Ej.: Puntos Dobles Nocturnos"
                   required
                 />
               </div>
 
               <div>
-                <Label htmlFor="description">Description</Label>
+                <Label htmlFor="description">Descripción</Label>
                 <Textarea
                   id="description"
                   value={formData.description}
                   onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                  placeholder="Describe when and how this rule applies"
+                  placeholder="Describe cuándo y cómo aplica esta regla"
                   rows={3}
                 />
               </div>
@@ -256,7 +256,7 @@ export default function EditPointsRulePage() {
                     checked={formData.is_active}
                     onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
                   />
-                  <Label htmlFor="is_active">Active</Label>
+                  <Label htmlFor="is_active">Activo</Label>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -280,7 +280,7 @@ export default function EditPointsRulePage() {
                       })
                     }
                   />
-                  <Label htmlFor="is_default">Default</Label>
+                  <Label htmlFor="is_default">Por Defecto</Label>
                 </div>
 
                 <div className="flex items-center space-x-2">
@@ -290,17 +290,17 @@ export default function EditPointsRulePage() {
                     onCheckedChange={(checked) => setFormData({ ...formData, show_in_app: checked })}
                     disabled={formData.is_default}
                   />
-                  <Label htmlFor="show_in_app">Show in Mobile App</Label>
+                  <Label htmlFor="show_in_app">Mostrar en App Móvil</Label>
                 </div>
               </div>
             </div>
 
             {/* Points Calculation */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Points Calculation</h3>
+              <h3 className="text-lg font-semibold">Cálculo de Puntos</h3>
 
               <div>
-                <Label htmlFor="branch_id">Branch *</Label>
+                <Label htmlFor="branch_id">Sucursal *</Label>
                 <select
                   id="branch_id"
                   name="branch_id"
@@ -309,7 +309,7 @@ export default function EditPointsRulePage() {
                   className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
                   required
                 >
-                  <option value="">Select a branch</option>
+                  <option value="">Seleccionar una sucursal</option>
                   {branches.map((b) => (
                     <option key={b.id} value={b.id}>
                       {b.name}
@@ -319,7 +319,7 @@ export default function EditPointsRulePage() {
               </div>
 
               <div>
-                <Label htmlFor="priority">Priority *</Label>
+                <Label htmlFor="priority">Prioridad *</Label>
                 <Input
                   id="priority"
                   type="number"
@@ -330,12 +330,12 @@ export default function EditPointsRulePage() {
                   required
                 />
                 <p className="text-sm text-muted-foreground mt-1">
-                  Higher priority rules are applied first when multiple rules match. Use 0 for default rules, higher numbers for special promotions.
+                  Las reglas de mayor prioridad se aplican primero cuando coinciden varias reglas. Usa 0 para reglas por defecto y números más altos para promociones especiales.
                 </p>
               </div>
 
               <div>
-                <Label htmlFor="rule_type">Rule Type *</Label>
+                <Label htmlFor="rule_type">Tipo de Regla *</Label>
                 <Select
                   value={formData.rule_type}
                   onValueChange={(value: "fixed_amount" | "percentage" | "fixed_per_item" | "tiered") => setFormData({ ...formData, rule_type: value })}
@@ -344,16 +344,16 @@ export default function EditPointsRulePage() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="fixed_amount">Fixed Points per Dollar</SelectItem>
-                    <SelectItem value="percentage">Percentage of Amount</SelectItem>
-                    <SelectItem value="fixed_per_item">Fixed Points per Item</SelectItem>
+                    <SelectItem value="fixed_amount">Puntos Fijos por Compra</SelectItem>
+                    <SelectItem value="percentage">Porcentaje del Monto</SelectItem>
+                    <SelectItem value="fixed_per_item">Puntos Fijos por Ítem</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
               {formData.rule_type === "fixed_amount" && (
                 <div>
-                  <Label htmlFor="points_per_dollar">Points per Dollar *</Label>
+                  <Label htmlFor="points_per_dollar">Puntos por Compra *</Label>
                   <Input
                     id="points_per_dollar"
                     type="number"
@@ -364,14 +364,14 @@ export default function EditPointsRulePage() {
                     required
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    Example: 2 means customers earn 2 points for every $1 spent
+                    Ejemplo: 2 significa que los clientes ganan 2 puntos por cada $1 gastado
                   </p>
                 </div>
               )}
 
               {formData.rule_type === "percentage" && (
                 <div>
-                  <Label htmlFor="percentage">Percentage *</Label>
+                  <Label htmlFor="percentage">Porcentaje *</Label>
                   <Input
                     id="percentage"
                     type="number"
@@ -382,14 +382,14 @@ export default function EditPointsRulePage() {
                     required
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    Example: 10 means customers earn points equal to 10% of purchase amount
+                    Ejemplo: 10 significa que los clientes ganan puntos equivalentes al 10% del monto de compra
                   </p>
                 </div>
               )}
 
               {formData.rule_type === "fixed_per_item" && (
                 <div>
-                  <Label htmlFor="points_per_item">Points per Item *</Label>
+                  <Label htmlFor="points_per_item">Puntos por Ítem *</Label>
                   <Input
                     id="points_per_item"
                     type="number"
@@ -400,7 +400,7 @@ export default function EditPointsRulePage() {
                     required
                   />
                   <p className="text-sm text-muted-foreground mt-1">
-                    Example: 10 means customers earn 10 points for each item purchased
+                    Ejemplo: 10 significa que los clientes ganan 10 puntos por cada ítem comprado
                   </p>
                 </div>
               )}
@@ -408,11 +408,11 @@ export default function EditPointsRulePage() {
 
             {/* Schedule */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Schedule (Optional)</h3>
+              <h3 className="text-lg font-semibold">Horario (Opcional)</h3>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="start_date">Start Date</Label>
+                  <Label htmlFor="start_date">Fecha de Inicio</Label>
                   <Input
                     id="start_date"
                     type="date"
@@ -422,7 +422,7 @@ export default function EditPointsRulePage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="end_date">End Date</Label>
+                  <Label htmlFor="end_date">Fecha de Fin</Label>
                   <Input
                     id="end_date"
                     type="date"
@@ -435,7 +435,7 @@ export default function EditPointsRulePage() {
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="time_start">Start Time</Label>
+                  <Label htmlFor="time_start">Hora de Inicio</Label>
                   <Input
                     id="time_start"
                     type="time"
@@ -445,7 +445,7 @@ export default function EditPointsRulePage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="time_end">End Time</Label>
+                  <Label htmlFor="time_end">Hora de Fin</Label>
                   <Input
                     id="time_end"
                     type="time"
@@ -456,11 +456,11 @@ export default function EditPointsRulePage() {
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
-                Leave empty for all-day. Supports overnight ranges (e.g., 18:00 to 06:00).
+                Dejar vacío para todo el día. Soporta rangos nocturnos (ej.: 18:00 a 06:00).
               </p>
 
               <div>
-                <Label>Active Days</Label>
+                <Label>Días Activos</Label>
                 <div className="grid grid-cols-4 gap-2 mt-2">
                   {DAY_OPTIONS.map((day) => (
                     <div key={day.value} className="flex items-center space-x-2">
@@ -477,30 +477,30 @@ export default function EditPointsRulePage() {
                   ))}
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">
-                  Leave unchecked for all days
+                  Dejar sin marcar para todos los días
                 </p>
               </div>
             </div>
 
             {/* Display Settings */}
             <div className="space-y-4">
-              <h3 className="text-lg font-semibold">Display Settings</h3>
+              <h3 className="text-lg font-semibold">Configuración de Visualización</h3>
 
               <div>
-                <Label htmlFor="display_name">Display Name</Label>
+                <Label htmlFor="display_name">Nombre a Mostrar</Label>
                 <Input
                   id="display_name"
                   value={formData.display_name}
                   onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
-                  placeholder="e.g., Night Bonus"
+                  placeholder="Ej.: Bonus Nocturno"
                 />
                 <p className="text-sm text-muted-foreground mt-1">
-                  User-friendly name shown in mobile apps. Defaults to rule name.
+                  Nombre amigable mostrado en la app móvil. Por defecto usa el nombre de la regla.
                 </p>
               </div>
 
               <div>
-                <Label>Icon</Label>
+                <Label>Ícono</Label>
                 <div className="flex gap-2 mt-2">
                   {EMOJI_OPTIONS.map((emoji) => (
                     <button
@@ -510,7 +510,7 @@ export default function EditPointsRulePage() {
                       className={`text-2xl p-2 rounded border-2 transition-all ${
                         formData.display_icon === emoji
                           ? "border-primary bg-primary/20 ring-2 ring-primary ring-offset-2 shadow-md scale-110"
-                          : "border-gray-200 hover:border-primary/50 hover:bg-gray-50"
+                          : "border-border hover:border-primary/50 hover:bg-muted/50"
                       }`}
                     >
                       {emoji}
@@ -521,6 +521,7 @@ export default function EditPointsRulePage() {
 
               <div>
                 <Label htmlFor="display_color">Color</Label>
+
                 <div className="flex gap-2 items-center">
                   <Input
                     id="display_color"
@@ -543,11 +544,11 @@ export default function EditPointsRulePage() {
             <div className="flex gap-4 pt-4">
               <Button type="submit" disabled={loading}>
                 <Save className="mr-2 h-4 w-4" />
-                {loading ? "Saving..." : "Save Changes"}
+                {loading ? "Guardando..." : "Guardar Cambios"}
               </Button>
               <Link href="/dashboard/points-rules">
                 <Button type="button" variant="outline">
-                  Cancel
+                  Cancelar
                 </Button>
               </Link>
             </div>

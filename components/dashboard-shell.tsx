@@ -51,14 +51,29 @@ export function DashboardShell({
   const [activeOrgId, setActiveOrgId] = React.useState<string | null>(null);
 
   const breadcrumbItems = React.useMemo(() => {
-    const titleCase = (value: string) =>
-      value
-        .replace(/[-_]+/g, " ")
-        .trim()
-        .split(/\s+/)
-        .filter(Boolean)
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join(" ");
+    const segmentLabels: Record<string, string> = {
+      address: "Direcciones",
+      app_order: "Pedidos",
+      app_user: "Usuarios de la App",
+      app_user_organization: "Usuarios por Organización",
+      beneficiary: "Beneficiarios",
+      beneficiary_organization: "Organizaciones de Beneficiarios",
+      branch: "Sucursales",
+      category: "Categorías",
+      notifications: "Notificaciones",
+      organization: "Organizaciones",
+      organization_notification_limits: "Límites de Notificaciones",
+      "points-rules": "Reglas de Puntos",
+      product: "Productos",
+      profile: "Perfil",
+      purchase: "Compras",
+      push_notifications: "Notificaciones Push",
+      push_tokens: "Tokens Push",
+      redemption: "Canjes",
+      stock: "Stock",
+      "user-role": "Roles de Usuario",
+      users: "Usuarios",
+    };
 
     const isUuidLike = (value: string) =>
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
@@ -72,16 +87,16 @@ export function DashboardShell({
     const dashboardIndex = rawSegments.indexOf("dashboard");
     const segments = dashboardIndex >= 0 ? rawSegments.slice(dashboardIndex + 1) : rawSegments;
 
-    const items: { label: string; href?: string }[] = [{ label: "Dashboard", href: "/dashboard" }];
+    const items: { label: string; href?: string }[] = [{ label: "Panel", href: "/dashboard" }];
 
     let hrefAcc = "/dashboard";
     for (const seg of segments) {
       hrefAcc += `/${seg}`;
 
-      let label = titleCase(seg);
-      if (seg === "new") label = "New";
-      if (seg === "edit") label = "Edit";
-      if (isUuidLike(seg) || /^\d+$/.test(seg)) label = "Details";
+      let label = segmentLabels[seg] ?? seg;
+      if (seg === "new") label = "Nuevo";
+      if (seg === "edit") label = "Editar";
+      if (isUuidLike(seg) || /^\d+$/.test(seg)) label = "Detalles";
 
       items.push({ label, href: hrefAcc });
     }

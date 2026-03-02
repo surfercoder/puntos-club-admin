@@ -7,6 +7,15 @@ import { toast } from 'sonner';
 
 import { deleteStock } from '@/actions/dashboard/stock/actions';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from '@/components/ui/dialog';
 
 interface DeleteModalProps {
   stockId: string;
@@ -14,7 +23,7 @@ interface DeleteModalProps {
 }
 
 export default function DeleteModal({ stockId, stockDescription }: DeleteModalProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
 
@@ -23,55 +32,42 @@ export default function DeleteModal({ stockId, stockDescription }: DeleteModalPr
     try {
       const result = await deleteStock(stockId);
       if (result.error) {
-        toast.error('Failed to delete stock record');
+        toast.error('Error al eliminar el registro de stock');
       } else {
-        toast.success('Stock record deleted successfully');
+        toast.success('Registro de stock eliminado correctamente');
         router.refresh();
+        setOpen(false);
       }
     } catch {
-      toast.error('An error occurred while deleting');
+      toast.error('Ocurrió un error al eliminar');
     } finally {
       setIsDeleting(false);
-      setIsOpen(false);
     }
   };
 
-  if (!isOpen) {
-    return (
-      <Button
-        onClick={() => setIsOpen(true)}
-        size="sm"
-        variant="destructive"
-      >
-        <Trash2 className="h-4 w-4" />
-      </Button>
-    );
-  }
-
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-      <div className="bg-white p-6 rounded-lg shadow-lg max-w-md w-full mx-4 text-center">
-        <h3 className="text-lg font-semibold mb-4">Delete Stock Record</h3>
-        <p className="text-gray-600 mb-6">
-          Are you sure you want to delete stock record for <strong>{stockDescription}</strong>? This action cannot be undone.
-        </p>
-        <div className="flex gap-3 justify-center">
-          <Button
-            disabled={isDeleting}
-            onClick={() => setIsOpen(false)}
-            variant="outline"
-          >
-            Cancel
+    <Dialog onOpenChange={setOpen} open={open}>
+      <DialogTrigger asChild>
+        <Button size="sm" variant="destructive">
+          <Trash2 className="h-4 w-4" />
+        </Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Eliminar Registro de Stock</DialogTitle>
+          <DialogDescription>
+            ¿Estás seguro de que deseas eliminar el registro de stock de <strong>{stockDescription}</strong>? Esta acción no se puede deshacer.
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button disabled={isDeleting} onClick={() => setOpen(false)} variant="outline">
+            Cancelar
           </Button>
-          <Button
-            disabled={isDeleting}
-            onClick={handleDelete}
-            variant="destructive"
-          >
-            {isDeleting ? 'Deleting...' : 'Delete'}
+          <Button disabled={isDeleting} onClick={handleDelete} variant="destructive">
+            {isDeleting ? 'Eliminando...' : 'Eliminar'}
           </Button>
-        </div>
-      </div>
-    </div>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 }

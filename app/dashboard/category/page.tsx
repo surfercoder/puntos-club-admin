@@ -36,7 +36,7 @@ export default async function CategoryListPage() {
   const { data, error } = await query;
 
   if (error) {
-    return <div>Error fetching categories</div>;
+    return <div>Error al obtener categorías</div>;
   }
 
   return (
@@ -44,11 +44,11 @@ export default async function CategoryListPage() {
       <ToastHandler />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Categories</h1>
-          <p className="text-muted-foreground">Manage product categories in your system</p>
+          <h1 className="text-2xl font-bold">Categorías</h1>
+          <p className="text-muted-foreground">Administrar categorías de productos del sistema</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/category/create">+ New Category</Link>
+          <Link href="/dashboard/category/create">+ Nueva Categoría</Link>
         </Button>
       </div>
 
@@ -56,10 +56,10 @@ export default async function CategoryListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Descripción</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -82,7 +82,7 @@ export default async function CategoryListPage() {
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {category.active ? 'Active' : 'Inactive'}
+                      {category.active ? 'Activo' : 'Inactivo'}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
@@ -103,7 +103,7 @@ export default async function CategoryListPage() {
               })
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={4}>No categories found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={4}>No se encontraron categorías.</TableCell>
               </TableRow>
             )}
           </TableBody>

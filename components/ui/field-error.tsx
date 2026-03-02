@@ -10,5 +10,9 @@ export default function FieldError({ actionState, name }: FieldErrorProps) {
 
   if (!message) {return null;}
 
-  return <span className="text-red-500 text-xs">{message}</span>;
+  return (
+    <p id={`${name}-error`} className="text-destructive text-sm">
+      {message}
+    </p>
+  );
 };

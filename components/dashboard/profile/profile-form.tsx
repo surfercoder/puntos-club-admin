@@ -16,6 +16,7 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { createClient } from '@/lib/supabase/client';
+import { ProfileSchema } from '@/schemas/auth.schema';
 import type { AppUserWithRelations } from '@/types/app_user';
 
 type ProfileFormProps = {
@@ -25,6 +26,7 @@ type ProfileFormProps = {
 export function ProfileForm({ user }: ProfileFormProps) {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     first_name: user.first_name || '',
     last_name: user.last_name || '',
@@ -34,6 +36,20 @@ export function ProfileForm({ user }: ProfileFormProps) {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setFieldErrors({});
+
+    const result = ProfileSchema.safeParse(formData);
+
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const field = String(issue.path[0]);
+        if (!errors[field]) errors[field] = issue.message;
+      }
+      setFieldErrors(errors);
+      return;
+    }
+
     setIsLoading(true);
 
     try {
@@ -44,7 +60,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         .update({
           first_name: formData.first_name,
           last_name: formData.last_name,
-          username: formData.username,
+          username: formData.username || null,
         })
         .eq('id', user.id);
 
@@ -61,56 +77,68 @@ export function ProfileForm({ user }: ProfileFormProps) {
           throw emailError;
         }
 
-        toast.success('Email update initiated. Please check your new email address to confirm the change.');
+        toast.success('Actualización de correo iniciada. Revisa tu nueva dirección de correo para confirmar el cambio.');
       }
 
-      toast.success('Profile updated successfully.');
+      toast.success('Perfil actualizado correctamente.');
 
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to update profile');
+      toast.error(error instanceof Error ? error.message : 'Error al actualizar el perfil');
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
+    <form onSubmit={handleSubmit} noValidate>
       <Card>
         <CardHeader>
-          <CardTitle>Personal Information</CardTitle>
+          <CardTitle>Información Personal</CardTitle>
           <CardDescription>
-            Update your personal details and contact information
+            Actualiza tus datos personales y de contacto
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="first_name">First Name</Label>
+              <Label htmlFor="first_name">Nombre</Label>
               <Input
                 id="first_name"
                 value={formData.first_name}
                 onChange={(e) =>
                   setFormData({ ...formData, first_name: e.target.value })
                 }
-                required
+                aria-invalid={!!fieldErrors.first_name}
+                aria-describedby="first_name-error"
               />
+              {fieldErrors.first_name && (
+                <p id="first_name-error" className="text-destructive text-sm">
+                  {fieldErrors.first_name}
+                </p>
+              )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="last_name">Last Name</Label>
+              <Label htmlFor="last_name">Apellido</Label>
               <Input
                 id="last_name"
                 value={formData.last_name}
                 onChange={(e) =>
                   setFormData({ ...formData, last_name: e.target.value })
                 }
-                required
+                aria-invalid={!!fieldErrors.last_name}
+                aria-describedby="last_name-error"
               />
+              {fieldErrors.last_name && (
+                <p id="last_name-error" className="text-destructive text-sm">
+                  {fieldErrors.last_name}
+                </p>
+              )}
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Correo electrónico</Label>
             <Input
               id="email"
               type="email"
@@ -118,23 +146,36 @@ export function ProfileForm({ user }: ProfileFormProps) {
               onChange={(e) =>
                 setFormData({ ...formData, email: e.target.value })
               }
-              required
+              aria-invalid={!!fieldErrors.email}
+              aria-describedby="email-error"
             />
+            {fieldErrors.email && (
+              <p id="email-error" className="text-destructive text-sm">
+                {fieldErrors.email}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="username">Username</Label>
+            <Label htmlFor="username">Usuario</Label>
             <Input
               id="username"
               value={formData.username}
               onChange={(e) =>
                 setFormData({ ...formData, username: e.target.value })
               }
+              aria-invalid={!!fieldErrors.username}
+              aria-describedby="username-error"
             />
+            {fieldErrors.username && (
+              <p id="username-error" className="text-destructive text-sm">
+                {fieldErrors.username}
+              </p>
+            )}
           </div>
 
           <div className="space-y-2">
-            <Label>Organization</Label>
+            <Label>Organización</Label>
             <Input
               value={user.organization?.name || 'N/A'}
               disabled
@@ -143,7 +184,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label>Role</Label>
+            <Label>Rol</Label>
             <Input
               value={user.role?.display_name || user.role?.name || 'N/A'}
               disabled
@@ -158,10 +199,10 @@ export function ProfileForm({ user }: ProfileFormProps) {
               onClick={() => router.back()}
               disabled={isLoading}
             >
-              Cancel
+              Cancelar
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Saving...' : 'Save Changes'}
+              {isLoading ? 'Guardando...' : 'Guardar Cambios'}
             </Button>
           </div>
         </CardContent>

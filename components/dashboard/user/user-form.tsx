@@ -92,7 +92,7 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
       {isOrgDisabled && <input name="organization_id" type="hidden" value={selectedOrg} />}
       
       <div>
-        <Label htmlFor="organization_id">Organization *</Label>
+        <Label htmlFor="organization_id">Organización *</Label>
         <select
           id="organization_id"
           name={isOrgDisabled ? undefined : "organization_id"}
@@ -103,7 +103,7 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
           aria-describedby="organization_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.organization_id}
         >
-          <option value="">Select organization</option>
+          <option value="">Seleccionar organización</option>
           {organizations.map((org) => (
             <option key={org.id} value={org.id}>
               {org.name}
@@ -113,13 +113,13 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
         <FieldError actionState={validation ?? actionState} name="organization_id" />
         {isOrgDisabled && (
           <p className="text-sm text-muted-foreground mt-1">
-            You can only create users for your organization
+            Solo podés crear usuarios para tu organización
           </p>
         )}
       </div>
 
       <div>
-        <Label htmlFor="role_id">Role *</Label>
+        <Label htmlFor="role_id">Rol *</Label>
         <select
           id="role_id"
           name="role_id"
@@ -129,7 +129,7 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
           aria-describedby="role_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.role_id}
         >
-          <option value="">Select role</option>
+          <option value="">Seleccionar rol</option>
           {availableRoles.map((role) => (
             <option key={role.id} value={role.id}>
               {role.display_name} ({role.name})
@@ -146,28 +146,28 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="first_name">First Name *</Label>
+          <Label htmlFor="first_name">Nombre *</Label>
           <Input
             aria-describedby="first_name-error"
             aria-invalid={!!(validation ?? actionState).fieldErrors?.first_name}
             defaultValue={user?.first_name ?? ''}
             id="first_name"
             name="first_name"
-            placeholder="Enter first name"
+            placeholder="Ingresa el nombre"
             type="text"
           />
           <FieldError actionState={validation ?? actionState} name="first_name" />
         </div>
 
         <div>
-          <Label htmlFor="last_name">Last Name *</Label>
+          <Label htmlFor="last_name">Apellido *</Label>
           <Input
             aria-describedby="last_name-error"
             aria-invalid={!!(validation ?? actionState).fieldErrors?.last_name}
             defaultValue={user?.last_name ?? ''}
             id="last_name"
             name="last_name"
-            placeholder="Enter last name"
+            placeholder="Ingresa el apellido"
             type="text"
           />
           <FieldError actionState={validation ?? actionState} name="last_name" />
@@ -175,56 +175,56 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
       </div>
 
       <div>
-        <Label htmlFor="email">Email *</Label>
+        <Label htmlFor="email">Correo electrónico *</Label>
         <Input
           aria-describedby="email-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.email}
           defaultValue={user?.email ?? ''}
           id="email"
           name="email"
-          placeholder="Enter email address"
+          placeholder="Ingresa el correo electrónico"
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="email" />
       </div>
 
       <div>
-        <Label htmlFor="username">Username</Label>
+        <Label htmlFor="username">Usuario</Label>
         <Input
           aria-describedby="username-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.username}
           defaultValue={user?.username ?? ''}
           id="username"
           name="username"
-          placeholder="Enter username (optional)"
+          placeholder="Ingresa el nombre de usuario (opcional)"
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="username" />
       </div>
 
       <div>
-        <Label htmlFor="phone">Phone</Label>
+        <Label htmlFor="phone">Teléfono</Label>
         <Input
           aria-describedby="phone-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.phone}
           defaultValue={user?.phone ?? ''}
           id="phone"
           name="phone"
-          placeholder="Enter phone number (optional)"
+          placeholder="Ingresa el número de teléfono (opcional)"
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="phone" />
       </div>
 
       <div>
-        <Label htmlFor="document_id">Document ID</Label>
+        <Label htmlFor="document_id">DNI / RUT</Label>
         <Input
           aria-describedby="document_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.document_id}
           defaultValue={user?.document_id ?? ''}
           id="document_id"
           name="document_id"
-          placeholder="Enter document ID (optional)"
+          placeholder="Ingresa el DNI o RUT (opcional)"
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="document_id" />
@@ -232,18 +232,18 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
 
       {getUserType(selectedRole) === 'app_user' && (
         <div>
-          <Label htmlFor="password">Password {!user && '*'}</Label>
+          <Label htmlFor="password">Contraseña {!user && '*'}</Label>
           <Input
             aria-describedby="password-error"
             aria-invalid={!!(validation ?? actionState).fieldErrors?.password}
             id="password"
             name="password"
-            placeholder={user ? "Leave blank to keep current password" : "Enter password"}
+            placeholder={user ? "Dejar en blanco para mantener la contraseña actual" : "Ingresa la contraseña"}
             type="password"
           />
           <FieldError actionState={validation ?? actionState} name="password" />
           <p className="text-sm text-muted-foreground mt-1">
-            {user ? "Leave blank to keep the current password" : "Minimum 6 characters"}
+            {user ? "Dejar en blanco para mantener la contraseña actual" : "Mínimo 6 caracteres"}
           </p>
         </div>
       )}
@@ -258,16 +258,16 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           htmlFor="active"
         >
-          Active
+          Activo
         </Label>
       </div>
 
       <div className="flex gap-2">
         <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/users">Cancel</Link>
+          <Link href="/dashboard/users">Cancelar</Link>
         </Button>
         <Button className="w-full" disabled={pending} type="submit">
-          {user ? 'Update User' : 'Create User'}
+          {user ? 'Actualizar Usuario' : 'Crear Usuario'}
         </Button>
       </div>
     </form>

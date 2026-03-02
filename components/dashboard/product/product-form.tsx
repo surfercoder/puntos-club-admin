@@ -101,7 +101,7 @@ export default function ProductForm({ product }: ProductFormProps) {
       <input name="image_urls" type="hidden" value={JSON.stringify(imageUrls)} />
       
       <div>
-        <Label htmlFor="category_id">Category</Label>
+        <Label htmlFor="category_id">Categoría</Label>
         <select
           id="category_id"
           name="category_id"
@@ -111,7 +111,7 @@ export default function ProductForm({ product }: ProductFormProps) {
           aria-describedby="category_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.category_id}
         >
-          <option value="">Select a category</option>
+          <option value="">Seleccionar una categoría</option>
           {categories.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
@@ -122,44 +122,45 @@ export default function ProductForm({ product }: ProductFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="name">Nombre</Label>
         <Input
           defaultValue={product?.name ?? ''}
           id="name"
           name="name"
-          placeholder="Enter product name"
+          placeholder="Ingresa el nombre del producto"
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="name" />
       </div>
 
       <div>
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">Descripción</Label>
         <Textarea
           defaultValue={product?.description ?? ''}
           id="description"
           name="description"
-          placeholder="Enter product description (optional)"
+          placeholder="Ingresa una descripción del producto (opcional)"
           rows={3}
         />
         <FieldError actionState={validation ?? actionState} name="description" />
       </div>
 
       <div>
-        <Label htmlFor="required_points">Required Points</Label>
+        <Label htmlFor="required_points">Puntos Requeridos</Label>
         <Input
+          aria-describedby="required_points-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.required_points}
           defaultValue={product?.required_points ?? 0}
           id="required_points"
-          min="0"
           name="required_points"
-          placeholder="Enter required points"
+          placeholder="Ingresa los puntos requeridos"
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="required_points" />
       </div>
 
       <div>
-        <Label>Product Images (up to 3)</Label>
+        <Label>Imágenes del Producto (hasta 3)</Label>
         <ProductImageUpload
           productId={product?.id}
           initialImages={product?.image_urls ?? []}
@@ -170,22 +171,22 @@ export default function ProductForm({ product }: ProductFormProps) {
 
       <div className="flex items-center space-x-2">
         <input
-          className="rounded border-gray-300"
+          className="rounded"
           defaultChecked={product?.active ?? true}
           id="active"
           name="active"
           type="checkbox"
         />
-        <Label htmlFor="active">Active</Label>
+        <Label htmlFor="active">Activo</Label>
         <FieldError actionState={validation ?? actionState} name="active" />
       </div>
 
       <div className="flex gap-2">
         <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/product">Cancel</Link>
+          <Link href="/dashboard/product">Cancelar</Link>
         </Button>
         <Button className="w-full" disabled={pending} type="submit">
-          {product ? 'Update' : 'Create'}
+          {product ? 'Actualizar' : 'Crear'}
         </Button>
       </div>
     </form>

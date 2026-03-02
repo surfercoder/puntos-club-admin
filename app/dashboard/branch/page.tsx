@@ -42,18 +42,18 @@ export default async function BranchListPage() {
   const { data, error } = await query;
 
   if (error) {
-    return <div>Error fetching branches</div>;
+    return <div>Error al obtener sucursales</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Branches</h1>
-          <p className="text-muted-foreground">Manage all branches in your system</p>
+          <h1 className="text-2xl font-bold">Sucursales</h1>
+          <p className="text-muted-foreground">Administrar todas las sucursales del sistema</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/branch/create">+ New Branch</Link>
+          <Link href="/dashboard/branch/create">+ Nueva Sucursal</Link>
         </Button>
       </div>
 
@@ -61,12 +61,12 @@ export default async function BranchListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Organization</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Address</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Organización</TableHead>
+              <TableHead>Teléfono</TableHead>
+              <TableHead>Dirección</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -88,7 +88,7 @@ export default async function BranchListPage() {
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {branch.active ? 'Active' : 'Inactive'}
+                      {branch.active ? 'Activo' : 'Inactivo'}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
@@ -108,7 +108,7 @@ export default async function BranchListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={6}>No branches found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>No se encontraron sucursales.</TableCell>
               </TableRow>
             )}
           </TableBody>

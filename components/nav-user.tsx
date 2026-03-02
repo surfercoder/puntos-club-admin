@@ -91,7 +91,7 @@ export function NavUser({
             <DropdownMenuItem asChild>
               <Link href="/dashboard/profile" className="cursor-pointer">
                 <User />
-                Profile
+                Perfil
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -99,7 +99,7 @@ export function NavUser({
               className="cursor-pointer"
             >
               <LogOut />
-              Log out
+              Cerrar sesión
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

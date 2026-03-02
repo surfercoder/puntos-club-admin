@@ -61,7 +61,7 @@ export default async function RedemptionListPage() {
     .order('redemption_date', { ascending: false });
 
   if (error) {
-    return <div>Error fetching redemptions</div>;
+    return <div>Error al obtener canjes</div>;
   }
 
   // Only filter by organization for non-admin users
@@ -75,11 +75,11 @@ export default async function RedemptionListPage() {
     <div className="space-y-6">      
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Redemptions</h1>
-          <p className="text-muted-foreground">Manage redemptions in your system</p>
+          <h1 className="text-2xl font-bold">Canjes</h1>
+          <p className="text-muted-foreground">Administrar canjes del sistema</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/redemption/create">+ New Redemption</Link>
+          <Link href="/dashboard/redemption/create">+ Nuevo Canje</Link>
         </Button>
       </div>
 
@@ -87,13 +87,13 @@ export default async function RedemptionListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Beneficiary</TableHead>
-              <TableHead>Product</TableHead>
-              <TableHead>Order</TableHead>
-              <TableHead>Points Used</TableHead>
-              <TableHead>Quantity</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Beneficiario</TableHead>
+              <TableHead>Producto</TableHead>
+              <TableHead>Pedido</TableHead>
+              <TableHead>Puntos Usados</TableHead>
+              <TableHead>Cantidad</TableHead>
+              <TableHead>Fecha</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -110,7 +110,7 @@ export default async function RedemptionListPage() {
                   <TableCell>{redemption.points_used}</TableCell>
                   <TableCell>{redemption.quantity}</TableCell>
                   <TableCell>
-                    {new Date(redemption.redemption_date).toLocaleString('en-US', { 
+                    {new Date(redemption.redemption_date).toLocaleString('es-AR', { 
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric',
@@ -136,7 +136,7 @@ export default async function RedemptionListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={7}>No redemptions found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={7}>No se encontraron canjes.</TableCell>
               </TableRow>
             )}
           </TableBody>

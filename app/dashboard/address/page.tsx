@@ -35,30 +35,30 @@ export default async function AddressListPage() {
   const { data, error } = await query;
 
   if (error) {
-    return <div>Error fetching addresses</div>;
+    return <div>Error al obtener direcciones</div>;
   }
 
   return (
     <div className="space-y-6">    
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Addresses</h1>
-          <p className="text-muted-foreground">Manage all addresses in your system</p>
+          <h1 className="text-2xl font-bold">Direcciones</h1>
+          <p className="text-muted-foreground">Administrar todas las direcciones del sistema</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/address/create">+ New Address</Link>
+          <Link href="/dashboard/address/create">+ Nueva Dirección</Link>
         </Button>
       </div>
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Street</TableHead>
-              <TableHead>Number</TableHead>
-              <TableHead>City</TableHead>
-              <TableHead>State</TableHead>
-              <TableHead>Zip Code</TableHead>
-              <TableHead>Actions</TableHead>
+              <TableHead>Calle</TableHead>
+              <TableHead>Número</TableHead>
+              <TableHead>Ciudad</TableHead>
+              <TableHead>Provincia</TableHead>
+              <TableHead>Código Postal</TableHead>
+              <TableHead>Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -82,7 +82,7 @@ export default async function AddressListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={6}>No addresses found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>No se encontraron direcciones.</TableCell>
               </TableRow>
             )}
           </TableBody>

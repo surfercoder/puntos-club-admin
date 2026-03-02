@@ -38,18 +38,18 @@ export default async function AppUserListPage() {
     .order('first_name', { nullsFirst: false });
 
   if (error) {
-    return <div>Error fetching users</div>;
+    return <div>Error al obtener usuarios</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Users</h1>
-          <p className="text-muted-foreground">Manage application users in your system</p>
+          <h1 className="text-2xl font-bold">Usuarios</h1>
+          <p className="text-muted-foreground">Administrar usuarios de la aplicación</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/app_user/create">+ New User</Link>
+          <Link href="/dashboard/app_user/create">+ Nuevo Usuario</Link>
         </Button>
       </div>
 
@@ -57,12 +57,12 @@ export default async function AppUserListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Username</TableHead>
-              <TableHead>Organization</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Correo</TableHead>
+              <TableHead>Usuario</TableHead>
+              <TableHead>Organización</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -83,7 +83,7 @@ export default async function AppUserListPage() {
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {user.active ? 'Active' : 'Inactive'}
+                      {user.active ? 'Activo' : 'Inactivo'}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
@@ -105,7 +105,7 @@ export default async function AppUserListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={6}>No users found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>No se encontraron usuarios.</TableCell>
               </TableRow>
             )}
           </TableBody>

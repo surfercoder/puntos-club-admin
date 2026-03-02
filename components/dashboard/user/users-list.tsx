@@ -6,6 +6,7 @@ import Link from 'next/link';
 
 import { getAllUsers } from '@/actions/dashboard/user/actions';
 import DeleteModal from '@/components/dashboard/user/delete-modal';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -99,21 +100,21 @@ export function UsersList({ initialUsers, isOwner, isAdmin }: UsersListProps) {
   return (
     <div className="border rounded-lg">
       {isLoading && (
-        <div className="absolute inset-0 bg-white/50 flex items-center justify-center z-10">
-          <div className="text-sm text-muted-foreground">Loading users...</div>
+        <div className="absolute inset-0 bg-background/50 flex items-center justify-center z-10">
+          <div className="text-sm text-muted-foreground">Cargando usuarios...</div>
         </div>
       )}
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Role</TableHead>
-            <TableHead>Organization</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Created</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead>Nombre</TableHead>
+            <TableHead>Correo electrónico</TableHead>
+            <TableHead>Rol</TableHead>
+            <TableHead>Organización</TableHead>
+            <TableHead>Tipo</TableHead>
+            <TableHead>Estado</TableHead>
+            <TableHead>Creado</TableHead>
+            <TableHead className="text-right">Acciones</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -128,43 +129,23 @@ export function UsersList({ initialUsers, isOwner, isAdmin }: UsersListProps) {
                 </TableCell>
                 <TableCell>{user.email || 'N/A'}</TableCell>
                 <TableCell>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    user.role?.name === 'admin'
-                      ? 'bg-red-100 text-red-800'
-                      : user.role?.name === 'owner'
-                      ? 'bg-blue-100 text-blue-800'
-                      : user.role?.name === 'collaborator'
-                      ? 'bg-teal-100 text-teal-800'
-                      : user.role?.name === 'cashier'
-                      ? 'bg-orange-100 text-orange-800'
-                      : user.role?.name === 'final_user'
-                      ? 'bg-purple-100 text-purple-800'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
+                  <Badge variant="outline">
                     {user.role?.display_name || 'N/A'}
-                  </span>
+                  </Badge>
                 </TableCell>
                 <TableCell>{user.organization?.name || 'N/A'}</TableCell>
                 <TableCell>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    user.user_type === 'beneficiary' 
-                      ? 'bg-purple-100 text-purple-800' 
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {user.user_type === 'beneficiary' ? 'Beneficiary' : 'App User'}
-                  </span>
+                  <Badge variant="secondary">
+                    {user.user_type === 'beneficiary' ? 'Beneficiario' : 'Usuario de la App'}
+                  </Badge>
                 </TableCell>
                 <TableCell>
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    user.active 
-                      ? 'bg-green-100 text-green-800' 
-                      : 'bg-red-100 text-red-800'
-                  }`}>
-                    {user.active ? 'Active' : 'Inactive'}
-                  </span>
+                  <Badge variant={user.active ? 'default' : 'destructive'}>
+                    {user.active ? 'Activo' : 'Inactivo'}
+                  </Badge>
                 </TableCell>
                 <TableCell>
-                  {new Date(user.created_at).toLocaleDateString('en-US', { timeZone: 'UTC' })}
+                  {new Date(user.created_at).toLocaleDateString('es-AR', { timeZone: 'UTC' })}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-2">
@@ -187,9 +168,9 @@ export function UsersList({ initialUsers, isOwner, isAdmin }: UsersListProps) {
               </TableRow>
             ))
           ) : (
-            <TableRow>
-              <TableCell className="text-center py-4" colSpan={8}>No users found.</TableCell>
-            </TableRow>
+              <TableRow>
+              <TableCell className="text-center py-4" colSpan={8}>No se encontraron usuarios.</TableCell>
+              </TableRow>
           )}
         </TableBody>
       </Table>

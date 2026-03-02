@@ -140,7 +140,7 @@ export default function StockForm({ stock }: StockFormProps) {
       {stock?.id && <input name="id" type="hidden" value={stock.id} />}
       
       <div>
-        <Label htmlFor="branch_id">Branch</Label>
+        <Label htmlFor="branch_id">Sucursal</Label>
         <select
           id="branch_id"
           name="branch_id"
@@ -150,7 +150,7 @@ export default function StockForm({ stock }: StockFormProps) {
           aria-describedby="branch_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.branch_id}
         >
-          <option value="">Select a branch</option>
+          <option value="">Seleccionar una sucursal</option>
           {branches.map((branch) => (
             <option key={branch.id} value={branch.id}>
               {branch.name}
@@ -161,7 +161,7 @@ export default function StockForm({ stock }: StockFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="product_id">Product</Label>
+        <Label htmlFor="product_id">Producto</Label>
         <select
           id="product_id"
           name="product_id"
@@ -171,7 +171,7 @@ export default function StockForm({ stock }: StockFormProps) {
           aria-describedby="product_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.product_id}
         >
-          <option value="">Select a product</option>
+          <option value="">Seleccionar un producto</option>
           {products.map((product) => (
             <option key={product.id} value={product.id}>
               {product.name}
@@ -182,26 +182,28 @@ export default function StockForm({ stock }: StockFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="quantity">Current Quantity</Label>
+        <Label htmlFor="quantity">Cantidad Actual</Label>
         <Input
+          aria-describedby="quantity-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.quantity}
           defaultValue={stock?.quantity ?? 0}
           id="quantity"
-          min="0"
           name="quantity"
-          placeholder="Enter current quantity"
+          placeholder="Ingresa la cantidad actual"
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="quantity" />
       </div>
 
       <div>
-        <Label htmlFor="minimum_quantity">Minimum Quantity</Label>
+        <Label htmlFor="minimum_quantity">Cantidad Mínima</Label>
         <Input
+          aria-describedby="minimum_quantity-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.minimum_quantity}
           defaultValue={stock?.minimum_quantity ?? 0}
           id="minimum_quantity"
-          min="0"
           name="minimum_quantity"
-          placeholder="Enter minimum quantity threshold"
+          placeholder="Ingresa el umbral mínimo de cantidad"
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="minimum_quantity" />
@@ -209,10 +211,10 @@ export default function StockForm({ stock }: StockFormProps) {
 
       <div className="flex gap-2">
         <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/stock">Cancel</Link>
+          <Link href="/dashboard/stock">Cancelar</Link>
         </Button>
         <Button className="w-full" disabled={pending} type="submit">
-          {stock ? 'Update' : 'Create'}
+          {stock ? 'Actualizar' : 'Crear'}
         </Button>
       </div>
     </form>

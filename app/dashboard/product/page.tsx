@@ -19,18 +19,18 @@ export default async function ProductListPage() {
   const { data, error } = await getProducts();
 
   if (error) {
-    return <div>Error fetching products</div>;
+    return <div>Error al obtener productos</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Products</h1>
-          <p className="text-muted-foreground">Manage products in your system</p>
+          <h1 className="text-2xl font-bold">Productos</h1>
+          <p className="text-muted-foreground">Administrar productos del sistema</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/product/create">+ New Product</Link>
+          <Link href="/dashboard/product/create">+ Nuevo Producto</Link>
         </Button>
       </div>
 
@@ -38,12 +38,12 @@ export default async function ProductListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Images</TableHead>
-              <TableHead>Name</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead>Required Points</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Imágenes</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Descripción</TableHead>
+              <TableHead>Puntos Requeridos</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -56,7 +56,7 @@ export default async function ProductListPage() {
                         product.image_urls.map((url, index) => (
                           <div
                             key={index}
-                            className="relative w-12 h-12 rounded border border-gray-200 overflow-hidden bg-gray-50"
+                            className="relative w-12 h-12 rounded border overflow-hidden bg-muted"
                           >
                             <Image
                               src={url}
@@ -68,8 +68,8 @@ export default async function ProductListPage() {
                           </div>
                         ))
                       ) : (
-                        <div className="w-12 h-12 rounded border border-gray-200 bg-gray-50 flex items-center justify-center">
-                          <ImageIcon className="w-5 h-5 text-gray-400" />
+                        <div className="w-12 h-12 rounded border bg-muted flex items-center justify-center">
+                          <ImageIcon className="w-5 h-5 text-muted-foreground" />
                         </div>
                       )}
                     </div>
@@ -85,7 +85,7 @@ export default async function ProductListPage() {
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {product.active ? 'Active' : 'Inactive'}
+                      {product.active ? 'Activo' : 'Inactivo'}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
@@ -105,7 +105,7 @@ export default async function ProductListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={6}>No products found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>No se encontraron productos.</TableCell>
               </TableRow>
             )}
           </TableBody>

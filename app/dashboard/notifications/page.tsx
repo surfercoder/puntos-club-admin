@@ -1,6 +1,7 @@
 import { Bell, Send } from 'lucide-react';
 import Link from 'next/link';
 
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -32,14 +33,14 @@ export default async function NotificationsPage() {
     throw new Error('Failed to fetch notifications');
   }
 
-  const getStatusBadge = (status: string) => {
-    const styles = {
-      draft: 'bg-gray-100 text-gray-800',
-      sending: 'bg-blue-100 text-blue-800',
-      sent: 'bg-green-100 text-green-800',
-      failed: 'bg-red-100 text-red-800',
+  const getStatusVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
+    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+      sent: 'default',
+      sending: 'outline',
+      draft: 'secondary',
+      failed: 'destructive',
     };
-    return styles[status as keyof typeof styles] || styles.draft;
+    return variants[status] ?? 'secondary';
   };
 
   return (
@@ -48,16 +49,16 @@ export default async function NotificationsPage() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Bell className="h-6 w-6" />
-            Push Notifications
+            Notificaciones Push
           </h1>
           <p className="text-muted-foreground">
-            Send notifications to your beneficiaries
+            Envía notificaciones a tus beneficiarios
           </p>
         </div>
         <Button asChild>
           <Link href="/dashboard/notifications/create">
             <Send className="h-4 w-4 mr-2" />
-            New Notification
+            Nueva Notificación
           </Link>
         </Button>
       </div>
@@ -66,13 +67,13 @@ export default async function NotificationsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Title</TableHead>
-              <TableHead>Body</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Sent</TableHead>
-              <TableHead>Failed</TableHead>
-              <TableHead>Created By</TableHead>
-              <TableHead>Created At</TableHead>
+              <TableHead>Título</TableHead>
+              <TableHead>Mensaje</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead>Enviadas</TableHead>
+              <TableHead>Fallidas</TableHead>
+              <TableHead>Creado por</TableHead>
+              <TableHead>Creado el</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -86,9 +87,9 @@ export default async function NotificationsPage() {
                     {notification.body}
                   </TableCell>
                   <TableCell>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${getStatusBadge(notification.status)}`}>
+                    <Badge variant={getStatusVariant(notification.status)}>
                       {notification.status}
-                    </span>
+                    </Badge>
                   </TableCell>
                   <TableCell>{notification.sent_count}</TableCell>
                   <TableCell>{notification.failed_count}</TableCell>
@@ -108,10 +109,10 @@ export default async function NotificationsPage() {
                 <TableCell className="text-center py-8" colSpan={7}>
                   <div className="flex flex-col items-center gap-2">
                     <Bell className="h-12 w-12 text-muted-foreground" />
-                    <p className="text-muted-foreground">No notifications sent yet</p>
+                    <p className="text-muted-foreground">Aún no se enviaron notificaciones</p>
                     <Button asChild variant="outline" size="sm">
                       <Link href="/dashboard/notifications/create">
-                        Send your first notification
+                        Enviar la primera notificación
                       </Link>
                     </Button>
                   </div>

@@ -37,7 +37,7 @@ export default async function CreateUserPage() {
       .order('name');
     
     if (orgError) {
-      return <div>Error fetching organizations</div>;
+      return <div>Error al obtener organizaciones</div>;
     }
     organizations = orgsData || [];
     // Use active org from cookie if available
@@ -74,7 +74,7 @@ export default async function CreateUserPage() {
     .order('name');
   
   if (rolesError) {
-    return <div>Error fetching roles</div>;
+    return <div>Error al obtener roles</div>;
   }
 
   return (
@@ -83,22 +83,22 @@ export default async function CreateUserPage() {
       <nav aria-label="Breadcrumb" className="flex">
         <ol className="inline-flex items-center space-x-1 md:space-x-3">
           <li className="inline-flex items-center">
-            <Link className="text-sm font-medium text-gray-500 hover:text-blue-600" href="/dashboard">
-              Dashboard
+            <Link className="text-sm font-medium text-muted-foreground hover:text-foreground" href="/dashboard">
+              Panel
             </Link>
           </li>
           <li>
             <div className="flex items-center">
-              <span className="mx-2 text-gray-400">/</span>
-              <Link className="text-sm font-medium text-gray-500 hover:text-blue-600" href="/dashboard/users">
-                Users
+              <span className="mx-2 text-muted-foreground">/</span>
+              <Link className="text-sm font-medium text-muted-foreground hover:text-foreground" href="/dashboard/users">
+                Usuarios
               </Link>
             </div>
           </li>
           <li>
             <div className="flex items-center">
-              <span className="mx-2 text-gray-400">/</span>
-              <span className="text-sm font-medium text-gray-900">Create</span>
+              <span className="mx-2 text-muted-foreground">/</span>
+              <span className="text-sm font-medium text-foreground">Crear</span>
             </div>
           </li>
         </ol>
@@ -107,7 +107,7 @@ export default async function CreateUserPage() {
       <div className="max-w-2xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle>Create User</CardTitle>
+            <CardTitle>Crear Usuario</CardTitle>
           </CardHeader>
           <CardContent>
             <UserForm 

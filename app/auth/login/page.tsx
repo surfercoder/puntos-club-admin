@@ -3,8 +3,8 @@ import type { Metadata } from "next";
 import { LoginForm } from "@/components/login-form";
 
 export const metadata: Metadata = {
-  title: "Login - Puntos Club Admin",
-  description: "Login to your account",
+  title: "Iniciar sesión - Puntos Club Admin",
+  description: "Inicia sesión en tu cuenta",
 };
 
 export default function Page() {

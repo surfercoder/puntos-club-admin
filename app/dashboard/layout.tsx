@@ -8,10 +8,10 @@ import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
   title: {
-    template: '%s | Dashboard',
-    default: 'Dashboard',
+    template: '%s | Panel',
+    default: 'Panel',
   },
-  description: 'Admin dashboard for Puntos Club',
+  description: 'Panel de administración de Puntos Club',
 }
 
 export default async function DashboardLayout({

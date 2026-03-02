@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
+import { createAdminClient } from "@/lib/supabase/admin";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 
@@ -49,9 +50,19 @@ export async function POST(request: NextRequest) {
       .eq("auth_user_id", user.id)
       .single();
 
-    if (!appUser?.organization_id) {
+    const role = Array.isArray(appUser?.role) ? appUser?.role[0] : appUser?.role;
+    const userIsAdmin = role?.name === 'admin';
+
+    if (!userIsAdmin && !appUser?.organization_id) {
       return NextResponse.json(
         { success: false, error: "User not associated with an organization" },
+        { status: 403 }
+      );
+    }
+
+    if (!role || !['owner', 'admin'].includes(role.name)) {
+      return NextResponse.json(
+        { success: false, error: "Only owners and admins can send notifications" },
         { status: 403 }
       );
     }
@@ -66,12 +77,20 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { data: notification, error: notifError } = await supabase
+    // Use admin client so admins can look up notifications across all orgs
+    const dbClient = userIsAdmin ? createAdminClient() : supabase;
+
+    let notificationQuery = dbClient
       .from("push_notifications")
       .select("*")
-      .eq("id", notificationId)
-      .eq("organization_id", appUser.organization_id)
-      .single();
+      .eq("id", notificationId);
+
+    // Non-admins are restricted to their own organization's notifications
+    if (!userIsAdmin && appUser?.organization_id) {
+      notificationQuery = notificationQuery.eq("organization_id", appUser.organization_id);
+    }
+
+    const { data: notification, error: notifError } = await notificationQuery.single();
 
     if (notifError || !notification) {
       return NextResponse.json(
@@ -87,12 +106,12 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    await supabase
+    await dbClient
       .from("push_notifications")
       .update({ status: 'sending' })
       .eq("id", notificationId);
 
-    const { data: beneficiaryOrgs } = await supabase
+    const { data: beneficiaryOrgs } = await dbClient
       .from("beneficiary_organization")
       .select(`
         beneficiary_id,
@@ -102,11 +121,11 @@ export async function POST(request: NextRequest) {
           last_name
         )
       `)
-      .eq("organization_id", appUser.organization_id)
+      .eq("organization_id", notification.organization_id)
       .eq("is_active", true);
 
     if (!beneficiaryOrgs || beneficiaryOrgs.length === 0) {
-      await supabase
+      await dbClient
         .from("push_notifications")
         .update({ status: 'sent', sent_at: new Date().toISOString(), sent_count: 0 })
         .eq("id", notificationId);
@@ -120,14 +139,14 @@ export async function POST(request: NextRequest) {
 
     const beneficiaryIds = beneficiaryOrgs.map(bo => bo.beneficiary_id);
 
-    const { data: pushTokens } = await supabase
+    const { data: pushTokens } = await dbClient
       .from("push_tokens")
       .select("*")
       .in("beneficiary_id", beneficiaryIds)
       .eq("is_active", true);
 
     if (!pushTokens || pushTokens.length === 0) {
-      await supabase
+      await dbClient
         .from("push_notifications")
         .update({ status: 'sent', sent_at: new Date().toISOString(), sent_count: 0 })
         .eq("id", notificationId);
@@ -173,7 +192,7 @@ export async function POST(request: NextRequest) {
               failedCount++;
 
               if (ticketResult.details?.error === 'DeviceNotRegistered') {
-                await supabase
+                await dbClient
                   .from("push_tokens")
                   .update({ is_active: false })
                   .eq("id", token.id);
@@ -186,7 +205,7 @@ export async function POST(request: NextRequest) {
       }
     }
 
-    await supabase
+    await dbClient
       .from("push_notifications")
       .update({
         status: 'sent',
@@ -196,8 +215,8 @@ export async function POST(request: NextRequest) {
       })
       .eq("id", notificationId);
 
-    await supabase.rpc('increment_notification_counters', {
-      org_id: appUser.organization_id,
+    await dbClient.rpc('increment_notification_counters', {
+      org_id: notification.organization_id,
     });
 
     return NextResponse.json({

@@ -63,7 +63,7 @@ export default async function EditUserPage({
       .order('name');
     
     if (orgError) {
-      return <div>Error fetching organizations</div>;
+      return <div>Error al obtener organizaciones</div>;
     }
     organizations = orgsData || [];
   } else if (isOwner(currentUser)) {
@@ -96,7 +96,7 @@ export default async function EditUserPage({
     .order('name');
   
   if (rolesError) {
-    return <div>Error fetching roles</div>;
+    return <div>Error al obtener roles</div>;
   }
 
   return (
@@ -105,22 +105,22 @@ export default async function EditUserPage({
       <nav aria-label="Breadcrumb" className="flex">
         <ol className="inline-flex items-center space-x-1 md:space-x-3">
           <li className="inline-flex items-center">
-            <Link className="text-sm font-medium text-gray-500 hover:text-blue-600" href="/dashboard">
-              Dashboard
+            <Link className="text-sm font-medium text-muted-foreground hover:text-foreground" href="/dashboard">
+              Panel
             </Link>
           </li>
           <li>
             <div className="flex items-center">
-              <span className="mx-2 text-gray-400">/</span>
-              <Link className="text-sm font-medium text-gray-500 hover:text-blue-600" href="/dashboard/users">
-                Users
+              <span className="mx-2 text-muted-foreground">/</span>
+              <Link className="text-sm font-medium text-muted-foreground hover:text-foreground" href="/dashboard/users">
+                Usuarios
               </Link>
             </div>
           </li>
           <li>
             <div className="flex items-center">
-              <span className="mx-2 text-gray-400">/</span>
-              <span className="text-sm font-medium text-gray-900">Edit</span>
+              <span className="mx-2 text-muted-foreground">/</span>
+              <span className="text-sm font-medium text-foreground">Editar</span>
             </div>
           </li>
         </ol>
@@ -129,7 +129,7 @@ export default async function EditUserPage({
       <div className="max-w-2xl mx-auto">
         <Card>
           <CardHeader>
-            <CardTitle>Edit User</CardTitle>
+            <CardTitle>Editar Usuario</CardTitle>
           </CardHeader>
           <CardContent>
             <UserForm 

@@ -80,13 +80,13 @@ export default function CategoryForm({ category }: CategoryFormProps) {
       {category?.id && <input name="id" type="hidden" value={category.id} />}
 
       <div>
-        <Label htmlFor="parent_id">Parent Category</Label>
+        <Label htmlFor="parent_id">Categoría Padre</Label>
         <Select defaultValue={category?.parent_id ?? 'null'} name="parent_id">
           <SelectTrigger>
-            <SelectValue placeholder="No parent" />
+            <SelectValue placeholder="Sin categoría padre" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="null">No parent</SelectItem>
+            <SelectItem value="null">Sin categoría padre</SelectItem>
             {categories.map((c) => (
               <SelectItem key={c.id} value={c.id}>
                 {c.name}
@@ -98,28 +98,28 @@ export default function CategoryForm({ category }: CategoryFormProps) {
       </div>
       
       <div>
-        <Label htmlFor="name">Name</Label>
+        <Label htmlFor="name">Nombre</Label>
         <Input
           aria-describedby="name-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.name}
           defaultValue={category?.name ?? ''}
           id="name"
           name="name"
-          placeholder="Enter category name"
+          placeholder="Ingresa el nombre de la categoría"
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="name" />
       </div>
 
       <div>
-        <Label htmlFor="description">Description</Label>
+        <Label htmlFor="description">Descripción</Label>
         <Textarea
           aria-describedby="description-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.description}
           defaultValue={category?.description ?? ''}
           id="description"
           name="description"
-          placeholder="Enter category description (optional)"
+          placeholder="Ingresa una descripción de la categoría (opcional)"
           rows={3}
         />
         <FieldError actionState={validation ?? actionState} name="description" />
@@ -127,22 +127,22 @@ export default function CategoryForm({ category }: CategoryFormProps) {
 
       <div className="flex items-center space-x-2">
         <input
-          className="rounded border-gray-300"
+          className="rounded"
           defaultChecked={category?.active ?? true}
           id="active"
           name="active"
           type="checkbox"
         />
-        <Label htmlFor="active">Active</Label>
+        <Label htmlFor="active">Activo</Label>
         <FieldError actionState={validation ?? actionState} name="active" />
       </div>
 
       <div className="flex gap-2">
         <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/category">Cancel</Link>
+          <Link href="/dashboard/category">Cancelar</Link>
         </Button>
         <Button className="w-full" disabled={pending} type="submit">
-          {category ? 'Update' : 'Create'}
+          {category ? 'Actualizar' : 'Crear'}
         </Button>
       </div>
     </form>

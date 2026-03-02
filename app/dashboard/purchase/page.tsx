@@ -99,42 +99,42 @@ export default function PurchaseListPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Purchases</h1>
-          <p className="text-muted-foreground">View all purchase transactions and points earned</p>
+          <h1 className="text-2xl font-bold">Compras</h1>
+          <p className="text-muted-foreground">Ver todas las transacciones de compra y puntos ganados</p>
         </div>
         <Button variant="outline" onClick={loadPurchases}>
           <RefreshCw className="h-4 w-4 mr-2" />
-          Refresh
+          Actualizar
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>All Purchases</CardTitle>
+          <CardTitle>Todas las Compras</CardTitle>
           <CardDescription>
-            {purchases.length} total purchases
+            {purchases.length} compras en total
           </CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
-            <div className="text-center py-8">Loading purchases...</div>
+            <div className="text-center py-8">Cargando compras...</div>
           ) : purchases.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No purchases found.
+              No se encontraron compras.
             </div>
           ) : (
             <div className="border rounded-lg">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Purchase #</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Beneficiary</TableHead>
-                    <TableHead>Cashier</TableHead>
-                    <TableHead>Branch</TableHead>
-                    <TableHead className="text-right">Amount</TableHead>
-                    <TableHead className="text-right">Points</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    <TableHead>Compra #</TableHead>
+                    <TableHead>Fecha</TableHead>
+                    <TableHead>Beneficiario</TableHead>
+                    <TableHead>Cajero</TableHead>
+                    <TableHead>Sucursal</TableHead>
+                    <TableHead className="text-right">Monto</TableHead>
+                    <TableHead className="text-right">Puntos</TableHead>
+                    <TableHead className="text-right">Acciones</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -192,30 +192,30 @@ export default function PurchaseListPage() {
         </CardContent>
       </Card>
 
-      {/* Purchase Details Dialog */}
+      {/* Diálogo de Detalles de Compra */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Purchase Details</DialogTitle>
+            <DialogTitle>Detalles de la Compra</DialogTitle>
             <DialogDescription>
               {selectedPurchase?.purchase_number}
             </DialogDescription>
           </DialogHeader>
           {detailsLoading ? (
-            <div className="text-center py-8">Loading details...</div>
+            <div className="text-center py-8">Cargando detalles...</div>
           ) : selectedPurchase ? (
             <div className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Date</h4>
+                  <h4 className="text-sm font-medium text-muted-foreground">Fecha</h4>
                   <p>{formatDate(selectedPurchase.purchase_date)}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Branch</h4>
+                  <h4 className="text-sm font-medium text-muted-foreground">Sucursal</h4>
                   <p>{selectedPurchase.branch?.name || "N/A"}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Beneficiary</h4>
+                  <h4 className="text-sm font-medium text-muted-foreground">Beneficiario</h4>
                   <p>
                     {selectedPurchase.beneficiary
                       ? `${selectedPurchase.beneficiary.first_name} ${selectedPurchase.beneficiary.last_name}`
@@ -223,7 +223,7 @@ export default function PurchaseListPage() {
                   </p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Cashier</h4>
+                  <h4 className="text-sm font-medium text-muted-foreground">Cajero</h4>
                   <p>
                     {selectedPurchase.cashier
                       ? `${selectedPurchase.cashier.first_name} ${selectedPurchase.cashier.last_name}`
@@ -234,20 +234,20 @@ export default function PurchaseListPage() {
 
               {selectedPurchase.notes && (
                 <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Notes</h4>
+                  <h4 className="text-sm font-medium text-muted-foreground">Notas</h4>
                   <p>{selectedPurchase.notes}</p>
                 </div>
               )}
 
               <div className="flex justify-between items-center pt-4 border-t">
                 <div>
-                  <span className="text-sm text-muted-foreground">Total Amount:</span>
+                  <span className="text-sm text-muted-foreground">Monto Total:</span>
                   <span className="ml-2 text-lg font-bold">
                     {formatCurrency(selectedPurchase.total_amount)}
                   </span>
                 </div>
                 <div>
-                  <span className="text-sm text-muted-foreground">Points Earned:</span>
+                  <span className="text-sm text-muted-foreground">Puntos Ganados:</span>
                   <Badge className="ml-2" variant="default">
                     +{selectedPurchase.points_earned} pts
                   </Badge>

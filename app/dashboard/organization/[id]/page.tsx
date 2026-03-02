@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { Pencil, Package, ShoppingCart } from 'lucide-react';
 
 import { getOrganization, getOrganizationProducts } from '@/actions/dashboard/organization/actions';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import type { ProductWithRelations } from '@/types/product';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
@@ -29,38 +30,38 @@ export default async function OrganizationDetailsPage({ params }: { params: Prom
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{organization.name}</h1>
-          <p className="text-muted-foreground">Organization details and available products</p>
+          <p className="text-muted-foreground">Detalles de la organización y productos disponibles</p>
         </div>
         <Button asChild variant="secondary">
           <Link href={`/dashboard/organization/edit/${organization.id}`}>
             <Pencil className="h-4 w-4 mr-2" />
-            Edit Organization
+            Editar Organización
           </Link>
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Organization Information</CardTitle>
+          <CardTitle>Información de la Organización</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Name</p>
+              <p className="text-sm font-medium text-muted-foreground">Nombre</p>
               <p className="text-base">{organization.name}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Business Name</p>
+              <p className="text-sm font-medium text-muted-foreground">Razón Social</p>
               <p className="text-base">{organization.business_name || 'N/A'}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Tax ID</p>
+              <p className="text-sm font-medium text-muted-foreground">CUIT/RUT</p>
               <p className="text-base">{organization.tax_id || 'N/A'}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Creation Date</p>
+              <p className="text-sm font-medium text-muted-foreground">Fecha de Creación</p>
               <p className="text-base">
-                {new Date(organization.creation_date).toLocaleDateString('en-US', { timeZone: 'UTC' })}
+                {new Date(organization.creation_date).toLocaleDateString('es-AR', { timeZone: 'UTC' })}
               </p>
             </div>
           </div>
@@ -73,16 +74,16 @@ export default async function OrganizationDetailsPage({ params }: { params: Prom
             <div>
               <CardTitle className="flex items-center gap-2">
                 <ShoppingCart className="h-5 w-5" />
-                Available Products for Redemption
+                Productos Disponibles para Canje
               </CardTitle>
               <CardDescription>
-                Products that users can redeem with their points
+                Productos que los usuarios pueden canjear con sus puntos
               </CardDescription>
             </div>
             <Button asChild size="sm">
               <Link href="/dashboard/product">
                 <Package className="h-4 w-4 mr-2" />
-                Manage Products
+                Administrar Productos
               </Link>
             </Button>
           </div>
@@ -90,22 +91,22 @@ export default async function OrganizationDetailsPage({ params }: { params: Prom
         <CardContent>
           {productsError ? (
             <div className="text-center py-8 text-muted-foreground">
-              Error loading products
+              Error al cargar productos
             </div>
           ) : !products || products.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              No products available for redemption yet.
+              Aún no hay productos disponibles para canje.
             </div>
           ) : (
             <div className="border rounded-lg">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Product Name</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Category</TableHead>
-                    <TableHead className="text-right">Required Points</TableHead>
-                    <TableHead className="text-right">Available Stock</TableHead>
+                    <TableHead>Nombre del Producto</TableHead>
+                    <TableHead>Descripción</TableHead>
+                    <TableHead>Categoría</TableHead>
+                    <TableHead className="text-right">Puntos Requeridos</TableHead>
+                    <TableHead className="text-right">Stock Disponible</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -127,18 +128,14 @@ export default async function OrganizationDetailsPage({ params }: { params: Prom
                           {product.category?.name || 'N/A'}
                         </TableCell>
                         <TableCell className="text-right">
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                          <Badge variant="outline">
                             {product.required_points} pts
-                          </span>
+                          </Badge>
                         </TableCell>
                         <TableCell className="text-right">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            totalStock > 0
-                              ? 'bg-green-100 text-green-800'
-                              : 'bg-red-100 text-red-800'
-                          }`}>
-                            {totalStock > 0 ? `${totalStock} units` : 'Out of stock'}
-                          </span>
+                          <Badge variant={totalStock > 0 ? 'default' : 'destructive'}>
+                            {totalStock > 0 ? `${totalStock} unidades` : 'Sin stock'}
+                          </Badge>
                         </TableCell>
                       </TableRow>
                     );

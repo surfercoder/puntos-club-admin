@@ -74,16 +74,16 @@ export default function AddressForm({ address }: { address?: Address }) {
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
       {address?.id && <input name="id" type="hidden" value={String(address.id)} />}
       <div className="space-y-2">
-        <Label htmlFor="google-address">Search Address</Label>
+        <Label htmlFor="google-address">Buscar Dirección</Label>
         <GoogleAddressAutocomplete
           onPlaceSelected={handlePlaceSelected}
-          placeholder="Start typing an address..."
+          placeholder="Comienza a escribir una dirección..."
           id="google-address"
         />
-        <p className="text-xs text-muted-foreground">Select an address from Google suggestions or fill manually below</p>
+        <p className="text-xs text-muted-foreground">Selecciona una dirección de las sugerencias de Google o completa manualmente abajo</p>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="street">Street</Label>
+        <Label htmlFor="street">Calle</Label>
         <Input
           aria-describedby="street-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.street}
@@ -95,7 +95,7 @@ export default function AddressForm({ address }: { address?: Address }) {
         <FieldError actionState={validation ?? actionState} name="street" />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="number">Number</Label>
+        <Label htmlFor="number">Número</Label>
         <Input
           aria-describedby="number-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.number}
@@ -107,7 +107,7 @@ export default function AddressForm({ address }: { address?: Address }) {
         <FieldError actionState={validation ?? actionState} name="number" />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="city">City</Label>
+        <Label htmlFor="city">Ciudad</Label>
         <Input
           aria-describedby="city-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.city}
@@ -119,7 +119,7 @@ export default function AddressForm({ address }: { address?: Address }) {
         <FieldError actionState={validation ?? actionState} name="city" />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="state">State</Label>
+        <Label htmlFor="state">Provincia</Label>
         <Input
           aria-describedby="state-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.state}
@@ -131,7 +131,7 @@ export default function AddressForm({ address }: { address?: Address }) {
         <FieldError actionState={validation ?? actionState} name="state" />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="zip_code">Zip Code</Label>
+        <Label htmlFor="zip_code">Código Postal</Label>
         <Input
           aria-describedby="zip_code-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.zip_code}
@@ -156,10 +156,10 @@ export default function AddressForm({ address }: { address?: Address }) {
       )}
       <div className="flex gap-2">
         <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/address">Cancel</Link>
+          <Link href="/dashboard/address">Cancelar</Link>
         </Button>
         <Button className="w-full" disabled={pending} type="submit">
-          {address ? 'Update' : 'Create'}
+          {address ? 'Actualizar' : 'Crear'}
         </Button>
       </div>
     </form>

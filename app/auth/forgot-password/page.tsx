@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { ForgotPasswordForm } from "@/components/forgot-password-form";
+
+export const metadata: Metadata = {
+  title: "Restablecer contraseña - Puntos Club Admin",
+  description: "Restablece la contraseña de tu cuenta",
+};
 
 export default function Page() {
   return (

@@ -15,6 +15,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
+import { UpdatePasswordSchema } from "@/schemas/auth.schema";
 
 export function UpdatePasswordForm({
   className,
@@ -22,22 +23,36 @@ export function UpdatePasswordForm({
 }: React.ComponentPropsWithoutRef<"div">) {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  const handleForgotPassword = async (e: React.FormEvent) => {
+  const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    setError(null);
+    setFieldErrors({});
+
+    const result = UpdatePasswordSchema.safeParse({ password });
+
+    if (!result.success) {
+      const errors: Record<string, string> = {};
+      for (const issue of result.error.issues) {
+        const field = String(issue.path[0]);
+        if (!errors[field]) errors[field] = issue.message;
+      }
+      setFieldErrors(errors);
+      return;
+    }
+
     const supabase = createClient();
     setIsLoading(true);
-    setError(null);
 
     try {
-      const { error } = await supabase.auth.updateUser({ password });
-      if (error) {throw error;}
-      // Update this route to redirect to an authenticated route. The user already has an active session.
+      const { error: updateError } = await supabase.auth.updateUser({ password });
+      if (updateError) {throw updateError;}
       router.push("/dashboard");
-    } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Ocurrió un error");
     } finally {
       setIsLoading(false);
     }
@@ -47,28 +62,34 @@ export function UpdatePasswordForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Reset Your Password</CardTitle>
+          <CardTitle className="text-2xl">Restablecer contraseña</CardTitle>
           <CardDescription>
-            Please enter your new password below.
+            Por favor ingresa tu nueva contraseña.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <form onSubmit={handleForgotPassword}>
+          <form onSubmit={handleUpdatePassword} noValidate>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="password">New password</Label>
+                <Label htmlFor="password">Nueva contraseña</Label>
                 <Input
                   id="password"
                   onChange={(e) => setPassword(e.target.value)}
-                  placeholder="New password"
-                  required
+                  placeholder="Nueva contraseña"
                   type="password"
                   value={password}
+                  aria-invalid={!!fieldErrors.password}
+                  aria-describedby="password-error"
                 />
+                {fieldErrors.password && (
+                  <p id="password-error" className="text-destructive text-sm">
+                    {fieldErrors.password}
+                  </p>
+                )}
               </div>
-              {error && <p className="text-sm text-red-500">{error}</p>}
+              {error && <p className="text-sm text-destructive">{error}</p>}
               <Button className="w-full" disabled={isLoading} type="submit">
-                {isLoading ? "Saving..." : "Save new password"}
+                {isLoading ? "Guardando..." : "Guardar nueva contraseña"}
               </Button>
             </div>
           </form>

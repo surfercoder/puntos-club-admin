@@ -55,18 +55,18 @@ export default async function BeneficiaryListPage() {
   }
 
   if (error) {
-    return <div>Error fetching beneficiaries</div>;
+    return <div>Error al obtener beneficiarios</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Beneficiaries</h1>
-          <p className="text-muted-foreground">Manage all beneficiaries in your system</p>
+          <h1 className="text-2xl font-bold">Beneficiarios</h1>
+          <p className="text-muted-foreground">Administrar todos los beneficiarios del sistema</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/beneficiary/create">+ New Beneficiary</Link>
+          <Link href="/dashboard/beneficiary/create">+ Nuevo Beneficiario</Link>
         </Button>
       </div>
 
@@ -74,13 +74,13 @@ export default async function BeneficiaryListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Email</TableHead>
-              <TableHead>Phone</TableHead>
-              <TableHead>Document ID</TableHead>
-              <TableHead>Available Points</TableHead>
-              <TableHead>Registration Date</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Nombre</TableHead>
+              <TableHead>Correo electrónico</TableHead>
+              <TableHead>Teléfono</TableHead>
+              <TableHead>Documento</TableHead>
+              <TableHead>Puntos Disponibles</TableHead>
+              <TableHead>Fecha de Registro</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -98,7 +98,7 @@ export default async function BeneficiaryListPage() {
                   <TableCell>{beneficiary.document_id || 'N/A'}</TableCell>
                   <TableCell>{beneficiary.available_points}</TableCell>
                   <TableCell>
-                    {new Date(beneficiary.registration_date).toLocaleDateString('en-US', { timeZone: 'UTC' })}
+                    {new Date(beneficiary.registration_date).toLocaleDateString('es-AR', { timeZone: 'UTC' })}
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
@@ -121,7 +121,7 @@ export default async function BeneficiaryListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={7}>No beneficiaries found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={7}>No se encontraron beneficiarios.</TableCell>
               </TableRow>
             )}
           </TableBody>

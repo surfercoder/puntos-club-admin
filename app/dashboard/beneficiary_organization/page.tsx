@@ -44,18 +44,18 @@ export default async function BeneficiaryOrganizationListPage() {
     .order('id', { ascending: false });
 
   if (error) {
-    return <div>Error fetching beneficiary organizations</div>;
+    return <div>Error al obtener beneficiarios por organización</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Beneficiary Organizations</h1>
-          <p className="text-muted-foreground">Manage beneficiary memberships and points per organization</p>
+          <h1 className="text-2xl font-bold">Beneficiarios por Organización</h1>
+          <p className="text-muted-foreground">Administrar membresías de beneficiarios y puntos por organización</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/beneficiary_organization/create">+ New Membership</Link>
+          <Link href="/dashboard/beneficiary_organization/create">+ Nueva Membresía</Link>
         </Button>
       </div>
 
@@ -63,13 +63,13 @@ export default async function BeneficiaryOrganizationListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Beneficiary</TableHead>
-              <TableHead>Organization</TableHead>
-              <TableHead className="text-right">Available</TableHead>
-              <TableHead className="text-right">Earned</TableHead>
-              <TableHead className="text-right">Redeemed</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>Beneficiario</TableHead>
+              <TableHead>Organización</TableHead>
+              <TableHead className="text-right">Disponibles</TableHead>
+              <TableHead className="text-right">Acumulados</TableHead>
+              <TableHead className="text-right">Canjeados</TableHead>
+              <TableHead>Estado</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -85,7 +85,7 @@ export default async function BeneficiaryOrganizationListPage() {
                   <TableCell className="text-right">{row.available_points}</TableCell>
                   <TableCell className="text-right">{row.total_points_earned}</TableCell>
                   <TableCell className="text-right">{row.total_points_redeemed}</TableCell>
-                  <TableCell>{row.is_active === false ? 'Inactive' : 'Active'}</TableCell>
+                  <TableCell>{row.is_active === false ? 'Inactivo' : 'Activo'}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">
@@ -104,7 +104,7 @@ export default async function BeneficiaryOrganizationListPage() {
             ) : (
               <TableRow>
                 <TableCell className="text-center py-4" colSpan={7}>
-                  No memberships found.
+                  No se encontraron membresías.
                 </TableCell>
               </TableRow>
             )}

@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import { UpdatePasswordForm } from "@/components/update-password-form";
+
+export const metadata: Metadata = {
+  title: "Nueva contraseña - Puntos Club Admin",
+  description: "Establecé una nueva contraseña para tu cuenta",
+};
 
 export default function Page() {
   return (
