@@ -89,7 +89,7 @@ function Step1CompletedView({
 
 // ─── Registration form view ──────────────────────────────────────────────────
 
-function Step1FormView({ onNext }: { onNext: (data: Step1CompletedData) => void }) {
+function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData) => void }) {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [email, setEmail] = useState('');

@@ -124,7 +124,6 @@ export function OnboardingWizard({
 
     const saved4 = lsGet<OnboardingStep4Data>(LS_STEP4);
     if (saved4) setStep4Data(saved4);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const goToStep = (step: number) => {

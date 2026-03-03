@@ -87,7 +87,6 @@ export function Step5QR({
       .catch(() => {
         setState({ status: 'error', message: 'Error de conexión. Por favor intenta de nuevo.' });
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const handleRetry = () => {

@@ -72,6 +72,6 @@ Si está rechazado, establece isApproved en false, proporciona razones específi
 
     return result;
   } catch (_error: unknown) {
-    throw new Error('Error al moderar el contenido. Por favor intenta de nuevo.');
+    throw new Error('Error al moderar el contenido. Por favor intenta de nuevo.', { cause: _error });
   }
 }

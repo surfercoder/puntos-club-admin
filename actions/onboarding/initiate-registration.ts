@@ -1,5 +1,7 @@
 'use server';
 
+import nodemailer from 'nodemailer';
+
 import {
   createRegistrationToken,
   type PendingRegistration,
@@ -33,15 +35,12 @@ export async function initiateRegistration(input: {
 
   const verificationUrl = `${siteUrl}/auth/complete-registration?token=${token}`;
 
-  // Dev fallback: no email service configured → print link to server console
-  if (!process.env.RESEND_API_KEY) {
-    console.log('\n📧  [DEV] Verification URL (no RESEND_API_KEY set):\n');
-    console.log(' ', verificationUrl, '\n');
+  // Dev fallback: no email credentials configured → print link to server console
+  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    console.warn('\n📧  [DEV] Verification URL (no GMAIL_USER / GMAIL_APP_PASSWORD set):\n');
+    console.warn(' ', verificationUrl, '\n');
     return { success: true };
   }
-
-  const fromEmail =
-    process.env.RESEND_FROM_EMAIL || 'onboarding@puntosclub.com';
 
   const html = `
     <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px">
@@ -65,23 +64,23 @@ export async function initiateRegistration(input: {
     </div>
   `;
 
-  const res = await fetch('https://api.resend.com/emails', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
+  const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+      user: process.env.GMAIL_USER,
+      pass: process.env.GMAIL_APP_PASSWORD,
     },
-    body: JSON.stringify({
-      from: fromEmail,
+  });
+
+  try {
+    await transporter.sendMail({
+      from: `"Puntos Club" <${process.env.GMAIL_USER}>`,
       to: input.email,
       subject: 'Confirma tu email – Puntos Club',
       html,
-    }),
-  });
-
-  if (!res.ok) {
-    const body = await res.text().catch(() => '');
-    console.error('[initiateRegistration] Resend error:', res.status, body);
+    });
+  } catch (err) {
+    console.error('[initiateRegistration] Nodemailer error:', err);
     return { success: false, error: 'No se pudo enviar el email de verificación.' };
   }
 
