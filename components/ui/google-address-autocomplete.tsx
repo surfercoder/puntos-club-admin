@@ -42,7 +42,13 @@ export function GoogleAddressAutocomplete({
 }: GoogleAddressAutocompleteProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const autocompleteRef = useRef<google.maps.places.Autocomplete | null>(null);
+  const onPlaceSelectedRef = useRef(onPlaceSelected);
   const { isLoaded, error } = useGoogleMaps();
+
+  // Keep the ref in sync with the latest callback without re-running the setup effect
+  useEffect(() => {
+    onPlaceSelectedRef.current = onPlaceSelected;
+  }, [onPlaceSelected]);
 
   useEffect(() => {
     if (!isLoaded || !inputRef.current || autocompleteRef.current) {
@@ -115,7 +121,7 @@ export function GoogleAddressAutocomplete({
         }
       }
 
-      onPlaceSelected(addressComponents);
+      onPlaceSelectedRef.current(addressComponents);
     };
 
     google.maps.event.addListener(autocomplete, 'place_changed', handlePlaceChanged);
@@ -170,7 +176,7 @@ export function GoogleAddressAutocomplete({
       }
       document.removeEventListener('mousedown', handleDocumentMouseDown);
     };
-  }, [isLoaded, onPlaceSelected]);
+  }, [isLoaded]);
 
   if (error) {
     return (
