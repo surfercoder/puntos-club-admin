@@ -6,6 +6,7 @@ import {
   Building2,
   Check,
   CreditCard,
+  FileText,
   Package,
   QrCode,
   User,
@@ -16,6 +17,7 @@ import { Step1Personal } from './steps/step-1-personal';
 import { Step2Company } from './steps/step-2-company';
 import { Step3Plan } from './steps/step-3-plan';
 import { Step4Products } from './steps/step-4-products';
+import { Step5Consent } from './steps/step-5-consent';
 import { Step5QR } from './steps/step-5-qr';
 import type { OnboardingStep2Data, OnboardingStep4Data } from '@/actions/onboarding/actions';
 
@@ -31,7 +33,8 @@ const STEPS: Step[] = [
   { number: 2, label: 'Tu negocio', icon: Building2, description: 'Configura tu organización' },
   { number: 3, label: 'Plan', icon: CreditCard, description: 'Elige el plan que más te convenga' },
   { number: 4, label: 'Catálogo', icon: Package, description: 'Crea categorías y premios' },
-  { number: 5, label: 'Tu QR', icon: QrCode, description: 'Listo para empezar' },
+  { number: 5, label: 'Términos', icon: FileText, description: 'Acepta los términos y condiciones' },
+  { number: 6, label: 'Tu QR', icon: QrCode, description: 'Listo para empezar' },
 ];
 
 export interface Step1CompletedData {
@@ -57,6 +60,7 @@ const LS_STEP2 = 'onboarding_step2';
 const LS_STEP4 = 'onboarding_step4';
 const LS_PLAN = 'onboarding_plan';
 const LS_MP_PREAPPROVAL_ID = 'mp_preapproval_id';
+const LS_CONSENT = 'onboarding_consent';
 
 function lsGet<T>(key: string): T | null {
   try {
@@ -84,11 +88,11 @@ export function OnboardingWizard({
 }: OnboardingWizardProps) {
   const router = useRouter();
 
-  const clampedStep = Math.max(1, Math.min(5, initialStep));
+  const clampedStep = Math.max(1, Math.min(6, initialStep));
   const [currentStep, setCurrentStep] = useState(clampedStep);
   const [maxReachedStep, setMaxReachedStep] = useState(clampedStep);
 
-  // Collected data across steps — only written to DB atomically at step 5
+  // Collected data across steps — only written to DB atomically at step 6
   const [step2Data, setStep2Data] = useState<OnboardingStep2Data | null>(null);
   const [step4Data, setStep4Data] = useState<OnboardingStep4Data | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string>('trial');
@@ -96,6 +100,8 @@ export function OnboardingWizard({
 
   // Derived display values
   const [organizationName, setOrganizationName] = useState<string>(initialOrgName);
+
+  const [consentGiven, setConsentGiven] = useState(false);
 
   const [step1Completed, setStep1Completed] = useState(initialStep1Completed);
   const [step1Data, setStep1Data] = useState<Step1CompletedData | null>(initialUserInfo ?? null);
@@ -129,6 +135,9 @@ export function OnboardingWizard({
 
     const saved4 = lsGet<OnboardingStep4Data>(LS_STEP4);
     if (saved4) setStep4Data(saved4);
+
+    const savedConsent = localStorage.getItem(LS_CONSENT);
+    if (savedConsent === 'true') setConsentGiven(true);
 
     // When MP redirects back after checkout, the URL contains step=4.
     // Clean it up so the user doesn't see query noise.
@@ -183,6 +192,11 @@ export function OnboardingWizard({
     goToStep(5);
   };
 
+  const handleStep5ConsentNext = () => {
+    setConsentGiven(true);
+    goToStep(6);
+  };
+
   const clearOnboardingLocalStorage = () => {
     [
       'onboarding_first_name',
@@ -193,6 +207,7 @@ export function OnboardingWizard({
       LS_MP_PREAPPROVAL_ID,
       LS_STEP2,
       LS_STEP4,
+      LS_CONSENT,
       LS_MAX_STEP,
     ].forEach((key) => localStorage.removeItem(key));
   };
@@ -205,8 +220,12 @@ export function OnboardingWizard({
   const canNavigateToStep = (step: number) => {
     if (step === 1) return true;
     if (step === 2) return step1Completed || maxReachedStep >= 2;
-    // Steps 3–5: need step 2 data in memory OR already completed (org exists from server)
-    if (step >= 3) return (step2Data !== null || initialOrganizationId !== null) && maxReachedStep >= step;
+    // Steps 3–4: need step 2 data in memory OR already completed (org exists from server)
+    if (step >= 3 && step <= 4) return (step2Data !== null || initialOrganizationId !== null) && maxReachedStep >= step;
+    // Step 5 (consent): same conditions as step 4
+    if (step === 5) return (step2Data !== null || initialOrganizationId !== null) && maxReachedStep >= 5;
+    // Step 6 (QR): additionally requires consent
+    if (step === 6) return (step2Data !== null || initialOrganizationId !== null) && consentGiven && maxReachedStep >= 6;
     return false;
   };
 
@@ -249,6 +268,14 @@ export function OnboardingWizard({
         );
       case 5:
         return (
+          <Step5Consent
+            onNext={handleStep5ConsentNext}
+            onBack={() => goToStep(4)}
+            initialConsent={consentGiven}
+          />
+        );
+      case 6:
+        return (
           <Step5QR
             existingOrganizationId={initialOrganizationId}
             existingOrganizationName={initialOrgName || organizationName}
@@ -256,7 +283,7 @@ export function OnboardingWizard({
             step4Data={step4Data}
             selectedPlan={selectedPlan}
             mpPreapprovalId={mpPreapprovalId}
-            onBack={() => goToStep(2)}
+            onBack={() => goToStep(5)}
             onFinish={handleFinish}
             onCreationComplete={clearOnboardingLocalStorage}
           />
