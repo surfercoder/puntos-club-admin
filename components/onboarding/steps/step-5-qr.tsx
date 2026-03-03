@@ -27,6 +27,8 @@ interface Step5Props {
   step2Data?: OnboardingStep2Data | null;
   step4Data?: OnboardingStep4Data | null;
   selectedPlan?: string;
+  /** Mercado Pago preapproval ID for paid plans (set after MP checkout redirect). */
+  mpPreapprovalId?: string | null;
   onBack: () => void;
   onFinish: () => void;
   /** Called immediately after org is successfully created — clears onboarding localStorage */
@@ -45,6 +47,7 @@ export function Step5QR({
   step2Data,
   step4Data,
   selectedPlan,
+  mpPreapprovalId,
   onBack,
   onFinish,
   onCreationComplete,
@@ -71,7 +74,7 @@ export function Step5QR({
     if (state.status !== 'creating') return;
     hasRun.current = true;
 
-    completeOnboarding({ step2: step2Data!, plan: selectedPlan, step4: step4Data })
+    completeOnboarding({ step2: step2Data!, plan: selectedPlan, mpPreapprovalId: mpPreapprovalId ?? undefined, step4: step4Data })
       .then((result) => {
         if (result.success && result.data) {
           onCreationComplete?.();

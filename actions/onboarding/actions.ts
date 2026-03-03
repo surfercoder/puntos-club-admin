@@ -77,6 +77,7 @@ export interface OnboardingStep4Data {
 export async function completeOnboarding(input: {
   step2: OnboardingStep2Data;
   plan?: string;
+  mpPreapprovalId?: string;
   step4?: OnboardingStep4Data | null;
 }): Promise<{
   success: boolean;
@@ -127,6 +128,8 @@ export async function completeOnboarding(input: {
       };
     }
 
+    const plan = input.plan ?? 'trial';
+
     // ── 1. Create organization ────────────────────────────────────────────────
     const { data: orgData, error: orgError } = await adminClient
       .from('organization')
@@ -135,6 +138,8 @@ export async function completeOnboarding(input: {
         business_name: input.step2.org.business_name || null,
         tax_id: input.step2.org.tax_id || null,
         logo_url: input.step2.org.logo_url || null,
+        plan,
+        trial_started_at: plan === 'trial' ? new Date().toISOString() : null,
       })
       .select()
       .single();
@@ -277,7 +282,29 @@ export async function completeOnboarding(input: {
       show_in_app: true,
     });
 
-    // ── 8. Create catalog (optional) ──────────────────────────────────────────
+    // ── 8. Create subscription record for paid plans ─────────────────────────
+    if (input.mpPreapprovalId && (plan === 'advance' || plan === 'pro')) {
+      const PLAN_AMOUNTS: Record<string, number> = { advance: 50, pro: 89 };
+      const PLAN_ENV_VARS: Record<string, string> = {
+        advance: 'MP_PLAN_ID_ADVANCE',
+        pro: 'MP_PLAN_ID_PRO',
+      };
+      await adminClient.from('subscription').upsert(
+        {
+          organization_id: organizationId,
+          mp_preapproval_id: input.mpPreapprovalId,
+          mp_plan_id: process.env[PLAN_ENV_VARS[plan]] ?? '',
+          plan,
+          status: 'pending',
+          payer_email: user.email ?? '',
+          amount: PLAN_AMOUNTS[plan] ?? 0,
+          currency: 'ARS',
+        },
+        { onConflict: 'mp_preapproval_id' }
+      );
+    }
+
+    // ── 9. Create catalog (optional) ──────────────────────────────────────────
     if (input.step4?.categories?.length) {
       for (const cat of input.step4.categories) {
         if (!cat.name.trim()) continue;
@@ -324,7 +351,7 @@ export async function completeOnboarding(input: {
       }
     }
 
-    // ── 9. Create cashier user (optional) ────────────────────────────────────
+    // ── 10. Create cashier user (optional) ───────────────────────────────────
     if (input.step2.cashier?.email && input.step2.cashier?.password) {
       const { cashier } = input.step2;
 

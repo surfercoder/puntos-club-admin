@@ -56,6 +56,7 @@ const LS_MAX_STEP = 'onboarding_max_step';
 const LS_STEP2 = 'onboarding_step2';
 const LS_STEP4 = 'onboarding_step4';
 const LS_PLAN = 'onboarding_plan';
+const LS_MP_PREAPPROVAL_ID = 'mp_preapproval_id';
 
 function lsGet<T>(key: string): T | null {
   try {
@@ -91,6 +92,7 @@ export function OnboardingWizard({
   const [step2Data, setStep2Data] = useState<OnboardingStep2Data | null>(null);
   const [step4Data, setStep4Data] = useState<OnboardingStep4Data | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string>('trial');
+  const [mpPreapprovalId, setMpPreapprovalId] = useState<string | null>(null);
 
   // Derived display values
   const [organizationName, setOrganizationName] = useState<string>(initialOrgName);
@@ -122,8 +124,19 @@ export function OnboardingWizard({
     const savedPlan = localStorage.getItem(LS_PLAN);
     if (savedPlan) setSelectedPlan(savedPlan);
 
+    const savedMpId = localStorage.getItem(LS_MP_PREAPPROVAL_ID);
+    if (savedMpId) setMpPreapprovalId(savedMpId);
+
     const saved4 = lsGet<OnboardingStep4Data>(LS_STEP4);
     if (saved4) setStep4Data(saved4);
+
+    // When MP redirects back after checkout, the URL contains step=4.
+    // Clean it up so the user doesn't see query noise.
+    const url = new URL(window.location.href);
+    if (url.searchParams.has('step')) {
+      url.searchParams.delete('step');
+      window.history.replaceState({}, '', url.toString());
+    }
   }, []);
 
   const goToStep = (step: number) => {
@@ -177,6 +190,7 @@ export function OnboardingWizard({
       'onboarding_email',
       'onboarding_org_name',
       LS_PLAN,
+      LS_MP_PREAPPROVAL_ID,
       LS_STEP2,
       LS_STEP4,
       LS_MAX_STEP,
@@ -241,6 +255,7 @@ export function OnboardingWizard({
             step2Data={step2Data}
             step4Data={step4Data}
             selectedPlan={selectedPlan}
+            mpPreapprovalId={mpPreapprovalId}
             onBack={() => goToStep(2)}
             onFinish={handleFinish}
             onCreationComplete={clearOnboardingLocalStorage}

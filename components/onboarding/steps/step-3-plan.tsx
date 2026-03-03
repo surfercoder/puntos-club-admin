@@ -1,9 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Star, Zap, Rocket } from 'lucide-react';
+import { Check, Star, Zap, Rocket, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { toast } from 'sonner';
 
 interface Plan {
   id: string;
@@ -13,6 +14,7 @@ interface Plan {
   icon: React.ElementType;
   color: string;
   badge?: string;
+  isPaid: boolean;
   features: {
     label: string;
     value: string | boolean;
@@ -28,6 +30,7 @@ const plans: Plan[] = [
     priceNote: 'por 3 meses',
     icon: Star,
     color: 'emerald',
+    isPaid: false,
     features: [
       { label: 'Premios canjeables', value: '2' },
       { label: 'Beneficiarios', value: '100' },
@@ -49,6 +52,7 @@ const plans: Plan[] = [
     icon: Zap,
     color: 'blue',
     badge: 'Popular',
+    isPaid: true,
     features: [
       { label: 'Premios canjeables', value: '10', highlight: true },
       { label: 'Beneficiarios', value: '500', highlight: true },
@@ -69,6 +73,7 @@ const plans: Plan[] = [
     priceNote: 'por mes',
     icon: Rocket,
     color: 'purple',
+    isPaid: true,
     features: [
       { label: 'Premios canjeables', value: '30', highlight: true },
       { label: 'Beneficiarios', value: '5.000', highlight: true },
@@ -127,6 +132,43 @@ interface Step3Props {
 
 export function Step3Plan({ onNext, onBack, initialPlan = 'trial' }: Step3Props) {
   const [selected, setSelected] = useState<string>(initialPlan);
+  const [loading, setLoading] = useState(false);
+
+  const selectedPlan = plans.find((p) => p.id === selected) ?? plans[0];
+
+  const handleContinue = async () => {
+    if (!selectedPlan.isPaid) {
+      onNext(selected);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const res = await fetch('/api/mercadopago/create-subscription', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ planId: selected }),
+      });
+
+      const data = await res.json() as { initPoint?: string; preapprovalId?: string; error?: string };
+
+      if (!res.ok || !data.initPoint) {
+        throw new Error(data.error ?? 'No se pudo iniciar el pago');
+      }
+
+      // Save preapproval id to localStorage so the wizard can recover it on return
+      if (data.preapprovalId) {
+        localStorage.setItem('mp_preapproval_id', data.preapprovalId);
+      }
+      localStorage.setItem('onboarding_plan', selected);
+
+      // Redirect to Mercado Pago hosted checkout
+      window.location.href = data.initPoint;
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : 'Error al procesar el pago');
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -196,18 +238,31 @@ export function Step3Plan({ onNext, onBack, initialPlan = 'trial' }: Step3Props)
 
       <p className="text-center text-xs text-muted-foreground">
         Todos los planes incluyen soporte por email. Puedes cambiar de plan en cualquier momento.
+        {selectedPlan.isPaid && (
+          <span className="block mt-1">
+            El pago se procesa de forma segura a través de Mercado Pago.
+          </span>
+        )}
       </p>
 
       <div className="flex gap-3 pt-2">
-        <Button type="button" variant="outline" onClick={onBack} className="flex-1">
+        <Button type="button" variant="outline" onClick={onBack} className="flex-1" disabled={loading}>
           Atrás
         </Button>
         <Button
           type="button"
-          className={cn('flex-1', buttonColorMap[plans.find((p) => p.id === selected)?.color ?? 'emerald'])}
-          onClick={() => onNext(selected)}
+          className={cn('flex-1', buttonColorMap[selectedPlan.color])}
+          onClick={handleContinue}
+          disabled={loading}
         >
-          Continuar con {plans.find((p) => p.id === selected)?.name}
+          {loading ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Redirigiendo a Mercado Pago...
+            </>
+          ) : (
+            `Continuar con ${selectedPlan.name}`
+          )}
         </Button>
       </div>
     </div>
