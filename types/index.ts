@@ -20,3 +20,6 @@ export * from './user_role';
 export * from './push_token';
 export * from './push_notification';
 export * from './organization_notification_limit';
+
+// Plan & usage limit types
+export * from './plan';

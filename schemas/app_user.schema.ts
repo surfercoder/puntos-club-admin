@@ -12,6 +12,7 @@ export const AppUserSchema = z.object({
     if (typeof val === 'boolean') return val;
     return val === 'true' || val === 'on';
   }).default(true),
+  role_id: z.string().optional().nullable(),
 });
 
 export type AppUserInput = z.input<typeof AppUserSchema>;

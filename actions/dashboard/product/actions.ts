@@ -6,6 +6,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { isAdmin } from '@/lib/auth/roles';
 import type { Product } from '@/types/product';
+import { enforcePlanLimit } from '@/lib/plans/usage';
 
 export async function createProduct(input: Product) {
   const supabase = await createClient();
@@ -16,6 +17,11 @@ export async function createProduct(input: Product) {
 
   if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
     return { data: null, error: { message: 'Missing active organization' } };
+  }
+
+  const limitError = await enforcePlanLimit(activeOrgIdNumber, 'redeemable_products');
+  if (limitError) {
+    return { data: null, error: { message: limitError.message } };
   }
 
   const { data, error } = await supabase

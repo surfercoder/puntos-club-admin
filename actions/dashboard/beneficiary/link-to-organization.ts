@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { enforcePlanLimit } from '@/lib/plans/usage';
 
 /**
  * Links an existing beneficiary to the current user's organization
@@ -45,6 +46,12 @@ export async function linkBeneficiaryToOrganization(beneficiaryId: string) {
   if (existing) {
     // If relationship exists but is inactive, reactivate it
     if (!existing.is_active) {
+      // Re-activating counts as a new beneficiary — enforce the limit
+      const limitError = await enforcePlanLimit(Number(currentUser.organization_id), 'beneficiaries');
+      if (limitError) {
+        return { data: null, error: { message: limitError.message } };
+      }
+
       const { data, error } = await supabase
         .from('beneficiary_organization')
         .update({ is_active: true })
@@ -60,6 +67,12 @@ export async function linkBeneficiaryToOrganization(beneficiaryId: string) {
       data: existing, 
       error: null 
     };
+  }
+
+  // Enforce beneficiary limit before creating a new link
+  const limitError = await enforcePlanLimit(Number(currentUser.organization_id), 'beneficiaries');
+  if (limitError) {
+    return { data: null, error: { message: limitError.message } };
   }
 
   // Create the beneficiary_organization relationship

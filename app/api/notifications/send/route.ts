@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { checkPlanLimit } from "@/lib/plans/usage";
 
 interface ExpoPushMessage {
   to: string;
@@ -103,6 +104,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         { success: false, error: "Notification already sent" },
         { status: 400 }
+      );
+    }
+
+    // Enforce monthly push notification quota
+    const limitResult = await checkPlanLimit(
+      notification.organization_id as number,
+      'push_notifications_monthly'
+    );
+
+    if (limitResult && !limitResult.allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Has alcanzado el límite de notificaciones mensuales (${limitResult.current_usage}/${limitResult.limit_value}) para tu plan ${limitResult.plan}. Actualiza tu plan para continuar.`,
+          limit: limitResult,
+        },
+        { status: 429 }
       );
     }
 

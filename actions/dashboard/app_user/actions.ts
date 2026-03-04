@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { AppUserSchema } from '@/schemas/app_user.schema';
 import type { AppUser } from '@/types/app_user';
+import { enforcePlanLimit } from '@/lib/plans/usage';
+import type { PlanFeatureKey } from '@/types/plan';
 
 export async function createAppUser(input: AppUser) {
   const parsed = AppUserSchema.safeParse(input);
@@ -17,6 +19,29 @@ export async function createAppUser(input: AppUser) {
   }
 
   const supabase = await createClient();
+
+  // Enforce cashier / collaborator quotas before inserting
+  if (parsed.data.role_id && parsed.data.organization_id) {
+    const { data: roleData } = await supabase
+      .from('user_role')
+      .select('name')
+      .eq('id', parsed.data.role_id)
+      .single();
+
+    const roleFeatureMap: Record<string, PlanFeatureKey> = {
+      cashier:      'cashiers',
+      collaborator: 'collaborators',
+    };
+    const feature = roleData?.name ? roleFeatureMap[roleData.name as string] : undefined;
+
+    if (feature) {
+      const limitError = await enforcePlanLimit(Number(parsed.data.organization_id), feature);
+      if (limitError) {
+        return { data: null, error: { message: limitError.message } };
+      }
+    }
+  }
+
   const { data, error } = await supabase.from('app_user').insert([parsed.data]).select().single();
 
   return { data, error };

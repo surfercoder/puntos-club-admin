@@ -5,6 +5,7 @@ import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { BranchSchema } from '@/schemas/branch.schema';
 import type { Branch } from '@/types/branch';
+import { enforcePlanLimit } from '@/lib/plans/usage';
 
 export async function createBranch(input: Branch) {
   const parsed = BranchSchema.safeParse(input);
@@ -26,6 +27,11 @@ export async function createBranch(input: Branch) {
 
   if (!activeOrgIdNumber) {
     return { data: null, error: { message: 'No active organization selected' } };
+  }
+
+  const limitError = await enforcePlanLimit(activeOrgIdNumber, 'branches');
+  if (limitError) {
+    return { data: null, error: { message: limitError.message } };
   }
 
   const { data, error } = await supabase.from('branch').insert([{
