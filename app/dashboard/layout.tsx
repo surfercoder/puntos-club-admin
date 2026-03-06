@@ -77,7 +77,9 @@ export default async function DashboardLayout({
           name: name || currentUser.username || 'User',
           email: currentUser.email || 'unknown',
         }}
+        userId={currentUser.id}
         userRole={currentUser.role?.name ?? null}
+        tourCompleted={currentUser.tour_completed ?? false}
         orgs={orgs.length ? orgs : currentUser.organization ? [{ id: currentUser.organization.id, name: currentUser.organization.name }] : []}
         portalMode={isAdmin(currentUser) ? 'admin' : 'org'}
       >

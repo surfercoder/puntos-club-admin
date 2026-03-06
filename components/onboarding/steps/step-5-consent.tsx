@@ -2,7 +2,7 @@
 
 import { useEffect, useReducer, useRef } from 'react';
 import { ArrowLeft, CheckCircle2, FileText, Loader2, ScrollText, ShieldCheck } from 'lucide-react';
-import { Turnstile } from '@marsidev/react-turnstile';
+import ReCAPTCHA from 'react-google-recaptcha';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
@@ -19,7 +19,7 @@ interface ConsentState {
   hasScrolledToBottom: boolean;
   consentChecked: boolean;
   captchaToken: string | null;
-  captchaStatus: 'idle' | 'solving' | 'success' | 'error';
+  captchaStatus: 'idle' | 'success' | 'error' | 'expired';
   captchaError: string | null;
   isVerifying: boolean;
 }
@@ -27,7 +27,6 @@ interface ConsentState {
 type ConsentAction =
   | { type: 'SCROLL_TO_BOTTOM' }
   | { type: 'SET_CONSENT'; value: boolean }
-  | { type: 'CAPTCHA_SOLVING' }
   | { type: 'CAPTCHA_SUCCESS'; token: string }
   | { type: 'CAPTCHA_ERROR' }
   | { type: 'CAPTCHA_EXPIRE' }
@@ -53,14 +52,12 @@ function consentReducer(state: ConsentState, action: ConsentAction): ConsentStat
         return { ...state, consentChecked: false, captchaToken: null, captchaStatus: 'idle', captchaError: null };
       }
       return { ...state, consentChecked: true };
-    case 'CAPTCHA_SOLVING':
-      return { ...state, captchaStatus: 'solving' };
     case 'CAPTCHA_SUCCESS':
       return { ...state, captchaToken: action.token, captchaStatus: 'success', captchaError: null };
     case 'CAPTCHA_ERROR':
       return { ...state, captchaToken: null, captchaStatus: 'error', captchaError: 'Error al cargar el captcha. Intentá de nuevo.' };
     case 'CAPTCHA_EXPIRE':
-      return { ...state, captchaToken: null, captchaStatus: 'idle', captchaError: 'El captcha expiró. Por favor completalo de nuevo.' };
+      return { ...state, captchaToken: null, captchaStatus: 'expired', captchaError: 'El captcha expiró. Por favor completalo de nuevo.' };
     case 'VERIFY_START':
       return { ...state, isVerifying: true, captchaError: null };
     case 'VERIFY_FAILED':
@@ -237,10 +234,10 @@ interface CaptchaVerificationProps {
   onSuccess: (token: string) => void;
   onError: () => void;
   onExpire: () => void;
-  onBeforeInteractive: () => void;
+  recaptchaRef: React.RefObject<ReCAPTCHA | null>;
 }
 
-function CaptchaVerification({ status, error, onSuccess, onError, onExpire, onBeforeInteractive }: CaptchaVerificationProps) {
+function CaptchaVerification({ status, error, onSuccess, onError, onExpire, recaptchaRef }: CaptchaVerificationProps) {
   return (
     <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30 p-4 space-y-3 transition-all">
       <div className="flex items-center gap-2">
@@ -254,13 +251,14 @@ function CaptchaVerification({ status, error, onSuccess, onError, onExpire, onBe
       </p>
 
       <div className="flex items-center justify-start">
-        <Turnstile
-          siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY ?? '1x00000000000000000000AA'}
-          onSuccess={onSuccess}
-          onError={onError}
-          onExpire={onExpire}
-          onBeforeInteractive={onBeforeInteractive}
-          options={{ theme: 'auto', size: 'normal' }}
+        <ReCAPTCHA
+          ref={recaptchaRef}
+          sitekey={process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY!}
+          onChange={(token) => {
+            if (token) onSuccess(token);
+          }}
+          onErrored={onError}
+          onExpired={onExpire}
         />
       </div>
 
@@ -292,6 +290,7 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
   const t = useTranslations('Onboarding.step5');
   const tCommon = useTranslations('Common');
   const scrollRef = useRef<HTMLDivElement>(null);
+  const recaptchaRef = useRef<ReCAPTCHA>(null);
   const [state, dispatch] = useReducer(consentReducer, initialState);
 
   useEffect(() => {
@@ -316,6 +315,9 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
   const handleConsentChange = (checked: boolean | 'indeterminate') => {
     const value = checked === true;
     dispatch({ type: 'SET_CONSENT', value });
+    if (!value) {
+      recaptchaRef.current?.reset();
+    }
     try {
       if (value) {
         localStorage.setItem(LS_CONSENT, 'true');
@@ -335,9 +337,11 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
       if (result.success) {
         onNext();
       } else {
+        recaptchaRef.current?.reset();
         dispatch({ type: 'VERIFY_FAILED', error: result.error ?? 'Verificación fallida. Intentá de nuevo.' });
       }
     } catch {
+      recaptchaRef.current?.reset();
       dispatch({ type: 'VERIFY_FAILED', error: 'Error inesperado. Intentá de nuevo.' });
     }
   };
@@ -409,10 +413,10 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
         <CaptchaVerification
           status={state.captchaStatus}
           error={state.captchaError}
+          recaptchaRef={recaptchaRef}
           onSuccess={(token) => dispatch({ type: 'CAPTCHA_SUCCESS', token })}
           onError={() => dispatch({ type: 'CAPTCHA_ERROR' })}
           onExpire={() => dispatch({ type: 'CAPTCHA_EXPIRE' })}
-          onBeforeInteractive={() => dispatch({ type: 'CAPTCHA_SOLVING' })}
         />
       )}
 

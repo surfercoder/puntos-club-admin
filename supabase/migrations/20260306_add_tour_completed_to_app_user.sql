@@ -1,0 +1,2 @@
+ALTER TABLE public.app_user
+ADD COLUMN tour_completed BOOLEAN NOT NULL DEFAULT FALSE;

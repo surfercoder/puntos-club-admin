@@ -348,7 +348,7 @@ export function OnboardingWizard({
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
       <div className="mb-8">
         <nav aria-label={t('progress')}>
-          <ol className="flex items-center justify-between">
+          <ol className="flex items-center">
             {steps.map((step, idx) => {
               const Icon = step.icon;
               const isCompleted = currentStep > step.number;
@@ -356,13 +356,13 @@ export function OnboardingWizard({
               const isClickable = canNavigateToStep(step.number);
 
               return (
-                <li key={step.number} className="flex flex-1 items-center">
+                <li key={step.number} className="contents">
                   <button
                     type="button"
                     disabled={!isClickable}
                     onClick={() => isClickable && goToStep(step.number)}
                     className={cn(
-                      'flex flex-col items-center gap-1.5 focus:outline-none group',
+                      'flex flex-col items-center gap-1.5 focus:outline-none group shrink-0',
                       isClickable ? 'cursor-pointer' : 'cursor-not-allowed'
                     )}
                     aria-current={isCurrent ? 'step' : undefined}

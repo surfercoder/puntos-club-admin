@@ -2,44 +2,35 @@
 
 import { useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
+import { completeTour } from "@/actions/dashboard/tour/actions";
 import type { Tour, StepOptions } from "shepherd.js";
-
-const TOUR_STORAGE_KEY_PREFIX = "puntos_club_tour_v1_";
 
 interface DashboardTourProps {
   userRole: string | null;
-  userEmail: string;
+  userId: string;
+  tourCompleted: boolean;
 }
 
-export function DashboardTour({ userRole, userEmail }: DashboardTourProps) {
+export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTourProps) {
   const t = useTranslations("Tour");
   const initialized = useRef(false);
   const tourRef = useRef<Tour | null>(null);
 
   useEffect(() => {
     if (userRole !== "owner") return;
+    if (tourCompleted) return;
     if (initialized.current) return;
-
-    const storageKey = `${TOUR_STORAGE_KEY_PREFIX}${userEmail}`;
-
-    try {
-      if (localStorage.getItem(storageKey) === "completed") return;
-    } catch {
-      return;
-    }
 
     initialized.current = true;
 
     const markCompleted = () => {
-      try {
-        localStorage.setItem(storageKey, "completed");
-      } catch { /* ignore localStorage errors */ }
+      completeTour(userId).catch(console.error);
     };
 
     const initTour = async () => {
-      const { Tour: ShepherdTour } = await import("shepherd.js");
+      const Shepherd = (await import("shepherd.js")).default;
 
-      const tour = new ShepherdTour({
+      const tour = new Shepherd.Tour({
         useModalOverlay: true,
         defaultStepOptions: {
           cancelIcon: { enabled: false },
@@ -79,13 +70,12 @@ export function DashboardTour({ userRole, userEmail }: DashboardTourProps) {
       const skipButton = {
         text: t("skip"),
         action() {
-          markCompleted();
           tour.cancel();
         },
         classes: "shepherd-button-secondary",
       };
 
-      const steps: StepOptions[] = [
+      const stepDefs: StepOptions[] = [
         {
           id: "welcome",
           title: t("welcome.title"),
@@ -160,6 +150,15 @@ export function DashboardTour({ userRole, userEmail }: DashboardTourProps) {
         },
       ];
 
+      const totalSteps = stepDefs.length;
+      const steps: StepOptions[] = stepDefs.map((step, idx) => {
+        const dots = Array.from({ length: totalSteps }, (_, i) =>
+          `<span class="shepherd-progress-dot${i === idx ? " shepherd-progress-dot--active" : ""}"></span>`
+        ).join("");
+        const progress = `<div class="shepherd-progress">${dots}<span class="shepherd-progress-text">${idx + 1} / ${totalSteps}</span></div>`;
+        return { ...step, text: `${step.text ?? ""}${progress}` };
+      });
+
       tour.addSteps(steps);
 
       const timer = setTimeout(() => {
@@ -184,11 +183,11 @@ export function DashboardTour({ userRole, userEmail }: DashboardTourProps) {
       if (tourRef.current) {
         try {
           tourRef.current.cancel();
-        } catch { /* ignore localStorage errors */ }
+        } catch { /* ignore */ }
         tourRef.current = null;
       }
     };
-  }, [userRole, userEmail, t]);
+  }, [userRole, userId, tourCompleted, t]);
 
   return null;
 }

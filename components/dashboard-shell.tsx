@@ -39,13 +39,17 @@ type DashboardShellPortalMode = "admin" | "org";
 export function DashboardShell({
   children,
   user,
+  userId,
   userRole,
+  tourCompleted,
   orgs,
   portalMode,
 }: {
   children: React.ReactNode;
   user: DashboardShellUser;
+  userId: string;
   userRole: string | null;
+  tourCompleted: boolean;
   orgs: DashboardShellOrg[];
   portalMode: DashboardShellPortalMode;
 }) {
@@ -144,7 +148,7 @@ export function DashboardShell({
 
   return (
     <SidebarProvider>
-      <DashboardTour userRole={userRole} userEmail={user.email} />
+      <DashboardTour userRole={userRole} userId={userId} tourCompleted={tourCompleted} />
       <AppSidebar
         user={user}
         userRole={userRole}

@@ -211,6 +211,35 @@
   opacity: 1;
 }
 
+.shepherd-progress {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px solid var(--border);
+}
+
+.shepherd-progress-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--muted);
+  transition: background 0.2s, transform 0.2s;
+}
+
+.shepherd-progress-dot--active {
+  background: var(--primary);
+  transform: scale(1.25);
+}
+
+.shepherd-progress-text {
+  margin-left: 6px;
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
 .dark .shepherd-element {
   box-shadow:
     0 10px 15px -3px oklch(0 0 0 / 0.4),
