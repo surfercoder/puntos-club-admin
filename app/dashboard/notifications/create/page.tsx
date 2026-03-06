@@ -1,5 +1,6 @@
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
 import NotificationForm from '@/components/dashboard/notifications/notification-form';
 import { Button } from '@/components/ui/button';
@@ -7,6 +8,8 @@ import { createClient } from '@/lib/supabase/server';
 
 export default async function CreateNotificationPage() {
   const supabase = await createClient();
+  const t = await getTranslations('Dashboard.notifications');
+  const tCommon = await getTranslations('Common');
 
   const {
     data: { user },
@@ -34,14 +37,12 @@ export default async function CreateNotificationPage() {
         <Button asChild variant="ghost" size="sm">
           <Link href="/dashboard/notifications">
             <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
+            {tCommon('back')}
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold">Create Push Notification</h1>
-          <p className="text-muted-foreground">
-            Send a notification to all your active beneficiaries
-          </p>
+          <h1 className="text-2xl font-bold">{t('createPage.title')}</h1>
+          <p className="text-muted-foreground">{t('createPage.description')}</p>
         </div>
       </div>
 

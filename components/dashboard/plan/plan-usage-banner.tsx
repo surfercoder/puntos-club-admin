@@ -3,18 +3,20 @@
 import { useEffect, useState } from 'react';
 import { AlertTriangle, XCircle, TrendingUp, X } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+
 import { cn } from '@/lib/utils';
 import { getUsageSummaryAction } from '@/actions/dashboard/usage/actions';
 import { PLAN_FEATURE_LABELS, PLAN_DISPLAY_NAMES } from '@/lib/plans/config';
 import type { FeatureUsage, OrganizationUsageSummary, PlanFeatureKey } from '@/types/plan';
 
 interface PlanUsageBannerProps {
-  /** Only show warnings for these specific features (all features by default) */
   features?: PlanFeatureKey[];
   className?: string;
 }
 
 function FeatureWarning({ usage }: { usage: FeatureUsage }) {
+  const t = useTranslations('Dashboard.plan');
   const label = PLAN_FEATURE_LABELS[usage.feature];
   const isAtLimit = usage.is_at_limit;
 
@@ -27,13 +29,14 @@ function FeatureWarning({ usage }: { usage: FeatureUsage }) {
       )}
       <span>
         <strong>{label}</strong>: {usage.current_usage}/{usage.limit_value}
-        {isAtLimit ? ' — límite alcanzado' : ` (${usage.usage_percentage}%)`}
+        {isAtLimit ? ` ${t('limitReachedSuffix')}` : ` (${usage.usage_percentage}%)`}
       </span>
     </span>
   );
 }
 
 export function PlanUsageBanner({ features, className }: PlanUsageBannerProps) {
+  const t = useTranslations('Dashboard.plan');
   const [summary, setSummary] = useState<OrganizationUsageSummary | null>(null);
   const [dismissed, setDismissed] = useState(false);
 
@@ -68,7 +71,7 @@ export function PlanUsageBanner({ features, className }: PlanUsageBannerProps) {
         type="button"
         onClick={() => setDismissed(true)}
         className="absolute right-3 top-3 opacity-60 hover:opacity-100 transition-opacity"
-        aria-label="Cerrar aviso"
+        aria-label={t('closeBanner')}
       >
         <X className="h-4 w-4" />
       </button>
@@ -78,8 +81,8 @@ export function PlanUsageBanner({ features, className }: PlanUsageBannerProps) {
         <div className="space-y-1.5">
           <p className="font-semibold text-sm">
             {hasAtLimit
-              ? `Has alcanzado uno o más límites de tu ${planName}`
-              : `Te estás acercando a los límites de tu ${planName}`}
+              ? t('limitReachedBanner', { plan: planName })
+              : t('nearingLimitBanner', { plan: planName })}
           </p>
 
           <div className="flex flex-wrap gap-x-4 gap-y-1">
@@ -94,7 +97,7 @@ export function PlanUsageBanner({ features, className }: PlanUsageBannerProps) {
                 href="/dashboard/settings/plan"
                 className="underline underline-offset-2 font-medium hover:opacity-100"
               >
-                Actualiza tu plan
+                {t('upgradePlan')}
               </Link>{' '}
               para aumentar estos límites.
             </p>

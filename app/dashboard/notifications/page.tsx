@@ -1,5 +1,6 @@
 import { Bell, Send } from 'lucide-react';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,7 +17,9 @@ import type { PushNotification } from '@/types/push_notification';
 
 export default async function NotificationsPage() {
   const supabase = await createClient();
-  
+  const t = await getTranslations('Dashboard.notifications');
+  const tCommon = await getTranslations('Common');
+
   const { data: notifications, error } = await supabase
     .from('push_notifications')
     .select(`
@@ -49,16 +52,14 @@ export default async function NotificationsPage() {
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Bell className="h-6 w-6" />
-            Notificaciones Push
+            {t('title')}
           </h1>
-          <p className="text-muted-foreground">
-            Envía notificaciones a tus beneficiarios
-          </p>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
           <Link href="/dashboard/notifications/create">
             <Send className="h-4 w-4 mr-2" />
-            Nueva Notificación
+            {t('newButton')}
           </Link>
         </Button>
       </div>
@@ -67,13 +68,13 @@ export default async function NotificationsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Título</TableHead>
-              <TableHead>Mensaje</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Enviadas</TableHead>
-              <TableHead>Fallidas</TableHead>
-              <TableHead>Creado por</TableHead>
-              <TableHead>Creado el</TableHead>
+              <TableHead>{t('tableHeaders.title')}</TableHead>
+              <TableHead>{t('tableHeaders.message')}</TableHead>
+              <TableHead>{t('tableHeaders.status')}</TableHead>
+              <TableHead>{t('tableHeaders.sent')}</TableHead>
+              <TableHead>{t('tableHeaders.failed')}</TableHead>
+              <TableHead>{tCommon('createdBy')}</TableHead>
+              <TableHead>{tCommon('createdAt')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -94,7 +95,7 @@ export default async function NotificationsPage() {
                   <TableCell>{notification.sent_count}</TableCell>
                   <TableCell>{notification.failed_count}</TableCell>
                   <TableCell>
-                    {notification.creator 
+                    {notification.creator
                       ? `${notification.creator.first_name || ''} ${notification.creator.last_name || ''}`.trim() || notification.creator.email
                       : 'N/A'
                     }
@@ -109,10 +110,10 @@ export default async function NotificationsPage() {
                 <TableCell className="text-center py-8" colSpan={7}>
                   <div className="flex flex-col items-center gap-2">
                     <Bell className="h-12 w-12 text-muted-foreground" />
-                    <p className="text-muted-foreground">Aún no se enviaron notificaciones</p>
+                    <p className="text-muted-foreground">{t('empty')}</p>
                     <Button asChild variant="outline" size="sm">
                       <Link href="/dashboard/notifications/create">
-                        Enviar la primera notificación
+                        {t('emptyAction')}
                       </Link>
                     </Button>
                   </div>

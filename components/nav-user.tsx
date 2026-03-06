@@ -5,6 +5,8 @@ import {
   LogOut,
   User,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
+import Link from "next/link"
 
 import {
   Avatar,
@@ -25,7 +27,6 @@ import {
   SidebarMenuItem,
   useSidebar,
 } from "@/components/ui/sidebar"
-import Link from "next/link"
 
 export function NavUser({
   user,
@@ -39,6 +40,7 @@ export function NavUser({
   onLogout?: () => void
 }) {
   const { isMobile } = useSidebar()
+  const t = useTranslations("Navigation")
 
   const initials = user.name
     .split(" ")
@@ -91,7 +93,7 @@ export function NavUser({
             <DropdownMenuItem asChild>
               <Link href="/dashboard/profile" className="cursor-pointer">
                 <User />
-                Perfil
+                {t("profile")}
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem
@@ -99,7 +101,7 @@ export function NavUser({
               className="cursor-pointer"
             >
               <LogOut />
-              Cerrar sesión
+              {t("logout")}
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

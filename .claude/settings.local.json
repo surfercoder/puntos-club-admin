@@ -24,7 +24,20 @@
       "Bash(kill:*)",
       "Bash(npm run seed:*)",
       "Bash(tsx scripts/check-database.ts:*)",
-      "Bash(npx tsx:*)"
+      "Bash(npx tsx:*)",
+      "Bash(npx next build --no-lint 2>&1 | tail -30)",
+      "Bash(npx next build 2>&1 | tail -40)",
+      "Bash(npx tsc --noEmit --pretty 2>&1 | head -20)",
+      "Bash(npx react-doctor --help 2>&1 | head -30)",
+      "Bash(npx react-doctor --no-ami 2>&1)",
+      "Bash(npx tsc --noEmit --pretty app/dashboard/points-rules/page.tsx 2>&1 | head -50)",
+      "Bash(npx tsc --noEmit --pretty app/dashboard/points-rules/edit/\\\\[id\\\\]/page.tsx 2>&1 | head -50)",
+      "Bash(npx tsc --noEmit --pretty components/onboarding/steps/step-2-company.tsx 2>&1 | head -50)",
+      "Bash(npx tsc --noEmit 2>&1 | grep \"page.tsx\" | head -20)",
+      "Bash(npx tsc --noEmit --pretty 2>&1 | grep \"page.tsx\" | grep -v \"Cannot find module\" | head -20)",
+      "Bash(npx next lint --file components/onboarding/steps/step-2-company.tsx 2>&1 | head -20)",
+      "Bash(npx tsc --noEmit 2>&1 | grep step-2-company | head -20)",
+      "Bash(npx jest --no-watchman 2>&1)"
     ],
     "deny": []
   },

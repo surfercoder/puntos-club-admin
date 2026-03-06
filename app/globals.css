@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "shepherd.js/dist/css/shepherd.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -122,4 +123,96 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Shepherd.js tour overrides */
+.shepherd-element {
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 10px 15px -3px oklch(0 0 0 / 0.1),
+    0 4px 6px -4px oklch(0 0 0 / 0.1);
+  max-width: 360px;
+}
+
+.shepherd-content {
+  border-radius: var(--radius-lg);
+  background: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  padding: 0;
+}
+
+.shepherd-header {
+  background: var(--card);
+  border-bottom: 1px solid var(--border);
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  padding: 1rem 1.25rem 0.875rem;
+}
+
+.shepherd-title {
+  color: var(--card-foreground);
+  font-size: 0.9375rem;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.shepherd-text {
+  background: var(--card);
+  color: var(--muted-foreground);
+  font-size: 0.875rem;
+  line-height: 1.6;
+  padding: 0.875rem 1.25rem;
+}
+
+.shepherd-footer {
+  background: var(--card);
+  border-top: 1px solid var(--border);
+  border-radius: 0 0 var(--radius-lg) var(--radius-lg);
+  padding: 0.75rem 1.25rem;
+  gap: 0.5rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.shepherd-button {
+  border-radius: var(--radius-md);
+  font-size: 0.875rem;
+  font-weight: 500;
+  padding: 0.4375rem 1rem;
+  transition: opacity 0.15s ease;
+  cursor: pointer;
+  border: none;
+}
+
+.shepherd-button-primary {
+  background: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.shepherd-button-primary:hover:not(:disabled) {
+  opacity: 0.9;
+}
+
+.shepherd-button-secondary {
+  background: var(--secondary);
+  color: var(--secondary-foreground);
+}
+
+.shepherd-button-secondary:hover:not(:disabled) {
+  opacity: 0.8;
+}
+
+.shepherd-arrow::before {
+  background: var(--card);
+  border: 1px solid var(--border);
+}
+
+.shepherd-modal-overlay-container {
+  opacity: 1;
+}
+
+.dark .shepherd-element {
+  box-shadow:
+    0 10px 15px -3px oklch(0 0 0 / 0.4),
+    0 4px 6px -4px oklch(0 0 0 / 0.3);
 }

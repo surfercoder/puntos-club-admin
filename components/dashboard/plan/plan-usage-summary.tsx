@@ -13,6 +13,8 @@ import {
   ExternalLink,
 } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
+
 import { cn } from '@/lib/utils';
 import { getUsageSummaryAction } from '@/actions/dashboard/usage/actions';
 import {
@@ -62,7 +64,6 @@ function FeatureRow({ usage }: { usage: FeatureUsage }) {
         </span>
       </div>
 
-      {/* Progress bar */}
       <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
         <div
           className={cn('h-full rounded-full transition-all duration-500', color)}
@@ -80,11 +81,11 @@ function FeatureRow({ usage }: { usage: FeatureUsage }) {
 
 interface PlanUsageSummaryProps {
   className?: string;
-  /** Show a compact version without the card chrome */
   compact?: boolean;
 }
 
 export function PlanUsageSummary({ className, compact = false }: PlanUsageSummaryProps) {
+  const t = useTranslations('Dashboard.plan');
   const [summary, setSummary] = useState<OrganizationUsageSummary | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -129,11 +130,10 @@ export function PlanUsageSummary({ className, compact = false }: PlanUsageSummar
         className
       )}
     >
-      {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b">
         <div className="flex items-center gap-2">
           <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          <span className="font-semibold text-sm">Uso del plan</span>
+          <span className="font-semibold text-sm">{t('usageTitle')}</span>
           <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
             {planName}
           </span>
@@ -144,23 +144,19 @@ export function PlanUsageSummary({ className, compact = false }: PlanUsageSummar
             href="/dashboard/settings/plan"
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
-            Mejorar plan
+            {t('upgradePlanButton')}
             <ExternalLink className="h-3 w-3" />
           </Link>
         )}
       </div>
 
-      {/* Warning pill */}
       {anyWarning && (
         <div className="mx-5 mt-4 flex items-center gap-2 rounded-md bg-amber-50 px-3 py-2 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
           <TrendingUp className="h-3.5 w-3.5 shrink-0" />
-          <span className="text-xs">
-            Uno o más recursos están cerca del límite de tu plan.
-          </span>
+          <span className="text-xs">{t('nearingLimitWarning')}</span>
         </div>
       )}
 
-      {/* Feature rows */}
       <div className="px-5 py-4">{inner}</div>
     </div>
   );

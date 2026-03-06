@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { Plus, Trash2, Package, Tag, Info } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -61,6 +62,9 @@ function restoreCategories(data: OnboardingStep4Data): Category[] {
 }
 
 export function Step4Products({ onNext, onBack, initialData, onAutoSave }: Step4Props) {
+  const t = useTranslations('Onboarding.step4');
+  const tCommon = useTranslations('Common');
+
   const [categories, setCategories] = useState<Category[]>(() =>
     initialData?.categories.length ? restoreCategories(initialData) : [createCategory()]
   );
@@ -148,7 +152,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave }: Step4
     );
 
     if (validCategories.length === 0) {
-      toast.error('Agrega al menos una categoría con un producto.');
+      toast.error(t('validationError'));
       return;
     }
 
@@ -191,7 +195,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave }: Step4
               <div className="flex-1 space-y-1">
                 <Label htmlFor={`cat-${category.id}`} className="flex items-center gap-1.5">
                   <Tag className="h-3.5 w-3.5" />
-                  Nombre de la categoría
+                  {t('categoryName')}
                 </Label>
                 <Input
                   id={`cat-${category.id}`}
@@ -222,7 +226,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave }: Step4
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2 text-sm text-muted-foreground">
                       <Package className="h-3.5 w-3.5" />
-                      Premio {prodIndex + 1}
+                      {t('rewardPlaceholder', { n: prodIndex + 1 })}
                     </div>
                     {category.products.length > 1 && (
                       <Button
@@ -233,14 +237,14 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave }: Step4
                         onClick={() => removeProduct(category.id, product.id)}
                       >
                         <Trash2 className="h-3.5 w-3.5 mr-1" />
-                        Eliminar
+                        {tCommon('delete')}
                       </Button>
                     )}
                   </div>
 
                   <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                     <div className="space-y-1 sm:col-span-2">
-                      <Label className="text-xs">Nombre del premio</Label>
+                      <Label className="text-xs">{t('rewardName')}</Label>
                       <Input
                         placeholder="Ej: Café mediano, Remera, Cargador..."
                         value={product.name}
@@ -252,7 +256,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave }: Step4
                     </div>
 
                     <div className="space-y-1">
-                      <Label className="text-xs">Puntos requeridos</Label>
+                      <Label className="text-xs">{t('pointsRequired')}</Label>
                       <Input
                         type="number"
                         min={1}
@@ -271,7 +275,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave }: Step4
                     </div>
 
                     <div className="space-y-1">
-                      <Label className="text-xs">Stock inicial</Label>
+                      <Label className="text-xs">{t('initialStock')}</Label>
                       <Input
                         type="number"
                         min={0}
@@ -300,7 +304,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave }: Step4
                 onClick={() => addProduct(category.id)}
               >
                 <Plus className="mr-1.5 h-3.5 w-3.5" />
-                Agregar otro premio a esta categoría
+                {t('addReward')}
               </Button>
             </div>
           </div>
@@ -314,12 +318,12 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave }: Step4
         onClick={addCategory}
       >
         <Plus className="mr-2 h-4 w-4" />
-        Agregar otra categoría
+        {t('addCategory')}
       </Button>
 
       <div className="flex flex-col gap-3 pt-2 sm:flex-row">
         <Button type="button" variant="outline" onClick={handleBack} className="sm:flex-1">
-          Atrás
+          {tCommon('back')}
         </Button>
         <Button
           type="button"
@@ -327,10 +331,10 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave }: Step4
           onClick={() => onNext(null)}
           className="text-muted-foreground text-sm sm:flex-none"
         >
-          Omitir por ahora
+          {tCommon('skip')}
         </Button>
         <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 sm:flex-1">
-          Continuar
+          {tCommon('continue')}
         </Button>
       </div>
     </form>

@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from "sonner";
 
 import { userFormAction } from '@/actions/dashboard/user/user-form-actions';
@@ -29,7 +30,8 @@ interface UserFormProps {
 }
 
 export default function UserForm({ user, organizations, roles, currentUser, defaultOrgId }: UserFormProps) {
-  // State
+  const t = useTranslations('Dashboard.user.form');
+  const tCommon = useTranslations('Common');
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [selectedOrg, setSelectedOrg] = useState<string>(
     user?.organization_id ?? defaultOrgId ?? ''
@@ -41,25 +43,24 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
   const isOrgDisabled = currentUser && isOwner(currentUser) && organizations.length === 1;
 
   // Utils
-  const [actionState, formAction, pending] = useActionState(userFormAction, EMPTY_ACTION_STATE);
   const router = useRouter();
 
-  useEffect(() => {
-    if (actionState.message) {
-      // Check if it's an error message (contains "Failed" or "Error")
-      const isError = actionState.message.toLowerCase().includes('failed') || 
-                      actionState.message.toLowerCase().includes('error');
-      
+  const wrappedAction = async (state: ActionState, formData: FormData) => {
+    const result = await userFormAction(state, formData);
+    if (result.message) {
+      const isError = result.message.toLowerCase().includes('failed') ||
+                      result.message.toLowerCase().includes('error');
       if (isError) {
-        toast.error(actionState.message);
+        toast.error(result.message);
       } else {
-        toast.success(actionState.message);
-        setTimeout(() => {
-          router.push("/dashboard/users");
-        }, 500);
+        toast.success(result.message);
+        setTimeout(() => router.push("/dashboard/users"), 500);
       }
     }
-  }, [actionState, router]);
+    return result;
+  };
+
+  const [actionState, formAction, pending] = useActionState(wrappedAction, EMPTY_ACTION_STATE);
 
   // Determine user_type based on selected role
   const getUserType = (roleId: string | undefined): 'app_user' | 'beneficiary' => {
@@ -92,7 +93,7 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
       {isOrgDisabled && <input name="organization_id" type="hidden" value={selectedOrg} />}
       
       <div>
-        <Label htmlFor="organization_id">Organización *</Label>
+        <Label htmlFor="organization_id">{t('organizationLabel')}</Label>
         <select
           id="organization_id"
           name={isOrgDisabled ? undefined : "organization_id"}
@@ -103,7 +104,7 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
           aria-describedby="organization_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.organization_id}
         >
-          <option value="">Seleccionar organización</option>
+          <option value="">{t('selectOrganization')}</option>
           {organizations.map((org) => (
             <option key={org.id} value={org.id}>
               {org.name}
@@ -113,13 +114,13 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
         <FieldError actionState={validation ?? actionState} name="organization_id" />
         {isOrgDisabled && (
           <p className="text-sm text-muted-foreground mt-1">
-            Solo podés crear usuarios para tu organización
+            {t('orgDisabledHint')}
           </p>
         )}
       </div>
 
       <div>
-        <Label htmlFor="role_id">Rol *</Label>
+        <Label htmlFor="role_id">{t('roleLabel')}</Label>
         <select
           id="role_id"
           name="role_id"
@@ -129,7 +130,7 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
           aria-describedby="role_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.role_id}
         >
-          <option value="">Seleccionar rol</option>
+          <option value="">{t('selectRole')}</option>
           {availableRoles.map((role) => (
             <option key={role.id} value={role.id}>
               {role.display_name} ({role.name})
@@ -146,28 +147,28 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <Label htmlFor="first_name">Nombre *</Label>
+          <Label htmlFor="first_name">{t('firstNameLabel')}</Label>
           <Input
             aria-describedby="first_name-error"
             aria-invalid={!!(validation ?? actionState).fieldErrors?.first_name}
             defaultValue={user?.first_name ?? ''}
             id="first_name"
             name="first_name"
-            placeholder="Ingresa el nombre"
+            placeholder={t('firstNamePlaceholder')}
             type="text"
           />
           <FieldError actionState={validation ?? actionState} name="first_name" />
         </div>
 
         <div>
-          <Label htmlFor="last_name">Apellido *</Label>
+          <Label htmlFor="last_name">{t('lastNameLabel')}</Label>
           <Input
             aria-describedby="last_name-error"
             aria-invalid={!!(validation ?? actionState).fieldErrors?.last_name}
             defaultValue={user?.last_name ?? ''}
             id="last_name"
             name="last_name"
-            placeholder="Ingresa el apellido"
+            placeholder={t('lastNamePlaceholder')}
             type="text"
           />
           <FieldError actionState={validation ?? actionState} name="last_name" />
@@ -175,56 +176,56 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
       </div>
 
       <div>
-        <Label htmlFor="email">Correo electrónico *</Label>
+        <Label htmlFor="email">{t('emailLabel')}</Label>
         <Input
           aria-describedby="email-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.email}
           defaultValue={user?.email ?? ''}
           id="email"
           name="email"
-          placeholder="Ingresa el correo electrónico"
+          placeholder={t('emailPlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="email" />
       </div>
 
       <div>
-        <Label htmlFor="username">Usuario</Label>
+        <Label htmlFor="username">{t('usernameLabel')}</Label>
         <Input
           aria-describedby="username-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.username}
           defaultValue={user?.username ?? ''}
           id="username"
           name="username"
-          placeholder="Ingresa el nombre de usuario (opcional)"
+          placeholder={t('usernamePlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="username" />
       </div>
 
       <div>
-        <Label htmlFor="phone">Teléfono</Label>
+        <Label htmlFor="phone">{t('phoneLabel')}</Label>
         <Input
           aria-describedby="phone-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.phone}
           defaultValue={user?.phone ?? ''}
           id="phone"
           name="phone"
-          placeholder="Ingresa el número de teléfono (opcional)"
+          placeholder={t('phonePlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="phone" />
       </div>
 
       <div>
-        <Label htmlFor="document_id">DNI / RUT</Label>
+        <Label htmlFor="document_id">{t('documentIdLabel')}</Label>
         <Input
           aria-describedby="document_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.document_id}
           defaultValue={user?.document_id ?? ''}
           id="document_id"
           name="document_id"
-          placeholder="Ingresa el DNI o RUT (opcional)"
+          placeholder={t('documentIdPlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="document_id" />
@@ -232,18 +233,18 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
 
       {getUserType(selectedRole) === 'app_user' && (
         <div>
-          <Label htmlFor="password">Contraseña {!user && '*'}</Label>
+          <Label htmlFor="password">{user ? t('passwordLabel') : t('passwordRequired')}</Label>
           <Input
             aria-describedby="password-error"
             aria-invalid={!!(validation ?? actionState).fieldErrors?.password}
             id="password"
             name="password"
-            placeholder={user ? "Dejar en blanco para mantener la contraseña actual" : "Ingresa la contraseña"}
+            placeholder={user ? t('passwordKeepBlank') : t('passwordPlaceholder')}
             type="password"
           />
           <FieldError actionState={validation ?? actionState} name="password" />
           <p className="text-sm text-muted-foreground mt-1">
-            {user ? "Dejar en blanco para mantener la contraseña actual" : "Mínimo 6 caracteres"}
+            {user ? t('passwordKeepBlank') : t('passwordMinLength')}
           </p>
         </div>
       )}
@@ -258,16 +259,16 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
           className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
           htmlFor="active"
         >
-          Activo
+          {t('active')}
         </Label>
       </div>
 
       <div className="flex gap-2">
         <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/users">Cancelar</Link>
+          <Link href="/dashboard/users">{tCommon('cancel')}</Link>
         </Button>
         <Button className="w-full" disabled={pending} type="submit">
-          {user ? 'Actualizar Usuario' : 'Crear Usuario'}
+          {user ? t('updateUser') : t('createUser')}
         </Button>
       </div>
     </form>

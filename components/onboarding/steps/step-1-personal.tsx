@@ -1,8 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useReducer } from 'react';
+import Link from 'next/link';
 import { BadgeCheck, Eye, EyeOff, Loader2, Mail, ShieldCheck, User } from 'lucide-react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 import { initiateRegistration } from '@/actions/onboarding/initiate-registration';
 import { Button } from '@/components/ui/button';
@@ -25,6 +27,7 @@ function Step1CompletedView({
   data: Step1CompletedData;
   onNext: () => void;
 }) {
+  const t = useTranslations('Onboarding.step1');
   const initials = [data.firstName[0], data.lastName[0]]
     .filter(Boolean)
     .join('')
@@ -37,10 +40,10 @@ function Step1CompletedView({
         <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-600" />
         <div>
           <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
-            Email verificado
+            {t('emailVerified')}
           </p>
           <p className="text-xs text-emerald-700 dark:text-emerald-400">
-            Tu cuenta está activa y lista para continuar.
+            {t('emailVerifiedMessage')}
           </p>
         </div>
       </div>
@@ -70,10 +73,10 @@ function Step1CompletedView({
       </div>
 
       <p className="text-xs text-muted-foreground text-center">
-        ¿Necesitas usar otro email?{' '}
-        <a href="/auth/login" className="underline hover:text-foreground">
-          Inicia sesión con otra cuenta.
-        </a>
+        {t('needDifferentEmail')}{' '}
+        <Link href="/auth/login" className="underline hover:text-foreground">
+          {t('useDifferentEmail')}
+        </Link>
       </p>
 
       <Button
@@ -81,7 +84,7 @@ function Step1CompletedView({
         className="w-full bg-emerald-600 hover:bg-emerald-700"
         onClick={onNext}
       >
-        Continuar con la configuración
+        {t('continueSetup')}
       </Button>
     </div>
   );
@@ -89,24 +92,66 @@ function Step1CompletedView({
 
 // ─── Registration form view ──────────────────────────────────────────────────
 
+interface Step1FormState {
+  firstName: string;
+  lastName: string;
+  email: string;
+  password: string;
+  showPassword: boolean;
+  loading: boolean;
+  emailSent: boolean;
+  errors: Record<string, string>;
+}
+
+type Step1FormAction =
+  | { type: 'SET_FIELD'; field: 'firstName' | 'lastName' | 'email' | 'password'; value: string }
+  | { type: 'TOGGLE_SHOW_PASSWORD' }
+  | { type: 'SET_LOADING'; value: boolean }
+  | { type: 'SET_EMAIL_SENT'; value: boolean }
+  | { type: 'SET_ERRORS'; value: Record<string, string> };
+
+const step1FormInitialState: Step1FormState = {
+  firstName: '',
+  lastName: '',
+  email: '',
+  password: '',
+  showPassword: false,
+  loading: false,
+  emailSent: false,
+  errors: {},
+};
+
+function step1FormReducer(state: Step1FormState, action: Step1FormAction): Step1FormState {
+  switch (action.type) {
+    case 'SET_FIELD':
+      return { ...state, [action.field]: action.value };
+    case 'TOGGLE_SHOW_PASSWORD':
+      return { ...state, showPassword: !state.showPassword };
+    case 'SET_LOADING':
+      return { ...state, loading: action.value };
+    case 'SET_EMAIL_SENT':
+      return { ...state, emailSent: action.value };
+    case 'SET_ERRORS':
+      return { ...state, errors: action.value };
+    default:
+      return state;
+  }
+}
+
 function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData) => void }) {
-  const [firstName, setFirstName] = useState('');
-  const [lastName, setLastName] = useState('');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [emailSent, setEmailSent] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const t = useTranslations('Onboarding.step1');
+  const tCommon = useTranslations('Common');
+  const [state, dispatch] = useReducer(step1FormReducer, step1FormInitialState);
+  const { firstName, lastName, email, password, showPassword, loading, emailSent, errors } = state;
 
   const validate = () => {
     const newErrors: Record<string, string> = {};
-    if (!firstName.trim()) newErrors.firstName = 'El nombre es requerido';
-    if (!lastName.trim()) newErrors.lastName = 'El apellido es requerido';
-    if (!email.trim()) newErrors.email = 'El email es requerido';
-    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = 'Email inválido';
-    if (!password) newErrors.password = 'La contraseña es requerida';
-    else if (password.length < 8) newErrors.password = 'Mínimo 8 caracteres';
+    if (!firstName.trim()) newErrors.firstName = t('firstNameRequired');
+    if (!lastName.trim()) newErrors.lastName = t('lastNameRequired');
+    if (!email.trim()) newErrors.email = tCommon('email');
+    else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = tCommon('email');
+    if (!password) newErrors.password = tCommon('password');
+    else if (password.length < 8) newErrors.password = t('minPassword');
     return newErrors;
   };
 
@@ -114,11 +159,11 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+      dispatch({ type: 'SET_ERRORS', value: validationErrors });
       return;
     }
-    setErrors({});
-    setLoading(true);
+    dispatch({ type: 'SET_ERRORS', value: {} });
+    dispatch({ type: 'SET_LOADING', value: true });
 
     const result = await initiateRegistration({
       email: email.trim(),
@@ -128,7 +173,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
       redirectTo: '/owner/onboarding?step=2',
     });
 
-    setLoading(false);
+    dispatch({ type: 'SET_LOADING', value: false });
 
     if (!result.success) {
       toast.error(result.error || 'Ocurrió un error. Por favor intenta de nuevo.');
@@ -140,7 +185,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
     localStorage.setItem('onboarding_last_name', lastName.trim());
     localStorage.setItem('onboarding_email', email.trim());
 
-    setEmailSent(true);
+    dispatch({ type: 'SET_EMAIL_SENT', value: true });
   };
 
   if (emailSent) {
@@ -151,24 +196,23 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
         </div>
         <div className="space-y-2">
           <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
-            ¡Revisa tu email!
+            {t('checkEmail')}
           </h2>
           <p className="text-muted-foreground max-w-sm">
-            Enviamos un enlace de confirmación a{' '}
+            {t('confirmationSent')}{' '}
             <span className="font-medium text-gray-700 dark:text-gray-200">{email}</span>.
-            Haz clic en el enlace para continuar con el registro.
           </p>
         </div>
         <div className="rounded-lg border bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 p-4 text-sm text-amber-800 dark:text-amber-200 max-w-sm">
-          <p className="font-medium mb-1">¿No recibiste el email?</p>
+          <p className="font-medium mb-1">{t('noEmailReceived')}</p>
           <p>Revisa tu carpeta de spam o correo no deseado.</p>
         </div>
         <Button
           variant="outline"
-          onClick={() => setEmailSent(false)}
+          onClick={() => dispatch({ type: 'SET_EMAIL_SENT', value: false })}
           className="text-sm"
         >
-          Usar otro email
+          {t('useDifferentEmail')}
         </Button>
       </div>
     );
@@ -178,7 +222,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
     <form onSubmit={handleSubmit} className="space-y-5">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="firstName">Nombre</Label>
+          <Label htmlFor="firstName">{tCommon('name')}</Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -186,7 +230,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
               placeholder="Juan"
               className="pl-9"
               value={firstName}
-              onChange={(e) => setFirstName(e.target.value)}
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'firstName', value: e.target.value })}
               disabled={loading}
             />
           </div>
@@ -195,7 +239,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
           )}
         </div>
         <div className="space-y-2">
-          <Label htmlFor="lastName">Apellido</Label>
+          <Label htmlFor="lastName">{tCommon('lastName')}</Label>
           <div className="relative">
             <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
@@ -203,7 +247,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
               placeholder="García"
               className="pl-9"
               value={lastName}
-              onChange={(e) => setLastName(e.target.value)}
+              onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'lastName', value: e.target.value })}
               disabled={loading}
             />
           </div>
@@ -223,7 +267,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
             placeholder="juan@minegocio.com"
             className="pl-9"
             value={email}
-            onChange={(e) => setEmail(e.target.value)}
+            onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'email', value: e.target.value })}
             disabled={loading}
             autoComplete="email"
           />
@@ -232,14 +276,14 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="password">Contraseña</Label>
+        <Label htmlFor="password">{tCommon('password')}</Label>
         <div className="relative">
           <Input
             id="password"
             type={showPassword ? 'text' : 'password'}
-            placeholder="Mínimo 8 caracteres"
+            placeholder={t('minPassword')}
             value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'password', value: e.target.value })}
             disabled={loading}
             autoComplete="new-password"
             className="pr-10"
@@ -247,7 +291,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
           <button
             type="button"
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            onClick={() => setShowPassword(!showPassword)}
+            onClick={() => dispatch({ type: 'TOGGLE_SHOW_PASSWORD' })}
           >
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
@@ -262,23 +306,15 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
         {loading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            Creando cuenta...
+            {t('creating')}
           </>
         ) : (
-          'Crear cuenta y verificar email'
+          t('submitButton')
         )}
       </Button>
 
       <p className="text-center text-xs text-muted-foreground">
-        Al registrarte, aceptas nuestros{' '}
-        <a href="#" className="underline hover:text-foreground">
-          Términos de servicio
-        </a>{' '}
-        y{' '}
-        <a href="#" className="underline hover:text-foreground">
-          Política de privacidad
-        </a>
-        .
+        {t('termsNote')}
       </p>
     </form>
   );

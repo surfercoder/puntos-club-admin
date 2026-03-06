@@ -5,6 +5,7 @@ import { QRCodeSVG } from 'qrcode.react';
 import { Download, Info, Printer, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import NextImage from 'next/image';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,6 +17,7 @@ interface OrgQRDisplayProps {
 }
 
 export function OrgQRDisplay({ organizationId, organizationName, logoUrl }: OrgQRDisplayProps) {
+  const t = useTranslations('Dashboard.qr.display');
   const qrContainerRef = useRef<HTMLDivElement>(null);
 
   const qrData = JSON.stringify({
@@ -56,7 +58,7 @@ export function OrgQRDisplay({ organizationId, organizationName, logoUrl }: OrgQ
         a.click();
         document.body.removeChild(a);
         URL.revokeObjectURL(downloadUrl);
-        toast.success('QR descargado correctamente');
+        toast.success(t('download'));
       }, 'image/png');
     };
 
@@ -155,11 +157,8 @@ export function OrgQRDisplay({ organizationId, organizationName, logoUrl }: OrgQ
               ${svgData}
             </div>
             <div class="org-name">${organizationName}</div>
-            <div class="tagline">
-              Escanea con la app PuntosClub<br>
-              para unirte y ganar puntos en cada compra
-            </div>
-            <div class="footer">puntosclub.app · Programa de fidelización</div>
+            <div class="tagline">${t('printTagline')}</div>
+            <div class="footer">${t('printFooter')}</div>
           </div>
         </body>
       </html>
@@ -182,16 +181,15 @@ export function OrgQRDisplay({ organizationId, organizationName, logoUrl }: OrgQ
         // User cancelled
       }
     } else {
-      toast.info('Descarga el QR o imprímelo para compartirlo.');
+      toast.info(t('download'));
     }
   };
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">
-      {/* QR Card */}
       <Card className="flex flex-col items-center">
         <CardHeader className="w-full pb-3">
-          <CardTitle className="text-base">Código QR de tu organización</CardTitle>
+          <CardTitle className="text-base">{t('title')}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4 w-full">
           <div ref={qrContainerRef} className="rounded-2xl border-4 border-emerald-500 bg-white p-6 shadow-md">
@@ -224,50 +222,36 @@ export function OrgQRDisplay({ organizationId, organizationName, logoUrl }: OrgQ
           <div className="grid grid-cols-3 gap-2 w-full">
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handleDownload}>
               <Download className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Descargar</span>
+              <span className="hidden sm:inline">{t('download')}</span>
             </Button>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handlePrint}>
               <Printer className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Imprimir</span>
+              <span className="hidden sm:inline">{t('print')}</span>
             </Button>
             <Button variant="outline" size="sm" className="gap-1.5" onClick={handleShare}>
               <Share2 className="h-3.5 w-3.5" />
-              <span className="hidden sm:inline">Compartir</span>
+              <span className="hidden sm:inline">{t('share')}</span>
             </Button>
           </div>
         </CardContent>
       </Card>
 
-      {/* Instructions Card */}
       <div className="flex flex-col gap-4">
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
               <Info className="h-4 w-4 text-emerald-600" />
-              ¿Cómo funciona?
+              {t('howItWorks')}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <ol className="space-y-4">
               {[
-                {
-                  title: 'Imprime o muestra el QR',
-                  desc: 'Colócalo en un lugar visible de tu local, en el mostrador o en la caja.',
-                },
-                {
-                  title: 'El cliente escanea con PuntosClub',
-                  desc: 'Tus clientes abren la app PuntosClub y escanean el QR para unirse automáticamente a tu programa de fidelización.',
-                },
-                {
-                  title: 'Acumulan puntos en cada compra',
-                  desc: 'Tu cajero registra las compras desde la app PuntosClubCaja. Los puntos se acreditan automáticamente.',
-                },
-                {
-                  title: 'Canjean sus premios',
-                  desc: 'Cuando acumulan suficientes puntos, los clientes pueden canjearlos por los premios que configuraste.',
-                },
+                { id: 'step1', title: t('step1Title'), desc: t('step1Description') },
+                { id: 'step2', title: t('step2Title'), desc: t('step2Description') },
+                { id: 'step3', title: t('step3Title'), desc: t('step3Description') },
               ].map((item, idx) => (
-                <li key={idx} className="flex gap-3">
+                <li key={item.id} className="flex gap-3">
                   <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold">
                     {idx + 1}
                   </span>
@@ -284,13 +268,12 @@ export function OrgQRDisplay({ organizationId, organizationName, logoUrl }: OrgQ
         <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800">
           <CardContent className="pt-4">
             <p className="text-sm font-medium text-emerald-800 dark:text-emerald-200 mb-2">
-              💡 Consejos para maximizar el uso
+              {t('tipsTitle')}
             </p>
             <ul className="space-y-1.5 text-xs text-emerald-700 dark:text-emerald-300">
-              <li>• Crea stickers con el QR y distribúyelos entre tus clientes frecuentes</li>
-              <li>• Coloca el QR en el menú, facturas o bolsas de tu negocio</li>
-              <li>• Capacita a tu equipo para mencionar el programa en cada venta</li>
-              <li>• El QR es permanente — no cambia aunque actualices tu perfil</li>
+              <li>• {t('tip1')}</li>
+              <li>• {t('tip2')}</li>
+              <li>• {t('tip3')}</li>
             </ul>
           </CardContent>
         </Card>

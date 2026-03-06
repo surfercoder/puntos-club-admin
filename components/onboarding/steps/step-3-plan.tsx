@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Check, Star, Zap, Rocket, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
@@ -21,73 +22,6 @@ interface Plan {
     highlight?: boolean;
   }[];
 }
-
-const plans: Plan[] = [
-  {
-    id: 'trial',
-    name: 'Plan Trial',
-    price: 'Gratis',
-    priceNote: 'por 3 meses',
-    icon: Star,
-    color: 'emerald',
-    isPaid: false,
-    features: [
-      { label: 'Premios canjeables', value: '2' },
-      { label: 'Beneficiarios', value: '100' },
-      { label: 'Notificaciones / mes', value: '3' },
-      { label: 'Cajeros', value: '1' },
-      { label: 'Sucursales', value: '1' },
-      { label: 'Usuarios colaboradores', value: '1' },
-      { label: 'Mapa de beneficiarios', value: false },
-      { label: 'Dashboard', value: 'Básico' },
-      { label: 'Exportación Excel / PDF', value: false },
-      { label: 'IA personalizada', value: false },
-    ],
-  },
-  {
-    id: 'advance',
-    name: 'Plan Advance',
-    price: '$50',
-    priceNote: 'por mes',
-    icon: Zap,
-    color: 'blue',
-    badge: 'Popular',
-    isPaid: true,
-    features: [
-      { label: 'Premios canjeables', value: '10', highlight: true },
-      { label: 'Beneficiarios', value: '500', highlight: true },
-      { label: 'Notificaciones / mes', value: '10', highlight: true },
-      { label: 'Cajeros', value: '10', highlight: true },
-      { label: 'Sucursales', value: '5', highlight: true },
-      { label: 'Usuarios colaboradores', value: '3', highlight: true },
-      { label: 'Mapa de beneficiarios', value: true },
-      { label: 'Dashboard', value: 'Business Intelligence' },
-      { label: 'Exportación Excel / PDF', value: false },
-      { label: 'IA personalizada', value: 'Mensajería adaptada' },
-    ],
-  },
-  {
-    id: 'pro',
-    name: 'Plan Pro',
-    price: '$89',
-    priceNote: 'por mes',
-    icon: Rocket,
-    color: 'purple',
-    isPaid: true,
-    features: [
-      { label: 'Premios canjeables', value: '30', highlight: true },
-      { label: 'Beneficiarios', value: '5.000', highlight: true },
-      { label: 'Notificaciones / mes', value: '50', highlight: true },
-      { label: 'Cajeros', value: '100', highlight: true },
-      { label: 'Sucursales', value: '15', highlight: true },
-      { label: 'Usuarios colaboradores', value: '10', highlight: true },
-      { label: 'Mapa de beneficiarios', value: true },
-      { label: 'Dashboard', value: 'Business Intelligence' },
-      { label: 'Exportación Excel / PDF', value: true },
-      { label: 'IA personalizada', value: true },
-    ],
-  },
-];
 
 const colorMap: Record<string, string> = {
   emerald: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20',
@@ -131,8 +65,79 @@ interface Step3Props {
 }
 
 export function Step3Plan({ onNext, onBack, initialPlan = 'trial' }: Step3Props) {
-  const [selected, setSelected] = useState<string>(initialPlan);
+  const t = useTranslations('Onboarding.step3');
+  const tCommon = useTranslations('Common');
+  const [selected, setSelected] = useState<string>(() => initialPlan);
   const [loading, setLoading] = useState(false);
+
+  const f = t.raw('features') as Record<string, string>;
+
+  const plans: Plan[] = [
+    {
+      id: 'trial',
+      name: t('trialPlan'),
+      price: t('freePriceLabel'),
+      priceNote: t('trialPriceNote'),
+      icon: Star,
+      color: 'emerald',
+      isPaid: false,
+      features: [
+        { label: f.rewards, value: '2' },
+        { label: f.beneficiaries, value: '100' },
+        { label: f.notificationsPerMonth, value: '3' },
+        { label: f.cashiers, value: '1' },
+        { label: f.branches, value: '1' },
+        { label: f.collaborators, value: '1' },
+        { label: f.beneficiaryMap, value: false },
+        { label: f.dashboard, value: t('dashboardBasic') },
+        { label: f.excelPdfExport, value: false },
+        { label: f.customAI, value: false },
+      ],
+    },
+    {
+      id: 'advance',
+      name: t('advancePlan'),
+      price: '$50',
+      priceNote: t('paidPriceNote'),
+      icon: Zap,
+      color: 'blue',
+      badge: t('popularBadge'),
+      isPaid: true,
+      features: [
+        { label: f.rewards, value: '10', highlight: true },
+        { label: f.beneficiaries, value: '500', highlight: true },
+        { label: f.notificationsPerMonth, value: '10', highlight: true },
+        { label: f.cashiers, value: '10', highlight: true },
+        { label: f.branches, value: '5', highlight: true },
+        { label: f.collaborators, value: '3', highlight: true },
+        { label: f.beneficiaryMap, value: true },
+        { label: f.dashboard, value: 'Business Intelligence' },
+        { label: f.excelPdfExport, value: false },
+        { label: f.customAI, value: t('adaptedMessaging') },
+      ],
+    },
+    {
+      id: 'pro',
+      name: t('proPlan'),
+      price: '$89',
+      priceNote: t('paidPriceNote'),
+      icon: Rocket,
+      color: 'purple',
+      isPaid: true,
+      features: [
+        { label: f.rewards, value: '30', highlight: true },
+        { label: f.beneficiaries, value: '5.000', highlight: true },
+        { label: f.notificationsPerMonth, value: '50', highlight: true },
+        { label: f.cashiers, value: '100', highlight: true },
+        { label: f.branches, value: '15', highlight: true },
+        { label: f.collaborators, value: '10', highlight: true },
+        { label: f.beneficiaryMap, value: true },
+        { label: f.dashboard, value: 'Business Intelligence' },
+        { label: f.excelPdfExport, value: true },
+        { label: f.customAI, value: true },
+      ],
+    },
+  ];
 
   const selectedPlan = plans.find((p) => p.id === selected) ?? plans[0];
 
@@ -153,19 +158,17 @@ export function Step3Plan({ onNext, onBack, initialPlan = 'trial' }: Step3Props)
       const data = await res.json() as { initPoint?: string; preapprovalId?: string; error?: string };
 
       if (!res.ok || !data.initPoint) {
-        throw new Error(data.error ?? 'No se pudo iniciar el pago');
+        throw new Error(data.error ?? t('paymentInitError'));
       }
 
-      // Save preapproval id to localStorage so the wizard can recover it on return
       if (data.preapprovalId) {
         localStorage.setItem('mp_preapproval_id', data.preapprovalId);
       }
       localStorage.setItem('onboarding_plan', selected);
 
-      // Redirect to Mercado Pago hosted checkout
       window.location.href = data.initPoint;
     } catch (err) {
-      toast.error(err instanceof Error ? err.message : 'Error al procesar el pago');
+      toast.error(err instanceof Error ? err.message : t('paymentError'));
       setLoading(false);
     }
   };
@@ -228,7 +231,7 @@ export function Step3Plan({ onNext, onBack, initialPlan = 'trial' }: Step3Props)
               {isSelected && (
                 <div className="mt-4 flex items-center gap-2 text-xs font-medium text-emerald-700 dark:text-emerald-400">
                   <Check className="h-4 w-4" />
-                  Plan seleccionado
+                  {t('selectedPlan')}
                 </div>
               )}
             </button>
@@ -237,17 +240,17 @@ export function Step3Plan({ onNext, onBack, initialPlan = 'trial' }: Step3Props)
       </div>
 
       <p className="text-center text-xs text-muted-foreground">
-        Todos los planes incluyen soporte por email. Puedes cambiar de plan en cualquier momento.
+        {t('allPlansInclude')} {t('changePlanAnytime')}
         {selectedPlan.isPaid && (
           <span className="block mt-1">
-            El pago se procesa de forma segura a través de Mercado Pago.
+            {t('securePayment')}
           </span>
         )}
       </p>
 
       <div className="flex gap-3 pt-2">
         <Button type="button" variant="outline" onClick={onBack} className="flex-1" disabled={loading}>
-          Atrás
+          {tCommon('back')}
         </Button>
         <Button
           type="button"
@@ -258,10 +261,10 @@ export function Step3Plan({ onNext, onBack, initialPlan = 'trial' }: Step3Props)
           {loading ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Redirigiendo a Mercado Pago...
+              {t('redirectingToMP')}
             </>
           ) : (
-            `Continuar con ${selectedPlan.name}`
+            t('continueWith', { plan: selectedPlan.name })
           )}
         </Button>
       </div>

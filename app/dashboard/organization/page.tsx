@@ -1,6 +1,7 @@
 import { Pencil } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/organization/delete-modal';
 import { Button } from '@/components/ui/button';
@@ -17,21 +18,24 @@ import type { Organization } from '@/types/organization';
 
 export default async function OrganizationListPage() {
   const supabase = await createClient();
+  const t = await getTranslations('Dashboard.organization');
+  const tCommon = await getTranslations('Common');
+
   const { data, error } = await supabase.from('organization').select('*').order('name');
 
   if (error) {
-    return <div>Error al obtener organizaciones</div>;
+    return <div>{tCommon('error')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Organizaciones</h1>
-          <p className="text-muted-foreground">Administrar todas las organizaciones del sistema</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/organization/create">+ Nueva Organización</Link>
+          <Link href="/dashboard/organization/create">{t('newButton')}</Link>
         </Button>
       </div>
 
@@ -39,12 +43,12 @@ export default async function OrganizationListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Logo</TableHead>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Razón Social</TableHead>
-              <TableHead>CUIT/RUT</TableHead>
-              <TableHead>Fecha de Creación</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>{t('tableHeaders.logo')}</TableHead>
+              <TableHead>{t('tableHeaders.name')}</TableHead>
+              <TableHead>{t('tableHeaders.legalName')}</TableHead>
+              <TableHead>{t('tableHeaders.taxId')}</TableHead>
+              <TableHead>{t('tableHeaders.createdAt')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -67,7 +71,7 @@ export default async function OrganizationListPage() {
                     )}
                   </TableCell>
                   <TableCell className="font-medium">
-                    <Link 
+                    <Link
                       href={`/dashboard/organization/${organization.id}`}
                       className="text-primary hover:text-primary/80 hover:underline"
                     >
@@ -86,7 +90,7 @@ export default async function OrganizationListPage() {
                           <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
-                      <DeleteModal 
+                      <DeleteModal
                         organizationId={organization.id}
                         organizationName={organization.name}
                       />
@@ -96,7 +100,7 @@ export default async function OrganizationListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={6}>No se encontraron organizaciones.</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

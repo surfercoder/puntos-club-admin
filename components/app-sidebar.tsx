@@ -35,6 +35,7 @@ import {
   ShoppingCart,
   QrCode,
 } from "lucide-react"
+import { useTranslations } from "next-intl"
 
 import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
@@ -74,31 +75,33 @@ export function AppSidebar({
   onLogout: () => void
   portalMode: DashboardSidebarPortalMode
 }) {
+  const t = useTranslations("Sidebar")
+
   const navMain = React.useMemo(() => {
     const isOwnerOrCollaborator = userRole === "owner" || userRole === "collaborator"
 
     if (portalMode === "admin") {
       const adminEntities = [
-        { title: "Direcciones", url: "/dashboard/address", icon: MapPin },
-        { title: "Pedidos", url: "/dashboard/app_order", icon: ShoppingBag },
-        { title: "Usuarios de la App", url: "/dashboard/app_user", icon: Smartphone },
-        { title: "Usuarios por Organización", url: "/dashboard/app_user_organization", icon: UserCog },
-        { title: "Beneficiarios", url: "/dashboard/beneficiary", icon: HeartHandshake },
-        { title: "Organizaciones de Beneficiarios", url: "/dashboard/beneficiary_organization", icon: Building },
-        { title: "Sucursales", url: "/dashboard/branch", icon: Store },
-        { title: "Categorías", url: "/dashboard/category", icon: LayoutGrid },
-        { title: "Límites de Notificaciones", url: "/dashboard/organization_notification_limits", icon: BellMinus },
-        { title: "Organizaciones", url: "/dashboard/organization", icon: Building2 },
-        { title: "Reglas de Puntos", url: "/dashboard/points-rules", icon: Trophy },
-        { title: "Productos", url: "/dashboard/product", icon: Package },
-        { title: "Compras", url: "/dashboard/purchase", icon: CreditCard },
-        { title: "Notificaciones Push", url: "/dashboard/push_notifications", icon: BellRing },
-        { title: "Tokens Push", url: "/dashboard/push_tokens", icon: KeyRound },
-        { title: "Canjes", url: "/dashboard/redemption", icon: Ticket },
-        { title: "Stock", url: "/dashboard/stock", icon: Boxes },
-        { title: "Código QR", url: "/dashboard/qr", icon: QrCode },
-        { title: "Roles de Usuario", url: "/dashboard/user-role", icon: Shield },
-        { title: "Usuarios", url: "/dashboard/users", icon: Users },
+        { title: t("addresses"), url: "/dashboard/address", icon: MapPin },
+        { title: t("orders"), url: "/dashboard/app_order", icon: ShoppingBag },
+        { title: t("appUsers"), url: "/dashboard/app_user", icon: Smartphone },
+        { title: t("usersByOrg"), url: "/dashboard/app_user_organization", icon: UserCog },
+        { title: t("beneficiaries"), url: "/dashboard/beneficiary", icon: HeartHandshake },
+        { title: t("beneficiaryOrgs"), url: "/dashboard/beneficiary_organization", icon: Building },
+        { title: t("branches"), url: "/dashboard/branch", icon: Store },
+        { title: t("categories"), url: "/dashboard/category", icon: LayoutGrid },
+        { title: t("notificationLimits"), url: "/dashboard/organization_notification_limits", icon: BellMinus },
+        { title: t("organizations"), url: "/dashboard/organization", icon: Building2 },
+        { title: t("pointsRules"), url: "/dashboard/points-rules", icon: Trophy },
+        { title: t("products"), url: "/dashboard/product", icon: Package },
+        { title: t("purchases"), url: "/dashboard/purchase", icon: CreditCard },
+        { title: t("pushNotifications"), url: "/dashboard/push_notifications", icon: BellRing },
+        { title: t("pushTokens"), url: "/dashboard/push_tokens", icon: KeyRound },
+        { title: t("redemptions"), url: "/dashboard/redemption", icon: Ticket },
+        { title: t("stock"), url: "/dashboard/stock", icon: Boxes },
+        { title: t("qrCode"), url: "/dashboard/qr", icon: QrCode },
+        { title: t("userRoles"), url: "/dashboard/user-role", icon: Shield },
+        { title: t("users"), url: "/dashboard/users", icon: Users },
       ]
         .slice()
         .sort((a, b) => a.title.localeCompare(b.title))
@@ -108,18 +111,18 @@ export function AppSidebar({
 
     if (isOwnerOrCollaborator) {
       const ownerEntities = [
-        { title: "Código QR", url: "/dashboard/qr", icon: QrCode },
-        { title: "Pedidos", url: "/dashboard/app_order", icon: ClipboardList },
-        { title: "Beneficiarios", url: "/dashboard/beneficiary", icon: HandHeart },
-        { title: "Sucursales", url: "/dashboard/branch", icon: Store },
-        { title: "Categorías", url: "/dashboard/category", icon: Tags },
-        { title: "Notificaciones", url: "/dashboard/notifications", icon: Bell },
-        { title: "Reglas de Puntos", url: "/dashboard/points-rules", icon: Star },
-        { title: "Productos", url: "/dashboard/product", icon: Package },
-        { title: "Compras", url: "/dashboard/purchase", icon: Receipt },
-        { title: "Canjes", url: "/dashboard/redemption", icon: Gift },
-        { title: "Stock", url: "/dashboard/stock", icon: Boxes },
-        { title: "Usuarios", url: "/dashboard/users", icon: Users },
+        { title: t("qrCode"), url: "/dashboard/qr", icon: QrCode },
+        { title: t("orders"), url: "/dashboard/app_order", icon: ClipboardList },
+        { title: t("beneficiaries"), url: "/dashboard/beneficiary", icon: HandHeart },
+        { title: t("branches"), url: "/dashboard/branch", icon: Store },
+        { title: t("categories"), url: "/dashboard/category", icon: Tags },
+        { title: t("notifications"), url: "/dashboard/notifications", icon: Bell },
+        { title: t("pointsRules"), url: "/dashboard/points-rules", icon: Star },
+        { title: t("products"), url: "/dashboard/product", icon: Package },
+        { title: t("purchases"), url: "/dashboard/purchase", icon: Receipt },
+        { title: t("redemptions"), url: "/dashboard/redemption", icon: Gift },
+        { title: t("stock"), url: "/dashboard/stock", icon: Boxes },
+        { title: t("users"), url: "/dashboard/users", icon: Users },
       ]
         .slice()
         .sort((a, b) => a.title.localeCompare(b.title))
@@ -129,72 +132,72 @@ export function AppSidebar({
 
     return [
       {
-        title: "Resumen",
+        title: t("summary"),
         url: "/dashboard",
         icon: LayoutDashboard,
         isActive: true,
-        items: [{ title: "Panel", url: "/dashboard" }],
+        items: [{ title: t("panel"), url: "/dashboard" }],
       },
       {
-        title: "Puntos",
+        title: t("points"),
         url: "/dashboard/points-rules",
         icon: Star,
         items: [
-          { title: "Reglas de Puntos", url: "/dashboard/points-rules" },
-          { title: "Canjes", url: "/dashboard/redemption" },
+          { title: t("pointsRules"), url: "/dashboard/points-rules" },
+          { title: t("redemptions"), url: "/dashboard/redemption" },
         ],
       },
       {
-        title: "Clientes",
+        title: t("clients"),
         url: "/dashboard/beneficiary",
         icon: Users,
         items: [
-          { title: "Beneficiarios", url: "/dashboard/beneficiary" },
-          { title: "Organizaciones de Beneficiarios", url: "/dashboard/beneficiary_organization" },
+          { title: t("beneficiaries"), url: "/dashboard/beneficiary" },
+          { title: t("beneficiaryOrgs"), url: "/dashboard/beneficiary_organization" },
         ],
       },
       {
-        title: "Ventas",
+        title: t("sales"),
         url: "/dashboard/purchase",
         icon: ShoppingCart,
-        items: [{ title: "Compras", url: "/dashboard/purchase" }],
+        items: [{ title: t("purchases"), url: "/dashboard/purchase" }],
       },
       {
-        title: "Configuración",
+        title: t("settings"),
         url: "/dashboard/branch",
         icon: Store,
         items: [
-          { title: "Sucursales", url: "/dashboard/branch" },
-          { title: "Direcciones", url: "/dashboard/address" },
-          { title: "Categorías", url: "/dashboard/category" },
-          { title: "Productos", url: "/dashboard/product" },
-          { title: "Stock", url: "/dashboard/stock" },
-          { title: "Usuarios", url: "/dashboard/users" },
-          { title: "Usuarios por Organización", url: "/dashboard/app_user_organization" },
+          { title: t("branches"), url: "/dashboard/branch" },
+          { title: t("addresses"), url: "/dashboard/address" },
+          { title: t("categories"), url: "/dashboard/category" },
+          { title: t("products"), url: "/dashboard/product" },
+          { title: t("stock"), url: "/dashboard/stock" },
+          { title: t("users"), url: "/dashboard/users" },
+          { title: t("usersByOrg"), url: "/dashboard/app_user_organization" },
         ],
       },
     ]
-  }, [portalMode, userRole])
+  }, [portalMode, userRole, t])
 
   const projects = React.useMemo(
     () => [
       {
-        name: "Ingeniería de diseño",
+        name: t("designEngineering"),
         url: "#",
         icon: Frame,
       },
       {
-        name: "Ventas y marketing",
+        name: t("salesMarketing"),
         url: "#",
         icon: PieChart,
       },
       {
-        name: "Viajes",
+        name: t("travel"),
         url: "#",
         icon: Map,
       },
     ],
-    [],
+    [t],
   )
 
   return (

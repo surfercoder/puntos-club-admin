@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useReducer } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Building2,
@@ -11,6 +11,7 @@ import {
   QrCode,
   User,
 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 
 import { Step1Personal } from './steps/step-1-personal';
@@ -21,22 +22,6 @@ import { Step5Consent } from './steps/step-5-consent';
 import { Step5QR } from './steps/step-5-qr';
 import type { OnboardingStep2Data, OnboardingStep4Data } from '@/actions/onboarding/actions';
 
-interface Step {
-  number: number;
-  label: string;
-  icon: React.ElementType;
-  description: string;
-}
-
-const STEPS: Step[] = [
-  { number: 1, label: 'Tu información', icon: User, description: 'Crea tu cuenta personal' },
-  { number: 2, label: 'Tu negocio', icon: Building2, description: 'Configura tu organización' },
-  { number: 3, label: 'Plan', icon: CreditCard, description: 'Elige el plan que más te convenga' },
-  { number: 4, label: 'Catálogo', icon: Package, description: 'Crea categorías y premios' },
-  { number: 5, label: 'Términos', icon: FileText, description: 'Acepta los términos y condiciones' },
-  { number: 6, label: 'Tu QR', icon: QrCode, description: 'Listo para empezar' },
-];
-
 export interface Step1CompletedData {
   firstName: string;
   lastName: string;
@@ -45,11 +30,8 @@ export interface Step1CompletedData {
 
 interface OnboardingWizardProps {
   initialStep?: number;
-  /** Server-derived: true when the user is authenticated (email confirmed) */
   initialStep1Completed?: boolean;
-  /** Server-derived user identity from auth metadata */
   initialUserInfo?: Step1CompletedData | null;
-  /** Only present when the user already completed onboarding in a previous session */
   initialOrganizationId?: number | null;
   initialBranchId?: number | null;
   initialOrgName?: string;
@@ -79,6 +61,108 @@ function lsSet(key: string, value: unknown) {
   }
 }
 
+// ─── Reducer ──────────────────────────────────────────────────────────────────
+
+interface WizardState {
+  currentStep: number;
+  maxReachedStep: number;
+  step1Completed: boolean;
+  step1Data: Step1CompletedData | null;
+  step2Data: OnboardingStep2Data | null;
+  step4Data: OnboardingStep4Data | null;
+  selectedPlan: string;
+  mpPreapprovalId: string | null;
+  organizationName: string;
+  consentGiven: boolean;
+}
+
+type WizardAction =
+  | { type: 'HYDRATE_FROM_LS'; payload: Partial<WizardState> }
+  | { type: 'GO_TO_STEP'; step: number }
+  | { type: 'COMPLETE_STEP1'; data?: Step1CompletedData }
+  | { type: 'COMPLETE_STEP2'; data: OnboardingStep2Data }
+  | { type: 'COMPLETE_STEP3'; plan: string }
+  | { type: 'COMPLETE_STEP4'; data: OnboardingStep4Data | null }
+  | { type: 'COMPLETE_CONSENT' }
+  | { type: 'SET_STEP4_DATA'; data: OnboardingStep4Data };
+
+function wizardReducer(state: WizardState, action: WizardAction): WizardState {
+  switch (action.type) {
+    case 'HYDRATE_FROM_LS':
+      return { ...state, ...action.payload };
+
+    case 'GO_TO_STEP': {
+      const maxReachedStep = Math.max(state.maxReachedStep, action.step);
+      localStorage.setItem(LS_MAX_STEP, String(maxReachedStep));
+      const url = new URL(window.location.href);
+      url.searchParams.set('step', String(action.step));
+      window.history.replaceState({}, '', url.toString());
+      return { ...state, currentStep: action.step, maxReachedStep };
+    }
+
+    case 'COMPLETE_STEP1': {
+      const next: WizardState = {
+        ...state,
+        step1Completed: true,
+        currentStep: 2,
+        maxReachedStep: Math.max(state.maxReachedStep, 2),
+      };
+      if (action.data) {
+        next.step1Data = action.data;
+        localStorage.setItem('onboarding_first_name', action.data.firstName);
+        localStorage.setItem('onboarding_last_name', action.data.lastName);
+        localStorage.setItem('onboarding_email', action.data.email);
+      }
+      localStorage.setItem(LS_MAX_STEP, String(next.maxReachedStep));
+      return next;
+    }
+
+    case 'COMPLETE_STEP2': {
+      lsSet(LS_STEP2, action.data);
+      localStorage.setItem('onboarding_org_name', action.data.org.name);
+      const maxReachedStep = Math.max(state.maxReachedStep, 3);
+      localStorage.setItem(LS_MAX_STEP, String(maxReachedStep));
+      return {
+        ...state,
+        step2Data: action.data,
+        organizationName: action.data.org.name,
+        currentStep: 3,
+        maxReachedStep,
+      };
+    }
+
+    case 'COMPLETE_STEP3': {
+      localStorage.setItem(LS_PLAN, action.plan);
+      const maxReachedStep = Math.max(state.maxReachedStep, 4);
+      localStorage.setItem(LS_MAX_STEP, String(maxReachedStep));
+      return { ...state, selectedPlan: action.plan, currentStep: 4, maxReachedStep };
+    }
+
+    case 'COMPLETE_STEP4': {
+      if (action.data) lsSet(LS_STEP4, action.data);
+      else localStorage.removeItem(LS_STEP4);
+      const maxReachedStep = Math.max(state.maxReachedStep, 5);
+      localStorage.setItem(LS_MAX_STEP, String(maxReachedStep));
+      return { ...state, step4Data: action.data, currentStep: 5, maxReachedStep };
+    }
+
+    case 'COMPLETE_CONSENT': {
+      const maxReachedStep = Math.max(state.maxReachedStep, 6);
+      localStorage.setItem(LS_MAX_STEP, String(maxReachedStep));
+      return { ...state, consentGiven: true, currentStep: 6, maxReachedStep };
+    }
+
+    case 'SET_STEP4_DATA':
+      lsSet(LS_STEP4, action.data);
+      return { ...state, step4Data: action.data };
+
+    default:
+      return state;
+  }
+}
+
+// ─── Component ────────────────────────────────────────────────────────────────
+
 export function OnboardingWizard({
   initialStep = 1,
   initialStep1Completed = false,
@@ -87,60 +171,76 @@ export function OnboardingWizard({
   initialOrgName = '',
 }: OnboardingWizardProps) {
   const router = useRouter();
+  const t = useTranslations('Onboarding.wizard');
+
+  const steps = [
+    { number: 1, label: t('steps.personalInfo'), icon: User, description: t('stepDescriptions.personalInfo') },
+    { number: 2, label: t('steps.business'), icon: Building2, description: t('stepDescriptions.business') },
+    { number: 3, label: t('steps.plan'), icon: CreditCard, description: t('stepDescriptions.plan') },
+    { number: 4, label: t('steps.catalog'), icon: Package, description: t('stepDescriptions.catalog') },
+    { number: 5, label: t('steps.terms'), icon: FileText, description: t('stepDescriptions.terms') },
+    { number: 6, label: t('steps.qr'), icon: QrCode, description: t('stepDescriptions.qr') },
+  ];
 
   const clampedStep = Math.max(1, Math.min(6, initialStep));
-  const [currentStep, setCurrentStep] = useState(clampedStep);
-  const [maxReachedStep, setMaxReachedStep] = useState(clampedStep);
 
-  // Collected data across steps — only written to DB atomically at step 6
-  const [step2Data, setStep2Data] = useState<OnboardingStep2Data | null>(null);
-  const [step4Data, setStep4Data] = useState<OnboardingStep4Data | null>(null);
-  const [selectedPlan, setSelectedPlan] = useState<string>('trial');
-  const [mpPreapprovalId, setMpPreapprovalId] = useState<string | null>(null);
+  const [state, dispatch] = useReducer(wizardReducer, {
+    currentStep: clampedStep,
+    maxReachedStep: clampedStep,
+    step1Completed: initialStep1Completed,
+    step1Data: initialUserInfo ?? null,
+    step2Data: null,
+    step4Data: null,
+    selectedPlan: 'trial',
+    mpPreapprovalId: null,
+    organizationName: initialOrgName,
+    consentGiven: false,
+  });
 
-  // Derived display values
-  const [organizationName, setOrganizationName] = useState<string>(initialOrgName);
-
-  const [consentGiven, setConsentGiven] = useState(false);
-
-  const [step1Completed, setStep1Completed] = useState(initialStep1Completed);
-  const [step1Data, setStep1Data] = useState<Step1CompletedData | null>(initialUserInfo ?? null);
+  const {
+    currentStep, maxReachedStep, step1Completed, step1Data,
+    step2Data, step4Data, selectedPlan, mpPreapprovalId,
+    organizationName, consentGiven,
+  } = state;
 
   useEffect(() => {
+    const payload: Partial<WizardState> = {};
+
     const storedMax = parseInt(localStorage.getItem(LS_MAX_STEP) ?? '0', 10);
-    if (storedMax > clampedStep) setMaxReachedStep(storedMax);
+    if (storedMax > clampedStep) payload.maxReachedStep = storedMax;
 
     if (!initialUserInfo) {
       const firstName = localStorage.getItem('onboarding_first_name') ?? '';
       const lastName = localStorage.getItem('onboarding_last_name') ?? '';
       const email = localStorage.getItem('onboarding_email') ?? '';
-      if (firstName || email) setStep1Data({ firstName, lastName, email });
+      if (firstName || email) payload.step1Data = { firstName, lastName, email };
     }
 
-    // Restore collected step data so navigation back/forth and page refreshes work
     const saved2 = lsGet<OnboardingStep2Data>(LS_STEP2);
     if (saved2) {
-      setStep2Data(saved2);
-      if (!initialOrgName && saved2.org.name) setOrganizationName(saved2.org.name);
+      payload.step2Data = saved2;
+      if (!initialOrgName && saved2.org.name) payload.organizationName = saved2.org.name;
     } else if (!initialOrgName) {
       const storedOrgName = localStorage.getItem('onboarding_org_name');
-      if (storedOrgName) setOrganizationName(storedOrgName);
+      if (storedOrgName) payload.organizationName = storedOrgName;
     }
 
     const savedPlan = localStorage.getItem(LS_PLAN);
-    if (savedPlan) setSelectedPlan(savedPlan);
+    if (savedPlan) payload.selectedPlan = savedPlan;
 
     const savedMpId = localStorage.getItem(LS_MP_PREAPPROVAL_ID);
-    if (savedMpId) setMpPreapprovalId(savedMpId);
+    if (savedMpId) payload.mpPreapprovalId = savedMpId;
 
     const saved4 = lsGet<OnboardingStep4Data>(LS_STEP4);
-    if (saved4) setStep4Data(saved4);
+    if (saved4) payload.step4Data = saved4;
 
     const savedConsent = localStorage.getItem(LS_CONSENT);
-    if (savedConsent === 'true') setConsentGiven(true);
+    if (savedConsent === 'true') payload.consentGiven = true;
 
-    // When MP redirects back after checkout, the URL contains step=4.
-    // Clean it up so the user doesn't see query noise.
+    if (Object.keys(payload).length > 0) {
+      dispatch({ type: 'HYDRATE_FROM_LS', payload });
+    }
+
     const url = new URL(window.location.href);
     if (url.searchParams.has('step')) {
       url.searchParams.delete('step');
@@ -149,52 +249,7 @@ export function OnboardingWizard({
   }, []);
 
   const goToStep = (step: number) => {
-    setCurrentStep(step);
-    setMaxReachedStep((prev) => {
-      const next = Math.max(prev, step);
-      localStorage.setItem(LS_MAX_STEP, String(next));
-      return next;
-    });
-    const url = new URL(window.location.href);
-    url.searchParams.set('step', String(step));
-    window.history.replaceState({}, '', url.toString());
-  };
-
-  const handleStep1Next = (data?: Step1CompletedData) => {
-    if (data) {
-      setStep1Data(data);
-      localStorage.setItem('onboarding_first_name', data.firstName);
-      localStorage.setItem('onboarding_last_name', data.lastName);
-      localStorage.setItem('onboarding_email', data.email);
-    }
-    setStep1Completed(true);
-    goToStep(2);
-  };
-
-  const handleStep2Next = (data: OnboardingStep2Data) => {
-    setStep2Data(data);
-    setOrganizationName(data.org.name);
-    lsSet(LS_STEP2, data);
-    localStorage.setItem('onboarding_org_name', data.org.name);
-    goToStep(3);
-  };
-
-  const handleStep3Next = (plan: string) => {
-    setSelectedPlan(plan);
-    localStorage.setItem(LS_PLAN, plan);
-    goToStep(4);
-  };
-
-  const handleStep4Next = (data: OnboardingStep4Data | null) => {
-    setStep4Data(data);
-    if (data) lsSet(LS_STEP4, data);
-    else localStorage.removeItem(LS_STEP4);
-    goToStep(5);
-  };
-
-  const handleStep5ConsentNext = () => {
-    setConsentGiven(true);
-    goToStep(6);
+    dispatch({ type: 'GO_TO_STEP', step });
   };
 
   const clearOnboardingLocalStorage = () => {
@@ -220,11 +275,8 @@ export function OnboardingWizard({
   const canNavigateToStep = (step: number) => {
     if (step === 1) return true;
     if (step === 2) return step1Completed || maxReachedStep >= 2;
-    // Steps 3–4: need step 2 data in memory OR already completed (org exists from server)
     if (step >= 3 && step <= 4) return (step2Data !== null || initialOrganizationId !== null) && maxReachedStep >= step;
-    // Step 5 (consent): same conditions as step 4
     if (step === 5) return (step2Data !== null || initialOrganizationId !== null) && maxReachedStep >= 5;
-    // Step 6 (QR): additionally requires consent
     if (step === 6) return (step2Data !== null || initialOrganizationId !== null) && consentGiven && maxReachedStep >= 6;
     return false;
   };
@@ -234,14 +286,14 @@ export function OnboardingWizard({
       case 1:
         return (
           <Step1Personal
-            onNext={handleStep1Next}
+            onNext={(data) => dispatch({ type: 'COMPLETE_STEP1', data })}
             completedData={step1Completed ? step1Data : null}
           />
         );
       case 2:
         return (
           <Step2Company
-            onNext={handleStep2Next}
+            onNext={(data) => dispatch({ type: 'COMPLETE_STEP2', data })}
             onBack={() => goToStep(1)}
             initialData={step2Data}
           />
@@ -249,7 +301,7 @@ export function OnboardingWizard({
       case 3:
         return (
           <Step3Plan
-            onNext={handleStep3Next}
+            onNext={(plan) => dispatch({ type: 'COMPLETE_STEP3', plan })}
             onBack={() => goToStep(2)}
             initialPlan={selectedPlan}
           />
@@ -257,19 +309,16 @@ export function OnboardingWizard({
       case 4:
         return (
           <Step4Products
-            onNext={handleStep4Next}
+            onNext={(data) => dispatch({ type: 'COMPLETE_STEP4', data })}
             onBack={() => goToStep(3)}
             initialData={step4Data}
-            onAutoSave={(data) => {
-              setStep4Data(data);
-              lsSet(LS_STEP4, data);
-            }}
+            onAutoSave={(data) => dispatch({ type: 'SET_STEP4_DATA', data })}
           />
         );
       case 5:
         return (
           <Step5Consent
-            onNext={handleStep5ConsentNext}
+            onNext={() => dispatch({ type: 'COMPLETE_CONSENT' })}
             onBack={() => goToStep(4)}
             initialConsent={consentGiven}
           />
@@ -293,15 +342,14 @@ export function OnboardingWizard({
     }
   };
 
-  const currentStepInfo = STEPS[currentStep - 1];
+  const currentStepInfo = steps[currentStep - 1];
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
-      {/* Stepper Header */}
       <div className="mb-8">
-        <nav aria-label="Progreso del registro">
+        <nav aria-label={t('progress')}>
           <ol className="flex items-center justify-between">
-            {STEPS.map((step, idx) => {
+            {steps.map((step, idx) => {
               const Icon = step.icon;
               const isCompleted = currentStep > step.number;
               const isCurrent = currentStep === step.number;
@@ -345,7 +393,7 @@ export function OnboardingWizard({
                     </span>
                   </button>
 
-                  {idx < STEPS.length - 1 && (
+                  {idx < steps.length - 1 && (
                     <div
                       className={cn(
                         'flex-1 h-0.5 mx-2 transition-all',
@@ -361,7 +409,6 @@ export function OnboardingWizard({
         </nav>
       </div>
 
-      {/* Step Card */}
       <div className="rounded-2xl border bg-white dark:bg-gray-900 shadow-sm">
         <div className="border-b px-6 py-5">
           <div className="flex items-center gap-3">
@@ -372,7 +419,7 @@ export function OnboardingWizard({
             </div>
             <div>
               <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                Paso {currentStep} de {STEPS.length}
+                {t('step', { current: currentStep, total: steps.length })}
               </p>
               <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
                 {currentStepInfo?.label}
@@ -389,10 +436,9 @@ export function OnboardingWizard({
         <div className="p-6">{stepContent()}</div>
       </div>
 
-      {/* Progress indicator */}
       <div className="mt-4 flex justify-center">
         <div className="flex items-center gap-1.5">
-          {STEPS.map((step) => (
+          {steps.map((step) => (
             <div
               key={step.number}
               className={cn(

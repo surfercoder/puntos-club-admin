@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useReducer } from "react";
+import { useTranslations } from "next-intl";
 
 import { signUpAdmin } from "@/actions/auth/actions";
 import { Button } from "@/components/ui/button";
@@ -18,24 +19,69 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { SignUpSchema } from "@/schemas/auth.schema";
 
+interface SignUpFormState {
+  email: string;
+  password: string;
+  repeatPassword: string;
+  firstName: string;
+  lastName: string;
+  error: string | null;
+  fieldErrors: Record<string, string>;
+  isLoading: boolean;
+}
+
+type SignUpFormAction =
+  | { type: "SET_FIELD"; field: keyof SignUpFormState; value: string }
+  | { type: "SET_ERROR"; error: string | null }
+  | { type: "SET_FIELD_ERRORS"; fieldErrors: Record<string, string> }
+  | { type: "SET_LOADING"; isLoading: boolean }
+  | { type: "CLEAR_ERRORS" };
+
+const initialState: SignUpFormState = {
+  email: "",
+  password: "",
+  repeatPassword: "",
+  firstName: "",
+  lastName: "",
+  error: null,
+  fieldErrors: {},
+  isLoading: false,
+};
+
+function signUpFormReducer(
+  state: SignUpFormState,
+  action: SignUpFormAction
+): SignUpFormState {
+  switch (action.type) {
+    case "SET_FIELD":
+      return { ...state, [action.field]: action.value };
+    case "SET_ERROR":
+      return { ...state, error: action.error };
+    case "SET_FIELD_ERRORS":
+      return { ...state, fieldErrors: action.fieldErrors };
+    case "SET_LOADING":
+      return { ...state, isLoading: action.isLoading };
+    case "CLEAR_ERRORS":
+      return { ...state, error: null, fieldErrors: {} };
+    default:
+      return state;
+  }
+}
+
 export function SignUpForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [repeatPassword, setRepeatPassword] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const t = useTranslations("Auth.signUp");
+  const tCommon = useTranslations("Common");
+
+  const [state, dispatch] = useReducer(signUpFormReducer, initialState);
+  const { email, password, repeatPassword, firstName, lastName, error, fieldErrors, isLoading } = state;
   const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setFieldErrors({});
+    dispatch({ type: "CLEAR_ERRORS" });
 
     const result = SignUpSchema.safeParse({
       firstName,
@@ -51,11 +97,11 @@ export function SignUpForm({
         const field = String(issue.path[0]);
         if (!errors[field]) errors[field] = issue.message;
       }
-      setFieldErrors(errors);
+      dispatch({ type: "SET_FIELD_ERRORS", fieldErrors: errors });
       return;
     }
 
-    setIsLoading(true);
+    dispatch({ type: "SET_LOADING", isLoading: true });
 
     try {
       const signUpResult = await signUpAdmin({
@@ -66,15 +112,15 @@ export function SignUpForm({
       });
 
       if (!signUpResult.success) {
-        setError(signUpResult.error || "Ocurrió un error");
+        dispatch({ type: "SET_ERROR", error: signUpResult.error || tCommon("error") });
         return;
       }
 
       router.push("/auth/sign-up-success");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Ocurrió un error");
+      dispatch({ type: "SET_ERROR", error: err instanceof Error ? err.message : tCommon("error") });
     } finally {
-      setIsLoading(false);
+      dispatch({ type: "SET_LOADING", isLoading: false });
     }
   };
 
@@ -82,19 +128,19 @@ export function SignUpForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Registrarse</CardTitle>
-          <CardDescription>Crear una nueva cuenta</CardDescription>
+          <CardTitle className="text-2xl">{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSignUp} noValidate>
             <div className="flex flex-col gap-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="grid gap-2">
-                  <Label htmlFor="firstName">Nombre</Label>
+                  <Label htmlFor="firstName">{tCommon("name")}</Label>
                   <Input
                     id="firstName"
-                    onChange={(e) => setFirstName(e.target.value)}
-                    placeholder="Juan"
+                    onChange={(e) => dispatch({ type: "SET_FIELD", field: "firstName", value: e.target.value })}
+                    placeholder={t("firstNamePlaceholder")}
                     type="text"
                     value={firstName}
                     aria-invalid={!!fieldErrors.firstName}
@@ -107,11 +153,11 @@ export function SignUpForm({
                   )}
                 </div>
                 <div className="grid gap-2">
-                  <Label htmlFor="lastName">Apellido</Label>
+                  <Label htmlFor="lastName">{tCommon("lastName")}</Label>
                   <Input
                     id="lastName"
-                    onChange={(e) => setLastName(e.target.value)}
-                    placeholder="García"
+                    onChange={(e) => dispatch({ type: "SET_FIELD", field: "lastName", value: e.target.value })}
+                    placeholder={t("lastNamePlaceholder")}
                     type="text"
                     value={lastName}
                     aria-invalid={!!fieldErrors.lastName}
@@ -125,11 +171,11 @@ export function SignUpForm({
                 </div>
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="email">Correo electrónico</Label>
+                <Label htmlFor="email">{tCommon("email")}</Label>
                 <Input
                   id="email"
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="m@ejemplo.com"
+                  onChange={(e) => dispatch({ type: "SET_FIELD", field: "email", value: e.target.value })}
+                  placeholder={tCommon("emailPlaceholder")}
                   type="email"
                   value={email}
                   aria-invalid={!!fieldErrors.email}
@@ -142,10 +188,10 @@ export function SignUpForm({
                 )}
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="password">Contraseña</Label>
+                <Label htmlFor="password">{tCommon("password")}</Label>
                 <Input
                   id="password"
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => dispatch({ type: "SET_FIELD", field: "password", value: e.target.value })}
                   type="password"
                   value={password}
                   aria-invalid={!!fieldErrors.password}
@@ -158,10 +204,10 @@ export function SignUpForm({
                 )}
               </div>
               <div className="grid gap-2">
-                <Label htmlFor="repeat-password">Repetir contraseña</Label>
+                <Label htmlFor="repeat-password">{t("repeatPassword")}</Label>
                 <Input
                   id="repeat-password"
-                  onChange={(e) => setRepeatPassword(e.target.value)}
+                  onChange={(e) => dispatch({ type: "SET_FIELD", field: "repeatPassword", value: e.target.value })}
                   type="password"
                   value={repeatPassword}
                   aria-invalid={!!fieldErrors.repeatPassword}
@@ -175,13 +221,13 @@ export function SignUpForm({
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
               <Button className="w-full" disabled={isLoading} type="submit">
-                {isLoading ? "Creando cuenta..." : "Registrarse"}
+                {isLoading ? t("submitting") : t("title")}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
-              ¿Ya tienes una cuenta?{" "}
+              {t("alreadyHaveAccount")}{" "}
               <Link className="underline underline-offset-4" href="/auth/login">
-                Iniciar sesión
+                {t("loginLink")}
               </Link>
             </div>
           </form>

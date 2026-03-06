@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useReducer } from "react";
+import { useTranslations } from "next-intl";
 
 import { signInAdminPortal } from "@/actions/auth/actions";
 import { Button } from "@/components/ui/button";
@@ -18,21 +19,66 @@ import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 import { LoginSchema } from "@/schemas/auth.schema";
 
+type LoginFormState = {
+  email: string;
+  password: string;
+  error: string | null;
+  fieldErrors: Record<string, string>;
+  isLoading: boolean;
+};
+
+type LoginFormAction =
+  | { type: "SET_EMAIL"; payload: string }
+  | { type: "SET_PASSWORD"; payload: string }
+  | { type: "SET_ERROR"; payload: string | null }
+  | { type: "SET_FIELD_ERRORS"; payload: Record<string, string> }
+  | { type: "SET_IS_LOADING"; payload: boolean }
+  | { type: "CLEAR_ERRORS" };
+
+const initialState: LoginFormState = {
+  email: "",
+  password: "",
+  error: null,
+  fieldErrors: {},
+  isLoading: false,
+};
+
+function loginFormReducer(
+  state: LoginFormState,
+  action: LoginFormAction
+): LoginFormState {
+  switch (action.type) {
+    case "SET_EMAIL":
+      return { ...state, email: action.payload };
+    case "SET_PASSWORD":
+      return { ...state, password: action.payload };
+    case "SET_ERROR":
+      return { ...state, error: action.payload };
+    case "SET_FIELD_ERRORS":
+      return { ...state, fieldErrors: action.payload };
+    case "SET_IS_LOADING":
+      return { ...state, isLoading: action.payload };
+    case "CLEAR_ERRORS":
+      return { ...state, error: null, fieldErrors: {} };
+    default:
+      return state;
+  }
+}
+
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const t = useTranslations("Auth.login");
+  const tCommon = useTranslations("Common");
+
+  const [state, dispatch] = useReducer(loginFormReducer, initialState);
+  const { email, password, error, fieldErrors, isLoading } = state;
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setFieldErrors({});
+    dispatch({ type: "CLEAR_ERRORS" });
 
     const result = LoginSchema.safeParse({ email, password });
 
@@ -42,28 +88,28 @@ export function LoginForm({
         const field = String(issue.path[0]);
         if (!errors[field]) errors[field] = issue.message;
       }
-      setFieldErrors(errors);
+      dispatch({ type: "SET_FIELD_ERRORS", payload: errors });
       return;
     }
 
-    setIsLoading(true);
+    dispatch({ type: "SET_IS_LOADING", payload: true });
 
     try {
       const loginResult = await signInAdminPortal(email, password);
 
       if (!loginResult.success) {
-        throw new Error(
-          loginResult.error ||
-            "No tienes permisos para acceder al portal de administración.",
-        );
+        throw new Error(loginResult.error || t("noPermission"));
       }
 
       router.push("/dashboard");
       router.refresh();
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : "Ocurrió un error");
+      dispatch({
+        type: "SET_ERROR",
+        payload: err instanceof Error ? err.message : tCommon("error"),
+      });
     } finally {
-      setIsLoading(false);
+      dispatch({ type: "SET_IS_LOADING", payload: false });
     }
   };
 
@@ -71,20 +117,18 @@ export function LoginForm({
     <div className={cn("flex flex-col gap-6", className)} {...props}>
       <Card>
         <CardHeader>
-          <CardTitle className="text-2xl">Iniciar sesión</CardTitle>
-          <CardDescription>
-            Ingresa tu correo electrónico para acceder a tu cuenta
-          </CardDescription>
+          <CardTitle className="text-2xl">{t("title")}</CardTitle>
+          <CardDescription>{t("description")}</CardDescription>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleLogin} noValidate>
             <div className="flex flex-col gap-6">
               <div className="grid gap-2">
-                <Label htmlFor="email">Correo electrónico</Label>
+                <Label htmlFor="email">{tCommon("email")}</Label>
                 <Input
                   id="email"
-                  onChange={(e) => setEmail(e.target.value)}
-                  placeholder="m@ejemplo.com"
+                  onChange={(e) => dispatch({ type: "SET_EMAIL", payload: e.target.value })}
+                  placeholder={tCommon("emailPlaceholder")}
                   type="email"
                   value={email}
                   aria-invalid={!!fieldErrors.email}
@@ -98,17 +142,17 @@ export function LoginForm({
               </div>
               <div className="grid gap-2">
                 <div className="flex items-center">
-                  <Label htmlFor="password">Contraseña</Label>
+                  <Label htmlFor="password">{tCommon("password")}</Label>
                   <Link
                     className="ml-auto inline-block text-sm underline-offset-4 hover:underline"
                     href="/auth/forgot-password"
                   >
-                    ¿Olvidaste tu contraseña?
+                    {t("forgotPassword")}
                   </Link>
                 </div>
                 <Input
                   id="password"
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => dispatch({ type: "SET_PASSWORD", payload: e.target.value })}
                   type="password"
                   value={password}
                   aria-invalid={!!fieldErrors.password}
@@ -122,16 +166,16 @@ export function LoginForm({
               </div>
               {error && <p className="text-sm text-destructive">{error}</p>}
               <Button className="w-full" disabled={isLoading} type="submit">
-                {isLoading ? "Iniciando sesión..." : "Iniciar sesión"}
+                {isLoading ? t("submitting") : t("title")}
               </Button>
             </div>
             <div className="mt-4 text-center text-sm">
-              ¿No tienes una cuenta?{" "}
+              {t("noAccount")}{" "}
               <Link
                 className="underline underline-offset-4"
                 href="/auth/sign-up"
               >
-                Registrarse
+                {t("signUpLink")}
               </Link>
             </div>
           </form>

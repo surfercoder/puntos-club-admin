@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useActionState, useState, useEffect, useCallback } from 'react';
+import { useActionState, useState, useCallback } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from "sonner";
 
 import { branchWithAddressFormAction } from '@/actions/dashboard/branch/branch-with-address-form-actions';
@@ -22,6 +23,8 @@ interface BranchFormWithAddressProps {
 }
 
 export default function BranchFormWithAddress({ branch }: BranchFormWithAddressProps) {
+  const t = useTranslations('Dashboard.branch.form');
+  const tCommon = useTranslations('Common');
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [isActive, setIsActive] = useState<boolean>(branch?.active ?? true);
   const [addressData, setAddressData] = useState<Partial<GoogleAddressComponents>>({
@@ -33,17 +36,18 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
     country: '',
   });
 
-  const [actionState, formAction, pending] = useActionState(branchWithAddressFormAction, EMPTY_ACTION_STATE);
   const router = useRouter();
 
-  useEffect(() => {
-    if (actionState.message) {
-      toast.success(actionState.message);
-      setTimeout(() => {
-        router.push("/dashboard/branch");
-      }, 500);
+  const wrappedAction = async (state: ActionState, formData: FormData) => {
+    const result = await branchWithAddressFormAction(state, formData);
+    if (result.message) {
+      toast.success(result.message);
+      setTimeout(() => router.push("/dashboard/branch"), 500);
     }
-  }, [actionState, router]);
+    return result;
+  };
+
+  const [actionState, formAction, pending] = useActionState(wrappedAction, EMPTY_ACTION_STATE);
 
   const handlePlaceSelected = useCallback((components: GoogleAddressComponents) => {
     setAddressData({
@@ -93,27 +97,27 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
       {branch?.id && <input name="id" type="hidden" value={branch.id} />}
 
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">Branch Information</h3>
+        <h3 className="text-lg font-semibold">{t('branchInfo')}</h3>
         
         <div>
-          <Label htmlFor="name">Branch Name</Label>
+          <Label htmlFor="name">{t('nameLabel')}</Label>
           <Input
             defaultValue={branch?.name ?? ''}
             id="name"
             name="name"
-            placeholder="Enter branch name"
+            placeholder={t('namePlaceholder')}
             type="text"
           />
           <FieldError actionState={validation ?? actionState} name="name" />
         </div>
 
         <div>
-          <Label htmlFor="phone">Phone</Label>
+          <Label htmlFor="phone">{t('phoneLabel')}</Label>
           <Input
             defaultValue={branch?.phone ?? ''}
             id="phone"
             name="phone"
-            placeholder="Enter phone number (optional)"
+            placeholder={t('phonePlaceholder')}
             type="text"
           />
           <FieldError actionState={validation ?? actionState} name="phone" />
@@ -122,7 +126,7 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
         <input name="active" type="hidden" value={isActive.toString()} />
         
         <div>
-          <Label htmlFor="active">Status</Label>
+          <Label htmlFor="active">{t('statusLabel')}</Label>
           <select
             id="active"
             value={isActive ? 'true' : 'false'}
@@ -131,28 +135,28 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
             aria-describedby="active-error"
             aria-invalid={!!((validation ?? actionState).fieldErrors as Record<string, string[]> | undefined)?.active}
           >
-            <option value="true">Active</option>
-            <option value="false">Inactive</option>
+            <option value="true">{t('active')}</option>
+            <option value="false">{t('inactive')}</option>
           </select>
           <FieldError actionState={validation ?? actionState} name="active" />
         </div>
       </div>
 
       <div className="space-y-4 border-t pt-6">
-        <h3 className="text-lg font-semibold">Address Information</h3>
+        <h3 className="text-lg font-semibold">{t('addressInfo')}</h3>
         
         <div className="space-y-2">
-          <Label htmlFor="google-address">Search Address</Label>
+          <Label htmlFor="google-address">{t('addressLabel')}</Label>
           <GoogleAddressAutocomplete
             onPlaceSelected={handlePlaceSelected}
-            placeholder="Start typing an address..."
+            placeholder={t('addressPlaceholder')}
             id="google-address"
           />
-          <p className="text-xs text-muted-foreground">Select an address from Google suggestions or fill manually below</p>
+          <p className="text-xs text-muted-foreground">{t('addressHint')}</p>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="street">Street</Label>
+          <Label htmlFor="street">{t('street')}</Label>
           <Input
             aria-describedby="street-error"
             aria-invalid={!!((validation ?? actionState).fieldErrors as Record<string, string[]> | undefined)?.street}
@@ -160,13 +164,13 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
             onChange={(e) => setAddressData({ ...addressData, street: e.target.value })}
             id="street"
             name="street"
-            placeholder="Street name"
+            placeholder={t('streetPlaceholder')}
           />
           <FieldError actionState={validation ?? actionState} name="street" />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="number">Number</Label>
+          <Label htmlFor="number">{t('number')}</Label>
           <Input
             aria-describedby="number-error"
             aria-invalid={!!((validation ?? actionState).fieldErrors as Record<string, string[]> | undefined)?.number}
@@ -174,13 +178,13 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
             onChange={(e) => setAddressData({ ...addressData, number: e.target.value })}
             id="number"
             name="number"
-            placeholder="Street number"
+            placeholder={t('numberPlaceholder')}
           />
           <FieldError actionState={validation ?? actionState} name="number" />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="city">City</Label>
+          <Label htmlFor="city">{t('city')}</Label>
           <Input
             aria-describedby="city-error"
             aria-invalid={!!((validation ?? actionState).fieldErrors as Record<string, string[]> | undefined)?.city}
@@ -188,13 +192,13 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
             onChange={(e) => setAddressData({ ...addressData, city: e.target.value })}
             id="city"
             name="city"
-            placeholder="City"
+            placeholder={t('cityPlaceholder')}
           />
           <FieldError actionState={validation ?? actionState} name="city" />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="state">State</Label>
+          <Label htmlFor="state">{t('state')}</Label>
           <Input
             aria-describedby="state-error"
             aria-invalid={!!((validation ?? actionState).fieldErrors as Record<string, string[]> | undefined)?.state}
@@ -202,13 +206,13 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
             onChange={(e) => setAddressData({ ...addressData, state: e.target.value })}
             id="state"
             name="state"
-            placeholder="State/Province"
+            placeholder={t('statePlaceholder')}
           />
           <FieldError actionState={validation ?? actionState} name="state" />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="zip_code">Zip Code</Label>
+          <Label htmlFor="zip_code">{t('zipCode')}</Label>
           <Input
             aria-describedby="zip_code-error"
             aria-invalid={!!((validation ?? actionState).fieldErrors as Record<string, string[]> | undefined)?.zip_code}
@@ -216,7 +220,7 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
             onChange={(e) => setAddressData({ ...addressData, zip_code: e.target.value })}
             id="zip_code"
             name="zip_code"
-            placeholder="Postal code"
+            placeholder={t('zipCodePlaceholder')}
           />
           <FieldError actionState={validation ?? actionState} name="zip_code" />
         </div>
@@ -237,10 +241,10 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
 
       <div className="flex gap-2">
         <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/branch">Cancel</Link>
+          <Link href="/dashboard/branch">{tCommon('cancel')}</Link>
         </Button>
         <Button className="w-full" disabled={pending} type="submit">
-          {branch ? 'Update' : 'Create'}
+          {branch ? t('update') : t('create')}
         </Button>
       </div>
     </form>

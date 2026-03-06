@@ -3,6 +3,7 @@
 import { useEffect, useReducer, useRef } from 'react';
 import { ArrowLeft, CheckCircle2, FileText, Loader2, ScrollText, ShieldCheck } from 'lucide-react';
 import { Turnstile } from '@marsidev/react-turnstile';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -288,6 +289,8 @@ interface Step5ConsentProps {
 }
 
 export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5ConsentProps) {
+  const t = useTranslations('Onboarding.step5');
+  const tCommon = useTranslations('Common');
   const scrollRef = useRef<HTMLDivElement>(null);
   const [state, dispatch] = useReducer(consentReducer, initialState);
 
@@ -370,7 +373,7 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
 
       {!state.hasScrolledToBottom && (
         <p className="text-center text-xs text-muted-foreground">
-          ↓ Desplazate hasta el final para habilitar la confirmación
+          {t('scrollPrompt')}
         </p>
       )}
 
@@ -398,12 +401,7 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
               : 'text-gray-400 cursor-not-allowed'
           )}
         >
-          He leído y acepto en su totalidad los{' '}
-          <span className="font-semibold text-emerald-600 dark:text-emerald-400">
-            Términos y Condiciones de Uso
-          </span>{' '}
-          de Puntos Club, incluyendo la Política de Privacidad. Entiendo que este acuerdo
-          es vinculante para la operación de mi comercio en la plataforma.
+          {t('acceptTerms')}
         </Label>
       </div>
 
@@ -421,7 +419,7 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
       {canContinue && (
         <div className="flex items-center gap-2 text-sm text-emerald-700 dark:text-emerald-400 font-medium">
           <CheckCircle2 className="h-4 w-4" />
-          Todo listo. Podés continuar al siguiente paso.
+          {t('allDone')}
         </div>
       )}
 
@@ -434,7 +432,7 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
           className="sm:flex-1"
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
-          Atrás
+          {tCommon('back')}
         </Button>
         <Button
           type="button"
@@ -450,12 +448,12 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
           {state.isVerifying ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Verificando...
+              {t('verifying')}
             </>
           ) : (
             <>
               <FileText className="mr-2 h-4 w-4" />
-              Continuar
+              {tCommon('continue')}
             </>
           )}
         </Button>

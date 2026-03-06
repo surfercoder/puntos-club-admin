@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 
 import { getAllUsers } from '@/actions/dashboard/user/actions';
 import DeleteModal from '@/components/dashboard/user/delete-modal';
@@ -42,39 +43,45 @@ interface UsersListProps {
 }
 
 export function UsersList({ initialUsers, isOwner, isAdmin }: UsersListProps) {
-  const [users, setUsers] = useState<User[]>(initialUsers);
-  const [isLoading, setIsLoading] = useState(false);
+  const t = useTranslations('Dashboard.users');
+  const tCommon = useTranslations('Common');
+
+  const [state, setState] = useState<{ users: User[]; isLoading: boolean }>(() => ({
+    users: initialUsers,
+    isLoading: false,
+  }));
+  const { users, isLoading } = state;
 
   useEffect(() => {
+    let cancelled = false;
+
     async function fetchUsers() {
-      setIsLoading(true);
+      let fetchedUsers: User[] | null = null;
       try {
         if (isAdmin) {
-          // Admins see all users without organization filter
-          const fetchedUsers = await getAllUsers();
-          setUsers(fetchedUsers);
+          fetchedUsers = await getAllUsers();
         } else if (isOwner) {
-          // Owners see users from their active organization
           const activeOrgId = typeof window !== "undefined"
             ? window.localStorage.getItem("active_org_id")
             : null;
-          
+
           if (activeOrgId) {
-            const fetchedUsers = await getAllUsers(activeOrgId);
-            setUsers(fetchedUsers);
+            fetchedUsers = await getAllUsers(activeOrgId);
           }
         }
-      } catch (_error) {
-        // Silently ignore fetch errors
-      } finally {
-        setIsLoading(false);
+      } catch {
+        // keep current users on error
+      }
+      if (!cancelled) {
+        setState((prev) => ({
+          users: fetchedUsers ?? prev.users,
+          isLoading: false,
+        }));
       }
     }
 
-    // Listen for custom event from org switcher (only relevant for owners)
     const handleOrgChange = () => {
       if (isOwner && !isAdmin) {
-        // Small delay to ensure localStorage is updated
         setTimeout(() => {
           fetchUsers();
         }, 100);
@@ -85,12 +92,12 @@ export function UsersList({ initialUsers, isOwner, isAdmin }: UsersListProps) {
       window.addEventListener('orgChanged', handleOrgChange);
     }
 
-    // Fetch on mount to ensure we have the latest
     if (isAdmin || isOwner) {
       fetchUsers();
     }
 
     return () => {
+      cancelled = true;
       if (isOwner && !isAdmin) {
         window.removeEventListener('orgChanged', handleOrgChange);
       }
@@ -101,20 +108,20 @@ export function UsersList({ initialUsers, isOwner, isAdmin }: UsersListProps) {
     <div className="border rounded-lg">
       {isLoading && (
         <div className="absolute inset-0 bg-background/50 flex items-center justify-center z-10">
-          <div className="text-sm text-muted-foreground">Cargando usuarios...</div>
+          <div className="text-sm text-muted-foreground">{t('loading')}</div>
         </div>
       )}
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Nombre</TableHead>
-            <TableHead>Correo electrónico</TableHead>
-            <TableHead>Rol</TableHead>
-            <TableHead>Organización</TableHead>
-            <TableHead>Tipo</TableHead>
-            <TableHead>Estado</TableHead>
-            <TableHead>Creado</TableHead>
-            <TableHead className="text-right">Acciones</TableHead>
+            <TableHead>{t('tableHeaders.name')}</TableHead>
+            <TableHead>{t('tableHeaders.email')}</TableHead>
+            <TableHead>{t('tableHeaders.role')}</TableHead>
+            <TableHead>{t('tableHeaders.organization')}</TableHead>
+            <TableHead>{t('tableHeaders.type')}</TableHead>
+            <TableHead>{t('tableHeaders.status')}</TableHead>
+            <TableHead>{t('tableHeaders.created')}</TableHead>
+            <TableHead className="text-right">{tCommon('actions')}</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -122,7 +129,7 @@ export function UsersList({ initialUsers, isOwner, isAdmin }: UsersListProps) {
             users.map((user) => (
               <TableRow key={`${user.user_type}-${user.id}`}>
                 <TableCell className="font-medium">
-                  {user.first_name || user.last_name 
+                  {user.first_name || user.last_name
                     ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
                     : 'N/A'
                   }
@@ -136,12 +143,12 @@ export function UsersList({ initialUsers, isOwner, isAdmin }: UsersListProps) {
                 <TableCell>{user.organization?.name || 'N/A'}</TableCell>
                 <TableCell>
                   <Badge variant="secondary">
-                    {user.user_type === 'beneficiary' ? 'Beneficiario' : 'Usuario de la App'}
+                    {user.user_type === 'beneficiary' ? t('typeBeneficiary') : t('typeAppUser')}
                   </Badge>
                 </TableCell>
                 <TableCell>
                   <Badge variant={user.active ? 'default' : 'destructive'}>
-                    {user.active ? 'Activo' : 'Inactivo'}
+                    {user.active ? t('statusActive') : t('statusInactive')}
                   </Badge>
                 </TableCell>
                 <TableCell>
@@ -154,10 +161,10 @@ export function UsersList({ initialUsers, isOwner, isAdmin }: UsersListProps) {
                         <Pencil className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <DeleteModal 
+                    <DeleteModal
                       userId={user.id}
                       userName={
-                        user.first_name || user.last_name 
+                        user.first_name || user.last_name
                           ? `${user.first_name || ''} ${user.last_name || ''}`.trim()
                           : 'Unnamed User'
                       }
@@ -168,9 +175,9 @@ export function UsersList({ initialUsers, isOwner, isAdmin }: UsersListProps) {
               </TableRow>
             ))
           ) : (
-              <TableRow>
-              <TableCell className="text-center py-4" colSpan={8}>No se encontraron usuarios.</TableCell>
-              </TableRow>
+            <TableRow>
+              <TableCell className="text-center py-4" colSpan={8}>{t('empty')}</TableCell>
+            </TableRow>
           )}
         </TableBody>
       </Table>

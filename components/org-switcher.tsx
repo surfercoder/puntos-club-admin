@@ -3,6 +3,7 @@
 import * as React from "react"
 import { ChevronsUpDown, Plus } from "lucide-react"
 import { useRouter } from "next/navigation"
+import { useTranslations } from "next-intl"
 
 import {
   DropdownMenu,
@@ -46,6 +47,7 @@ export function OrgSwitcher({
 }: OrgSwitcherProps) {
   const { isMobile } = useSidebar()
   const router = useRouter()
+  const t = useTranslations("Navigation")
   const activeOrg = orgs.find((o) => o.id === activeOrgId) ?? orgs[0]
   const [isAddOrgOpen, setIsAddOrgOpen] = React.useState(false)
 
@@ -71,7 +73,7 @@ export function OrgSwitcher({
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{activeOrg.name}</span>
-                <span className="truncate text-xs">Organization</span>
+                <span className="truncate text-xs">{t("organization")}</span>
               </div>
               <ChevronsUpDown className="ml-auto" />
             </SidebarMenuButton>
@@ -83,7 +85,7 @@ export function OrgSwitcher({
             sideOffset={4}
           >
             <DropdownMenuLabel className="text-muted-foreground text-xs">
-              Organizations
+              {t("organizations")}
             </DropdownMenuLabel>
             {orgs.map((org) => (
               <DropdownMenuItem
@@ -106,7 +108,7 @@ export function OrgSwitcher({
                 <div className="flex size-6 items-center justify-center rounded-md border">
                   <Plus className="h-4 w-4" />
                 </div>
-                Add New Organization
+                {t("addNewOrganization")}
               </DropdownMenuItem>
             ) : null}
           </DropdownMenuContent>
@@ -115,7 +117,7 @@ export function OrgSwitcher({
         <Dialog open={isAddOrgOpen} onOpenChange={setIsAddOrgOpen}>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Add New Organization</DialogTitle>
+              <DialogTitle>{t("addNewOrganization")}</DialogTitle>
             </DialogHeader>
             <OrganizationForm
               onCancel={() => setIsAddOrgOpen(false)}

@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 
 import { toast } from 'sonner';
 
@@ -25,6 +26,9 @@ type ProfileFormProps = {
 
 export function ProfileForm({ user }: ProfileFormProps) {
   const router = useRouter();
+  const t = useTranslations('Dashboard.profile');
+  const tCommon = useTranslations('Common');
+
   const [isLoading, setIsLoading] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
@@ -76,15 +80,12 @@ export function ProfileForm({ user }: ProfileFormProps) {
         if (emailError) {
           throw emailError;
         }
-
-        toast.success('Actualización de correo iniciada. Revisa tu nueva dirección de correo para confirmar el cambio.');
       }
 
-      toast.success('Perfil actualizado correctamente.');
-
+      toast.success(tCommon('saveChanges'));
       router.refresh();
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Error al actualizar el perfil');
+      toast.error(error instanceof Error ? error.message : tCommon('error'));
     } finally {
       setIsLoading(false);
     }
@@ -94,15 +95,13 @@ export function ProfileForm({ user }: ProfileFormProps) {
     <form onSubmit={handleSubmit} noValidate>
       <Card>
         <CardHeader>
-          <CardTitle>Información Personal</CardTitle>
-          <CardDescription>
-            Actualiza tus datos personales y de contacto
-          </CardDescription>
+          <CardTitle>{t('section')}</CardTitle>
+          <CardDescription>{t('sectionDescription')}</CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid gap-4 md:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="first_name">Nombre</Label>
+              <Label htmlFor="first_name">{tCommon('name')}</Label>
               <Input
                 id="first_name"
                 value={formData.first_name}
@@ -119,7 +118,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
               )}
             </div>
             <div className="space-y-2">
-              <Label htmlFor="last_name">Apellido</Label>
+              <Label htmlFor="last_name">{tCommon('lastName')}</Label>
               <Input
                 id="last_name"
                 value={formData.last_name}
@@ -138,7 +137,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Correo electrónico</Label>
+            <Label htmlFor="email">{tCommon('email')}</Label>
             <Input
               id="email"
               type="email"
@@ -157,7 +156,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="username">Usuario</Label>
+            <Label htmlFor="username">{t('username')}</Label>
             <Input
               id="username"
               value={formData.username}
@@ -175,7 +174,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label>Organización</Label>
+            <Label>{t('organization')}</Label>
             <Input
               value={user.organization?.name || 'N/A'}
               disabled
@@ -184,7 +183,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label>Rol</Label>
+            <Label>{t('role')}</Label>
             <Input
               value={user.role?.display_name || user.role?.name || 'N/A'}
               disabled
@@ -199,10 +198,10 @@ export function ProfileForm({ user }: ProfileFormProps) {
               onClick={() => router.back()}
               disabled={isLoading}
             >
-              Cancelar
+              {tCommon('cancel')}
             </Button>
             <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Guardando...' : 'Guardar Cambios'}
+              {isLoading ? tCommon('savingChanges') : tCommon('saveChanges')}
             </Button>
           </div>
         </CardContent>

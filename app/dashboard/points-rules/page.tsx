@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useCallback } from "react";
+import { useTranslations } from "next-intl";
 import {
   getAllPointsRules,
   togglePointsRuleStatus,
@@ -23,6 +24,10 @@ import {
 } from "@/components/ui/table";
 import { Plus, Pencil, Trash2, Calculator, RefreshCw } from "lucide-react";
 import Link from "next/link";
+
+// ---------------------------------------------------------------------------
+// Types
+// ---------------------------------------------------------------------------
 
 interface PointsRule {
   id: number;
@@ -49,275 +54,270 @@ interface PointsRule {
   category: { name: string } | null;
 }
 
-const DAY_NAMES = ["Dom", "Lun", "Mar", "Mié", "Jue", "Vie", "Sáb"];
+interface Branch {
+  id: string;
+  name: string;
+}
 
-export default function PointsRulesPage() {
-  const [rules, setRules] = useState<PointsRule[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [testAmount, setTestAmount] = useState("100");
-  const [testBranchId, setTestBranchId] = useState<string>("");
-  const [branches, setBranches] = useState<Array<{ id: string; name: string }>>([]);
-  const [testResult, setTestResult] = useState<number | null>(null);
-  const [testLoading, setTestLoading] = useState(false);
+// ---------------------------------------------------------------------------
+// Reducer
+// ---------------------------------------------------------------------------
 
-  useEffect(() => {
-    loadRules();
-    loadBranches();
+interface State {
+  rules: PointsRule[];
+  loading: boolean;
+  testAmount: string;
+  testBranchId: string;
+  branches: Branch[];
+  testResult: number | null;
+  testLoading: boolean;
+}
 
-    // Listen for organization changes
-    const handleOrgChange = () => {
-      loadRules();
-      loadBranches();
-      setTestBranchId("");
-    };
+type Action =
+  | { type: "SET_RULES"; payload: PointsRule[] }
+  | { type: "SET_LOADING"; payload: boolean }
+  | { type: "SET_TEST_AMOUNT"; payload: string }
+  | { type: "SET_TEST_BRANCH_ID"; payload: string }
+  | { type: "SET_BRANCHES"; payload: Branch[] }
+  | { type: "SET_TEST_RESULT"; payload: number | null }
+  | { type: "SET_TEST_LOADING"; payload: boolean }
+  | { type: "RESET_ORG" };
 
-    window.addEventListener('orgChanged', handleOrgChange);
-    return () => {
-      window.removeEventListener('orgChanged', handleOrgChange);
-    };
-  }, []);
+const initialState: State = {
+  rules: [],
+  loading: true,
+  testAmount: "100",
+  testBranchId: "",
+  branches: [],
+  testResult: null,
+  testLoading: false,
+};
 
-  const loadBranches = async () => {
-    const activeOrgId =
-      typeof document !== "undefined"
-        ? document.cookie
-            .split(";")
-            .map((c) => c.trim())
-            .find((c) => c.startsWith("active_org_id="))
-            ?.split("=")[1]
-        : undefined;
+function reducer(state: State, action: Action): State {
+  switch (action.type) {
+    case "SET_RULES":
+      return { ...state, rules: action.payload };
+    case "SET_LOADING":
+      return { ...state, loading: action.payload };
+    case "SET_TEST_AMOUNT":
+      return { ...state, testAmount: action.payload };
+    case "SET_TEST_BRANCH_ID":
+      return { ...state, testBranchId: action.payload };
+    case "SET_BRANCHES":
+      return { ...state, branches: action.payload };
+    case "SET_TEST_RESULT":
+      return { ...state, testResult: action.payload };
+    case "SET_TEST_LOADING":
+      return { ...state, testLoading: action.payload };
+    case "RESET_ORG":
+      return { ...state, testBranchId: "", branches: [] };
+    default:
+      return state;
+  }
+}
 
-    const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
-    if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
-      setBranches([]);
-      return;
-    }
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
 
-    const { createClient } = await import("@/lib/supabase/client");
-    const supabase = createClient();
-    const { data } = await supabase
-      .from("branch")
-      .select("id, name")
-      .eq("organization_id", activeOrgIdNumber)
-      .eq("active", true)
-      .order("name");
+function getRuleTypeLabel(t: ReturnType<typeof useTranslations>, type: string) {
+  const key = `ruleTypes.${type}` as Parameters<typeof t>[0];
+  try {
+    return t(key);
+  } catch {
+    return type;
+  }
+}
 
-    setBranches((data ?? []) as Array<{ id: string; name: string }>);
-  };
+function getRuleConfig(t: ReturnType<typeof useTranslations>, rule: PointsRule) {
+  const config = rule.config;
+  switch (rule.rule_type) {
+    case "fixed_amount":
+      return `${config.points_per_dollar} pts/$`;
+    case "percentage":
+      return `${config.percentage}%`;
+    case "fixed_per_item":
+      return `${config.points_per_item} pts/item`;
+    case "tiered":
+      return t("ruleTypes.multiplelevels");
+    default:
+      return "N/A";
+  }
+}
 
-  const loadRules = async () => {
-    setLoading(true);
-    const result = await getAllPointsRules();
-    if (result.success && result.data) {
-      setRules(result.data);
-    }
-    setLoading(false);
-  };
+function getTimeDisplay(t: ReturnType<typeof useTranslations>, rule: PointsRule) {
+  if (!rule.time_start && !rule.time_end) return t("schedule.allDay");
+  return `${rule.time_start?.slice(0, 5) || "00:00"} - ${rule.time_end?.slice(0, 5) || "23:59"}`;
+}
 
-  const handleToggleStatus = async (id: number, currentStatus: boolean) => {
-    const result = await togglePointsRuleStatus(id, !currentStatus);
-    if (result.success) {
-      loadRules();
-    }
-  };
+function getDaysDisplay(t: ReturnType<typeof useTranslations>, days: number[] | null) {
+  if (!days || days.length === 0) return t("schedule.allDays");
+  if (days.length === 7) return t("schedule.allDays");
+  const DAY_NAMES = Array.from({ length: 7 }, (_, i) => t(`form.days.${i}` as Parameters<typeof t>[0]));
+  return days.map((d) => DAY_NAMES[d]).join(", ");
+}
 
-  const handleDelete = async (id: number, name: string) => {
-    if (confirm(`¿Estás seguro de que deseas eliminar la regla "${name}"?`)) {
-      const result = await deletePointsRule(id);
-      if (result.success) {
-        loadRules();
-      }
-    }
-  };
+function getDateRangeDisplay(t: ReturnType<typeof useTranslations>, rule: PointsRule) {
+  if (rule.is_default) return t("schedule.always");
+  const start = rule.start_date || null;
+  const end = rule.end_date || null;
+  if (!start && !end) return null;
+  if (start && end) return `${start} → ${end}`;
+  if (start) return t("schedule.from", { date: start });
+  return t("schedule.until", { date: end! });
+}
+
+// ---------------------------------------------------------------------------
+// Sub-component: PointsCalculator
+// ---------------------------------------------------------------------------
+
+interface PointsCalculatorProps {
+  state: State;
+  dispatch: React.Dispatch<Action>;
+  t: ReturnType<typeof useTranslations>;
+}
+
+function PointsCalculator({ state, dispatch, t }: PointsCalculatorProps) {
+  const { testAmount, testBranchId, branches, testResult, testLoading } = state;
 
   const handleTestCalculation = async () => {
     if (!testBranchId) {
-      alert("Por favor selecciona una sucursal");
+      alert(t("calculator.selectBranchAlert"));
       return;
     }
-    setTestLoading(true);
+    dispatch({ type: "SET_TEST_LOADING", payload: true });
     const result = await testPointsCalculation(
       parseFloat(testAmount),
       undefined,
       Number(testBranchId)
     );
     if (result.success) {
-      setTestResult(result.points || 0);
+      dispatch({ type: "SET_TEST_RESULT", payload: result.points || 0 });
     }
-    setTestLoading(false);
-  };
-
-  const getRuleTypeLabel = (type: string) => {
-    const labels: Record<string, string> = {
-      fixed_amount: "Fijo por compra",
-      percentage: "Porcentaje",
-      fixed_per_item: "Fijo por ítem",
-      tiered: "Escalonado",
-    };
-    return labels[type] || type;
-  };
-
-  const getRuleConfig = (rule: PointsRule) => {
-    const config = rule.config;
-    switch (rule.rule_type) {
-      case "fixed_amount":
-        return `${config.points_per_dollar} pts/$`;
-      case "percentage":
-        return `${config.percentage}%`;
-      case "fixed_per_item":
-        return `${config.points_per_item} pts/item`;
-      case "tiered":
-        return "Múltiples niveles";
-      default:
-        return "N/A";
-    }
-  };
-
-  const getTimeDisplay = (rule: PointsRule) => {
-    if (!rule.time_start && !rule.time_end) return "Todo el día";
-    return `${rule.time_start?.slice(0, 5) || "00:00"} - ${rule.time_end?.slice(0, 5) || "23:59"}`;
-  };
-
-  const getDaysDisplay = (days: number[] | null) => {
-    if (!days || days.length === 0) return "Todos los días";
-    if (days.length === 7) return "Todos los días";
-    return days.map(d => DAY_NAMES[d]).join(", ");
-  };
-
-  const getDateRangeDisplay = (rule: PointsRule) => {
-    if (rule.is_default) return "Siempre";
-    const start = rule.start_date || null;
-    const end = rule.end_date || null;
-    if (!start && !end) return null;
-    if (start && end) return `${start} → ${end}`;
-    if (start) return `Desde ${start}`;
-    return `Hasta ${end}`;
+    dispatch({ type: "SET_TEST_LOADING", payload: false });
   };
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Reglas de Puntos y Ofertas Especiales</h1>
-          <p className="text-muted-foreground mt-2">
-            Administrar cómo los clientes acumulan puntos en sus compras
-          </p>
-        </div>
-        <Link href="/dashboard/points-rules/new">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Crear Regla
+    <Card className="mb-6">
+      <CardHeader>
+        <CardTitle className="flex items-center gap-2">
+          <Calculator className="h-5 w-5" />
+          {t("calculator.title")}
+        </CardTitle>
+        <CardDescription>{t("calculator.description")}</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="flex gap-4 items-end">
+          <div className="flex-1">
+            <Label htmlFor="test-amount">{t("calculator.purchaseAmount")}</Label>
+            <Input
+              id="test-amount"
+              type="number"
+              step="0.01"
+              value={testAmount}
+              onChange={(e) => dispatch({ type: "SET_TEST_AMOUNT", payload: e.target.value })}
+              placeholder="100.00"
+            />
+          </div>
+          <div className="flex-1">
+            <Label htmlFor="test-branch">{t("calculator.branch")}</Label>
+            <select
+              id="test-branch"
+              value={testBranchId}
+              onChange={(e) => dispatch({ type: "SET_TEST_BRANCH_ID", payload: e.target.value })}
+              className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              required
+            >
+              <option value="">{t("calculator.selectBranch")}</option>
+              {branches.map((b) => (
+                <option key={b.id} value={b.id}>
+                  {b.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <Button onClick={handleTestCalculation} disabled={testLoading}>
+            {testLoading ? t("calculator.calculating") : t("calculator.calculate")}
           </Button>
-        </Link>
-      </div>
+          {testResult !== null && (
+            <div className="px-6 py-3 bg-primary/10 rounded-lg">
+              <div className="text-sm text-muted-foreground">{t("calculator.pointsEarned")}</div>
+              <div className="text-2xl font-bold text-primary">{testResult}</div>
+            </div>
+          )}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
 
-      {/* Test Calculator Card */}
-      <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Calculator className="h-5 w-5" />
-            Calculadora de Puntos
-          </CardTitle>
-          <CardDescription>
-            Prueba cuántos puntos acumularía una compra con las reglas activas actuales
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <div className="flex gap-4 items-end">
-            <div className="flex-1">
-              <Label htmlFor="test-amount">Monto de Compra</Label>
-              <Input
-                id="test-amount"
-                type="number"
-                step="0.01"
-                value={testAmount}
-                onChange={(e) => setTestAmount(e.target.value)}
-                placeholder="100.00"
-              />
-            </div>
-            <div className="flex-1">
-              <Label htmlFor="test-branch">Sucursal *</Label>
-              <select
-                id="test-branch"
-                value={testBranchId}
-                onChange={(e) => setTestBranchId(e.target.value)}
-                className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                required
-              >
-                <option value="">Seleccionar sucursal</option>
-                {branches.map((b) => (
-                  <option key={b.id} value={b.id}>
-                    {b.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <Button onClick={handleTestCalculation} disabled={testLoading}>
-              {testLoading ? "Calculando..." : "Calcular"}
-            </Button>
-            {testResult !== null && (
-              <div className="px-6 py-3 bg-primary/10 rounded-lg">
-                <div className="text-sm text-muted-foreground">Puntos obtenidos</div>
-                <div className="text-2xl font-bold text-primary">{testResult}</div>
-              </div>
-            )}
-          </div>
-        </CardContent>
-      </Card>
+// ---------------------------------------------------------------------------
+// Sub-component: RulesTable
+// ---------------------------------------------------------------------------
 
-      {/* Rules Table */}
-      <Card>
-        <CardHeader>
-          <div className="flex justify-between items-center">
-            <CardTitle>Todas las Reglas</CardTitle>
-            <Button variant="outline" size="sm" onClick={loadRules}>
-              <RefreshCw className="h-4 w-4 mr-2" />
-              Actualizar
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8">Cargando reglas...</div>
-          ) : rules.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No se encontraron reglas. Crea tu primera regla para comenzar.
-            </div>
-          ) : (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Estado</TableHead>
-                  <TableHead>Visualización</TableHead>
-                  <TableHead>Nombre</TableHead>
-                  <TableHead>Tipo</TableHead>
-                  <TableHead>Config</TableHead>
-                  <TableHead>Horario</TableHead>
-                  <TableHead>Prioridad</TableHead>
-                  <TableHead>Mostrar en App</TableHead>
-                  <TableHead className="text-right">Acciones</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {rules.map((rule) => (
+interface RulesTableProps {
+  rules: PointsRule[];
+  loading: boolean;
+  onRefresh: () => void;
+  onToggleStatus: (id: number, currentStatus: boolean) => void;
+  onDelete: (id: number, name: string) => void;
+  t: ReturnType<typeof useTranslations>;
+}
+
+function RulesTable({ rules, loading, onRefresh, onToggleStatus, onDelete, t }: RulesTableProps) {
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex justify-between items-center">
+          <CardTitle>{t("table.title")}</CardTitle>
+          <Button variant="outline" size="sm" onClick={onRefresh}>
+            <RefreshCw className="h-4 w-4 mr-2" />
+            {t("table.refresh")}
+          </Button>
+        </div>
+      </CardHeader>
+      <CardContent>
+        {loading ? (
+          <div className="text-center py-8">{t("table.loading")}</div>
+        ) : rules.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground">{t("table.empty")}</div>
+        ) : (
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t("table.status")}</TableHead>
+                <TableHead>{t("table.display")}</TableHead>
+                <TableHead>{t("table.name")}</TableHead>
+                <TableHead>{t("table.type")}</TableHead>
+                <TableHead>{t("table.config")}</TableHead>
+                <TableHead>{t("table.schedule")}</TableHead>
+                <TableHead>{t("table.priority")}</TableHead>
+                <TableHead>{t("table.showInApp")}</TableHead>
+                <TableHead className="text-right">{t("table.actions")}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {rules.map((rule) => {
+                const dateRange = getDateRangeDisplay(t, rule);
+                return (
                   <TableRow key={rule.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Switch
                           checked={rule.is_active}
-                          onCheckedChange={() => handleToggleStatus(rule.id, rule.is_active)}
+                          onCheckedChange={() => onToggleStatus(rule.id, rule.is_active)}
                         />
                         <Badge variant={rule.is_active ? "default" : "secondary"}>
-                          {rule.is_active ? "Activo" : "Inactivo"}
+                          {rule.is_active ? t("status.active") : t("status.inactive")}
                         </Badge>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <span className="text-2xl">{rule.display_icon || "⭐"}</span>
+                        <span className="text-2xl">{rule.display_icon || "\u2B50"}</span>
                         <span className="font-medium">{rule.display_name || rule.name}</span>
                         {rule.is_default && (
-                          <Badge variant="default">Por defecto</Badge>
+                          <Badge variant="default">{t("status.default")}</Badge>
                         )}
                       </div>
                     </TableCell>
@@ -330,18 +330,16 @@ export default function PointsRulesPage() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline">{getRuleTypeLabel(rule.rule_type)}</Badge>
+                      <Badge variant="outline">{getRuleTypeLabel(t, rule.rule_type)}</Badge>
                     </TableCell>
-                    <TableCell className="font-mono text-sm">
-                      {getRuleConfig(rule)}
-                    </TableCell>
+                    <TableCell className="font-mono text-sm">{getRuleConfig(t, rule)}</TableCell>
                     <TableCell>
                       <div className="text-sm">
-                        {getDateRangeDisplay(rule) && (
-                          <div>{getDateRangeDisplay(rule)}</div>
-                        )}
-                        <div>{getTimeDisplay(rule)}</div>
-                        <div className="text-muted-foreground">{getDaysDisplay(rule.days_of_week)}</div>
+                        {dateRange && <div>{dateRange}</div>}
+                        <div>{getTimeDisplay(t, rule)}</div>
+                        <div className="text-muted-foreground">
+                          {getDaysDisplay(t, rule.days_of_week)}
+                        </div>
                       </div>
                     </TableCell>
                     <TableCell>
@@ -349,9 +347,9 @@ export default function PointsRulesPage() {
                     </TableCell>
                     <TableCell>
                       {rule.show_in_app ? (
-                        <Badge variant="default">Visible</Badge>
+                        <Badge variant="default">{t("status.visible")}</Badge>
                       ) : (
-                        <Badge variant="outline">Oculto</Badge>
+                        <Badge variant="outline">{t("status.hidden")}</Badge>
                       )}
                     </TableCell>
                     <TableCell className="text-right">
@@ -364,19 +362,131 @@ export default function PointsRulesPage() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => handleDelete(rule.id, rule.name)}
+                          onClick={() => onDelete(rule.id, rule.name)}
                         >
                           <Trash2 className="h-4 w-4 text-destructive" />
                         </Button>
                       </div>
                     </TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          )}
-        </CardContent>
-      </Card>
+                );
+              })}
+            </TableBody>
+          </Table>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Main component
+// ---------------------------------------------------------------------------
+
+export default function PointsRulesPage() {
+  const t = useTranslations("PointsRules");
+  const [state, dispatch] = useReducer(reducer, initialState);
+
+  const loadBranches = useCallback(async () => {
+    const activeOrgId =
+      typeof document !== "undefined"
+        ? document.cookie
+            .split(";")
+            .map((c) => c.trim())
+            .find((c) => c.startsWith("active_org_id="))
+            ?.split("=")[1]
+        : undefined;
+
+    const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+    if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
+      dispatch({ type: "SET_BRANCHES", payload: [] });
+      return;
+    }
+
+    const { createClient } = await import("@/lib/supabase/client");
+    const supabase = createClient();
+    const { data } = await supabase
+      .from("branch")
+      .select("id, name")
+      .eq("organization_id", activeOrgIdNumber)
+      .eq("active", true)
+      .order("name");
+
+    dispatch({ type: "SET_BRANCHES", payload: (data ?? []) as Branch[] });
+  }, []);
+
+  const loadRules = useCallback(async () => {
+    dispatch({ type: "SET_LOADING", payload: true });
+    const result = await getAllPointsRules();
+    if (result.success && result.data) {
+      dispatch({ type: "SET_RULES", payload: result.data });
+    }
+    dispatch({ type: "SET_LOADING", payload: false });
+  }, []);
+
+  useEffect(() => {
+    loadRules();
+    loadBranches();
+
+    const handleOrgChange = () => {
+      dispatch({ type: "RESET_ORG" });
+      loadRules();
+      loadBranches();
+    };
+
+    window.addEventListener("orgChanged", handleOrgChange);
+    return () => {
+      window.removeEventListener("orgChanged", handleOrgChange);
+    };
+  }, [loadRules, loadBranches]);
+
+  const handleToggleStatus = useCallback(
+    async (id: number, currentStatus: boolean) => {
+      const result = await togglePointsRuleStatus(id, !currentStatus);
+      if (result.success) {
+        loadRules();
+      }
+    },
+    [loadRules]
+  );
+
+  const handleDelete = useCallback(
+    async (id: number, name: string) => {
+      if (confirm(t("deleteConfirm", { name }))) {
+        const result = await deletePointsRule(id);
+        if (result.success) {
+          loadRules();
+        }
+      }
+    },
+    [loadRules, t]
+  );
+
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold">{t("title")}</h1>
+          <p className="text-muted-foreground mt-2">{t("description")}</p>
+        </div>
+        <Link href="/dashboard/points-rules/new">
+          <Button>
+            <Plus className="mr-2 h-4 w-4" />
+            {t("createButton")}
+          </Button>
+        </Link>
+      </div>
+
+      <PointsCalculator state={state} dispatch={dispatch} t={t} />
+
+      <RulesTable
+        rules={state.rules}
+        loading={state.loading}
+        onRefresh={loadRules}
+        onToggleStatus={handleToggleStatus}
+        onDelete={handleDelete}
+        t={t}
+      />
     </div>
   );
 }

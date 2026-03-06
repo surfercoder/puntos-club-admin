@@ -2,8 +2,11 @@
 
 import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useTranslations } from "next-intl";
 
 import { AppSidebar } from "@/components/app-sidebar";
+import { DashboardTour } from "@/components/dashboard/tour/dashboard-tour";
+import { LanguageSwitcher } from "@/components/language-switcher";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -48,32 +51,22 @@ export function DashboardShell({
 }) {
   const router = useRouter();
   const pathname = usePathname();
+  const tBreadcrumb = useTranslations("Breadcrumb");
   const [activeOrgId, setActiveOrgId] = React.useState<string | null>(null);
 
   const breadcrumbItems = React.useMemo(() => {
-    const segmentLabels: Record<string, string> = {
-      address: "Direcciones",
-      app_order: "Pedidos",
-      app_user: "Usuarios de la App",
-      app_user_organization: "Usuarios por Organización",
-      beneficiary: "Beneficiarios",
-      beneficiary_organization: "Organizaciones de Beneficiarios",
-      branch: "Sucursales",
-      category: "Categorías",
-      notifications: "Notificaciones",
-      organization: "Organizaciones",
-      organization_notification_limits: "Límites de Notificaciones",
-      "points-rules": "Reglas de Puntos",
-      product: "Productos",
-      profile: "Perfil",
-      purchase: "Compras",
-      push_notifications: "Notificaciones Push",
-      push_tokens: "Tokens Push",
-      redemption: "Canjes",
-      stock: "Stock",
-      "user-role": "Roles de Usuario",
-      users: "Usuarios",
-    };
+    const knownSegments = [
+      "address", "app_order", "app_user", "app_user_organization",
+      "beneficiary", "beneficiary_organization", "branch", "category",
+      "notifications", "organization", "organization_notification_limits",
+      "points-rules", "product", "profile", "purchase", "push_notifications",
+      "push_tokens", "redemption", "stock", "user-role", "users", "qr",
+    ] as const;
+
+    type KnownSegment = typeof knownSegments[number];
+
+    const isKnownSegment = (s: string): s is KnownSegment =>
+      (knownSegments as readonly string[]).includes(s);
 
     const isUuidLike = (value: string) =>
       /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
@@ -87,25 +80,28 @@ export function DashboardShell({
     const dashboardIndex = rawSegments.indexOf("dashboard");
     const segments = dashboardIndex >= 0 ? rawSegments.slice(dashboardIndex + 1) : rawSegments;
 
-    const items: { label: string; href?: string }[] = [{ label: "Panel", href: "/dashboard" }];
+    const items: { label: string; href?: string }[] = [
+      { label: tBreadcrumb("panel"), href: "/dashboard" },
+    ];
 
     let hrefAcc = "/dashboard";
     for (const seg of segments) {
       hrefAcc += `/${seg}`;
 
-      let label = segmentLabels[seg] ?? seg;
-      if (seg === "new") label = "Nuevo";
-      if (seg === "edit") label = "Editar";
-      if (isUuidLike(seg) || /^\d+$/.test(seg)) label = "Detalles";
+      let label: string;
+      if (seg === "new") label = tBreadcrumb("new");
+      else if (seg === "edit") label = tBreadcrumb("edit");
+      else if (isUuidLike(seg) || /^\d+$/.test(seg)) label = tBreadcrumb("details");
+      else if (isKnownSegment(seg)) label = tBreadcrumb(seg);
+      else label = seg;
 
       items.push({ label, href: hrefAcc });
     }
 
-    // Last item should be current page (no link)
     if (items.length > 0) items[items.length - 1] = { label: items[items.length - 1].label };
 
     return items;
-  }, [pathname]);
+  }, [pathname, tBreadcrumb]);
 
   React.useEffect(() => {
     if (portalMode === "admin") return;
@@ -148,6 +144,7 @@ export function DashboardShell({
 
   return (
     <SidebarProvider>
+      <DashboardTour userRole={userRole} userEmail={user.email} />
       <AppSidebar
         user={user}
         userRole={userRole}
@@ -159,7 +156,7 @@ export function DashboardShell({
       />
       <SidebarInset>
         <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <div className="flex items-center gap-2 px-4">
+          <div className="flex flex-1 items-center gap-2 px-4">
             <SidebarTrigger className="-ml-1" />
             <Separator
               orientation="vertical"
@@ -171,7 +168,7 @@ export function DashboardShell({
                   const isLast = idx === breadcrumbItems.length - 1;
 
                   return (
-                    <React.Fragment key={`${item.label}-${idx}`}>
+                    <React.Fragment key={item.href ?? `last-${item.label}`}>
                       <BreadcrumbItem className={idx === 0 ? "hidden md:block" : undefined}>
                         {isLast || !item.href ? (
                           <BreadcrumbPage>{item.label}</BreadcrumbPage>
@@ -185,6 +182,9 @@ export function DashboardShell({
                 })}
               </BreadcrumbList>
             </Breadcrumb>
+            <div className="ml-auto">
+              <LanguageSwitcher />
+            </div>
           </div>
         </header>
         <div className="flex flex-1 flex-col px-4">{children}</div>

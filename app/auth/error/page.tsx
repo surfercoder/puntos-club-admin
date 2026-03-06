@@ -1,4 +1,12 @@
+import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+
+export const metadata: Metadata = {
+  title: "Error | Puntos Club",
+  description: "Ocurrió un error de autenticación.",
+};
 
 export default async function Page({
   searchParams,
@@ -6,6 +14,7 @@ export default async function Page({
   searchParams: Promise<{ error: string }>;
 }) {
   const params = await searchParams;
+  const t = await getTranslations("Auth.error");
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
@@ -13,18 +22,16 @@ export default async function Page({
         <div className="flex flex-col gap-6">
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">
-                Lo sentimos, algo salió mal.
-              </CardTitle>
+              <CardTitle className="text-2xl">{t("title")}</CardTitle>
             </CardHeader>
             <CardContent>
               {params?.error ? (
                 <p className="text-sm text-muted-foreground">
-                  Código de error: {params.error}
+                  {t("errorCode")} {params.error}
                 </p>
               ) : (
                 <p className="text-sm text-muted-foreground">
-                  Ocurrió un error no especificado.
+                  {t("unspecifiedError")}
                 </p>
               )}
             </CardContent>
