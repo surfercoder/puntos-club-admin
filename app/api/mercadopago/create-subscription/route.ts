@@ -2,9 +2,14 @@
 
 import { type NextRequest, NextResponse } from 'next/server';
 import { PreApproval } from 'mercadopago/dist/clients/preApproval';
-import { getMercadoPagoClient, getMpPlanId, PLAN_CONFIG, type PlanId } from '@/lib/mercadopago/client';
+import { getMercadoPagoClient, PLAN_CONFIG, type PlanId } from '@/lib/mercadopago/client';
 import { createClient } from '@/lib/supabase/server';
 
+/**
+ * Create a subscription without associated plan (status: pending).
+ * User is redirected to MercadoPago checkout; no card_token_id required.
+ * @see https://www.mercadopago.com.ar/developers/en/docs/subscriptions/integration-configuration/subscription-no-associated-plan/pending-payments
+ */
 export async function POST(request: NextRequest) {
   try {
     const supabase = await createClient();
@@ -23,22 +28,39 @@ export async function POST(request: NextRequest) {
 
     const typedPlanId = planId as PlanId;
     const config = PLAN_CONFIG[typedPlanId];
-    const mpPlanId = getMpPlanId(typedPlanId);
 
-    const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://puntos-club-admin.vercel.app';
+    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://puntos-club-admin.vercel.app').trim().replace(/\/+$/, '');
     const backUrl = `${siteUrl}/owner/onboarding?step=4`;
+    try {
+      new URL(backUrl); // validate it's an absolute URL
+    } catch {
+      console.error('[create-subscription] Invalid NEXT_PUBLIC_SITE_URL:', process.env.NEXT_PUBLIC_SITE_URL);
+      return NextResponse.json(
+        {
+          error:
+            'back_url inválida. Verifica que NEXT_PUBLIC_SITE_URL sea una URL absoluta (ej: https://tu-dominio.com). Para pruebas locales, MercadoPago puede rechazar localhost; usa ngrok: `ngrok http 3001` y pon la URL de ngrok en NEXT_PUBLIC_SITE_URL.',
+        },
+        { status: 500 }
+      );
+    }
 
     const mp = getMercadoPagoClient();
     const preApproval = new PreApproval(mp);
 
+    // Subscription WITHOUT plan + status pending = redirect to MP checkout, no card_token_id
     const subscription = await preApproval.create({
       body: {
-        preapproval_plan_id: mpPlanId,
         reason: `Puntos Club — ${config.name}`,
         payer_email: user.email!,
+        external_reference: `${user.id}|${typedPlanId}`, // webhook parses plan from here
         back_url: backUrl,
         status: 'pending',
-        external_reference: user.id,
+        auto_recurring: {
+          frequency: 1,
+          frequency_type: 'months',
+          transaction_amount: config.amount,
+          currency_id: config.currency,
+        },
       },
     });
 
@@ -48,7 +70,24 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     console.error('[create-subscription]', err);
-    const message = err instanceof Error ? err.message : 'Error inesperado';
+
+    // MercadoPago SDK throws response.json() on API errors (not Error instances)
+    const e = err as { message?: string; error?: string; cause?: unknown };
+    let message =
+      err instanceof Error
+        ? err.message
+        : typeof e?.message === 'string'
+          ? e.message
+          : typeof e?.error === 'string'
+            ? e.error
+            : Array.isArray(e?.cause) && e.cause.length > 0
+              ? String((e.cause as { message?: string }[])[0]?.message ?? e.cause[0])
+              : 'Error inesperado';
+
+    if (typeof message === 'string' && message.toLowerCase().includes('back_url')) {
+      message += ' MercadoPago puede rechazar localhost; usa ngrok (ngrok http 3001) y pon la URL en NEXT_PUBLIC_SITE_URL.';
+    }
+
     return NextResponse.json({ error: message }, { status: 500 });
   }
 }

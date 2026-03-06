@@ -285,15 +285,11 @@ export async function completeOnboarding(input: {
     // ── 8. Create subscription record for paid plans ─────────────────────────
     if (input.mpPreapprovalId && (plan === 'advance' || plan === 'pro')) {
       const PLAN_AMOUNTS: Record<string, number> = { advance: 50, pro: 89 };
-      const PLAN_ENV_VARS: Record<string, string> = {
-        advance: 'MP_PLAN_ID_ADVANCE',
-        pro: 'MP_PLAN_ID_PRO',
-      };
       await adminClient.from('subscription').upsert(
         {
           organization_id: organizationId,
           mp_preapproval_id: input.mpPreapprovalId,
-          mp_plan_id: process.env[PLAN_ENV_VARS[plan]] ?? '',
+          mp_plan_id: plan, // Subscription uses "without plan" flow; plan is our internal id
           plan,
           status: 'pending',
           payer_email: user.email ?? '',

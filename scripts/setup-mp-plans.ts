@@ -8,6 +8,8 @@
  * After running, copy the printed plan IDs into your .env.local:
  *   MP_PLAN_ID_ADVANCE=...
  *   MP_PLAN_ID_PRO=...
+ *
+ * For local testing: see docs/mercadopago-local-testing.md
  */
 import 'dotenv/config';
 import MercadoPago from 'mercadopago';

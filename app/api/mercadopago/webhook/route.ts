@@ -55,7 +55,17 @@ export async function POST(request: NextRequest) {
     };
 
     const mpStatus = subscription.status as string;
-    const mpPlanId = subscription.preapproval_plan_id as string;
+    const mpPlanId = subscription.preapproval_plan_id as string | undefined;
+    const externalRef = subscription.external_reference as string | undefined;
+
+    // For subscriptions without plan: plan is encoded in external_reference as "userId|planId"
+    const planPart = externalRef?.split('|')[1];
+    const parsedPlan: PlanId | undefined =
+      planPart && ['advance', 'pro'].includes(planPart) ? (planPart as PlanId) : undefined;
+    const planFromMpPlanId = Object.entries(PLAN_CONFIG).find(
+      ([, cfg]) => process.env[cfg.mpPlanIdEnvVar] === mpPlanId
+    )?.[0] as PlanId | undefined;
+    const plan: PlanId = parsedPlan ?? planFromMpPlanId ?? 'advance';
 
     // Map MP status to our status
     const statusMap: Record<string, string> = {
@@ -99,14 +109,12 @@ export async function POST(request: NextRequest) {
       }
     } else {
       // Subscription not in our DB yet (edge case: webhook arrived before onboarding step 5)
-      // Determine plan from MP plan ID
-      const planEntry = Object.entries(PLAN_CONFIG).find(
-        ([, cfg]) => process.env[cfg.mpPlanIdEnvVar] === mpPlanId
-      );
-      const plan = (planEntry?.[0] as PlanId | undefined) ?? 'advance';
+      // plan already resolved above (from external_reference or mpPlanId)
 
-      // We need the organization; use external_reference = auth user id set during creation
-      const authUserId = subscription.external_reference as string | undefined;
+      // We need the organization; use external_reference = auth user id (before |) or full string
+      const authUserId = externalRef?.includes('|')
+        ? externalRef.split('|')[0]
+        : (subscription.external_reference as string | undefined);
       if (authUserId) {
         const { data: appUser } = await admin
           .from('app_user')
@@ -120,7 +128,7 @@ export async function POST(request: NextRequest) {
             {
               organization_id: Number(appUser.organization_id),
               mp_preapproval_id: preapprovalId,
-              mp_plan_id: mpPlanId,
+              mp_plan_id: mpPlanId ?? plan, // MP plan ID or our plan when subscription has no plan
               plan,
               status: mappedStatus,
               payer_email: (subscription.payer_email as string) ?? '',
