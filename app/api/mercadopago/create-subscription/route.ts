@@ -60,6 +60,7 @@ export async function POST(request: NextRequest) {
         auto_recurring: {
           frequency: 1,
           frequency_type: 'months',
+          start_date: new Date().toISOString(),
           transaction_amount: config.amount,
           currency_id: config.currency,
         },
