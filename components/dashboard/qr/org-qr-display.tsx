@@ -72,7 +72,7 @@ export function OrgQRDisplay({ organizationId, organizationName, logoUrl }: OrgQ
     const svgData = svgEl.outerHTML;
     const printWindow = window.open('', '_blank');
     if (!printWindow) {
-      toast.error('No se pudo abrir la ventana de impresión. Verifica que no estén bloqueados los pop-ups.');
+      toast.error(t('printError'));
       return;
     }
 
@@ -171,7 +171,7 @@ export function OrgQRDisplay({ organizationId, organizationName, logoUrl }: OrgQ
   const handleShare = async () => {
     const shareData = {
       title: `${organizationName} - Puntos Club`,
-      text: `Unite a ${organizationName} en Puntos Club y acumula puntos en cada compra.`,
+      text: t('shareText', { name: organizationName }),
     };
 
     if (navigator.share) {

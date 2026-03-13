@@ -1,12 +1,16 @@
+import { getTranslations } from 'next-intl/server';
+
 import AppOrderForm from '@/components/dashboard/app_order/app_order-form';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 
-export default function CreateAppOrderPage() {
+export default async function CreateAppOrderPage() {
+  const t = await getTranslations('Dashboard.appOrder');
+
   return (
-    <div className="max-w-xl mx-auto">
+    <div className="w-full max-w-3xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>Create Order</CardTitle>
+          <CardTitle>{t('createTitle')}</CardTitle>
         </CardHeader>
         <CardContent>
           <AppOrderForm />

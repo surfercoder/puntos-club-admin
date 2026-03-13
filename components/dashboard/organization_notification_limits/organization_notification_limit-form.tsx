@@ -1,7 +1,8 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { redirect } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
 import { toast } from "sonner";
 
@@ -31,36 +32,28 @@ export default function OrganizationNotificationLimitForm({
   onCancel, 
   redirectTo = "/dashboard/organization_notification_limits" 
 }: OrganizationNotificationLimitFormProps) {
+  const t = useTranslations('Dashboard.organizationNotificationLimit');
+  const tCommon = useTranslations('Common');
+
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [selectedPlan, setSelectedPlan] = useState<string>(organizationNotificationLimit?.plan_type ?? 'free');
   const [selectedOrganization, setSelectedOrganization] = useState<string>(organizationNotificationLimit?.organization_id ?? '');
   
   const [actionState, formAction, pending] = useActionState(organizationNotificationLimitFormAction, EMPTY_ACTION_STATE);
-  const router = useRouter();
 
   useEffect(() => {
-    if (actionState.message) {
-      const hasErrors = Object.values(actionState.fieldErrors ?? {}).some((v) => (v?.length ?? 0) > 0);
-
-      if (hasErrors) {
-        toast.error(actionState.message);
-        return;
-      }
-
+    if (actionState.status === 'success' && onSuccess) {
       toast.success(actionState.message);
-      setTimeout(() => {
-        if (onSuccess) {
-          onSuccess();
-          return;
-        }
-
-        if (redirectTo) {
-          router.refresh();
-          router.push(redirectTo);
-        }
-      }, 500);
+      onSuccess();
+    } else if (actionState.status === 'error' && actionState.message) {
+      toast.error(actionState.message);
     }
-  }, [actionState, onSuccess, redirectTo, router]);
+  }, [actionState, onSuccess]);
+
+  if (actionState.status === 'success' && !onSuccess && redirectTo) {
+    toast.success(actionState.message);
+    redirect(redirectTo);
+  }
 
   const handlePlanChange = (value: string) => {
     setSelectedPlan(value);
@@ -94,7 +87,7 @@ export default function OrganizationNotificationLimitForm({
       {organizationNotificationLimit?.id && <input name="id" type="hidden" value={organizationNotificationLimit.id} />}
       
       <div>
-        <Label htmlFor="organization_id">Organización</Label>
+        <Label htmlFor="organization_id">{t('form.organizationLabel')}</Label>
         <select
           id="organization_id"
           name="organization_id"
@@ -105,7 +98,7 @@ export default function OrganizationNotificationLimitForm({
           aria-describedby="organization_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.organization_id}
         >
-          <option value="">Seleccionar una organización</option>
+          <option value="">{t('form.selectOrganization')}</option>
           {organizations.map((org) => (
             <option key={org.id} value={org.id}>
               {org.name}
@@ -116,7 +109,7 @@ export default function OrganizationNotificationLimitForm({
       </div>
 
       <div>
-        <Label htmlFor="plan_type">Tipo de Plan</Label>
+        <Label htmlFor="plan_type">{t('form.planType')}</Label>
         <select
           id="plan_type"
           name="plan_type"
@@ -134,65 +127,65 @@ export default function OrganizationNotificationLimitForm({
         <FieldError actionState={validation ?? actionState} name="plan_type" />
         {planLimits && (
           <p className="text-sm text-muted-foreground mt-1">
-            Límites por defecto: {planLimits.daily} diarias, {planLimits.monthly} mensuales, {planLimits.minHours}h entre notificaciones
+            {t('form.defaultLimits', { daily: planLimits.daily, monthly: planLimits.monthly, minHours: planLimits.minHours })}
           </p>
         )}
       </div>
 
       <div>
-        <Label htmlFor="daily_limit">Límite Diario</Label>
+        <Label htmlFor="daily_limit">{t('form.dailyLimit')}</Label>
         <Input
           aria-describedby="daily_limit-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.daily_limit}
           defaultValue={organizationNotificationLimit?.daily_limit ?? planLimits?.daily ?? 1}
           id="daily_limit"
           name="daily_limit"
-          placeholder="Ingresa el límite diario"
+          placeholder={t('form.dailyLimitPlaceholder')}
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="daily_limit" />
       </div>
 
       <div>
-        <Label htmlFor="monthly_limit">Límite Mensual</Label>
+        <Label htmlFor="monthly_limit">{t('form.monthlyLimit')}</Label>
         <Input
           aria-describedby="monthly_limit-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.monthly_limit}
           defaultValue={organizationNotificationLimit?.monthly_limit ?? planLimits?.monthly ?? 5}
           id="monthly_limit"
           name="monthly_limit"
-          placeholder="Ingresa el límite mensual"
+          placeholder={t('form.monthlyLimitPlaceholder')}
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="monthly_limit" />
       </div>
 
       <div>
-        <Label htmlFor="min_hours_between_notifications">Horas Mínimas Entre Notificaciones</Label>
+        <Label htmlFor="min_hours_between_notifications">{t('form.minHours')}</Label>
         <Input
           aria-describedby="min_hours_between_notifications-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.min_hours_between_notifications}
           defaultValue={organizationNotificationLimit?.min_hours_between_notifications ?? planLimits?.minHours ?? 24}
           id="min_hours_between_notifications"
           name="min_hours_between_notifications"
-          placeholder="Ingresa las horas mínimas entre notificaciones"
+          placeholder={t('form.minHoursPlaceholder')}
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="min_hours_between_notifications" />
       </div>
 
-      <div className="flex gap-2">
+      <div className="grid grid-cols-2 gap-2">
         {onCancel ? (
-          <Button className="w-full" type="button" variant="secondary" onClick={onCancel}>
-            Cancelar
+          <Button type="button" variant="secondary" onClick={onCancel}>
+            {tCommon('cancel')}
           </Button>
         ) : (
-          <Button asChild className="w-full" type="button" variant="secondary">
-            <Link href="/dashboard/organization_notification_limits">Cancelar</Link>
+          <Button asChild type="button" variant="secondary">
+            <Link href="/dashboard/organization_notification_limits">{tCommon('cancel')}</Link>
           </Button>
         )}
-        <Button className="w-full" disabled={pending} type="submit">
-          {organizationNotificationLimit ? 'Actualizar' : 'Crear'}
+        <Button disabled={pending} type="submit">
+          {organizationNotificationLimit ? tCommon('update') : tCommon('create')}
         </Button>
       </div>
     </form>

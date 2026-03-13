@@ -51,7 +51,7 @@ export default async function AppOrderListPage() {
   // Only filter by organization for non-admin users
   const filteredData = !userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)
     ? data?.filter((order: AppOrderWithRelations) =>
-        order.redemption?.some(r => r.product?.organization_id === activeOrgIdNumber)
+        !order.redemption?.length || order.redemption.some(r => r.product?.organization_id === activeOrgIdNumber)
       )
     : data;
 

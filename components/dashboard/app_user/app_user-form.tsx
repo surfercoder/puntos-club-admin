@@ -1,7 +1,8 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { redirect } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
 import { toast } from "sonner";
 
@@ -27,13 +28,15 @@ interface Organization {
 }
 
 export default function AppUserForm({ appUser }: AppUserFormProps) {
+  const t = useTranslations('Dashboard.appUser');
+  const tCommon = useTranslations('Common');
+
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
 
   // Utils
   const [actionState, formAction, pending] = useActionState(appUserFormAction, EMPTY_ACTION_STATE);
-  const router = useRouter();
 
   // Load organizations
   useEffect(() => {
@@ -51,13 +54,15 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
   }, []);
 
   useEffect(() => {
-    if (actionState.message) {
-      toast.success(actionState.message);
-      setTimeout(() => {
-        router.push("/dashboard/app_user");
-      }, 500); // Show toast briefly before navigating
+    if (actionState.status === 'error' && actionState.message) {
+      toast.error(actionState.message);
     }
-  }, [actionState, router]);
+  }, [actionState]);
+
+  if (actionState.status === 'success') {
+    toast.success(actionState.message);
+    redirect("/dashboard/app_user");
+  }
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -77,10 +82,10 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
       {appUser?.id && <input name="id" type="hidden" value={appUser.id} />}
       
       <div>
-        <Label htmlFor="organization_id">Organización</Label>
+        <Label htmlFor="organization_id">{t('form.organizationLabel')}</Label>
         <Select defaultValue={appUser?.organization_id ?? ''} name="organization_id">
           <SelectTrigger>
-            <SelectValue placeholder="Seleccionar una organización" />
+            <SelectValue placeholder={t('form.selectOrganization')} />
           </SelectTrigger>
           <SelectContent>
             {organizations.map((organization) => (
@@ -94,69 +99,69 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="first_name">Nombre</Label>
+        <Label htmlFor="first_name">{t('form.firstNameLabel')}</Label>
         <Input
           aria-describedby="first_name-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.first_name}
           defaultValue={appUser?.first_name ?? ''}
           id="first_name"
           name="first_name"
-          placeholder="Ingresa el nombre (opcional)"
+          placeholder={t('form.firstNamePlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="first_name" />
       </div>
 
       <div>
-        <Label htmlFor="last_name">Apellido</Label>
+        <Label htmlFor="last_name">{t('form.lastNameLabel')}</Label>
         <Input
           aria-describedby="last_name-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.last_name}
           defaultValue={appUser?.last_name ?? ''}
           id="last_name"
           name="last_name"
-          placeholder="Ingresa el apellido (opcional)"
+          placeholder={t('form.lastNamePlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="last_name" />
       </div>
 
       <div>
-        <Label htmlFor="email">Correo electrónico</Label>
+        <Label htmlFor="email">{t('form.emailLabel')}</Label>
         <Input
           aria-describedby="email-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.email}
           defaultValue={appUser?.email ?? ''}
           id="email"
           name="email"
-          placeholder="Ingresa el correo electrónico (opcional)"
+          placeholder={t('form.emailPlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="email" />
       </div>
 
       <div>
-        <Label htmlFor="username">Usuario</Label>
+        <Label htmlFor="username">{t('form.usernameLabel')}</Label>
         <Input
           aria-describedby="username-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.username}
           defaultValue={appUser?.username ?? ''}
           id="username"
           name="username"
-          placeholder="Ingresa el nombre de usuario (opcional)"
+          placeholder={t('form.usernamePlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="username" />
       </div>
 
       <div>
-        <Label htmlFor="password">Contraseña</Label>
+        <Label htmlFor="password">{t('form.passwordLabel')}</Label>
         <Input
           aria-describedby="password-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.password}
           id="password"
           name="password"
-          placeholder="Ingresa la contraseña (opcional)"
+          placeholder={t('form.passwordPlaceholder')}
           type="password"
         />
         <FieldError actionState={validation ?? actionState} name="password" />
@@ -170,16 +175,16 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
           name="active"
           type="checkbox"
         />
-        <Label htmlFor="active">Activo</Label>
+        <Label htmlFor="active">{t('form.activeLabel')}</Label>
         <FieldError actionState={validation ?? actionState} name="active" />
       </div>
 
-      <div className="flex gap-2">
-        <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/app_user">Cancelar</Link>
+      <div className="grid grid-cols-2 gap-2">
+        <Button asChild type="button" variant="secondary">
+          <Link href="/dashboard/app_user">{tCommon('cancel')}</Link>
         </Button>
-        <Button className="w-full" disabled={pending} type="submit">
-          {appUser ? 'Actualizar' : 'Crear'}
+        <Button disabled={pending} type="submit">
+          {appUser ? tCommon('update') : tCommon('create')}
         </Button>
       </div>
     </form>

@@ -7,6 +7,7 @@ import { useTranslations } from "next-intl";
 import { AppSidebar } from "@/components/app-sidebar";
 import { DashboardTour } from "@/components/dashboard/tour/dashboard-tour";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { PlanUsageProvider } from "@/components/providers/plan-usage-provider";
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -22,6 +23,7 @@ import {
   SidebarTrigger,
 } from "@/components/ui/sidebar";
 import { createClient } from "@/lib/supabase/client";
+import type { OrganizationUsageSummary } from "@/types/plan";
 
 type DashboardShellUser = {
   name: string;
@@ -32,6 +34,7 @@ type DashboardShellUser = {
 type DashboardShellOrg = {
   id: string;
   name: string;
+  logo_url?: string | null;
 };
 
 type DashboardShellPortalMode = "admin" | "org";
@@ -44,6 +47,7 @@ export function DashboardShell({
   tourCompleted,
   orgs,
   portalMode,
+  initialPlanUsage,
 }: {
   children: React.ReactNode;
   user: DashboardShellUser;
@@ -52,6 +56,7 @@ export function DashboardShell({
   tourCompleted: boolean;
   orgs: DashboardShellOrg[];
   portalMode: DashboardShellPortalMode;
+  initialPlanUsage?: OrganizationUsageSummary | null;
 }) {
   const router = useRouter();
   const pathname = usePathname();
@@ -191,7 +196,9 @@ export function DashboardShell({
             </div>
           </div>
         </header>
-        <div className="flex flex-1 flex-col px-4">{children}</div>
+        <PlanUsageProvider initialSummary={initialPlanUsage}>
+          <div className="flex flex-1 flex-col px-4">{children}</div>
+        </PlanUsageProvider>
       </SidebarInset>
     </SidebarProvider>
   );

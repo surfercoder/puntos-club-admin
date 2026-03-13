@@ -1,6 +1,7 @@
 "use client";
 
 import Link from 'next/link';
+import { useTranslations } from 'next-intl';
 import { useActionState, useState, useEffect } from 'react';
 
 import { categoryFormAction } from '@/actions/dashboard/category/category-form-actions';
@@ -21,6 +22,9 @@ interface CategoryFormProps {
 }
 
 export default function CategoryForm({ category }: CategoryFormProps) {
+  const t = useTranslations('Dashboard.category');
+  const tCommon = useTranslations('Common');
+
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [categories, setCategories] = useState<Array<{ id: string; name: string; active: boolean }>>([]);
@@ -80,13 +84,13 @@ export default function CategoryForm({ category }: CategoryFormProps) {
       {category?.id && <input name="id" type="hidden" value={category.id} />}
 
       <div>
-        <Label htmlFor="parent_id">Categoría Padre</Label>
+        <Label htmlFor="parent_id">{t('form.parentCategory')}</Label>
         <Select defaultValue={category?.parent_id ?? 'null'} name="parent_id">
           <SelectTrigger>
-            <SelectValue placeholder="Sin categoría padre" />
+            <SelectValue placeholder={t('form.noParent')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="null">Sin categoría padre</SelectItem>
+            <SelectItem value="null">{t('form.noParent')}</SelectItem>
             {categories.map((c) => (
               <SelectItem key={c.id} value={c.id}>
                 {c.name}
@@ -98,28 +102,28 @@ export default function CategoryForm({ category }: CategoryFormProps) {
       </div>
       
       <div>
-        <Label htmlFor="name">Nombre</Label>
+        <Label htmlFor="name">{t('form.nameLabel')}</Label>
         <Input
           aria-describedby="name-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.name}
           defaultValue={category?.name ?? ''}
           id="name"
           name="name"
-          placeholder="Ingresa el nombre de la categoría"
+          placeholder={t('form.namePlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="name" />
       </div>
 
       <div>
-        <Label htmlFor="description">Descripción</Label>
+        <Label htmlFor="description">{t('form.descriptionLabel')}</Label>
         <Textarea
           aria-describedby="description-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.description}
           defaultValue={category?.description ?? ''}
           id="description"
           name="description"
-          placeholder="Ingresa una descripción de la categoría (opcional)"
+          placeholder={t('form.descriptionPlaceholder')}
           rows={3}
         />
         <FieldError actionState={validation ?? actionState} name="description" />
@@ -133,16 +137,16 @@ export default function CategoryForm({ category }: CategoryFormProps) {
           name="active"
           type="checkbox"
         />
-        <Label htmlFor="active">Activo</Label>
+        <Label htmlFor="active">{t('form.activeLabel')}</Label>
         <FieldError actionState={validation ?? actionState} name="active" />
       </div>
 
-      <div className="flex gap-2">
-        <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/category">Cancelar</Link>
+      <div className="grid grid-cols-2 gap-2">
+        <Button asChild type="button" variant="secondary">
+          <Link href="/dashboard/category">{tCommon('cancel')}</Link>
         </Button>
-        <Button className="w-full" disabled={pending} type="submit">
-          {category ? 'Actualizar' : 'Crear'}
+        <Button disabled={pending} type="submit">
+          {category ? tCommon('update') : tCommon('create')}
         </Button>
       </div>
     </form>

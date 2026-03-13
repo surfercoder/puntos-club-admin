@@ -40,9 +40,11 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
 
   const wrappedAction = async (state: ActionState, formData: FormData) => {
     const result = await branchWithAddressFormAction(state, formData);
-    if (result.message) {
+    if (result.status === 'success') {
       toast.success(result.message);
       setTimeout(() => router.push("/dashboard/branch"), 500);
+    } else if (result.status === 'error' && result.message) {
+      toast.error(result.message);
     }
     return result;
   };

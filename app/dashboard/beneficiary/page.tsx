@@ -1,8 +1,11 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/beneficiary/delete-modal';
+import { PlanLimitCreateButton } from '@/components/dashboard/plan/plan-limit-create-button';
+import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -18,11 +21,14 @@ import { createClient } from '@/lib/supabase/server';
 import type { Beneficiary } from '@/types/beneficiary';
 
 export default async function BeneficiaryListPage() {
-  const supabase = await createClient();
-  const currentUser = await getCurrentUser();
+  const [supabase, currentUser, t, _tCommon, cookieStore] = await Promise.all([
+    createClient(),
+    getCurrentUser(),
+    getTranslations('Dashboard.beneficiary'),
+    getTranslations('Common'),
+    cookies(),
+  ]);
   const userIsAdmin = isAdmin(currentUser);
-
-  const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
   const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
 
@@ -55,32 +61,36 @@ export default async function BeneficiaryListPage() {
   }
 
   if (error) {
-    return <div>Error al obtener beneficiarios</div>;
+    return <div>{t('error')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Beneficiarios</h1>
-          <p className="text-muted-foreground">Administrar todos los beneficiarios del sistema</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/beneficiary/create">+ Nuevo Beneficiario</Link>
-        </Button>
+        <PlanLimitCreateButton
+          features={['beneficiaries']}
+          createHref="/dashboard/beneficiary/create"
+          createLabel={t('newButton')}
+        />
       </div>
+
+      <PlanUsageBanner features={['beneficiaries']} />
 
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Correo electrónico</TableHead>
-              <TableHead>Teléfono</TableHead>
-              <TableHead>Documento</TableHead>
-              <TableHead>Puntos Disponibles</TableHead>
-              <TableHead>Fecha de Registro</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>{t('tableHeaders.name')}</TableHead>
+              <TableHead>{t('tableHeaders.email')}</TableHead>
+              <TableHead>{t('tableHeaders.phone')}</TableHead>
+              <TableHead>{t('tableHeaders.document')}</TableHead>
+              <TableHead>{t('tableHeaders.availablePoints')}</TableHead>
+              <TableHead>{t('tableHeaders.registrationDate')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -88,7 +98,7 @@ export default async function BeneficiaryListPage() {
               data.map((beneficiary: Beneficiary) => (
                 <TableRow key={beneficiary.id}>
                   <TableCell className="font-medium">
-                    {beneficiary.first_name || beneficiary.last_name 
+                    {beneficiary.first_name || beneficiary.last_name
                       ? `${beneficiary.first_name || ''} ${beneficiary.last_name || ''}`.trim()
                       : 'N/A'
                     }
@@ -107,10 +117,10 @@ export default async function BeneficiaryListPage() {
                           <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
-                      <DeleteModal 
+                      <DeleteModal
                         beneficiaryId={beneficiary.id}
                         beneficiaryName={
-                          beneficiary.first_name || beneficiary.last_name 
+                          beneficiary.first_name || beneficiary.last_name
                             ? `${beneficiary.first_name || ''} ${beneficiary.last_name || ''}`.trim()
                             : 'Unnamed Beneficiary'
                         }
@@ -121,7 +131,7 @@ export default async function BeneficiaryListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={7}>No se encontraron beneficiarios.</TableCell>
+                <TableCell className="text-center py-4" colSpan={7}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

@@ -1,9 +1,13 @@
 "use client";
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
+import { useTranslations } from 'next-intl';
+import Image from 'next/image';
 import { X, Upload, Image as ImageIcon } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { toast } from 'sonner';
+
+const EMPTY_IMAGES: string[] = [];
 
 interface ProductImageUploadProps {
   productId?: string;
@@ -13,10 +17,12 @@ interface ProductImageUploadProps {
 
 export default function ProductImageUpload({
   productId: _productId,
-  initialImages = [],
+  initialImages = EMPTY_IMAGES,
   onImagesChange,
 }: ProductImageUploadProps) {
-  const [images, setImages] = useState<string[]>(initialImages);
+  const t = useTranslations('Dashboard.product.imageUpload');
+  const initialRef = useRef(initialImages);
+  const [images, setImages] = useState<string[]>(initialRef.current);
   const [uploading, setUploading] = useState(false);
   const supabase = createClient();
 
@@ -25,7 +31,7 @@ export default function ProductImageUpload({
     const availableSlots = 3 - images.length;
     
     if (filesArray.length > availableSlots) {
-      toast.error(`You can only upload ${availableSlots} more image${availableSlots !== 1 ? 's' : ''}`);
+      toast.error(t('uploadLimitError', { count: availableSlots }));
       return;
     }
 
@@ -33,11 +39,11 @@ export default function ProductImageUpload({
     const supportedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
     for (const file of filesArray) {
       if (!supportedTypes.includes(file.type)) {
-        toast.error(`${file.name} format not supported. Please use JPEG, PNG, WebP, or GIF`);
+        toast.error(t('formatError', { name: file.name }));
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        toast.error(`${file.name} exceeds 5MB limit`);
+        toast.error(t('sizeError', { name: file.name }));
         return;
       }
     }
@@ -72,9 +78,9 @@ export default function ProductImageUpload({
       const newImages = [...images, ...uploadedUrls];
       setImages(newImages);
       onImagesChange(newImages);
-      toast.success(`${uploadedUrls.length} image${uploadedUrls.length !== 1 ? 's' : ''} uploaded successfully`);
+      toast.success(t('uploadSuccess', { count: uploadedUrls.length }));
     } catch (_error) {
-      toast.error('Failed to upload images');
+      toast.error(t('uploadError'));
 
       // Clean up any successfully uploaded images on error
       for (const url of uploadedUrls) {
@@ -100,9 +106,9 @@ export default function ProductImageUpload({
       const newImages = images.filter((_, i) => i !== index);
       setImages(newImages);
       onImagesChange(newImages);
-      toast.success('Image removed successfully');
+      toast.success(t('removeSuccess'));
     } catch (_error) {
-      toast.error('Failed to remove image');
+      toast.error(t('removeError'));
     }
   };
 
@@ -118,11 +124,13 @@ export default function ProductImageUpload({
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-4">
         {images.map((imageUrl, index) => (
-          <div key={index} className="relative aspect-square rounded-lg border overflow-hidden group">
-            <img
+          <div key={imageUrl} className="relative aspect-square rounded-lg border overflow-hidden group">
+            <Image
               src={imageUrl}
               alt={`Product image ${index + 1}`}
-              className="w-full h-full object-cover"
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 33vw, 200px"
             />
             <button
               type="button"
@@ -147,14 +155,14 @@ export default function ProductImageUpload({
             {uploading ? (
               <div className="flex flex-col items-center gap-2">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground" />
-                <span className="text-sm text-muted-foreground">Uploading...</span>
+                <span className="text-sm text-muted-foreground">{t('uploading')}</span>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2">
                 <Upload className="w-8 h-8 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">Upload Images</span>
-                <span className="text-xs text-muted-foreground/70">JPEG, PNG, WebP, GIF</span>
-                <span className="text-xs text-muted-foreground/70">Max 5MB each</span>
+                <span className="text-sm text-muted-foreground">{t('uploadButton')}</span>
+                <span className="text-xs text-muted-foreground/70">{t('formats')}</span>
+                <span className="text-xs text-muted-foreground/70">{t('maxSize')}</span>
               </div>
             )}
           </label>
@@ -164,13 +172,13 @@ export default function ProductImageUpload({
       {images.length === 0 && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <ImageIcon className="w-4 h-4" />
-          <span>No images uploaded yet. You can add up to 3 images.</span>
+          <span>{t('noImages')}</span>
         </div>
       )}
 
       {images.length > 0 && (
         <p className="text-sm text-muted-foreground">
-          {images.length} of 3 images uploaded
+          {t('imageCount', { count: images.length })}
         </p>
       )}
     </div>

@@ -19,8 +19,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const body = await request.json() as { planId: string };
-    const { planId } = body;
+    const body = await request.json() as { planId: string; backUrl?: string };
+    const { planId, backUrl: customBackUrl } = body;
 
     if (!planId || !['advance', 'pro'].includes(planId)) {
       return NextResponse.json({ error: 'Plan inválido' }, { status: 400 });
@@ -30,7 +30,9 @@ export async function POST(request: NextRequest) {
     const config = PLAN_CONFIG[typedPlanId];
 
     const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://puntos-club-admin.vercel.app').trim().replace(/\/+$/, '');
-    const backUrl = `${siteUrl}/owner/onboarding?step=4`;
+    const backUrl = customBackUrl
+      ? `${siteUrl}${customBackUrl}`
+      : `${siteUrl}/owner/onboarding?step=4`;
     try {
       new URL(backUrl); // validate it's an absolute URL
     } catch {

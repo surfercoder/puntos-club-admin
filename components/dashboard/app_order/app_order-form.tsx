@@ -1,7 +1,8 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { redirect } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
 import { toast } from "sonner";
 
@@ -21,21 +22,25 @@ interface AppOrderFormProps {
 }
 
 export default function AppOrderForm({ appOrder }: AppOrderFormProps) {
+  const t = useTranslations('Dashboard.appOrder');
+  const tCommon = useTranslations('Common');
+
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
 
   // Utils
   const [actionState, formAction, pending] = useActionState(appOrderFormAction, EMPTY_ACTION_STATE);
-  const router = useRouter();
 
   useEffect(() => {
-    if (actionState.message) {
-      toast.success(actionState.message);
-      setTimeout(() => {
-        router.push("/dashboard/app_order");
-      }, 500); // Show toast briefly before navigating
+    if (actionState.status === 'error' && actionState.message) {
+      toast.error(actionState.message);
     }
-  }, [actionState, router]);
+  }, [actionState]);
+
+  if (actionState.status === 'success') {
+    toast.success(actionState.message);
+    redirect("/dashboard/app_order");
+  }
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -61,21 +66,21 @@ export default function AppOrderForm({ appOrder }: AppOrderFormProps) {
       {appOrder?.id && <input name="id" type="hidden" value={appOrder.id} />}
       
       <div>
-        <Label htmlFor="order_number">Número de Pedido</Label>
+        <Label htmlFor="order_number">{t('form.orderNumber')}</Label>
         <Input
           aria-describedby="order_number-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.order_number}
           defaultValue={appOrder?.order_number ?? ''}
           id="order_number"
           name="order_number"
-          placeholder="Ingresa el número de pedido"
+          placeholder={t('form.orderNumberPlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="order_number" />
       </div>
 
       <div>
-        <Label htmlFor="creation_date">Fecha de Creación</Label>
+        <Label htmlFor="creation_date">{t('form.creationDate')}</Label>
         <Input
           aria-describedby="creation_date-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.creation_date}
@@ -88,39 +93,39 @@ export default function AppOrderForm({ appOrder }: AppOrderFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="total_points">Puntos Totales</Label>
+        <Label htmlFor="total_points">{t('form.totalPoints')}</Label>
         <Input
           aria-describedby="total_points-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.total_points}
           defaultValue={appOrder?.total_points ?? 0}
           id="total_points"
           name="total_points"
-          placeholder="Ingresa los puntos totales"
+          placeholder={t('form.totalPointsPlaceholder')}
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="total_points" />
       </div>
 
       <div>
-        <Label htmlFor="observations">Observaciones</Label>
+        <Label htmlFor="observations">{t('form.observations')}</Label>
         <Textarea
           aria-describedby="observations-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.observations}
           defaultValue={appOrder?.observations ?? ''}
           id="observations"
           name="observations"
-          placeholder="Ingresa observaciones (opcional)"
+          placeholder={t('form.observationsPlaceholder')}
           rows={3}
         />
         <FieldError actionState={validation ?? actionState} name="observations" />
       </div>
 
-      <div className="flex gap-2">
-        <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/app_order">Cancelar</Link>
+      <div className="grid grid-cols-2 gap-2">
+        <Button asChild type="button" variant="secondary">
+          <Link href="/dashboard/app_order">{tCommon('cancel')}</Link>
         </Button>
-        <Button className="w-full" disabled={pending} type="submit">
-          {appOrder ? 'Actualizar' : 'Crear'}
+        <Button disabled={pending} type="submit">
+          {appOrder ? tCommon('update') : tCommon('create')}
         </Button>
       </div>
     </form>

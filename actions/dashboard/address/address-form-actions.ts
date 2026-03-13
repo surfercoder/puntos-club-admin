@@ -3,21 +3,22 @@
 import { revalidatePath } from 'next/cache';
 
 import { createAddress, updateAddress } from '@/actions/dashboard/address/actions';
-import { fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
+import { cleanFormData, fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
 import { AddressSchema } from '@/schemas/address.schema';
 import type { Address } from '@/types/address';
 
 
 export async function addressFormAction(_prevState: ActionState, formData: FormData) {
   try {
-    const parsed = AddressSchema.safeParse(Object.fromEntries(formData));
+    const formDataObject = cleanFormData(formData);
+    const parsed = AddressSchema.safeParse(formDataObject);
 
     if (!parsed.success) {
       return fromErrorToActionState(parsed.error);
     }
 
-    if (formData.get('id')) {
-      await updateAddress(Number(formData.get('id')), parsed.data as Address);
+    if (formDataObject.id) {
+      await updateAddress(Number(formDataObject.id), parsed.data as Address);
     } else {
       await createAddress(parsed.data as Address);
     }
@@ -25,7 +26,7 @@ export async function addressFormAction(_prevState: ActionState, formData: FormD
     // Revalidate the address list page
     revalidatePath('/dashboard/address');
 
-    return toActionState(formData.get('id') ? 'Address updated successfully!' : 'Address created successfully!');
+    return toActionState(formDataObject.id ? 'Address updated successfully!' : 'Address created successfully!');
   } catch (error) {
     return fromErrorToActionState(error);
   }

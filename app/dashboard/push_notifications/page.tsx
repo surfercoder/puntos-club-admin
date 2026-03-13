@@ -1,7 +1,10 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 
+import { PlanLimitCreateButton } from '@/components/dashboard/plan/plan-limit-create-button';
+import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -20,6 +23,8 @@ import { createAdminClient } from '@/lib/supabase/admin';
 export default async function PushNotificationsListPage() {
   const currentUser = await getCurrentUser();
   const userIsAdmin = isAdmin(currentUser);
+  const t = await getTranslations('Dashboard.pushNotifications');
+  const _tCommon = await getTranslations('Common');
 
   // Use admin client to bypass RLS for admin users
   const supabase = userIsAdmin ? createAdminClient() : await createClient();
@@ -41,32 +46,36 @@ export default async function PushNotificationsListPage() {
   const { data, error } = await query;
 
   if (error) {
-    return <div>Error al obtener notificaciones push</div>;
+    return <div>{t('error')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Notificaciones Push</h1>
-          <p className="text-muted-foreground">Administrar notificaciones push enviadas a beneficiarios</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/push_notifications/create">+ Nueva Notificación Push</Link>
-        </Button>
+        <PlanLimitCreateButton
+          features={['push_notifications_monthly']}
+          createHref="/dashboard/push_notifications/create"
+          createLabel={t('newButton')}
+        />
       </div>
+
+      <PlanUsageBanner features={['push_notifications_monthly']} />
 
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Título</TableHead>
-              <TableHead>Organización</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead>Enviadas</TableHead>
-              <TableHead>Fallidas</TableHead>
-              <TableHead>Creado el</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>{t('tableHeaders.title')}</TableHead>
+              <TableHead>{t('tableHeaders.organization')}</TableHead>
+              <TableHead>{t('tableHeaders.status')}</TableHead>
+              <TableHead>{t('tableHeaders.sent')}</TableHead>
+              <TableHead>{t('tableHeaders.failed')}</TableHead>
+              <TableHead>{t('tableHeaders.createdAt')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -107,7 +116,7 @@ export default async function PushNotificationsListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={7}>No se encontraron notificaciones push.</TableCell>
+                <TableCell className="text-center py-4" colSpan={7}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

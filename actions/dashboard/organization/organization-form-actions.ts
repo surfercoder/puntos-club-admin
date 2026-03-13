@@ -3,20 +3,21 @@
 import { revalidatePath } from 'next/cache';
 
 import { createOrganization, updateOrganization } from '@/actions/dashboard/organization/actions';
-import { fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
+import { cleanFormData, fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
 import { OrganizationSchema } from '@/schemas/organization.schema';
 import type { Organization } from '@/types/organization';
 
 export async function organizationFormAction(_prevState: ActionState, formData: FormData) {
   try {
-    const parsed = OrganizationSchema.safeParse(Object.fromEntries(formData));
+    const formDataObject = cleanFormData(formData);
+    const parsed = OrganizationSchema.safeParse(formDataObject);
 
     if (!parsed.success) {
       return fromErrorToActionState(parsed.error);
     }
 
-    if (formData.get('id')) {
-      await updateOrganization(String(formData.get('id')), parsed.data as Organization);
+    if (formDataObject.id) {
+      await updateOrganization(String(formDataObject.id), parsed.data as Organization);
     } else {
       await createOrganization(parsed.data as Organization);
     }
@@ -25,9 +26,8 @@ export async function organizationFormAction(_prevState: ActionState, formData: 
     revalidatePath('/dashboard/organization');
     revalidatePath('/dashboard');
 
-    return toActionState(formData.get('id') ? 'Organization updated successfully!' : 'Organization created successfully!');
+    return toActionState(formDataObject.id ? 'Organization updated successfully!' : 'Organization created successfully!');
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'An unknown error occurred';
-    return { message, fieldErrors: { _form: [message] } };
+    return fromErrorToActionState(error);
   }
 }

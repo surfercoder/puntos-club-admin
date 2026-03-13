@@ -205,6 +205,9 @@
       "title": "Organizations",
       "description": "Manage all organizations in the system",
       "newButton": "+ New Organization",
+      "createTitle": "Create Organization",
+      "editTitle": "Edit Organization",
+      "fetchError": "Error fetching organization",
       "tableHeaders": {
         "logo": "Logo",
         "name": "Name",
@@ -214,10 +217,21 @@
         "actions": "Actions"
       },
       "empty": "No organizations found.",
+      "deleteModal": {
+        "title": "Delete Organization",
+        "confirm": "Are you sure you want to delete {name}? This action cannot be undone.",
+        "deleteError": "Error deleting organization",
+        "deleteSuccess": "Organization deleted successfully",
+        "genericError": "An error occurred while deleting"
+      },
       "form": {
         "legalName": "Legal Name",
         "taxId": "Tax ID",
-        "logoLabel": "Organization Logo"
+        "logoLabel": "Organization Logo",
+        "nameLabel": "Name",
+        "namePlaceholder": "Enter organization name",
+        "legalNamePlaceholder": "Enter legal name (optional)",
+        "taxIdPlaceholder": "Enter tax ID (optional)"
       }
     },
     "notifications": {
@@ -259,6 +273,19 @@
       }
     },
     "users": {
+      "title": "Users",
+      "newButton": "+ New User",
+      "createTitle": "Create User",
+      "fetchErrorOrgs": "Error fetching organizations",
+      "fetchErrorRoles": "Error fetching roles",
+      "descriptionAdmin": "Manage all users in the system (owners, collaborators, cashiers and beneficiaries)",
+      "descriptionOwner": "Manage users in your organization (collaborators and cashiers)",
+      "deleteModal": {
+        "title": "Delete User",
+        "confirm": "Are you sure you want to delete {name}? This action cannot be undone.",
+        "deleteSuccess": "User deleted successfully",
+        "deleteError": "Error deleting user"
+      },
       "loading": "Loading users...",
       "tableHeaders": {
         "name": "Name",
@@ -274,6 +301,95 @@
       "statusActive": "Active",
       "statusInactive": "Inactive",
       "empty": "No users found."
+    },
+    "pushNotifications": {
+      "title": "Push Notifications",
+      "description": "Manage push notifications sent to beneficiaries",
+      "newButton": "+ New Push Notification",
+      "error": "Error fetching push notifications",
+      "createTitle": "Create Push Notification",
+      "createDescription": "Send a notification to all active beneficiaries of this organization",
+      "tableHeaders": {
+        "title": "Title",
+        "organization": "Organization",
+        "status": "Status",
+        "sent": "Sent",
+        "failed": "Failed",
+        "createdAt": "Created at",
+        "actions": "Actions"
+      },
+      "empty": "No push notifications found."
+    },
+    "beneficiaryOrganization": {
+      "createTitle": "Create Membership",
+      "editTitle": "Edit Membership",
+      "fetchError": "Error fetching membership",
+      "form": {
+        "beneficiaryLabel": "Beneficiary",
+        "selectBeneficiary": "Select a beneficiary",
+        "noName": "No name",
+        "organizationLabel": "Organization",
+        "selectOrganization": "Select an organization",
+        "availablePoints": "Available Points",
+        "totalPointsEarned": "Total Points Earned",
+        "totalPointsRedeemed": "Total Points Redeemed",
+        "activeLabel": "Active"
+      },
+      "deleteModal": {
+        "title": "Delete Membership",
+        "confirm": "Are you sure you want to delete {name}? This action cannot be undone.",
+        "deleteError": "Error deleting membership",
+        "deleteSuccess": "Membership deleted successfully",
+        "genericError": "An error occurred while deleting"
+      }
+    },
+    "category": {
+      "createTitle": "Create Category",
+      "editTitle": "Edit Category",
+      "fetchError": "Error fetching category",
+      "form": {
+        "parentCategory": "Parent Category",
+        "noParent": "No parent category",
+        "nameLabel": "Name",
+        "namePlaceholder": "Enter category name",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Enter category description (optional)",
+        "activeLabel": "Active"
+      },
+      "deleteModal": {
+        "title": "Delete Category",
+        "confirm": "Are you sure you want to delete {name}? This action cannot be undone.",
+        "deleteError": "Error deleting category",
+        "deleteSuccess": "Category deleted successfully",
+        "genericError": "An error occurred while deleting"
+      }
+    },
+    "appUser": {
+      "createTitle": "Create User",
+      "editTitle": "Edit User",
+      "fetchError": "Error fetching user",
+      "form": {
+        "organizationLabel": "Organization",
+        "selectOrganization": "Select an organization",
+        "firstNameLabel": "First Name",
+        "firstNamePlaceholder": "Enter first name (optional)",
+        "lastNameLabel": "Last Name",
+        "lastNamePlaceholder": "Enter last name (optional)",
+        "emailLabel": "Email",
+        "emailPlaceholder": "Enter email address (optional)",
+        "usernameLabel": "Username",
+        "usernamePlaceholder": "Enter username (optional)",
+        "passwordLabel": "Password",
+        "passwordPlaceholder": "Enter password (optional)",
+        "activeLabel": "Active"
+      },
+      "deleteModal": {
+        "title": "Delete User",
+        "confirm": "Are you sure you want to delete user {name}? This action cannot be undone.",
+        "deleteError": "Error deleting user",
+        "deleteSuccess": "User deleted successfully",
+        "genericError": "An error occurred while deleting"
+      }
     },
     "qr": {
       "title": "QR Code",
@@ -298,7 +414,9 @@
         "tip2": "Print multiple copies for different points in the store.",
         "tip3": "Share the digital QR on social media or WhatsApp.",
         "printTagline": "Scan with the PuntosClub app to join and earn points on every purchase",
-        "printFooter": "puntosclub.app · Loyalty program"
+        "printFooter": "puntosclub.app · Loyalty program",
+        "printError": "Could not open print window. Please check that pop-ups are not blocked.",
+        "shareText": "Join {name} on Puntos Club and earn points on every purchase."
       }
     },
     "plan": {
@@ -309,9 +427,44 @@
       "closeBanner": "Dismiss",
       "usageTitle": "Plan usage",
       "upgradePlanButton": "Upgrade plan",
-      "nearingLimitWarning": "One or more resources are close to your plan limit."
+      "nearingLimitWarning": "One or more resources are close to your plan limit.",
+      "limitReachedTitle": "Plan limit reached",
+      "limitReachedDescription": "You have reached the limit of your {plan}. Upgrade your plan to continue creating resources.",
+      "goBack": "Go back"
+    },
+    "planSettings": {
+      "title": "Plan & Subscription",
+      "description": "Manage your current plan and compare available options",
+      "currentPlan": "Current plan",
+      "availablePlans": "Available plans",
+      "upgradeTo": "Upgrade to {plan}",
+      "contactToDowngrade": "To downgrade to a lower plan, please contact support by email."
     },
     "branch": {
+      "title": "Branches",
+      "description": "Manage all branches in the system",
+      "newButton": "+ New Branch",
+      "error": "Error fetching branches",
+      "createTitle": "Create Branch",
+      "editTitle": "Edit Branch",
+      "fetchError": "Error fetching branch",
+      "tableHeaders": {
+        "name": "Name",
+        "organization": "Organization",
+        "phone": "Phone",
+        "address": "Address",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "empty": "No branches found.",
+      "deleteModal": {
+        "title": "Delete Branch",
+        "confirm": "Are you sure you want to delete {name}? This action cannot be undone.",
+        "deleteError": "Error deleting branch",
+        "deleteErrorHasPointsRule": "Cannot delete this branch because it has an associated points rule. Please delete the points rule first.",
+        "deleteSuccess": "Branch deleted successfully",
+        "genericError": "An error occurred while deleting"
+      },
       "form": {
         "branchInfo": "Branch Information",
         "nameLabel": "Branch Name",
@@ -365,21 +518,188 @@
         "passwordMinLength": "Minimum 6 characters",
         "active": "Active",
         "createUser": "Create User",
-        "updateUser": "Update User"
+        "updateUser": "Update User",
+        "roleLimitReached": "limit reached",
+        "roleLimitReachedHint": "You have reached your plan limit for this role. Upgrade your plan to create more users of this type."
       }
     },
     "beneficiary": {
+      "title": "Beneficiaries",
+      "description": "Manage all beneficiaries in the system",
+      "newButton": "+ New Beneficiary",
+      "error": "Error fetching beneficiaries",
+      "createTitle": "Create Beneficiary",
+      "editTitle": "Edit Beneficiary",
+      "fetchError": "Error fetching beneficiary",
+      "tableHeaders": {
+        "name": "Name",
+        "email": "Email",
+        "phone": "Phone",
+        "document": "Document",
+        "availablePoints": "Available Points",
+        "registrationDate": "Registration Date",
+        "actions": "Actions"
+      },
+      "empty": "No beneficiaries found.",
       "form": {
+        "firstNameLabel": "First Name",
+        "firstNamePlaceholder": "Enter first name",
+        "lastNameLabel": "Last Name",
+        "lastNamePlaceholder": "Enter last name",
+        "emailLabel": "Email",
+        "emailPlaceholder": "Enter email address",
+        "phoneLabel": "Phone",
+        "phonePlaceholder": "Enter phone number",
         "dniLabel": "ID / Tax Number",
-        "pointsLabel": "Available Points"
+        "dniPlaceholder": "Enter ID or tax number",
+        "pointsLabel": "Available Points",
+        "pointsPlaceholder": "Enter available points"
+      },
+      "deleteModal": {
+        "title": "Delete Beneficiary",
+        "confirm": "Are you sure you want to delete {name}? This action cannot be undone.",
+        "deleteError": "Error deleting beneficiary",
+        "deleteSuccess": "Beneficiary deleted successfully",
+        "genericError": "An error occurred while deleting"
       }
     },
     "product": {
+      "title": "Products",
+      "description": "Manage products in the system",
+      "newButton": "+ New Product",
+      "error": "Error fetching products",
+      "createTitle": "Create Product",
+      "editTitle": "Edit Product",
+      "tableHeaders": {
+        "images": "Images",
+        "name": "Name",
+        "description": "Description",
+        "requiredPoints": "Required Points",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "empty": "No products found.",
       "form": {
         "categoryLabel": "Category",
         "categoryPlaceholder": "Select a category",
+        "nameLabel": "Name",
+        "namePlaceholder": "Enter product name",
+        "descriptionLabel": "Description",
+        "descriptionPlaceholder": "Enter product description (optional)",
         "pointsLabel": "Required Points",
-        "imagesLabel": "Product Images (up to 3)"
+        "pointsPlaceholder": "Enter required points",
+        "imagesLabel": "Product Images (up to 3)",
+        "activeLabel": "Active"
+      },
+      "deleteModal": {
+        "title": "Delete Product",
+        "confirm": "Are you sure you want to delete {name}? This action cannot be undone.",
+        "deleteError": "Error deleting product",
+        "deleteSuccess": "Product deleted successfully",
+        "genericError": "An error occurred while deleting"
+      },
+      "imageUpload": {
+        "uploadLimitError": "You can only upload {count} more image(s)",
+        "formatError": "{name} format not supported. Please use JPEG, PNG, WebP, or GIF",
+        "sizeError": "{name} exceeds 5MB limit",
+        "uploadSuccess": "{count} image(s) uploaded successfully",
+        "uploadError": "Failed to upload images",
+        "removeSuccess": "Image removed successfully",
+        "removeError": "Failed to remove image",
+        "uploading": "Uploading...",
+        "uploadButton": "Upload Images",
+        "formats": "JPEG, PNG, WebP, GIF",
+        "maxSize": "Max 5MB each",
+        "noImages": "No images uploaded yet. You can add up to 3 images.",
+        "imageCount": "{count} of 3 images uploaded"
+      }
+    },
+    "appOrder": {
+      "createTitle": "Create Order",
+      "editTitle": "Edit Order",
+      "fetchError": "Error fetching order",
+      "form": {
+        "orderNumber": "Order Number",
+        "orderNumberPlaceholder": "Enter order number",
+        "creationDate": "Creation Date",
+        "totalPoints": "Total Points",
+        "totalPointsPlaceholder": "Enter total points",
+        "observations": "Observations",
+        "observationsPlaceholder": "Enter observations (optional)"
+      }
+    },
+    "redemption": {
+      "createTitle": "Create Redemption",
+      "editTitle": "Edit Redemption",
+      "fetchError": "Error fetching redemption",
+      "form": {
+        "beneficiaryLabel": "Beneficiary",
+        "selectBeneficiary": "Select a beneficiary",
+        "noName": "Unnamed beneficiary",
+        "productLabel": "Product (Optional)",
+        "selectProduct": "Select a product (optional)",
+        "none": "None",
+        "orderLabel": "Order",
+        "selectOrder": "Select an order",
+        "pointsUsed": "Points Used",
+        "pointsUsedPlaceholder": "Enter points used",
+        "quantityLabel": "Quantity",
+        "quantityPlaceholder": "Enter quantity"
+      }
+    },
+    "appUserOrganization": {
+      "createTitle": "Create Membership",
+      "editTitle": "Edit Membership",
+      "fetchError": "Error fetching membership",
+      "form": {
+        "userLabel": "User",
+        "selectUser": "Select a user",
+        "noName": "No name",
+        "organizationLabel": "Organization",
+        "selectOrganization": "Select an organization",
+        "activeLabel": "Active"
+      }
+    },
+    "stock": {
+      "createTitle": "Create Stock Record",
+      "editTitle": "Edit Stock Record",
+      "form": {
+        "branchLabel": "Branch",
+        "selectBranch": "Select a branch",
+        "productLabel": "Product",
+        "selectProduct": "Select a product",
+        "quantityLabel": "Current Quantity",
+        "quantityPlaceholder": "Enter current quantity",
+        "minimumQuantityLabel": "Minimum Quantity",
+        "minimumQuantityPlaceholder": "Enter minimum quantity threshold"
+      }
+    },
+    "address": {
+      "createTitle": "Create Address",
+      "form": {
+        "searchAddress": "Search Address",
+        "searchPlaceholder": "Start typing an address...",
+        "searchHint": "Select an address from Google suggestions or fill manually below",
+        "street": "Street",
+        "number": "Number",
+        "city": "City",
+        "state": "State",
+        "zipCode": "Zip Code"
+      }
+    },
+    "organizationNotificationLimit": {
+      "createTitle": "Create Notification Limit",
+      "form": {
+        "organizationLabel": "Organization",
+        "selectOrganization": "Select an organization",
+        "planType": "Plan Type",
+        "defaultLimits": "Default limits: {daily} daily, {monthly} monthly, {minHours}h between notifications",
+        "dailyLimit": "Daily Limit",
+        "dailyLimitPlaceholder": "Enter daily limit",
+        "monthlyLimit": "Monthly Limit",
+        "monthlyLimitPlaceholder": "Enter monthly limit",
+        "minHours": "Minimum Hours Between Notifications",
+        "minHoursPlaceholder": "Enter minimum hours between notifications"
       }
     }
   },
@@ -496,7 +816,9 @@
       "initialStock": "Initial stock",
       "addReward": "Add another reward to this category",
       "addCategory": "Add another category",
-      "validationError": "Add at least one category with a product."
+      "validationError": "Add at least one category with a product.",
+      "productCount": "Rewards: {current} / {max}",
+      "limitReached": "You have reached the limit of {max} rewards for your {plan}. To add more, you can upgrade your plan."
     },
     "step5": {
       "termsTitle": "Terms and Conditions of Use — Puntos Club",
@@ -579,7 +901,13 @@
       "from": "From {date}",
       "until": "Until {date}"
     },
-    "deleteConfirm": "Are you sure you want to delete the rule \"{name}\"?",
+    "deleteModal": {
+      "title": "Delete Points Rule",
+      "confirm": "Are you sure you want to delete <strong>{name}</strong>? This action cannot be undone.",
+      "deleteError": "Error deleting the points rule",
+      "deleteSuccess": "Points rule deleted successfully",
+      "genericError": "An error occurred while deleting"
+    },
     "form": {
       "createTitle": "Create New Points Rule",
       "editTitle": "Edit Points Rule",

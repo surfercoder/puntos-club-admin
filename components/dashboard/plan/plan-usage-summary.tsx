@@ -1,6 +1,5 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import {
   Users,
   Bell,
@@ -16,13 +15,13 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
-import { getUsageSummaryAction } from '@/actions/dashboard/usage/actions';
+import { usePlanUsage } from '@/components/providers/plan-usage-provider';
 import {
   PLAN_FEATURE_LABELS,
   PLAN_DISPLAY_NAMES,
   PLAN_FEATURE_ORDER,
 } from '@/lib/plans/config';
-import type { FeatureUsage, OrganizationUsageSummary, PlanFeatureKey } from '@/types/plan';
+import type { FeatureUsage, PlanFeatureKey } from '@/types/plan';
 
 const FEATURE_ICONS: Record<PlanFeatureKey, React.ElementType> = {
   beneficiaries:              Users,
@@ -86,17 +85,9 @@ interface PlanUsageSummaryProps {
 
 export function PlanUsageSummary({ className, compact = false }: PlanUsageSummaryProps) {
   const t = useTranslations('Dashboard.plan');
-  const [summary, setSummary] = useState<OrganizationUsageSummary | null>(null);
-  const [loading, setLoading] = useState(true);
+  const { summary, isLoading } = usePlanUsage();
 
-  useEffect(() => {
-    getUsageSummaryAction()
-      .then(setSummary)
-      .catch(() => null)
-      .finally(() => setLoading(false));
-  }, []);
-
-  if (loading) {
+  if (isLoading) {
     return (
       <div className={cn('flex items-center justify-center py-8', className)}>
         <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />

@@ -2,8 +2,10 @@ import { cookies } from 'next/headers';
 import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
+import { getTranslations } from 'next-intl/server';
 
 import NotificationForm from '@/components/dashboard/notifications/notification-form';
+import { PlanLimitGuard } from '@/components/dashboard/plan/plan-limit-guard';
 import { Button } from '@/components/ui/button';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
@@ -16,7 +18,11 @@ export default async function AdminCreateNotificationPage() {
     redirect('/dashboard/notifications/create');
   }
 
-  const cookieStore = await cookies();
+  const [t, tCommon, cookieStore] = await Promise.all([
+    getTranslations('Dashboard.pushNotifications'),
+    getTranslations('Common'),
+    cookies(),
+  ]);
   const activeOrgId = cookieStore.get('active_org_id')?.value;
   const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
 
@@ -42,28 +48,30 @@ export default async function AdminCreateNotificationPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/dashboard/push_notifications">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold">Create Push Notification</h1>
-          <p className="text-muted-foreground">
-            Send a notification to all active beneficiaries of this organization
-          </p>
+    <PlanLimitGuard features={['push_notifications_monthly']} backHref="/dashboard/push_notifications">
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/dashboard/push_notifications">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              {tCommon('back')}
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">{t('createTitle')}</h1>
+            <p className="text-muted-foreground">
+              {t('createDescription')}
+            </p>
+          </div>
         </div>
-      </div>
 
-      <NotificationForm
-        limits={limits}
-        canSend={canSend}
-        organizationId={activeOrgIdNumber}
-        redirectPath="/dashboard/push_notifications"
-      />
-    </div>
+        <NotificationForm
+          limits={limits}
+          canSend={canSend}
+          organizationId={activeOrgIdNumber}
+          redirectPath="/dashboard/push_notifications"
+        />
+      </div>
+    </PlanLimitGuard>
   );
 }

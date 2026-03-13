@@ -169,6 +169,12 @@ export function UsersList({ initialUsers, isOwner, isAdmin }: UsersListProps) {
                           : 'Unnamed User'
                       }
                       userType={user.user_type}
+                      onDeleted={() => {
+                        setState((prev) => ({
+                          ...prev,
+                          users: prev.users.filter((u) => u.id !== user.id),
+                        }));
+                      }}
                     />
                   </div>
                 </TableCell>

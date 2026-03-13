@@ -5,7 +5,6 @@ import { useTranslations } from "next-intl";
 import {
   getAllPointsRules,
   togglePointsRuleStatus,
-  deletePointsRule,
   testPointsCalculation,
 } from "@/actions/dashboard/points-rules/actions";
 import { Button } from "@/components/ui/button";
@@ -22,8 +21,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Pencil, Trash2, Calculator, RefreshCw } from "lucide-react";
+import { Plus, Pencil, Calculator, RefreshCw } from "lucide-react";
 import Link from "next/link";
+import DeleteModal from "@/components/dashboard/points-rules/delete-modal";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -260,11 +260,10 @@ interface RulesTableProps {
   loading: boolean;
   onRefresh: () => void;
   onToggleStatus: (id: number, currentStatus: boolean) => void;
-  onDelete: (id: number, name: string) => void;
   t: ReturnType<typeof useTranslations>;
 }
 
-function RulesTable({ rules, loading, onRefresh, onToggleStatus, onDelete, t }: RulesTableProps) {
+function RulesTable({ rules, loading, onRefresh, onToggleStatus, t }: RulesTableProps) {
   return (
     <Card>
       <CardHeader>
@@ -353,19 +352,19 @@ function RulesTable({ rules, loading, onRefresh, onToggleStatus, onDelete, t }: 
                       )}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Link href={`/dashboard/points-rules/edit/${rule.id}`}>
-                          <Button variant="ghost" size="sm">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button asChild size="sm" variant="secondary">
+                          <Link href={`/dashboard/points-rules/edit/${rule.id}`}>
                             <Pencil className="h-4 w-4" />
-                          </Button>
-                        </Link>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => onDelete(rule.id, rule.name)}
-                        >
-                          <Trash2 className="h-4 w-4 text-destructive" />
+                          </Link>
                         </Button>
+                        {!rule.is_default && (
+                          <DeleteModal
+                            ruleId={rule.id}
+                            ruleName={rule.name}
+                            onDeleted={onRefresh}
+                          />
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
@@ -450,18 +449,6 @@ export default function PointsRulesPage() {
     [loadRules]
   );
 
-  const handleDelete = useCallback(
-    async (id: number, name: string) => {
-      if (confirm(t("deleteConfirm", { name }))) {
-        const result = await deletePointsRule(id);
-        if (result.success) {
-          loadRules();
-        }
-      }
-    },
-    [loadRules, t]
-  );
-
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-8">
@@ -484,7 +471,6 @@ export default function PointsRulesPage() {
         loading={state.loading}
         onRefresh={loadRules}
         onToggleStatus={handleToggleStatus}
-        onDelete={handleDelete}
         t={t}
       />
     </div>

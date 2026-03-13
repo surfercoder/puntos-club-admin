@@ -67,6 +67,7 @@ export async function enforcePlanLimit(
   if (!result.allowed) {
     const label = PLAN_FEATURE_LABELS[feature];
     return {
+      status: 'error' as const,
       message: `Has alcanzado el límite de ${label} (${result.current_usage}/${result.limit_value}) para tu plan ${result.plan}. Actualiza tu plan para continuar.`,
       fieldErrors: {},
     };

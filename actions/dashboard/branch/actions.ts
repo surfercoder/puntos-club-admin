@@ -95,5 +95,5 @@ export async function deleteBranch(id: string) {
     .eq('id', id)
     .eq('organization_id', activeOrgIdNumber);
 
-  return { error };
+  return { error: error ? { message: error.message, code: error.code } : null };
 }

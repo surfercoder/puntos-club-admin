@@ -1,11 +1,13 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from "sonner";
 
 import { productFormAction } from '@/actions/dashboard/product/product-form-actions';
+import { usePlanUsage } from '@/components/providers/plan-usage-provider';
 import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
@@ -29,6 +31,9 @@ interface Category {
 }
 
 export default function ProductForm({ product }: ProductFormProps) {
+  const t = useTranslations('Dashboard.product.form');
+  const tCommon = useTranslations('Common');
+
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -37,7 +42,7 @@ export default function ProductForm({ product }: ProductFormProps) {
 
   // Utils
   const [actionState, formAction, pending] = useActionState(productFormAction, EMPTY_ACTION_STATE);
-  const router = useRouter();
+  const { invalidate } = usePlanUsage();
 
   // Load categories
   useEffect(() => {
@@ -70,13 +75,16 @@ export default function ProductForm({ product }: ProductFormProps) {
   }, []);
 
   useEffect(() => {
-    if (actionState.message) {
-      toast.success(actionState.message);
-      setTimeout(() => {
-        router.push("/dashboard/product");
-      }, 500); // Show toast briefly before navigating
+    if (actionState.status === 'error' && actionState.message) {
+      toast.error(actionState.message);
     }
-  }, [actionState, router]);
+  }, [actionState]);
+
+  if (actionState.status === 'success') {
+    toast.success(actionState.message);
+    invalidate();
+    redirect("/dashboard/product");
+  }
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -101,7 +109,7 @@ export default function ProductForm({ product }: ProductFormProps) {
       <input name="image_urls" type="hidden" value={JSON.stringify(imageUrls)} />
       
       <div>
-        <Label htmlFor="category_id">Categoría</Label>
+        <Label htmlFor="category_id">{t('categoryLabel')}</Label>
         <select
           id="category_id"
           name="category_id"
@@ -111,7 +119,7 @@ export default function ProductForm({ product }: ProductFormProps) {
           aria-describedby="category_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.category_id}
         >
-          <option value="">Seleccionar una categoría</option>
+          <option value="">{t('categoryPlaceholder')}</option>
           {categories.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
@@ -122,45 +130,45 @@ export default function ProductForm({ product }: ProductFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="name">Nombre</Label>
+        <Label htmlFor="name">{t('nameLabel')}</Label>
         <Input
           defaultValue={product?.name ?? ''}
           id="name"
           name="name"
-          placeholder="Ingresa el nombre del producto"
+          placeholder={t('namePlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="name" />
       </div>
 
       <div>
-        <Label htmlFor="description">Descripción</Label>
+        <Label htmlFor="description">{t('descriptionLabel')}</Label>
         <Textarea
           defaultValue={product?.description ?? ''}
           id="description"
           name="description"
-          placeholder="Ingresa una descripción del producto (opcional)"
+          placeholder={t('descriptionPlaceholder')}
           rows={3}
         />
         <FieldError actionState={validation ?? actionState} name="description" />
       </div>
 
       <div>
-        <Label htmlFor="required_points">Puntos Requeridos</Label>
+        <Label htmlFor="required_points">{t('pointsLabel')}</Label>
         <Input
           aria-describedby="required_points-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.required_points}
           defaultValue={product?.required_points ?? 0}
           id="required_points"
           name="required_points"
-          placeholder="Ingresa los puntos requeridos"
+          placeholder={t('pointsPlaceholder')}
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="required_points" />
       </div>
 
       <div>
-        <Label>Imágenes del Producto (hasta 3)</Label>
+        <Label>{t('imagesLabel')}</Label>
         <ProductImageUpload
           productId={product?.id}
           initialImages={product?.image_urls ?? []}
@@ -177,16 +185,16 @@ export default function ProductForm({ product }: ProductFormProps) {
           name="active"
           type="checkbox"
         />
-        <Label htmlFor="active">Activo</Label>
+        <Label htmlFor="active">{t('activeLabel')}</Label>
         <FieldError actionState={validation ?? actionState} name="active" />
       </div>
 
-      <div className="flex gap-2">
-        <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/product">Cancelar</Link>
+      <div className="grid grid-cols-2 gap-2">
+        <Button asChild type="button" variant="secondary">
+          <Link href="/dashboard/product">{tCommon('cancel')}</Link>
         </Button>
-        <Button className="w-full" disabled={pending} type="submit">
-          {product ? 'Actualizar' : 'Crear'}
+        <Button disabled={pending} type="submit">
+          {product ? tCommon('update') : tCommon('create')}
         </Button>
       </div>
     </form>

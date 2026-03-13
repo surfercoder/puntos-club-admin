@@ -1,7 +1,8 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { redirect } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -33,12 +34,14 @@ interface OrganizationOption {
 }
 
 export default function AppUserOrganizationForm({ appUserOrganization }: AppUserOrganizationFormProps) {
+  const t = useTranslations('Dashboard.appUserOrganization');
+  const tCommon = useTranslations('Common');
+
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [users, setUsers] = useState<AppUserOption[]>([]);
   const [orgs, setOrgs] = useState<OrganizationOption[]>([]);
 
   const [actionState, formAction, pending] = useActionState(appUserOrganizationFormAction, EMPTY_ACTION_STATE);
-  const router = useRouter();
 
   useEffect(() => {
     async function loadData() {
@@ -56,13 +59,15 @@ export default function AppUserOrganizationForm({ appUserOrganization }: AppUser
   }, []);
 
   useEffect(() => {
-    if (actionState.message) {
-      toast.success(actionState.message);
-      setTimeout(() => {
-        router.push('/dashboard/app_user_organization');
-      }, 500);
+    if (actionState.status === 'error' && actionState.message) {
+      toast.error(actionState.message);
     }
-  }, [actionState, router]);
+  }, [actionState]);
+
+  if (actionState.status === 'success') {
+    toast.success(actionState.message);
+    redirect('/dashboard/app_user_organization');
+  }
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     const formData = Object.fromEntries(new FormData(event.currentTarget));
@@ -81,15 +86,15 @@ export default function AppUserOrganizationForm({ appUserOrganization }: AppUser
       {appUserOrganization?.id && <input name="id" type="hidden" value={appUserOrganization.id} />}
 
       <div>
-        <Label htmlFor="app_user_id">Usuario</Label>
+        <Label htmlFor="app_user_id">{t('form.userLabel')}</Label>
         <Select defaultValue={appUserOrganization?.app_user_id ?? ''} name="app_user_id">
           <SelectTrigger>
-            <SelectValue placeholder="Seleccionar un usuario" />
+            <SelectValue placeholder={t('form.selectUser')} />
           </SelectTrigger>
           <SelectContent>
             {users.map((u) => (
               <SelectItem key={u.id} value={u.id}>
-                {u.first_name || u.last_name ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : u.email || 'Sin nombre'}
+                {u.first_name || u.last_name ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : u.email || t('form.noName')}
               </SelectItem>
             ))}
           </SelectContent>
@@ -98,10 +103,10 @@ export default function AppUserOrganizationForm({ appUserOrganization }: AppUser
       </div>
 
       <div>
-        <Label htmlFor="organization_id">Organización</Label>
+        <Label htmlFor="organization_id">{t('form.organizationLabel')}</Label>
         <Select defaultValue={appUserOrganization?.organization_id ?? ''} name="organization_id">
           <SelectTrigger>
-            <SelectValue placeholder="Seleccionar una organización" />
+            <SelectValue placeholder={t('form.selectOrganization')} />
           </SelectTrigger>
           <SelectContent>
             {orgs.map((o) => (
@@ -122,16 +127,16 @@ export default function AppUserOrganizationForm({ appUserOrganization }: AppUser
           name="is_active"
           type="checkbox"
         />
-        <Label htmlFor="is_active">Activo</Label>
+        <Label htmlFor="is_active">{t('form.activeLabel')}</Label>
         <FieldError actionState={validation ?? actionState} name="is_active" />
       </div>
 
-      <div className="flex gap-2">
-        <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/app_user_organization">Cancelar</Link>
+      <div className="grid grid-cols-2 gap-2">
+        <Button asChild type="button" variant="secondary">
+          <Link href="/dashboard/app_user_organization">{tCommon('cancel')}</Link>
         </Button>
-        <Button className="w-full" disabled={pending} type="submit">
-          {appUserOrganization ? 'Actualizar' : 'Crear'}
+        <Button disabled={pending} type="submit">
+          {appUserOrganization ? tCommon('update') : tCommon('create')}
         </Button>
       </div>
     </form>

@@ -1,7 +1,8 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { redirect } from 'next/navigation';
 import { useActionState, useEffect, useState } from 'react';
 import { toast } from 'sonner';
 
@@ -34,12 +35,14 @@ interface OrganizationOption {
 }
 
 export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }: BeneficiaryOrganizationFormProps) {
+  const t = useTranslations('Dashboard.beneficiaryOrganization');
+  const tCommon = useTranslations('Common');
+
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [beneficiaries, setBeneficiaries] = useState<BeneficiaryOption[]>([]);
   const [orgs, setOrgs] = useState<OrganizationOption[]>([]);
 
   const [actionState, formAction, pending] = useActionState(beneficiaryOrganizationFormAction, EMPTY_ACTION_STATE);
-  const router = useRouter();
 
   useEffect(() => {
     async function loadData() {
@@ -57,13 +60,15 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
   }, []);
 
   useEffect(() => {
-    if (actionState.message) {
-      toast.success(actionState.message);
-      setTimeout(() => {
-        router.push('/dashboard/beneficiary_organization');
-      }, 500);
+    if (actionState.status === 'error' && actionState.message) {
+      toast.error(actionState.message);
     }
-  }, [actionState, router]);
+  }, [actionState]);
+
+  if (actionState.status === 'success') {
+    toast.success(actionState.message);
+    redirect('/dashboard/beneficiary_organization');
+  }
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     const formData = Object.fromEntries(new FormData(event.currentTarget));
@@ -82,15 +87,15 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
       {beneficiaryOrganization?.id && <input name="id" type="hidden" value={beneficiaryOrganization.id} />}
 
       <div>
-        <Label htmlFor="beneficiary_id">Beneficiario</Label>
+        <Label htmlFor="beneficiary_id">{t('form.beneficiaryLabel')}</Label>
         <Select defaultValue={beneficiaryOrganization?.beneficiary_id ?? ''} name="beneficiary_id">
           <SelectTrigger>
-            <SelectValue placeholder="Seleccionar un beneficiario" />
+            <SelectValue placeholder={t('form.selectBeneficiary')} />
           </SelectTrigger>
           <SelectContent>
             {beneficiaries.map((b) => (
               <SelectItem key={b.id} value={b.id}>
-                {b.first_name || b.last_name ? `${b.first_name || ''} ${b.last_name || ''}`.trim() : b.email || 'Sin nombre'}
+                {b.first_name || b.last_name ? `${b.first_name || ''} ${b.last_name || ''}`.trim() : b.email || t('form.noName')}
               </SelectItem>
             ))}
           </SelectContent>
@@ -99,10 +104,10 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
       </div>
 
       <div>
-        <Label htmlFor="organization_id">Organización</Label>
+        <Label htmlFor="organization_id">{t('form.organizationLabel')}</Label>
         <Select defaultValue={beneficiaryOrganization?.organization_id ?? ''} name="organization_id">
           <SelectTrigger>
-            <SelectValue placeholder="Seleccionar una organización" />
+            <SelectValue placeholder={t('form.selectOrganization')} />
           </SelectTrigger>
           <SelectContent>
             {orgs.map((o) => (
@@ -116,7 +121,7 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
       </div>
 
       <div>
-        <Label htmlFor="available_points">Puntos Disponibles</Label>
+        <Label htmlFor="available_points">{t('form.availablePoints')}</Label>
         <Input
           aria-describedby="available_points-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.available_points}
@@ -129,7 +134,7 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
       </div>
 
       <div>
-        <Label htmlFor="total_points_earned">Puntos Totales Acumulados</Label>
+        <Label htmlFor="total_points_earned">{t('form.totalPointsEarned')}</Label>
         <Input
           aria-describedby="total_points_earned-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.total_points_earned}
@@ -142,7 +147,7 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
       </div>
 
       <div>
-        <Label htmlFor="total_points_redeemed">Puntos Totales Canjeados</Label>
+        <Label htmlFor="total_points_redeemed">{t('form.totalPointsRedeemed')}</Label>
         <Input
           aria-describedby="total_points_redeemed-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.total_points_redeemed}
@@ -162,16 +167,16 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
           name="is_active"
           type="checkbox"
         />
-        <Label htmlFor="is_active">Activo</Label>
+        <Label htmlFor="is_active">{t('form.activeLabel')}</Label>
         <FieldError actionState={validation ?? actionState} name="is_active" />
       </div>
 
-      <div className="flex gap-2">
-        <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/beneficiary_organization">Cancelar</Link>
+      <div className="grid grid-cols-2 gap-2">
+        <Button asChild type="button" variant="secondary">
+          <Link href="/dashboard/beneficiary_organization">{tCommon('cancel')}</Link>
         </Button>
-        <Button className="w-full" disabled={pending} type="submit">
-          {beneficiaryOrganization ? 'Actualizar' : 'Crear'}
+        <Button disabled={pending} type="submit">
+          {beneficiaryOrganization ? tCommon('update') : tCommon('create')}
         </Button>
       </div>
     </form>

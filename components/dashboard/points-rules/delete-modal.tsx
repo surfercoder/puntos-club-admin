@@ -1,11 +1,11 @@
 "use client";
 
 import { Trash2 } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { deleteAppOrder } from '@/actions/dashboard/app_order/actions';
+import { deletePointsRule } from '@/actions/dashboard/points-rules/actions';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -18,24 +18,30 @@ import {
 } from '@/components/ui/dialog';
 
 interface DeleteModalProps {
-  appOrderId: string;
-  appOrderNumber: string;
+  ruleId: number;
+  ruleName: string;
+  onDeleted?: () => void;
 }
 
-export default function DeleteModal({ appOrderId, appOrderNumber }: DeleteModalProps) {
+export default function DeleteModal({ ruleId, ruleName, onDeleted }: DeleteModalProps) {
   const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const router = useRouter();
+  const t = useTranslations('PointsRules.deleteModal');
+  const tCommon = useTranslations('Common');
 
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
-      await deleteAppOrder(appOrderId);
-      toast.success('Pedido eliminado correctamente');
-      router.refresh();
-      setOpen(false);
+      const result = await deletePointsRule(ruleId);
+      if (!result.success) {
+        toast.error(result.error || t('deleteError'));
+      } else {
+        toast.success(t('deleteSuccess'));
+        setOpen(false);
+        onDeleted?.();
+      }
     } catch {
-      toast.error('Ocurrió un error al eliminar');
+      toast.error(t('genericError'));
     } finally {
       setIsDeleting(false);
     }
@@ -50,17 +56,17 @@ export default function DeleteModal({ appOrderId, appOrderNumber }: DeleteModalP
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Eliminar Pedido</DialogTitle>
+          <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>
-            ¿Estás seguro de que deseas eliminar el pedido <strong>{appOrderNumber}</strong>? Esta acción no se puede deshacer.
+            {t.rich('confirm', { name: ruleName, strong: (chunks) => <strong>{chunks}</strong> })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button disabled={isDeleting} onClick={() => setOpen(false)} variant="outline">
-            Cancelar
+            {tCommon('cancel')}
           </Button>
           <Button disabled={isDeleting} onClick={handleDelete} variant="destructive">
-            {isDeleting ? 'Eliminando...' : 'Eliminar'}
+            {isDeleting ? tCommon('loading') : tCommon('delete')}
           </Button>
         </DialogFooter>
       </DialogContent>

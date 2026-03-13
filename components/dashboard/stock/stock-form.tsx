@@ -1,8 +1,9 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useActionState, useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { redirect } from 'next/navigation';
+import { useActionState, useState, useEffect, useReducer } from 'react';
 import { toast } from "sonner";
 
 import { stockFormAction } from '@/actions/dashboard/stock/stock-form-actions';
@@ -30,21 +31,51 @@ interface Product {
   name: string;
 }
 
+interface StockFormState {
+  branches: Branch[];
+  products: Product[];
+  selectedBranch: string;
+  selectedProduct: string;
+}
+
+type StockFormAction =
+  | { type: 'SET_DATA'; branches: Branch[]; products: Product[] }
+  | { type: 'SELECT_BRANCH'; value: string }
+  | { type: 'SELECT_PRODUCT'; value: string };
+
+function stockFormReducer(state: StockFormState, action: StockFormAction): StockFormState {
+  switch (action.type) {
+    case 'SET_DATA':
+      return { ...state, branches: action.branches, products: action.products };
+    case 'SELECT_BRANCH':
+      return { ...state, selectedBranch: action.value };
+    case 'SELECT_PRODUCT':
+      return { ...state, selectedProduct: action.value };
+    default:
+      return state;
+  }
+}
+
 export default function StockForm({ stock }: StockFormProps) {
+  const t = useTranslations('Dashboard.stock');
+  const tCommon = useTranslations('Common');
+
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [branches, setBranches] = useState<Branch[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [selectedBranch, setSelectedBranch] = useState<string>(stock?.branch_id ?? '');
-  const [selectedProduct, setSelectedProduct] = useState<string>(stock?.product_id ?? '');
+  const [state, dispatch] = useReducer(stockFormReducer, {
+    branches: [],
+    products: [],
+    selectedBranch: stock?.branch_id ?? '',
+    selectedProduct: stock?.product_id ?? '',
+  });
+  const { branches, products, selectedBranch, selectedProduct } = state;
 
   // Utils
   const [actionState, formAction, pending] = useActionState(stockFormAction, EMPTY_ACTION_STATE);
-  const router = useRouter();
 
   // Load branches and products
   useEffect(() => {
-    async function loadBranches() {
+    async function loadData() {
       const activeOrgId =
         typeof document !== "undefined"
           ? document.cookie
@@ -56,71 +87,52 @@ export default function StockForm({ stock }: StockFormProps) {
 
       const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
       if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
-        setBranches([]);
+        dispatch({ type: 'SET_DATA', branches: [], products: [] });
         return;
       }
 
       const supabase = createClient();
-      const { data } = await supabase
-        .from("branch")
-        .select("id, name")
-        .eq("organization_id", activeOrgIdNumber)
-        .eq("active", true)
-        .order("name");
+      const [branchesResult, productsResult] = await Promise.all([
+        supabase
+          .from("branch")
+          .select("id, name")
+          .eq("organization_id", activeOrgIdNumber)
+          .eq("active", true)
+          .order("name"),
+        supabase
+          .from('product')
+          .select('id, name')
+          .eq("organization_id", activeOrgIdNumber)
+          .eq('active', true)
+          .order('name'),
+      ]);
 
-      setBranches((data ?? []) as Branch[]);
+      dispatch({
+        type: 'SET_DATA',
+        branches: (branchesResult.data ?? []) as Branch[],
+        products: (productsResult.data ?? []) as Product[],
+      });
     }
 
-    async function loadProducts() {
-      const activeOrgId =
-        typeof document !== "undefined"
-          ? document.cookie
-              .split(";")
-              .map((c) => c.trim())
-              .find((c) => c.startsWith("active_org_id="))
-              ?.split("=")[1]
-          : undefined;
-
-      const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
-      if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
-        setProducts([]);
-        return;
-      }
-
-      const supabase = createClient();
-      const { data } = await supabase
-        .from('product')
-        .select('id, name')
-        .eq("organization_id", activeOrgIdNumber)
-        .eq('active', true)
-        .order('name');
-
-      setProducts((data ?? []) as Product[]);
-    }
-
-    loadBranches();
-    loadProducts();
+    loadData();
 
     // Listen for organization changes
-    const handleOrgChange = () => {
-      loadBranches();
-      loadProducts();
-    };
-
-    window.addEventListener('orgChanged', handleOrgChange);
+    window.addEventListener('orgChanged', loadData);
     return () => {
-      window.removeEventListener('orgChanged', handleOrgChange);
+      window.removeEventListener('orgChanged', loadData);
     };
   }, []);
 
   useEffect(() => {
-    if (actionState.message) {
-      toast.success(actionState.message);
-      setTimeout(() => {
-        router.push("/dashboard/stock");
-      }, 500);
+    if (actionState.status === 'error' && actionState.message) {
+      toast.error(actionState.message);
     }
-  }, [actionState, router]);
+  }, [actionState]);
+
+  if (actionState.status === 'success') {
+    toast.success(actionState.message);
+    redirect("/dashboard/stock");
+  }
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -140,17 +152,17 @@ export default function StockForm({ stock }: StockFormProps) {
       {stock?.id && <input name="id" type="hidden" value={stock.id} />}
       
       <div>
-        <Label htmlFor="branch_id">Sucursal</Label>
+        <Label htmlFor="branch_id">{t('form.branchLabel')}</Label>
         <select
           id="branch_id"
           name="branch_id"
           value={selectedBranch}
-          onChange={(e) => setSelectedBranch(e.target.value)}
+          onChange={(e) => dispatch({ type: 'SELECT_BRANCH', value: e.target.value })}
           className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           aria-describedby="branch_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.branch_id}
         >
-          <option value="">Seleccionar una sucursal</option>
+          <option value="">{t('form.selectBranch')}</option>
           {branches.map((branch) => (
             <option key={branch.id} value={branch.id}>
               {branch.name}
@@ -161,17 +173,17 @@ export default function StockForm({ stock }: StockFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="product_id">Producto</Label>
+        <Label htmlFor="product_id">{t('form.productLabel')}</Label>
         <select
           id="product_id"
           name="product_id"
           value={selectedProduct}
-          onChange={(e) => setSelectedProduct(e.target.value)}
+          onChange={(e) => dispatch({ type: 'SELECT_PRODUCT', value: e.target.value })}
           className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
           aria-describedby="product_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.product_id}
         >
-          <option value="">Seleccionar un producto</option>
+          <option value="">{t('form.selectProduct')}</option>
           {products.map((product) => (
             <option key={product.id} value={product.id}>
               {product.name}
@@ -182,39 +194,39 @@ export default function StockForm({ stock }: StockFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="quantity">Cantidad Actual</Label>
+        <Label htmlFor="quantity">{t('form.quantityLabel')}</Label>
         <Input
           aria-describedby="quantity-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.quantity}
           defaultValue={stock?.quantity ?? 0}
           id="quantity"
           name="quantity"
-          placeholder="Ingresa la cantidad actual"
+          placeholder={t('form.quantityPlaceholder')}
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="quantity" />
       </div>
 
       <div>
-        <Label htmlFor="minimum_quantity">Cantidad Mínima</Label>
+        <Label htmlFor="minimum_quantity">{t('form.minimumQuantityLabel')}</Label>
         <Input
           aria-describedby="minimum_quantity-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.minimum_quantity}
           defaultValue={stock?.minimum_quantity ?? 0}
           id="minimum_quantity"
           name="minimum_quantity"
-          placeholder="Ingresa el umbral mínimo de cantidad"
+          placeholder={t('form.minimumQuantityPlaceholder')}
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="minimum_quantity" />
       </div>
 
-      <div className="flex gap-2">
-        <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/stock">Cancelar</Link>
+      <div className="grid grid-cols-2 gap-2">
+        <Button asChild type="button" variant="secondary">
+          <Link href="/dashboard/stock">{tCommon('cancel')}</Link>
         </Button>
-        <Button className="w-full" disabled={pending} type="submit">
-          {stock ? 'Actualizar' : 'Crear'}
+        <Button disabled={pending} type="submit">
+          {stock ? tCommon('update') : tCommon('create')}
         </Button>
       </div>
     </form>

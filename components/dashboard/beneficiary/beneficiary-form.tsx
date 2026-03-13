@@ -1,11 +1,13 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from "sonner";
 
 import { beneficiaryFormAction } from '@/actions/dashboard/beneficiary/beneficiary-form-actions';
+import { usePlanUsage } from '@/components/providers/plan-usage-provider';
 import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
@@ -20,21 +22,27 @@ interface BeneficiaryFormProps {
 }
 
 export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
+  const t = useTranslations('Dashboard.beneficiary.form');
+  const tCommon = useTranslations('Common');
+
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
 
   // Utils
   const [actionState, formAction, pending] = useActionState(beneficiaryFormAction, EMPTY_ACTION_STATE);
-  const router = useRouter();
+  const { invalidate } = usePlanUsage();
 
   useEffect(() => {
-    if (actionState.message) {
-      toast.success(actionState.message);
-      setTimeout(() => {
-        router.push("/dashboard/beneficiary");
-      }, 500); // Show toast briefly before navigating
+    if (actionState.status === 'error' && actionState.message) {
+      toast.error(actionState.message);
     }
-  }, [actionState, router]);
+  }, [actionState]);
+
+  if (actionState.status === 'success') {
+    toast.success(actionState.message);
+    invalidate();
+    redirect("/dashboard/beneficiary");
+  }
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -53,95 +61,95 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
       {beneficiary?.id && <input name="id" type="hidden" value={beneficiary.id} />}
       <div>
-        <Label htmlFor="first_name">Nombre</Label>
+        <Label htmlFor="first_name">{t('firstNameLabel')}</Label>
         <Input
           aria-describedby="first_name-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.first_name}
           defaultValue={beneficiary?.first_name ?? ''}
           id="first_name"
           name="first_name"
-          placeholder="Ingresa el nombre"
+          placeholder={t('firstNamePlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="first_name" />
       </div>
 
       <div>
-        <Label htmlFor="last_name">Apellido</Label>
+        <Label htmlFor="last_name">{t('lastNameLabel')}</Label>
         <Input
           aria-describedby="last_name-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.last_name}
           defaultValue={beneficiary?.last_name ?? ''}
           id="last_name"
           name="last_name"
-          placeholder="Ingresa el apellido"
+          placeholder={t('lastNamePlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="last_name" />
       </div>
 
       <div>
-        <Label htmlFor="email">Correo electrónico</Label>
+        <Label htmlFor="email">{t('emailLabel')}</Label>
         <Input
           aria-describedby="email-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.email}
           defaultValue={beneficiary?.email ?? ''}
           id="email"
           name="email"
-          placeholder="Ingresa el correo electrónico"
+          placeholder={t('emailPlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="email" />
       </div>
 
       <div>
-        <Label htmlFor="phone">Teléfono</Label>
+        <Label htmlFor="phone">{t('phoneLabel')}</Label>
         <Input
           aria-describedby="phone-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.phone}
           defaultValue={beneficiary?.phone ?? ''}
           id="phone"
           name="phone"
-          placeholder="Ingresa el número de teléfono"
+          placeholder={t('phonePlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="phone" />
       </div>
 
       <div>
-        <Label htmlFor="document_id">DNI / RUT</Label>
+        <Label htmlFor="document_id">{t('dniLabel')}</Label>
         <Input
           aria-describedby="document_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.document_id}
           defaultValue={beneficiary?.document_id ?? ''}
           id="document_id"
           name="document_id"
-          placeholder="Ingresa el DNI o RUT"
+          placeholder={t('dniPlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="document_id" />
       </div>
 
       <div>
-        <Label htmlFor="available_points">Puntos Disponibles</Label>
+        <Label htmlFor="available_points">{t('pointsLabel')}</Label>
         <Input
           aria-describedby="available_points-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.available_points}
           defaultValue={beneficiary?.available_points ?? 0}
           id="available_points"
           name="available_points"
-          placeholder="Ingresa los puntos disponibles"
+          placeholder={t('pointsPlaceholder')}
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="available_points" />
       </div>
 
-      <div className="flex gap-2">
-        <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/beneficiary">Cancelar</Link>
+      <div className="grid grid-cols-2 gap-2">
+        <Button asChild type="button" variant="secondary">
+          <Link href="/dashboard/beneficiary">{tCommon('cancel')}</Link>
         </Button>
-        <Button className="w-full" disabled={pending} type="submit">
-          {beneficiary ? 'Actualizar' : 'Crear'}
+        <Button disabled={pending} type="submit">
+          {beneficiary ? tCommon('update') : tCommon('create')}
         </Button>
       </div>
     </form>

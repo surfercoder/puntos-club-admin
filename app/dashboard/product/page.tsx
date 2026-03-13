@@ -1,9 +1,12 @@
 import { Pencil, ImageIcon } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { getTranslations } from 'next-intl/server';
 
 import { getProducts } from '@/actions/dashboard/product/actions';
 import DeleteModal from '@/components/dashboard/product/delete-modal';
+import { PlanLimitCreateButton } from '@/components/dashboard/plan/plan-limit-create-button';
+import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -16,34 +19,42 @@ import {
 import type { Product } from '@/types/product';
 
 export default async function ProductListPage() {
-  const { data, error } = await getProducts();
+  const [{ data, error }, t, tCommon] = await Promise.all([
+    getProducts(),
+    getTranslations('Dashboard.product'),
+    getTranslations('Common'),
+  ]);
 
   if (error) {
-    return <div>Error al obtener productos</div>;
+    return <div>{t('error')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Productos</h1>
-          <p className="text-muted-foreground">Administrar productos del sistema</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/product/create">+ Nuevo Producto</Link>
-        </Button>
+        <PlanLimitCreateButton
+          features={['redeemable_products']}
+          createHref="/dashboard/product/create"
+          createLabel={t('newButton')}
+        />
       </div>
+
+      <PlanUsageBanner features={['redeemable_products']} />
 
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Imágenes</TableHead>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Descripción</TableHead>
-              <TableHead>Puntos Requeridos</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>{t('tableHeaders.images')}</TableHead>
+              <TableHead>{t('tableHeaders.name')}</TableHead>
+              <TableHead>{t('tableHeaders.description')}</TableHead>
+              <TableHead>{t('tableHeaders.requiredPoints')}</TableHead>
+              <TableHead>{t('tableHeaders.status')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -55,7 +66,7 @@ export default async function ProductListPage() {
                       {product.image_urls && product.image_urls.length > 0 ? (
                         product.image_urls.map((url, index) => (
                           <div
-                            key={index}
+                            key={url}
                             className="relative w-12 h-12 rounded border overflow-hidden bg-muted"
                           >
                             <Image
@@ -81,11 +92,11 @@ export default async function ProductListPage() {
                   <TableCell>{product.required_points}</TableCell>
                   <TableCell>
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      product.active 
-                        ? 'bg-green-100 text-green-800' 
+                      product.active
+                        ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {product.active ? 'Activo' : 'Inactivo'}
+                      {product.active ? tCommon('active') : tCommon('inactive')}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
@@ -95,7 +106,7 @@ export default async function ProductListPage() {
                           <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
-                      <DeleteModal 
+                      <DeleteModal
                         productId={product.id}
                         productName={product.name}
                       />
@@ -105,7 +116,7 @@ export default async function ProductListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={6}>No se encontraron productos.</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

@@ -205,6 +205,9 @@
       "title": "Organizaciones",
       "description": "Administrar todas las organizaciones del sistema",
       "newButton": "+ Nueva Organización",
+      "createTitle": "Crear Organización",
+      "editTitle": "Editar Organización",
+      "fetchError": "Error al obtener la organización",
       "tableHeaders": {
         "logo": "Logo",
         "name": "Nombre",
@@ -214,10 +217,21 @@
         "actions": "Acciones"
       },
       "empty": "No se encontraron organizaciones.",
+      "deleteModal": {
+        "title": "Eliminar Organización",
+        "confirm": "¿Estás seguro de que deseas eliminar {name}? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar la organización",
+        "deleteSuccess": "Organización eliminada correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      },
       "form": {
         "legalName": "Razón Social",
         "taxId": "CUIT / RUT",
-        "logoLabel": "Logo de la Organización"
+        "logoLabel": "Logo de la Organización",
+        "nameLabel": "Nombre",
+        "namePlaceholder": "Ingresa el nombre de la organización",
+        "legalNamePlaceholder": "Ingresa la razón social (opcional)",
+        "taxIdPlaceholder": "Ingresa el CUIT o RUT (opcional)"
       }
     },
     "notifications": {
@@ -259,6 +273,19 @@
       }
     },
     "users": {
+      "title": "Usuarios",
+      "newButton": "+ Nuevo Usuario",
+      "createTitle": "Crear Usuario",
+      "fetchErrorOrgs": "Error al obtener organizaciones",
+      "fetchErrorRoles": "Error al obtener roles",
+      "descriptionAdmin": "Administrar todos los usuarios del sistema (propietarios, colaboradores, cajeros y beneficiarios)",
+      "descriptionOwner": "Administrar usuarios de su organización (colaboradores y cajeros)",
+      "deleteModal": {
+        "title": "Eliminar Usuario",
+        "confirm": "¿Estás seguro de que deseas eliminar {name}? Esta acción no se puede deshacer.",
+        "deleteSuccess": "Usuario eliminado correctamente",
+        "deleteError": "Error al eliminar el usuario"
+      },
       "loading": "Cargando usuarios...",
       "tableHeaders": {
         "name": "Nombre",
@@ -274,6 +301,95 @@
       "statusActive": "Activo",
       "statusInactive": "Inactivo",
       "empty": "No se encontraron usuarios."
+    },
+    "pushNotifications": {
+      "title": "Notificaciones Push",
+      "description": "Administrar notificaciones push enviadas a beneficiarios",
+      "newButton": "+ Nueva Notificación Push",
+      "error": "Error al obtener notificaciones push",
+      "createTitle": "Crear Notificación Push",
+      "createDescription": "Envía una notificación a todos los beneficiarios activos de esta organización",
+      "tableHeaders": {
+        "title": "Título",
+        "organization": "Organización",
+        "status": "Estado",
+        "sent": "Enviadas",
+        "failed": "Fallidas",
+        "createdAt": "Creado el",
+        "actions": "Acciones"
+      },
+      "empty": "No se encontraron notificaciones push."
+    },
+    "beneficiaryOrganization": {
+      "createTitle": "Crear Membresía",
+      "editTitle": "Editar Membresía",
+      "fetchError": "Error al obtener la membresía",
+      "form": {
+        "beneficiaryLabel": "Beneficiario",
+        "selectBeneficiary": "Seleccionar un beneficiario",
+        "noName": "Sin nombre",
+        "organizationLabel": "Organización",
+        "selectOrganization": "Seleccionar una organización",
+        "availablePoints": "Puntos Disponibles",
+        "totalPointsEarned": "Puntos Totales Acumulados",
+        "totalPointsRedeemed": "Puntos Totales Canjeados",
+        "activeLabel": "Activo"
+      },
+      "deleteModal": {
+        "title": "Eliminar Membresía",
+        "confirm": "¿Estás seguro de que deseas eliminar {name}? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar la membresía",
+        "deleteSuccess": "Membresía eliminada correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      }
+    },
+    "category": {
+      "createTitle": "Crear Categoría",
+      "editTitle": "Editar Categoría",
+      "fetchError": "Error al obtener la categoría",
+      "form": {
+        "parentCategory": "Categoría Padre",
+        "noParent": "Sin categoría padre",
+        "nameLabel": "Nombre",
+        "namePlaceholder": "Ingresa el nombre de la categoría",
+        "descriptionLabel": "Descripción",
+        "descriptionPlaceholder": "Ingresa una descripción de la categoría (opcional)",
+        "activeLabel": "Activo"
+      },
+      "deleteModal": {
+        "title": "Eliminar Categoría",
+        "confirm": "¿Estás seguro de que deseas eliminar {name}? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar la categoría",
+        "deleteSuccess": "Categoría eliminada correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      }
+    },
+    "appUser": {
+      "createTitle": "Crear Usuario",
+      "editTitle": "Editar Usuario",
+      "fetchError": "Error al obtener el usuario",
+      "form": {
+        "organizationLabel": "Organización",
+        "selectOrganization": "Seleccionar una organización",
+        "firstNameLabel": "Nombre",
+        "firstNamePlaceholder": "Ingresa el nombre (opcional)",
+        "lastNameLabel": "Apellido",
+        "lastNamePlaceholder": "Ingresa el apellido (opcional)",
+        "emailLabel": "Correo electrónico",
+        "emailPlaceholder": "Ingresa el correo electrónico (opcional)",
+        "usernameLabel": "Usuario",
+        "usernamePlaceholder": "Ingresa el nombre de usuario (opcional)",
+        "passwordLabel": "Contraseña",
+        "passwordPlaceholder": "Ingresa la contraseña (opcional)",
+        "activeLabel": "Activo"
+      },
+      "deleteModal": {
+        "title": "Eliminar Usuario",
+        "confirm": "¿Estás seguro de que deseas eliminar al usuario {name}? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar el usuario",
+        "deleteSuccess": "Usuario eliminado correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      }
     },
     "qr": {
       "title": "Código QR",
@@ -298,7 +414,9 @@
         "tip2": "Imprime múltiples copias para distintos puntos del local.",
         "tip3": "Comparte el QR digital por redes sociales o WhatsApp.",
         "printTagline": "Escanea con la app PuntosClub para unirte y ganar puntos en cada compra",
-        "printFooter": "puntosclub.app · Programa de fidelización"
+        "printFooter": "puntosclub.app · Programa de fidelización",
+        "printError": "No se pudo abrir la ventana de impresión. Verifica que no estén bloqueados los pop-ups.",
+        "shareText": "Unite a {name} en Puntos Club y acumula puntos en cada compra."
       }
     },
     "plan": {
@@ -309,9 +427,44 @@
       "closeBanner": "Cerrar aviso",
       "usageTitle": "Uso del plan",
       "upgradePlanButton": "Mejorar plan",
-      "nearingLimitWarning": "Uno o más recursos están cerca del límite de tu plan."
+      "nearingLimitWarning": "Uno o más recursos están cerca del límite de tu plan.",
+      "limitReachedTitle": "Límite de plan alcanzado",
+      "limitReachedDescription": "Has alcanzado el límite de tu {plan}. Mejora tu plan para continuar creando recursos.",
+      "goBack": "Volver"
+    },
+    "planSettings": {
+      "title": "Plan y Suscripción",
+      "description": "Administra tu plan actual y compara las opciones disponibles",
+      "currentPlan": "Plan actual",
+      "availablePlans": "Planes disponibles",
+      "upgradeTo": "Mejorar a {plan}",
+      "contactToDowngrade": "Para cambiar a un plan inferior, contacta a soporte por email."
     },
     "branch": {
+      "title": "Sucursales",
+      "description": "Administrar todas las sucursales del sistema",
+      "newButton": "+ Nueva Sucursal",
+      "error": "Error al obtener sucursales",
+      "createTitle": "Crear Sucursal",
+      "editTitle": "Editar Sucursal",
+      "fetchError": "Error al obtener la sucursal",
+      "tableHeaders": {
+        "name": "Nombre",
+        "organization": "Organización",
+        "phone": "Teléfono",
+        "address": "Dirección",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "empty": "No se encontraron sucursales.",
+      "deleteModal": {
+        "title": "Eliminar Sucursal",
+        "confirm": "¿Estás seguro de que deseas eliminar {name}? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar la sucursal",
+        "deleteErrorHasPointsRule": "No se puede eliminar la sucursal porque tiene una regla de puntos asociada. Eliminá primero la regla de puntos.",
+        "deleteSuccess": "Sucursal eliminada correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      },
       "form": {
         "branchInfo": "Información de la Sucursal",
         "nameLabel": "Nombre de la Sucursal",
@@ -365,21 +518,188 @@
         "passwordMinLength": "Mínimo 6 caracteres",
         "active": "Activo",
         "createUser": "Crear Usuario",
-        "updateUser": "Actualizar Usuario"
+        "updateUser": "Actualizar Usuario",
+        "roleLimitReached": "límite alcanzado",
+        "roleLimitReachedHint": "Has alcanzado el límite de tu plan para este rol. Actualizá tu plan para crear más usuarios de este tipo."
       }
     },
     "beneficiary": {
+      "title": "Beneficiarios",
+      "description": "Administrar todos los beneficiarios del sistema",
+      "newButton": "+ Nuevo Beneficiario",
+      "error": "Error al obtener beneficiarios",
+      "createTitle": "Crear Beneficiario",
+      "editTitle": "Editar Beneficiario",
+      "fetchError": "Error al obtener el beneficiario",
+      "tableHeaders": {
+        "name": "Nombre",
+        "email": "Correo electrónico",
+        "phone": "Teléfono",
+        "document": "Documento",
+        "availablePoints": "Puntos Disponibles",
+        "registrationDate": "Fecha de Registro",
+        "actions": "Acciones"
+      },
+      "empty": "No se encontraron beneficiarios.",
       "form": {
+        "firstNameLabel": "Nombre",
+        "firstNamePlaceholder": "Ingresa el nombre",
+        "lastNameLabel": "Apellido",
+        "lastNamePlaceholder": "Ingresa el apellido",
+        "emailLabel": "Correo electrónico",
+        "emailPlaceholder": "Ingresa el correo electrónico",
+        "phoneLabel": "Teléfono",
+        "phonePlaceholder": "Ingresa el número de teléfono",
         "dniLabel": "DNI / RUT",
-        "pointsLabel": "Puntos Disponibles"
+        "dniPlaceholder": "Ingresa el DNI o RUT",
+        "pointsLabel": "Puntos Disponibles",
+        "pointsPlaceholder": "Ingresa los puntos disponibles"
+      },
+      "deleteModal": {
+        "title": "Eliminar Beneficiario",
+        "confirm": "¿Estás seguro de que deseas eliminar {name}? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar el beneficiario",
+        "deleteSuccess": "Beneficiario eliminado correctamente",
+        "genericError": "Ocurrió un error al eliminar"
       }
     },
     "product": {
+      "title": "Productos",
+      "description": "Administrar productos del sistema",
+      "newButton": "+ Nuevo Producto",
+      "error": "Error al obtener productos",
+      "createTitle": "Crear Producto",
+      "editTitle": "Editar Producto",
+      "tableHeaders": {
+        "images": "Imágenes",
+        "name": "Nombre",
+        "description": "Descripción",
+        "requiredPoints": "Puntos Requeridos",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "empty": "No se encontraron productos.",
       "form": {
         "categoryLabel": "Categoría",
         "categoryPlaceholder": "Seleccionar una categoría",
+        "nameLabel": "Nombre",
+        "namePlaceholder": "Ingresa el nombre del producto",
+        "descriptionLabel": "Descripción",
+        "descriptionPlaceholder": "Ingresa una descripción del producto (opcional)",
         "pointsLabel": "Puntos Requeridos",
-        "imagesLabel": "Imágenes del Producto (hasta 3)"
+        "pointsPlaceholder": "Ingresa los puntos requeridos",
+        "imagesLabel": "Imágenes del Producto (hasta 3)",
+        "activeLabel": "Activo"
+      },
+      "deleteModal": {
+        "title": "Eliminar Producto",
+        "confirm": "¿Estás seguro de que deseas eliminar {name}? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar el producto",
+        "deleteSuccess": "Producto eliminado correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      },
+      "imageUpload": {
+        "uploadLimitError": "Solo podés subir {count} imagen/es más",
+        "formatError": "{name} formato no soportado. Usá JPEG, PNG, WebP o GIF",
+        "sizeError": "{name} excede el límite de 5MB",
+        "uploadSuccess": "{count} imagen/es subida/s correctamente",
+        "uploadError": "Error al subir imágenes",
+        "removeSuccess": "Imagen eliminada correctamente",
+        "removeError": "Error al eliminar imagen",
+        "uploading": "Subiendo...",
+        "uploadButton": "Subir Imágenes",
+        "formats": "JPEG, PNG, WebP, GIF",
+        "maxSize": "Máx 5MB cada una",
+        "noImages": "No se subieron imágenes aún. Podés agregar hasta 3 imágenes.",
+        "imageCount": "{count} de 3 imágenes subidas"
+      }
+    },
+    "appOrder": {
+      "createTitle": "Crear Pedido",
+      "editTitle": "Editar Pedido",
+      "fetchError": "Error al obtener el pedido",
+      "form": {
+        "orderNumber": "Número de Pedido",
+        "orderNumberPlaceholder": "Ingresa el número de pedido",
+        "creationDate": "Fecha de Creación",
+        "totalPoints": "Puntos Totales",
+        "totalPointsPlaceholder": "Ingresa los puntos totales",
+        "observations": "Observaciones",
+        "observationsPlaceholder": "Ingresa observaciones (opcional)"
+      }
+    },
+    "redemption": {
+      "createTitle": "Crear Canje",
+      "editTitle": "Editar Canje",
+      "fetchError": "Error al obtener el canje",
+      "form": {
+        "beneficiaryLabel": "Beneficiario",
+        "selectBeneficiary": "Seleccionar un beneficiario",
+        "noName": "Beneficiario sin nombre",
+        "productLabel": "Producto (Opcional)",
+        "selectProduct": "Seleccionar un producto (opcional)",
+        "none": "Ninguno",
+        "orderLabel": "Pedido",
+        "selectOrder": "Seleccionar un pedido",
+        "pointsUsed": "Puntos Usados",
+        "pointsUsedPlaceholder": "Ingresa los puntos usados",
+        "quantityLabel": "Cantidad",
+        "quantityPlaceholder": "Ingresa la cantidad"
+      }
+    },
+    "appUserOrganization": {
+      "createTitle": "Crear Membresía",
+      "editTitle": "Editar Membresía",
+      "fetchError": "Error al obtener la membresía",
+      "form": {
+        "userLabel": "Usuario",
+        "selectUser": "Seleccionar un usuario",
+        "noName": "Sin nombre",
+        "organizationLabel": "Organización",
+        "selectOrganization": "Seleccionar una organización",
+        "activeLabel": "Activo"
+      }
+    },
+    "stock": {
+      "createTitle": "Crear Registro de Stock",
+      "editTitle": "Editar Registro de Stock",
+      "form": {
+        "branchLabel": "Sucursal",
+        "selectBranch": "Seleccionar una sucursal",
+        "productLabel": "Producto",
+        "selectProduct": "Seleccionar un producto",
+        "quantityLabel": "Cantidad Actual",
+        "quantityPlaceholder": "Ingresa la cantidad actual",
+        "minimumQuantityLabel": "Cantidad Mínima",
+        "minimumQuantityPlaceholder": "Ingresa el umbral mínimo de cantidad"
+      }
+    },
+    "address": {
+      "createTitle": "Crear Dirección",
+      "form": {
+        "searchAddress": "Buscar Dirección",
+        "searchPlaceholder": "Comienza a escribir una dirección...",
+        "searchHint": "Selecciona una dirección de las sugerencias de Google o completa manualmente abajo",
+        "street": "Calle",
+        "number": "Número",
+        "city": "Ciudad",
+        "state": "Provincia",
+        "zipCode": "Código Postal"
+      }
+    },
+    "organizationNotificationLimit": {
+      "createTitle": "Crear Límite de Notificaciones",
+      "form": {
+        "organizationLabel": "Organización",
+        "selectOrganization": "Seleccionar una organización",
+        "planType": "Tipo de Plan",
+        "defaultLimits": "Límites por defecto: {daily} diarias, {monthly} mensuales, {minHours}h entre notificaciones",
+        "dailyLimit": "Límite Diario",
+        "dailyLimitPlaceholder": "Ingresa el límite diario",
+        "monthlyLimit": "Límite Mensual",
+        "monthlyLimitPlaceholder": "Ingresa el límite mensual",
+        "minHours": "Horas Mínimas Entre Notificaciones",
+        "minHoursPlaceholder": "Ingresa las horas mínimas entre notificaciones"
       }
     }
   },
@@ -496,7 +816,9 @@
       "initialStock": "Stock inicial",
       "addReward": "Agregar otro premio a esta categoría",
       "addCategory": "Agregar otra categoría",
-      "validationError": "Agrega al menos una categoría con un producto."
+      "validationError": "Agrega al menos una categoría con un producto.",
+      "productCount": "Premios: {current} / {max}",
+      "limitReached": "Alcanzaste el límite de {max} premios de tu {plan}. Para agregar más, podés cambiar de plan."
     },
     "step5": {
       "termsTitle": "Términos y Condiciones de Uso — Puntos Club",
@@ -579,7 +901,13 @@
       "from": "Desde {date}",
       "until": "Hasta {date}"
     },
-    "deleteConfirm": "¿Estás seguro de que deseas eliminar la regla \"{name}\"?",
+    "deleteModal": {
+      "title": "Eliminar Regla de Puntos",
+      "confirm": "¿Estás seguro de que deseas eliminar <strong>{name}</strong>? Esta acción no se puede deshacer.",
+      "deleteError": "Error al eliminar la regla de puntos",
+      "deleteSuccess": "Regla de puntos eliminada correctamente",
+      "genericError": "Ocurrió un error al eliminar"
+    },
     "form": {
       "createTitle": "Crear Nueva Regla de Puntos",
       "editTitle": "Editar Regla de Puntos",

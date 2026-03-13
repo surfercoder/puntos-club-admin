@@ -1,8 +1,11 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/branch/delete-modal';
+import { PlanLimitCreateButton } from '@/components/dashboard/plan/plan-limit-create-button';
+import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -18,11 +21,14 @@ import { createClient } from '@/lib/supabase/server';
 import type { BranchWithRelations } from '@/types/branch';
 
 export default async function BranchListPage() {
-  const supabase = await createClient();
-  const currentUser = await getCurrentUser();
+  const [supabase, currentUser, t, tCommon, cookieStore] = await Promise.all([
+    createClient(),
+    getCurrentUser(),
+    getTranslations('Dashboard.branch'),
+    getTranslations('Common'),
+    cookies(),
+  ]);
   const userIsAdmin = isAdmin(currentUser);
-
-  const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
   const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
 
@@ -42,31 +48,35 @@ export default async function BranchListPage() {
   const { data, error } = await query;
 
   if (error) {
-    return <div>Error al obtener sucursales</div>;
+    return <div>{t('error')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Sucursales</h1>
-          <p className="text-muted-foreground">Administrar todas las sucursales del sistema</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/branch/create">+ Nueva Sucursal</Link>
-        </Button>
+        <PlanLimitCreateButton
+          features={['branches']}
+          createHref="/dashboard/branch/create"
+          createLabel={t('newButton')}
+        />
       </div>
+
+      <PlanUsageBanner features={['branches']} />
 
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Organización</TableHead>
-              <TableHead>Teléfono</TableHead>
-              <TableHead>Dirección</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>{t('tableHeaders.name')}</TableHead>
+              <TableHead>{t('tableHeaders.organization')}</TableHead>
+              <TableHead>{t('tableHeaders.phone')}</TableHead>
+              <TableHead>{t('tableHeaders.address')}</TableHead>
+              <TableHead>{t('tableHeaders.status')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -77,18 +87,18 @@ export default async function BranchListPage() {
                   <TableCell>{branch.organization?.name || 'N/A'}</TableCell>
                   <TableCell>{branch.phone || 'N/A'}</TableCell>
                   <TableCell>
-                    {branch.address 
+                    {branch.address
                       ? `${branch.address.street}, ${branch.address.city}`
                       : 'N/A'
                     }
                   </TableCell>
                   <TableCell>
                     <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      branch.active 
-                        ? 'bg-green-100 text-green-800' 
+                      branch.active
+                        ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {branch.active ? 'Activo' : 'Inactivo'}
+                      {branch.active ? tCommon('active') : tCommon('inactive')}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
@@ -98,7 +108,7 @@ export default async function BranchListPage() {
                           <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
-                      <DeleteModal 
+                      <DeleteModal
                         branchId={branch.id}
                         branchName={branch.name}
                       />
@@ -108,7 +118,7 @@ export default async function BranchListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={6}>No se encontraron sucursales.</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

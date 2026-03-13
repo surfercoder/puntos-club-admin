@@ -3,30 +3,14 @@
 import { revalidatePath } from 'next/cache';
 
 import { createOrganizationNotificationLimit, updateOrganizationNotificationLimit } from '@/actions/dashboard/organization_notification_limits/actions';
-import { fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
+import { cleanFormData, fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
 import { OrganizationNotificationLimitSchema } from '@/schemas/organization_notification_limit.schema';
 import type { OrganizationNotificationLimit } from '@/types/organization_notification_limit';
 
 export async function organizationNotificationLimitFormAction(_prevState: ActionState, formData: FormData) {
   try {
-    // Strip the useActionState prefix from field names (e.g., "1_organization_id" -> "organization_id")
-    const rawFormDataObject = Object.fromEntries(formData);
-    const formDataObject: Record<string, FormDataEntryValue> = {};
-    
-    for (const [key, value] of Object.entries(rawFormDataObject)) {
-      // Skip the action state metadata field (just a number like "0")
-      if (key.match(/^\d+$/)) {
-        continue;
-      }
-      
-      // Remove the numeric prefix added by useActionState (e.g., "1_organization_id" -> "organization_id")
-      const cleanKey = key.match(/^\d+_/) ? key.substring(key.indexOf('_') + 1) : key;
-      
-      if (cleanKey) {
-        formDataObject[cleanKey] = value;
-      }
-    }
-    
+    const formDataObject = cleanFormData(formData);
+
     const parsedData = {
       ...formDataObject,
       daily_limit: formDataObject.daily_limit ? Number(formDataObject.daily_limit) : 1,
@@ -63,9 +47,8 @@ export async function organizationNotificationLimitFormAction(_prevState: Action
     revalidatePath('/dashboard/organization_notification_limits');
     revalidatePath('/dashboard');
 
-    return toActionState(formData.get('id') ? 'Organization notification limit updated successfully!' : 'Organization notification limit created successfully!');
+    return toActionState(formDataObject.id ? 'Organization notification limit updated successfully!' : 'Organization notification limit created successfully!');
   } catch (error) {
-    const message = error instanceof Error ? error.message : 'An unknown error occurred';
-    return { message, fieldErrors: { _form: [message] } };
+    return fromErrorToActionState(error);
   }
 }

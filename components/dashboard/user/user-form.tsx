@@ -7,6 +7,7 @@ import { useTranslations } from 'next-intl';
 import { toast } from "sonner";
 
 import { userFormAction } from '@/actions/dashboard/user/user-form-actions';
+import { usePlanUsage } from '@/components/providers/plan-usage-provider';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import FieldError from '@/components/ui/field-error';
@@ -19,7 +20,10 @@ import type { Organization } from '@/types/organization';
 import type { UserWithRelations } from '@/types/user';
 import type { UserRole } from '@/types/user_role';
 import type { AppUserWithRelations } from '@/types/app_user';
+import type { PlanFeatureKey } from '@/types/plan';
 import { isOwner } from '@/lib/auth/roles';
+
+const EMPTY_DISABLED_ROLES: string[] = [];
 
 interface UserFormProps {
   user?: UserWithRelations;
@@ -27,9 +31,15 @@ interface UserFormProps {
   roles: UserRole[];
   currentUser?: AppUserWithRelations;
   defaultOrgId?: string;
+  disabledRoleNames?: string[];
 }
 
-export default function UserForm({ user, organizations, roles, currentUser, defaultOrgId }: UserFormProps) {
+const ROLE_FEATURE_MAP: Record<string, PlanFeatureKey> = {
+  cashier: 'cashiers',
+  collaborator: 'collaborators',
+};
+
+export default function UserForm({ user, organizations, roles, currentUser, defaultOrgId, disabledRoleNames: disabledRoleNamesProp = EMPTY_DISABLED_ROLES }: UserFormProps) {
   const t = useTranslations('Dashboard.user.form');
   const tCommon = useTranslations('Common');
   const [validation, setValidation] = useState<ActionState | null>(null);
@@ -44,6 +54,16 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
 
   // Utils
   const router = useRouter();
+  const { invalidate, isAtLimit } = usePlanUsage();
+
+  // Derive disabled roles from plan usage context (overrides server prop)
+  // When editing, the user's current role should never be disabled (they already occupy that slot)
+  const currentRoleName = user ? roles.find(r => r.id === user.role_id)?.name : undefined;
+  const disabledRoleNames = Object.entries(ROLE_FEATURE_MAP)
+    .filter(([roleName, feature]) => isAtLimit(feature) && roleName !== currentRoleName)
+    .map(([role]) => role)
+    .concat(disabledRoleNamesProp)
+    .filter((v, i, a) => a.indexOf(v) === i);
 
   const wrappedAction = async (state: ActionState, formData: FormData) => {
     const result = await userFormAction(state, formData);
@@ -54,6 +74,7 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
         toast.error(result.message);
       } else {
         toast.success(result.message);
+        invalidate();
         setTimeout(() => router.push("/dashboard/users"), 500);
       }
     }
@@ -131,14 +152,22 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
           aria-invalid={!!(validation ?? actionState).fieldErrors?.role_id}
         >
           <option value="">{t('selectRole')}</option>
-          {availableRoles.map((role) => (
-            <option key={role.id} value={role.id}>
-              {role.display_name} ({role.name})
-            </option>
-          ))}
+          {availableRoles.map((role) => {
+            const isRoleDisabled = disabledRoleNames.includes(role.name);
+            return (
+              <option key={role.id} value={role.id} disabled={isRoleDisabled}>
+                {role.display_name} ({role.name}){isRoleDisabled ? ` — ${t('roleLimitReached')}` : ''}
+              </option>
+            );
+          })}
         </select>
         <FieldError actionState={validation ?? actionState} name="role_id" />
-        {selectedRole && (
+        {selectedRole && disabledRoleNames.includes(roles.find(r => r.id === selectedRole)?.name ?? '') && (
+          <p className="text-sm text-destructive mt-1">
+            {t('roleLimitReachedHint')}
+          </p>
+        )}
+        {selectedRole && !disabledRoleNames.includes(roles.find(r => r.id === selectedRole)?.name ?? '') && (
           <p className="text-sm text-muted-foreground mt-1">
             {roles.find(r => r.id === selectedRole)?.description}
           </p>
@@ -263,11 +292,11 @@ export default function UserForm({ user, organizations, roles, currentUser, defa
         </Label>
       </div>
 
-      <div className="flex gap-2">
-        <Button asChild className="w-full" type="button" variant="secondary">
+      <div className="grid grid-cols-2 gap-2">
+        <Button asChild type="button" variant="secondary">
           <Link href="/dashboard/users">{tCommon('cancel')}</Link>
         </Button>
-        <Button className="w-full" disabled={pending} type="submit">
+        <Button disabled={pending || disabledRoleNames.includes(roles.find(r => r.id === selectedRole)?.name ?? '')} type="submit">
           {user ? t('updateUser') : t('createUser')}
         </Button>
       </div>

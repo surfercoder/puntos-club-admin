@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import NotificationForm from '@/components/dashboard/notifications/notification-form';
+import { PlanLimitGuard } from '@/components/dashboard/plan/plan-limit-guard';
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
 
@@ -32,21 +33,23 @@ export default async function CreateNotificationPage() {
   });
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Button asChild variant="ghost" size="sm">
-          <Link href="/dashboard/notifications">
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            {tCommon('back')}
-          </Link>
-        </Button>
-        <div>
-          <h1 className="text-2xl font-bold">{t('createPage.title')}</h1>
-          <p className="text-muted-foreground">{t('createPage.description')}</p>
+    <PlanLimitGuard features={['push_notifications_monthly']} backHref="/dashboard/notifications">
+      <div className="space-y-6">
+        <div className="flex items-center gap-4">
+          <Button asChild variant="ghost" size="sm">
+            <Link href="/dashboard/notifications">
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              {tCommon('back')}
+            </Link>
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold">{t('createPage.title')}</h1>
+            <p className="text-muted-foreground">{t('createPage.description')}</p>
+          </div>
         </div>
-      </div>
 
-      <NotificationForm limits={limits} canSend={canSend} />
-    </div>
+        <NotificationForm limits={limits} canSend={canSend} />
+      </div>
+    </PlanLimitGuard>
   );
 }

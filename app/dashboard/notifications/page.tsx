@@ -1,7 +1,9 @@
-import { Bell, Send } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
+import { PlanLimitCreateButton } from '@/components/dashboard/plan/plan-limit-create-button';
+import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -56,13 +58,14 @@ export default async function NotificationsPage() {
           </h1>
           <p className="text-muted-foreground">{t('description')}</p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/notifications/create">
-            <Send className="h-4 w-4 mr-2" />
-            {t('newButton')}
-          </Link>
-        </Button>
+        <PlanLimitCreateButton
+          features={['push_notifications_monthly']}
+          createHref="/dashboard/notifications/create"
+          createLabel={t('newButton')}
+        />
       </div>
+
+      <PlanUsageBanner features={['push_notifications_monthly']} />
 
       <div className="border rounded-lg">
         <Table>

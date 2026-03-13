@@ -4,6 +4,7 @@ import { redirect } from 'next/navigation'
 import { DashboardShell } from '@/components/dashboard-shell'
 import { getCurrentUser } from '@/lib/auth/get-current-user'
 import { isAdmin, isCollaborator, isOwner } from '@/lib/auth/roles'
+import { getOrganizationUsageSummary } from '@/lib/plans/usage'
 import { createClient } from '@/lib/supabase/server'
 
 export const metadata: Metadata = {
@@ -35,7 +36,7 @@ export default async function DashboardLayout({
     // Later we’ll scope this list to only orgs the user has access to.
     let { data: membershipsData } = await supabase
       .from('app_user_organization')
-      .select('organization:organization_id(id, name)')
+      .select('organization:organization_id(id, name, logo_url)')
       .eq('app_user_id', currentUser.id)
       .eq('is_active', true)
 
@@ -50,7 +51,7 @@ export default async function DashboardLayout({
 
       const refreshed = await supabase
         .from('app_user_organization')
-        .select('organization:organization_id(id, name)')
+        .select('organization:organization_id(id, name, logo_url)')
         .eq('app_user_id', currentUser.id)
         .eq('is_active', true)
 
@@ -62,14 +63,23 @@ export default async function DashboardLayout({
         const org = Array.isArray(m.organization) ? m.organization[0] : m.organization
         return org
       })
-      .filter((o): o is { id: string; name: string } => Boolean(o && o.id && o.name))
+      .filter((o): o is { id: string; name: string; logo_url: string | null } => Boolean(o && o.id && o.name))
       .map((o) => ({
         id: o.id,
         name: o.name,
+        logo_url: o.logo_url ?? null,
       }))
       .sort((a, b) => a.name.localeCompare(b.name))
 
     const name = `${currentUser.first_name ?? ''} ${currentUser.last_name ?? ''}`.trim()
+
+    // Fetch plan usage server-side so it's available on first render (no flash)
+    const orgIdForUsage = currentUser.organization_id
+      ? Number(currentUser.organization_id)
+      : null
+    const initialPlanUsage = orgIdForUsage
+      ? await getOrganizationUsageSummary(orgIdForUsage)
+      : null
 
     return (
       <DashboardShell
@@ -80,8 +90,9 @@ export default async function DashboardLayout({
         userId={currentUser.id}
         userRole={currentUser.role?.name ?? null}
         tourCompleted={currentUser.tour_completed ?? false}
-        orgs={orgs.length ? orgs : currentUser.organization ? [{ id: currentUser.organization.id, name: currentUser.organization.name }] : []}
+        orgs={orgs.length ? orgs : currentUser.organization ? [{ id: currentUser.organization.id, name: currentUser.organization.name, logo_url: currentUser.organization.logo_url ?? null }] : []}
         portalMode={isAdmin(currentUser) ? 'admin' : 'org'}
+        initialPlanUsage={initialPlanUsage}
       >
         {children}
       </DashboardShell>

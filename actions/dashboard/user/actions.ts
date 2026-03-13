@@ -2,18 +2,42 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { enforcePlanLimit } from '@/lib/plans/usage';
+import type { PlanFeatureKey } from '@/types/plan';
 import type { User } from '@/types/user';
+
+const ROLE_FEATURE_MAP: Record<string, PlanFeatureKey> = {
+  cashier: 'cashiers',
+  collaborator: 'collaborators',
+};
 
 /**
  * Create a new user (either app_user or beneficiary based on role)
  */
 export async function createUser(user: Partial<User>) {
-  
+
   const supabase = await createClient();
   
   // Determine which table to insert into based on user_type
   const table = user.user_type === 'beneficiary' ? 'beneficiary' : 'app_user';
-  
+
+  // Enforce plan limits for app_user roles (cashier, collaborator)
+  if (table === 'app_user' && user.role_id && user.organization_id) {
+    const { data: roleData } = await supabase
+      .from('user_role')
+      .select('name')
+      .eq('id', user.role_id)
+      .single();
+
+    const feature = roleData?.name ? ROLE_FEATURE_MAP[roleData.name] : undefined;
+    if (feature) {
+      const limitError = await enforcePlanLimit(Number(user.organization_id), feature);
+      if (limitError) {
+        throw new Error(limitError.message);
+      }
+    }
+  }
+
   // For app_user types (owner, collaborator, cashier, admin), create a Supabase Auth user first
   let authUserId: string | null = null;
   

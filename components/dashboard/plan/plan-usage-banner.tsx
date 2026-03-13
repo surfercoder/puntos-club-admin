@@ -1,14 +1,14 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { AlertTriangle, XCircle, TrendingUp, X } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
-import { getUsageSummaryAction } from '@/actions/dashboard/usage/actions';
+import { usePlanUsage } from '@/components/providers/plan-usage-provider';
 import { PLAN_FEATURE_LABELS, PLAN_DISPLAY_NAMES } from '@/lib/plans/config';
-import type { FeatureUsage, OrganizationUsageSummary, PlanFeatureKey } from '@/types/plan';
+import type { FeatureUsage, PlanFeatureKey } from '@/types/plan';
 
 interface PlanUsageBannerProps {
   features?: PlanFeatureKey[];
@@ -37,14 +37,10 @@ function FeatureWarning({ usage }: { usage: FeatureUsage }) {
 
 export function PlanUsageBanner({ features, className }: PlanUsageBannerProps) {
   const t = useTranslations('Dashboard.plan');
-  const [summary, setSummary] = useState<OrganizationUsageSummary | null>(null);
+  const { summary, isLoading } = usePlanUsage();
   const [dismissed, setDismissed] = useState(false);
 
-  useEffect(() => {
-    getUsageSummaryAction().then(setSummary).catch(() => null);
-  }, []);
-
-  if (!summary || dismissed) return null;
+  if (isLoading || !summary || dismissed) return null;
 
   const warnings = summary.features.filter((f) => {
     if (features && !features.includes(f.feature)) return false;

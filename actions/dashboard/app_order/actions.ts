@@ -1,50 +1,41 @@
 "use server";
 
 import { createClient } from '@/lib/supabase/server';
-import { AppOrderSchema } from '@/schemas/app_order.schema';
 import type { AppOrder } from '@/types/app_order';
 
 export async function createAppOrder(input: AppOrder) {
-  const parsed = AppOrderSchema.safeParse(input);
-
-  if (!parsed.success) {
-    const fieldErrors: Record<string, string> = {};
-    parsed.error.issues.forEach(err => {
-      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
-    });
-
-    return { error: { fieldErrors } };
-  }
+  const { id: _id, ...insertData } = input;
 
   const supabase = await createClient();
-  const { data, error } = await supabase.from('app_order').insert([parsed.data]).select().single();
+  const { data, error } = await supabase.from('app_order').insert([insertData]).select().single();
 
-  return { data, error };
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return { data };
 }
 
 export async function updateAppOrder(id: string, input: AppOrder) {
-  const parsed = AppOrderSchema.safeParse(input);
-
-  if (!parsed.success) {
-    const fieldErrors: Record<string, string> = {};
-    parsed.error.issues.forEach(err => {
-      if (err.path[0]) {fieldErrors[err.path[0] as string] = err.message;}
-    });
-
-    return { error: { fieldErrors } };
-  }
+  const { id: _id, ...updateData } = input;
 
   const supabase = await createClient();
-  const { data, error } = await supabase.from('app_order').update(parsed.data).eq('id', id).select().single();
+  const { data, error } = await supabase.from('app_order').update(updateData).eq('id', id).select().single();
 
-  return { data, error };
+  if (error) {
+    throw new Error(error.message);
+  }
+
+  return { data };
 }
 
 export async function deleteAppOrder(id: string) {
   const supabase = await createClient();
   const { error } = await supabase.from('app_order').delete().eq('id', id);
 
-  return { error };
+  if (error) {
+    throw new Error(error.message);
+  }
 }
 
 export async function getAppOrders() {

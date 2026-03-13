@@ -4,20 +4,21 @@ import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
 import { createCategory, updateCategory } from '@/actions/dashboard/category/actions';
-import { fromErrorToActionState, type ActionState } from '@/lib/error-handler';
+import { cleanFormData, fromErrorToActionState, type ActionState } from '@/lib/error-handler';
 import { CategorySchema } from '@/schemas/category.schema';
 import type { Category } from '@/types/category';
 
 export async function categoryFormAction(_prevState: ActionState, formData: FormData) {
-  const parsed = CategorySchema.safeParse(Object.fromEntries(formData));
+  const formDataObject = cleanFormData(formData);
+  const parsed = CategorySchema.safeParse(formDataObject);
 
   if (!parsed.success) {
     return fromErrorToActionState(parsed.error);
   }
 
-  const isUpdate = !!formData.get('id');
+  const isUpdate = !!formDataObject.id;
   const result = isUpdate
-    ? await updateCategory(String(formData.get('id')), parsed.data as Category)
+    ? await updateCategory(String(formDataObject.id), parsed.data as Category)
     : await createCategory(parsed.data as Category);
 
   if (result.error) {

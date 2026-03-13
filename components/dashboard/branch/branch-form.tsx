@@ -1,11 +1,13 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { redirect } from 'next/navigation';
 import { useActionState, useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
 import { toast } from "sonner";
 
 import { branchFormAction } from '@/actions/dashboard/branch/branch-form-actions';
+import { usePlanUsage } from '@/components/providers/plan-usage-provider';
 import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
@@ -21,6 +23,9 @@ interface BranchFormProps {
 }
 
 export default function BranchForm({ branch }: BranchFormProps) {
+  const t = useTranslations('Dashboard.branch.form');
+  const tCommon = useTranslations('Common');
+
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [addresses, setAddresses] = useState<{ id: string; street: string; city: string }[]>([]);
@@ -29,16 +34,13 @@ export default function BranchForm({ branch }: BranchFormProps) {
 
   // Utils
   const [actionState, formAction, pending] = useActionState(branchFormAction, EMPTY_ACTION_STATE);
-  const router = useRouter();
+  const { invalidate } = usePlanUsage();
 
   useEffect(() => {
-    if (actionState.message) {
-      toast.success(actionState.message);
-      setTimeout(() => {
-        router.push("/dashboard/branch");
-      }, 500); // Show toast briefly before navigating
+    if (actionState.status === 'error' && actionState.message) {
+      toast.error(actionState.message);
     }
-  }, [actionState, router]);
+  }, [actionState]);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -69,6 +71,12 @@ export default function BranchForm({ branch }: BranchFormProps) {
     fetchData();
   }, []);
 
+  if (actionState.status === 'success') {
+    toast.success(actionState.message);
+    invalidate();
+    redirect("/dashboard/branch");
+  }
+
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     const formData = Object.fromEntries(new FormData(event.currentTarget));
@@ -87,21 +95,21 @@ export default function BranchForm({ branch }: BranchFormProps) {
       {branch?.id && <input name="id" type="hidden" value={branch.id} />}
 
       <div>
-        <Label htmlFor="name">Nombre de la Sucursal</Label>
+        <Label htmlFor="name">{t('nameLabel')}</Label>
         <Input
           aria-describedby="name-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.name}
           defaultValue={branch?.name ?? ''}
           id="name"
           name="name"
-          placeholder="Ingresa el nombre de la sucursal"
+          placeholder={t('namePlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="name" />
       </div>
 
       <div>
-        <Label htmlFor="address_id">Dirección</Label>
+        <Label htmlFor="address_id">{t('addressLabel')}</Label>
         <select
           id="address_id"
           name="address_id"
@@ -111,7 +119,7 @@ export default function BranchForm({ branch }: BranchFormProps) {
           aria-describedby="address_id-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.address_id}
         >
-          <option value="">Seleccionar una dirección</option>
+          <option value="">{t('addressPlaceholder')}</option>
           {addresses.map((address) => (
             <option key={address.id} value={address.id}>
               {address.street}, {address.city}
@@ -122,12 +130,12 @@ export default function BranchForm({ branch }: BranchFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="phone">Teléfono</Label>
+        <Label htmlFor="phone">{t('phoneLabel')}</Label>
         <Input
           defaultValue={branch?.phone ?? ''}
           id="phone"
           name="phone"
-          placeholder="Ingresa el número de teléfono (opcional)"
+          placeholder={t('phonePlaceholder')}
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="phone" />
@@ -136,7 +144,7 @@ export default function BranchForm({ branch }: BranchFormProps) {
       <input name="active" type="hidden" value={isActive.toString()} />
       
       <div>
-        <Label htmlFor="active">Estado</Label>
+        <Label htmlFor="active">{t('statusLabel')}</Label>
         <select
           id="active"
           value={isActive ? 'true' : 'false'}
@@ -145,18 +153,18 @@ export default function BranchForm({ branch }: BranchFormProps) {
           aria-describedby="active-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.active}
         >
-          <option value="true">Activo</option>
-          <option value="false">Inactivo</option>
+          <option value="true">{t('active')}</option>
+          <option value="false">{t('inactive')}</option>
         </select>
         <FieldError actionState={validation ?? actionState} name="active" />
       </div>
 
-      <div className="flex gap-2">
-        <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/branch">Cancelar</Link>
+      <div className="grid grid-cols-2 gap-2">
+        <Button asChild type="button" variant="secondary">
+          <Link href="/dashboard/branch">{tCommon('cancel')}</Link>
         </Button>
-        <Button className="w-full" disabled={pending} type="submit">
-          {branch ? 'Actualizar' : 'Crear'}
+        <Button disabled={pending} type="submit">
+          {branch ? tCommon('update') : tCommon('create')}
         </Button>
       </div>
     </form>

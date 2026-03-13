@@ -3,13 +3,13 @@
 import { revalidatePath } from 'next/cache';
 
 import { createProduct, updateProduct } from '@/actions/dashboard/product/actions';
-import { fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
+import { cleanFormData, fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
 import { ProductSchema } from '@/schemas/product.schema';
 import type { Product } from '@/types/product';
 
 export async function productFormAction(_prevState: ActionState, formData: FormData) {
   try {
-    const formDataObj: Record<string, FormDataEntryValue | unknown[]> = Object.fromEntries(formData);
+    const formDataObj: Record<string, FormDataEntryValue | unknown[]> = cleanFormData(formData);
     
     // Parse image_urls from JSON string
     if (formDataObj.image_urls && typeof formDataObj.image_urls === 'string') {
@@ -27,8 +27,8 @@ export async function productFormAction(_prevState: ActionState, formData: FormD
     }
 
     let result;
-    if (formData.get('id')) {
-      result = await updateProduct(String(formData.get('id')), parsed.data as Product);
+    if (formDataObj.id) {
+      result = await updateProduct(String(formDataObj.id), parsed.data as Product);
     } else {
       result = await createProduct(parsed.data as Product);
     }
@@ -40,7 +40,7 @@ export async function productFormAction(_prevState: ActionState, formData: FormD
     // Revalidate the product list page
     revalidatePath('/dashboard/product');
 
-    return toActionState(formData.get('id') ? 'Product updated successfully!' : 'Product created successfully!');
+    return toActionState(formDataObj.id ? 'Product updated successfully!' : 'Product created successfully!');
   } catch (error) {
     return fromErrorToActionState(error);
   }

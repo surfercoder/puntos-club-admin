@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Plus, Trash2, Package, Tag, Info } from 'lucide-react';
+import { Plus, Trash2, Package, Tag, Info, AlertTriangle } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 
@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { OnboardingStep4Data, OnboardingProductInput } from '@/actions/onboarding/actions';
+import { PLAN_LIMITS_CONFIG, PLAN_DISPLAY_NAMES } from '@/lib/plans/config';
+import type { PlanType } from '@/types/plan';
 
 interface ProductRow extends OnboardingProductInput {
   id: string;
@@ -39,11 +41,56 @@ function createCategory(): Category {
   };
 }
 
+interface ProductRowProps {
+  product: ProductRow;
+  prodIndex: number;
+  categoryId: string;
+  canRemove: boolean;
+  onRemove: (categoryId: string, productId: string) => void;
+  onUpdate: (categoryId: string, productId: string, field: keyof ProductRow, value: string | number) => void;
+  t: ReturnType<typeof useTranslations>;
+  tCommon: ReturnType<typeof useTranslations>;
+}
+
+function ProductRowCard({ product, prodIndex, categoryId, canRemove, onRemove, onUpdate, t, tCommon }: ProductRowProps) {
+  return (
+    <div className="rounded-lg border border-dashed border-gray-200 dark:border-gray-700 p-3 space-y-3">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Package className="h-3.5 w-3.5" />
+          {t('rewardPlaceholder', { n: prodIndex + 1 })}
+        </div>
+        {canRemove && (
+          <Button type="button" variant="ghost" size="sm" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => onRemove(categoryId, product.id)}>
+            <Trash2 className="h-3.5 w-3.5 mr-1" />
+            {tCommon('delete')}
+          </Button>
+        )}
+      </div>
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+        <div className="space-y-1 sm:col-span-2">
+          <Label className="text-xs">{t('rewardName')}</Label>
+          <Input placeholder="Ej: Café mediano, Remera, Cargador..." value={product.name} onChange={(e) => onUpdate(categoryId, product.id, 'name', e.target.value)} className="h-8 text-sm" />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs">{t('pointsRequired')}</Label>
+          <Input type="number" min={1} placeholder="100" value={product.required_points} onChange={(e) => onUpdate(categoryId, product.id, 'required_points', parseInt(e.target.value) || 100)} className="h-8 text-sm" />
+        </div>
+        <div className="space-y-1">
+          <Label className="text-xs">{t('initialStock')}</Label>
+          <Input type="number" min={0} placeholder="10" value={product.quantity} onChange={(e) => onUpdate(categoryId, product.id, 'quantity', parseInt(e.target.value) || 0)} className="h-8 text-sm" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
 interface Step4Props {
   onNext: (data: OnboardingStep4Data | null) => void;
   onBack: () => void;
   initialData?: OnboardingStep4Data | null;
   onAutoSave?: (data: OnboardingStep4Data) => void;
+  selectedPlan?: string;
 }
 
 function restoreCategories(data: OnboardingStep4Data): Category[] {
@@ -61,13 +108,22 @@ function restoreCategories(data: OnboardingStep4Data): Category[] {
   }));
 }
 
-export function Step4Products({ onNext, onBack, initialData, onAutoSave }: Step4Props) {
+export function Step4Products({ onNext, onBack, initialData, onAutoSave, selectedPlan = 'trial' }: Step4Props) {
   const t = useTranslations('Onboarding.step4');
   const tCommon = useTranslations('Common');
+
+  const planType = (selectedPlan as PlanType) in PLAN_LIMITS_CONFIG
+    ? (selectedPlan as PlanType)
+    : 'trial';
+  const maxProducts = PLAN_LIMITS_CONFIG[planType].redeemable_products;
+  const planDisplayName = PLAN_DISPLAY_NAMES[planType];
 
   const [categories, setCategories] = useState<Category[]>(() =>
     initialData?.categories.length ? restoreCategories(initialData) : [createCategory()]
   );
+
+  const totalProducts = categories.reduce((sum, cat) => sum + cat.products.length, 0);
+  const limitReached = totalProducts >= maxProducts;
 
   const handleBack = () => {
     if (onAutoSave) {
@@ -182,6 +238,10 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave }: Step4
         </span>
       </div>
 
+      <div className="flex items-center justify-end text-xs text-muted-foreground">
+        <span>{t('productCount', { current: totalProducts, max: maxProducts })}</span>
+      </div>
+
       <div className="space-y-6">
         {categories.map((category, catIndex) => (
           <div
@@ -219,81 +279,17 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave }: Step4
 
             <div className="space-y-3 pl-10">
               {category.products.map((product, prodIndex) => (
-                <div
+                <ProductRowCard
                   key={product.id}
-                  className="rounded-lg border border-dashed border-gray-200 dark:border-gray-700 p-3 space-y-3"
-                >
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                      <Package className="h-3.5 w-3.5" />
-                      {t('rewardPlaceholder', { n: prodIndex + 1 })}
-                    </div>
-                    {category.products.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="h-7 text-xs text-destructive hover:text-destructive"
-                        onClick={() => removeProduct(category.id, product.id)}
-                      >
-                        <Trash2 className="h-3.5 w-3.5 mr-1" />
-                        {tCommon('delete')}
-                      </Button>
-                    )}
-                  </div>
-
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
-                    <div className="space-y-1 sm:col-span-2">
-                      <Label className="text-xs">{t('rewardName')}</Label>
-                      <Input
-                        placeholder="Ej: Café mediano, Remera, Cargador..."
-                        value={product.name}
-                        onChange={(e) =>
-                          updateProduct(category.id, product.id, 'name', e.target.value)
-                        }
-                        className="h-8 text-sm"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <Label className="text-xs">{t('pointsRequired')}</Label>
-                      <Input
-                        type="number"
-                        min={1}
-                        placeholder="100"
-                        value={product.required_points}
-                        onChange={(e) =>
-                          updateProduct(
-                            category.id,
-                            product.id,
-                            'required_points',
-                            parseInt(e.target.value) || 100
-                          )
-                        }
-                        className="h-8 text-sm"
-                      />
-                    </div>
-
-                    <div className="space-y-1">
-                      <Label className="text-xs">{t('initialStock')}</Label>
-                      <Input
-                        type="number"
-                        min={0}
-                        placeholder="10"
-                        value={product.quantity}
-                        onChange={(e) =>
-                          updateProduct(
-                            category.id,
-                            product.id,
-                            'quantity',
-                            parseInt(e.target.value) || 0
-                          )
-                        }
-                        className="h-8 text-sm"
-                      />
-                    </div>
-                  </div>
-                </div>
+                  product={product}
+                  prodIndex={prodIndex}
+                  categoryId={category.id}
+                  canRemove={category.products.length > 1}
+                  onRemove={removeProduct}
+                  onUpdate={updateProduct}
+                  t={t}
+                  tCommon={tCommon}
+                />
               ))}
 
               <Button
@@ -302,6 +298,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave }: Step4
                 size="sm"
                 className="w-full border-dashed text-xs"
                 onClick={() => addProduct(category.id)}
+                disabled={limitReached}
               >
                 <Plus className="mr-1.5 h-3.5 w-3.5" />
                 {t('addReward')}
@@ -316,10 +313,20 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave }: Step4
         variant="outline"
         className="w-full border-dashed"
         onClick={addCategory}
+        disabled={limitReached}
       >
         <Plus className="mr-2 h-4 w-4" />
         {t('addCategory')}
       </Button>
+
+      {limitReached && (
+        <div className="flex items-start gap-2 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
+          <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+          <span>
+            {t('limitReached', { max: maxProducts, plan: planDisplayName })}
+          </span>
+        </div>
+      )}
 
       <div className="flex flex-col gap-3 pt-2 sm:flex-row">
         <Button type="button" variant="outline" onClick={handleBack} className="sm:flex-1">

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useReducer } from 'react';
+import React, { useEffect, useReducer } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Building2,
@@ -93,10 +93,6 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
 
     case 'GO_TO_STEP': {
       const maxReachedStep = Math.max(state.maxReachedStep, action.step);
-      localStorage.setItem(LS_MAX_STEP, String(maxReachedStep));
-      const url = new URL(window.location.href);
-      url.searchParams.set('step', String(action.step));
-      window.history.replaceState({}, '', url.toString());
       return { ...state, currentStep: action.step, maxReachedStep };
     }
 
@@ -161,6 +157,73 @@ function wizardReducer(state: WizardState, action: WizardAction): WizardState {
   }
 }
 
+// ─── Step Nav ─────────────────────────────────────────────────────────────────
+
+interface StepDef {
+  number: number;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  description: string;
+}
+
+function StepNav({ steps, currentStep, canNavigateToStep, onGoToStep }: {
+  steps: StepDef[];
+  currentStep: number;
+  canNavigateToStep: (step: number) => boolean;
+  onGoToStep: (step: number) => void;
+}) {
+  const t = useTranslations('Onboarding.wizard');
+  return (
+    <nav aria-label={t('progress')}>
+      <ol className="flex items-center">
+        {steps.map((step, idx) => {
+          const Icon = step.icon;
+          const isCompleted = currentStep > step.number;
+          const isCurrent = currentStep === step.number;
+          const isClickable = canNavigateToStep(step.number);
+          return (
+            <li key={step.number} className="contents">
+              <button
+                type="button"
+                disabled={!isClickable}
+                onClick={() => isClickable && onGoToStep(step.number)}
+                className={cn(
+                  'flex flex-col items-center gap-1.5 focus:outline-none group shrink-0',
+                  isClickable ? 'cursor-pointer' : 'cursor-not-allowed'
+                )}
+                aria-current={isCurrent ? 'step' : undefined}
+              >
+                <span className={cn(
+                  'flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all',
+                  isCompleted ? 'border-emerald-600 bg-emerald-600 text-white'
+                    : isCurrent ? 'border-emerald-600 bg-white dark:bg-gray-900 text-emerald-600'
+                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-400'
+                )}>
+                  {isCompleted ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                </span>
+                <span className={cn(
+                  'hidden sm:block text-xs font-medium leading-tight text-center max-w-16',
+                  isCurrent ? 'text-emerald-700 dark:text-emerald-400'
+                    : isCompleted ? 'text-emerald-600'
+                    : 'text-gray-400'
+                )}>
+                  {step.label}
+                </span>
+              </button>
+              {idx < steps.length - 1 && (
+                <div className={cn(
+                  'flex-1 h-0.5 mx-2 transition-all',
+                  currentStep > step.number ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'
+                )} aria-hidden />
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  );
+}
+
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function OnboardingWizard({
@@ -202,6 +265,14 @@ export function OnboardingWizard({
     step2Data, step4Data, selectedPlan, mpPreapprovalId,
     organizationName, consentGiven,
   } = state;
+
+  // Sync currentStep & maxReachedStep to URL and localStorage as a side effect
+  useEffect(() => {
+    localStorage.setItem(LS_MAX_STEP, String(maxReachedStep));
+    const url = new URL(window.location.href);
+    url.searchParams.set('step', String(currentStep));
+    window.history.replaceState({}, '', url.toString());
+  }, [currentStep, maxReachedStep]);
 
   useEffect(() => {
     const payload: Partial<WizardState> = {};
@@ -313,6 +384,7 @@ export function OnboardingWizard({
             onBack={() => goToStep(3)}
             initialData={step4Data}
             onAutoSave={(data) => dispatch({ type: 'SET_STEP4_DATA', data })}
+            selectedPlan={selectedPlan}
           />
         );
       case 5:
@@ -347,66 +419,7 @@ export function OnboardingWizard({
   return (
     <div className="mx-auto max-w-2xl px-4 py-8 sm:px-6">
       <div className="mb-8">
-        <nav aria-label={t('progress')}>
-          <ol className="flex items-center">
-            {steps.map((step, idx) => {
-              const Icon = step.icon;
-              const isCompleted = currentStep > step.number;
-              const isCurrent = currentStep === step.number;
-              const isClickable = canNavigateToStep(step.number);
-
-              return (
-                <li key={step.number} className="contents">
-                  <button
-                    type="button"
-                    disabled={!isClickable}
-                    onClick={() => isClickable && goToStep(step.number)}
-                    className={cn(
-                      'flex flex-col items-center gap-1.5 focus:outline-none group shrink-0',
-                      isClickable ? 'cursor-pointer' : 'cursor-not-allowed'
-                    )}
-                    aria-current={isCurrent ? 'step' : undefined}
-                  >
-                    <span
-                      className={cn(
-                        'flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all',
-                        isCompleted
-                          ? 'border-emerald-600 bg-emerald-600 text-white'
-                          : isCurrent
-                          ? 'border-emerald-600 bg-white dark:bg-gray-900 text-emerald-600'
-                          : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-400'
-                      )}
-                    >
-                      {isCompleted ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
-                    </span>
-                    <span
-                      className={cn(
-                        'hidden sm:block text-xs font-medium leading-tight text-center max-w-16',
-                        isCurrent
-                          ? 'text-emerald-700 dark:text-emerald-400'
-                          : isCompleted
-                          ? 'text-emerald-600'
-                          : 'text-gray-400'
-                      )}
-                    >
-                      {step.label}
-                    </span>
-                  </button>
-
-                  {idx < steps.length - 1 && (
-                    <div
-                      className={cn(
-                        'flex-1 h-0.5 mx-2 transition-all',
-                        currentStep > step.number ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'
-                      )}
-                      aria-hidden
-                    />
-                  )}
-                </li>
-              );
-            })}
-          </ol>
-        </nav>
+        <StepNav steps={steps} currentStep={currentStep} canNavigateToStep={canNavigateToStep} onGoToStep={goToStep} />
       </div>
 
       <div className="rounded-2xl border bg-white dark:bg-gray-900 shadow-sm">

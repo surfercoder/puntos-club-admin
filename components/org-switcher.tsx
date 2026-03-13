@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import { ChevronsUpDown, Plus } from "lucide-react"
+import Image from "next/image"
 import { useRouter } from "next/navigation"
 import { useTranslations } from "next-intl"
 
@@ -30,6 +31,7 @@ import {
 export type OrgSwitcherOrg = {
   id: string
   name: string
+  logo_url?: string | null
 }
 
 export type OrgSwitcherProps = {
@@ -68,8 +70,12 @@ export function OrgSwitcher({
               size="lg"
               className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
             >
-              <div className="bg-sidebar-primary text-sidebar-primary-foreground flex aspect-square size-8 items-center justify-center rounded-lg">
-                <span className="text-xs font-semibold">{activeOrg.name[0]?.toUpperCase()}</span>
+              <div className="flex aspect-square size-8 items-center justify-center rounded-lg overflow-hidden bg-sidebar-primary text-sidebar-primary-foreground">
+                {activeOrg.logo_url ? (
+                  <Image src={activeOrg.logo_url} alt={activeOrg.name} width={32} height={32} className="size-8 object-contain" />
+                ) : (
+                  <span className="text-xs font-semibold">{activeOrg.name[0]?.toUpperCase()}</span>
+                )}
               </div>
               <div className="grid flex-1 text-left text-sm leading-tight">
                 <span className="truncate font-medium">{activeOrg.name}</span>
@@ -93,8 +99,12 @@ export function OrgSwitcher({
                 onClick={() => onChangeOrg(org.id)}
                 className="gap-2 p-2"
               >
-                <div className="flex size-6 items-center justify-center rounded-md border">
-                  <span className="text-xs font-semibold">{org.name[0]?.toUpperCase()}</span>
+                <div className="flex size-6 items-center justify-center rounded-md border overflow-hidden">
+                  {org.logo_url ? (
+                    <Image src={org.logo_url} alt={org.name} width={24} height={24} className="size-6 object-contain" />
+                  ) : (
+                    <span className="text-xs font-semibold">{org.name[0]?.toUpperCase()}</span>
+                  )}
                 </div>
                 {org.name}
               </DropdownMenuItem>

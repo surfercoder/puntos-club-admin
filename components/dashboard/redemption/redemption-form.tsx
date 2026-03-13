@@ -1,8 +1,9 @@
 "use client";
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
-import { useActionState, useState, useEffect } from 'react';
+import { useTranslations } from 'next-intl';
+import { redirect } from 'next/navigation';
+import { useActionState, useState, useEffect, useReducer } from 'react';
 import { toast } from "sonner";
 
 import { redemptionFormAction } from '@/actions/dashboard/redemption/redemption-form-actions';
@@ -38,49 +39,126 @@ interface AppOrder {
   order_number: string;
 }
 
+interface FormDataState {
+  beneficiaries: Beneficiary[];
+  products: Product[];
+  orders: AppOrder[];
+}
+
+type FormDataAction = {
+  type: 'SET_FORM_DATA';
+  payload: FormDataState;
+};
+
+function formDataReducer(_state: FormDataState, action: FormDataAction): FormDataState {
+  switch (action.type) {
+    case 'SET_FORM_DATA':
+      return action.payload;
+    default:
+      return _state;
+  }
+}
+
+const initialFormDataState: FormDataState = {
+  beneficiaries: [],
+  products: [],
+  orders: [],
+};
+
 export default function RedemptionForm({ redemption }: RedemptionFormProps) {
+  const t = useTranslations('Dashboard.redemption');
+  const tCommon = useTranslations('Common');
+
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>([]);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [orders, setOrders] = useState<AppOrder[]>([]);
+  const [formData, dispatchFormData] = useReducer(formDataReducer, initialFormDataState);
+  const { beneficiaries, products, orders } = formData;
 
   // Utils
   const [actionState, formAction, pending] = useActionState(redemptionFormAction, EMPTY_ACTION_STATE);
-  const router = useRouter();
 
   // Load beneficiaries, products, and orders
   useEffect(() => {
     async function loadData() {
       const supabase = createClient();
-      
+
+      // Get active organization ID
+      let orgIdNumber: number | null = null;
+      try {
+        const activeOrgId = document.cookie
+          .split('; ')
+          .find(row => row.startsWith('active_org_id='))
+          ?.split('=')[1];
+        if (activeOrgId) {
+          const parsed = Number(activeOrgId);
+          if (!Number.isNaN(parsed)) {
+            orgIdNumber = parsed;
+          }
+        }
+      } catch {
+        // ignore
+      }
+
+      // Build beneficiaries query filtered by organization
+      let beneficiariesPromise;
+      if (orgIdNumber) {
+        beneficiariesPromise = supabase
+          .from('beneficiary_organization')
+          .select('beneficiary:beneficiary_id(id, first_name, last_name, email)')
+          .eq('organization_id', orgIdNumber)
+          .eq('is_active', true);
+      } else {
+        beneficiariesPromise = supabase
+          .from('beneficiary')
+          .select('id, first_name, last_name, email')
+          .order('first_name');
+      }
+
+      // Build products query filtered by organization
+      let productsQuery = supabase.from('product').select('id, name').eq('active', true).order('name');
+      if (orgIdNumber) {
+        productsQuery = productsQuery.eq('organization_id', orgIdNumber);
+      }
+
       const [beneficiariesResult, productsResult, ordersResult] = await Promise.all([
-        supabase.from('beneficiary').select('id, first_name, last_name, email').order('first_name'),
-        supabase.from('product').select('id, name').eq('active', true).order('name'),
+        beneficiariesPromise,
+        productsQuery,
         supabase.from('app_order').select('id, order_number').order('order_number')
       ]);
 
+      let loadedBeneficiaries: Beneficiary[] = [];
       if (beneficiariesResult.data) {
-        setBeneficiaries(beneficiariesResult.data);
+        if (orgIdNumber) {
+          // Extract nested beneficiary objects from join
+          const nested = beneficiariesResult.data as unknown as { beneficiary: Beneficiary }[];
+          loadedBeneficiaries = nested.map(r => r.beneficiary).filter(Boolean);
+        } else {
+          loadedBeneficiaries = beneficiariesResult.data as unknown as Beneficiary[];
+        }
       }
-      if (productsResult.data) {
-        setProducts(productsResult.data);
-      }
-      if (ordersResult.data) {
-        setOrders(ordersResult.data);
-      }
+
+      dispatchFormData({
+        type: 'SET_FORM_DATA',
+        payload: {
+          beneficiaries: loadedBeneficiaries,
+          products: productsResult.data ? (productsResult.data as unknown as Product[]) : [],
+          orders: ordersResult.data ? (ordersResult.data as unknown as AppOrder[]) : [],
+        },
+      });
     }
     loadData();
   }, []);
 
   useEffect(() => {
-    if (actionState.message) {
-      toast.success(actionState.message);
-      setTimeout(() => {
-        router.push("/dashboard/redemption");
-      }, 500);
+    if (actionState.status === 'error' && actionState.message) {
+      toast.error(actionState.message);
     }
-  }, [actionState, router]);
+  }, [actionState]);
+
+  if (actionState.status === 'success') {
+    toast.success(actionState.message);
+    redirect("/dashboard/redemption");
+  }
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -98,19 +176,19 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
       {redemption?.id && <input name="id" type="hidden" value={redemption.id} />}
-      
+
       <div>
-        <Label htmlFor="beneficiary_id">Beneficiario</Label>
-        <Select defaultValue={redemption?.beneficiary_id ?? ''} name="beneficiary_id">
+        <Label htmlFor="beneficiary_id">{t('form.beneficiaryLabel')}</Label>
+        <Select defaultValue={redemption?.beneficiary_id ? String(redemption.beneficiary_id) : ''} name="beneficiary_id">
           <SelectTrigger>
-            <SelectValue placeholder="Seleccionar un beneficiario" />
+            <SelectValue placeholder={t('form.selectBeneficiary')} />
           </SelectTrigger>
           <SelectContent>
             {beneficiaries.map((beneficiary) => (
-              <SelectItem key={beneficiary.id} value={beneficiary.id}>
-                {beneficiary.first_name || beneficiary.last_name 
+              <SelectItem key={beneficiary.id} value={String(beneficiary.id)}>
+                {beneficiary.first_name || beneficiary.last_name
                   ? `${beneficiary.first_name || ''} ${beneficiary.last_name || ''}`.trim()
-                  : beneficiary.email || 'Beneficiario sin nombre'}
+                  : beneficiary.email || t('form.noName')}
               </SelectItem>
             ))}
           </SelectContent>
@@ -119,15 +197,15 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="product_id">Producto (Opcional)</Label>
-        <Select defaultValue={redemption?.product_id ?? ''} name="product_id">
+        <Label htmlFor="product_id">{t('form.productLabel')}</Label>
+        <Select defaultValue={redemption?.product_id ? String(redemption.product_id) : 'none'} name="product_id">
           <SelectTrigger>
-            <SelectValue placeholder="Seleccionar un producto (opcional)" />
+            <SelectValue placeholder={t('form.selectProduct')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Ninguno</SelectItem>
+            <SelectItem value="none">{t('form.none')}</SelectItem>
             {products.map((product) => (
-              <SelectItem key={product.id} value={product.id}>
+              <SelectItem key={product.id} value={String(product.id)}>
                 {product.name}
               </SelectItem>
             ))}
@@ -137,14 +215,14 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="order_id">Pedido</Label>
-        <Select defaultValue={redemption?.order_id ?? ''} name="order_id">
+        <Label htmlFor="order_id">{t('form.orderLabel')}</Label>
+        <Select defaultValue={redemption?.order_id ? String(redemption.order_id) : ''} name="order_id">
           <SelectTrigger>
-            <SelectValue placeholder="Seleccionar un pedido" />
+            <SelectValue placeholder={t('form.selectOrder')} />
           </SelectTrigger>
           <SelectContent>
             {orders.map((order) => (
-              <SelectItem key={order.id} value={order.id}>
+              <SelectItem key={order.id} value={String(order.id)}>
                 {order.order_number}
               </SelectItem>
             ))}
@@ -154,39 +232,39 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="points_used">Puntos Usados</Label>
+        <Label htmlFor="points_used">{t('form.pointsUsed')}</Label>
         <Input
           aria-describedby="points_used-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.points_used}
           defaultValue={redemption?.points_used ?? 0}
           id="points_used"
           name="points_used"
-          placeholder="Ingresa los puntos usados"
+          placeholder={t('form.pointsUsedPlaceholder')}
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="points_used" />
       </div>
 
       <div>
-        <Label htmlFor="quantity">Cantidad</Label>
+        <Label htmlFor="quantity">{t('form.quantityLabel')}</Label>
         <Input
           aria-describedby="quantity-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.quantity}
           defaultValue={redemption?.quantity ?? 0}
           id="quantity"
           name="quantity"
-          placeholder="Ingresa la cantidad"
+          placeholder={t('form.quantityPlaceholder')}
           type="number"
         />
         <FieldError actionState={validation ?? actionState} name="quantity" />
       </div>
 
-      <div className="flex gap-2">
-        <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/redemption">Cancelar</Link>
+      <div className="grid grid-cols-2 gap-2">
+        <Button asChild type="button" variant="secondary">
+          <Link href="/dashboard/redemption">{tCommon('cancel')}</Link>
         </Button>
-        <Button className="w-full" disabled={pending} type="submit">
-          {redemption ? 'Actualizar' : 'Crear'}
+        <Button disabled={pending} type="submit">
+          {redemption ? tCommon('update') : tCommon('create')}
         </Button>
       </div>
     </form>

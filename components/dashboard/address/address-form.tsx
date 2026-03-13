@@ -1,7 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+import { redirect } from 'next/navigation';
 import { useActionState, useState , useEffect } from 'react';
 import { toast } from "sonner"
 
@@ -18,6 +19,9 @@ import type { Address } from '@/types/address';
 
 
 export default function AddressForm({ address }: { address?: Address }) {
+  const t = useTranslations('Dashboard.address');
+  const tCommon = useTranslations('Common');
+
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [addressData, setAddressData] = useState<Partial<GoogleAddressComponents>>({
@@ -31,16 +35,17 @@ export default function AddressForm({ address }: { address?: Address }) {
 
   // Utils
   const [actionState, formAction, pending] = useActionState(addressFormAction, EMPTY_ACTION_STATE);
-  const router = useRouter()
 
   useEffect(() => {
-    if (actionState.message) {
-      toast.success(actionState.message)
-      setTimeout(() => {
-        router.push("/dashboard/address")
-      }, 500) // Show toast briefly before navigating
+    if (actionState.status === 'error' && actionState.message) {
+      toast.error(actionState.message);
     }
-  }, [actionState, router])
+  }, [actionState])
+
+  if (actionState.status === 'success') {
+    toast.success(actionState.message)
+    redirect("/dashboard/address")
+  }
 
   // Handlers
   const handlePlaceSelected = (components: GoogleAddressComponents) => {
@@ -74,16 +79,16 @@ export default function AddressForm({ address }: { address?: Address }) {
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
       {address?.id && <input name="id" type="hidden" value={String(address.id)} />}
       <div className="space-y-2">
-        <Label htmlFor="google-address">Buscar Dirección</Label>
+        <Label htmlFor="google-address">{t('form.searchAddress')}</Label>
         <GoogleAddressAutocomplete
           onPlaceSelected={handlePlaceSelected}
-          placeholder="Comienza a escribir una dirección..."
+          placeholder={t('form.searchPlaceholder')}
           id="google-address"
         />
-        <p className="text-xs text-muted-foreground">Selecciona una dirección de las sugerencias de Google o completa manualmente abajo</p>
+        <p className="text-xs text-muted-foreground">{t('form.searchHint')}</p>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="street">Calle</Label>
+        <Label htmlFor="street">{t('form.street')}</Label>
         <Input
           aria-describedby="street-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.street}
@@ -95,7 +100,7 @@ export default function AddressForm({ address }: { address?: Address }) {
         <FieldError actionState={validation ?? actionState} name="street" />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="number">Número</Label>
+        <Label htmlFor="number">{t('form.number')}</Label>
         <Input
           aria-describedby="number-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.number}
@@ -107,7 +112,7 @@ export default function AddressForm({ address }: { address?: Address }) {
         <FieldError actionState={validation ?? actionState} name="number" />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="city">Ciudad</Label>
+        <Label htmlFor="city">{t('form.city')}</Label>
         <Input
           aria-describedby="city-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.city}
@@ -119,7 +124,7 @@ export default function AddressForm({ address }: { address?: Address }) {
         <FieldError actionState={validation ?? actionState} name="city" />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="state">Provincia</Label>
+        <Label htmlFor="state">{t('form.state')}</Label>
         <Input
           aria-describedby="state-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.state}
@@ -131,7 +136,7 @@ export default function AddressForm({ address }: { address?: Address }) {
         <FieldError actionState={validation ?? actionState} name="state" />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="zip_code">Código Postal</Label>
+        <Label htmlFor="zip_code">{t('form.zipCode')}</Label>
         <Input
           aria-describedby="zip_code-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.zip_code}
@@ -154,12 +159,12 @@ export default function AddressForm({ address }: { address?: Address }) {
       {addressData.longitude && (
         <input type="hidden" name="longitude" value={addressData.longitude} />
       )}
-      <div className="flex gap-2">
-        <Button asChild className="w-full" type="button" variant="secondary">
-          <Link href="/dashboard/address">Cancelar</Link>
+      <div className="grid grid-cols-2 gap-2">
+        <Button asChild type="button" variant="secondary">
+          <Link href="/dashboard/address">{tCommon('cancel')}</Link>
         </Button>
-        <Button className="w-full" disabled={pending} type="submit">
-          {address ? 'Actualizar' : 'Crear'}
+        <Button disabled={pending} type="submit">
+          {address ? tCommon('update') : tCommon('create')}
         </Button>
       </div>
     </form>
