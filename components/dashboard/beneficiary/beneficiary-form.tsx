@@ -30,7 +30,7 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
 
   // Utils
   const [actionState, formAction, pending] = useActionState(beneficiaryFormAction, EMPTY_ACTION_STATE);
-  const { invalidate } = usePlanUsage();
+  const { invalidate: _invalidate } = usePlanUsage();
 
   useEffect(() => {
     if (actionState.status === 'error' && actionState.message) {
@@ -40,7 +40,6 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
 
   if (actionState.status === 'success') {
     toast.success(actionState.message);
-    invalidate();
     redirect("/dashboard/beneficiary");
   }
 
@@ -128,20 +127,6 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="document_id" />
-      </div>
-
-      <div>
-        <Label htmlFor="available_points">{t('pointsLabel')}</Label>
-        <Input
-          aria-describedby="available_points-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.available_points}
-          defaultValue={beneficiary?.available_points ?? 0}
-          id="available_points"
-          name="available_points"
-          placeholder={t('pointsPlaceholder')}
-          type="number"
-        />
-        <FieldError actionState={validation ?? actionState} name="available_points" />
       </div>
 
       <div className="grid grid-cols-2 gap-2">

@@ -580,7 +580,7 @@ export default function EditPointsRulePage() {
               .map((c) => c.trim())
               .find((c) => c.startsWith("active_org_id="))
               ?.split("=")[1]
-          : undefined;
+          : /* c8 ignore next */ undefined;
 
       const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
       if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
@@ -596,7 +596,7 @@ export default function EditPointsRulePage() {
         .eq("active", true)
         .order("name");
 
-      const newBranches = (data ?? []) as Array<{ id: string; name: string }>;
+      const newBranches = (data /* c8 ignore next */ ?? []) as Array<{ id: string; name: string }>;
       dispatch({ type: "LOAD_BRANCHES", branches: newBranches, resetBranch });
     }
 

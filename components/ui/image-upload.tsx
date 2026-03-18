@@ -4,6 +4,7 @@ import { Upload, X, Image as ImageIcon } from 'lucide-react';
 import Image from 'next/image';
 import { useRef, useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 
@@ -34,18 +35,19 @@ export function ImageUpload({
   const [preview, setPreview] = useState<string | null>(value || null);
   const [uploadedPath, setUploadedPath] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const t = useTranslations('Common.imageUpload');
 
   const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
     if (file.size > maxSizeMB * 1024 * 1024) {
-      toast.error(`File size must be less than ${maxSizeMB}MB`);
+      toast.error(t('fileSizeError', { maxSize: maxSizeMB }));
       return;
     }
 
     if (!file.type.startsWith('image/')) {
-      toast.error('Please select an image file');
+      toast.error(t('selectImageFile'));
       return;
     }
 
@@ -64,16 +66,16 @@ export function ImageUpload({
 
       if (!response.ok) {
         const errorData = await response.json();
-        throw new Error(errorData.error || 'Upload failed');
+        throw new Error(errorData.error || t('uploadFailed'));
       }
 
       const { url, path: filePath } = await response.json();
       setPreview(url);
       setUploadedPath(filePath);
       onChange(url);
-      toast.success('Image uploaded successfully');
+      toast.success(t('uploadSuccess'));
     } catch (error) {
-      toast.error(error instanceof Error ? error.message : 'Failed to upload image');
+      toast.error(error instanceof Error ? error.message : t('uploadError'));
     } finally {
       setUploading(false);
       if (fileInputRef.current) {
@@ -97,9 +99,9 @@ export function ImageUpload({
       setPreview(null);
       setUploadedPath(null);
       onChange(null);
-      toast.success('Image removed');
+      toast.success(t('removeSuccess'));
     } catch (_error) {
-      toast.error('Failed to remove image');
+      toast.error(t('removeError'));
     }
   };
 
@@ -119,7 +121,7 @@ export function ImageUpload({
           className="relative inline-block"
           style={aspectRatio === 'square' ? { width: `${maxHeight}px`, height: `${maxHeight}px` } : undefined}
         >
-          <div 
+          <div
             className={`relative overflow-hidden rounded-lg border bg-muted ${
               aspectRatio === 'square' ? 'w-full h-full' : 'w-full max-w-md'
             }`}
@@ -153,7 +155,7 @@ export function ImageUpload({
           {uploading ? (
             <div className="flex flex-col items-center gap-2">
               <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-              <p className="text-sm text-muted-foreground">Uploading...</p>
+              <p className="text-sm text-muted-foreground">{t('uploading')}</p>
             </div>
           ) : (
             <>
@@ -161,9 +163,9 @@ export function ImageUpload({
                 <ImageIcon className="h-8 w-8 text-primary" />
               </div>
               <div className="mt-4 flex flex-col items-center gap-1">
-                <p className="text-sm font-medium">Click to upload image</p>
+                <p className="text-sm font-medium">{t('clickToUpload')}</p>
                 <p className="text-xs text-muted-foreground">
-                  Max size: {maxSizeMB}MB
+                  {t('maxSize', { maxSize: maxSizeMB })}
                 </p>
               </div>
               <Upload className="mt-2 h-4 w-4 text-muted-foreground" />

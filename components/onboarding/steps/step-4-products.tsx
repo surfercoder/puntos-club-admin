@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Plus, Trash2, Package, Tag, Info, AlertTriangle } from 'lucide-react';
+import { useEffect, useState } from 'react';
+import { Plus, Trash2, Package, Tag, Info, AlertTriangle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 
@@ -9,8 +9,9 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { OnboardingStep4Data, OnboardingProductInput } from '@/actions/onboarding/actions';
-import { PLAN_LIMITS_CONFIG, PLAN_DISPLAY_NAMES } from '@/lib/plans/config';
-import type { PlanType } from '@/types/plan';
+import { PLAN_DISPLAY_NAMES } from '@/lib/plans/config';
+import { getAllPlanLimitsAction } from '@/actions/dashboard/usage/actions';
+import type { PlanFeatureKey, PlanType } from '@/types/plan';
 
 interface ProductRow extends OnboardingProductInput {
   id: string;
@@ -112,10 +113,18 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
   const t = useTranslations('Onboarding.step4');
   const tCommon = useTranslations('Common');
 
-  const planType = (selectedPlan as PlanType) in PLAN_LIMITS_CONFIG
+  const [planLimits, setPlanLimits] = useState<Record<PlanType, Record<PlanFeatureKey, number>> | null>(null);
+
+  useEffect(() => {
+    getAllPlanLimitsAction().then((data) => {
+      if (data) setPlanLimits(data);
+    });
+  }, []);
+
+  const planType = planLimits && (selectedPlan as PlanType) in planLimits
     ? (selectedPlan as PlanType)
     : 'trial';
-  const maxProducts = PLAN_LIMITS_CONFIG[planType].redeemable_products;
+  const maxProducts = planLimits?.[planType]?.redeemable_products ?? 0;
   const planDisplayName = PLAN_DISPLAY_NAMES[planType];
 
   const [categories, setCategories] = useState<Category[]>(() =>
@@ -227,6 +236,14 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
       })),
     });
   };
+
+  if (!planLimits) {
+    return (
+      <div className="flex items-center justify-center py-16">
+        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+      </div>
+    );
+  }
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">

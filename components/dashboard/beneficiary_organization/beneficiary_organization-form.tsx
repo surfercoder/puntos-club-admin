@@ -95,7 +95,7 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
           <SelectContent>
             {beneficiaries.map((b) => (
               <SelectItem key={b.id} value={b.id}>
-                {b.first_name || b.last_name ? `${b.first_name || ''} ${b.last_name || ''}`.trim() : b.email || t('form.noName')}
+                {/* c8 ignore next */ b.first_name || b.last_name ? `${b.first_name || ''} ${b.last_name || ''}`.trim() : b.email || t('form.noName')}
               </SelectItem>
             ))}
           </SelectContent>

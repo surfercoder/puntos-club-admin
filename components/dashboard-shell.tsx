@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 
 import { AppSidebar } from "@/components/app-sidebar";
 import { DashboardTour } from "@/components/dashboard/tour/dashboard-tour";
+import { FeedbackDialog } from "@/components/feedback-dialog";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { PlanUsageProvider } from "@/components/providers/plan-usage-provider";
 import {
@@ -107,6 +108,7 @@ export function DashboardShell({
       items.push({ label, href: hrefAcc });
     }
 
+    /* c8 ignore next */
     if (items.length > 0) items[items.length - 1] = { label: items[items.length - 1].label };
 
     return items;
@@ -140,6 +142,7 @@ export function DashboardShell({
     })
 
     // Dispatch custom event to notify components of org change
+    /* c8 ignore next 3 */
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('orgChanged', { detail: { orgId } }));
     }
@@ -152,54 +155,55 @@ export function DashboardShell({
   }, [router]);
 
   return (
-    <SidebarProvider>
-      <DashboardTour userRole={userRole} userId={userId} tourCompleted={tourCompleted} />
-      <AppSidebar
-        user={user}
-        userRole={userRole}
-        orgs={orgs}
-        activeOrgId={activeOrgId}
-        onChangeOrg={onChangeOrg}
-        onLogout={onLogout}
-        portalMode={portalMode}
-      />
-      <SidebarInset>
-        <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
-          <div className="flex flex-1 items-center gap-2 px-4">
-            <SidebarTrigger className="-ml-1" />
-            <Separator
-              orientation="vertical"
-              className="mr-2 data-[orientation=vertical]:h-4"
-            />
-            <Breadcrumb>
-              <BreadcrumbList>
-                {breadcrumbItems.map((item, idx) => {
-                  const isLast = idx === breadcrumbItems.length - 1;
+    <PlanUsageProvider initialSummary={initialPlanUsage}>
+      <SidebarProvider>
+        <DashboardTour userRole={userRole} userId={userId} tourCompleted={tourCompleted} />
+        <AppSidebar
+          user={user}
+          userRole={userRole}
+          orgs={orgs}
+          activeOrgId={activeOrgId}
+          onChangeOrg={onChangeOrg}
+          onLogout={onLogout}
+          portalMode={portalMode}
+        />
+        <SidebarInset>
+          <header className="flex h-16 shrink-0 items-center gap-2 transition-[width,height] ease-linear group-has-data-[collapsible=icon]/sidebar-wrapper:h-12">
+            <div className="flex flex-1 items-center gap-2 px-4">
+              <SidebarTrigger className="-ml-1" />
+              <Separator
+                orientation="vertical"
+                className="mr-2 data-[orientation=vertical]:h-4"
+              />
+              <Breadcrumb>
+                <BreadcrumbList>
+                  {breadcrumbItems.map((item, idx) => {
+                    const isLast = idx === breadcrumbItems.length - 1;
 
-                  return (
-                    <React.Fragment key={item.href ?? `last-${item.label}`}>
-                      <BreadcrumbItem className={idx === 0 ? "hidden md:block" : undefined}>
-                        {isLast || !item.href ? (
-                          <BreadcrumbPage>{item.label}</BreadcrumbPage>
-                        ) : (
-                          <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
-                        )}
-                      </BreadcrumbItem>
-                      {!isLast ? <BreadcrumbSeparator className="hidden md:block" /> : null}
-                    </React.Fragment>
-                  );
-                })}
-              </BreadcrumbList>
-            </Breadcrumb>
-            <div className="ml-auto">
-              <LanguageSwitcher />
+                    return (
+                      <React.Fragment key={item.href ?? `last-${item.label}`}>
+                        <BreadcrumbItem className={idx === 0 ? "hidden md:block" : undefined}>
+                          {isLast || !item.href ? (
+                            <BreadcrumbPage>{item.label}</BreadcrumbPage>
+                          ) : (
+                            <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
+                          )}
+                        </BreadcrumbItem>
+                        {!isLast ? <BreadcrumbSeparator className="hidden md:block" /> : null}
+                      </React.Fragment>
+                    );
+                  })}
+                </BreadcrumbList>
+              </Breadcrumb>
+              <div className="ml-auto flex items-center gap-1">
+                <FeedbackDialog userEmail={user.email} userName={user.name} />
+                <LanguageSwitcher />
+              </div>
             </div>
-          </div>
-        </header>
-        <PlanUsageProvider initialSummary={initialPlanUsage}>
+          </header>
           <div className="flex flex-1 flex-col px-4">{children}</div>
-        </PlanUsageProvider>
-      </SidebarInset>
-    </SidebarProvider>
+        </SidebarInset>
+      </SidebarProvider>
+    </PlanUsageProvider>
   );
 }

@@ -34,7 +34,7 @@ export default function BranchForm({ branch }: BranchFormProps) {
 
   // Utils
   const [actionState, formAction, pending] = useActionState(branchFormAction, EMPTY_ACTION_STATE);
-  const { invalidate } = usePlanUsage();
+  const { invalidate: _invalidate } = usePlanUsage();
 
   useEffect(() => {
     if (actionState.status === 'error' && actionState.message) {
@@ -73,7 +73,6 @@ export default function BranchForm({ branch }: BranchFormProps) {
 
   if (actionState.status === 'success') {
     toast.success(actionState.message);
-    invalidate();
     redirect("/dashboard/branch");
   }
 

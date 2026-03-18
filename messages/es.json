@@ -3,7 +3,14 @@
     "appTitle": "Puntos Club Admin",
     "appDescription": "Portal de administración de Puntos Club",
     "dashboardTitle": "Panel",
-    "dashboardDescription": "Panel de administración de Puntos Club"
+    "dashboardDescription": "Panel de administración de Puntos Club",
+    "homeTitle": "Puntos Club - Programa de fidelización para tu negocio",
+    "homeDescription": "Crea tu programa de puntos y fideliza a tus clientes con Puntos Club.",
+    "dashboardTemplate": "{page} | Panel",
+    "onboardingTitle": "Registro de Propietario - Puntos Club",
+    "onboardingDescription": "Crea tu cuenta como propietario de negocio en Puntos Club. Configura tu organización, productos y empieza a fidelizar a tus clientes con puntos de recompensa.",
+    "qrTitle": "Código QR | Panel",
+    "qrDescription": "Código QR de tu organización para que los clientes se unan al programa de puntos"
   },
   "Common": {
     "cancel": "Cancelar",
@@ -42,7 +49,20 @@
     "savingChanges": "Guardando...",
     "saveChanges": "Guardar Cambios",
     "emailPlaceholder": "m@ejemplo.com",
-    "noResults": "Sin resultados"
+    "noResults": "Sin resultados",
+    "deleting": "Eliminando...",
+    "imageUpload": {
+      "fileSizeError": "El tamaño del archivo debe ser menor a {maxSize}MB",
+      "selectImageFile": "Por favor selecciona un archivo de imagen",
+      "uploadFailed": "Error al subir",
+      "uploadSuccess": "Imagen subida correctamente",
+      "uploadError": "Error al subir la imagen",
+      "removeSuccess": "Imagen eliminada",
+      "removeError": "Error al eliminar la imagen",
+      "uploading": "Subiendo...",
+      "clickToUpload": "Haz clic para subir imagen",
+      "maxSize": "Tamaño máximo: {maxSize}MB"
+    }
   },
   "NotFound": {
     "title": "404 - Página no encontrada",
@@ -63,7 +83,8 @@
       "signUpLink": "Registrarse",
       "submitting": "Iniciando sesión...",
       "noPermission": "No tienes permisos para acceder al portal de administración.",
-      "pageTitle": "Iniciar sesión - Puntos Club Admin"
+      "pageTitle": "Iniciar sesión - Puntos Club Admin",
+      "pageDescription": "Inicia sesión en tu cuenta"
     },
     "signUp": {
       "title": "Registrarse",
@@ -74,7 +95,8 @@
       "submitting": "Creando cuenta...",
       "alreadyHaveAccount": "¿Ya tienes una cuenta?",
       "loginLink": "Iniciar sesión",
-      "pageTitle": "Registrarse - Puntos Club Admin"
+      "pageTitle": "Registrarse - Puntos Club Admin",
+      "pageDescription": "Crear una nueva cuenta de administrador"
     },
     "signUpSuccess": {
       "title": "¡Gracias por registrarte!",
@@ -93,7 +115,8 @@
       "submitting": "Enviando...",
       "alreadyHaveAccount": "¿Ya tienes una cuenta?",
       "loginLink": "Iniciar sesión",
-      "pageTitle": "Restablecer contraseña - Puntos Club Admin"
+      "pageTitle": "Restablecer contraseña - Puntos Club Admin",
+      "pageDescription": "Restablece la contraseña de tu cuenta"
     },
     "updatePassword": {
       "title": "Restablecer contraseña",
@@ -102,18 +125,23 @@
       "newPasswordPlaceholder": "Nueva contraseña",
       "submitButton": "Guardar nueva contraseña",
       "submitting": "Guardando...",
-      "pageTitle": "Nueva contraseña - Puntos Club Admin"
+      "pageTitle": "Nueva contraseña - Puntos Club Admin",
+      "pageDescription": "Establecé una nueva contraseña para tu cuenta"
     },
     "emailConfirmed": {
       "title": "Cuenta confirmada",
       "message": "Tu cuenta fue confirmada exitosamente. ¡Bienvenido/a a PuntosClub! Ya puedes iniciar sesión y empezar a usar la app.",
       "openApp": "Abrir PuntosClub",
-      "openAppFallback": "Si el boton no funciona, abre la app manualmente desde tu dispositivo."
+      "openAppFallback": "Si el boton no funciona, abre la app manualmente desde tu dispositivo.",
+      "pageTitle": "Email Confirmado | Puntos Club",
+      "pageDescription": "Tu email ha sido confirmado exitosamente."
     },
     "error": {
       "title": "Lo sentimos, algo salió mal.",
       "errorCode": "Código de error:",
-      "unspecifiedError": "Ocurrió un error no especificado."
+      "unspecifiedError": "Ocurrió un error no especificado.",
+      "pageTitle": "Error | Puntos Club",
+      "pageDescription": "Ocurrió un error de autenticación."
     },
     "logout": "Cerrar sesión"
   },
@@ -129,7 +157,11 @@
     "organization": "Organización",
     "organizations": "Organizaciones",
     "addNewOrganization": "Agregar nueva organización",
-    "panel": "Panel"
+    "panel": "Panel",
+    "planTrial": "Plan Gratis",
+    "planAdvance": "Plan Advance",
+    "planPro": "Plan Pro",
+    "managePlan": "Gestionar plan"
   },
   "Sidebar": {
     "addresses": "Direcciones",
@@ -150,6 +182,9 @@
     "redemptions": "Canjes",
     "stock": "Stock",
     "qrCode": "Código QR",
+    "subscriptions": "Suscripciones",
+    "planLimits": "Límites de Plan",
+    "orgPlanLimits": "Límites de Plan por Org",
     "userRoles": "Roles de Usuario",
     "users": "Usuarios",
     "notifications": "Notificaciones",
@@ -187,6 +222,9 @@
     "push_tokens": "Tokens Push",
     "redemption": "Canjes",
     "stock": "Stock",
+    "subscription": "Suscripciones",
+    "plan_limits": "Límites de Plan",
+    "organization_plan_limits": "Límites de Plan por Org",
     "user-role": "Roles de Usuario",
     "users": "Usuarios",
     "qr": "Código QR"
@@ -251,6 +289,17 @@
         "title": "Crear Notificación Push",
         "description": "Envía una notificación a todos tus beneficiarios activos"
       },
+      "editPage": {
+        "title": "Editar Notificación Push",
+        "description": "Edita y reenvía una notificación a todos tus beneficiarios activos"
+      },
+      "deleteModal": {
+        "title": "Eliminar Notificación",
+        "confirm": "¿Estás seguro de que deseas eliminar <strong>{name}</strong>? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar la notificación",
+        "deleteSuccess": "Notificación eliminada correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      },
       "form": {
         "readyToSend": "Listo para Enviar",
         "limitReached": "Límite Alcanzado",
@@ -269,7 +318,68 @@
         "aiTip": "Los mensajes claros y concisos funcionan mejor. ¡Los emojis son compatibles!",
         "approved": "Aprobado",
         "rejected": "Rechazado",
-        "moderationError": "Error al moderar el contenido"
+        "moderationError": "Error al moderar el contenido",
+        "validationTitleRequired": "El título es requerido",
+        "validationTitleMaxLength": "El título debe tener {max} caracteres o menos",
+        "validationBodyRequired": "El mensaje es requerido",
+        "validationBodyMaxLength": "El mensaje debe tener {max} caracteres o menos",
+        "moderationApproved": "¡Contenido aprobado! Ahora puedes enviar la notificación.",
+        "moderationAlreadyApproved": "Este contenido ya fue verificado previamente. Puedes enviar la notificación.",
+        "moderationNeedsReview": "El contenido necesita revisión. Por favor revisa los comentarios.",
+        "moderationVerifyError": "Error al verificar el contenido",
+        "moderationVerifyRetry": "Error al verificar el contenido. Por favor intenta de nuevo.",
+        "limitReachedError": "Has alcanzado tu límite de notificaciones. Por favor actualiza tu plan o espera.",
+        "verifyBeforeSend": "Por favor verifica el contenido con IA antes de enviar",
+        "createError": "Error al crear la notificación",
+        "createSuccess": "¡Notificación creada! Enviando ahora...",
+        "sendError": "Error al enviar la notificación",
+        "sendSuccess": "¡Notificación enviada! {sent} enviada(s), {failed} fallida(s)",
+        "unexpectedError": "Ocurrió un error inesperado",
+        "previewTitlePlaceholder": "El título de tu notificación",
+        "previewBodyPlaceholder": "El mensaje de tu notificación aparecerá aquí",
+        "creating": "Creando...",
+        "sending": "Enviando...",
+        "titleTip": "¡Sé breve y directo. Se permiten emojis!",
+        "titlePlaceholder": "Ej.: ¡Nuevas recompensas disponibles! 🎉",
+        "bodyPlaceholder": "Ej.: ¡Mirá nuestros nuevos productos y ganá el doble de puntos esta semana! 🌟",
+        "addEmoji": "Agregar emoji",
+        "notesList1": "Las notificaciones se enviarán a todos los beneficiarios activos que siguen tu organización",
+        "notesList2": "Los límites de caracteres aseguran compatibilidad en todos los dispositivos",
+        "notesList3": "Una vez enviadas, las notificaciones no se pueden cancelar ni editar",
+        "notesList4": "Los beneficiarios deben tener instalada la app PuntosClub para recibir notificaciones",
+        "sentCount": "enviada(s)",
+        "resend": "Reenviar Notificación",
+        "updateError": "Error al actualizar la notificación"
+      },
+      "limits": {
+        "dailyLimitReached": "Has alcanzado tu límite diario de notificaciones",
+        "dailyLimitDetail": "Límite diario: {limit} notificación(es)",
+        "dailyLimitAction": "Espera hasta mañana o actualiza tu plan para enviar más notificaciones.",
+        "monthlyLimitReached": "Has alcanzado tu límite mensual de notificaciones",
+        "monthlyLimitDetail": "Límite mensual: {limit} notificación(es)",
+        "monthlyLimitAction": "Espera hasta el próximo mes o actualiza tu plan para enviar más notificaciones.",
+        "timeRestriction": "Debes esperar entre notificaciones",
+        "timeRestrictionDetail": "Tiempo mínimo entre notificaciones: {hours} hora(s)",
+        "timeRestrictionAction": "Espera el tiempo indicado o actualiza tu plan para reducir el tiempo de espera.",
+        "readyToSend": "Listo para Enviar",
+        "limitReached": "Límite Alcanzado",
+        "plan": "Plan:",
+        "today": "Hoy:",
+        "thisMonth": "Este Mes:",
+        "lastSent": "Última Enviada:",
+        "timeRemaining": "Tiempo restante:",
+        "nextAvailable": "Próxima notificación disponible:",
+        "dailyReset": "Reinicio diario:",
+        "monthlyReset": "Reinicio mensual:",
+        "whatToDo": "Qué hacer:",
+        "sent": "enviada(s)"
+      },
+      "moderation": {
+        "contentApproved": "Contenido Aprobado",
+        "contentNeedsReview": "El Contenido Necesita Revisión",
+        "approvedMessage": "Tu contenido de notificación ha sido revisado y aprobado. Ahora puedes enviarlo a tus beneficiarios.",
+        "reviewReasons": "Por favor revisa tu contenido por las siguientes razones:",
+        "reminder": "Recuerda: Las notificaciones solo deben contener información sobre productos, ofertas, promociones y campañas."
       }
     },
     "users": {
@@ -430,7 +540,8 @@
       "nearingLimitWarning": "Uno o más recursos están cerca del límite de tu plan.",
       "limitReachedTitle": "Límite de plan alcanzado",
       "limitReachedDescription": "Has alcanzado el límite de tu {plan}. Mejora tu plan para continuar creando recursos.",
-      "goBack": "Volver"
+      "goBack": "Volver",
+      "upgradeSuffix": "para aumentar estos límites."
     },
     "planSettings": {
       "title": "Plan y Suscripción",
@@ -561,6 +672,10 @@
         "deleteError": "Error al eliminar el beneficiario",
         "deleteSuccess": "Beneficiario eliminado correctamente",
         "genericError": "Ocurrió un error al eliminar"
+      },
+      "hide": {
+        "hideTooltip": "Ocultar organización para este beneficiario",
+        "unhideTooltip": "Mostrar organización para este beneficiario"
       }
     },
     "product": {
@@ -618,6 +733,12 @@
       "createTitle": "Crear Pedido",
       "editTitle": "Editar Pedido",
       "fetchError": "Error al obtener el pedido",
+      "deleteModal": {
+        "title": "Eliminar Pedido",
+        "confirm": "¿Estás seguro de que deseas eliminar el pedido <strong>{name}</strong>? Esta acción no se puede deshacer.",
+        "deleteSuccess": "Pedido eliminado correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      },
       "form": {
         "orderNumber": "Número de Pedido",
         "orderNumberPlaceholder": "Ingresa el número de pedido",
@@ -632,6 +753,13 @@
       "createTitle": "Crear Canje",
       "editTitle": "Editar Canje",
       "fetchError": "Error al obtener el canje",
+      "deleteModal": {
+        "title": "Eliminar Canje",
+        "confirm": "¿Estás seguro de que deseas eliminar el canje <strong>{name}</strong>? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar el canje",
+        "deleteSuccess": "Canje eliminado correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      },
       "form": {
         "beneficiaryLabel": "Beneficiario",
         "selectBeneficiary": "Seleccionar un beneficiario",
@@ -651,6 +779,13 @@
       "createTitle": "Crear Membresía",
       "editTitle": "Editar Membresía",
       "fetchError": "Error al obtener la membresía",
+      "deleteModal": {
+        "title": "Eliminar Membresía",
+        "confirm": "¿Estás seguro de que deseas eliminar <strong>{name}</strong>? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar la membresía",
+        "deleteSuccess": "Membresía eliminada correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      },
       "form": {
         "userLabel": "Usuario",
         "selectUser": "Seleccionar un usuario",
@@ -663,6 +798,13 @@
     "stock": {
       "createTitle": "Crear Registro de Stock",
       "editTitle": "Editar Registro de Stock",
+      "deleteModal": {
+        "title": "Eliminar Registro de Stock",
+        "confirm": "¿Estás seguro de que deseas eliminar el registro de stock de <strong>{name}</strong>? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar el registro de stock",
+        "deleteSuccess": "Registro de stock eliminado correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      },
       "form": {
         "branchLabel": "Sucursal",
         "selectBranch": "Seleccionar una sucursal",
@@ -738,7 +880,10 @@
       "confirmationSent": "Enviamos un enlace de confirmación a",
       "noEmailReceived": "¿No recibiste el email?",
       "useDifferentEmail": "Usar otro email",
-      "creating": "Creando cuenta..."
+      "creating": "Creando cuenta...",
+      "genericError": "Ocurrió un error. Por favor intenta de nuevo.",
+      "spamNote": "Revisa tu carpeta de spam o correo no deseado.",
+      "passwordHint": "Usa al menos 8 caracteres con una mezcla de letras y números."
     },
     "step2": {
       "businessName": "Nombre del negocio",
@@ -797,7 +942,8 @@
         "beneficiaryMap": "Mapa de beneficiarios",
         "dashboard": "Dashboard",
         "excelPdfExport": "Exportación Excel / PDF",
-        "customAI": "IA personalizada"
+        "customAI": "IA personalizada",
+        "businessIntelligence": "Business Intelligence"
       },
       "allPlansInclude": "Todos los planes incluyen soporte por email.",
       "changePlanAnytime": "Puedes cambiar de plan en cualquier momento.",
@@ -1026,6 +1172,23 @@
     "label": "Idioma",
     "es": "Español",
     "en": "English"
+  },
+  "Feedback": {
+    "trigger": "Feedback",
+    "title": "Envianos tu feedback",
+    "description": "Ayudanos a mejorar Puntos Club. Compartí tus comentarios, reportá errores o sugerí mejoras.",
+    "typeLabel": "Tipo",
+    "messageLabel": "Mensaje",
+    "messagePlaceholder": "Contanos qué pensás...",
+    "types": {
+      "comment": "Comentario",
+      "feedback": "Feedback",
+      "error": "Reporte de error",
+      "improvement": "Mejora",
+      "question": "Pregunta"
+    },
+    "successMessage": "Feedback enviado con éxito. ¡Gracias!",
+    "errorMessage": "No se pudo enviar el feedback. Intentá de nuevo."
   },
   "Tour": {
     "next": "Siguiente",

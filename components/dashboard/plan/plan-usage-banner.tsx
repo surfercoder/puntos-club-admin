@@ -95,7 +95,7 @@ export function PlanUsageBanner({ features, className }: PlanUsageBannerProps) {
               >
                 {t('upgradePlan')}
               </Link>{' '}
-              para aumentar estos límites.
+              {t('upgradeSuffix')}
             </p>
           )}
         </div>

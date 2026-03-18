@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server';
 import { getProducts } from '@/actions/dashboard/product/actions';
 import DeleteModal from '@/components/dashboard/product/delete-modal';
 import { PlanLimitCreateButton } from '@/components/dashboard/plan/plan-limit-create-button';
+import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
 import { Button } from '@/components/ui/button';
 import {
@@ -33,7 +34,10 @@ export default async function ProductListPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            {t('title')}
+            <PlanUsageBadge feature="redeemable_products" />
+          </h1>
           <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <PlanLimitCreateButton

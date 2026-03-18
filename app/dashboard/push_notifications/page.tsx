@@ -3,17 +3,15 @@ import Link from 'next/link';
 import { cookies } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 
+import DeleteModal from '@/components/dashboard/push_notifications_crud/delete-modal';
+import ToastHandler from '@/components/dashboard/push_notifications_crud/toast-handler';
 import { PlanLimitCreateButton } from '@/components/dashboard/plan/plan-limit-create-button';
+import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { isAdmin } from '@/lib/auth/roles';
@@ -24,9 +22,7 @@ export default async function PushNotificationsListPage() {
   const currentUser = await getCurrentUser();
   const userIsAdmin = isAdmin(currentUser);
   const t = await getTranslations('Dashboard.pushNotifications');
-  const _tCommon = await getTranslations('Common');
 
-  // Use admin client to bypass RLS for admin users
   const supabase = userIsAdmin ? createAdminClient() : await createClient();
 
   const cookieStore = await cookies();
@@ -38,7 +34,6 @@ export default async function PushNotificationsListPage() {
     .select('*, organization:organization_id(name), creator:created_by(first_name, last_name)')
     .order('created_at', { ascending: false });
 
-  // Only filter by organization for non-admin users
   if (!userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
     query = query.eq('organization_id', activeOrgIdNumber);
   }
@@ -51,9 +46,13 @@ export default async function PushNotificationsListPage() {
 
   return (
     <div className="space-y-6">
+      <ToastHandler />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            {t('title')}
+            <PlanUsageBadge feature="push_notifications_monthly" />
+          </h1>
           <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <PlanLimitCreateButton
@@ -84,8 +83,8 @@ export default async function PushNotificationsListPage() {
                 <TableRow key={notification.id}>
                   <TableCell className="font-medium">{notification.title}</TableCell>
                   <TableCell>
-                    {Array.isArray(notification.organization) 
-                      ? notification.organization[0]?.name 
+                    {Array.isArray(notification.organization)
+                      ? notification.organization[0]?.name
                       : notification.organization?.name || 'N/A'}
                   </TableCell>
                   <TableCell>
@@ -100,16 +99,18 @@ export default async function PushNotificationsListPage() {
                   </TableCell>
                   <TableCell>{notification.sent_count}</TableCell>
                   <TableCell>{notification.failed_count}</TableCell>
-                  <TableCell>
-                    {new Date(notification.created_at).toLocaleString()}
-                  </TableCell>
+                  <TableCell>{new Date(notification.created_at).toLocaleString()}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">
-                        <Link href={`/dashboard/push_notifications/${notification.id}`}>
+                        <Link href={`/dashboard/push_notifications/edit/${notification.id}`}>
                           <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
+                      <DeleteModal
+                        notificationId={String(notification.id)}
+                        notificationTitle={notification.title}
+                      />
                     </div>
                   </TableCell>
                 </TableRow>

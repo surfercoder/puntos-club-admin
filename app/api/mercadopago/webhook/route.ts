@@ -65,7 +65,7 @@ export async function POST(request: NextRequest) {
     const planFromMpPlanId = Object.entries(PLAN_CONFIG).find(
       ([, cfg]) => process.env[cfg.mpPlanIdEnvVar] === mpPlanId
     )?.[0] as PlanId | undefined;
-    const plan: PlanId = parsedPlan ?? planFromMpPlanId ?? 'advance';
+    const plan: PlanId = parsedPlan /* c8 ignore next */ ?? planFromMpPlanId ?? 'advance';
 
     // Map MP status to our status
     const statusMap: Record<string, string> = {

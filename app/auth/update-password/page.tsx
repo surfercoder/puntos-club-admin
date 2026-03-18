@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+
 import { UpdatePasswordForm } from "@/components/update-password-form";
 
-export const metadata: Metadata = {
-  title: "Nueva contraseña - Puntos Club Admin",
-  description: "Establecé una nueva contraseña para tu cuenta",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Auth.updatePassword");
+  return {
+    title: t("pageTitle"),
+    description: t("pageDescription"),
+  };
+}
 
 export default function Page() {
   return (

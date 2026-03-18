@@ -10,6 +10,7 @@ export type BeneficiaryOrganization = {
   total_points_redeemed: number;
   joined_date: string;
   is_active?: boolean | null;
+  is_hidden?: boolean | null;
   created_at?: string | null;
   updated_at?: string | null;
 };

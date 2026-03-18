@@ -13,6 +13,8 @@ export type PushNotification = {
   sent_count: number;
   failed_count: number;
   status: PushNotificationStatus;
+  moderation_approved: boolean;
+  moderation_content_hash?: string | null;
   sent_at?: string | null;
   created_at: string;
   updated_at: string;

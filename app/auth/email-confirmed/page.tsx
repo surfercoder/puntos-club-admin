@@ -6,10 +6,13 @@ import { CheckCircle2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
-export const metadata: Metadata = {
-  title: "Email Confirmado | Puntos Club",
-  description: "Tu email ha sido confirmado exitosamente.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Auth.emailConfirmed");
+  return {
+    title: t("pageTitle"),
+    description: t("pageDescription"),
+  };
+}
 
 export default async function EmailConfirmedPage() {
   const t = await getTranslations("Auth.emailConfirmed");

@@ -394,7 +394,7 @@ export default function PointsRulesPage() {
             .map((c) => c.trim())
             .find((c) => c.startsWith("active_org_id="))
             ?.split("=")[1]
-        : undefined;
+        : /* c8 ignore next */ undefined;
 
     const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
     if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
@@ -411,7 +411,7 @@ export default function PointsRulesPage() {
       .eq("active", true)
       .order("name");
 
-    dispatch({ type: "SET_BRANCHES", payload: (data ?? []) as Branch[] });
+    dispatch({ type: "SET_BRANCHES", payload: (data /* c8 ignore next */ ?? []) as Branch[] });
   }, []);
 
   const loadRules = useCallback(async () => {

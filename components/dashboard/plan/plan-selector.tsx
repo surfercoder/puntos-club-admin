@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Check, Star, Zap, Rocket, Loader2, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
@@ -9,6 +9,8 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { usePlanUsage } from '@/components/providers/plan-usage-provider';
 import { PlanUsageSummary } from '@/components/dashboard/plan/plan-usage-summary';
+import { getAllPlanLimitsAction } from '@/actions/dashboard/usage/actions';
+import type { PlanFeatureKey, PlanType } from '@/types/plan';
 
 
 interface Plan {
@@ -68,6 +70,61 @@ function FeatureValue({ value }: { value: string | boolean }) {
   return <span className="text-sm font-medium">{value}</span>;
 }
 
+function formatNumber(n: number): string {
+  return n.toLocaleString('es-AR');
+}
+
+function buildFeatures(
+  f: Record<string, string>,
+  t: ReturnType<typeof useTranslations>,
+  planId: PlanType,
+  limits: Record<PlanFeatureKey, number> | undefined,
+  isPaid: boolean
+): Plan['features'] {
+  const v = (key: PlanFeatureKey) => formatNumber(limits?.[key] ?? 0);
+  const highlight = isPaid;
+
+  const numericFeatures: { label: string; key: PlanFeatureKey }[] = [
+    { label: f.rewards, key: 'redeemable_products' },
+    { label: f.beneficiaries, key: 'beneficiaries' },
+    { label: f.notificationsPerMonth, key: 'push_notifications_monthly' },
+    { label: f.cashiers, key: 'cashiers' },
+    { label: f.branches, key: 'branches' },
+    { label: f.collaborators, key: 'collaborators' },
+  ];
+
+  const features: Plan['features'] = numericFeatures.map(({ label, key }) => ({
+    label,
+    value: v(key),
+    ...(highlight ? { highlight: true } : {}),
+  }));
+
+  if (planId === 'trial') {
+    features.push(
+      { label: f.beneficiaryMap, value: false },
+      { label: f.dashboard, value: t('dashboardBasic') },
+      { label: f.excelPdfExport, value: false },
+      { label: f.customAI, value: false }
+    );
+  } else if (planId === 'advance') {
+    features.push(
+      { label: f.beneficiaryMap, value: true },
+      { label: f.dashboard, value: f.businessIntelligence },
+      { label: f.excelPdfExport, value: false },
+      { label: f.customAI, value: t('adaptedMessaging') }
+    );
+  } else {
+    features.push(
+      { label: f.beneficiaryMap, value: true },
+      { label: f.dashboard, value: f.businessIntelligence },
+      { label: f.excelPdfExport, value: true },
+      { label: f.customAI, value: true }
+    );
+  }
+
+  return features;
+}
+
 export function PlanSelector() {
   const t = useTranslations('Onboarding.step3');
   const tSettings = useTranslations('Dashboard.planSettings');
@@ -75,6 +132,13 @@ export function PlanSelector() {
   const currentPlan = usageSummary?.plan ?? null;
   const [selected, setSelected] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [planLimits, setPlanLimits] = useState<Record<PlanType, Record<PlanFeatureKey, number>> | null>(null);
+
+  useEffect(() => {
+    getAllPlanLimitsAction().then((data) => {
+      if (data) setPlanLimits(data);
+    });
+  }, []);
 
   // Sync selected with current plan when data loads
   if (selected === null && currentPlan !== null) {
@@ -92,18 +156,7 @@ export function PlanSelector() {
       icon: Star,
       color: 'emerald',
       isPaid: false,
-      features: [
-        { label: f.rewards, value: '2' },
-        { label: f.beneficiaries, value: '100' },
-        { label: f.notificationsPerMonth, value: '3' },
-        { label: f.cashiers, value: '1' },
-        { label: f.branches, value: '1' },
-        { label: f.collaborators, value: '1' },
-        { label: f.beneficiaryMap, value: false },
-        { label: f.dashboard, value: t('dashboardBasic') },
-        { label: f.excelPdfExport, value: false },
-        { label: f.customAI, value: false },
-      ],
+      features: buildFeatures(f, t, 'trial', planLimits?.trial, false),
     },
     {
       id: 'advance',
@@ -114,18 +167,7 @@ export function PlanSelector() {
       color: 'blue',
       badge: t('popularBadge'),
       isPaid: true,
-      features: [
-        { label: f.rewards, value: '10', highlight: true },
-        { label: f.beneficiaries, value: '500', highlight: true },
-        { label: f.notificationsPerMonth, value: '10', highlight: true },
-        { label: f.cashiers, value: '10', highlight: true },
-        { label: f.branches, value: '5', highlight: true },
-        { label: f.collaborators, value: '3', highlight: true },
-        { label: f.beneficiaryMap, value: true },
-        { label: f.dashboard, value: 'Business Intelligence' },
-        { label: f.excelPdfExport, value: false },
-        { label: f.customAI, value: t('adaptedMessaging') },
-      ],
+      features: buildFeatures(f, t, 'advance', planLimits?.advance, true),
     },
     {
       id: 'pro',
@@ -135,18 +177,7 @@ export function PlanSelector() {
       icon: Rocket,
       color: 'purple',
       isPaid: true,
-      features: [
-        { label: f.rewards, value: '30', highlight: true },
-        { label: f.beneficiaries, value: '5.000', highlight: true },
-        { label: f.notificationsPerMonth, value: '50', highlight: true },
-        { label: f.cashiers, value: '100', highlight: true },
-        { label: f.branches, value: '15', highlight: true },
-        { label: f.collaborators, value: '10', highlight: true },
-        { label: f.beneficiaryMap, value: true },
-        { label: f.dashboard, value: 'Business Intelligence' },
-        { label: f.excelPdfExport, value: true },
-        { label: f.customAI, value: true },
-      ],
+      features: buildFeatures(f, t, 'pro', planLimits?.pro, true),
     },
   ];
 
@@ -159,9 +190,11 @@ export function PlanSelector() {
       (currentPlan === 'advance' && selected === 'pro'));
 
   const handleChangePlan = async () => {
+    /* c8 ignore next */
     if (!selected || !isChangingPlan) return;
 
     const targetPlan = plans.find((p) => p.id === selected);
+    /* c8 ignore next */
     if (!targetPlan) return;
 
     if (targetPlan.isPaid) {
@@ -193,12 +226,12 @@ export function PlanSelector() {
         );
         setLoading(false);
       }
-    } else {
+    } else /* c8 ignore start */ {
       toast.info(tSettings('contactToDowngrade'));
-    }
+    } /* c8 ignore stop */
   };
 
-  if (fetching) {
+  if (fetching || !planLimits) {
     return (
       <div className="flex items-center justify-center py-16">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

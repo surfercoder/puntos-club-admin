@@ -176,7 +176,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
     dispatch({ type: 'SET_LOADING', value: false });
 
     if (!result.success) {
-      toast.error(result.error || 'Ocurrió un error. Por favor intenta de nuevo.');
+      toast.error(result.error || t('genericError'));
       return;
     }
 
@@ -205,7 +205,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
         </div>
         <div className="rounded-lg border bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 p-4 text-sm text-amber-800 dark:text-amber-200 max-w-sm">
           <p className="font-medium mb-1">{t('noEmailReceived')}</p>
-          <p>Revisa tu carpeta de spam o correo no deseado.</p>
+          <p>{t('spamNote')}</p>
         </div>
         <Button
           variant="outline"
@@ -298,7 +298,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
         </div>
         {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
         <p className="text-xs text-muted-foreground">
-          Usa al menos 8 caracteres con una mezcla de letras y números.
+          {t('passwordHint')}
         </p>
       </div>
 

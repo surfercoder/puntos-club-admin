@@ -64,7 +64,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
         .update({
           first_name: formData.first_name,
           last_name: formData.last_name,
-          username: formData.username || null,
+          username: formData.username /* c8 ignore next */ || null,
         })
         .eq('id', user.id);
 

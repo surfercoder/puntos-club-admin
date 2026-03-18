@@ -1,262 +1,125 @@
-"use client";
+import { Pencil } from 'lucide-react';
+import Link from 'next/link';
+import { cookies } from 'next/headers';
 
-import { useEffect, useState } from "react";
-import { getAllPurchases, getPurchaseById } from "@/actions/dashboard/purchase/actions";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import DeleteModal from '@/components/dashboard/purchase/delete-modal';
+import ToastHandler from '@/components/dashboard/purchase/toast-handler';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Eye, RefreshCw } from "lucide-react";
+  Table, TableHeader, TableRow, TableHead, TableBody, TableCell,
+} from '@/components/ui/table';
+import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { isAdmin } from '@/lib/auth/roles';
+import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
-interface Purchase {
-  id: number;
-  purchase_number: string;
-  total_amount: string;
-  points_earned: number;
-  purchase_date: string;
-  notes: string | null;
-  beneficiary: {
-    first_name: string;
-    last_name: string;
-    email: string;
-  } | null;
-  cashier: {
-    first_name: string;
-    last_name: string;
-  } | null;
-  branch: {
-    name: string;
-    organization_id: number;
-  } | null;
-}
+export default async function PurchaseListPage() {
+  const currentUser = await getCurrentUser();
+  const userIsAdmin = isAdmin(currentUser);
+  const supabase = userIsAdmin ? createAdminClient() : await createClient();
 
-interface PurchaseDetails extends Purchase {
-  beneficiary: {
-    first_name: string;
-    last_name: string;
-    email: string;
-    phone?: string;
-  } | null;
-}
+  const cookieStore = await cookies();
+  const activeOrgId = cookieStore.get('active_org_id')?.value;
+  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
 
-export default function PurchaseListPage() {
-  const [purchases, setPurchases] = useState<Purchase[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [selectedPurchase, setSelectedPurchase] = useState<PurchaseDetails | null>(null);
-  const [detailsLoading, setDetailsLoading] = useState(false);
-  const [dialogOpen, setDialogOpen] = useState(false);
+  let query = supabase
+    .from('purchase')
+    .select(`
+      *,
+      beneficiary:beneficiary_id(first_name, last_name, email),
+      cashier:app_user!purchase_cashier_id_fkey(first_name, last_name),
+      branch:branch_id(name)
+    `)
+    .order('purchase_date', { ascending: false });
 
-  useEffect(() => {
-    loadPurchases();
-  }, []);
+  if (!userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
+    query = query.eq('organization_id', activeOrgIdNumber);
+  }
 
-  const loadPurchases = async () => {
-    setLoading(true);
-    const result = await getAllPurchases();
-    if (result.success && result.data) {
-      setPurchases(result.data);
-    }
-    setLoading(false);
-  };
+  const { data, error } = await query;
 
-  const handleViewDetails = async (purchaseId: number) => {
-    setDetailsLoading(true);
-    setDialogOpen(true);
-    const result = await getPurchaseById(purchaseId);
-    if (result.success && result.data) {
-      setSelectedPurchase(result.data as PurchaseDetails);
-    }
-    setDetailsLoading(false);
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString();
-  };
+  if (error) {
+    return <div>Error loading purchases</div>;
+  }
 
   const formatCurrency = (amount: string | number) => {
-    const num = typeof amount === "string" ? parseFloat(amount) : amount;
-    return new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(num);
+    const num = typeof amount === 'string' ? parseFloat(amount) : amount;
+    return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(num);
   };
 
   return (
     <div className="space-y-6">
+      <ToastHandler />
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Compras</h1>
-          <p className="text-muted-foreground">Ver todas las transacciones de compra y puntos ganados</p>
+          <p className="text-muted-foreground">Administrar compras del sistema</p>
         </div>
-        <Button variant="outline" onClick={loadPurchases}>
-          <RefreshCw className="h-4 w-4 mr-2" />
-          Actualizar
+        <Button asChild>
+          <Link href="/dashboard/purchase/create">+ Nueva Compra</Link>
         </Button>
       </div>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Todas las Compras</CardTitle>
-          <CardDescription>
-            {purchases.length} compras en total
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {loading ? (
-            <div className="text-center py-8">Cargando compras...</div>
-          ) : purchases.length === 0 ? (
-            <div className="text-center py-8 text-muted-foreground">
-              No se encontraron compras.
-            </div>
-          ) : (
-            <div className="border rounded-lg">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Compra #</TableHead>
-                    <TableHead>Fecha</TableHead>
-                    <TableHead>Beneficiario</TableHead>
-                    <TableHead>Cajero</TableHead>
-                    <TableHead>Sucursal</TableHead>
-                    <TableHead className="text-right">Monto</TableHead>
-                    <TableHead className="text-right">Puntos</TableHead>
-                    <TableHead className="text-right">Acciones</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {purchases.map((purchase) => (
-                    <TableRow key={purchase.id}>
-                      <TableCell className="font-mono font-medium">
-                        {purchase.purchase_number}
-                      </TableCell>
-                      <TableCell>{formatDate(purchase.purchase_date)}</TableCell>
-                      <TableCell>
-                        {purchase.beneficiary ? (
-                          <div>
-                            <div className="font-medium">
-                              {purchase.beneficiary.first_name} {purchase.beneficiary.last_name}
-                            </div>
-                            <div className="text-sm text-muted-foreground">
-                              {purchase.beneficiary.email}
-                            </div>
-                          </div>
-                        ) : (
-                          "N/A"
-                        )}
-                      </TableCell>
-                      <TableCell>
-                        {purchase.cashier ? (
-                          `${purchase.cashier.first_name} ${purchase.cashier.last_name}`
-                        ) : (
-                          "N/A"
-                        )}
-                      </TableCell>
-                      <TableCell>{purchase.branch?.name || "N/A"}</TableCell>
-                      <TableCell className="text-right font-medium">
-                        {formatCurrency(purchase.total_amount)}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Badge variant="secondary">
-                          +{purchase.points_earned} pts
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleViewDetails(purchase.id)}
-                        >
-                          <Eye className="h-4 w-4" />
+      <div className="border rounded-lg">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Compra #</TableHead>
+              <TableHead>Fecha</TableHead>
+              <TableHead>Beneficiario</TableHead>
+              <TableHead>Cajero</TableHead>
+              <TableHead>Sucursal</TableHead>
+              <TableHead className="text-right">Monto</TableHead>
+              <TableHead className="text-right">Puntos</TableHead>
+              <TableHead className="text-right">Acciones</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {data && data.length > 0 ? (
+              data.map((purchase) => {
+                const beneficiary = Array.isArray(purchase.beneficiary) ? purchase.beneficiary[0] : purchase.beneficiary;
+                const cashier = Array.isArray(purchase.cashier) ? purchase.cashier[0] : purchase.cashier;
+                const branch = Array.isArray(purchase.branch) ? purchase.branch[0] : purchase.branch;
+
+                return (
+                  <TableRow key={purchase.id}>
+                    <TableCell className="font-mono font-medium">{purchase.purchase_number}</TableCell>
+                    <TableCell>{new Date(purchase.purchase_date).toLocaleString()}</TableCell>
+                    <TableCell>
+                      {beneficiary ? `${beneficiary.first_name} ${beneficiary.last_name}` : 'N/A'}
+                    </TableCell>
+                    <TableCell>
+                      {cashier ? `${cashier.first_name} ${cashier.last_name}` : 'N/A'}
+                    </TableCell>
+                    <TableCell>{branch?.name || 'N/A'}</TableCell>
+                    <TableCell className="text-right font-medium">
+                      {formatCurrency(purchase.total_amount)}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <Badge variant="secondary">+{purchase.points_earned} pts</Badge>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button asChild size="sm" variant="secondary">
+                          <Link href={`/dashboard/purchase/edit/${purchase.id}`}>
+                            <Pencil className="h-4 w-4" />
+                          </Link>
                         </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
-        </CardContent>
-      </Card>
-
-      {/* Diálogo de Detalles de Compra */}
-      <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Detalles de la Compra</DialogTitle>
-            <DialogDescription>
-              {selectedPurchase?.purchase_number}
-            </DialogDescription>
-          </DialogHeader>
-          {detailsLoading ? (
-            <div className="text-center py-8">Cargando detalles...</div>
-          ) : selectedPurchase ? (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Fecha</h4>
-                  <p>{formatDate(selectedPurchase.purchase_date)}</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Sucursal</h4>
-                  <p>{selectedPurchase.branch?.name || "N/A"}</p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Beneficiario</h4>
-                  <p>
-                    {selectedPurchase.beneficiary
-                      ? `${selectedPurchase.beneficiary.first_name} ${selectedPurchase.beneficiary.last_name}`
-                      : "N/A"}
-                  </p>
-                </div>
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Cajero</h4>
-                  <p>
-                    {selectedPurchase.cashier
-                      ? `${selectedPurchase.cashier.first_name} ${selectedPurchase.cashier.last_name}`
-                      : "N/A"}
-                  </p>
-                </div>
-              </div>
-
-              {selectedPurchase.notes && (
-                <div>
-                  <h4 className="text-sm font-medium text-muted-foreground">Notas</h4>
-                  <p>{selectedPurchase.notes}</p>
-                </div>
-              )}
-
-              <div className="flex justify-between items-center pt-4 border-t">
-                <div>
-                  <span className="text-sm text-muted-foreground">Monto Total:</span>
-                  <span className="ml-2 text-lg font-bold">
-                    {formatCurrency(selectedPurchase.total_amount)}
-                  </span>
-                </div>
-                <div>
-                  <span className="text-sm text-muted-foreground">Puntos Ganados:</span>
-                  <Badge className="ml-2" variant="default">
-                    +{selectedPurchase.points_earned} pts
-                  </Badge>
-                </div>
-              </div>
-            </div>
-          ) : null}
-        </DialogContent>
-      </Dialog>
+                        <DeleteModal purchaseId={String(purchase.id)} purchaseNumber={purchase.purchase_number} />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
+            ) : (
+              <TableRow>
+                <TableCell className="text-center py-4" colSpan={8}>No se encontraron compras.</TableCell>
+              </TableRow>
+            )}
+          </TableBody>
+        </Table>
+      </div>
     </div>
   );
 }

@@ -1,8 +1,10 @@
-import { Bell } from 'lucide-react';
+import { Bell, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
+import DeleteModal from '@/components/dashboard/notifications/delete-modal';
 import { PlanLimitCreateButton } from '@/components/dashboard/plan/plan-limit-create-button';
+import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -55,6 +57,7 @@ export default async function NotificationsPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             <Bell className="h-6 w-6" />
             {t('title')}
+            <PlanUsageBadge feature="push_notifications_monthly" />
           </h1>
           <p className="text-muted-foreground">{t('description')}</p>
         </div>
@@ -78,6 +81,7 @@ export default async function NotificationsPage() {
               <TableHead>{t('tableHeaders.failed')}</TableHead>
               <TableHead>{tCommon('createdBy')}</TableHead>
               <TableHead>{tCommon('createdAt')}</TableHead>
+              <TableHead className="text-right">{tCommon('actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -106,11 +110,24 @@ export default async function NotificationsPage() {
                   <TableCell>
                     {new Date(notification.created_at).toLocaleString()}
                   </TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <Button asChild size="sm" variant="secondary">
+                        <Link href={`/dashboard/notifications/edit/${notification.id}`}>
+                          <Pencil className="h-4 w-4" />
+                        </Link>
+                      </Button>
+                      <DeleteModal
+                        notificationId={notification.id}
+                        notificationTitle={notification.title}
+                      />
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-8" colSpan={7}>
+                <TableCell className="text-center py-8" colSpan={8}>
                   <div className="flex flex-col items-center gap-2">
                     <Bell className="h-12 w-12 text-muted-foreground" />
                     <p className="text-muted-foreground">{t('empty')}</p>

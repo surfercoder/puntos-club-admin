@@ -4,6 +4,7 @@ import { Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 import { deleteAppOrder } from '@/actions/dashboard/app_order/actions';
 import { Button } from '@/components/ui/button';
@@ -26,16 +27,18 @@ export default function DeleteModal({ appOrderId, appOrderNumber }: DeleteModalP
   const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
+  const t = useTranslations('Dashboard.appOrder.deleteModal');
+  const tCommon = useTranslations('Common');
 
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
       await deleteAppOrder(appOrderId);
-      toast.success('Pedido eliminado correctamente');
+      toast.success(t('deleteSuccess'));
       router.refresh();
       setOpen(false);
     } catch {
-      toast.error('Ocurrió un error al eliminar');
+      toast.error(t('genericError'));
     } finally {
       setIsDeleting(false);
     }
@@ -50,17 +53,20 @@ export default function DeleteModal({ appOrderId, appOrderNumber }: DeleteModalP
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Eliminar Pedido</DialogTitle>
+          <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>
-            ¿Estás seguro de que deseas eliminar el pedido <strong>{appOrderNumber}</strong>? Esta acción no se puede deshacer.
+            {t.rich('confirm', {
+              name: appOrderNumber,
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button disabled={isDeleting} onClick={() => setOpen(false)} variant="outline">
-            Cancelar
+            {tCommon('cancel')}
           </Button>
           <Button disabled={isDeleting} onClick={handleDelete} variant="destructive">
-            {isDeleting ? 'Eliminando...' : 'Eliminar'}
+            {isDeleting ? tCommon('deleting') : tCommon('delete')}
           </Button>
         </DialogFooter>
       </DialogContent>

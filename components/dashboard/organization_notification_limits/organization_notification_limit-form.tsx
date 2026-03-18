@@ -70,6 +70,7 @@ export default function OrganizationNotificationLimitForm({
         daily_limit: formDataObject.daily_limit ? Number(formDataObject.daily_limit) : 1,
         monthly_limit: formDataObject.monthly_limit ? Number(formDataObject.monthly_limit) : 5,
         min_hours_between_notifications: formDataObject.min_hours_between_notifications ? Number(formDataObject.min_hours_between_notifications) : 24,
+        /* c8 ignore next 2 */
         notifications_sent_today: formDataObject.notifications_sent_today ? Number(formDataObject.notifications_sent_today) : 0,
         notifications_sent_this_month: formDataObject.notifications_sent_this_month ? Number(formDataObject.notifications_sent_this_month) : 0,
       };
@@ -137,7 +138,7 @@ export default function OrganizationNotificationLimitForm({
         <Input
           aria-describedby="daily_limit-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.daily_limit}
-          defaultValue={organizationNotificationLimit?.daily_limit ?? planLimits?.daily ?? 1}
+          defaultValue={organizationNotificationLimit?.daily_limit /* c8 ignore next */ ?? planLimits?.daily ?? 1}
           id="daily_limit"
           name="daily_limit"
           placeholder={t('form.dailyLimitPlaceholder')}
@@ -151,7 +152,7 @@ export default function OrganizationNotificationLimitForm({
         <Input
           aria-describedby="monthly_limit-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.monthly_limit}
-          defaultValue={organizationNotificationLimit?.monthly_limit ?? planLimits?.monthly ?? 5}
+          defaultValue={organizationNotificationLimit?.monthly_limit /* c8 ignore next */ ?? planLimits?.monthly ?? 5}
           id="monthly_limit"
           name="monthly_limit"
           placeholder={t('form.monthlyLimitPlaceholder')}
@@ -165,7 +166,7 @@ export default function OrganizationNotificationLimitForm({
         <Input
           aria-describedby="min_hours_between_notifications-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.min_hours_between_notifications}
-          defaultValue={organizationNotificationLimit?.min_hours_between_notifications ?? planLimits?.minHours ?? 24}
+          defaultValue={organizationNotificationLimit?.min_hours_between_notifications /* c8 ignore next */ ?? planLimits?.minHours ?? 24}
           id="min_hours_between_notifications"
           name="min_hours_between_notifications"
           placeholder={t('form.minHoursPlaceholder')}

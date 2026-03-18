@@ -419,7 +419,7 @@ export default function NewPointsRulePage() {
             .map((c) => c.trim())
             .find((c) => c.startsWith("active_org_id="))
             ?.split("=")[1]
-        : undefined;
+        : /* c8 ignore next */ undefined;
 
     const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
     if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {

@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import {
   getOrganizationUsageSummary,
   checkPlanLimit,
+  getAllPlanLimits,
 } from '@/lib/plans/usage';
 import type { PlanFeatureKey } from '@/types/plan';
 
@@ -35,6 +36,14 @@ export async function getUsageSummaryAction() {
   const orgId = await getAuthenticatedOrgId();
   if (!orgId) return null;
   return getOrganizationUsageSummary(orgId);
+}
+
+/**
+ * Returns all plan limits from the database (for all plans).
+ * Used to display plan comparison cards with up-to-date values.
+ */
+export async function getAllPlanLimitsAction() {
+  return getAllPlanLimits();
 }
 
 /**

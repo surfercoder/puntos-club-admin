@@ -82,6 +82,53 @@ export async function updateUserRole(
 }
 
 /**
+ * Create a new user role
+ */
+export async function createUserRole(input: { name: string; display_name: string; description?: string }) {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("user_role")
+      .insert([input])
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath("/dashboard/user-role");
+    return { success: true, data };
+  } catch (_error) {
+    return { success: false, error: "An unexpected error occurred" };
+  }
+}
+
+/**
+ * Delete a user role
+ */
+export async function deleteUserRole(id: string) {
+  try {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+      .from("user_role")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath("/dashboard/user-role");
+    return { success: true };
+  } catch (_error) {
+    return { success: false, error: "An unexpected error occurred" };
+  }
+}
+
+/**
  * Get users count by role
  */
 export async function getUsersCountByRole() {

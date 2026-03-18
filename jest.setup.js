@@ -34,9 +34,51 @@ jest.mock('next/link', () => {
   return MockedLink
 })
 
-// Supabase mocks will be added in individual test files as needed
+// Mock next-intl
+jest.mock('next-intl', () => ({
+  useTranslations: jest.fn(() => {
+    const t = (key) => key;
+    t.rich = (key, _params) => key;
+    t.raw = (_key) => ({});
+    return t;
+  }),
+  useLocale: jest.fn(() => 'es'),
+}));
 
-// UI component mocks are handled in individual test files as needed
+// Mock Supabase client
+jest.mock('@/lib/supabase/client', () => ({
+  createClient: jest.fn(() => ({
+    auth: {
+      signOut: jest.fn().mockResolvedValue({}),
+      signInWithPassword: jest.fn(),
+      signUp: jest.fn(),
+      getSession: jest.fn(),
+      getUser: jest.fn(),
+    },
+    from: jest.fn(() => ({
+      select: jest.fn().mockReturnThis(),
+      insert: jest.fn().mockReturnThis(),
+      update: jest.fn().mockReturnThis(),
+      delete: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      single: jest.fn(),
+    })),
+  })),
+}));
+
+// Mock plan-usage-provider
+jest.mock('@/components/providers/plan-usage-provider', () => ({
+  usePlanUsage: jest.fn(() => ({
+    summary: null,
+    isLoading: false,
+    invalidate: jest.fn(),
+    isAtLimit: jest.fn(() => false),
+    shouldWarn: jest.fn(() => false),
+    getFeature: jest.fn(),
+    plan: null,
+  })),
+  PlanUsageProvider: ({ children }) => children,
+}));
 
 // Mock Sonner toast
 jest.mock('sonner', () => ({
@@ -91,6 +133,66 @@ if (typeof global.Headers === 'undefined') {
     constructor() {}
   };
 }
+
+// Polyfill Response.json static method for NextResponse.json compatibility
+if (typeof global.Response !== 'undefined' && typeof global.Response.json !== 'function') {
+  global.Response.json = function(data, init) {
+    const body = JSON.stringify(data);
+    const headers = new Headers(init?.headers);
+    headers.set('content-type', 'application/json');
+    return new Response(body, { ...init, headers });
+  };
+}
+
+// Polyfill Headers.getSetCookie for Next.js NextResponse cookie support (edge runtime)
+if (typeof global.Headers !== 'undefined' && !global.Headers.prototype.getSetCookie) {
+  global.Headers.prototype.getSetCookie = function() {
+    return [];
+  };
+}
+
+// Mock next/server NextResponse for jsdom environment (edge runtime APIs not available)
+jest.mock('next/server', () => {
+  class MockNextResponse {
+    constructor(body, init = {}) {
+      this._body = body;
+      this.status = init.status || 200;
+      this.statusText = init.statusText || '';
+      this.headers = new Headers(init.headers);
+      this._cookies = new Map();
+      this.ok = this.status >= 200 && this.status < 300;
+    }
+    async json() {
+      if (this._body === null || this._body === undefined) return null;
+      if (typeof this._body === 'string') return JSON.parse(this._body);
+      return this._body;
+    }
+    async text() { return typeof this._body === 'string' ? this._body : JSON.stringify(this._body); }
+    get cookies() {
+      return {
+        set: (name, value, options) => { this._cookies.set(name, { value, options }); },
+        get: (name) => this._cookies.get(name),
+        delete: (name) => this._cookies.delete(name),
+      };
+    }
+  }
+  MockNextResponse.json = function(body, init) {
+    const jsonBody = JSON.stringify(body);
+    const headers = new Headers(init?.headers);
+    headers.set('content-type', 'application/json');
+    return new MockNextResponse(jsonBody, { ...init, headers });
+  };
+  MockNextResponse.redirect = function(url, status) {
+    return new MockNextResponse(null, {
+      status: status || 307,
+      headers: { Location: typeof url === 'string' ? url : url.toString() },
+    });
+  };
+  return {
+    NextResponse: MockNextResponse,
+    NextRequest: class extends Request {},
+  };
+});
 
 // Clean up after each test
 afterEach(() => {

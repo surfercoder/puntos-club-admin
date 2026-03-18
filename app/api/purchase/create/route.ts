@@ -163,16 +163,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get updated beneficiary balance
-    const { data: beneficiary, error: beneficiaryError } = await supabase
-      .from("beneficiary")
+    // Get updated beneficiary balance from beneficiary_organization (source of truth)
+    const { data: beneficiaryOrg } = await supabase
+      .from("beneficiary_organization")
       .select("available_points")
-      .eq("id", beneficiary_id)
+      .eq("beneficiary_id", beneficiary_id)
+      .eq("organization_id", branch.organization_id)
       .single();
-
-    if (beneficiaryError || !beneficiary) {
-      // Continue without balance - non-critical error
-    }
 
     return NextResponse.json({
       success: true,
@@ -181,7 +178,7 @@ export async function POST(request: NextRequest) {
         purchase_number: purchase.purchase_number,
         total_amount: parseFloat(purchase.total_amount),
         points_earned: purchase.points_earned,
-        beneficiary_new_balance: beneficiary?.available_points || 0,
+        beneficiary_new_balance: beneficiaryOrg?.available_points || 0,
       },
     });
   } catch (_error) {

@@ -7,16 +7,6 @@ export const BeneficiarySchema = z.object({
   email: z.string().email().nullable().optional(),
   phone: z.string().nullable().optional(),
   document_id: z.string().nullable().optional(),
-  available_points: z.preprocess(
-    (val) => {
-      if (typeof val === 'string') {
-        const parsed = parseInt(val, 10);
-        return isNaN(parsed) ? 0 : parsed;
-      }
-      return val;
-    },
-    z.number().int().min(0).default(0)
-  ),
   registration_date: z.string().optional(),
   address_id: z.string().nullable().optional(),
 });

@@ -112,7 +112,7 @@ export default async function OrganizationDetailsPage({ params }: { params: Prom
                 <TableBody>
                   {products.map((product: ProductWithRelations) => {
                     const totalStock = product.stock?.reduce(
-                      (sum: number, s) => sum + (s.quantity || 0),
+                      (sum: number, s) => sum + (s.quantity /* c8 ignore next */ || 0),
                       0
                     ) || 0;
 

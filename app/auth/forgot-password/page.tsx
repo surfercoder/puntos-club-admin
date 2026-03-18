@@ -1,10 +1,15 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
+
 import { ForgotPasswordForm } from "@/components/forgot-password-form";
 
-export const metadata: Metadata = {
-  title: "Restablecer contraseña - Puntos Club Admin",
-  description: "Restablece la contraseña de tu cuenta",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Auth.forgotPassword");
+  return {
+    title: t("pageTitle"),
+    description: t("pageDescription"),
+  };
+}
 
 export default function Page() {
   return (

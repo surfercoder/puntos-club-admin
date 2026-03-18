@@ -3,7 +3,14 @@
     "appTitle": "Puntos Club Admin",
     "appDescription": "Puntos Club Administration Portal",
     "dashboardTitle": "Dashboard",
-    "dashboardDescription": "Puntos Club Administration Dashboard"
+    "dashboardDescription": "Puntos Club Administration Dashboard",
+    "homeTitle": "Puntos Club - Loyalty program for your business",
+    "homeDescription": "Create your points program and retain your customers with Puntos Club.",
+    "dashboardTemplate": "{page} | Dashboard",
+    "onboardingTitle": "Owner Registration - Puntos Club",
+    "onboardingDescription": "Create your business owner account on Puntos Club. Set up your organization, products, and start retaining your customers with reward points.",
+    "qrTitle": "QR Code | Dashboard",
+    "qrDescription": "Your organization's QR code for customers to join the loyalty program"
   },
   "Common": {
     "cancel": "Cancel",
@@ -42,7 +49,20 @@
     "savingChanges": "Saving...",
     "saveChanges": "Save Changes",
     "emailPlaceholder": "m@example.com",
-    "noResults": "No results"
+    "noResults": "No results",
+    "deleting": "Deleting...",
+    "imageUpload": {
+      "fileSizeError": "File size must be less than {maxSize}MB",
+      "selectImageFile": "Please select an image file",
+      "uploadFailed": "Upload failed",
+      "uploadSuccess": "Image uploaded successfully",
+      "uploadError": "Failed to upload image",
+      "removeSuccess": "Image removed",
+      "removeError": "Failed to remove image",
+      "uploading": "Uploading...",
+      "clickToUpload": "Click to upload image",
+      "maxSize": "Max size: {maxSize}MB"
+    }
   },
   "NotFound": {
     "title": "404 - Page Not Found",
@@ -63,7 +83,8 @@
       "signUpLink": "Sign up",
       "submitting": "Signing in...",
       "noPermission": "You do not have permission to access the administration portal.",
-      "pageTitle": "Sign in - Puntos Club Admin"
+      "pageTitle": "Sign in - Puntos Club Admin",
+      "pageDescription": "Sign in to your account"
     },
     "signUp": {
       "title": "Sign up",
@@ -74,7 +95,8 @@
       "submitting": "Creating account...",
       "alreadyHaveAccount": "Already have an account?",
       "loginLink": "Sign in",
-      "pageTitle": "Sign up - Puntos Club Admin"
+      "pageTitle": "Sign up - Puntos Club Admin",
+      "pageDescription": "Create a new administrator account"
     },
     "signUpSuccess": {
       "title": "Thanks for signing up!",
@@ -93,7 +115,8 @@
       "submitting": "Sending...",
       "alreadyHaveAccount": "Already have an account?",
       "loginLink": "Sign in",
-      "pageTitle": "Reset password - Puntos Club Admin"
+      "pageTitle": "Reset password - Puntos Club Admin",
+      "pageDescription": "Reset your account password"
     },
     "updatePassword": {
       "title": "Reset password",
@@ -102,18 +125,23 @@
       "newPasswordPlaceholder": "New password",
       "submitButton": "Save new password",
       "submitting": "Saving...",
-      "pageTitle": "New password - Puntos Club Admin"
+      "pageTitle": "New password - Puntos Club Admin",
+      "pageDescription": "Set a new password for your account"
     },
     "emailConfirmed": {
       "title": "Account confirmed",
       "message": "Your account has been successfully confirmed. Welcome to PuntosClub! You can now sign in and start using the app.",
       "openApp": "Open PuntosClub",
-      "openAppFallback": "If the button does not work, open the app manually from your device."
+      "openAppFallback": "If the button does not work, open the app manually from your device.",
+      "pageTitle": "Email Confirmed | Puntos Club",
+      "pageDescription": "Your email has been successfully confirmed."
     },
     "error": {
       "title": "We're sorry, something went wrong.",
       "errorCode": "Error code:",
-      "unspecifiedError": "An unspecified error occurred."
+      "unspecifiedError": "An unspecified error occurred.",
+      "pageTitle": "Error | Puntos Club",
+      "pageDescription": "An authentication error occurred."
     },
     "logout": "Sign out"
   },
@@ -129,7 +157,11 @@
     "organization": "Organization",
     "organizations": "Organizations",
     "addNewOrganization": "Add New Organization",
-    "panel": "Dashboard"
+    "panel": "Dashboard",
+    "planTrial": "Free Plan",
+    "planAdvance": "Advance Plan",
+    "planPro": "Pro Plan",
+    "managePlan": "Manage plan"
   },
   "Sidebar": {
     "addresses": "Addresses",
@@ -150,6 +182,9 @@
     "redemptions": "Redemptions",
     "stock": "Stock",
     "qrCode": "QR Code",
+    "subscriptions": "Subscriptions",
+    "planLimits": "Plan Limits",
+    "orgPlanLimits": "Org Plan Limits",
     "userRoles": "User Roles",
     "users": "Users",
     "notifications": "Notifications",
@@ -187,6 +222,9 @@
     "push_tokens": "Push Tokens",
     "redemption": "Redemptions",
     "stock": "Stock",
+    "subscription": "Subscriptions",
+    "plan_limits": "Plan Limits",
+    "organization_plan_limits": "Org Plan Limits",
     "user-role": "User Roles",
     "users": "Users",
     "qr": "QR Code"
@@ -251,6 +289,17 @@
         "title": "Create Push Notification",
         "description": "Send a notification to all your active beneficiaries"
       },
+      "editPage": {
+        "title": "Edit Push Notification",
+        "description": "Edit and resend a notification to all your active beneficiaries"
+      },
+      "deleteModal": {
+        "title": "Delete Notification",
+        "confirm": "Are you sure you want to delete <strong>{name}</strong>? This action cannot be undone.",
+        "deleteError": "Error deleting notification",
+        "deleteSuccess": "Notification deleted successfully",
+        "genericError": "An error occurred while deleting"
+      },
       "form": {
         "readyToSend": "Ready to Send",
         "limitReached": "Limit Reached",
@@ -269,7 +318,68 @@
         "aiTip": "Clear and concise messages work best. Emojis are supported!",
         "approved": "Approved",
         "rejected": "Rejected",
-        "moderationError": "Error moderating content"
+        "moderationError": "Error moderating content",
+        "validationTitleRequired": "Title is required",
+        "validationTitleMaxLength": "Title must be {max} characters or less",
+        "validationBodyRequired": "Message is required",
+        "validationBodyMaxLength": "Message must be {max} characters or less",
+        "moderationApproved": "Content approved! You can now send the notification.",
+        "moderationAlreadyApproved": "This content was already verified. You can send the notification.",
+        "moderationNeedsReview": "Content needs review. Please check the comments.",
+        "moderationVerifyError": "Error verifying content",
+        "moderationVerifyRetry": "Error verifying content. Please try again.",
+        "limitReachedError": "You have reached your notification limit. Please upgrade your plan or wait.",
+        "verifyBeforeSend": "Please verify the content with AI before sending",
+        "createError": "Error creating notification",
+        "createSuccess": "Notification created! Sending now...",
+        "sendError": "Error sending notification",
+        "sendSuccess": "Notification sent! {sent} sent, {failed} failed",
+        "unexpectedError": "An unexpected error occurred",
+        "previewTitlePlaceholder": "Your notification title",
+        "previewBodyPlaceholder": "Your notification message will appear here",
+        "creating": "Creating...",
+        "sending": "Sending...",
+        "titleTip": "Keep it short and direct. Emojis are allowed!",
+        "titlePlaceholder": "e.g. New rewards available! 🎉",
+        "bodyPlaceholder": "e.g. Check out our new products and earn double points this week! 🌟",
+        "addEmoji": "Add emoji",
+        "notesList1": "Notifications will be sent to all active beneficiaries following your organization",
+        "notesList2": "Character limits ensure compatibility across all devices",
+        "notesList3": "Once sent, notifications cannot be cancelled or edited",
+        "notesList4": "Beneficiaries must have the PuntosClub app installed to receive notifications",
+        "sentCount": "sent",
+        "resend": "Resend Notification",
+        "updateError": "Error updating notification"
+      },
+      "limits": {
+        "dailyLimitReached": "You have reached your daily notification limit",
+        "dailyLimitDetail": "Daily limit: {limit} notification(s)",
+        "dailyLimitAction": "Wait until tomorrow or upgrade your plan to send more notifications.",
+        "monthlyLimitReached": "You have reached your monthly notification limit",
+        "monthlyLimitDetail": "Monthly limit: {limit} notification(s)",
+        "monthlyLimitAction": "Wait until next month or upgrade your plan to send more notifications.",
+        "timeRestriction": "You must wait between notifications",
+        "timeRestrictionDetail": "Minimum time between notifications: {hours} hour(s)",
+        "timeRestrictionAction": "Wait the indicated time or upgrade your plan to reduce the waiting time.",
+        "readyToSend": "Ready to Send",
+        "limitReached": "Limit Reached",
+        "plan": "Plan:",
+        "today": "Today:",
+        "thisMonth": "This Month:",
+        "lastSent": "Last Sent:",
+        "timeRemaining": "Time remaining:",
+        "nextAvailable": "Next notification available:",
+        "dailyReset": "Daily reset:",
+        "monthlyReset": "Monthly reset:",
+        "whatToDo": "What to do:",
+        "sent": "sent"
+      },
+      "moderation": {
+        "contentApproved": "Content Approved",
+        "contentNeedsReview": "Content Needs Review",
+        "approvedMessage": "Your notification content has been reviewed and approved. You can now send it to your beneficiaries.",
+        "reviewReasons": "Please review your content for the following reasons:",
+        "reminder": "Remember: Notifications should only contain information about products, offers, promotions and campaigns."
       }
     },
     "users": {
@@ -430,7 +540,8 @@
       "nearingLimitWarning": "One or more resources are close to your plan limit.",
       "limitReachedTitle": "Plan limit reached",
       "limitReachedDescription": "You have reached the limit of your {plan}. Upgrade your plan to continue creating resources.",
-      "goBack": "Go back"
+      "goBack": "Go back",
+      "upgradeSuffix": "to increase these limits."
     },
     "planSettings": {
       "title": "Plan & Subscription",
@@ -561,6 +672,10 @@
         "deleteError": "Error deleting beneficiary",
         "deleteSuccess": "Beneficiary deleted successfully",
         "genericError": "An error occurred while deleting"
+      },
+      "hide": {
+        "hideTooltip": "Hide organization from this beneficiary",
+        "unhideTooltip": "Show organization to this beneficiary"
       }
     },
     "product": {
@@ -618,6 +733,12 @@
       "createTitle": "Create Order",
       "editTitle": "Edit Order",
       "fetchError": "Error fetching order",
+      "deleteModal": {
+        "title": "Delete Order",
+        "confirm": "Are you sure you want to delete order <strong>{name}</strong>? This action cannot be undone.",
+        "deleteSuccess": "Order deleted successfully",
+        "genericError": "An error occurred while deleting"
+      },
       "form": {
         "orderNumber": "Order Number",
         "orderNumberPlaceholder": "Enter order number",
@@ -632,6 +753,13 @@
       "createTitle": "Create Redemption",
       "editTitle": "Edit Redemption",
       "fetchError": "Error fetching redemption",
+      "deleteModal": {
+        "title": "Delete Redemption",
+        "confirm": "Are you sure you want to delete redemption <strong>{name}</strong>? This action cannot be undone.",
+        "deleteError": "Error deleting redemption",
+        "deleteSuccess": "Redemption deleted successfully",
+        "genericError": "An error occurred while deleting"
+      },
       "form": {
         "beneficiaryLabel": "Beneficiary",
         "selectBeneficiary": "Select a beneficiary",
@@ -651,6 +779,13 @@
       "createTitle": "Create Membership",
       "editTitle": "Edit Membership",
       "fetchError": "Error fetching membership",
+      "deleteModal": {
+        "title": "Delete Membership",
+        "confirm": "Are you sure you want to delete <strong>{name}</strong>? This action cannot be undone.",
+        "deleteError": "Error deleting membership",
+        "deleteSuccess": "Membership deleted successfully",
+        "genericError": "An error occurred while deleting"
+      },
       "form": {
         "userLabel": "User",
         "selectUser": "Select a user",
@@ -663,6 +798,13 @@
     "stock": {
       "createTitle": "Create Stock Record",
       "editTitle": "Edit Stock Record",
+      "deleteModal": {
+        "title": "Delete Stock Record",
+        "confirm": "Are you sure you want to delete the stock record for <strong>{name}</strong>? This action cannot be undone.",
+        "deleteError": "Error deleting stock record",
+        "deleteSuccess": "Stock record deleted successfully",
+        "genericError": "An error occurred while deleting"
+      },
       "form": {
         "branchLabel": "Branch",
         "selectBranch": "Select a branch",
@@ -738,7 +880,10 @@
       "confirmationSent": "We sent a confirmation link to",
       "noEmailReceived": "Didn't receive the email?",
       "useDifferentEmail": "Use a different email",
-      "creating": "Creating account..."
+      "creating": "Creating account...",
+      "genericError": "An error occurred. Please try again.",
+      "spamNote": "Check your spam or junk mail folder.",
+      "passwordHint": "Use at least 8 characters with a mix of letters and numbers."
     },
     "step2": {
       "businessName": "Business name",
@@ -797,7 +942,8 @@
         "beneficiaryMap": "Beneficiary map",
         "dashboard": "Dashboard",
         "excelPdfExport": "Excel / PDF export",
-        "customAI": "Custom AI"
+        "customAI": "Custom AI",
+        "businessIntelligence": "Business Intelligence"
       },
       "allPlansInclude": "All plans include email support.",
       "changePlanAnytime": "You can change your plan at any time.",
@@ -1026,6 +1172,23 @@
     "label": "Language",
     "es": "Español",
     "en": "English"
+  },
+  "Feedback": {
+    "trigger": "Feedback",
+    "title": "Send us your feedback",
+    "description": "Help us improve Puntos Club. Share your comments, report errors, or suggest improvements.",
+    "typeLabel": "Type",
+    "messageLabel": "Message",
+    "messagePlaceholder": "Tell us what you think...",
+    "types": {
+      "comment": "Comment",
+      "feedback": "Feedback",
+      "error": "Bug report",
+      "improvement": "Improvement",
+      "question": "Question"
+    },
+    "successMessage": "Feedback sent successfully. Thank you!",
+    "errorMessage": "Could not send feedback. Please try again."
   },
   "Tour": {
     "next": "Next",

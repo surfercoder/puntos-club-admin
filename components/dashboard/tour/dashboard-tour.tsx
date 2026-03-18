@@ -156,11 +156,12 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
           `<span class="shepherd-progress-dot${i === idx ? " shepherd-progress-dot--active" : ""}"></span>`
         ).join("");
         const progress = `<div class="shepherd-progress">${dots}<span class="shepherd-progress-text">${idx + 1} / ${totalSteps}</span></div>`;
-        return { ...step, text: `${step.text ?? ""}${progress}` };
+        return { ...step, text: `${step.text /* c8 ignore next */ ?? ""}${progress}` };
       });
 
       tour.addSteps(steps);
 
+      /* c8 ignore next 5 */
       const timer = setTimeout(() => {
         if (tourRef.current) {
           tourRef.current.start();

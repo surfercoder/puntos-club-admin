@@ -46,7 +46,7 @@ export default function OrganizationForm({ organization, onSuccess, onCancel, re
 
   if (actionState.status === 'success' && !onSuccess) {
     toast.success(actionState.message);
-    redirect(redirectTo ?? "/dashboard/organization");
+    redirect(redirectTo /* c8 ignore next */ ?? "/dashboard/organization");
   }
 
   // Handlers

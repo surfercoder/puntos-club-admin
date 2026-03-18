@@ -34,6 +34,9 @@ import {
   Frame,
   ShoppingCart,
   QrCode,
+  Wallet,
+  Gauge,
+  SlidersHorizontal,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
 
@@ -41,6 +44,7 @@ import { NavMain } from "@/components/nav-main"
 import { NavProjects } from "@/components/nav-projects"
 import { NavUser } from "@/components/nav-user"
 import { OrgSwitcher, type OrgSwitcherOrg } from "@/components/org-switcher"
+import { PlanBadge } from "@/components/plan-badge"
 import {
   Sidebar,
   SidebarContent,
@@ -91,7 +95,9 @@ export function AppSidebar({
         { title: t("branches"), url: "/dashboard/branch", icon: Store },
         { title: t("categories"), url: "/dashboard/category", icon: LayoutGrid },
         { title: t("notificationLimits"), url: "/dashboard/organization_notification_limits", icon: BellMinus },
+        { title: t("orgPlanLimits"), url: "/dashboard/organization_plan_limits", icon: SlidersHorizontal },
         { title: t("organizations"), url: "/dashboard/organization", icon: Building2 },
+        { title: t("planLimits"), url: "/dashboard/plan_limits", icon: Gauge },
         { title: t("pointsRules"), url: "/dashboard/points-rules", icon: Trophy },
         { title: t("products"), url: "/dashboard/product", icon: Package },
         { title: t("purchases"), url: "/dashboard/purchase", icon: CreditCard },
@@ -99,9 +105,8 @@ export function AppSidebar({
         { title: t("pushTokens"), url: "/dashboard/push_tokens", icon: KeyRound },
         { title: t("redemptions"), url: "/dashboard/redemption", icon: Ticket },
         { title: t("stock"), url: "/dashboard/stock", icon: Boxes },
-        { title: t("qrCode"), url: "/dashboard/qr", icon: QrCode },
+        { title: t("subscriptions"), url: "/dashboard/subscription", icon: Wallet },
         { title: t("userRoles"), url: "/dashboard/user-role", icon: Shield },
-        { title: t("users"), url: "/dashboard/users", icon: Users },
       ]
         .slice()
         .sort((a, b) => a.title.localeCompare(b.title))
@@ -122,7 +127,7 @@ export function AppSidebar({
         { title: t("purchases"), url: "/dashboard/purchase", icon: Receipt },
         { title: t("redemptions"), url: "/dashboard/redemption", icon: Gift },
         { title: t("stock"), url: "/dashboard/stock", icon: Boxes },
-        { title: t("users"), url: "/dashboard/users", icon: Users },
+        { title: t("appUsers"), url: "/dashboard/app_user", icon: Users },
       ]
         .slice()
         .sort((a, b) => a.title.localeCompare(b.title))
@@ -172,7 +177,7 @@ export function AppSidebar({
           { title: t("categories"), url: "/dashboard/category" },
           { title: t("products"), url: "/dashboard/product" },
           { title: t("stock"), url: "/dashboard/stock" },
-          { title: t("users"), url: "/dashboard/users" },
+          { title: t("appUsers"), url: "/dashboard/app_user" },
           { title: t("usersByOrg"), url: "/dashboard/app_user_organization" },
         ],
       },
@@ -218,6 +223,7 @@ export function AppSidebar({
         )}
       </SidebarContent>
       <SidebarFooter>
+        {portalMode === "org" && <PlanBadge />}
         <NavUser user={user} onLogout={onLogout} />
       </SidebarFooter>
       <SidebarRail />

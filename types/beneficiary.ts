@@ -9,7 +9,6 @@ export type Beneficiary = {
   email?: string | null;
   phone?: string | null;
   document_id?: string | null;
-  available_points: number;
   registration_date: string;
   role_id?: string | null;
   address_id?: string | null;

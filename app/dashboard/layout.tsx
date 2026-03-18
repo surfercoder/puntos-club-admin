@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import { getTranslations } from 'next-intl/server'
 
 import { DashboardShell } from '@/components/dashboard-shell'
 import { getCurrentUser } from '@/lib/auth/get-current-user'
@@ -7,12 +8,15 @@ import { isAdmin, isCollaborator, isOwner } from '@/lib/auth/roles'
 import { getOrganizationUsageSummary } from '@/lib/plans/usage'
 import { createClient } from '@/lib/supabase/server'
 
-export const metadata: Metadata = {
-  title: {
-    template: '%s | Panel',
-    default: 'Panel',
-  },
-  description: 'Panel de administración de Puntos Club',
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations('Metadata')
+  return {
+    title: {
+      template: `%s | ${t('dashboardTitle')}`,
+      default: t('dashboardTitle'),
+    },
+    description: t('dashboardDescription'),
+  }
 }
 
 export default async function DashboardLayout({

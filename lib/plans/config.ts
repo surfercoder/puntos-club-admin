@@ -23,38 +23,6 @@ export const PLAN_FEATURE_ICONS: Record<PlanFeatureKey, string> = {
   redeemable_products:        'Gift',
 };
 
-/**
- * Static copy of the plan limits (mirrors the `plan_limits` DB table).
- * Use this for UI rendering that does not need a DB round-trip.
- * Always treat the DB as the authoritative source for enforcement.
- */
-export const PLAN_LIMITS_CONFIG: Record<PlanType, Record<PlanFeatureKey, number>> = {
-  trial: {
-    beneficiaries:               100,
-    push_notifications_monthly:    3,
-    cashiers:                      1,
-    branches:                      1,
-    collaborators:                  1,
-    redeemable_products:           2,
-  },
-  advance: {
-    beneficiaries:               500,
-    push_notifications_monthly:   10,
-    cashiers:                     10,
-    branches:                      5,
-    collaborators:                  3,
-    redeemable_products:          10,
-  },
-  pro: {
-    beneficiaries:              5000,
-    push_notifications_monthly:   50,
-    cashiers:                    100,
-    branches:                     15,
-    collaborators:                 10,
-    redeemable_products:          30,
-  },
-};
-
 /** Plan display names */
 export const PLAN_DISPLAY_NAMES: Record<PlanType, string> = {
   trial:   'Plan Trial',

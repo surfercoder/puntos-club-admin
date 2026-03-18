@@ -1,15 +1,12 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
 
+import DeleteModal from '@/components/dashboard/push_tokens_crud/delete-modal';
+import ToastHandler from '@/components/dashboard/push_tokens_crud/toast-handler';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { isAdmin } from '@/lib/auth/roles';
@@ -19,8 +16,6 @@ import { createAdminClient } from '@/lib/supabase/admin';
 export default async function PushTokensListPage() {
   const currentUser = await getCurrentUser();
   const userIsAdmin = isAdmin(currentUser);
-
-  // Use admin client to bypass RLS for admin users
   const supabase = userIsAdmin ? createAdminClient() : await createClient();
 
   const { data, error } = await supabase
@@ -29,18 +24,19 @@ export default async function PushTokensListPage() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    return <div>Error al obtener tokens push</div>;
+    return <div>Error loading push tokens</div>;
   }
 
   return (
     <div className="space-y-6">
+      <ToastHandler />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Tokens Push</h1>
-          <p className="text-muted-foreground">Administrar tokens push de dispositivos de beneficiarios</p>
+          <h1 className="text-2xl font-bold">Push Tokens</h1>
+          <p className="text-muted-foreground">Manage beneficiary device push tokens</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/push_tokens/create">+ Nuevo Token Push</Link>
+          <Link href="/dashboard/push_tokens/create">+ New Push Token</Link>
         </Button>
       </div>
 
@@ -48,49 +44,51 @@ export default async function PushTokensListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Beneficiario</TableHead>
-              <TableHead>Plataforma</TableHead>
-              <TableHead>ID de Dispositivo</TableHead>
+              <TableHead>Beneficiary</TableHead>
+              <TableHead>Platform</TableHead>
+              <TableHead>Device ID</TableHead>
               <TableHead>Token</TableHead>
-              <TableHead>Activo</TableHead>
-              <TableHead>Creado el</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>Active</TableHead>
+              <TableHead>Created</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {data && data.length > 0 ? (
-              data.map((token) => (
-                <TableRow key={token.id}>
-                  <TableCell className="font-medium">
-                    {Array.isArray(token.beneficiary) 
-                      ? `${token.beneficiary[0]?.first_name || ''} ${token.beneficiary[0]?.last_name || ''}`.trim() || token.beneficiary[0]?.email
-                      : `${token.beneficiary?.first_name || ''} ${token.beneficiary?.last_name || ''}`.trim() || token.beneficiary?.email || 'N/A'}
-                  </TableCell>
-                  <TableCell>{token.platform || 'N/A'}</TableCell>
-                  <TableCell>{token.device_id || 'N/A'}</TableCell>
-                  <TableCell className="max-w-xs truncate">{token.expo_push_token}</TableCell>
-                  <TableCell>
-                    <Badge variant={token.is_active ? 'default' : 'secondary'}>
-                      {token.is_active ? 'Activo' : 'Inactivo'}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {new Date(token.created_at).toLocaleString()}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button asChild size="sm" variant="secondary">
-                        <Link href={`/dashboard/push_tokens/${token.id}`}>
-                          <Pencil className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+              data.map((token) => {
+                const beneficiary = Array.isArray(token.beneficiary) ? token.beneficiary[0] : token.beneficiary;
+                const beneficiaryName = beneficiary
+                  ? `${beneficiary.first_name || ''} ${beneficiary.last_name || ''}`.trim() || beneficiary.email
+                  : 'N/A';
+
+                return (
+                  <TableRow key={token.id}>
+                    <TableCell className="font-medium">{beneficiaryName}</TableCell>
+                    <TableCell>{token.platform || 'N/A'}</TableCell>
+                    <TableCell>{token.device_id || 'N/A'}</TableCell>
+                    <TableCell className="max-w-xs truncate">{token.expo_push_token}</TableCell>
+                    <TableCell>
+                      <Badge variant={token.is_active ? 'default' : 'secondary'}>
+                        {token.is_active ? 'Active' : 'Inactive'}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>{new Date(token.created_at).toLocaleString()}</TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button asChild size="sm" variant="secondary">
+                          <Link href={`/dashboard/push_tokens/edit/${token.id}`}>
+                            <Pencil className="h-4 w-4" />
+                          </Link>
+                        </Button>
+                        <DeleteModal tokenId={String(token.id)} tokenLabel={beneficiaryName} />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                );
+              })
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={7}>No se encontraron tokens push.</TableCell>
+                <TableCell className="text-center py-4" colSpan={7}>No push tokens found.</TableCell>
               </TableRow>
             )}
           </TableBody>

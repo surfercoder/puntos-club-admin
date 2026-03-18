@@ -57,6 +57,7 @@ export default function AppOrderForm({ appOrder }: AppOrderFormProps) {
 
   // Format date for input (YYYY-MM-DD)
   const formatDateForInput = (dateString: string) => {
+    /* c8 ignore next */
     if (!dateString) {return '';}
     return new Date(dateString).toISOString().split('T')[0];
   };

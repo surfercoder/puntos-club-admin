@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
 import { moderateNotificationContent } from '@/lib/ai/content-moderator';
+import { computeContentHash } from '@/lib/notifications/content-hash';
 import { createClient } from '@/lib/supabase/server';
 
 export async function POST(request: NextRequest) {
@@ -41,13 +42,31 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { title, body: notificationBody } = body;
+    const { title, body: notificationBody, notificationId } = body;
 
     if (!title || !notificationBody) {
       return NextResponse.json(
         { success: false, error: 'El título y el cuerpo son requeridos' },
         { status: 400 }
       );
+    }
+
+    // If editing an existing notification, check if content was already approved with same hash
+    if (notificationId) {
+      const contentHash = computeContentHash(title, notificationBody);
+      const { data: existing } = await supabase
+        .from('push_notifications')
+        .select('moderation_approved, moderation_content_hash')
+        .eq('id', notificationId)
+        .single();
+
+      if (existing?.moderation_approved && existing.moderation_content_hash === contentHash) {
+        return NextResponse.json({
+          success: true,
+          data: { isApproved: true, reasons: [], severity: 'low' },
+          cached: true,
+        });
+      }
     }
 
     if (!process.env.ANTHROPIC_API_KEY) {
@@ -58,6 +77,18 @@ export async function POST(request: NextRequest) {
     }
 
     const moderationResult = await moderateNotificationContent(title, notificationBody);
+
+    // Persist moderation result to the notification record
+    if (notificationId) {
+      const contentHash = computeContentHash(title, notificationBody);
+      await supabase
+        .from('push_notifications')
+        .update({
+          moderation_approved: moderationResult.isApproved,
+          moderation_content_hash: contentHash,
+        })
+        .eq('id', notificationId);
+    }
 
     return NextResponse.json({
       success: true,

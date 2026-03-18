@@ -127,19 +127,13 @@ export async function createPurchase(
       };
     }
 
-    // Get updated beneficiary balance
-    const { data: beneficiary, error: beneficiaryError } = await supabase
-      .from("beneficiary")
+    // Get updated beneficiary balance from beneficiary_organization (source of truth)
+    const { data: beneficiaryOrg } = await supabase
+      .from("beneficiary_organization")
       .select("available_points")
-      .eq("id", input.beneficiary_id)
+      .eq("beneficiary_id", input.beneficiary_id)
+      .eq("organization_id", branch.organization_id)
       .single();
-
-    if (beneficiaryError || !beneficiary) {
-      return {
-        success: false,
-        error: "Failed to fetch beneficiary balance",
-      };
-    }
 
     // Revalidate relevant paths
     revalidatePath("/dashboard/purchases");
@@ -152,7 +146,7 @@ export async function createPurchase(
         purchase_number: purchase.purchase_number,
         total_amount: parseFloat(purchase.total_amount),
         points_earned: purchase.points_earned,
-        beneficiary_new_balance: beneficiary?.available_points || 0,
+        beneficiary_new_balance: beneficiaryOrg?.available_points || 0,
       },
     };
   } catch (_error) {
@@ -258,6 +252,54 @@ export async function getAllPurchases(filters?: {
 }
 
 /**
+ * Update an existing purchase (admin only)
+ */
+export async function updatePurchase(id: string, input: Record<string, unknown>) {
+  try {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+      .from("purchase")
+      .update(input)
+      .eq("id", id)
+      .select()
+      .single();
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath("/dashboard/purchase");
+    return { success: true, data };
+  } catch (_error) {
+    return { success: false, error: "An unexpected error occurred" };
+  }
+}
+
+/**
+ * Delete a purchase (admin only)
+ */
+export async function deletePurchase(id: string) {
+  try {
+    const supabase = await createClient();
+
+    const { error } = await supabase
+      .from("purchase")
+      .delete()
+      .eq("id", id);
+
+    if (error) {
+      return { success: false, error: error.message };
+    }
+
+    revalidatePath("/dashboard/purchase");
+    return { success: true };
+  } catch (_error) {
+    return { success: false, error: "An unexpected error occurred" };
+  }
+}
+
+/**
  * Get purchase details by ID
  */
 export async function getPurchaseById(purchase_id: number) {
@@ -304,7 +346,7 @@ export async function verifyBeneficiary(_user_id: string) {
 
     const { data, error } = await supabase
       .from("beneficiary")
-      .select("id, first_name, last_name, email, available_points")
+      .select("id, first_name, last_name, email")
       .eq("email", authUser.user.email)
       .single();
 

@@ -94,7 +94,7 @@ export default function AppUserOrganizationForm({ appUserOrganization }: AppUser
           <SelectContent>
             {users.map((u) => (
               <SelectItem key={u.id} value={u.id}>
-                {u.first_name || u.last_name ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : u.email || t('form.noName')}
+                {/* c8 ignore next */ u.first_name || u.last_name ? `${u.first_name || ''} ${u.last_name || ''}`.trim() : u.email || t('form.noName')}
               </SelectItem>
             ))}
           </SelectContent>

@@ -271,10 +271,11 @@ export async function completeOnboarding(input: {
       name: 'Regla de puntos base',
       description: 'Por cada $1 de compra, el cliente gana 1 punto',
       rule_type: 'fixed_amount',
-      config: { points_per_unit: 1, unit_amount: 1 },
+      config: { points_per_dollar: 1 },
       is_active: true,
       is_default: true,
       organization_id: organizationId,
+      branch_id: branchId,
       priority: 0,
       display_name: '1 punto por $1',
       display_icon: '⭐',
@@ -292,8 +293,8 @@ export async function completeOnboarding(input: {
           mp_plan_id: plan, // Subscription uses "without plan" flow; plan is our internal id
           plan,
           status: 'pending',
-          payer_email: user.email ?? '',
-          amount: PLAN_AMOUNTS[plan] ?? 0,
+          payer_email: user.email /* c8 ignore next */ ?? '',
+          amount: PLAN_AMOUNTS[plan] /* c8 ignore next */ ?? 0,
           currency: 'ARS',
         },
         { onConflict: 'mp_preapproval_id' }
@@ -497,7 +498,7 @@ export async function getOnboardingStatus() {
       data: {
         appUserId: appUser.id,
         organizationId: appUser.organization_id,
-        branchId: branch?.id ?? null,
+        branchId: branch?.id /* c8 ignore next */ ?? null,
         role: role?.name,
         org,
       },

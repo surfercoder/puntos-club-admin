@@ -12,37 +12,23 @@ import {
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
-import { LanguageSwitcher } from "@/components/language-switcher";
+import { PublicHeader } from "@/components/public-header";
+import { PublicFooter } from "@/components/public-footer";
 
-export const metadata: Metadata = {
-  title: "Puntos Club - Programa de fidelización para tu negocio",
-  description: "Crea tu programa de puntos y fideliza a tus clientes con Puntos Club.",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Metadata");
+  return {
+    title: t("homeTitle"),
+    description: t("homeDescription"),
+  };
+}
 
 export default async function Home() {
   const t = await getTranslations("HomePage");
 
   return (
     <div className="flex min-h-svh flex-col">
-      {/* Header */}
-      <header className="sticky top-0 z-50 border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="mx-auto flex h-14 max-w-6xl items-center justify-between px-4 sm:px-6">
-          <Link href="/" className="text-lg font-bold tracking-tight">
-            Puntos Club
-          </Link>
-          <div className="absolute left-1/2 -translate-x-1/2">
-            <LanguageSwitcher />
-          </div>
-          <nav className="flex items-center gap-2">
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/auth/login">{t("signIn")}</Link>
-            </Button>
-            <Button size="sm" asChild>
-              <Link href="/auth/sign-up">{t("signUp")}</Link>
-            </Button>
-          </nav>
-        </div>
-      </header>
+      <PublicHeader />
 
       {/* Hero */}
       <main className="flex-1">
@@ -131,28 +117,7 @@ export default async function Home() {
         </section>
       </main>
 
-      {/* Footer */}
-      <footer className="border-t">
-        <div className="mx-auto flex max-w-6xl flex-col items-center gap-4 px-4 py-8 sm:flex-row sm:justify-between sm:px-6">
-          <p className="text-sm text-muted-foreground">
-            {t("footerCopyright", { year: new Date().getFullYear() })}
-          </p>
-          <nav className="flex gap-6">
-            <Link
-              href="/auth/login"
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              {t("signIn")}
-            </Link>
-            <Link
-              href="/auth/sign-up"
-              className="text-sm text-muted-foreground hover:text-foreground"
-            >
-              {t("signUp")}
-            </Link>
-          </nav>
-        </div>
-      </footer>
+      <PublicFooter />
     </div>
   );
 }

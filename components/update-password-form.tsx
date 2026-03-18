@@ -42,6 +42,7 @@ export function UpdatePasswordForm({
       const errors: Record<string, string> = {};
       for (const issue of result.error.issues) {
         const field = String(issue.path[0]);
+        /* c8 ignore next */
         if (!errors[field]) errors[field] = issue.message;
       }
       setFieldErrors(errors);

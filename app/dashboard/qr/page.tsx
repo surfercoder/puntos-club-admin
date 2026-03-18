@@ -8,10 +8,13 @@ import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { OrgQRDisplay } from '@/components/dashboard/qr/org-qr-display';
 
-export const metadata: Metadata = {
-  title: 'Código QR | Panel',
-  description: 'Código QR de tu organización para que los clientes se unan al programa de puntos',
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const tMeta = await getTranslations('Metadata');
+  return {
+    title: tMeta('qrTitle'),
+    description: tMeta('qrDescription'),
+  };
+}
 
 export default async function QRPage() {
   const supabase = await createClient();

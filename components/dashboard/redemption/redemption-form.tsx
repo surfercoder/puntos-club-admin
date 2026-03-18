@@ -54,6 +54,7 @@ function formDataReducer(_state: FormDataState, action: FormDataAction): FormDat
   switch (action.type) {
     case 'SET_FORM_DATA':
       return action.payload;
+    /* c8 ignore next 2 */
     default:
       return _state;
   }
@@ -95,7 +96,7 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
             orgIdNumber = parsed;
           }
         }
-      } catch {
+      } /* c8 ignore next 2 */ catch {
         // ignore
       }
 

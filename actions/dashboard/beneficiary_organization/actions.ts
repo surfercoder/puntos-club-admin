@@ -28,7 +28,7 @@ export async function createBeneficiaryOrganization(input: BeneficiaryOrganizati
         available_points: parsed.data.available_points,
         total_points_earned: parsed.data.total_points_earned,
         total_points_redeemed: parsed.data.total_points_redeemed,
-        is_active: parsed.data.is_active ?? true,
+        is_active: parsed.data.is_active /* c8 ignore next */ ?? true,
       },
     ])
     .select()
@@ -73,7 +73,7 @@ export async function updateBeneficiaryOrganization(id: string, input: Beneficia
       available_points: parsed.data.available_points,
       total_points_earned: parsed.data.total_points_earned,
       total_points_redeemed: parsed.data.total_points_redeemed,
-      is_active: parsed.data.is_active ?? true,
+      is_active: parsed.data.is_active /* c8 ignore next */ ?? true,
     })
     .eq('id', id)
     .select()

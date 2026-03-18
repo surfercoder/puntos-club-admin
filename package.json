@@ -20,16 +20,17 @@
     "types:supabase": "supabase gen types typescript --local > types/supabase.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.78.0",
+    "@anthropic-ai/sdk": "^0.79.0",
     "@googlemaps/js-api-loader": "^2.0.2",
+    "@sentry/nextjs": "^10.44.0",
     "@supabase/ssr": "^0.9.0",
-    "@supabase/supabase-js": "^2.99.1",
+    "@supabase/supabase-js": "^2.99.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "emoji-picker-react": "^4.18.0",
     "lucide-react": "^0.577.0",
     "mercadopago": "^2.12.0",
-    "next": "^16.1.6",
+    "next": "^16.1.7",
     "next-intl": "^4.8.3",
     "next-themes": "^0.4.6",
     "nodemailer": "^8.0.2",
@@ -49,6 +50,7 @@
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.2.1",
+    "@testing-library/dom": "^10.4.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.2",
     "@testing-library/user-event": "^14.6.1",
@@ -61,7 +63,7 @@
     "@types/react-google-recaptcha": "^2.1.9",
     "dotenv": "^17.3.1",
     "eslint": "^10.0.3",
-    "eslint-config-next": "^16.1.6",
+    "eslint-config-next": "^16.1.7",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
@@ -71,11 +73,11 @@
     "jest": "^30.3.0",
     "jest-environment-jsdom": "^30.3.0",
     "postcss": "^8.5.8",
-    "shadcn": "^4.0.6",
+    "shadcn": "^4.0.8",
     "tailwindcss": "^4.2.1",
     "tsx": "^4.21.0",
     "tw-animate-css": "^1.4.0",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.57.0"
+    "typescript-eslint": "^8.57.1"
   }
 }

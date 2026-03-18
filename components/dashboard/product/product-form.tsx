@@ -36,13 +36,13 @@ export default function ProductForm({ product }: ProductFormProps) {
 
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoryState, setCategoryState] = useState<{ items: Category[]; loaded: boolean }>({ items: [], loaded: false });
   const [selectedCategory, setSelectedCategory] = useState<string>(product?.category_id ?? '');
   const [imageUrls, setImageUrls] = useState<string[]>(product?.image_urls ?? []);
 
   // Utils
   const [actionState, formAction, pending] = useActionState(productFormAction, EMPTY_ACTION_STATE);
-  const { invalidate } = usePlanUsage();
+  const { invalidate: _invalidate } = usePlanUsage();
 
   // Load categories
   useEffect(() => {
@@ -67,9 +67,7 @@ export default function ProductForm({ product }: ProductFormProps) {
       }
 
       const { data } = await query;
-      if (data) {
-        setCategories(data);
-      }
+      setCategoryState({ items: data ?? [], loaded: true });
     }
     loadCategories();
   }, []);
@@ -82,7 +80,9 @@ export default function ProductForm({ product }: ProductFormProps) {
 
   if (actionState.status === 'success') {
     toast.success(actionState.message);
-    invalidate();
+    // Redirect first, then invalidate plan usage cache.
+    // If invalidate() runs before redirect(), the PlanLimitGuard may
+    // re-render and block the page before the navigation occurs.
     redirect("/dashboard/product");
   }
 
@@ -120,7 +120,7 @@ export default function ProductForm({ product }: ProductFormProps) {
           aria-invalid={!!(validation ?? actionState).fieldErrors?.category_id}
         >
           <option value="">{t('categoryPlaceholder')}</option>
-          {categories.map((category) => (
+          {categoryState.items.map((category) => (
             <option key={category.id} value={category.id}>
               {category.name}
             </option>
@@ -193,7 +193,7 @@ export default function ProductForm({ product }: ProductFormProps) {
         <Button asChild type="button" variant="secondary">
           <Link href="/dashboard/product">{tCommon('cancel')}</Link>
         </Button>
-        <Button disabled={pending} type="submit">
+        <Button disabled={pending || !categoryState.loaded} type="submit">
           {product ? tCommon('update') : tCommon('create')}
         </Button>
       </div>

@@ -75,7 +75,19 @@
       "Bash(echo \"=== $f ===\")",
       "Read(//Users/agustincassani/Documents/projects/surfercoder/puntos-club/puntos-club-admin/**)",
       "Bash(done)",
-      "Bash(npm run:*)"
+      "Bash(npm run:*)",
+      "mcp__context7__resolve-library-id",
+      "mcp__context7__query-docs",
+      "mcp__playwright__browser_navigate",
+      "mcp__playwright__browser_fill_form",
+      "mcp__playwright__browser_click",
+      "mcp__playwright__browser_wait_for",
+      "mcp__playwright__browser_snapshot",
+      "Bash(npx jest:*)",
+      "Bash(JEST_WORKER_ID=1 node_modules/.bin/jest __tests__/schemas/ --no-coverage --watchAll=false --no-cache 2>&1 | tail -50)",
+      "Bash(tail:*)",
+      "Bash(npx:*)",
+      "Bash(ls:*)"
     ],
     "deny": []
   },

@@ -4,6 +4,7 @@ import { Trash2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 import { deleteRedemption } from '@/actions/dashboard/redemption/actions';
 import { Button } from '@/components/ui/button';
@@ -26,20 +27,22 @@ export default function DeleteModal({ redemptionId, redemptionDescription }: Del
   const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
+  const t = useTranslations('Dashboard.redemption.deleteModal');
+  const tCommon = useTranslations('Common');
 
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
       const result = await deleteRedemption(redemptionId);
       if (result.error) {
-        toast.error('Error al eliminar el canje');
+        toast.error(t('deleteError'));
       } else {
-        toast.success('Canje eliminado correctamente');
+        toast.success(t('deleteSuccess'));
         router.refresh();
         setOpen(false);
       }
     } catch {
-      toast.error('Ocurrió un error al eliminar');
+      toast.error(t('genericError'));
     } finally {
       setIsDeleting(false);
     }
@@ -54,17 +57,20 @@ export default function DeleteModal({ redemptionId, redemptionDescription }: Del
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Eliminar Canje</DialogTitle>
+          <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>
-            ¿Estás seguro de que deseas eliminar el canje <strong>{redemptionDescription}</strong>? Esta acción no se puede deshacer.
+            {t.rich('confirm', {
+              name: redemptionDescription,
+              strong: (chunks) => <strong>{chunks}</strong>,
+            })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button disabled={isDeleting} onClick={() => setOpen(false)} variant="outline">
-            Cancelar
+            {tCommon('cancel')}
           </Button>
           <Button disabled={isDeleting} onClick={handleDelete} variant="destructive">
-            {isDeleting ? 'Eliminando...' : 'Eliminar'}
+            {isDeleting ? tCommon('deleting') : tCommon('delete')}
           </Button>
         </DialogFooter>
       </DialogContent>

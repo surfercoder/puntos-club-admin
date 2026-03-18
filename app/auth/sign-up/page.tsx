@@ -1,11 +1,15 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 
 import { SignUpForm } from "@/components/sign-up-form";
 
-export const metadata: Metadata = {
-  title: "Registrarse - Puntos Club Admin",
-  description: "Crear una nueva cuenta de administrador",
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const t = await getTranslations("Auth.signUp");
+  return {
+    title: t("pageTitle"),
+    description: t("pageDescription"),
+  };
+}
 
 export default function Page() {
   return (
