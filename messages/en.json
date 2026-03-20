@@ -721,7 +721,10 @@
       },
       "hide": {
         "hideTooltip": "Hide organization from this beneficiary",
-        "unhideTooltip": "Show organization to this beneficiary"
+        "unhideTooltip": "Show organization to this beneficiary",
+        "hideSuccess": "Organization hidden from this beneficiary",
+        "unhideSuccess": "Organization is now visible to this beneficiary",
+        "error": "An error occurred while updating visibility"
       }
     },
     "product": {

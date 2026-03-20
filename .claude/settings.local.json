@@ -95,7 +95,12 @@
       "Bash(cp puntos-club-landing-page/public/legal/*.pdf public/assets/legal/)",
       "mcp__playwright__browser_take_screenshot",
       "mcp__playwright__browser_evaluate",
-      "Bash(git stash:*)"
+      "Bash(git stash:*)",
+      "mcp__mercadopago__application_list",
+      "mcp__mercadopago__quality_checklist",
+      "mcp__mercadopago__notifications_history",
+      "mcp__mercadopago__search_documentation",
+      "mcp__mercadopago__save_webhook"
     ],
     "deny": []
   },

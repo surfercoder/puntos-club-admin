@@ -1,5 +1,6 @@
 'use server';
 
+import crypto from 'crypto';
 import { type NextRequest, NextResponse } from 'next/server';
 import { PreApproval } from 'mercadopago/dist/clients/preApproval';
 import type { PreApprovalResponse } from 'mercadopago/dist/clients/preApproval/commonTypes';
@@ -22,9 +23,26 @@ export async function POST(request: NextRequest) {
     const webhookSecret = process.env.MP_WEBHOOK_SECRET;
 
     if (webhookSecret && xSignature) {
-      // MP signs: ts=<timestamp>,v1=<hmac-sha256(secret, "id:<notifId>;request-id:<xRequestId>;ts:<ts>")>
-      // For now we log; implement HMAC verification before going to production.
-      void xSignature; void xRequestId;
+      // Parse ts and v1 from the x-signature header (format: "ts=<ts>,v1=<hash>")
+      const parts = Object.fromEntries(
+        xSignature.split(',').map((part) => {
+          const [key, ...rest] = part.trim().split('=');
+          return [key, rest.join('=')];
+        })
+      );
+      const ts = parts.ts;
+      const v1 = parts.v1;
+
+      // data.id is sent by MercadoPago as a query parameter
+      const dataId = request.nextUrl.searchParams.get('data.id') ?? request.nextUrl.searchParams.get('id') ?? '';
+
+      // Build the manifest string and compute HMAC-SHA256
+      const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+      const hmac = crypto.createHmac('sha256', webhookSecret).update(manifest).digest('hex');
+
+      if (hmac !== v1) {
+        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+      }
     }
 
     const body = await request.json() as {

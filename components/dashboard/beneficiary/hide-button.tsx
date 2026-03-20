@@ -1,9 +1,10 @@
 'use client';
 
-import { EyeOff, Eye } from 'lucide-react';
+import { EyeOff, Eye, Loader2 } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import {
@@ -40,8 +41,13 @@ export function HideButton({
       });
 
       if (res.ok) {
+        toast.success(isHidden ? t('unhideSuccess') : t('hideSuccess'));
         router.refresh();
+      } else {
+        toast.error(t('error'));
       }
+    } catch {
+      toast.error(t('error'));
     } finally {
       setLoading(false);
     }
@@ -53,11 +59,14 @@ export function HideButton({
         <TooltipTrigger asChild>
           <Button
             size="sm"
-            variant={isHidden ? 'destructive' : 'outline'}
+            variant={isHidden ? 'ghost' : 'outline'}
+            className={isHidden ? '!bg-green-600 hover:!bg-green-700 !text-white shadow-sm' : ''}
             onClick={handleToggle}
             disabled={loading}
           >
-            {isHidden ? (
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : isHidden ? (
               <EyeOff className="h-4 w-4" />
             ) : (
               <Eye className="h-4 w-4" />
