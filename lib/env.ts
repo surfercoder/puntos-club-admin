@@ -9,7 +9,7 @@ const envSchema = z.object({
   // Registration flow — required for custom email verification
   REGISTRATION_SECRET: z.string().min(16).optional(),
   // MercadoPago — subscription billing
-  MERCADOPAGO_ACCESS_TOKEN: z.string().min(1),
+  MERCADOPAGO_ACCESS_TOKEN: z.string().min(1).optional(),
   MP_PLAN_ID_ADVANCE: z.string().min(1).optional(),
   MP_PLAN_ID_PRO: z.string().min(1).optional(),
   MP_WEBHOOK_SECRET: z.string().min(1).optional(),
