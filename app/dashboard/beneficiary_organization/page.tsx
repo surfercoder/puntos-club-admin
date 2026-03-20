@@ -1,5 +1,6 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/beneficiary_organization/delete-modal';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,8 @@ interface BeneficiaryOrganizationWithRelations {
 }
 
 export default async function BeneficiaryOrganizationListPage() {
+  const t = await getTranslations('Dashboard.beneficiaryOrganization');
+  const tCommon = await getTranslations('Common');
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('beneficiary_organization')
@@ -44,18 +47,18 @@ export default async function BeneficiaryOrganizationListPage() {
     .order('id', { ascending: false });
 
   if (error) {
-    return <div>Error al obtener beneficiarios por organización</div>;
+    return <div>{t('error')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Beneficiarios por Organización</h1>
-          <p className="text-muted-foreground">Administrar membresías de beneficiarios y puntos por organización</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/beneficiary_organization/create">+ Nueva Membresía</Link>
+          <Link href="/dashboard/beneficiary_organization/create">{t('newButton')}</Link>
         </Button>
       </div>
 
@@ -63,13 +66,13 @@ export default async function BeneficiaryOrganizationListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Beneficiario</TableHead>
-              <TableHead>Organización</TableHead>
-              <TableHead className="text-right">Disponibles</TableHead>
-              <TableHead className="text-right">Acumulados</TableHead>
-              <TableHead className="text-right">Canjeados</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>{t('tableHeaders.beneficiary')}</TableHead>
+              <TableHead>{t('tableHeaders.organization')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.available')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.earned')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.redeemed')}</TableHead>
+              <TableHead>{t('tableHeaders.status')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -85,7 +88,7 @@ export default async function BeneficiaryOrganizationListPage() {
                   <TableCell className="text-right">{row.available_points}</TableCell>
                   <TableCell className="text-right">{row.total_points_earned}</TableCell>
                   <TableCell className="text-right">{row.total_points_redeemed}</TableCell>
-                  <TableCell>{row.is_active === false ? 'Inactivo' : 'Activo'}</TableCell>
+                  <TableCell>{row.is_active === false ? tCommon('inactive') : tCommon('active')}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">
@@ -104,7 +107,7 @@ export default async function BeneficiaryOrganizationListPage() {
             ) : (
               <TableRow>
                 <TableCell className="text-center py-4" colSpan={7}>
-                  No se encontraron membresías.
+                  {t('empty')}
                 </TableCell>
               </TableRow>
             )}

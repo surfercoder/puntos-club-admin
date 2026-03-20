@@ -1,6 +1,7 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/address/delete-modal';
 import { Button } from '@/components/ui/button';
@@ -18,11 +19,13 @@ import { createClient } from '@/lib/supabase/server';
 import type { Address } from '@/types/address';
 
 export default async function AddressListPage() {
-  const supabase = await createClient();
-  const currentUser = await getCurrentUser();
+  const [t, supabase, currentUser, cookieStore] = await Promise.all([
+    getTranslations('Dashboard.address'),
+    createClient(),
+    getCurrentUser(),
+    cookies(),
+  ]);
   const userIsAdmin = isAdmin(currentUser);
-
-  const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
   const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
 
@@ -35,30 +38,30 @@ export default async function AddressListPage() {
   const { data, error } = await query;
 
   if (error) {
-    return <div>Error al obtener direcciones</div>;
+    return <div>{t('error')}</div>;
   }
 
   return (
     <div className="space-y-6">    
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Direcciones</h1>
-          <p className="text-muted-foreground">Administrar todas las direcciones del sistema</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/address/create">+ Nueva Dirección</Link>
+          <Link href="/dashboard/address/create">{t('newButton')}</Link>
         </Button>
       </div>
       <div className="border rounded-lg">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Calle</TableHead>
-              <TableHead>Número</TableHead>
-              <TableHead>Ciudad</TableHead>
-              <TableHead>Provincia</TableHead>
-              <TableHead>Código Postal</TableHead>
-              <TableHead>Acciones</TableHead>
+              <TableHead>{t('tableHeaders.street')}</TableHead>
+              <TableHead>{t('tableHeaders.number')}</TableHead>
+              <TableHead>{t('tableHeaders.city')}</TableHead>
+              <TableHead>{t('tableHeaders.state')}</TableHead>
+              <TableHead>{t('tableHeaders.zipCode')}</TableHead>
+              <TableHead>{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -82,7 +85,7 @@ export default async function AddressListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={6}>No se encontraron direcciones.</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

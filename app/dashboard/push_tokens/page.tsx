@@ -1,5 +1,6 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/push_tokens_crud/delete-modal';
 import ToastHandler from '@/components/dashboard/push_tokens_crud/toast-handler';
@@ -14,6 +15,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export default async function PushTokensListPage() {
+  const t = await getTranslations('Dashboard.pushTokensCrud');
   const currentUser = await getCurrentUser();
   const userIsAdmin = isAdmin(currentUser);
   const supabase = userIsAdmin ? createAdminClient() : await createClient();
@@ -24,7 +26,7 @@ export default async function PushTokensListPage() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    return <div>Error loading push tokens</div>;
+    return <div>{t('error')}</div>;
   }
 
   return (
@@ -32,11 +34,11 @@ export default async function PushTokensListPage() {
       <ToastHandler />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Push Tokens</h1>
-          <p className="text-muted-foreground">Manage beneficiary device push tokens</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/push_tokens/create">+ New Push Token</Link>
+          <Link href="/dashboard/push_tokens/create">{t('newButton')}</Link>
         </Button>
       </div>
 
@@ -44,13 +46,13 @@ export default async function PushTokensListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Beneficiary</TableHead>
-              <TableHead>Platform</TableHead>
-              <TableHead>Device ID</TableHead>
-              <TableHead>Token</TableHead>
-              <TableHead>Active</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t('tableHeaders.beneficiary')}</TableHead>
+              <TableHead>{t('tableHeaders.platform')}</TableHead>
+              <TableHead>{t('tableHeaders.deviceId')}</TableHead>
+              <TableHead>{t('tableHeaders.token')}</TableHead>
+              <TableHead>{t('tableHeaders.active')}</TableHead>
+              <TableHead>{t('tableHeaders.created')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -69,7 +71,7 @@ export default async function PushTokensListPage() {
                     <TableCell className="max-w-xs truncate">{token.expo_push_token}</TableCell>
                     <TableCell>
                       <Badge variant={token.is_active ? 'default' : 'secondary'}>
-                        {token.is_active ? 'Active' : 'Inactive'}
+                        {token.is_active ? t('statusActive') : t('statusInactive')}
                       </Badge>
                     </TableCell>
                     <TableCell>{new Date(token.created_at).toLocaleString()}</TableCell>
@@ -88,7 +90,7 @@ export default async function PushTokensListPage() {
               })
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={7}>No push tokens found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={7}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

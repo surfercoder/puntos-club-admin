@@ -45,7 +45,7 @@ export default async function QRPage() {
       <div className="flex flex-1 items-center justify-center p-8">
         <div className="text-center space-y-2">
           <p className="text-muted-foreground">{t('noOrg')}</p>
-          <Link href="/dashboard/organization" className="text-emerald-600 text-sm underline">
+          <Link href="/dashboard/organization" className="text-primary text-sm underline">
             {t('createOrg')}
           </Link>
         </div>

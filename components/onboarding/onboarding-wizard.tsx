@@ -195,17 +195,17 @@ function StepNav({ steps, currentStep, canNavigateToStep, onGoToStep }: {
               >
                 <span className={cn(
                   'flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all',
-                  isCompleted ? 'border-emerald-600 bg-emerald-600 text-white'
-                    : isCurrent ? 'border-emerald-600 bg-white dark:bg-gray-900 text-emerald-600'
-                    : 'border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-900 text-gray-400'
+                  isCompleted ? 'border-primary bg-primary text-primary-foreground'
+                    : isCurrent ? 'border-primary bg-white dark:bg-card text-primary'
+                    : 'border-muted-foreground/30 bg-white dark:bg-card text-muted-foreground/50'
                 )}>
                   {isCompleted ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
                 </span>
                 <span className={cn(
                   'hidden sm:block text-xs font-medium leading-tight text-center max-w-16',
-                  isCurrent ? 'text-emerald-700 dark:text-emerald-400'
-                    : isCompleted ? 'text-emerald-600'
-                    : 'text-gray-400'
+                  isCurrent ? 'text-primary'
+                    : isCompleted ? 'text-primary'
+                    : 'text-muted-foreground/50'
                 )}>
                   {step.label}
                 </span>
@@ -213,7 +213,7 @@ function StepNav({ steps, currentStep, canNavigateToStep, onGoToStep }: {
               {idx < steps.length - 1 && (
                 <div className={cn(
                   'flex-1 h-0.5 mx-2 transition-all',
-                  currentStep > step.number ? 'bg-emerald-600' : 'bg-gray-200 dark:bg-gray-700'
+                  currentStep > step.number ? 'bg-primary' : 'bg-muted'
                 )} aria-hidden />
               )}
             </li>
@@ -422,19 +422,19 @@ export function OnboardingWizard({
         <StepNav steps={steps} currentStep={currentStep} canNavigateToStep={canNavigateToStep} onGoToStep={goToStep} />
       </div>
 
-      <div className="rounded-2xl border bg-white dark:bg-gray-900 shadow-sm">
+      <div className="rounded-2xl border bg-card shadow-sm">
         <div className="border-b px-6 py-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-emerald-100 dark:bg-emerald-900/40">
+            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
               {currentStepInfo && (
-                <currentStepInfo.icon className="h-5 w-5 text-emerald-600" />
+                <currentStepInfo.icon className="h-5 w-5 text-primary" />
               )}
             </div>
             <div>
               <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {t('step', { current: currentStep, total: steps.length })}
               </p>
-              <h1 className="text-lg font-bold text-gray-900 dark:text-white leading-tight">
+              <h1 className="text-lg font-bold text-foreground leading-tight">
                 {currentStepInfo?.label}
               </h1>
             </div>
@@ -457,10 +457,10 @@ export function OnboardingWizard({
               className={cn(
                 'h-1.5 rounded-full transition-all',
                 currentStep === step.number
-                  ? 'w-6 bg-emerald-600'
+                  ? 'w-6 bg-primary'
                   : currentStep > step.number
-                  ? 'w-1.5 bg-emerald-400'
-                  : 'w-1.5 bg-gray-200 dark:bg-gray-700'
+                  ? 'w-1.5 bg-primary/60'
+                  : 'w-1.5 bg-muted'
               )}
             />
           ))}

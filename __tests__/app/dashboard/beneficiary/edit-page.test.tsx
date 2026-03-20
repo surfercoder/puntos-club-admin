@@ -1,7 +1,14 @@
 import { notFound } from 'next/navigation';
 import EditBeneficiaryPage from '@/app/dashboard/beneficiary/edit/[id]/page';
 
+jest.mock('next/navigation', () => ({ notFound: jest.fn(), redirect: jest.fn() }));
 jest.mock('next-intl/server', () => ({ getTranslations: jest.fn(() => Promise.resolve((key: string) => key)) }));
+jest.mock('@/lib/auth/get-current-user', () => ({
+  getCurrentUser: jest.fn(() => Promise.resolve({ id: '1', role: { name: 'admin' }, organization_id: 'org-1' })),
+}));
+jest.mock('@/lib/auth/roles', () => ({
+  isAdmin: jest.fn(() => true),
+}));
 jest.mock('@/lib/supabase/server', () => ({
   createClient: jest.fn(() => Promise.resolve({
     from: jest.fn(() => ({ select: jest.fn(() => ({ eq: jest.fn(() => ({ single: jest.fn(() => Promise.resolve({ data: { id: '1', first_name: 'Test' }, error: null })) })) })) })),

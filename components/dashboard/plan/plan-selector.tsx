@@ -18,7 +18,7 @@ interface Plan {
   name: string;
   price: string;
   priceNote?: string;
-  icon: React.ElementType;
+  icon: React.ComponentType<{ className?: string }>;
   color: string;
   badge?: string;
   isPaid: boolean;
@@ -30,39 +30,39 @@ interface Plan {
 }
 
 const colorMap: Record<string, string> = {
-  emerald: 'border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20',
-  blue: 'border-blue-500 bg-blue-50 dark:bg-blue-900/20',
-  purple: 'border-purple-500 bg-purple-50 dark:bg-purple-900/20',
+  green: 'border-brand-green bg-brand-green/10',
+  blue: 'border-brand-blue bg-brand-blue/10',
+  pink: 'border-brand-pink bg-brand-pink/10',
 };
 
 const iconColorMap: Record<string, string> = {
-  emerald: 'text-emerald-600 bg-emerald-100 dark:bg-emerald-900/40',
-  blue: 'text-blue-600 bg-blue-100 dark:bg-blue-900/40',
-  purple: 'text-purple-600 bg-purple-100 dark:bg-purple-900/40',
+  green: 'text-brand-green bg-brand-green/15',
+  blue: 'text-brand-blue bg-brand-blue/15',
+  pink: 'text-brand-pink bg-brand-pink/15',
 };
 
 const badgeColorMap: Record<string, string> = {
-  emerald: 'bg-emerald-100 text-emerald-800 dark:bg-emerald-900 dark:text-emerald-100',
-  blue: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-100',
-  purple: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-100',
+  green: 'bg-brand-green/15 text-brand-green',
+  blue: 'bg-brand-blue/15 text-brand-blue',
+  pink: 'bg-brand-pink/15 text-brand-pink',
 };
 
 const buttonColorMap: Record<string, string> = {
-  emerald: 'bg-emerald-600 hover:bg-emerald-700',
-  blue: 'bg-blue-600 hover:bg-blue-700',
-  purple: 'bg-purple-600 hover:bg-purple-700',
+  green: 'bg-brand-green hover:bg-brand-green/90 text-white',
+  blue: 'bg-brand-blue hover:bg-brand-blue/90 text-white',
+  pink: 'bg-brand-pink hover:bg-brand-pink/90 text-white',
 };
 
 const currentPlanBadgeMap: Record<string, string> = {
-  emerald: 'bg-emerald-600 text-white',
-  blue: 'bg-blue-600 text-white',
-  purple: 'bg-purple-600 text-white',
+  green: 'bg-brand-green text-white',
+  blue: 'bg-brand-blue text-white',
+  pink: 'bg-brand-pink text-white',
 };
 
 function FeatureValue({ value }: { value: string | boolean }) {
   if (typeof value === 'boolean') {
     return value ? (
-      <Check className="h-4 w-4 text-emerald-600" />
+      <Check className="h-4 w-4 text-brand-green" />
     ) : (
       <span className="text-muted-foreground text-xs">—</span>
     );
@@ -154,7 +154,7 @@ export function PlanSelector() {
       price: t('freePriceLabel'),
       priceNote: t('trialPriceNote'),
       icon: Star,
-      color: 'emerald',
+      color: 'green',
       isPaid: false,
       features: buildFeatures(f, t, 'trial', planLimits?.trial, false),
     },
@@ -175,7 +175,7 @@ export function PlanSelector() {
       price: '$89',
       priceNote: t('paidPriceNote'),
       icon: Rocket,
-      color: 'purple',
+      color: 'pink',
       isPaid: true,
       features: buildFeatures(f, t, 'pro', planLimits?.pro, true),
     },
@@ -260,7 +260,7 @@ export function PlanSelector() {
                   'relative flex flex-col rounded-xl border-2 p-5 text-left transition-all focus:outline-none focus:ring-2 focus:ring-offset-2',
                   isSelected
                     ? colorMap[plan.color]
-                    : 'border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600'
+                    : 'border-border hover:border-muted-foreground/30'
                 )}
               >
                 {isCurrent && (
@@ -289,11 +289,11 @@ export function PlanSelector() {
                     <Icon className="h-5 w-5" />
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900 dark:text-white">
+                    <p className="font-semibold text-foreground">
                       {plan.name}
                     </p>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-bold text-gray-900 dark:text-white">
+                      <span className="text-2xl font-bold text-foreground">
                         {plan.price}
                       </span>
                       {plan.priceNote && (
@@ -320,7 +320,7 @@ export function PlanSelector() {
                 </ul>
 
                 {isSelected && (
-                  <div className="mt-4 flex items-center gap-2 text-xs font-medium text-emerald-700 dark:text-emerald-400">
+                  <div className="mt-4 flex items-center gap-2 text-xs font-medium text-brand-green">
                     <Check className="h-4 w-4" />
                     {isCurrent ? tSettings('currentPlan') : t('selectedPlan')}
                   </div>

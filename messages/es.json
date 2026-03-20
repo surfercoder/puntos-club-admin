@@ -428,9 +428,30 @@
         "createdAt": "Creado el",
         "actions": "Acciones"
       },
-      "empty": "No se encontraron notificaciones push."
+      "empty": "No se encontraron notificaciones push.",
+      "deleteModal": {
+        "title": "Eliminar Notificación Push",
+        "confirm": "¿Estás seguro de que deseas eliminar <strong>{name}</strong>? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar la notificación push",
+        "deleteSuccess": "Notificación push eliminada correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      }
     },
     "beneficiaryOrganization": {
+      "title": "Beneficiarios por Organización",
+      "description": "Administrar membresías de beneficiarios y puntos por organización",
+      "newButton": "+ Nueva Membresía",
+      "error": "Error al obtener beneficiarios por organización",
+      "empty": "No se encontraron membresías.",
+      "tableHeaders": {
+        "beneficiary": "Beneficiario",
+        "organization": "Organización",
+        "available": "Disponibles",
+        "earned": "Acumulados",
+        "redeemed": "Canjeados",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
       "createTitle": "Crear Membresía",
       "editTitle": "Editar Membresía",
       "fetchError": "Error al obtener la membresía",
@@ -454,6 +475,17 @@
       }
     },
     "category": {
+      "title": "Categorías",
+      "description": "Administrar categorías de productos del sistema",
+      "newButton": "+ Nueva Categoría",
+      "error": "Error al obtener categorías",
+      "empty": "No se encontraron categorías.",
+      "tableHeaders": {
+        "name": "Nombre",
+        "description": "Descripción",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
       "createTitle": "Crear Categoría",
       "editTitle": "Editar Categoría",
       "fetchError": "Error al obtener la categoría",
@@ -475,6 +507,20 @@
       }
     },
     "appUser": {
+      "title": "Usuarios",
+      "description": "Administrar usuarios de la aplicación",
+      "newButton": "+ Nuevo Usuario",
+      "error": "Error al obtener usuarios",
+      "empty": "No se encontraron usuarios.",
+      "tableHeaders": {
+        "name": "Nombre",
+        "email": "Correo",
+        "username": "Usuario",
+        "role": "Rol",
+        "organization": "Organización",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
       "createTitle": "Crear Usuario",
       "editTitle": "Editar Usuario",
       "fetchError": "Error al obtener el usuario",
@@ -730,6 +776,18 @@
       }
     },
     "appOrder": {
+      "title": "Pedidos",
+      "description": "Administrar pedidos del sistema",
+      "newButton": "+ Nuevo Pedido",
+      "error": "Error al obtener pedidos",
+      "empty": "No se encontraron pedidos.",
+      "tableHeaders": {
+        "orderNumber": "Número de Pedido",
+        "creationDate": "Fecha de Creación",
+        "totalPoints": "Puntos Totales",
+        "observations": "Observaciones",
+        "actions": "Acciones"
+      },
       "createTitle": "Crear Pedido",
       "editTitle": "Editar Pedido",
       "fetchError": "Error al obtener el pedido",
@@ -750,6 +808,20 @@
       }
     },
     "redemption": {
+      "title": "Canjes",
+      "description": "Administrar canjes del sistema",
+      "newButton": "+ Nuevo Canje",
+      "error": "Error al obtener canjes",
+      "empty": "No se encontraron canjes.",
+      "tableHeaders": {
+        "beneficiary": "Beneficiario",
+        "product": "Producto",
+        "order": "Pedido",
+        "pointsUsed": "Puntos Usados",
+        "quantity": "Cantidad",
+        "date": "Fecha",
+        "actions": "Acciones"
+      },
       "createTitle": "Crear Canje",
       "editTitle": "Editar Canje",
       "fetchError": "Error al obtener el canje",
@@ -776,6 +848,17 @@
       }
     },
     "appUserOrganization": {
+      "title": "Usuarios por Organización",
+      "description": "Administrar membresías de usuarios en organizaciones",
+      "newButton": "+ Nueva Membresía",
+      "error": "Error al obtener membresías de usuarios",
+      "empty": "No se encontraron membresías.",
+      "tableHeaders": {
+        "user": "Usuario",
+        "organization": "Organización",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
       "createTitle": "Crear Membresía",
       "editTitle": "Editar Membresía",
       "fetchError": "Error al obtener la membresía",
@@ -796,6 +879,22 @@
       }
     },
     "stock": {
+      "title": "Stock",
+      "description": "Administrar niveles de stock de productos",
+      "newButton": "+ Nuevo Registro de Stock",
+      "error": "Error al obtener registros de stock",
+      "empty": "No se encontraron registros de stock.",
+      "tableHeaders": {
+        "branch": "Sucursal",
+        "product": "Producto",
+        "currentStock": "Stock Actual",
+        "minimumStock": "Stock Mínimo",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "statusInStock": "En Stock",
+      "statusLowStock": "Stock Bajo",
+      "statusOutOfStock": "Sin Stock",
       "createTitle": "Crear Registro de Stock",
       "editTitle": "Editar Registro de Stock",
       "deleteModal": {
@@ -817,6 +916,26 @@
       }
     },
     "address": {
+      "title": "Direcciones",
+      "description": "Administrar todas las direcciones del sistema",
+      "newButton": "+ Nueva Dirección",
+      "error": "Error al obtener direcciones",
+      "empty": "No se encontraron direcciones.",
+      "tableHeaders": {
+        "street": "Calle",
+        "number": "Número",
+        "city": "Ciudad",
+        "state": "Provincia",
+        "zipCode": "Código Postal",
+        "actions": "Acciones"
+      },
+      "deleteModal": {
+        "title": "Eliminar Dirección",
+        "confirm": "¿Estás seguro de que deseas eliminar esta dirección? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar la dirección",
+        "deleteSuccess": "Dirección eliminada correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      },
       "createTitle": "Crear Dirección",
       "form": {
         "searchAddress": "Buscar Dirección",
@@ -830,6 +949,21 @@
       }
     },
     "organizationNotificationLimit": {
+      "title": "Límites de Notificaciones",
+      "description": "Administrar límites de notificaciones y planes por organización",
+      "newButton": "+ Nuevo Límite",
+      "error": "Error al obtener límites de notificaciones",
+      "empty": "No se encontraron límites de notificaciones.",
+      "tableHeaders": {
+        "organization": "Organización",
+        "planType": "Tipo de Plan",
+        "dailyLimit": "Límite Diario",
+        "monthlyLimit": "Límite Mensual",
+        "minHoursBetween": "Horas Mín. Entre Envíos",
+        "sentToday": "Enviadas Hoy",
+        "sentThisMonth": "Enviadas Este Mes",
+        "actions": "Acciones"
+      },
       "createTitle": "Crear Límite de Notificaciones",
       "form": {
         "organizationLabel": "Organización",
@@ -843,6 +977,154 @@
         "minHours": "Horas Mínimas Entre Notificaciones",
         "minHoursPlaceholder": "Ingresa las horas mínimas entre notificaciones"
       }
+    },
+    "purchase": {
+      "title": "Compras",
+      "description": "Administrar compras del sistema",
+      "newButton": "+ Nueva Compra",
+      "error": "Error al obtener compras",
+      "empty": "No se encontraron compras.",
+      "tableHeaders": {
+        "purchaseNumber": "Compra #",
+        "date": "Fecha",
+        "beneficiary": "Beneficiario",
+        "cashier": "Cajero",
+        "branch": "Sucursal",
+        "amount": "Monto",
+        "points": "Puntos",
+        "actions": "Acciones"
+      },
+      "deleteModal": {
+        "title": "Eliminar Compra",
+        "confirm": "¿Estás seguro de que deseas eliminar la compra <strong>{name}</strong>? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar la compra",
+        "deleteSuccess": "Compra eliminada correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      }
+    },
+    "subscription": {
+      "title": "Suscripciones",
+      "description": "Administrar suscripciones de organizaciones",
+      "newButton": "+ Nueva Suscripción",
+      "error": "Error al obtener suscripciones",
+      "empty": "No se encontraron suscripciones.",
+      "tableHeaders": {
+        "organization": "Organización",
+        "plan": "Plan",
+        "status": "Estado",
+        "payerEmail": "Email del Pagador",
+        "amount": "Monto",
+        "created": "Creado",
+        "actions": "Acciones"
+      },
+      "deleteModal": {
+        "title": "Eliminar Suscripción",
+        "confirm": "¿Estás seguro de que deseas eliminar la suscripción <strong>{name}</strong>? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar la suscripción",
+        "deleteSuccess": "Suscripción eliminada correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      }
+    },
+    "planLimits": {
+      "title": "Límites de Plan",
+      "description": "Administrar límites de características del plan",
+      "newButton": "+ Nuevo Límite de Plan",
+      "error": "Error al obtener límites de plan",
+      "empty": "No se encontraron límites de plan.",
+      "tableHeaders": {
+        "plan": "Plan",
+        "feature": "Característica",
+        "limit": "Límite",
+        "warningThreshold": "Umbral de Alerta",
+        "actions": "Acciones"
+      },
+      "deleteModal": {
+        "title": "Eliminar Límite de Plan",
+        "confirm": "¿Estás seguro de que deseas eliminar <strong>{name}</strong>? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar el límite de plan",
+        "deleteSuccess": "Límite de plan eliminado correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      }
+    },
+    "pushTokensCrud": {
+      "title": "Tokens Push",
+      "description": "Administrar tokens push de dispositivos de beneficiarios",
+      "newButton": "+ Nuevo Token Push",
+      "error": "Error al obtener tokens push",
+      "empty": "No se encontraron tokens push.",
+      "tableHeaders": {
+        "beneficiary": "Beneficiario",
+        "platform": "Plataforma",
+        "deviceId": "ID del Dispositivo",
+        "token": "Token",
+        "active": "Activo",
+        "created": "Creado",
+        "actions": "Acciones"
+      },
+      "statusActive": "Activo",
+      "statusInactive": "Inactivo",
+      "deleteModal": {
+        "title": "Eliminar Token Push",
+        "confirm": "¿Estás seguro de que deseas eliminar el token de <strong>{name}</strong>? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar el token push",
+        "deleteSuccess": "Token push eliminado correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      }
+    },
+    "orgPlanLimits": {
+      "title": "Límites de Plan por Organización",
+      "description": "Administrar límites de plan por organización",
+      "newButton": "+ Nuevo Límite de Plan por Org",
+      "error": "Error al obtener límites de plan por organización",
+      "empty": "No se encontraron límites de plan por organización.",
+      "tableHeaders": {
+        "organization": "Organización",
+        "plan": "Plan",
+        "feature": "Característica",
+        "limit": "Límite",
+        "warning": "Alerta",
+        "actions": "Acciones"
+      },
+      "deleteModal": {
+        "title": "Eliminar Límite de Plan por Organización",
+        "confirm": "¿Estás seguro de que deseas eliminar <strong>{name}</strong>? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar el límite de plan por organización",
+        "deleteSuccess": "Límite de plan por organización eliminado correctamente",
+        "genericError": "Ocurrió un error al eliminar"
+      }
+    },
+    "organizationDetail": {
+      "description": "Detalles de la organización y productos disponibles",
+      "editButton": "Editar Organización",
+      "infoTitle": "Información de la Organización",
+      "name": "Nombre",
+      "legalName": "Razón Social",
+      "taxId": "CUIT/RUT",
+      "createdAt": "Fecha de Creación",
+      "productsTitle": "Productos Disponibles para Canje",
+      "productsDescription": "Productos que los usuarios pueden canjear con sus puntos",
+      "manageProducts": "Administrar Productos",
+      "productsError": "Error al cargar productos",
+      "productsEmpty": "Aún no hay productos disponibles para canje.",
+      "productTableHeaders": {
+        "name": "Nombre del Producto",
+        "description": "Descripción",
+        "category": "Categoría",
+        "requiredPoints": "Puntos Requeridos",
+        "availableStock": "Stock Disponible"
+      },
+      "noStock": "Sin stock"
+    },
+    "linkAllBeneficiaries": {
+      "title": "Vincular Beneficiarios No Vinculados",
+      "description": "Esta utilidad vinculará a todos los beneficiarios que no están actualmente asociados a tu organización. Es útil para corregir beneficiarios creados antes de la vinculación automática.",
+      "linkButton": "Vincular Todos los Beneficiarios No Vinculados",
+      "backButton": "Volver a Beneficiarios",
+      "whatThisDoes": "Qué hace esto:",
+      "step1": "Encuentra todos los beneficiarios no vinculados a tu organización",
+      "step2": "Crea registros de beneficiary_organization para ellos",
+      "step3": "Establece sus puntos iniciales en 0",
+      "step4": "Los convierte en miembros activos de tu organización"
     }
   },
   "Onboarding": {
@@ -1119,6 +1401,8 @@
     "tableDescription": "Roles definidos por el sistema. Puede editar nombres y descripciones.",
     "loading": "Cargando roles...",
     "empty": "No se encontraron roles.",
+    "newButton": "Nuevo Rol",
+    "error": "Error al obtener roles",
     "noDescription": "Sin descripción",
     "tableHeaders": {
       "roleType": "Tipo de Rol",
@@ -1140,11 +1424,19 @@
       "save": "Actualizar",
       "displayNameRequired": "El nombre a mostrar es requerido",
       "updateError": "No se pudo actualizar el rol"
+    },
+    "deleteModal": {
+      "title": "Eliminar Rol de Usuario",
+      "confirm": "¿Estás seguro de que deseas eliminar el rol <strong>{name}</strong>? Esta acción no se puede deshacer. Asegúrate de que ningún usuario tenga asignado este rol.",
+      "deleteError": "Error al eliminar el rol de usuario",
+      "deleteSuccess": "Rol de usuario eliminado exitosamente",
+      "genericError": "Ocurrió un error inesperado"
     }
   },
   "HomePage": {
     "signIn": "Iniciar sesión",
     "signUp": "Registrarse",
+    "join": "Unirse",
     "heroTitle": "El programa de fidelización que tu negocio necesita",
     "heroDescription": "Creá tu propio programa de puntos y premios en minutos. Fidelizá a tus clientes, aumentá las visitas recurrentes y hacé crecer tu negocio con Puntos Club.",
     "ctaOwner": "Empezar gratis",
@@ -1167,6 +1459,129 @@
     "ctaDescription": "Configurá tu programa de fidelización en solo unos minutos. No se requiere tarjeta de crédito para empezar.",
     "ctaButton": "Crear mi programa de fidelización",
     "footerCopyright": "\u00a9 {year} Puntos Club. Todos los derechos reservados."
+  },
+  "Landing": {
+    "loader": {
+      "slogan": "Creá tu propio club de beneficios"
+    },
+    "weDo": {
+      "title": "ESTO ES LO QUE HACEMOS",
+      "descriptionPrefix": "Puntos Club",
+      "description": "es una plataforma diseñada para empresas que buscan fidelizar a sus clientes. A través de un sistema de puntos, pueden premiar a sus clientes por su lealtad."
+    },
+    "callToAction": "Descubrí cómo",
+    "engines": {
+      "title": "Y sus beneficiarios podrán ...",
+      "updateData": {
+        "title": "Actualizar sus datos",
+        "description": "Mantener sus datos actualizados."
+      },
+      "earnPoints": {
+        "title": "Ganar puntos",
+        "description": "Acumular puntos por su preferencia."
+      },
+      "checkBalance": {
+        "title": "Consultar su saldo",
+        "description": "Visualizar sus puntos disponibles."
+      },
+      "browseCatalog": {
+        "title": "Navegar por el catálogo",
+        "description": "Explorar la variedad de productos y premios disponibles para canjear."
+      },
+      "claimReward": {
+        "title": "Recibir su premio",
+        "description": "Elegir su premio y canjearlo por sus puntos."
+      }
+    },
+    "profit": {
+      "sectionTitle": "Beneficios",
+      "title1": "Branding de marca",
+      "title2": "Fidelización de clientes",
+      "title3": "Gestión de campañas",
+      "title4": "Control total",
+      "title5": "Gestión de audiencia",
+      "desc1": "Personalizá la plataforma con los\ncolores y el logo de tu empresa.",
+      "desc2": "Creá lazos más fuertes y recompensalo\ncon productos que tus clientes adoren.",
+      "desc3": "Mejorá tu tasa de recompra y\nretención de clientes.",
+      "desc4": "Administrá premios y campañas\ndesde tu panel de control.\nObtención de datos mediante reportes.",
+      "desc5": "Comunicate con tus clientes\nsin intermediarios."
+    },
+    "steps": {
+      "0": {
+        "title": "Personalizá tu plataforma",
+        "content": "Podés personalizar tu plataforma de puntos captando la esencia de tu marca, con tus colores y tu logo.",
+        "highlightedWord": "plataforma"
+      },
+      "1": {
+        "title": "Creá tus premios",
+        "content": "Creá tu propio catálogo para premiar a tus clientes.",
+        "highlightedWord": "premios"
+      },
+      "2": {
+        "title": "Elegí tu plan",
+        "content": "Seleccioná la opción que mejor se adapte a tu negocio.",
+        "highlightedWord": "plan"
+      },
+      "3": {
+        "title": "Configurá tu negocio",
+        "content": "Sucursales y/o Colaboradores (Línea de caja, Administración, etc.)",
+        "highlightedWord": "Configurá"
+      },
+      "4": {
+        "title": "Invitá a tus beneficiarios",
+        "content": "Invitá a tus clientes a participar en tu club para que canjeen premios dentro de la aplicación.",
+        "highlightedWord": "beneficiarios"
+      },
+      "5": {
+        "title": "Gestioná desde el Panel de control",
+        "content": "Visualizá comportamiento de consumo.\nControlá las acciones realizadas por tus colaboradores.",
+        "highlightedWord": "Panel de control"
+      },
+      "6": {
+        "title": "Comunicate con tus beneficiarios",
+        "content": "Enviá notificaciones push con noticias, campañas y más.",
+        "highlightedWord": "Comunicate"
+      }
+    },
+    "parallax": {
+      "message1": "Fidelizá a tus clientes, potenciá tus resultados",
+      "message2": "Recompensá el rendimiento, multiplicá el éxito",
+      "message3": "Transformá tus objetivos en recompensas"
+    },
+    "contact": {
+      "title": "¡Charlemos!",
+      "subtitle": "Contactanos y descubrí cómo podemos ayudarte a crear un programa de fidelización hecho a medida para tu negocio.",
+      "firstName": "Nombre",
+      "lastName": "Apellido",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "business": "Nombre de la empresa",
+      "message": "Mensaje",
+      "submit": "Enviar mensaje",
+      "loading": "Cargando...",
+      "success": "El mensaje fue enviado con éxito. Nos estaremos comunicando a la brevedad.",
+      "validation": {
+        "firstNameRequired": "El nombre es obligatorio",
+        "firstNameMinLength": "El nombre debe tener al menos 2 caracteres",
+        "lastNameRequired": "El apellido es obligatorio",
+        "lastNameMinLength": "El apellido debe tener al menos 2 caracteres",
+        "emailRequired": "El correo electrónico es obligatorio",
+        "emailInvalid": "El correo electrónico no es válido",
+        "phoneRequired": "El número de teléfono es obligatorio",
+        "phoneNoLetters": "El número de teléfono no puede contener letras",
+        "phoneMinLength": "El número de teléfono debe tener al menos 11 caracteres",
+        "businessRequired": "El nombre de la empresa es obligatorio",
+        "businessMinLength": "El nombre de la empresa debe tener al menos 4 caracteres",
+        "messageRequired": "El mensaje es obligatorio",
+        "messageMinLength": "Por favor, escribí un mensaje más largo"
+      }
+    },
+    "footer": {
+      "terms": "Términos y condiciones",
+      "legal": "Aviso legal",
+      "privacy": "Política de privacidad y cookies",
+      "copyright": "\u00a92019-{year} Puntos Club"
+    }
   },
   "LanguageSwitcher": {
     "label": "Idioma",

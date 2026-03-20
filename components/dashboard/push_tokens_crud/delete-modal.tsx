@@ -1,6 +1,7 @@
 "use client";
 
 import { Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -8,7 +9,13 @@ import { toast } from 'sonner';
 import { deletePushToken } from '@/actions/dashboard/push_tokens/actions';
 import { Button } from '@/components/ui/button';
 import {
-  Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger,
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
 } from '@/components/ui/dialog';
 
 interface DeleteModalProps {
@@ -20,20 +27,22 @@ export default function DeleteModal({ tokenId, tokenLabel }: DeleteModalProps) {
   const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
+  const t = useTranslations('Dashboard.pushTokensCrud.deleteModal');
+  const tCommon = useTranslations('Common');
 
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
       const result = await deletePushToken(tokenId);
       if (result.error) {
-        toast.error('Error deleting push token');
+        toast.error(t('deleteError'));
       } else {
-        toast.success('Push token deleted successfully');
+        toast.success(t('deleteSuccess'));
         router.refresh();
         setOpen(false);
       }
     } catch {
-      toast.error('An unexpected error occurred');
+      toast.error(t('genericError'));
     } finally {
       setIsDeleting(false);
     }
@@ -42,19 +51,23 @@ export default function DeleteModal({ tokenId, tokenLabel }: DeleteModalProps) {
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="destructive"><Trash2 className="h-4 w-4" /></Button>
+        <Button size="sm" variant="destructive">
+          <Trash2 className="h-4 w-4" />
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Push Token</DialogTitle>
+          <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete token for <strong>{tokenLabel}</strong>? This action cannot be undone.
+            {t.rich('confirm', { name: tokenLabel, strong: (chunks) => <strong>{chunks}</strong> })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button disabled={isDeleting} onClick={() => setOpen(false)} variant="outline">Cancel</Button>
+          <Button disabled={isDeleting} onClick={() => setOpen(false)} variant="outline">
+            {tCommon('cancel')}
+          </Button>
           <Button disabled={isDeleting} onClick={handleDelete} variant="destructive">
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            {isDeleting ? tCommon('loading') : tCommon('delete')}
           </Button>
         </DialogFooter>
       </DialogContent>

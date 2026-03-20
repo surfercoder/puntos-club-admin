@@ -39,11 +39,6 @@ describe('LoginForm', () => {
     expect(screen.getByRole('link', { name: 'forgotPassword' })).toHaveAttribute('href', '/auth/forgot-password');
   });
 
-  it('renders sign up link', () => {
-    render(<LoginForm />);
-    expect(screen.getByRole('link', { name: 'signUpLink' })).toHaveAttribute('href', '/auth/sign-up');
-  });
-
   it('shows validation errors when submitting empty form', async () => {
     render(<LoginForm />);
     fireEvent.click(screen.getByRole('button', { name: 'title' }));

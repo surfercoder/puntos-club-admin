@@ -1,6 +1,13 @@
 import CreateBeneficiaryPage from '@/app/dashboard/beneficiary/create/page';
 
+jest.mock('next/navigation', () => ({ redirect: jest.fn() }));
 jest.mock('next-intl/server', () => ({ getTranslations: jest.fn(() => Promise.resolve((key: string) => key)) }));
+jest.mock('@/lib/auth/get-current-user', () => ({
+  getCurrentUser: jest.fn(() => Promise.resolve({ id: '1', role: { name: 'admin' }, organization_id: 'org-1' })),
+}));
+jest.mock('@/lib/auth/roles', () => ({
+  isAdmin: jest.fn(() => true),
+}));
 jest.mock('@/components/dashboard/beneficiary/beneficiary-form', () => function Mock() { return <div data-testid="beneficiary-form" />; });
 jest.mock('@/components/dashboard/plan/plan-limit-guard', () => ({ PlanLimitGuard: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }));
 jest.mock('@/components/ui/card', () => ({

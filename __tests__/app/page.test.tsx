@@ -23,24 +23,19 @@ jest.mock('@/components/public-header', () => ({
   PublicHeader: () => <div data-testid="public-header">Header</div>,
 }));
 
-jest.mock('@/components/public-footer', () => ({
-  PublicFooter: () => <div data-testid="public-footer">Footer</div>,
+jest.mock('@/components/landing/landing-app', () => ({
+  LandingApp: () => <div data-testid="landing-app">LandingApp</div>,
 }));
 
+
 describe('Home page', () => {
-  it('exports a default async function', () => {
+  it('exports a default function', () => {
     expect(typeof Home).toBe('function');
   });
 
-  it('renders without crashing and includes feature cards', async () => {
-    const jsx = await Home();
-    render(jsx);
-    // Verify the page renders with feature cards (covers FeatureCard function)
-    expect(screen.getByText('featureQrTitle')).toBeInTheDocument();
-    expect(screen.getByText('featureRewardsTitle')).toBeInTheDocument();
-    expect(screen.getByText('featureNotificationsTitle')).toBeInTheDocument();
-    expect(screen.getByText('featureDashboardTitle')).toBeInTheDocument();
-    expect(screen.getByText('featureBranchesTitle')).toBeInTheDocument();
-    expect(screen.getByText('featureClientsTitle')).toBeInTheDocument();
+  it('renders PublicHeader and LandingApp', () => {
+    render(<Home />);
+    expect(screen.getByTestId('public-header')).toBeInTheDocument();
+    expect(screen.getByTestId('landing-app')).toBeInTheDocument();
   });
 });

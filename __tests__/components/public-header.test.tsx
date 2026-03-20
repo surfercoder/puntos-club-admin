@@ -30,11 +30,10 @@ describe('PublicHeader', () => {
     expect(container.querySelector('header')).toBeInTheDocument();
   });
 
-  it('renders sign in and sign up links', async () => {
+  it('renders sign in link', async () => {
     const jsx = await PublicHeader();
     const { getByText } = render(jsx);
     expect(getByText('signIn')).toBeInTheDocument();
-    expect(getByText('signUp')).toBeInTheDocument();
   });
 
   it('renders language switcher', async () => {

@@ -38,25 +38,25 @@ const defaultProps = {
 describe('NotificationForm', () => {
   it('renders the form with title and body fields', () => {
     render(<NotificationForm {...defaultProps} />);
-    expect(screen.getByLabelText(/Título/)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Mensaje/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/titleLabel/)).toBeInTheDocument();
+    expect(screen.getByLabelText(/messageLabel/)).toBeInTheDocument();
   });
 
   it('renders cancel, verify and send buttons', () => {
     render(<NotificationForm {...defaultProps} />);
-    expect(screen.getByRole('button', { name: 'Cancelar' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Verificar Contenido/ })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Enviar Notificaci/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'cancel' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /verifyWithAI/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /submit/ })).toBeInTheDocument();
   });
 
   it('renders preview section', () => {
     render(<NotificationForm {...defaultProps} />);
-    expect(screen.getByText('Vista previa')).toBeInTheDocument();
+    expect(screen.getByText('preview')).toBeInTheDocument();
   });
 
   it('renders character count indicators', () => {
     render(<NotificationForm {...defaultProps} />);
-    const charCountElements = screen.getAllByText(/caracteres restantes/);
+    const charCountElements = screen.getAllByText(/charsRemaining/);
     expect(charCountElements).toHaveLength(2);
   });
 
@@ -76,10 +76,10 @@ describe('NotificationForm', () => {
       created_at: '2024-01-01',
     };
     render(<NotificationForm {...defaultProps} limits={limits} canSend={true} />);
-    expect(screen.getByText('Listo para Enviar')).toBeInTheDocument();
+    expect(screen.getByText('readyToSend')).toBeInTheDocument();
   });
 
-  it('renders "Límite Alcanzado" when canSend is false and daily limit hit', () => {
+  it('renders "limitReached" when canSend is false and daily limit hit', () => {
     const limits = {
       id: '1',
       organization_id: 'org-1',
@@ -95,8 +95,8 @@ describe('NotificationForm', () => {
       created_at: '2024-01-01',
     };
     render(<NotificationForm {...defaultProps} limits={limits} canSend={false} />);
-    expect(screen.getByText('Límite Alcanzado')).toBeInTheDocument();
-    expect(screen.getByText(/Has alcanzado tu límite diario/)).toBeInTheDocument();
+    expect(screen.getByText('limitReached')).toBeInTheDocument();
+    expect(screen.getByText(/dailyLimitReached/)).toBeInTheDocument();
   });
 
   it('renders monthly limit message when monthly limit hit', () => {
@@ -115,7 +115,7 @@ describe('NotificationForm', () => {
       created_at: '2024-01-01',
     };
     render(<NotificationForm {...defaultProps} limits={limits} canSend={false} />);
-    expect(screen.getByText(/Has alcanzado tu límite mensual/)).toBeInTheDocument();
+    expect(screen.getByText(/monthlyLimitReached/)).toBeInTheDocument();
   });
 
   it('renders time restriction message with countdown', () => {
@@ -135,7 +135,7 @@ describe('NotificationForm', () => {
       created_at: '2024-01-01',
     };
     render(<NotificationForm {...defaultProps} limits={limits} canSend={false} />);
-    expect(screen.getByText(/Debes esperar entre notificaciones/)).toBeInTheDocument();
+    expect(screen.getByText('timeRestriction')).toBeInTheDocument();
   });
 
   it('renders last sent timestamp', () => {
@@ -155,13 +155,13 @@ describe('NotificationForm', () => {
       created_at: '2024-01-01',
     };
     render(<NotificationForm {...defaultProps} limits={limits} canSend={true} />);
-    expect(screen.getByText(/Última Enviada/)).toBeInTheDocument();
+    expect(screen.getByText(/lastSent/)).toBeInTheDocument();
   });
 
   it('updates title and body on change', () => {
     render(<NotificationForm {...defaultProps} />);
-    const titleInput = screen.getByLabelText(/Título/);
-    const bodyInput = screen.getByLabelText(/Mensaje/);
+    const titleInput = screen.getByLabelText(/titleLabel/);
+    const bodyInput = screen.getByLabelText(/messageLabel/);
     fireEvent.change(titleInput, { target: { value: 'New Title' } });
     fireEvent.change(bodyInput, { target: { value: 'New Body' } });
     expect(titleInput).toHaveValue('New Title');
@@ -170,20 +170,20 @@ describe('NotificationForm', () => {
 
   it('navigates on cancel click', () => {
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
+    fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
     expect(mockPush).toHaveBeenCalledWith('/dashboard/notifications');
   });
 
   it('uses custom redirectPath', () => {
     render(<NotificationForm {...defaultProps} redirectPath="/custom" />);
-    fireEvent.click(screen.getByRole('button', { name: 'Cancelar' }));
+    fireEvent.click(screen.getByRole('button', { name: 'cancel' }));
     expect(mockPush).toHaveBeenCalledWith('/custom');
   });
 
   // -- handleCheckContent tests --
   it('verify button is disabled when title/body are empty', () => {
     render(<NotificationForm {...defaultProps} />);
-    const verifyBtn = screen.getByRole('button', { name: /Verificar Contenido/ });
+    const verifyBtn = screen.getByRole('button', { name: /verifyWithAI/ });
     expect(verifyBtn).toBeDisabled();
   });
 
@@ -194,13 +194,13 @@ describe('NotificationForm', () => {
     });
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'Promo' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'Descuento' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Promo' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'Descuento' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
 
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith(expect.stringContaining('aprobado')));
-    expect(screen.getByText(/Contenido Aprobado/)).toBeInTheDocument();
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('moderationApproved'));
+    expect(screen.getByText(/contentApproved/)).toBeInTheDocument();
   });
 
   it('shows rejected moderation result', async () => {
@@ -212,13 +212,13 @@ describe('NotificationForm', () => {
     });
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'Bad' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'Bad content' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Bad' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'Bad content' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('revisión')));
-    expect(screen.getByText(/El Contenido Necesita Revisión/)).toBeInTheDocument();
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('moderationNeedsReview'));
+    expect(screen.getByText(/contentNeedsReview/)).toBeInTheDocument();
     expect(screen.getByText('Contenido inapropiado')).toBeInTheDocument();
   });
 
@@ -229,10 +229,10 @@ describe('NotificationForm', () => {
     });
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'T' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'B' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'T' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'B' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
 
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Server error'));
   });
@@ -241,12 +241,12 @@ describe('NotificationForm', () => {
     (global.fetch as jest.Mock).mockRejectedValue(new Error('Network'));
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'T' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'B' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'T' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'B' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith(expect.stringContaining('Error al verificar')));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('moderationVerifyRetry'));
   });
 
   // -- handleSaveAndSend tests --
@@ -266,17 +266,17 @@ describe('NotificationForm', () => {
       });
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'Good Title' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'Good Body' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Good Title' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'Good Body' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith(expect.stringContaining('aprobado')));
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('moderationApproved'));
 
-    const sendBtn = screen.getByRole('button', { name: /Enviar Notificaci/ });
+    const sendBtn = screen.getByRole('button', { name: /submit/ });
     fireEvent.click(sendBtn);
 
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith(expect.stringContaining('Notificación creada')));
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith(expect.stringContaining('enviada')));
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('createSuccess'));
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('sendSuccess'));
 
     // Covers lines 286-287: setTimeout redirect
     act(() => { jest.advanceTimersByTime(1500); });
@@ -296,13 +296,13 @@ describe('NotificationForm', () => {
       });
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'Title' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'Body' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Title' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'Body' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
-    await waitFor(() => expect(screen.getByText(/Contenido Aprobado/)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(screen.getByText(/contentApproved/)).toBeInTheDocument());
 
-    fireEvent.click(screen.getByRole('button', { name: /Enviar Notificaci/ }));
+    fireEvent.click(screen.getByRole('button', { name: /submit/ }));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Create failed'));
   });
 
@@ -322,13 +322,13 @@ describe('NotificationForm', () => {
       });
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'Title' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'Body' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Title' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'Body' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
-    await waitFor(() => expect(screen.getByText(/Contenido Aprobado/)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(screen.getByText(/contentApproved/)).toBeInTheDocument());
 
-    fireEvent.click(screen.getByRole('button', { name: /Enviar Notificaci/ }));
+    fireEvent.click(screen.getByRole('button', { name: /submit/ }));
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Send failed'));
   });
 
@@ -341,14 +341,14 @@ describe('NotificationForm', () => {
       .mockRejectedValueOnce(new Error('Network error'));
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'Title' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'Body' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Title' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'Body' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
-    await waitFor(() => expect(screen.getByText(/Contenido Aprobado/)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(screen.getByText(/contentApproved/)).toBeInTheDocument());
 
-    fireEvent.click(screen.getByRole('button', { name: /Enviar Notificaci/ }));
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Ocurrió un error inesperado'));
+    fireEvent.click(screen.getByRole('button', { name: /submit/ }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('unexpectedError'));
   });
 
   it('clears moderation result when content changes', async () => {
@@ -358,14 +358,14 @@ describe('NotificationForm', () => {
     });
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'Title' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'Body' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Title' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'Body' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
-    await waitFor(() => expect(screen.getByText(/Contenido Aprobado/)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(screen.getByText(/contentApproved/)).toBeInTheDocument());
 
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'New Title' } });
-    expect(screen.queryByText(/Contenido Aprobado/)).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'New Title' } });
+    expect(screen.queryByText(/contentApproved/)).not.toBeInTheDocument();
   });
 
   it('renders moderation rejected with medium severity', async () => {
@@ -377,11 +377,11 @@ describe('NotificationForm', () => {
     });
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'T' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'B' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'T' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'B' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
-    await waitFor(() => expect(screen.getByText(/El Contenido Necesita Revisión/)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(screen.getByText(/contentNeedsReview/)).toBeInTheDocument());
   });
 
   it('renders moderation rejected with low severity', async () => {
@@ -393,11 +393,11 @@ describe('NotificationForm', () => {
     });
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'T' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'B' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'T' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'B' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
-    await waitFor(() => expect(screen.getByText(/El Contenido Necesita Revisión/)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(screen.getByText(/contentNeedsReview/)).toBeInTheDocument());
   });
 
   it('shows moderation API error with fallback message', async () => {
@@ -407,11 +407,11 @@ describe('NotificationForm', () => {
     });
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'T' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'B' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'T' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'B' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Error al verificar el contenido'));
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('moderationVerifyError'));
   });
 
   it('shows create API error with fallback message', async () => {
@@ -426,14 +426,14 @@ describe('NotificationForm', () => {
       });
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'T' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'B' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'T' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'B' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
-    await waitFor(() => expect(screen.getByText(/Contenido Aprobado/)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(screen.getByText(/contentApproved/)).toBeInTheDocument());
 
-    fireEvent.click(screen.getByRole('button', { name: /Enviar Notificaci/ }));
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Error al crear la notificación'));
+    fireEvent.click(screen.getByRole('button', { name: /submit/ }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('createError'));
   });
 
   it('shows send API error with fallback message', async () => {
@@ -452,14 +452,14 @@ describe('NotificationForm', () => {
       });
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'T' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'B' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'T' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'B' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
-    await waitFor(() => expect(screen.getByText(/Contenido Aprobado/)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(screen.getByText(/contentApproved/)).toBeInTheDocument());
 
-    fireEvent.click(screen.getByRole('button', { name: /Enviar Notificaci/ }));
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Error al enviar la notificación'));
+    fireEvent.click(screen.getByRole('button', { name: /submit/ }));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('sendError'));
   });
 
   // -- calculateTimeRemaining tests (lines 59-82) --
@@ -483,7 +483,7 @@ describe('NotificationForm', () => {
     render(<NotificationForm {...defaultProps} limits={limits} canSend={false} />);
     // The interval runs and sets timeRemaining. Advance timer to trigger interval.
     act(() => { jest.advanceTimersByTime(1000); });
-    expect(screen.getByText(/Tiempo restante/)).toBeInTheDocument();
+    expect(screen.getByText(/timeRemaining/)).toBeInTheDocument();
   });
 
   it('calculates time remaining with only minutes and seconds (no hours)', () => {
@@ -506,7 +506,7 @@ describe('NotificationForm', () => {
     render(<NotificationForm {...defaultProps} limits={limits} canSend={false} />);
     act(() => { jest.advanceTimersByTime(1000); });
     // Should show minutes and seconds format (Xm Xs)
-    expect(screen.getByText(/Tiempo restante/)).toBeInTheDocument();
+    expect(screen.getByText(/timeRemaining/)).toBeInTheDocument();
   });
 
   it('calculates time remaining with only seconds', () => {
@@ -528,7 +528,7 @@ describe('NotificationForm', () => {
     };
     render(<NotificationForm {...defaultProps} limits={limits} canSend={false} />);
     act(() => { jest.advanceTimersByTime(1000); });
-    expect(screen.getByText(/Tiempo restante/)).toBeInTheDocument();
+    expect(screen.getByText(/timeRemaining/)).toBeInTheDocument();
   });
 
   it('reloads page when time remaining expires (line 94)', () => {
@@ -576,7 +576,7 @@ describe('NotificationForm', () => {
     // useEffect condition: !canSend && limits?.last_notification_sent_at -> false because last_notification_sent_at is null
     // No timer should run; no crash
     act(() => { jest.advanceTimersByTime(2000); });
-    expect(screen.getByText('Límite Alcanzado')).toBeInTheDocument();
+    expect(screen.getByText('limitReached')).toBeInTheDocument();
   });
 
   it('returns null from calculateTimeRemaining when min_hours is 0 (line 59)', () => {
@@ -604,8 +604,8 @@ describe('NotificationForm', () => {
   // -- Emoji picker toggle tests (lines 439-453, 498-512) --
   it('toggles title emoji picker visibility', () => {
     render(<NotificationForm {...defaultProps} />);
-    // Two emoji toggle buttons exist: title and body, both have title="Agregar emoji"
-    const emojiButtons = screen.getAllByTitle('Agregar emoji');
+    // Two emoji toggle buttons exist: title and body, both have title="addEmoji"
+    const emojiButtons = screen.getAllByTitle('addEmoji');
     const titleEmojiBtn = emojiButtons[0];
 
     // Open title emoji picker
@@ -620,7 +620,7 @@ describe('NotificationForm', () => {
 
   it('toggles body emoji picker visibility', () => {
     render(<NotificationForm {...defaultProps} />);
-    const emojiButtons = screen.getAllByTitle('Agregar emoji');
+    const emojiButtons = screen.getAllByTitle('addEmoji');
     const bodyEmojiBtn = emojiButtons[1];
 
     // Open body emoji picker
@@ -637,10 +637,10 @@ describe('NotificationForm', () => {
     render(<NotificationForm {...defaultProps} />);
 
     // Type some text first
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'Hello' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Hello' } });
 
     // Open title emoji picker
-    const emojiButtons = screen.getAllByTitle('Agregar emoji');
+    const emojiButtons = screen.getAllByTitle('addEmoji');
     fireEvent.click(emojiButtons[0]);
 
     // Click an emoji in the picker
@@ -649,7 +649,7 @@ describe('NotificationForm', () => {
 
     // The emoji should be appended
     await waitFor(() => {
-      const titleInput = screen.getByLabelText(/Título/) as HTMLInputElement;
+      const titleInput = screen.getByLabelText(/titleLabel/) as HTMLInputElement;
       expect(titleInput.value).toContain('🎉');
     });
   });
@@ -658,10 +658,10 @@ describe('NotificationForm', () => {
   it('inserts emoji into body via emoji picker', async () => {
     render(<NotificationForm {...defaultProps} />);
 
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'World' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'World' } });
 
     // Open body emoji picker
-    const emojiButtons = screen.getAllByTitle('Agregar emoji');
+    const emojiButtons = screen.getAllByTitle('addEmoji');
     fireEvent.click(emojiButtons[1]);
 
     // Click an emoji in the picker
@@ -670,7 +670,7 @@ describe('NotificationForm', () => {
     fireEvent.click(bodyPickBtn);
 
     await waitFor(() => {
-      const bodyInput = screen.getByLabelText(/Mensaje/) as HTMLTextAreaElement;
+      const bodyInput = screen.getByLabelText(/messageLabel/) as HTMLTextAreaElement;
       expect(bodyInput.value).toContain('🎉');
     });
   });
@@ -691,7 +691,7 @@ describe('NotificationForm', () => {
     // In practice, they're unreachable from the test. The coverage tool marks them as uncovered.
     // We can still test the indirect effect via disabled button states.
     render(<NotificationForm {...defaultProps} canSend={false} />);
-    const sendBtn = screen.getByRole('button', { name: /Enviar Notificaci/ });
+    const sendBtn = screen.getByRole('button', { name: /submit/ });
     expect(sendBtn).toBeDisabled();
   });
 
@@ -712,14 +712,14 @@ describe('NotificationForm', () => {
       });
 
     render(<NotificationForm limits={null} canSend={true} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'Title' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'Body' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Title' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'Body' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
-    await waitFor(() => expect(screen.getByText(/Contenido Aprobado/)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(screen.getByText(/contentApproved/)).toBeInTheDocument());
 
-    fireEvent.click(screen.getByRole('button', { name: /Enviar Notificaci/ }));
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith(expect.stringContaining('enviada')));
+    fireEvent.click(screen.getByRole('button', { name: /submit/ }));
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('sendSuccess'));
 
     // Verify fetch was called without organizationId in body
     const createCall = (global.fetch as jest.Mock).mock.calls[1];
@@ -730,7 +730,7 @@ describe('NotificationForm', () => {
   // -- Close emoji picker via close button (X) inside picker (lines 449-453 close, 508-512 close) --
   it('closes title emoji picker via close button', () => {
     render(<NotificationForm {...defaultProps} />);
-    const emojiButtons = screen.getAllByTitle('Agregar emoji');
+    const emojiButtons = screen.getAllByTitle('addEmoji');
     // Open title emoji picker
     fireEvent.click(emojiButtons[0]);
 
@@ -749,7 +749,7 @@ describe('NotificationForm', () => {
 
   it('closes body emoji picker via close button', () => {
     render(<NotificationForm {...defaultProps} />);
-    const emojiButtons = screen.getAllByTitle('Agregar emoji');
+    const emojiButtons = screen.getAllByTitle('addEmoji');
     // Open body emoji picker
     fireEvent.click(emojiButtons[1]);
 
@@ -771,15 +771,15 @@ describe('NotificationForm', () => {
     });
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'Title' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'Body' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Title' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'Body' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
-    await waitFor(() => expect(screen.getByText(/Contenido Aprobado/)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(screen.getByText(/contentApproved/)).toBeInTheDocument());
 
     // Change body - moderation result should clear
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'New Body' } });
-    expect(screen.queryByText(/Contenido Aprobado/)).not.toBeInTheDocument();
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'New Body' } });
+    expect(screen.queryByText(/contentApproved/)).not.toBeInTheDocument();
   });
 
   // -- Emoji click also clears moderation result (line 158) --
@@ -790,21 +790,21 @@ describe('NotificationForm', () => {
     });
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'Title' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'Body' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Title' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'Body' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
-    await waitFor(() => expect(screen.getByText(/Contenido Aprobado/)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(screen.getByText(/contentApproved/)).toBeInTheDocument());
 
     // Open title emoji picker and click an emoji
-    const emojiButtons = screen.getAllByTitle('Agregar emoji');
+    const emojiButtons = screen.getAllByTitle('addEmoji');
     fireEvent.click(emojiButtons[0]);
     const pickBtn = screen.getAllByTestId('emoji-btn')[0];
     fireEvent.click(pickBtn);
 
     // Moderation result should be cleared
     await waitFor(() => {
-      expect(screen.queryByText(/Contenido Aprobado/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/contentApproved/)).not.toBeInTheDocument();
     });
   });
 
@@ -814,11 +814,11 @@ describe('NotificationForm', () => {
 
   it('handleCheckContent shows validation error when safeParse fails (lines 190-191)', async () => {
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'Valid Title' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'Valid Body' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Valid Title' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'Valid Body' } });
 
     // Button is now enabled. Access the verify button onClick from React props directly.
-    const verifyBtn = screen.getByRole('button', { name: /Verificar Contenido/ }) as HTMLButtonElement;
+    const verifyBtn = screen.getByRole('button', { name: /verifyWithAI/ }) as HTMLButtonElement;
 
     // Clear the fields programmatically so title/body state become empty strings
     // This won't disable the button instantly (React hasn't re-rendered), allowing us to call onClick.
@@ -832,7 +832,7 @@ describe('NotificationForm', () => {
     const propsKey = Object.keys(verifyBtn).find(k => k.startsWith('__reactProps$'));
 
     // First clear the title to empty string (state will be '') so safeParse fails
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: '' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: '' } });
     // Button is now disabled, but we can call onClick directly
     if (propsKey) {
       const props = (verifyBtn as any)[propsKey];
@@ -841,7 +841,7 @@ describe('NotificationForm', () => {
       }
     }
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('El título es requerido'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('validationTitleRequired'));
   });
 
   it('handleSaveAndSend shows validation error when safeParse fails (lines 230-231)', async () => {
@@ -852,17 +852,17 @@ describe('NotificationForm', () => {
     });
 
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'Title' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'Body' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Title' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'Body' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
-    await waitFor(() => expect(screen.getByText(/Contenido Aprobado/)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(screen.getByText(/contentApproved/)).toBeInTheDocument());
 
     // Now clear the title - this makes safeParse fail in handleSaveAndSend
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: '' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: '' } });
 
     // Send button is now disabled, but use fiber to call onClick directly
-    const sendBtn = screen.getByRole('button', { name: /Enviar Notificaci/ }) as HTMLButtonElement;
+    const sendBtn = screen.getByRole('button', { name: /submit/ }) as HTMLButtonElement;
     const propsKey = Object.keys(sendBtn).find(k => k.startsWith('__reactProps$'));
     if (propsKey) {
       const props = (sendBtn as any)[propsKey];
@@ -871,7 +871,7 @@ describe('NotificationForm', () => {
       }
     }
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('El título es requerido'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('validationTitleRequired'));
   });
 
   it('handleSaveAndSend shows error when canSend is false (lines 235-236)', async () => {
@@ -884,18 +884,18 @@ describe('NotificationForm', () => {
 
     // Render with canSend=true first to get moderation approved and button enabled
     const { rerender } = render(<NotificationForm {...defaultProps} canSend={true} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'Title' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'Body' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Title' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'Body' } });
 
-    fireEvent.click(screen.getByRole('button', { name: /Verificar Contenido/ }));
-    await waitFor(() => expect(screen.getByText(/Contenido Aprobado/)).toBeInTheDocument());
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(screen.getByText(/contentApproved/)).toBeInTheDocument());
 
     // Re-render with canSend=false - moderation result still set, form is valid,
     // but canSendNotification becomes false (canSend is false)
     rerender(<NotificationForm {...defaultProps} canSend={false} />);
 
     // The send button is now disabled. Access the onClick from the DOM directly.
-    const sendBtn = screen.getByRole('button', { name: /Enviar Notificaci/ }) as HTMLButtonElement;
+    const sendBtn = screen.getByRole('button', { name: /submit/ }) as HTMLButtonElement;
     // Get the React props (internal fiber) to call onClick directly
     const _fiberKey = Object.keys(sendBtn).find(k => k.startsWith('__reactFiber$') || k.startsWith('__reactInternalInstance$'));
     const propsKey = Object.keys(sendBtn).find(k => k.startsWith('__reactProps$'));
@@ -906,17 +906,17 @@ describe('NotificationForm', () => {
       }
     }
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Has alcanzado tu límite de notificaciones. Por favor actualiza tu plan o espera.'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('limitReachedError'));
   });
 
   it('handleSaveAndSend shows error when moderation not approved (lines 240-241)', async () => {
     // Fill valid data but don't verify content - moderationResult is null
     render(<NotificationForm {...defaultProps} />);
-    fireEvent.change(screen.getByLabelText(/Título/), { target: { value: 'Title' } });
-    fireEvent.change(screen.getByLabelText(/Mensaje/), { target: { value: 'Body' } });
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Title' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'Body' } });
 
     // The send button is disabled. Access onClick from React props directly.
-    const sendBtn = screen.getByRole('button', { name: /Enviar Notificaci/ }) as HTMLButtonElement;
+    const sendBtn = screen.getByRole('button', { name: /submit/ }) as HTMLButtonElement;
     const propsKey = Object.keys(sendBtn).find(k => k.startsWith('__reactProps$'));
     if (propsKey) {
       const props = (sendBtn as any)[propsKey];
@@ -925,6 +925,6 @@ describe('NotificationForm', () => {
       }
     }
 
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Por favor verifica el contenido con IA antes de enviar'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('verifyBeforeSend'));
   });
 });

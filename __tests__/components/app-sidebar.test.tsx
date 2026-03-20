@@ -24,6 +24,10 @@ jest.mock('@/components/org-switcher', () => ({
   ),
 }));
 
+jest.mock('@/components/plan-badge', () => ({
+  PlanBadge: () => <div data-testid="plan-badge">Plan Badge</div>,
+}));
+
 jest.mock('@/components/ui/sidebar', () => ({
   Sidebar: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => (
     <div data-testid="sidebar" {...props}>{children}</div>

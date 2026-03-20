@@ -1,5 +1,6 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/app_user_organization/delete-modal';
 import { Button } from '@/components/ui/button';
@@ -29,6 +30,8 @@ interface AppUserOrganizationWithRelations {
 }
 
 export default async function AppUserOrganizationListPage() {
+  const t = await getTranslations('Dashboard.appUserOrganization');
+  const tCommon = await getTranslations('Common');
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('app_user_organization')
@@ -40,18 +43,18 @@ export default async function AppUserOrganizationListPage() {
     .order('id', { ascending: false });
 
   if (error) {
-    return <div>Error al obtener membresías de usuarios</div>;
+    return <div>{t('error')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Usuarios por Organización</h1>
-          <p className="text-muted-foreground">Administrar membresías de usuarios en organizaciones</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/app_user_organization/create">+ Nueva Membresía</Link>
+          <Link href="/dashboard/app_user_organization/create">{t('newButton')}</Link>
         </Button>
       </div>
 
@@ -59,10 +62,10 @@ export default async function AppUserOrganizationListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Usuario</TableHead>
-              <TableHead>Organización</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>{t('tableHeaders.user')}</TableHead>
+              <TableHead>{t('tableHeaders.organization')}</TableHead>
+              <TableHead>{t('tableHeaders.status')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -75,7 +78,7 @@ export default async function AppUserOrganizationListPage() {
                       : row.app_user?.email || 'N/A'}
                   </TableCell>
                   <TableCell>{row.organization?.name || 'N/A'}</TableCell>
-                  <TableCell>{row.is_active ? 'Activo' : 'Inactivo'}</TableCell>
+                  <TableCell>{row.is_active ? tCommon('active') : tCommon('inactive')}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">
@@ -94,7 +97,7 @@ export default async function AppUserOrganizationListPage() {
             ) : (
               <TableRow>
                 <TableCell className="text-center py-4" colSpan={4}>
-                  No se encontraron membresías.
+                  {t('empty')}
                 </TableCell>
               </TableRow>
             )}

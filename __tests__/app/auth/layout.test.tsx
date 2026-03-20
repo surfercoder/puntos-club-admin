@@ -5,16 +5,12 @@ jest.mock('@/components/public-header', () => ({
   PublicHeader: () => <div data-testid="public-header">Header</div>,
 }));
 
-jest.mock('@/components/public-footer', () => ({
-  PublicFooter: () => <div data-testid="public-footer">Footer</div>,
-}));
-
 describe('AuthLayout', () => {
   it('exports a default function', () => {
     expect(typeof AuthLayout).toBe('function');
   });
 
-  it('renders children with header and footer', () => {
+  it('renders children with header', () => {
     render(
       <AuthLayout>
         <div data-testid="child">Child Content</div>
@@ -22,7 +18,6 @@ describe('AuthLayout', () => {
     );
 
     expect(screen.getByTestId('public-header')).toBeInTheDocument();
-    expect(screen.getByTestId('public-footer')).toBeInTheDocument();
     expect(screen.getByTestId('child')).toBeInTheDocument();
   });
 });

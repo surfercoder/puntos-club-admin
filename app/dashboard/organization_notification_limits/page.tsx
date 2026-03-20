@@ -1,5 +1,6 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -14,6 +15,7 @@ import {
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export default async function OrganizationNotificationLimitsListPage() {
+  const t = await getTranslations('Dashboard.organizationNotificationLimit');
   const supabase = createAdminClient();
   const { data, error } = await supabase
     .from('organization_notification_limits')
@@ -21,18 +23,18 @@ export default async function OrganizationNotificationLimitsListPage() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    return <div>Error al obtener límites de notificaciones</div>;
+    return <div>{t('error')}</div>;
   }
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Límites de Notificaciones</h1>
-          <p className="text-muted-foreground">Administrar límites de notificaciones y planes por organización</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/organization_notification_limits/create">+ Nuevo Límite</Link>
+          <Link href="/dashboard/organization_notification_limits/create">{t('newButton')}</Link>
         </Button>
       </div>
 
@@ -40,14 +42,14 @@ export default async function OrganizationNotificationLimitsListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Organización</TableHead>
-              <TableHead>Tipo de Plan</TableHead>
-              <TableHead>Límite Diario</TableHead>
-              <TableHead>Límite Mensual</TableHead>
-              <TableHead>Horas Mín. Entre Envíos</TableHead>
-              <TableHead>Enviadas Hoy</TableHead>
-              <TableHead>Enviadas Este Mes</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>{t('tableHeaders.organization')}</TableHead>
+              <TableHead>{t('tableHeaders.planType')}</TableHead>
+              <TableHead>{t('tableHeaders.dailyLimit')}</TableHead>
+              <TableHead>{t('tableHeaders.monthlyLimit')}</TableHead>
+              <TableHead>{t('tableHeaders.minHoursBetween')}</TableHead>
+              <TableHead>{t('tableHeaders.sentToday')}</TableHead>
+              <TableHead>{t('tableHeaders.sentThisMonth')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -87,7 +89,7 @@ export default async function OrganizationNotificationLimitsListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={8}>No se encontraron límites de notificaciones.</TableCell>
+                <TableCell className="text-center py-4" colSpan={8}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

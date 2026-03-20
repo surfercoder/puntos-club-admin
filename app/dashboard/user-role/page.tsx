@@ -1,5 +1,6 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/user_role_crud/delete-modal';
 import ToastHandler from '@/components/dashboard/user_role_crud/toast-handler';
@@ -11,6 +12,7 @@ import {
 import { createClient } from '@/lib/supabase/server';
 
 export default async function UserRoleListPage() {
+  const t = await getTranslations('UserRole');
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('user_role')
@@ -18,7 +20,7 @@ export default async function UserRoleListPage() {
     .order('display_name');
 
   if (error) {
-    return <div>Error loading user roles</div>;
+    return <div>{t('error')}</div>;
   }
 
   return (
@@ -26,11 +28,11 @@ export default async function UserRoleListPage() {
       <ToastHandler />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">User Roles</h1>
-          <p className="text-muted-foreground">Manage system user roles</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/user-role/create">+ New User Role</Link>
+          <Link href="/dashboard/user-role/create">{t('newButton')}</Link>
         </Button>
       </div>
 
@@ -38,10 +40,10 @@ export default async function UserRoleListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Role Type</TableHead>
-              <TableHead>Display Name</TableHead>
-              <TableHead>Description</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t('tableHeaders.roleType')}</TableHead>
+              <TableHead>{t('tableHeaders.displayName')}</TableHead>
+              <TableHead>{t('tableHeaders.description')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -73,7 +75,7 @@ export default async function UserRoleListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={4}>No user roles found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={4}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

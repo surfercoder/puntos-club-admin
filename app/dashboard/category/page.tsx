@@ -1,6 +1,7 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/category/delete-modal';
 import ToastHandler from '@/components/dashboard/category/toast-handler';
@@ -19,11 +20,14 @@ import { createClient } from '@/lib/supabase/server';
 import type { Category } from '@/types/category';
 
 export default async function CategoryListPage() {
-  const supabase = await createClient();
-  const currentUser = await getCurrentUser();
+  const [t, tCommon, supabase, currentUser, cookieStore] = await Promise.all([
+    getTranslations('Dashboard.category'),
+    getTranslations('Common'),
+    createClient(),
+    getCurrentUser(),
+    cookies(),
+  ]);
   const userIsAdmin = isAdmin(currentUser);
-
-  const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
   const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
 
@@ -36,7 +40,7 @@ export default async function CategoryListPage() {
   const { data, error } = await query;
 
   if (error) {
-    return <div>Error al obtener categorías</div>;
+    return <div>{t('error')}</div>;
   }
 
   return (
@@ -44,11 +48,11 @@ export default async function CategoryListPage() {
       <ToastHandler />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Categorías</h1>
-          <p className="text-muted-foreground">Administrar categorías de productos del sistema</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/category/create">+ Nueva Categoría</Link>
+          <Link href="/dashboard/category/create">{t('newButton')}</Link>
         </Button>
       </div>
 
@@ -56,10 +60,10 @@ export default async function CategoryListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Descripción</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>{t('tableHeaders.name')}</TableHead>
+              <TableHead>{t('tableHeaders.description')}</TableHead>
+              <TableHead>{t('tableHeaders.status')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -82,7 +86,7 @@ export default async function CategoryListPage() {
                         ? 'bg-green-100 text-green-800' 
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {category.active ? 'Activo' : 'Inactivo'}
+                      {category.active ? tCommon('active') : tCommon('inactive')}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
@@ -103,7 +107,7 @@ export default async function CategoryListPage() {
               })
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={4}>No se encontraron categorías.</TableCell>
+                <TableCell className="text-center py-4" colSpan={4}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

@@ -1,7 +1,10 @@
 import { POST } from '@/app/api/purchase/create/route';
 
 const mockSingle = jest.fn();
-const mockEq = jest.fn(() => ({ single: mockSingle }));
+const mockEqResult: any = { single: mockSingle };
+// Support chained .eq() calls (e.g. .eq("beneficiary_id", ...).eq("organization_id", ...))
+mockEqResult.eq = jest.fn(() => mockEqResult);
+const mockEq = jest.fn(() => mockEqResult);
 const mockSelect = jest.fn(() => ({ eq: mockEq }));
 const mockInsertSingle = jest.fn();
 const mockInsertSelect = jest.fn(() => ({ single: mockInsertSingle }));

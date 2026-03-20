@@ -104,7 +104,7 @@ export function OrgQRDisplay({ organizationId, organizationName, logoUrl }: OrgQ
               margin-bottom: 24px;
             }
             .brand-badge {
-              background: #059669;
+              background: #31A1D6;
               color: white;
               font-size: 12px;
               font-weight: bold;
@@ -114,20 +114,20 @@ export function OrgQRDisplay({ organizationId, organizationName, logoUrl }: OrgQ
             .brand-name {
               font-size: 16px;
               font-weight: 600;
-              color: #374151;
+              color: #FF4573;
             }
             .qr-frame {
               display: inline-block;
               padding: 20px;
-              border: 4px solid #059669;
+              border: 4px solid #31A1D6;
               border-radius: 16px;
               background: white;
-              box-shadow: 0 4px 20px rgba(5, 150, 105, 0.15);
+              box-shadow: 0 4px 20px rgba(49, 161, 214, 0.15);
             }
             .org-name {
               font-size: 28px;
               font-weight: bold;
-              color: #111827;
+              color: #1A1A2E;
               margin-top: 24px;
             }
             .tagline {
@@ -192,12 +192,12 @@ export function OrgQRDisplay({ organizationId, organizationName, logoUrl }: OrgQ
           <CardTitle className="text-base">{t('title')}</CardTitle>
         </CardHeader>
         <CardContent className="flex flex-col items-center gap-4 w-full">
-          <div ref={qrContainerRef} className="rounded-2xl border-4 border-emerald-500 bg-white p-6 shadow-md">
+          <div ref={qrContainerRef} className="rounded-2xl border-4 border-primary bg-white p-6 shadow-md">
             <QRCodeSVG
               value={qrData}
               size={260}
               bgColor="#ffffff"
-              fgColor="#059669"
+              fgColor="#31A1D6"
               level="H"
               includeMargin={false}
             />
@@ -215,7 +215,7 @@ export function OrgQRDisplay({ organizationId, organizationName, logoUrl }: OrgQ
                 />
               </div>
             )}
-            <p className="font-semibold text-gray-900 dark:text-white">{organizationName}</p>
+            <p className="font-semibold text-foreground">{organizationName}</p>
             <p className="text-xs text-muted-foreground">ID: {organizationId}</p>
           </div>
 
@@ -240,7 +240,7 @@ export function OrgQRDisplay({ organizationId, organizationName, logoUrl }: OrgQ
         <Card>
           <CardHeader className="pb-3">
             <CardTitle className="text-base flex items-center gap-2">
-              <Info className="h-4 w-4 text-emerald-600" />
+              <Info className="h-4 w-4 text-primary" />
               {t('howItWorks')}
             </CardTitle>
           </CardHeader>
@@ -252,11 +252,11 @@ export function OrgQRDisplay({ organizationId, organizationName, logoUrl }: OrgQ
                 { id: 'step3', title: t('step3Title'), desc: t('step3Description') },
               ].map((item, idx) => (
                 <li key={item.id} className="flex gap-3">
-                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold">
+                  <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold">
                     {idx + 1}
                   </span>
                   <div>
-                    <p className="text-sm font-medium text-gray-900 dark:text-white">{item.title}</p>
+                    <p className="text-sm font-medium text-foreground">{item.title}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">{item.desc}</p>
                   </div>
                 </li>
@@ -265,12 +265,12 @@ export function OrgQRDisplay({ organizationId, organizationName, logoUrl }: OrgQ
           </CardContent>
         </Card>
 
-        <Card className="bg-emerald-50 dark:bg-emerald-900/20 border-emerald-200 dark:border-emerald-800">
+        <Card className="bg-primary/5 border-primary/20">
           <CardContent className="pt-4">
-            <p className="text-sm font-medium text-emerald-800 dark:text-emerald-200 mb-2">
+            <p className="text-sm font-medium text-primary mb-2">
               {t('tipsTitle')}
             </p>
-            <ul className="space-y-1.5 text-xs text-emerald-700 dark:text-emerald-300">
+            <ul className="space-y-1.5 text-xs text-primary/80">
               <li>• {t('tip1')}</li>
               <li>• {t('tip2')}</li>
               <li>• {t('tip3')}</li>

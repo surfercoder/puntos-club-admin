@@ -1,6 +1,7 @@
 "use client";
 
 import { Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
@@ -26,20 +27,22 @@ export default function DeleteModal({ subscriptionId, subscriptionLabel }: Delet
   const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const router = useRouter();
+  const t = useTranslations('Dashboard.subscription.deleteModal');
+  const tCommon = useTranslations('Common');
 
   const handleDelete = async () => {
     setIsDeleting(true);
     try {
       const result = await deleteSubscription(subscriptionId);
       if (result.error) {
-        toast.error('Error deleting subscription');
+        toast.error(t('deleteError'));
       } else {
-        toast.success('Subscription deleted successfully');
+        toast.success(t('deleteSuccess'));
         router.refresh();
         setOpen(false);
       }
     } catch {
-      toast.error('An unexpected error occurred');
+      toast.error(t('genericError'));
     } finally {
       setIsDeleting(false);
     }
@@ -54,17 +57,17 @@ export default function DeleteModal({ subscriptionId, subscriptionLabel }: Delet
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Delete Subscription</DialogTitle>
+          <DialogTitle>{t('title')}</DialogTitle>
           <DialogDescription>
-            Are you sure you want to delete subscription <strong>{subscriptionLabel}</strong>? This action cannot be undone.
+            {t.rich('confirm', { name: subscriptionLabel, strong: (chunks) => <strong>{chunks}</strong> })}
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
           <Button disabled={isDeleting} onClick={() => setOpen(false)} variant="outline">
-            Cancel
+            {tCommon('cancel')}
           </Button>
           <Button disabled={isDeleting} onClick={handleDelete} variant="destructive">
-            {isDeleting ? 'Deleting...' : 'Delete'}
+            {isDeleting ? tCommon('loading') : tCommon('delete')}
           </Button>
         </DialogFooter>
       </DialogContent>

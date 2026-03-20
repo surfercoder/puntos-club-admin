@@ -23,7 +23,7 @@ import {
 } from '@/lib/plans/config';
 import type { FeatureUsage, PlanFeatureKey } from '@/types/plan';
 
-const FEATURE_ICONS: Record<PlanFeatureKey, React.ElementType> = {
+const FEATURE_ICONS: Record<PlanFeatureKey, React.ComponentType<{ className?: string }>> = {
   beneficiaries:              Users,
   push_notifications_monthly: Bell,
   cashiers:                   UserCheck,
@@ -36,7 +36,7 @@ function usageColor(pct: number, isAtLimit: boolean): string {
   if (isAtLimit)  return 'bg-red-500';
   if (pct >= 80)  return 'bg-amber-500';
   if (pct >= 50)  return 'bg-blue-500';
-  return 'bg-emerald-500';
+  return 'bg-brand-green';
 }
 
 function textColor(pct: number, isAtLimit: boolean): string {
@@ -142,7 +142,7 @@ export function PlanUsageSummary({ className, compact = false }: PlanUsageSummar
       </div>
 
       {anyWarning && (
-        <div className="mx-5 mt-4 flex items-center gap-2 rounded-md bg-amber-50 px-3 py-2 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300">
+        <div className="mx-5 mt-4 flex items-center gap-2 rounded-md bg-brand-orange/10 px-3 py-2 text-brand-orange">
           <TrendingUp className="h-3.5 w-3.5 shrink-0" />
           <span className="text-xs">{t('nearingLimitWarning')}</span>
         </div>

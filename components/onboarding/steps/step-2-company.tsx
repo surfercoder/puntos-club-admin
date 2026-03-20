@@ -105,11 +105,11 @@ function AddressSection({ state, dispatch, t }: AddressSectionProps) {
       />
       {state.errors.address && <p className="text-xs text-destructive">{state.errors.address}</p>}
       {state.address && (
-        <div className="rounded-md bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-200 dark:border-emerald-800 px-3 py-2 text-sm text-emerald-800 dark:text-emerald-200">
+        <div className="rounded-md bg-brand-green/10 border border-brand-green/30 px-3 py-2 text-sm text-brand-green">
           📍 {state.address.formatted_address}
         </div>
       )}
-      <div className="flex items-start gap-2 rounded-md bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 px-3 py-2 text-xs text-blue-700 dark:text-blue-300">
+      <div className="flex items-start gap-2 rounded-md bg-primary/10 border border-primary/30 px-3 py-2 text-xs text-primary">
         <Info className="h-4 w-4 mt-0.5 shrink-0" />
         <span>{t('firstBranchHint')}</span>
       </div>
@@ -129,18 +129,18 @@ function CashierSection({ state, dispatch, t, tCommon }: CashierSectionProps) {
     dispatch({ type: 'SET_FIELD', field, value: e.target.value });
 
   return (
-    <div className="rounded-xl border border-dashed border-gray-300 dark:border-gray-600 overflow-hidden">
+    <div className="rounded-xl border border-dashed border-border overflow-hidden">
       <button
         type="button"
         onClick={() => dispatch({ type: 'TOGGLE', field: 'showCashier' })}
-        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+        className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/50 transition-colors"
       >
         <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-violet-100 dark:bg-violet-900/40">
-            <UserCog className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-pink/10">
+            <UserCog className="h-4 w-4 text-brand-pink" />
           </div>
           <div>
-            <p className="text-sm font-medium text-gray-900 dark:text-white">
+            <p className="text-sm font-medium text-foreground">
               {t('createCashier')}
             </p>
             <p className="text-xs text-muted-foreground">
@@ -156,8 +156,8 @@ function CashierSection({ state, dispatch, t, tCommon }: CashierSectionProps) {
       </button>
 
       {state.showCashier && (
-        <div className="border-t border-dashed border-gray-300 dark:border-gray-600 px-4 py-4 space-y-4 bg-gray-50/50 dark:bg-gray-800/20">
-          <div className="flex items-start gap-2 rounded-md bg-violet-50 dark:bg-violet-900/20 border border-violet-200 dark:border-violet-800 px-3 py-2 text-xs text-violet-700 dark:text-violet-300">
+        <div className="border-t border-dashed border-border px-4 py-4 space-y-4 bg-muted/30">
+          <div className="flex items-start gap-2 rounded-md bg-brand-pink/10 border border-brand-pink/30 px-3 py-2 text-xs text-brand-pink">
             <Info className="h-4 w-4 mt-0.5 shrink-0" />
             <span>{t('cashierHint')}</span>
           </div>
@@ -438,7 +438,7 @@ export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
         <Button type="button" variant="outline" onClick={onBack} className="flex-1">
           {tCommon('back')}
         </Button>
-        <Button type="submit" className="flex-1 bg-emerald-600 hover:bg-emerald-700">
+        <Button type="submit" className="flex-1">
           {tCommon('continue')}
         </Button>
       </div>

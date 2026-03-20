@@ -428,9 +428,30 @@
         "createdAt": "Created at",
         "actions": "Actions"
       },
-      "empty": "No push notifications found."
+      "empty": "No push notifications found.",
+      "deleteModal": {
+        "title": "Delete Push Notification",
+        "confirm": "Are you sure you want to delete <strong>{name}</strong>? This action cannot be undone.",
+        "deleteError": "Error deleting push notification",
+        "deleteSuccess": "Push notification deleted successfully",
+        "genericError": "An unexpected error occurred"
+      }
     },
     "beneficiaryOrganization": {
+      "title": "Beneficiaries by Organization",
+      "description": "Manage beneficiary memberships and points by organization",
+      "newButton": "+ New Membership",
+      "error": "Error loading beneficiary organizations",
+      "empty": "No memberships found.",
+      "tableHeaders": {
+        "beneficiary": "Beneficiary",
+        "organization": "Organization",
+        "available": "Available",
+        "earned": "Earned",
+        "redeemed": "Redeemed",
+        "status": "Status",
+        "actions": "Actions"
+      },
       "createTitle": "Create Membership",
       "editTitle": "Edit Membership",
       "fetchError": "Error fetching membership",
@@ -454,6 +475,17 @@
       }
     },
     "category": {
+      "title": "Categories",
+      "description": "Manage product categories",
+      "newButton": "+ New Category",
+      "error": "Error loading categories",
+      "empty": "No categories found.",
+      "tableHeaders": {
+        "name": "Name",
+        "description": "Description",
+        "status": "Status",
+        "actions": "Actions"
+      },
       "createTitle": "Create Category",
       "editTitle": "Edit Category",
       "fetchError": "Error fetching category",
@@ -475,6 +507,20 @@
       }
     },
     "appUser": {
+      "title": "Users",
+      "description": "Manage app users",
+      "newButton": "+ New User",
+      "error": "Error loading users",
+      "empty": "No users found.",
+      "tableHeaders": {
+        "name": "Name",
+        "email": "Email",
+        "username": "Username",
+        "role": "Role",
+        "organization": "Organization",
+        "status": "Status",
+        "actions": "Actions"
+      },
       "createTitle": "Create User",
       "editTitle": "Edit User",
       "fetchError": "Error fetching user",
@@ -730,6 +776,18 @@
       }
     },
     "appOrder": {
+      "title": "Orders",
+      "description": "Manage system orders",
+      "newButton": "+ New Order",
+      "error": "Error loading orders",
+      "empty": "No orders found.",
+      "tableHeaders": {
+        "orderNumber": "Order Number",
+        "creationDate": "Creation Date",
+        "totalPoints": "Total Points",
+        "observations": "Observations",
+        "actions": "Actions"
+      },
       "createTitle": "Create Order",
       "editTitle": "Edit Order",
       "fetchError": "Error fetching order",
@@ -750,6 +808,20 @@
       }
     },
     "redemption": {
+      "title": "Redemptions",
+      "description": "Manage system redemptions",
+      "newButton": "+ New Redemption",
+      "error": "Error loading redemptions",
+      "empty": "No redemptions found.",
+      "tableHeaders": {
+        "beneficiary": "Beneficiary",
+        "product": "Product",
+        "order": "Order",
+        "pointsUsed": "Points Used",
+        "quantity": "Quantity",
+        "date": "Date",
+        "actions": "Actions"
+      },
       "createTitle": "Create Redemption",
       "editTitle": "Edit Redemption",
       "fetchError": "Error fetching redemption",
@@ -776,6 +848,17 @@
       }
     },
     "appUserOrganization": {
+      "title": "Users by Organization",
+      "description": "Manage user memberships in organizations",
+      "newButton": "+ New Membership",
+      "error": "Error loading user memberships",
+      "empty": "No memberships found.",
+      "tableHeaders": {
+        "user": "User",
+        "organization": "Organization",
+        "status": "Status",
+        "actions": "Actions"
+      },
       "createTitle": "Create Membership",
       "editTitle": "Edit Membership",
       "fetchError": "Error fetching membership",
@@ -796,6 +879,22 @@
       }
     },
     "stock": {
+      "title": "Stock",
+      "description": "Manage product stock levels",
+      "newButton": "+ New Stock Record",
+      "error": "Error loading stock records",
+      "empty": "No stock records found.",
+      "tableHeaders": {
+        "branch": "Branch",
+        "product": "Product",
+        "currentStock": "Current Stock",
+        "minimumStock": "Minimum Stock",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "statusInStock": "In Stock",
+      "statusLowStock": "Low Stock",
+      "statusOutOfStock": "Out of Stock",
       "createTitle": "Create Stock Record",
       "editTitle": "Edit Stock Record",
       "deleteModal": {
@@ -817,6 +916,26 @@
       }
     },
     "address": {
+      "title": "Addresses",
+      "description": "Manage all system addresses",
+      "newButton": "+ New Address",
+      "error": "Error loading addresses",
+      "empty": "No addresses found.",
+      "tableHeaders": {
+        "street": "Street",
+        "number": "Number",
+        "city": "City",
+        "state": "State",
+        "zipCode": "Zip Code",
+        "actions": "Actions"
+      },
+      "deleteModal": {
+        "title": "Delete Address",
+        "confirm": "Are you sure you want to delete this address? This action cannot be undone.",
+        "deleteError": "Error deleting address",
+        "deleteSuccess": "Address deleted successfully",
+        "genericError": "An error occurred while deleting"
+      },
       "createTitle": "Create Address",
       "form": {
         "searchAddress": "Search Address",
@@ -830,6 +949,21 @@
       }
     },
     "organizationNotificationLimit": {
+      "title": "Notification Limits",
+      "description": "Manage notification limits and plans by organization",
+      "newButton": "+ New Limit",
+      "error": "Error loading notification limits",
+      "empty": "No notification limits found.",
+      "tableHeaders": {
+        "organization": "Organization",
+        "planType": "Plan Type",
+        "dailyLimit": "Daily Limit",
+        "monthlyLimit": "Monthly Limit",
+        "minHoursBetween": "Min. Hours Between Sends",
+        "sentToday": "Sent Today",
+        "sentThisMonth": "Sent This Month",
+        "actions": "Actions"
+      },
       "createTitle": "Create Notification Limit",
       "form": {
         "organizationLabel": "Organization",
@@ -843,6 +977,154 @@
         "minHours": "Minimum Hours Between Notifications",
         "minHoursPlaceholder": "Enter minimum hours between notifications"
       }
+    },
+    "purchase": {
+      "title": "Purchases",
+      "description": "Manage system purchases",
+      "newButton": "+ New Purchase",
+      "error": "Error loading purchases",
+      "empty": "No purchases found.",
+      "tableHeaders": {
+        "purchaseNumber": "Purchase #",
+        "date": "Date",
+        "beneficiary": "Beneficiary",
+        "cashier": "Cashier",
+        "branch": "Branch",
+        "amount": "Amount",
+        "points": "Points",
+        "actions": "Actions"
+      },
+      "deleteModal": {
+        "title": "Delete Purchase",
+        "confirm": "Are you sure you want to delete purchase <strong>{name}</strong>? This action cannot be undone.",
+        "deleteError": "Error deleting purchase",
+        "deleteSuccess": "Purchase deleted successfully",
+        "genericError": "An unexpected error occurred"
+      }
+    },
+    "subscription": {
+      "title": "Subscriptions",
+      "description": "Manage organization subscriptions",
+      "newButton": "+ New Subscription",
+      "error": "Error loading subscriptions",
+      "empty": "No subscriptions found.",
+      "tableHeaders": {
+        "organization": "Organization",
+        "plan": "Plan",
+        "status": "Status",
+        "payerEmail": "Payer Email",
+        "amount": "Amount",
+        "created": "Created",
+        "actions": "Actions"
+      },
+      "deleteModal": {
+        "title": "Delete Subscription",
+        "confirm": "Are you sure you want to delete subscription <strong>{name}</strong>? This action cannot be undone.",
+        "deleteError": "Error deleting subscription",
+        "deleteSuccess": "Subscription deleted successfully",
+        "genericError": "An unexpected error occurred"
+      }
+    },
+    "planLimits": {
+      "title": "Plan Limits",
+      "description": "Manage plan feature limits",
+      "newButton": "+ New Plan Limit",
+      "error": "Error loading plan limits",
+      "empty": "No plan limits found.",
+      "tableHeaders": {
+        "plan": "Plan",
+        "feature": "Feature",
+        "limit": "Limit",
+        "warningThreshold": "Warning Threshold",
+        "actions": "Actions"
+      },
+      "deleteModal": {
+        "title": "Delete Plan Limit",
+        "confirm": "Are you sure you want to delete <strong>{name}</strong>? This action cannot be undone.",
+        "deleteError": "Error deleting plan limit",
+        "deleteSuccess": "Plan limit deleted successfully",
+        "genericError": "An unexpected error occurred"
+      }
+    },
+    "pushTokensCrud": {
+      "title": "Push Tokens",
+      "description": "Manage beneficiary device push tokens",
+      "newButton": "+ New Push Token",
+      "error": "Error loading push tokens",
+      "empty": "No push tokens found.",
+      "tableHeaders": {
+        "beneficiary": "Beneficiary",
+        "platform": "Platform",
+        "deviceId": "Device ID",
+        "token": "Token",
+        "active": "Active",
+        "created": "Created",
+        "actions": "Actions"
+      },
+      "statusActive": "Active",
+      "statusInactive": "Inactive",
+      "deleteModal": {
+        "title": "Delete Push Token",
+        "confirm": "Are you sure you want to delete token for <strong>{name}</strong>? This action cannot be undone.",
+        "deleteError": "Error deleting push token",
+        "deleteSuccess": "Push token deleted successfully",
+        "genericError": "An unexpected error occurred"
+      }
+    },
+    "orgPlanLimits": {
+      "title": "Organization Plan Limits",
+      "description": "Manage per-organization plan feature limits",
+      "newButton": "+ New Org Plan Limit",
+      "error": "Error loading organization plan limits",
+      "empty": "No organization plan limits found.",
+      "tableHeaders": {
+        "organization": "Organization",
+        "plan": "Plan",
+        "feature": "Feature",
+        "limit": "Limit",
+        "warning": "Warning",
+        "actions": "Actions"
+      },
+      "deleteModal": {
+        "title": "Delete Organization Plan Limit",
+        "confirm": "Are you sure you want to delete <strong>{name}</strong>? This action cannot be undone.",
+        "deleteError": "Error deleting organization plan limit",
+        "deleteSuccess": "Organization plan limit deleted successfully",
+        "genericError": "An unexpected error occurred"
+      }
+    },
+    "organizationDetail": {
+      "description": "Organization details and available products",
+      "editButton": "Edit Organization",
+      "infoTitle": "Organization Information",
+      "name": "Name",
+      "legalName": "Legal Name",
+      "taxId": "Tax ID",
+      "createdAt": "Creation Date",
+      "productsTitle": "Products Available for Redemption",
+      "productsDescription": "Products that users can redeem with their points",
+      "manageProducts": "Manage Products",
+      "productsError": "Error loading products",
+      "productsEmpty": "No products available for redemption yet.",
+      "productTableHeaders": {
+        "name": "Product Name",
+        "description": "Description",
+        "category": "Category",
+        "requiredPoints": "Required Points",
+        "availableStock": "Available Stock"
+      },
+      "noStock": "No stock"
+    },
+    "linkAllBeneficiaries": {
+      "title": "Link Unlinked Beneficiaries",
+      "description": "This utility will link all beneficiaries that are not currently associated with your organization. This is useful for fixing beneficiaries created before the automatic linking was implemented.",
+      "linkButton": "Link All Unlinked Beneficiaries",
+      "backButton": "Back to Beneficiaries",
+      "whatThisDoes": "What this does:",
+      "step1": "Finds all beneficiaries not linked to your organization",
+      "step2": "Creates beneficiary_organization records for them",
+      "step3": "Sets their initial points to 0",
+      "step4": "Makes them active members of your organization"
     }
   },
   "Onboarding": {
@@ -1119,6 +1401,8 @@
     "tableDescription": "System-defined roles. You can edit names and descriptions.",
     "loading": "Loading roles...",
     "empty": "No roles found.",
+    "newButton": "New Role",
+    "error": "Error loading roles",
     "noDescription": "No description",
     "tableHeaders": {
       "roleType": "Role Type",
@@ -1140,11 +1424,19 @@
       "save": "Update",
       "displayNameRequired": "Display name is required",
       "updateError": "Could not update the role"
+    },
+    "deleteModal": {
+      "title": "Delete User Role",
+      "confirm": "Are you sure you want to delete role <strong>{name}</strong>? This action cannot be undone. Make sure no users are assigned to this role.",
+      "deleteError": "Error deleting user role",
+      "deleteSuccess": "User role deleted successfully",
+      "genericError": "An unexpected error occurred"
     }
   },
   "HomePage": {
     "signIn": "Sign in",
     "signUp": "Sign up",
+    "join": "Join",
     "heroTitle": "The loyalty program your business needs",
     "heroDescription": "Create your own points and rewards program in minutes. Engage your customers, increase repeat visits, and grow your business with Puntos Club.",
     "ctaOwner": "Start for free",
@@ -1167,6 +1459,129 @@
     "ctaDescription": "Set up your loyalty program in just a few minutes. No credit card required to start.",
     "ctaButton": "Create my loyalty program",
     "footerCopyright": "\u00a9 {year} Puntos Club. All rights reserved."
+  },
+  "Landing": {
+    "loader": {
+      "slogan": "Create your own benefits club"
+    },
+    "weDo": {
+      "title": "THIS IS WHAT WE DO",
+      "descriptionPrefix": "Puntos Club",
+      "description": "is a platform designed for businesses looking to build customer loyalty. Through a points system, they can reward their customers for their loyalty."
+    },
+    "callToAction": "Discover how",
+    "engines": {
+      "title": "And your beneficiaries will be able to ...",
+      "updateData": {
+        "title": "Update their data",
+        "description": "Keep their information up to date."
+      },
+      "earnPoints": {
+        "title": "Earn points",
+        "description": "Accumulate points for their loyalty."
+      },
+      "checkBalance": {
+        "title": "Check their balance",
+        "description": "View their available points."
+      },
+      "browseCatalog": {
+        "title": "Browse the catalog",
+        "description": "Explore the variety of products and rewards available to redeem."
+      },
+      "claimReward": {
+        "title": "Claim their reward",
+        "description": "Choose their reward and redeem it with their points."
+      }
+    },
+    "profit": {
+      "sectionTitle": "Benefits",
+      "title1": "Brand identity",
+      "title2": "Customer loyalty",
+      "title3": "Campaign management",
+      "title4": "Total control",
+      "title5": "Audience management",
+      "desc1": "Customize the platform with your\ncompany's colors and logo.",
+      "desc2": "Build stronger bonds and reward them\nwith products your customers love.",
+      "desc3": "Improve your repurchase rate and\ncustomer retention.",
+      "desc4": "Manage rewards and campaigns\nfrom your control panel.\nData collection through reports.",
+      "desc5": "Communicate with your customers\nwithout intermediaries."
+    },
+    "steps": {
+      "0": {
+        "title": "Customize your platform",
+        "content": "You can customize your points platform capturing the essence of your brand, with your colors and logo.",
+        "highlightedWord": "platform"
+      },
+      "1": {
+        "title": "Create your rewards",
+        "content": "Create your own catalog to reward your customers.",
+        "highlightedWord": "rewards"
+      },
+      "2": {
+        "title": "Choose your plan",
+        "content": "Select the option that best suits your business.",
+        "highlightedWord": "plan"
+      },
+      "3": {
+        "title": "Set up your business",
+        "content": "Branches and/or Collaborators (Checkout line, Administration, etc.)",
+        "highlightedWord": "Set up"
+      },
+      "4": {
+        "title": "Invite your beneficiaries",
+        "content": "Invite your customers to join your club so they can redeem rewards within the app.",
+        "highlightedWord": "beneficiaries"
+      },
+      "5": {
+        "title": "Manage from the Control Panel",
+        "content": "Visualize consumer behavior.\nControl actions taken by your collaborators.",
+        "highlightedWord": "Control Panel"
+      },
+      "6": {
+        "title": "Communicate with your beneficiaries",
+        "content": "Send push notifications with news, campaigns and more.",
+        "highlightedWord": "Communicate"
+      }
+    },
+    "parallax": {
+      "message1": "Build customer loyalty, boost your results",
+      "message2": "Reward performance, multiply success",
+      "message3": "Transform your goals into rewards"
+    },
+    "contact": {
+      "title": "Let's chat!",
+      "subtitle": "Contact us and discover how we can help you create a loyalty program tailored to your business.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "business": "Business name",
+      "message": "Message",
+      "submit": "Send message",
+      "loading": "Loading...",
+      "success": "The message was sent successfully. We will be in touch shortly.",
+      "validation": {
+        "firstNameRequired": "First name is required",
+        "firstNameMinLength": "First name must be at least 2 characters",
+        "lastNameRequired": "Last name is required",
+        "lastNameMinLength": "Last name must be at least 2 characters",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Email is not valid",
+        "phoneRequired": "Phone number is required",
+        "phoneNoLetters": "Phone number cannot contain letters",
+        "phoneMinLength": "Phone number must be at least 11 characters",
+        "businessRequired": "Business name is required",
+        "businessMinLength": "Business name must be at least 4 characters",
+        "messageRequired": "Message is required",
+        "messageMinLength": "Please write a longer message"
+      }
+    },
+    "footer": {
+      "terms": "Terms and conditions",
+      "legal": "Legal notice",
+      "privacy": "Privacy and cookies policy",
+      "copyright": "\u00a92019-{year} Puntos Club"
+    }
   },
   "LanguageSwitcher": {
     "label": "Language",

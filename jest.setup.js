@@ -45,6 +45,22 @@ jest.mock('next-intl', () => ({
   useLocale: jest.fn(() => 'es'),
 }));
 
+// Mock next-intl/server (ESM module not parseable by Jest)
+jest.mock('next-intl/server', () => ({
+  getTranslations: jest.fn(async () => {
+    const t = (key) => key;
+    t.rich = (key, _params) => key;
+    t.raw = (_key) => ({});
+    return t;
+  }),
+  getLocale: jest.fn(async () => 'es'),
+  getMessages: jest.fn(async () => ({})),
+  getNow: jest.fn(async () => new Date()),
+  getTimeZone: jest.fn(async () => 'America/Argentina/Buenos_Aires'),
+  getRequestConfig: jest.fn(),
+  setRequestLocale: jest.fn(),
+}));
+
 // Mock Supabase client
 jest.mock('@/lib/supabase/client', () => ({
   createClient: jest.fn(() => ({
@@ -101,6 +117,19 @@ jest.mock('react', () => ({
 }))
 
 // Setup global test environment
+Object.defineProperty(window, 'matchMedia', {
+  writable: true,
+  value: jest.fn().mockImplementation(query => ({
+    matches: false,
+    media: query,
+    onchange: null,
+    addListener: jest.fn(),
+    removeListener: jest.fn(),
+    addEventListener: jest.fn(),
+    removeEventListener: jest.fn(),
+    dispatchEvent: jest.fn(),
+  })),
+});
 global.fetch = jest.fn()
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),

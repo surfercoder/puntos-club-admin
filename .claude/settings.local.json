@@ -87,7 +87,15 @@
       "Bash(JEST_WORKER_ID=1 node_modules/.bin/jest __tests__/schemas/ --no-coverage --watchAll=false --no-cache 2>&1 | tail -50)",
       "Bash(tail:*)",
       "Bash(npx:*)",
-      "Bash(ls:*)"
+      "Bash(ls:*)",
+      "Bash(cp puntos-club-landing-page/public/assets/imgs/cromatico/*.svg public/assets/imgs/cromatico/)",
+      "Bash(cp puntos-club-landing-page/public/assets/imgs/positivo/*.svg public/assets/imgs/positivo/)",
+      "Bash(cp puntos-club-landing-page/public/assets/imgs/engines/*.png public/assets/imgs/engines/)",
+      "Bash(cp puntos-club-landing-page/public/assets/legal/*.pdf public/assets/legal/)",
+      "Bash(cp puntos-club-landing-page/public/legal/*.pdf public/assets/legal/)",
+      "mcp__playwright__browser_take_screenshot",
+      "mcp__playwright__browser_evaluate",
+      "Bash(git stash:*)"
     ],
     "deny": []
   },

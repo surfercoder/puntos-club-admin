@@ -26,7 +26,6 @@ jest.mock('@/actions/dashboard/app_order/actions', () => ({ deleteAppOrder: jest
 jest.mock('@/actions/dashboard/app_user/actions', () => ({ deleteAppUser: jest.fn() }));
 jest.mock('@/actions/dashboard/app_user_organization/actions', () => ({ deleteAppUserOrganization: jest.fn() }));
 jest.mock('@/actions/dashboard/beneficiary_organization/actions', () => ({ deleteBeneficiaryOrganization: jest.fn() }));
-jest.mock('@/actions/dashboard/user/actions', () => ({ deleteUser: jest.fn(), getAllUsers: jest.fn() }));
 jest.mock('@/actions/dashboard/points-rules/actions', () => ({ deletePointsRule: jest.fn() }));
 
 import { deleteCategory } from '@/actions/dashboard/category/actions';
@@ -41,7 +40,6 @@ import { deleteAppOrder } from '@/actions/dashboard/app_order/actions';
 import { deleteAppUser } from '@/actions/dashboard/app_user/actions';
 import { deleteAppUserOrganization } from '@/actions/dashboard/app_user_organization/actions';
 import { deleteBeneficiaryOrganization } from '@/actions/dashboard/beneficiary_organization/actions';
-import { deleteUser } from '@/actions/dashboard/user/actions';
 import { deletePointsRule } from '@/actions/dashboard/points-rules/actions';
 
 import CategoryDeleteModal from '@/components/dashboard/category/delete-modal';
@@ -56,7 +54,6 @@ import AppOrderDeleteModal from '@/components/dashboard/app_order/delete-modal';
 import AppUserDeleteModal from '@/components/dashboard/app_user/delete-modal';
 import AppUserOrganizationDeleteModal from '@/components/dashboard/app_user_organization/delete-modal';
 import BeneficiaryOrganizationDeleteModal from '@/components/dashboard/beneficiary_organization/delete-modal';
-import UserDeleteModal from '@/components/dashboard/user/delete-modal';
 import PointsRulesDeleteModal from '@/components/dashboard/points-rules/delete-modal';
 
 const mockRefresh = jest.fn();
@@ -538,52 +535,6 @@ describe('BeneficiaryOrganizationDeleteModal', () => {
 
   it('cancel button click', () => {
     render(<BeneficiaryOrganizationDeleteModal beneficiaryOrganizationId="1" beneficiaryOrganizationDescription="Link" />);
-    fireEvent.click(getCancelButton());
-  });
-});
-
-// ---- User ----
-describe('UserDeleteModal', () => {
-  const mock = deleteUser as jest.Mock;
-
-  it('renders', () => {
-    render(<UserDeleteModal userId="1" userName="User" userType="app_user" />);
-    expectRendered();
-  });
-
-  it('success path with onDeleted', async () => {
-    mock.mockResolvedValue(undefined);
-    const onDeleted = jest.fn();
-    render(<UserDeleteModal userId="1" userName="User" userType="app_user" onDeleted={onDeleted} />);
-    fireEvent.click(getDeleteButton());
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('deleteSuccess'));
-    expect(mockInvalidate).toHaveBeenCalled();
-    expect(onDeleted).toHaveBeenCalled();
-  });
-
-  it('success without onDeleted', async () => {
-    mock.mockResolvedValue(undefined);
-    render(<UserDeleteModal userId="1" userName="User" userType="beneficiary" />);
-    fireEvent.click(getDeleteButton());
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('deleteSuccess'));
-  });
-
-  it('exception with Error instance', async () => {
-    mock.mockRejectedValue(new Error('Custom error'));
-    render(<UserDeleteModal userId="1" userName="User" userType="app_user" />);
-    fireEvent.click(getDeleteButton());
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('Custom error'));
-  });
-
-  it('exception with non-Error', async () => {
-    mock.mockRejectedValue('string error');
-    render(<UserDeleteModal userId="1" userName="User" userType="app_user" />);
-    fireEvent.click(getDeleteButton());
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('deleteError'));
-  });
-
-  it('cancel button click', () => {
-    render(<UserDeleteModal userId="1" userName="User" userType="app_user" />);
     fireEvent.click(getCancelButton());
   });
 });

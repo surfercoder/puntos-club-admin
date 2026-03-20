@@ -36,32 +36,32 @@ function Step1CompletedView({
   return (
     <div className="space-y-6">
       {/* Verified banner */}
-      <div className="flex items-center gap-3 rounded-xl border border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20 px-4 py-3">
-        <ShieldCheck className="h-5 w-5 shrink-0 text-emerald-600" />
+      <div className="flex items-center gap-3 rounded-xl border border-brand-green/30 bg-brand-green/10 px-4 py-3">
+        <ShieldCheck className="h-5 w-5 shrink-0 text-brand-green" />
         <div>
-          <p className="text-sm font-semibold text-emerald-800 dark:text-emerald-300">
+          <p className="text-sm font-semibold text-brand-green dark:text-brand-green">
             {t('emailVerified')}
           </p>
-          <p className="text-xs text-emerald-700 dark:text-emerald-400">
+          <p className="text-xs text-brand-green/80">
             {t('emailVerifiedMessage')}
           </p>
         </div>
       </div>
 
       {/* User card */}
-      <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 p-5">
+      <div className="rounded-xl border bg-muted/50 p-5">
         <div className="flex items-center gap-4">
           {/* Avatar */}
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-white text-lg font-bold shadow-sm">
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-lg font-bold shadow-sm">
             {initials || <User className="h-6 w-6" />}
           </div>
 
           <div className="min-w-0 flex-1 space-y-1">
             <div className="flex items-center gap-2">
-              <p className="text-base font-semibold text-gray-900 dark:text-white truncate">
+              <p className="text-base font-semibold text-foreground truncate">
                 {data.firstName} {data.lastName}
               </p>
-              <BadgeCheck className="h-4 w-4 shrink-0 text-emerald-600" />
+              <BadgeCheck className="h-4 w-4 shrink-0 text-brand-green" />
             </div>
 
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
@@ -81,7 +81,7 @@ function Step1CompletedView({
 
       <Button
         type="button"
-        className="w-full bg-emerald-600 hover:bg-emerald-700"
+        className="w-full"
         onClick={onNext}
       >
         {t('continueSetup')}
@@ -191,19 +191,19 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
   if (emailSent) {
     return (
       <div className="flex flex-col items-center gap-6 py-6 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/30">
-          <Mail className="h-10 w-10 text-emerald-600" />
+        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
+          <Mail className="h-10 w-10 text-primary" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-2xl font-bold text-foreground">
             {t('checkEmail')}
           </h2>
           <p className="text-muted-foreground max-w-sm">
             {t('confirmationSent')}{' '}
-            <span className="font-medium text-gray-700 dark:text-gray-200">{email}</span>.
+            <span className="font-medium text-foreground">{email}</span>.
           </p>
         </div>
-        <div className="rounded-lg border bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800 p-4 text-sm text-amber-800 dark:text-amber-200 max-w-sm">
+        <div className="rounded-lg border border-brand-orange/30 bg-brand-orange/10 p-4 text-sm text-brand-orange max-w-sm">
           <p className="font-medium mb-1">{t('noEmailReceived')}</p>
           <p>{t('spamNote')}</p>
         </div>
@@ -302,7 +302,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
         </p>
       </div>
 
-      <Button type="submit" className="w-full bg-emerald-600 hover:bg-emerald-700" disabled={loading}>
+      <Button type="submit" className="w-full" disabled={loading}>
         {loading ? (
           <>
             <Loader2 className="mr-2 h-4 w-4 animate-spin" />

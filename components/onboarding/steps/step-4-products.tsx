@@ -55,7 +55,7 @@ interface ProductRowProps {
 
 function ProductRowCard({ product, prodIndex, categoryId, canRemove, onRemove, onUpdate, t, tCommon }: ProductRowProps) {
   return (
-    <div className="rounded-lg border border-dashed border-gray-200 dark:border-gray-700 p-3 space-y-3">
+    <div className="rounded-lg border border-dashed border-border p-3 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
           <Package className="h-3.5 w-3.5" />
@@ -247,7 +247,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="flex items-start gap-2 rounded-md bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 px-3 py-2 text-xs text-blue-700 dark:text-blue-300">
+      <div className="flex items-start gap-2 rounded-md bg-primary/10 border border-primary/30 px-3 py-2 text-xs text-primary">
         <Info className="h-4 w-4 mt-0.5 shrink-0" />
         <span>
           Los <strong>premios</strong> son productos que tus clientes podrán canjear con sus puntos.
@@ -263,10 +263,10 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
         {categories.map((category, catIndex) => (
           <div
             key={category.id}
-            className="rounded-xl border border-gray-200 dark:border-gray-700 p-4 space-y-4"
+            className="rounded-xl border p-4 space-y-4"
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-emerald-100 dark:bg-emerald-900/40 text-emerald-700 dark:text-emerald-300 text-xs font-bold shrink-0">
+              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold shrink-0">
                 {catIndex + 1}
               </div>
               <div className="flex-1 space-y-1">
@@ -337,7 +337,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
       </Button>
 
       {limitReached && (
-        <div className="flex items-start gap-2 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
+        <div className="flex items-start gap-2 rounded-md bg-brand-orange/10 border border-brand-orange/30 px-3 py-2 text-xs text-brand-orange">
           <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
           <span>
             {t('limitReached', { max: maxProducts, plan: planDisplayName })}
@@ -357,7 +357,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
         >
           {tCommon('skip')}
         </Button>
-        <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 sm:flex-1">
+        <Button type="submit" className="sm:flex-1">
           {tCommon('continue')}
         </Button>
       </div>

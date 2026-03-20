@@ -74,13 +74,13 @@ function consentReducer(state: ConsentState, action: ConsentAction): ConsentStat
 function TermsContent() {
   return (
     <>
-      <h2 className="text-base font-bold text-gray-900 dark:text-white">
+      <h2 className="text-base font-bold text-foreground">
         Términos y Condiciones de Uso — Puntos Club
       </h2>
       <p className="text-xs text-muted-foreground">Última actualización: enero de 2025</p>
 
       <section className="space-y-2">
-        <h3 className="font-semibold text-gray-800 dark:text-gray-200">1. Aceptación de los términos</h3>
+        <h3 className="font-semibold text-foreground">1. Aceptación de los términos</h3>
         <p>
           Al registrarte como titular de un comercio adherido a la plataforma Puntos Club, declarás
           haber leído, comprendido y aceptado en su totalidad los presentes Términos y Condiciones
@@ -96,7 +96,7 @@ function TermsContent() {
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-semibold text-gray-800 dark:text-gray-200">2. Descripción del servicio</h3>
+        <h3 className="font-semibold text-foreground">2. Descripción del servicio</h3>
         <p>
           Puntos Club es una plataforma digital de fidelización que permite a los comercios adheridos
           otorgar puntos a sus clientes por compras realizadas. Los clientes acumulan puntos y los
@@ -110,7 +110,7 @@ function TermsContent() {
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-semibold text-gray-800 dark:text-gray-200">3. Obligaciones del comercio titular</h3>
+        <h3 className="font-semibold text-foreground">3. Obligaciones del comercio titular</h3>
         <p>Como titular del comercio, te comprometés a:</p>
         <ul className="list-disc pl-5 space-y-1">
           <li>Proporcionar información veraz, precisa y actualizada durante el registro y en toda comunicación posterior.</li>
@@ -123,7 +123,7 @@ function TermsContent() {
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-semibold text-gray-800 dark:text-gray-200">4. Privacidad y protección de datos</h3>
+        <h3 className="font-semibold text-foreground">4. Privacidad y protección de datos</h3>
         <p>
           La Empresa recopila y trata datos personales de los usuarios de la plataforma de conformidad
           con su Política de Privacidad, la cual forma parte integrante de estos Términos. Al aceptar
@@ -138,7 +138,7 @@ function TermsContent() {
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-semibold text-gray-800 dark:text-gray-200">5. Planes, pagos y facturación</h3>
+        <h3 className="font-semibold text-foreground">5. Planes, pagos y facturación</h3>
         <p>
           Los servicios de Puntos Club se ofrecen bajo distintos planes de suscripción. El plan
           contratado determinará las funcionalidades disponibles, el límite de clientes activos y
@@ -157,7 +157,7 @@ function TermsContent() {
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-semibold text-gray-800 dark:text-gray-200">6. Propiedad intelectual</h3>
+        <h3 className="font-semibold text-foreground">6. Propiedad intelectual</h3>
         <p>
           Todos los derechos de propiedad intelectual sobre la plataforma Puntos Club, incluyendo
           pero no limitado a su código fuente, diseño, logos, marcas, y documentación, son
@@ -173,7 +173,7 @@ function TermsContent() {
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-semibold text-gray-800 dark:text-gray-200">7. Limitación de responsabilidad</h3>
+        <h3 className="font-semibold text-foreground">7. Limitación de responsabilidad</h3>
         <p>
           La Empresa no será responsable por daños directos, indirectos, incidentales, especiales o
           consecuentes derivados del uso o imposibilidad de uso de la plataforma, incluyendo
@@ -189,7 +189,7 @@ function TermsContent() {
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-semibold text-gray-800 dark:text-gray-200">8. Modificaciones a los términos</h3>
+        <h3 className="font-semibold text-foreground">8. Modificaciones a los términos</h3>
         <p>
           La Empresa se reserva el derecho de modificar estos Términos en cualquier momento. Los
           cambios serán comunicados con al menos 15 días de anticipación por correo electrónico
@@ -202,7 +202,7 @@ function TermsContent() {
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-semibold text-gray-800 dark:text-gray-200">9. Resolución de disputas</h3>
+        <h3 className="font-semibold text-foreground">9. Resolución de disputas</h3>
         <p>
           Cualquier controversia derivada de la interpretación, aplicación o incumplimiento de
           estos Términos será sometida a la jurisdicción de los Tribunales Ordinarios de la
@@ -212,11 +212,11 @@ function TermsContent() {
       </section>
 
       <section className="space-y-2">
-        <h3 className="font-semibold text-gray-800 dark:text-gray-200">10. Contacto</h3>
+        <h3 className="font-semibold text-foreground">10. Contacto</h3>
         <p>
           Para consultas, reclamos o notificaciones relacionadas con estos Términos, podés
           contactarnos en{' '}
-          <span className="font-medium text-emerald-600 dark:text-emerald-400">
+          <span className="font-medium text-primary">
             legal@puntosclub.com
           </span>{' '}
           o por escrito a nuestra sede ubicada en la Ciudad Autónoma de Buenos Aires, Argentina.
@@ -239,10 +239,10 @@ interface CaptchaVerificationProps {
 
 function CaptchaVerification({ status, error, onSuccess, onError, onExpire, recaptchaRef }: CaptchaVerificationProps) {
   return (
-    <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30 p-4 space-y-3 transition-all">
+    <div className="rounded-xl border bg-muted/30 p-4 space-y-3 transition-all">
       <div className="flex items-center gap-2">
-        <ShieldCheck className="h-4 w-4 text-emerald-600 dark:text-emerald-400 shrink-0" />
-        <p className="text-sm font-medium text-gray-700 dark:text-gray-200">
+        <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+        <p className="text-sm font-medium text-foreground">
           Confirmá que no sos un robot
         </p>
       </div>
@@ -269,7 +269,7 @@ function CaptchaVerification({ status, error, onSuccess, onError, onExpire, reca
       )}
 
       {status === 'success' && !error && (
-        <div className="flex items-center gap-2 text-xs text-emerald-700 dark:text-emerald-400 font-medium">
+        <div className="flex items-center gap-2 text-xs text-brand-green font-medium">
           <CheckCircle2 className="h-3.5 w-3.5" />
           Verificación completada.
         </div>
@@ -350,7 +350,7 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
 
   return (
     <div className="space-y-5">
-      <div className="flex items-start gap-2 rounded-md bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 px-3 py-2 text-xs text-amber-700 dark:text-amber-300">
+      <div className="flex items-start gap-2 rounded-md bg-brand-orange/10 border border-brand-orange/30 px-3 py-2 text-xs text-brand-orange">
         <ScrollText className="h-4 w-4 mt-0.5 shrink-0" />
         <span>
           Por favor leé los términos y condiciones completos. Debés desplazarte hasta el final
@@ -362,14 +362,14 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
         <div
           ref={scrollRef}
           onScroll={handleScroll}
-          className="h-72 overflow-y-auto rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50 px-5 py-4 text-sm text-gray-700 dark:text-gray-300 space-y-5 scroll-smooth"
+          className="h-72 overflow-y-auto rounded-xl border bg-muted/50 px-5 py-4 text-sm text-muted-foreground space-y-5 scroll-smooth"
         >
           <TermsContent />
         </div>
 
         {!state.hasScrolledToBottom && (
           <div
-            className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 rounded-b-xl bg-gradient-to-t from-gray-50 dark:from-gray-800/90 to-transparent"
+            className="pointer-events-none absolute bottom-0 left-0 right-0 h-16 rounded-b-xl bg-gradient-to-t from-muted/80 to-transparent"
             aria-hidden
           />
         )}
@@ -385,8 +385,8 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
         className={cn(
           'flex items-start gap-3 rounded-xl border p-4 transition-all',
           state.hasScrolledToBottom
-            ? 'border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/20'
-            : 'border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/30 opacity-50 select-none'
+            ? 'border-brand-green/30 bg-brand-green/10'
+            : 'border-border bg-muted/30 opacity-50 select-none'
         )}
       >
         <Checkbox
@@ -401,8 +401,8 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
           className={cn(
             'text-sm leading-snug cursor-pointer',
             state.hasScrolledToBottom
-              ? 'text-gray-700 dark:text-gray-200'
-              : 'text-gray-400 cursor-not-allowed'
+              ? 'text-foreground'
+              : 'text-muted-foreground cursor-not-allowed'
           )}
         >
           {t('acceptTerms')}
@@ -421,7 +421,7 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
       )}
 
       {canContinue && (
-        <div className="flex items-center gap-2 text-sm text-emerald-700 dark:text-emerald-400 font-medium">
+        <div className="flex items-center gap-2 text-sm text-brand-green font-medium">
           <CheckCircle2 className="h-4 w-4" />
           {t('allDone')}
         </div>
@@ -444,9 +444,7 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
           onClick={handleContinue}
           className={cn(
             'sm:flex-1',
-            canContinue
-              ? 'bg-emerald-600 hover:bg-emerald-700'
-              : 'bg-emerald-600/50 cursor-not-allowed'
+            !canContinue && 'opacity-50 cursor-not-allowed'
           )}
         >
           {state.isVerifying ? (

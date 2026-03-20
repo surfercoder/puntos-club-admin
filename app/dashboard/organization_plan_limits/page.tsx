@@ -1,5 +1,6 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/organization_plan_limits/delete-modal';
 import ToastHandler from '@/components/dashboard/organization_plan_limits/toast-handler';
@@ -11,6 +12,7 @@ import {
 import { createClient } from '@/lib/supabase/server';
 
 export default async function OrganizationPlanLimitsListPage() {
+  const t = await getTranslations('Dashboard.orgPlanLimits');
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('organization_plan_limits')
@@ -19,7 +21,7 @@ export default async function OrganizationPlanLimitsListPage() {
     .order('feature');
 
   if (error) {
-    return <div>Error loading organization plan limits</div>;
+    return <div>{t('error')}</div>;
   }
 
   return (
@@ -27,11 +29,11 @@ export default async function OrganizationPlanLimitsListPage() {
       <ToastHandler />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Organization Plan Limits</h1>
-          <p className="text-muted-foreground">Manage per-organization plan feature limits</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/organization_plan_limits/create">+ New Org Plan Limit</Link>
+          <Link href="/dashboard/organization_plan_limits/create">{t('newButton')}</Link>
         </Button>
       </div>
 
@@ -39,12 +41,12 @@ export default async function OrganizationPlanLimitsListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Organization</TableHead>
-              <TableHead>Plan</TableHead>
-              <TableHead>Feature</TableHead>
-              <TableHead>Limit</TableHead>
-              <TableHead>Warning</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t('tableHeaders.organization')}</TableHead>
+              <TableHead>{t('tableHeaders.plan')}</TableHead>
+              <TableHead>{t('tableHeaders.feature')}</TableHead>
+              <TableHead>{t('tableHeaders.limit')}</TableHead>
+              <TableHead>{t('tableHeaders.warning')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -72,7 +74,7 @@ export default async function OrganizationPlanLimitsListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={6}>No organization plan limits found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

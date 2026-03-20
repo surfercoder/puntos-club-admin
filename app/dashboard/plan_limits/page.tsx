@@ -1,5 +1,6 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/plan_limits/delete-modal';
 import ToastHandler from '@/components/dashboard/plan_limits/toast-handler';
@@ -11,6 +12,7 @@ import {
 import { createClient } from '@/lib/supabase/server';
 
 export default async function PlanLimitsListPage() {
+  const t = await getTranslations('Dashboard.planLimits');
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('plan_limits')
@@ -19,7 +21,7 @@ export default async function PlanLimitsListPage() {
     .order('feature');
 
   if (error) {
-    return <div>Error loading plan limits</div>;
+    return <div>{t('error')}</div>;
   }
 
   return (
@@ -27,11 +29,11 @@ export default async function PlanLimitsListPage() {
       <ToastHandler />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Plan Limits</h1>
-          <p className="text-muted-foreground">Manage plan feature limits</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/plan_limits/create">+ New Plan Limit</Link>
+          <Link href="/dashboard/plan_limits/create">{t('newButton')}</Link>
         </Button>
       </div>
 
@@ -39,11 +41,11 @@ export default async function PlanLimitsListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Plan</TableHead>
-              <TableHead>Feature</TableHead>
-              <TableHead>Limit</TableHead>
-              <TableHead>Warning Threshold</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t('tableHeaders.plan')}</TableHead>
+              <TableHead>{t('tableHeaders.feature')}</TableHead>
+              <TableHead>{t('tableHeaders.limit')}</TableHead>
+              <TableHead>{t('tableHeaders.warningThreshold')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -70,7 +72,7 @@ export default async function PlanLimitsListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={5}>No plan limits found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={5}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

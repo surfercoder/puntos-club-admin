@@ -1,6 +1,7 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/stock/delete-modal';
 import { Button } from '@/components/ui/button';
@@ -33,6 +34,7 @@ interface StockWithRelations {
 }
 
 export default async function StockListPage() {
+  const t = await getTranslations('Dashboard.stock');
   const currentUser = await getCurrentUser();
   const userIsAdmin = isAdmin(currentUser);
 
@@ -52,7 +54,7 @@ export default async function StockListPage() {
     `);
 
   if (error) {
-    return <div>Error al obtener registros de stock</div>;
+    return <div>{t('error')}</div>;
   }
 
   // Only filter by organization for non-admin users
@@ -64,11 +66,11 @@ export default async function StockListPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Stock</h1>
-          <p className="text-muted-foreground">Administrar niveles de stock de productos</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/stock/create">+ Nuevo Registro de Stock</Link>
+          <Link href="/dashboard/stock/create">{t('newButton')}</Link>
         </Button>
       </div>
 
@@ -76,12 +78,12 @@ export default async function StockListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Sucursal</TableHead>
-              <TableHead>Producto</TableHead>
-              <TableHead>Stock Actual</TableHead>
-              <TableHead>Stock Mínimo</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>{t('tableHeaders.branch')}</TableHead>
+              <TableHead>{t('tableHeaders.product')}</TableHead>
+              <TableHead>{t('tableHeaders.currentStock')}</TableHead>
+              <TableHead>{t('tableHeaders.minimumStock')}</TableHead>
+              <TableHead>{t('tableHeaders.status')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -102,11 +104,11 @@ export default async function StockListPage() {
                         ? 'bg-yellow-100 text-yellow-800'
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {stock.quantity > stock.minimum_quantity 
-                        ? 'En Stock' 
+                      {stock.quantity > stock.minimum_quantity
+                        ? t('statusInStock')
                         : stock.quantity === stock.minimum_quantity
-                        ? 'Stock Bajo'
-                        : 'Sin Stock'}
+                        ? t('statusLowStock')
+                        : t('statusOutOfStock')}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
@@ -126,7 +128,7 @@ export default async function StockListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={6}>No se encontraron registros de stock.</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

@@ -60,8 +60,8 @@ export default async function BeneficiaryListPage() {
         if (b) {
           mapped.push({
             ...b,
-            available_points: (item as any).available_points ?? 0,
-            is_hidden: (item as any).is_hidden ?? false,
+            available_points: (item as unknown as Record<string, unknown>).available_points as number ?? 0,
+            is_hidden: (item as unknown as Record<string, unknown>).is_hidden as boolean ?? false,
           });
         }
       }

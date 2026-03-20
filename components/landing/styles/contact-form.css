@@ -1,0 +1,10 @@
+textarea::-webkit-scrollbar {
+  width: 32px;
+}
+
+textarea::-webkit-scrollbar-thumb {
+  border: 10px solid transparent;
+  background-clip: padding-box;
+  background-color: #31A1D6;
+  border-radius: 20px;
+}

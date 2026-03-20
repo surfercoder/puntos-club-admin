@@ -1,0 +1,13 @@
+.linear-text {
+  background: linear-gradient(to right, #FD7E14 0%, #EE21B5 50%, #007BFF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: bold;
+}
+.to-right {
+  opacity: 0;
+}
+
+.to-left {
+  opacity: 0;
+}

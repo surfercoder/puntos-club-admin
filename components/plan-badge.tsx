@@ -15,21 +15,21 @@ import { usePlanUsage } from '@/components/providers/plan-usage-provider';
 import { cn } from '@/lib/utils';
 import type { PlanType } from '@/types/plan';
 
-const planConfig: Record<PlanType, { icon: React.ElementType; colorClass: string; dotClass: string }> = {
+const planConfig: Record<PlanType, { icon: React.ComponentType<{ className?: string }>; colorClass: string; dotClass: string }> = {
   trial: {
     icon: Star,
-    colorClass: 'bg-emerald-100 text-emerald-700 hover:bg-emerald-200 dark:bg-emerald-900/40 dark:text-emerald-300 dark:hover:bg-emerald-900/60',
-    dotClass: 'bg-emerald-500',
+    colorClass: 'bg-brand-green/15 text-brand-green hover:bg-brand-green/25',
+    dotClass: 'bg-brand-green',
   },
   advance: {
     icon: Zap,
-    colorClass: 'bg-blue-100 text-blue-700 hover:bg-blue-200 dark:bg-blue-900/40 dark:text-blue-300 dark:hover:bg-blue-900/60',
-    dotClass: 'bg-blue-500',
+    colorClass: 'bg-brand-blue/15 text-brand-blue hover:bg-brand-blue/25',
+    dotClass: 'bg-brand-blue',
   },
   pro: {
     icon: Rocket,
-    colorClass: 'bg-purple-100 text-purple-700 hover:bg-purple-200 dark:bg-purple-900/40 dark:text-purple-300 dark:hover:bg-purple-900/60',
-    dotClass: 'bg-purple-500',
+    colorClass: 'bg-brand-pink/15 text-brand-pink hover:bg-brand-pink/25',
+    dotClass: 'bg-brand-pink',
   },
 };
 

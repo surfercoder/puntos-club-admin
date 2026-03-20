@@ -1,6 +1,7 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/app_user/delete-modal';
 import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
@@ -35,7 +36,9 @@ interface AppUserWithOrganization {
 }
 
 export default async function AppUserListPage() {
-  const [supabase, currentUser, cookieStore] = await Promise.all([
+  const [t, tCommon, supabase, currentUser, cookieStore] = await Promise.all([
+    getTranslations('Dashboard.appUser'),
+    getTranslations('Common'),
     createClient(),
     getCurrentUser(),
     cookies(),
@@ -60,7 +63,7 @@ export default async function AppUserListPage() {
   const { data: rawData, error } = await query;
 
   if (error) {
-    return <div>Error al obtener usuarios</div>;
+    return <div>{t('error')}</div>;
   }
 
   // Hide the currently logged-in owner from the list
@@ -73,14 +76,14 @@ export default async function AppUserListPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
-            Usuarios
+            {t('title')}
             <PlanUsageBadge feature="cashiers" showLabel />
             <PlanUsageBadge feature="collaborators" showLabel />
           </h1>
-          <p className="text-muted-foreground">Administrar usuarios de la aplicación</p>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/app_user/create">+ Nuevo Usuario</Link>
+          <Link href="/dashboard/app_user/create">{t('newButton')}</Link>
         </Button>
       </div>
 
@@ -88,13 +91,13 @@ export default async function AppUserListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Nombre</TableHead>
-              <TableHead>Correo</TableHead>
-              <TableHead>Usuario</TableHead>
-              <TableHead>Rol</TableHead>
-              <TableHead>Organización</TableHead>
-              <TableHead>Estado</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>{t('tableHeaders.name')}</TableHead>
+              <TableHead>{t('tableHeaders.email')}</TableHead>
+              <TableHead>{t('tableHeaders.username')}</TableHead>
+              <TableHead>{t('tableHeaders.role')}</TableHead>
+              <TableHead>{t('tableHeaders.organization')}</TableHead>
+              <TableHead>{t('tableHeaders.status')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -118,7 +121,7 @@ export default async function AppUserListPage() {
                         ? 'bg-green-100 text-green-800'
                         : 'bg-red-100 text-red-800'
                     }`}>
-                      {user.active ? 'Activo' : 'Inactivo'}
+                      {user.active ? tCommon('active') : tCommon('inactive')}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
@@ -140,7 +143,7 @@ export default async function AppUserListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={7}>No se encontraron usuarios.</TableCell>
+                <TableCell className="text-center py-4" colSpan={7}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

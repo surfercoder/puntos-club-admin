@@ -1,6 +1,7 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/redemption/delete-modal';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,7 @@ interface RedemptionWithRelations {
 }
 
 export default async function RedemptionListPage() {
+  const t = await getTranslations('Dashboard.redemption');
   const currentUser = await getCurrentUser();
   const userIsAdmin = isAdmin(currentUser);
 
@@ -61,7 +63,7 @@ export default async function RedemptionListPage() {
     .order('redemption_date', { ascending: false });
 
   if (error) {
-    return <div>Error al obtener canjes</div>;
+    return <div>{t('error')}</div>;
   }
 
   // Only filter by organization for non-admin users
@@ -75,11 +77,11 @@ export default async function RedemptionListPage() {
     <div className="space-y-6">      
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Canjes</h1>
-          <p className="text-muted-foreground">Administrar canjes del sistema</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/redemption/create">+ Nuevo Canje</Link>
+          <Link href="/dashboard/redemption/create">{t('newButton')}</Link>
         </Button>
       </div>
 
@@ -87,13 +89,13 @@ export default async function RedemptionListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Beneficiario</TableHead>
-              <TableHead>Producto</TableHead>
-              <TableHead>Pedido</TableHead>
-              <TableHead>Puntos Usados</TableHead>
-              <TableHead>Cantidad</TableHead>
-              <TableHead>Fecha</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>{t('tableHeaders.beneficiary')}</TableHead>
+              <TableHead>{t('tableHeaders.product')}</TableHead>
+              <TableHead>{t('tableHeaders.order')}</TableHead>
+              <TableHead>{t('tableHeaders.pointsUsed')}</TableHead>
+              <TableHead>{t('tableHeaders.quantity')}</TableHead>
+              <TableHead>{t('tableHeaders.date')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -136,7 +138,7 @@ export default async function RedemptionListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={7}>No se encontraron canjes.</TableCell>
+                <TableCell className="text-center py-4" colSpan={7}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

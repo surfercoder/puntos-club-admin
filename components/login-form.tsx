@@ -169,15 +169,6 @@ export function LoginForm({
                 {isLoading ? t("submitting") : t("title")}
               </Button>
             </div>
-            <div className="mt-4 text-center text-sm">
-              {t("noAccount")}{" "}
-              <Link
-                className="underline underline-offset-4"
-                href="/auth/sign-up"
-              >
-                {t("signUpLink")}
-              </Link>
-            </div>
           </form>
         </CardContent>
       </Card>

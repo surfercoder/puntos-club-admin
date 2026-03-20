@@ -9,7 +9,7 @@ const mockCookieStore = {
   set: jest.fn(),
 };
 jest.mock('next/headers', () => ({
-  cookies: jest.fn(() => mockCookieStore),
+  cookies: jest.fn(() => Promise.resolve(mockCookieStore)),
 }));
 
 const mockSupabase = {
@@ -31,9 +31,9 @@ const mockSupabase = {
     })),
   },
 };
-jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => mockSupabase) }));
+jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => Promise.resolve(mockSupabase)) }));
 jest.mock('@/lib/auth/get-current-user', () => ({
-  getCurrentUser: jest.fn(() => ({ id: 1, role: { name: 'owner' } })),
+  getCurrentUser: jest.fn(() => Promise.resolve({ id: 1, role: { name: 'owner' } })),
 }));
 jest.mock('@/lib/auth/roles', () => ({
   isAdmin: jest.fn(() => false),
@@ -149,14 +149,14 @@ describe('createPurchase', () => {
     expect(result.error).toBe('Failed to create purchase');
   });
 
-  it('should return error when beneficiary balance fetch fails', async () => {
+  it('should succeed with zero balance when beneficiary balance fetch fails', async () => {
     mockSupabase.single
       .mockReturnValueOnce({ data: { organization_id: 10 }, error: null }) // branch
       .mockReturnValueOnce({ data: { id: 1, purchase_number: 'P-001', total_amount: '100', points_earned: 100 }, error: null }) // purchase
       .mockReturnValueOnce({ data: null, error: { message: 'Not found' } }); // beneficiary
     const result = await createPurchase(validInput);
-    expect(result.success).toBe(false);
-    expect(result.error).toBe('Failed to fetch beneficiary balance');
+    expect(result.success).toBe(true);
+    expect(result.data?.beneficiary_new_balance).toBe(0);
   });
 
   it('should handle unexpected errors', async () => {

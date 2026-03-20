@@ -1,6 +1,7 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/app_order/delete-modal';
 import { Button } from '@/components/ui/button';
@@ -26,11 +27,13 @@ interface AppOrderWithRelations extends AppOrder {
 }
 
 export default async function AppOrderListPage() {
-  const supabase = await createClient();
-  const currentUser = await getCurrentUser();
+  const [t, supabase, currentUser, cookieStore] = await Promise.all([
+    getTranslations('Dashboard.appOrder'),
+    createClient(),
+    getCurrentUser(),
+    cookies(),
+  ]);
   const userIsAdmin = isAdmin(currentUser);
-
-  const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
   const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
 
@@ -45,7 +48,7 @@ export default async function AppOrderListPage() {
     .order('creation_date', { ascending: false });
 
   if (error) {
-    return <div>Error al obtener pedidos</div>;
+    return <div>{t('error')}</div>;
   }
 
   // Only filter by organization for non-admin users
@@ -59,11 +62,11 @@ export default async function AppOrderListPage() {
     <div className="space-y-6">     
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Pedidos</h1>
-          <p className="text-muted-foreground">Administrar pedidos del sistema</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/app_order/create">+ Nuevo Pedido</Link>
+          <Link href="/dashboard/app_order/create">{t('newButton')}</Link>
         </Button>
       </div>
 
@@ -71,11 +74,11 @@ export default async function AppOrderListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Número de Pedido</TableHead>
-              <TableHead>Fecha de Creación</TableHead>
-              <TableHead>Puntos Totales</TableHead>
-              <TableHead>Observaciones</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>{t('tableHeaders.orderNumber')}</TableHead>
+              <TableHead>{t('tableHeaders.creationDate')}</TableHead>
+              <TableHead>{t('tableHeaders.totalPoints')}</TableHead>
+              <TableHead>{t('tableHeaders.observations')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -107,7 +110,7 @@ export default async function AppOrderListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={5}>No se encontraron pedidos.</TableCell>
+                <TableCell className="text-center py-4" colSpan={5}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

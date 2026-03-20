@@ -1,6 +1,5 @@
 import {
   LoginSchema,
-  SignUpSchema,
   ProfileSchema,
   ForgotPasswordSchema,
   UpdatePasswordSchema,
@@ -39,105 +38,6 @@ describe('LoginSchema', () => {
 
     it('should reject empty password', () => {
       const result = LoginSchema.safeParse({ email: 'test@example.com', password: '' });
-      expect(result.success).toBe(false);
-    });
-  });
-});
-
-describe('SignUpSchema', () => {
-  const validSignUp = {
-    email: 'test@example.com',
-    password: 'secret123',
-    repeatPassword: 'secret123',
-  };
-
-  describe('valid input', () => {
-    it('should accept valid signup data', () => {
-      const result = SignUpSchema.safeParse(validSignUp);
-      expect(result.success).toBe(true);
-    });
-
-    it('should accept optional firstName and lastName', () => {
-      const result = SignUpSchema.safeParse({
-        ...validSignUp,
-        firstName: 'John',
-        lastName: 'Doe',
-      });
-      expect(result.success).toBe(true);
-    });
-
-    it('should accept empty string for firstName and lastName', () => {
-      const result = SignUpSchema.safeParse({
-        ...validSignUp,
-        firstName: '',
-        lastName: '',
-      });
-      expect(result.success).toBe(true);
-    });
-  });
-
-  describe('missing required fields', () => {
-    it('should reject missing email', () => {
-      const result = SignUpSchema.safeParse({ password: 'secret123', repeatPassword: 'secret123' });
-      expect(result.success).toBe(false);
-    });
-
-    it('should reject missing password', () => {
-      const result = SignUpSchema.safeParse({ email: 'test@example.com', repeatPassword: 'abc' });
-      expect(result.success).toBe(false);
-    });
-
-    it('should reject missing repeatPassword', () => {
-      const result = SignUpSchema.safeParse({ email: 'test@example.com', password: 'secret123' });
-      expect(result.success).toBe(false);
-    });
-  });
-
-  describe('refine logic', () => {
-    it('should reject when passwords do not match', () => {
-      const result = SignUpSchema.safeParse({
-        ...validSignUp,
-        repeatPassword: 'different',
-      });
-      expect(result.success).toBe(false);
-      if (!result.success) {
-        const repeatPasswordError = result.error.issues.find(
-          (i) => i.path.includes('repeatPassword')
-        );
-        expect(repeatPasswordError).toBeDefined();
-        expect(repeatPasswordError?.message).toBe('Las contraseñas no coinciden');
-      }
-    });
-
-    it('should accept when passwords match', () => {
-      const result = SignUpSchema.safeParse(validSignUp);
-      expect(result.success).toBe(true);
-    });
-  });
-
-  describe('edge cases', () => {
-    it('should reject password shorter than 6 characters', () => {
-      const result = SignUpSchema.safeParse({
-        ...validSignUp,
-        password: '12345',
-        repeatPassword: '12345',
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it('should reject empty repeatPassword', () => {
-      const result = SignUpSchema.safeParse({
-        ...validSignUp,
-        repeatPassword: '',
-      });
-      expect(result.success).toBe(false);
-    });
-
-    it('should reject invalid email', () => {
-      const result = SignUpSchema.safeParse({
-        ...validSignUp,
-        email: 'bad-email',
-      });
       expect(result.success).toBe(false);
     });
   });

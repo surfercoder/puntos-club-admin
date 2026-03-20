@@ -1,6 +1,7 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { cookies } from 'next/headers';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/purchase/delete-modal';
 import ToastHandler from '@/components/dashboard/purchase/toast-handler';
@@ -15,6 +16,7 @@ import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export default async function PurchaseListPage() {
+  const t = await getTranslations('Dashboard.purchase');
   const currentUser = await getCurrentUser();
   const userIsAdmin = isAdmin(currentUser);
   const supabase = userIsAdmin ? createAdminClient() : await createClient();
@@ -40,7 +42,7 @@ export default async function PurchaseListPage() {
   const { data, error } = await query;
 
   if (error) {
-    return <div>Error loading purchases</div>;
+    return <div>{t('error')}</div>;
   }
 
   const formatCurrency = (amount: string | number) => {
@@ -53,11 +55,11 @@ export default async function PurchaseListPage() {
       <ToastHandler />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Compras</h1>
-          <p className="text-muted-foreground">Administrar compras del sistema</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/purchase/create">+ Nueva Compra</Link>
+          <Link href="/dashboard/purchase/create">{t('newButton')}</Link>
         </Button>
       </div>
 
@@ -65,14 +67,14 @@ export default async function PurchaseListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Compra #</TableHead>
-              <TableHead>Fecha</TableHead>
-              <TableHead>Beneficiario</TableHead>
-              <TableHead>Cajero</TableHead>
-              <TableHead>Sucursal</TableHead>
-              <TableHead className="text-right">Monto</TableHead>
-              <TableHead className="text-right">Puntos</TableHead>
-              <TableHead className="text-right">Acciones</TableHead>
+              <TableHead>{t('tableHeaders.purchaseNumber')}</TableHead>
+              <TableHead>{t('tableHeaders.date')}</TableHead>
+              <TableHead>{t('tableHeaders.beneficiary')}</TableHead>
+              <TableHead>{t('tableHeaders.cashier')}</TableHead>
+              <TableHead>{t('tableHeaders.branch')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.amount')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.points')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -114,7 +116,7 @@ export default async function PurchaseListPage() {
               })
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={8}>No se encontraron compras.</TableCell>
+                <TableCell className="text-center py-4" colSpan={8}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

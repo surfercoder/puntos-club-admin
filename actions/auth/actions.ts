@@ -1,7 +1,6 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
-import { createAdminClient } from '@/lib/supabase/admin';
 
 /**
  * Check if the currently authenticated user is allowed to access the admin portal
@@ -102,74 +101,3 @@ export async function signInAdminPortal(email: string, password: string): Promis
   return { success: true, role: access.role, error: null };
 }
 
-/**
- * Sign up a new system admin user
- * Creates: 1) Supabase Auth user, 2) app_user record with admin role
- * Note: Only system administrators (partners/builders) should sign up through this flow
- * Admin users do NOT belong to any organization - they have full system access
- */
-export async function signUpAdmin(data: {
-  email: string;
-  password: string;
-  firstName?: string;
-  lastName?: string;
-}): Promise<{ success: boolean; error: string | null }> {
-  const adminClient = createAdminClient();
-
-  try {
-    // 1. Create the Supabase Auth user
-    const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
-      email: data.email,
-      password: data.password,
-      email_confirm: true, // Auto-confirm for immediate login
-      user_metadata: {
-        first_name: data.firstName,
-        last_name: data.lastName,
-        role_name: 'admin', // Prevents automatic beneficiary creation by database trigger
-      },
-    });
-
-    if (authError || !authData.user) {
-      return { success: false, error: authError?.message || 'Failed to create auth user' };
-    }
-
-    // 2. Get the admin role ID
-    const { data: roleData, error: roleError } = await adminClient
-      .from('user_role')
-      .select('id')
-      .eq('name', 'admin')
-      .single();
-
-    if (roleError || !roleData) {
-      // Cleanup: delete the auth user if we can't proceed
-      await adminClient.auth.admin.deleteUser(authData.user.id);
-      return { success: false, error: 'Failed to get admin role' };
-    }
-
-    // 3. Create the app_user record linked to auth user (no organization for admins)
-    const { error: appUserError } = await adminClient
-      .from('app_user')
-      .insert({
-        email: data.email,
-        first_name: data.firstName || null,
-        last_name: data.lastName || null,
-        organization_id: null, // Admin users don't belong to any organization
-        role_id: roleData.id,
-        auth_user_id: authData.user.id,
-        active: true,
-      });
-
-    if (appUserError) {
-      // Cleanup: delete auth user
-      await adminClient.auth.admin.deleteUser(authData.user.id);
-      return { success: false, error: 'Failed to create user profile' };
-    }
-
-    return { success: true, error: null };
-  } catch (error) {
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'An unexpected error occurred'
-    };
-  }
-}

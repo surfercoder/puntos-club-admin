@@ -1,5 +1,6 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
+import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/subscription/delete-modal';
 import ToastHandler from '@/components/dashboard/subscription/toast-handler';
@@ -16,6 +17,7 @@ import {
 import { createClient } from '@/lib/supabase/server';
 
 export default async function SubscriptionListPage() {
+  const t = await getTranslations('Dashboard.subscription');
   const supabase = await createClient();
 
   const { data, error } = await supabase
@@ -24,7 +26,7 @@ export default async function SubscriptionListPage() {
     .order('created_at', { ascending: false });
 
   if (error) {
-    return <div>Error loading subscriptions</div>;
+    return <div>{t('error')}</div>;
   }
 
   return (
@@ -32,11 +34,11 @@ export default async function SubscriptionListPage() {
       <ToastHandler />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Subscriptions</h1>
-          <p className="text-muted-foreground">Manage organization subscriptions</p>
+          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
-          <Link href="/dashboard/subscription/create">+ New Subscription</Link>
+          <Link href="/dashboard/subscription/create">{t('newButton')}</Link>
         </Button>
       </div>
 
@@ -44,13 +46,13 @@ export default async function SubscriptionListPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Organization</TableHead>
-              <TableHead>Plan</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Payer Email</TableHead>
-              <TableHead>Amount</TableHead>
-              <TableHead>Created</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead>{t('tableHeaders.organization')}</TableHead>
+              <TableHead>{t('tableHeaders.plan')}</TableHead>
+              <TableHead>{t('tableHeaders.status')}</TableHead>
+              <TableHead>{t('tableHeaders.payerEmail')}</TableHead>
+              <TableHead>{t('tableHeaders.amount')}</TableHead>
+              <TableHead>{t('tableHeaders.created')}</TableHead>
+              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -89,7 +91,7 @@ export default async function SubscriptionListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={7}>No subscriptions found.</TableCell>
+                <TableCell className="text-center py-4" colSpan={7}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>
