@@ -62,12 +62,12 @@ const currentPlanBadgeMap: Record<string, string> = {
 function FeatureValue({ value }: { value: string | boolean }) {
   if (typeof value === 'boolean') {
     return value ? (
-      <Check className="h-4 w-4 text-brand-green" />
+      <Check className="h-3.5 w-3.5 text-brand-green" />
     ) : (
-      <span className="text-muted-foreground text-xs">—</span>
+      <span className="text-muted-foreground text-[10px]">—</span>
     );
   }
-  return <span className="text-sm font-medium">{value}</span>;
+  return <span className="text-[11px] font-medium">{value}</span>;
 }
 
 function formatNumber(n: number): string {
@@ -240,24 +240,26 @@ export function PlanSelector() {
   }
 
   return (
-    <div className="space-y-8">
-      <PlanUsageSummary />
+    <div className="space-y-4">
+      <PlanUsageSummary hideUpgradeLink />
 
       <div>
-        <h2 className="text-lg font-semibold mb-4">{tSettings('availablePlans')}</h2>
+        <h2 className="text-sm font-semibold mb-2">{tSettings('availablePlans')}</h2>
 
-        <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
           {plans.map((plan) => {
             const Icon = plan.icon;
             const isSelected = selected === plan.id;
             const isCurrent = currentPlan === plan.id;
+            const showUpgradeButton = isSelected && isChangingPlan && isUpgrade;
+            const showDowngradeMsg = isSelected && isChangingPlan && !isUpgrade;
             return (
               <button
                 key={plan.id}
                 type="button"
                 onClick={() => setSelected(plan.id)}
                 className={cn(
-                  'relative flex flex-col rounded-xl border-2 p-5 text-left transition-all focus:outline-none focus:ring-2 focus:ring-offset-2',
+                  'relative flex flex-col rounded-lg border-2 p-3 text-left transition-all focus:outline-none focus:ring-2 focus:ring-offset-1',
                   isSelected
                     ? colorMap[plan.color]
                     : 'border-border hover:border-muted-foreground/30'
@@ -266,7 +268,7 @@ export function PlanSelector() {
                 {isCurrent && (
                   <span
                     className={cn(
-                      'absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full px-3 py-0.5 text-xs font-semibold',
+                      'absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-0.5 text-[10px] font-semibold',
                       currentPlanBadgeMap[plan.color]
                     )}
                   >
@@ -276,7 +278,7 @@ export function PlanSelector() {
                 {!isCurrent && plan.badge && (
                   <span
                     className={cn(
-                      'absolute -top-2.5 left-1/2 -translate-x-1/2 rounded-full px-3 py-0.5 text-xs font-semibold',
+                      'absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-0.5 text-[10px] font-semibold',
                       badgeColorMap[plan.color]
                     )}
                   >
@@ -284,20 +286,20 @@ export function PlanSelector() {
                   </span>
                 )}
 
-                <div className="flex items-center gap-3 mb-4">
-                  <div className={cn('rounded-lg p-2', iconColorMap[plan.color])}>
-                    <Icon className="h-5 w-5" />
+                <div className="flex items-center gap-2 mb-2">
+                  <div className={cn('rounded-md p-1.5', iconColorMap[plan.color])}>
+                    <Icon className="h-4 w-4" />
                   </div>
                   <div>
-                    <p className="font-semibold text-foreground">
+                    <p className="text-sm font-semibold text-foreground leading-tight">
                       {plan.name}
                     </p>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-bold text-foreground">
+                      <span className="text-lg font-bold text-foreground">
                         {plan.price}
                       </span>
                       {plan.priceNote && (
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-[10px] text-muted-foreground">
                           {plan.priceNote}
                         </span>
                       )}
@@ -305,13 +307,13 @@ export function PlanSelector() {
                   </div>
                 </div>
 
-                <ul className="space-y-2 flex-1">
+                <ul className="space-y-1 flex-1">
                   {plan.features.map((feature) => (
                     <li
                       key={feature.label}
-                      className="flex items-center justify-between gap-2"
+                      className="flex items-center justify-between gap-1"
                     >
-                      <span className="text-xs text-muted-foreground">
+                      <span className="text-[11px] text-muted-foreground">
                         {feature.label}
                       </span>
                       <FeatureValue value={feature.value} />
@@ -319,11 +321,40 @@ export function PlanSelector() {
                   ))}
                 </ul>
 
-                {isSelected && (
-                  <div className="mt-4 flex items-center gap-2 text-xs font-medium text-brand-green">
-                    <Check className="h-4 w-4" />
+                {isSelected && !showUpgradeButton && !showDowngradeMsg && (
+                  <div className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-brand-green">
+                    <Check className="h-3.5 w-3.5" />
                     {isCurrent ? tSettings('currentPlan') : t('selectedPlan')}
                   </div>
+                )}
+
+                {showUpgradeButton && (
+                  <div className="mt-2" onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      size="sm"
+                      className={cn('w-full text-xs h-8', buttonColorMap[selectedPlan.color])}
+                      onClick={handleChangePlan}
+                      disabled={loading}
+                    >
+                      {loading ? (
+                        <>
+                          <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
+                          {t('redirectingToMP')}
+                        </>
+                      ) : (
+                        <>
+                          {tSettings('upgradeTo', { plan: selectedPlan.name })}
+                          <ArrowRight className="ml-1.5 h-3 w-3" />
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                )}
+
+                {showDowngradeMsg && (
+                  <p className="mt-2 text-[11px] text-muted-foreground text-center">
+                    {tSettings('contactToDowngrade')}
+                  </p>
                 )}
               </button>
             );
@@ -331,40 +362,12 @@ export function PlanSelector() {
         </div>
       </div>
 
-      <p className="text-center text-xs text-muted-foreground">
+      <p className="text-center text-[11px] text-muted-foreground">
         {t('allPlansInclude')} {t('changePlanAnytime')}
         {isChangingPlan && selectedPlan.isPaid && (
-          <span className="block mt-1">{t('securePayment')}</span>
+          <span className="block">{t('securePayment')}</span>
         )}
       </p>
-
-      {isChangingPlan && (
-        <div className="flex justify-center">
-          {isUpgrade ? (
-            <Button
-              className={cn('min-w-[240px]', buttonColorMap[selectedPlan.color])}
-              onClick={handleChangePlan}
-              disabled={loading}
-            >
-              {loading ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  {t('redirectingToMP')}
-                </>
-              ) : (
-                <>
-                  {tSettings('upgradeTo', { plan: selectedPlan.name })}
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </>
-              )}
-            </Button>
-          ) : (
-            <p className="text-sm text-muted-foreground text-center">
-              {tSettings('contactToDowngrade')}
-            </p>
-          )}
-        </div>
-      )}
     </div>
   );
 }

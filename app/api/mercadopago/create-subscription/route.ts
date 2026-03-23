@@ -49,11 +49,14 @@ export async function POST(request: NextRequest) {
     const mp = getMercadoPagoClient();
     const preApproval = new PreApproval(mp);
 
+    const testPayerEmail = process.env.MP_TEST_PAYER_EMAIL;
+
     // Subscription WITHOUT plan + status pending = redirect to MP checkout, no card_token_id
     const subscription = await preApproval.create({
       body: {
         reason: `Puntos Club — ${config.name}`,
-        payer_email: user.email!,
+        // When MP_TEST_PAYER_EMAIL is set, use it to avoid test/production party mismatch
+        payer_email: testPayerEmail ?? user.email!,
         external_reference: `${user.id}|${typedPlanId}`, // webhook parses plan from here
         back_url: backUrl,
         status: 'pending',

@@ -201,7 +201,7 @@ export function DashboardShell({
               </div>
             </div>
           </header>
-          <div className="flex flex-1 flex-col px-4">{children}</div>
+          <div className="flex flex-1 flex-col px-4 pt-4">{children}</div>
         </SidebarInset>
       </SidebarProvider>
     </PlanUsageProvider>

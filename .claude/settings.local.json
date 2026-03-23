@@ -100,7 +100,14 @@
       "mcp__mercadopago__quality_checklist",
       "mcp__mercadopago__notifications_history",
       "mcp__mercadopago__search_documentation",
-      "mcp__mercadopago__save_webhook"
+      "mcp__mercadopago__save_webhook",
+      "Bash(/tmp/mp_summary.txt:*)",
+      "Read(//tmp/**)",
+      "mcp__mercadopago__create_test_user",
+      "Bash(python3 -m json.tool)",
+      "Bash(ACCESS_TOKEN=\"APP_USR-8871452259468188-030311-60dec0b70fd73e0603aad64fe9bed070-93762601\")",
+      "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(u.get\\(''''email'''',''''no-email''''\\), u.get\\(''''id''''\\), u.get\\(''''nickname''''\\)\\) for u in data] if isinstance\\(data, list\\) else print\\(json.dumps\\(data, indent=2\\)\\)\")",
+      "mcp__mercadopago__add_money_test_user"
     ],
     "deny": []
   },

@@ -52,18 +52,18 @@ function FeatureRow({ usage }: { usage: FeatureUsage }) {
   const pctText = textColor(usage.usage_percentage, usage.is_at_limit);
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1">
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
-          <Icon className="h-4 w-4 text-muted-foreground shrink-0" />
-          <span className="text-sm font-medium truncate">{label}</span>
+        <div className="flex items-center gap-1.5 min-w-0">
+          <Icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <span className="text-xs font-medium truncate">{label}</span>
         </div>
-        <span className={cn('text-xs font-mono shrink-0', pctText)}>
+        <span className={cn('text-[11px] font-mono shrink-0', pctText)}>
           {usage.current_usage} / {usage.limit_value}
         </span>
       </div>
 
-      <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+      <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
         <div
           className={cn('h-full rounded-full transition-all duration-500', color)}
           style={{ width: `${Math.min(100, usage.usage_percentage)}%` }}
@@ -81,9 +81,10 @@ function FeatureRow({ usage }: { usage: FeatureUsage }) {
 interface PlanUsageSummaryProps {
   className?: string;
   compact?: boolean;
+  hideUpgradeLink?: boolean;
 }
 
-export function PlanUsageSummary({ className, compact = false }: PlanUsageSummaryProps) {
+export function PlanUsageSummary({ className, compact = false, hideUpgradeLink = false }: PlanUsageSummaryProps) {
   const t = useTranslations('Dashboard.plan');
   const { summary, isLoading } = usePlanUsage();
 
@@ -105,7 +106,7 @@ export function PlanUsageSummary({ className, compact = false }: PlanUsageSummar
   const anyWarning = summary.features.some((f) => f.should_warn || f.is_at_limit);
 
   const inner = (
-    <div className="space-y-3">
+    <div className="grid grid-cols-2 gap-x-6 gap-y-2">
       {orderedFeatures.map((f) => (
         <FeatureRow key={f.feature} usage={f} />
       ))}
@@ -121,16 +122,16 @@ export function PlanUsageSummary({ className, compact = false }: PlanUsageSummar
         className
       )}
     >
-      <div className="flex items-center justify-between px-5 py-4 border-b">
+      <div className="flex items-center justify-between px-4 py-2.5 border-b">
         <div className="flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-muted-foreground" />
-          <span className="font-semibold text-sm">{t('usageTitle')}</span>
-          <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium text-muted-foreground">
+          <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+          <span className="font-semibold text-xs">{t('usageTitle')}</span>
+          <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
             {planName}
           </span>
         </div>
 
-        {summary.plan !== 'pro' && (
+        {!hideUpgradeLink && summary.plan !== 'pro' && (
           <Link
             href="/dashboard/settings/plan"
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
@@ -142,13 +143,13 @@ export function PlanUsageSummary({ className, compact = false }: PlanUsageSummar
       </div>
 
       {anyWarning && (
-        <div className="mx-5 mt-4 flex items-center gap-2 rounded-md bg-brand-orange/10 px-3 py-2 text-brand-orange">
-          <TrendingUp className="h-3.5 w-3.5 shrink-0" />
-          <span className="text-xs">{t('nearingLimitWarning')}</span>
+        <div className="mx-4 mt-2.5 flex items-center gap-2 rounded-md bg-brand-orange/10 px-3 py-1.5 text-brand-orange">
+          <TrendingUp className="h-3 w-3 shrink-0" />
+          <span className="text-[11px]">{t('nearingLimitWarning')}</span>
         </div>
       )}
 
-      <div className="px-5 py-4">{inner}</div>
+      <div className="px-4 py-3">{inner}</div>
     </div>
   );
 }
