@@ -595,7 +595,9 @@
       "currentPlan": "Current plan",
       "availablePlans": "Available plans",
       "upgradeTo": "Upgrade to {plan}",
-      "contactToDowngrade": "To downgrade to a lower plan, please contact support by email."
+      "contactToDowngrade": "To downgrade to a lower plan, please contact support by email.",
+      "planUpgraded": "Your plan has been upgraded successfully!",
+      "paymentPending": "Your payment is being processed. The plan will update shortly."
     },
     "branch": {
       "title": "Branches",

@@ -4,6 +4,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { PreApproval } from 'mercadopago/dist/clients/preApproval';
 import { getMercadoPagoClient, PLAN_CONFIG, type PlanId } from '@/lib/mercadopago/client';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 /**
  * Create a subscription without associated plan (status: pending).
@@ -69,6 +70,29 @@ export async function POST(request: NextRequest) {
         },
       },
     });
+
+    // Persist the subscription record so the webhook can find it later
+    const { data: appUser } = await createAdminClient()
+      .from('app_user')
+      .select('organization_id')
+      .eq('auth_user_id', user.id)
+      .maybeSingle();
+
+    if (appUser?.organization_id && subscription.id) {
+      await createAdminClient().from('subscription').upsert(
+        {
+          organization_id: Number(appUser.organization_id),
+          mp_preapproval_id: subscription.id,
+          mp_plan_id: typedPlanId,
+          plan: typedPlanId,
+          status: 'pending',
+          payer_email: user.email ?? '',
+          amount: config.amount,
+          currency: config.currency,
+        },
+        { onConflict: 'mp_preapproval_id' }
+      );
+    }
 
     return NextResponse.json({
       initPoint: subscription.init_point,

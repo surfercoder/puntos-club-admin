@@ -1,8 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Check, Star, Zap, Rocket, Loader2, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
@@ -128,17 +129,55 @@ function buildFeatures(
 export function PlanSelector() {
   const t = useTranslations('Onboarding.step3');
   const tSettings = useTranslations('Dashboard.planSettings');
-  const { summary: usageSummary, isLoading: fetching } = usePlanUsage();
+  const { summary: usageSummary, isLoading: fetching, invalidate } = usePlanUsage();
   const currentPlan = usageSummary?.plan ?? null;
   const [selected, setSelected] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [verifying, setVerifying] = useState(false);
   const [planLimits, setPlanLimits] = useState<Record<PlanType, Record<PlanFeatureKey, number>> | null>(null);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const verifiedRef = useRef(false);
 
   useEffect(() => {
     getAllPlanLimitsAction().then((data) => {
       if (data) setPlanLimits(data);
     });
   }, []);
+
+  // Verify subscription status when returning from MercadoPago
+  useEffect(() => {
+    const preapprovalId = searchParams.get('preapproval_id');
+    if (!preapprovalId || verifiedRef.current) return;
+    verifiedRef.current = true;
+    setVerifying(true);
+
+    const verify = async () => {
+      try {
+        const res = await fetch('/api/mercadopago/verify-subscription', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ preapprovalId }),
+        });
+        const data = (await res.json()) as { status?: string; plan?: string; error?: string };
+
+        if (data.status === 'authorized') {
+          toast.success(tSettings('planUpgraded'));
+          invalidate();
+        } else if (data.status === 'pending') {
+          toast.info(tSettings('paymentPending'));
+        }
+      } catch {
+        // Silent — webhook will handle it eventually
+      } finally {
+        setVerifying(false);
+        // Clean the URL
+        router.replace('/dashboard/settings/plan', { scroll: false });
+      }
+    };
+
+    verify();
+  }, [searchParams, invalidate, tSettings, router]);
 
   // Sync selected with current plan when data loads
   if (selected === null && currentPlan !== null) {
@@ -231,7 +270,7 @@ export function PlanSelector() {
     } /* c8 ignore stop */
   };
 
-  if (fetching || !planLimits) {
+  if (fetching || !planLimits || verifying) {
     return (
       <div className="flex items-center justify-center py-16">
         <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />

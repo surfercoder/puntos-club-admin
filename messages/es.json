@@ -595,7 +595,9 @@
       "currentPlan": "Plan actual",
       "availablePlans": "Planes disponibles",
       "upgradeTo": "Mejorar a {plan}",
-      "contactToDowngrade": "Para cambiar a un plan inferior, contacta a soporte por email."
+      "contactToDowngrade": "Para cambiar a un plan inferior, contacta a soporte por email.",
+      "planUpgraded": "¡Tu plan fue actualizado correctamente!",
+      "paymentPending": "Tu pago está siendo procesado. El plan se actualizará en breve."
     },
     "branch": {
       "title": "Sucursales",
