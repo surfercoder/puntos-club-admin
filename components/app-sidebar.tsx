@@ -1,6 +1,7 @@
 "use client"
 
 import * as React from "react"
+import Link from "next/link"
 import {
   MapPin,
   ShoppingBag,
@@ -37,6 +38,7 @@ import {
   Wallet,
   Gauge,
   SlidersHorizontal,
+  Home,
 } from "lucide-react"
 import { useTranslations } from "next-intl"
 
@@ -49,7 +51,11 @@ import {
   Sidebar,
   SidebarContent,
   SidebarFooter,
+  SidebarGroup,
   SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
 
@@ -217,6 +223,18 @@ export function AppSidebar({
         )}
       </SidebarHeader>
       <SidebarContent>
+        <SidebarGroup>
+          <SidebarMenu>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild tooltip={t("home")}>
+                <Link href="/dashboard">
+                  <Home />
+                  <span>{t("home")}</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          </SidebarMenu>
+        </SidebarGroup>
         <NavMain items={navMain} />
         {portalMode !== "admin" && userRole !== "owner" && userRole !== "collaborator" && (
           <NavProjects projects={projects} />

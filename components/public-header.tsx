@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 export async function PublicHeader() {
   const t = await getTranslations("HomePage");
@@ -14,8 +15,9 @@ export async function PublicHeader() {
           <span>Puntos</span>
           <span className="text-brand-pink">Club</span>
         </Link>
-        <div className="absolute left-1/2 -translate-x-1/2">
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1">
           <LanguageSwitcher />
+          <ThemeToggle />
         </div>
         <nav className="flex items-center gap-2">
           <Button variant="ghost" size="sm" asChild>

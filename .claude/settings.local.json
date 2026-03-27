@@ -108,7 +108,11 @@
       "Bash(ACCESS_TOKEN=\"APP_USR-8871452259468188-030311-60dec0b70fd73e0603aad64fe9bed070-93762601\")",
       "Bash(python3 -c \"import sys,json; data=json.load\\(sys.stdin\\); [print\\(u.get\\(''''email'''',''''no-email''''\\), u.get\\(''''id''''\\), u.get\\(''''nickname''''\\)\\) for u in data] if isinstance\\(data, list\\) else print\\(json.dumps\\(data, indent=2\\)\\)\")",
       "mcp__mercadopago__add_money_test_user",
-      "mcp__supabase__get_logs"
+      "mcp__supabase__get_logs",
+      "Bash(npm ls:*)",
+      "Bash(node -e \"const c = require\\(''./coverage/coverage-final.json''\\); const key = Object.keys\\(c\\).find\\(k => k.includes\\(''parallax''\\)\\); const f = c[key].fnMap; console.log\\(JSON.stringify\\(f, null, 2\\)\\)\")",
+      "Bash(node -e \"const c = require\\(''./coverage/coverage-final.json''\\); const key = Object.keys\\(c\\).find\\(k => k.includes\\(''parallax''\\)\\); const f = c[key].fnMap; const s = c[key].f; Object.entries\\(f\\).forEach\\(\\([k,v]\\) => console.log\\(k, s[k], v.name, v.loc.start.line\\)\\)\")",
+      "Bash(python3 -c \":*)"
     ],
     "deny": []
   },

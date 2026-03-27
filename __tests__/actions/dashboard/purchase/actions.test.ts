@@ -47,6 +47,8 @@ import {
   getPurchaseById,
   verifyBeneficiary,
   getActivePointsRules,
+  updatePurchase,
+  deletePurchase,
 } from '@/actions/dashboard/purchase/actions';
 import { isAdmin } from '@/lib/auth/roles';
 
@@ -318,6 +320,48 @@ describe('getActivePointsRules', () => {
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await getActivePointsRules();
+    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+  });
+});
+
+describe('updatePurchase', () => {
+  it('should update purchase successfully', async () => {
+    mockSupabase.single.mockReturnValue({ data: { id: '1', total_amount: '200.00' }, error: null });
+    const result = await updatePurchase('1', { total_amount: '200.00' });
+    expect(result).toEqual({ success: true, data: { id: '1', total_amount: '200.00' } });
+    expect(revalidatePath).toHaveBeenCalledWith('/dashboard/purchase');
+  });
+
+  it('should return error on failure', async () => {
+    mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Update failed' } });
+    const result = await updatePurchase('1', { total_amount: '200.00' });
+    expect(result).toEqual({ success: false, error: 'Update failed' });
+  });
+
+  it('should handle unexpected error', async () => {
+    mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
+    const result = await updatePurchase('1', { total_amount: '200.00' });
+    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+  });
+});
+
+describe('deletePurchase', () => {
+  it('should delete purchase successfully', async () => {
+    mockSupabase.eq.mockReturnValue({ error: null });
+    const result = await deletePurchase('1');
+    expect(result).toEqual({ success: true });
+    expect(revalidatePath).toHaveBeenCalledWith('/dashboard/purchase');
+  });
+
+  it('should return error on failure', async () => {
+    mockSupabase.eq.mockReturnValue({ error: { message: 'Delete failed' } });
+    const result = await deletePurchase('1');
+    expect(result).toEqual({ success: false, error: 'Delete failed' });
+  });
+
+  it('should handle unexpected error', async () => {
+    mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
+    const result = await deletePurchase('1');
     expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
   });
 });

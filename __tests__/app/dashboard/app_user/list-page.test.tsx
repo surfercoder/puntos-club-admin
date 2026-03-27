@@ -76,6 +76,38 @@ describe('AppUserListPage', () => {
     expect(result).toBeTruthy();
   });
 
+  it('filters by organization_id when non-admin with activeOrgId', async () => {
+    const { isAdmin } = require('@/lib/auth/roles');
+    (isAdmin as jest.Mock).mockReturnValueOnce(false);
+    // The code calls: query = supabase.from(...).select(...).order(...) then query.eq(...)
+    // mockOrder returns a thenable with .eq method
+    const eqResult = { data: [], error: null, then: (resolve: any) => resolve({ data: [], error: null }) };
+    mockOrder.mockReturnValueOnce({ eq: jest.fn(() => eqResult) });
+
+    const result = await AppUserListPage();
+    expect(result).toBeTruthy();
+  });
+
+  it('handles null rawData by falling back to null (line 72)', async () => {
+    mockOrder.mockResolvedValueOnce({ data: null, error: null });
+    const result = await AppUserListPage();
+    expect(result).toBeTruthy();
+  });
+
+  it('filters out current user from the list', async () => {
+    const { getCurrentUser } = require('@/lib/auth/get-current-user');
+    getCurrentUser.mockResolvedValueOnce({ id: 'current-user', role: { name: 'admin' } });
+    mockOrder.mockResolvedValueOnce({
+      data: [
+        { id: 'current-user', organization_id: '1', first_name: 'Me', last_name: 'Owner', email: 'me@test.com', username: 'me', active: true, organization: { name: 'Org1' }, role: { name: 'owner' } },
+        { id: 'other-user', organization_id: '1', first_name: 'Other', last_name: 'User', email: 'other@test.com', username: 'other', active: true, organization: { name: 'Org1' }, role: { name: 'cashier' } },
+      ],
+      error: null,
+    });
+    const result = await AppUserListPage();
+    expect(result).toBeTruthy();
+  });
+
   it('renders user with only last_name (no first_name)', async () => {
     mockOrder.mockResolvedValueOnce({
       data: [{ id: '6', organization_id: '1', first_name: null, last_name: 'OnlyLast', email: null, username: null, active: true, organization: { name: 'Org1' }, role: null }],

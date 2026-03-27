@@ -7,6 +7,10 @@ jest.mock('@/components/dashboard/plan/plan-usage-summary', () => ({
   PlanUsageSummary: () => <div data-testid="usage-summary">Usage Summary</div>,
 }));
 
+jest.mock('@/actions/dashboard/subscription/verify-subscription', () => ({
+  verifySubscriptionAction: jest.fn().mockResolvedValue({ status: 'authorized', plan: 'advance' }),
+}));
+
 jest.mock('@/actions/dashboard/usage/actions', () => ({
   getAllPlanLimitsAction: jest.fn().mockResolvedValue({
     trial: { beneficiaries: 10, push_notifications_monthly: 3, cashiers: 1, branches: 1, collaborators: 1, redeemable_products: 2 },
@@ -82,8 +86,8 @@ describe('PlanSelector', () => {
     // Click the advance plan
     fireEvent.click(screen.getByText('advancePlan'));
 
-    // Should show selectedPlan text for the newly selected plan
-    expect(screen.getByText('selectedPlan')).toBeInTheDocument();
+    // Should show upgrade button for the newly selected plan (upgrade from trial to advance)
+    expect(screen.getByText(/upgradeTo/)).toBeInTheDocument();
   });
 
   it('renders usage summary component', async () => {
@@ -108,6 +112,24 @@ describe('PlanSelector', () => {
     fireEvent.click(screen.getByText('advancePlan'));
 
     expect(screen.getByText(/upgradeTo/)).toBeInTheDocument();
+  });
+
+  it('stops keyDown propagation on upgrade button wrapper', async () => {
+    (usePlanUsage as jest.Mock).mockReturnValue({
+      summary: mockSummary,
+      isLoading: false,
+    });
+
+    await act(async () => { render(<PlanSelector />); });
+
+    fireEvent.click(screen.getByText('advancePlan'));
+
+    const upgradeButton = screen.getByText(/upgradeTo/);
+    const wrapper = upgradeButton.closest('[role="presentation"]')!;
+    const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
+    const stopSpy = jest.spyOn(event, 'stopPropagation');
+    wrapper.dispatchEvent(event);
+    expect(stopSpy).toHaveBeenCalled();
   });
 
   it('shows downgrade message when selecting a lower plan from advance', async () => {
@@ -310,6 +332,75 @@ describe('PlanSelector', () => {
     await act(async () => { render(<PlanSelector />); });
     fireEvent.click(screen.getByText('trialPlan'));
     expect(screen.getByText('contactToDowngrade')).toBeInTheDocument();
+  });
+
+  it('verifies subscription when preapproval_id is in search params (authorized)', async () => {
+    const { useSearchParams } = require('next/navigation');
+    useSearchParams.mockReturnValue(new URLSearchParams('preapproval_id=test-123'));
+    const { verifySubscriptionAction } = require('@/actions/dashboard/subscription/verify-subscription');
+    (verifySubscriptionAction as jest.Mock).mockResolvedValue({ status: 'authorized', plan: 'pro' });
+
+    (usePlanUsage as jest.Mock).mockReturnValue({
+      summary: mockSummary,
+      isLoading: false,
+      invalidate: jest.fn(),
+    });
+
+    await act(async () => { render(<PlanSelector />); });
+
+    await waitFor(() => {
+      expect(verifySubscriptionAction).toHaveBeenCalledWith('test-123');
+      expect(toast.success).toHaveBeenCalledWith('planUpgraded');
+    });
+
+    // Restore default
+    useSearchParams.mockReturnValue(new URLSearchParams());
+  });
+
+  it('shows pending toast when subscription status is pending', async () => {
+    const { useSearchParams } = require('next/navigation');
+    useSearchParams.mockReturnValue(new URLSearchParams('preapproval_id=test-456'));
+    const { verifySubscriptionAction } = require('@/actions/dashboard/subscription/verify-subscription');
+    (verifySubscriptionAction as jest.Mock).mockResolvedValue({ status: 'pending' });
+
+    (usePlanUsage as jest.Mock).mockReturnValue({
+      summary: mockSummary,
+      isLoading: false,
+      invalidate: jest.fn(),
+    });
+
+    await act(async () => { render(<PlanSelector />); });
+
+    await waitFor(() => {
+      expect(toast.info).toHaveBeenCalledWith('paymentPending');
+    });
+
+    useSearchParams.mockReturnValue(new URLSearchParams());
+  });
+
+  it('handles verify subscription error silently', async () => {
+    const { useSearchParams } = require('next/navigation');
+    useSearchParams.mockReturnValue(new URLSearchParams('preapproval_id=test-789'));
+    const { verifySubscriptionAction } = require('@/actions/dashboard/subscription/verify-subscription');
+    (verifySubscriptionAction as jest.Mock).mockRejectedValue(new Error('Network error'));
+
+    (usePlanUsage as jest.Mock).mockReturnValue({
+      summary: mockSummary,
+      isLoading: false,
+      invalidate: jest.fn(),
+    });
+
+    await act(async () => { render(<PlanSelector />); });
+
+    await waitFor(() => {
+      expect(verifySubscriptionAction).toHaveBeenCalledWith('test-789');
+    });
+
+    // Should not throw, error is silently caught
+    expect(toast.success).not.toHaveBeenCalled();
+    expect(toast.info).not.toHaveBeenCalled();
+
+    useSearchParams.mockReturnValue(new URLSearchParams());
   });
 
   it('shows error when initPoint is missing from response', async () => {

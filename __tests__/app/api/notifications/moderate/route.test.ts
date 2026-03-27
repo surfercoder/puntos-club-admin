@@ -27,6 +27,8 @@ describe('Notification Moderate API Route', () => {
     mockGetUser.mockResolvedValue({ data: { user: { id: 'u1' } }, error: null });
     mockSingle.mockResolvedValue({ data: { id: 1, organization_id: 1, role: { name: 'owner' } }, error: null });
     mockModerate.mockResolvedValue({ approved: true, reason: '' });
+    // Reset mockFrom to default implementation (may be overridden in specific tests)
+    mockFrom.mockImplementation(() => ({ select: mockSelect }));
   });
 
   afterAll(() => {
@@ -139,6 +141,87 @@ describe('Notification Moderate API Route', () => {
     const data = await response.json();
     expect(response.status).toBe(500);
     expect(data.error).toBe('Ocurrió un error inesperado durante la moderación');
+  });
+
+  it('returns cached moderation result when notification has matching hash', async () => {
+    const crypto = require('crypto');
+    const contentHash = crypto.createHash('sha256').update('Test\0Body').digest('hex');
+
+    // Setup: mock the chain for app_user lookup
+    const mockAppUserSingle = jest.fn().mockResolvedValue({ data: { id: 1, organization_id: 1, role: { name: 'owner' } }, error: null });
+    const mockAppUserEq = jest.fn(() => ({ single: mockAppUserSingle }));
+    const mockAppUserSelect = jest.fn(() => ({ eq: mockAppUserEq }));
+
+    // Setup: mock the chain for push_notifications lookup (cached moderation)
+    const mockNotifSingle = jest.fn().mockResolvedValue({
+      data: { moderation_approved: true, moderation_content_hash: contentHash },
+      error: null,
+    });
+    const mockNotifEq = jest.fn(() => ({ single: mockNotifSingle }));
+    const mockNotifSelect = jest.fn(() => ({ eq: mockNotifEq }));
+
+    let callCount = 0;
+    mockFrom.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return { select: mockAppUserSelect };
+      }
+      return { select: mockNotifSelect };
+    });
+
+    const request = {
+      json: () => Promise.resolve({ title: 'Test', body: 'Body', notificationId: 'notif-1' }),
+      headers: { get: () => null },
+    } as any;
+    const response = await POST(request);
+    const data = await response.json();
+    expect(data.cached).toBe(true);
+    expect(data.data.isApproved).toBe(true);
+    expect(mockModerate).not.toHaveBeenCalled();
+  });
+
+  it('persists moderation result when notificationId is provided', async () => {
+    const mockAppUserSingle = jest.fn().mockResolvedValue({ data: { id: 1, organization_id: 1, role: { name: 'owner' } }, error: null });
+    const mockAppUserEq = jest.fn(() => ({ single: mockAppUserSingle }));
+    const mockAppUserSelect = jest.fn(() => ({ eq: mockAppUserEq }));
+
+    // Notification lookup - no cached result (hash doesn't match)
+    const mockNotifSingle = jest.fn().mockResolvedValue({
+      data: { moderation_approved: false, moderation_content_hash: 'old-hash' },
+      error: null,
+    });
+    const mockNotifEq = jest.fn(() => ({ single: mockNotifSingle }));
+    const mockNotifSelect = jest.fn(() => ({ eq: mockNotifEq }));
+
+    // Update chain for persisting moderation
+    const mockUpdateEq = jest.fn().mockResolvedValue({ data: null, error: null });
+    const mockUpdate = jest.fn(() => ({ eq: mockUpdateEq }));
+
+    let callCount = 0;
+    mockFrom.mockImplementation(() => {
+      callCount++;
+      if (callCount === 1) {
+        return { select: mockAppUserSelect };
+      }
+      if (callCount === 2) {
+        return { select: mockNotifSelect };
+      }
+      return { update: mockUpdate };
+    });
+
+    mockModerate.mockResolvedValueOnce({ isApproved: true, reasons: [], severity: 'low' });
+
+    const request = {
+      json: () => Promise.resolve({ title: 'New Title', body: 'New Body', notificationId: 'notif-2' }),
+      headers: { get: () => null },
+    } as any;
+    const response = await POST(request);
+    const data = await response.json();
+    expect(data.success).toBe(true);
+    expect(mockModerate).toHaveBeenCalledWith('New Title', 'New Body');
+    expect(mockUpdate).toHaveBeenCalledWith(expect.objectContaining({
+      moderation_approved: true,
+    }));
   });
 
   it('handles role as array', async () => {

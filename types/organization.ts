@@ -11,6 +11,7 @@ export type Organization = {
   creation_date: string;
   plan: PlanType;
   trial_started_at?: string | null;
+  is_public?: boolean;
 };
 
 export type OrganizationWithRelations = Organization & {

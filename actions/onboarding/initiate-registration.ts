@@ -6,6 +6,7 @@ import {
   createRegistrationToken,
   type PendingRegistration,
 } from '@/lib/registration-token';
+import { brandedEmailLayout, ctaButton } from '@/lib/email-template';
 
 export async function initiateRegistration(input: {
   email: string;
@@ -42,27 +43,35 @@ export async function initiateRegistration(input: {
     return { success: true };
   }
 
-  const html = `
-    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px">
-      <h2 style="color:#111827">¡Hola, ${input.firstName}!</h2>
-      <p style="color:#374151">
-        Gracias por registrarte en <strong>Puntos Club</strong>. Haz clic en el
-        botón para confirmar tu dirección de email y continuar con la
-        configuración de tu cuenta.
-      </p>
-      <a
-        href="${verificationUrl}"
-        style="display:inline-block;background:#059669;color:#fff;padding:12px 28px;
-               border-radius:6px;text-decoration:none;font-weight:600;margin:20px 0"
-      >
-        Confirmar email
-      </a>
-      <p style="color:#6b7280;font-size:14px">
-        Este enlace expira en 1&nbsp;hora. Si no creaste esta cuenta, puedes
-        ignorar este mensaje.
-      </p>
-    </div>
+  const body = `
+    <h2 style="font-family:'Poppins',Arial,sans-serif;font-size:22px;font-weight:700;color:#1A1A2E;margin:0 0 12px">
+      ¡Hola, ${input.firstName}!
+    </h2>
+    <p style="font-family:'Lexend',Arial,sans-serif;font-size:15px;color:#374151;margin:0 0 8px;line-height:1.7">
+      Gracias por registrarte en <strong style="color:#1A1A2E">Puntos Club</strong>.
+      Un último paso: confirmá tu dirección de email para activar tu cuenta y
+      comenzar a gestionar tus programas de fidelización.
+    </p>
+    ${ctaButton(verificationUrl, 'Confirmar mi email')}
+    <p style="font-family:'Lexend',Arial,sans-serif;font-size:13px;color:#6B7280;margin:0;line-height:1.6">
+      Este enlace expira en <strong>1&nbsp;hora</strong>. Si no creaste esta
+      cuenta, podés ignorar este mensaje sin problema.
+    </p>
   `;
+
+  const footer = `
+    <p style="margin:0 0 4px;font-size:13px;color:#6B7280;font-family:'Lexend',Arial,sans-serif">
+      Si el botón no funciona, copiá y pegá este enlace en tu navegador:
+    </p>
+    <p style="margin:0 0 16px;font-size:11px;word-break:break-all">
+      <a href="${verificationUrl}" style="color:#31A1D6">${verificationUrl}</a>
+    </p>
+    <p style="margin:0;font-size:12px;color:#6B7280;font-family:'Lexend',Arial,sans-serif">
+      © ${new Date().getFullYear()} Puntos Club. Todos los derechos reservados.
+    </p>
+  `;
+
+  const html = brandedEmailLayout(body, footer);
 
   const transporter = nodemailer.createTransport({
     service: 'gmail',

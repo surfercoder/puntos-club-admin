@@ -65,6 +65,10 @@ jest.mock("next-intl", () => ({
   useTranslations: jest.fn(() => (key: string) => key),
 }));
 
+jest.mock("@/actions/contact/send-contact-email", () => ({
+  sendContactEmail: jest.fn().mockResolvedValue({ success: true }),
+}));
+
 jest.mock("@/components/landing/components/input-field", () => ({
   InputField: ({ name, value, onChange, errors, label }: any) => (
     <div>
@@ -239,19 +243,12 @@ describe("ContactForm", () => {
       expect(screen.getByTestId("error-phoneNumber")).toHaveTextContent("validation.phoneMinLength");
     });
 
-    it("shows error when business is empty", () => {
+    it("does not show error when business is empty (optional field)", () => {
       render(<ContactForm circleRefs={circleRefs as any} />);
       const input = screen.getByTestId("input-business");
       fireEvent.change(input, { target: { name: "business", value: "Acme" } });
       fireEvent.change(input, { target: { name: "business", value: "" } });
-      expect(screen.getByTestId("error-business")).toHaveTextContent("validation.businessRequired");
-    });
-
-    it("shows error when business is too short", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
-      const input = screen.getByTestId("input-business");
-      fireEvent.change(input, { target: { name: "business", value: "AB" } });
-      expect(screen.getByTestId("error-business")).toHaveTextContent("validation.businessMinLength");
+      expect(screen.queryByTestId("error-business")).not.toBeInTheDocument();
     });
 
     it("shows error when message is empty", () => {
@@ -345,18 +342,20 @@ describe("ContactForm", () => {
         expect(screen.getByTestId("error-lastName")).toBeInTheDocument();
         expect(screen.getByTestId("error-email")).toBeInTheDocument();
         expect(screen.getByTestId("error-phoneNumber")).toBeInTheDocument();
-        expect(screen.getByTestId("error-business")).toBeInTheDocument();
         expect(screen.getByTestId("error-message")).toBeInTheDocument();
       });
     });
 
-    it("disables submit button when there are validation errors", () => {
+    it("does not submit when there are validation errors from inline validation", () => {
       render(<ContactForm circleRefs={circleRefs as any} />);
       const input = screen.getByTestId("input-firstName");
       fireEvent.change(input, { target: { name: "firstName", value: "J" } });
 
+      // Button is only disabled during loading, not for validation errors
       const submitButton = screen.getByRole("button", { name: /submit/i });
-      expect(submitButton).toBeDisabled();
+      expect(submitButton).not.toBeDisabled();
+      // But the error is shown inline
+      expect(screen.getByTestId("error-firstName")).toBeInTheDocument();
     });
 
     it("does not submit when there are existing errors", async () => {
@@ -372,6 +371,21 @@ describe("ContactForm", () => {
 
       await waitFor(() => {
         expect(screen.queryByText("success")).not.toBeInTheDocument();
+      });
+    });
+
+    it("shows error message when sendContactEmail returns failure", async () => {
+      const { sendContactEmail } = require("@/actions/contact/send-contact-email");
+      sendContactEmail.mockResolvedValueOnce({ success: false, error: "Failed to send" });
+
+      render(<ContactForm circleRefs={circleRefs as any} />);
+      fillValidForm();
+
+      const submitButton = screen.getByRole("button", { name: /submit/i });
+      fireEvent.click(submitButton);
+
+      await waitFor(() => {
+        expect(screen.getByText("error")).toBeInTheDocument();
       });
     });
   });

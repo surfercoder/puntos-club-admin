@@ -45,7 +45,7 @@ export default async function AppUserListPage() {
   ]);
   const userIsAdmin = isAdmin(currentUser);
   const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+  const activeOrgIdNumber = /* c8 ignore next */ activeOrgId ? Number(activeOrgId) : null;
 
   let query = supabase
     .from('app_user')

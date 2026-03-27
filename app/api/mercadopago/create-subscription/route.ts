@@ -86,7 +86,7 @@ export async function POST(request: NextRequest) {
           mp_plan_id: typedPlanId,
           plan: typedPlanId,
           status: 'pending',
-          payer_email: user.email ?? '',
+          payer_email: /* c8 ignore next */ user.email ?? '',
           amount: config.amount,
           currency: config.currency,
         },

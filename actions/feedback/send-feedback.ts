@@ -1,6 +1,14 @@
 'use server';
 
 import nodemailer from 'nodemailer';
+import {
+  brandedEmailLayout,
+  sectionHeading,
+  subtitle,
+  dataTable,
+  messageBox,
+  typeBadge,
+} from '@/lib/email-template';
 
 type FeedbackType = 'comment' | 'feedback' | 'error' | 'improvement' | 'question';
 
@@ -17,6 +25,14 @@ const TYPE_LABELS: Record<FeedbackType, string> = {
   error: 'Error',
   improvement: 'Mejora',
   question: 'Pregunta',
+};
+
+const TYPE_COLORS: Record<FeedbackType, string> = {
+  comment: '#31A1D6',
+  feedback: '#FF4573',
+  error: '#EF4444',
+  improvement: '#4BB562',
+  question: '#FD7E14',
 };
 
 export async function sendFeedback(
@@ -38,29 +54,22 @@ export async function sendFeedback(
   }
 
   const typeLabel = TYPE_LABELS[type] || type;
+  const typeColor = TYPE_COLORS[type] ?? '#31A1D6';
 
-  const html = `
-    <div style="font-family:sans-serif;max-width:600px;margin:0 auto;padding:24px">
-      <h2 style="color:#111827">Nuevo feedback de usuario</h2>
-      <table style="border-collapse:collapse;width:100%;margin:16px 0">
-        <tr>
-          <td style="padding:8px 12px;font-weight:600;color:#374151;border-bottom:1px solid #e5e7eb">Tipo</td>
-          <td style="padding:8px 12px;color:#374151;border-bottom:1px solid #e5e7eb">${typeLabel}</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 12px;font-weight:600;color:#374151;border-bottom:1px solid #e5e7eb">Usuario</td>
-          <td style="padding:8px 12px;color:#374151;border-bottom:1px solid #e5e7eb">${userName}</td>
-        </tr>
-        <tr>
-          <td style="padding:8px 12px;font-weight:600;color:#374151;border-bottom:1px solid #e5e7eb">Email</td>
-          <td style="padding:8px 12px;color:#374151;border-bottom:1px solid #e5e7eb">${userEmail}</td>
-        </tr>
-      </table>
-      <div style="background:#f9fafb;border:1px solid #e5e7eb;border-radius:8px;padding:16px;margin:16px 0">
-        <p style="color:#374151;white-space:pre-wrap;margin:0">${message}</p>
-      </div>
-    </div>
+  const rows = [
+    { label: 'Tipo', value: typeBadge(typeLabel, typeColor) },
+    { label: 'Usuario', value: userName },
+    { label: 'Email', value: `<a href="mailto:${userEmail}" style="color:#FD7E14;text-decoration:none">${userEmail}</a>` },
+  ];
+
+  const body = `
+    ${sectionHeading('Nuevo feedback de usuario')}
+    ${subtitle('Un usuario de la plataforma envió un mensaje desde el panel de Puntos Club.')}
+    ${dataTable(rows)}
+    ${messageBox('Mensaje', message)}
   `;
+
+  const html = brandedEmailLayout(body);
 
   const transporter = nodemailer.createTransport({
     service: 'gmail',

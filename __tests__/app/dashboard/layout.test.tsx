@@ -1,5 +1,7 @@
 import { redirect } from 'next/navigation';
-import DashboardLayout from '@/app/dashboard/layout';
+import DashboardLayout, { generateMetadata } from '@/app/dashboard/layout';
+
+jest.mock('next-intl/server', () => ({ getTranslations: jest.fn(() => Promise.resolve((key: string) => key)) }));
 
 const mockFrom = jest.fn();
 const mockGetUser = jest.fn();
@@ -48,6 +50,12 @@ describe('DashboardLayout', () => {
 
   it('exports a default async function', () => {
     expect(typeof DashboardLayout).toBe('function');
+  });
+
+  it('generateMetadata returns correct metadata', async () => {
+    const metadata = await generateMetadata();
+    expect(metadata).toBeDefined();
+    expect(metadata.title).toBeDefined();
   });
 
   it('redirects when no user', async () => {

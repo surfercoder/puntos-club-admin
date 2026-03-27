@@ -10,7 +10,7 @@ jest.mock('@/actions/dashboard/purchase/actions', () => ({
 
 // Mock Dialog components - always render all children to test the full component
 jest.mock('@/components/ui/dialog', () => ({
-  Dialog: ({ children }: any) => <div data-testid="dialog">{children}</div>,
+  Dialog: ({ children, onOpenChange }: any) => <div role="dialog" data-testid="dialog" onClick={() => onOpenChange?.(false)} onKeyDown={(e: any) => { if (e.key === 'Escape') onOpenChange?.(false); }}>{children}</div>,
   DialogContent: ({ children }: any) => <div data-testid="dialog-content">{children}</div>,
   DialogDescription: ({ children }: any) => <p data-testid="dialog-description">{children}</p>,
   DialogFooter: ({ children }: any) => <div data-testid="dialog-footer">{children}</div>,
@@ -73,6 +73,24 @@ describe('DeleteModal', () => {
     });
   });
 
+  it('shows fallback error toast when deletePurchase returns failure with no error message', async () => {
+    mockDeletePurchase.mockResolvedValue({ success: false, error: undefined } as any);
+
+    render(<DeleteModal purchaseId="pur-1" purchaseNumber="PUR-001" />);
+
+    const buttons = screen.getAllByRole('button');
+    const deleteButton = buttons.find((b) => b.textContent === 'delete');
+    fireEvent.click(deleteButton!);
+
+    await waitFor(() => {
+      expect(mockDeletePurchase).toHaveBeenCalledWith('pur-1');
+    });
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('deleteError');
+    });
+  });
+
   it('shows error toast when deletePurchase returns failure', async () => {
     mockDeletePurchase.mockResolvedValue({ success: false, error: 'Something went wrong' } as any);
 
@@ -89,6 +107,18 @@ describe('DeleteModal', () => {
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalled();
     });
+  });
+
+  it('closes dialog when cancel button is clicked', () => {
+    render(<DeleteModal purchaseId="pur-1" purchaseNumber="PUR-001" />);
+    const buttons = screen.getAllByRole('button');
+    const cancelButton = buttons.find((b) => b.textContent === 'cancel');
+    fireEvent.click(cancelButton!);
+  });
+
+  it('triggers onOpenChange callback on Dialog', () => {
+    render(<DeleteModal purchaseId="pur-1" purchaseNumber="PUR-001" />);
+    fireEvent.click(screen.getByTestId('dialog'));
   });
 
   it('shows generic error toast when deletePurchase throws', async () => {

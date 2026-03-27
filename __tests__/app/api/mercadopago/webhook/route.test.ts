@@ -267,6 +267,29 @@ describe('MercadoPago Webhook Route', () => {
     expect(response.status).toBe(200);
   });
 
+  it('returns 401 when signature verification fails (invalid signature)', async () => {
+    process.env.MP_WEBHOOK_SECRET = 'test-secret';
+
+    // Create a request with nextUrl.searchParams so the HMAC code path runs fully
+    const url = new URL('http://localhost:3000/api/mercadopago/webhook?data.id=pa_123');
+    const request = {
+      headers: {
+        get: (name: string) => {
+          if (name === 'x-signature') return 'ts=12345,v1=invalid_hash';
+          if (name === 'x-request-id') return 'req-456';
+          return null;
+        },
+      },
+      nextUrl: url,
+      json: () => Promise.resolve({ type: 'subscription_preapproval', data: { id: 'pa_123' } }),
+    } as any;
+
+    const response = await POST(request);
+    expect(response.status).toBe(401);
+    const data = await response.json();
+    expect(data.error).toBe('Invalid signature');
+  });
+
   it('always returns 200 even on error', async () => {
     mockGet.mockRejectedValueOnce(new Error('MP API down'));
 
@@ -296,6 +319,27 @@ describe('MercadoPago Webhook Route', () => {
 
     const response = await POST(makeRequest({ type: 'subscription_preapproval', data: { id: 'pa_123' } }));
     expect(response.status).toBe(200);
+  });
+
+  it('falls back to id param when data.id is not present in signature verification', async () => {
+    process.env.MP_WEBHOOK_SECRET = 'test-secret';
+
+    const url = new URL('http://localhost:3000/api/mercadopago/webhook?id=pa_456');
+    const request = {
+      headers: {
+        get: (name: string) => {
+          if (name === 'x-signature') return 'ts=12345,v1=invalid_hash';
+          if (name === 'x-request-id') return 'req-789';
+          return null;
+        },
+      },
+      nextUrl: url,
+      json: () => Promise.resolve({ type: 'subscription_preapproval', data: { id: 'pa_456' } }),
+    } as any;
+
+    const response = await POST(request);
+    // Will fail HMAC check but exercises the id fallback branch
+    expect(response.status).toBe(401);
   });
 
   it('handles null payer_email (falls back to empty string)', async () => {

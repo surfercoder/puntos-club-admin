@@ -67,6 +67,14 @@ describe('userRoleFormAction', () => {
     expect(result.status).toBe('error');
   });
 
+  it('should return error from supabase on update', async () => {
+    mockSupabase.single.mockReturnValue({ error: new Error('Update DB error') });
+    const fd = createFormData({ id: '1', name: 'admin', display_name: 'Administrator' });
+    const result = await userRoleFormAction(EMPTY_ACTION_STATE, fd);
+    expect(result.status).toBe('error');
+    expect(mockSupabase.update).toHaveBeenCalled();
+  });
+
   it('should handle unexpected thrown error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const fd = createFormData({ name: 'admin', display_name: 'Administrator' });

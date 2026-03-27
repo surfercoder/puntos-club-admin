@@ -36,8 +36,11 @@ import {
   getOrganizations,
   getOrganization,
   getOrganizationProducts,
+  getOrganizationSettings,
+  updateOrganizationVisibility,
 } from '@/actions/dashboard/organization/actions';
 import { isAdmin } from '@/lib/auth/roles';
+import { getCurrentUser } from '@/lib/auth/get-current-user';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -218,5 +221,69 @@ describe('getOrganizationProducts', () => {
     mockSupabase.order.mockReturnValue({ data: [{ id: '1', name: 'Product' }], error: null });
     const result = await getOrganizationProducts('1');
     expect(result.data).toEqual([{ id: '1', name: 'Product' }]);
+  });
+});
+
+describe('getOrganizationSettings', () => {
+  it('should return organization settings', async () => {
+    mockSupabase.single.mockReturnValue({ data: { id: '1', name: 'Test Org', is_public: true }, error: null });
+    const result = await getOrganizationSettings('1');
+    expect(result.data).toEqual({ id: '1', name: 'Test Org', is_public: true });
+    expect(result.error).toBeNull();
+  });
+
+  it('should return error when org not found', async () => {
+    mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Not found' } });
+    const result = await getOrganizationSettings('999');
+    expect(result.data).toBeNull();
+    expect(result.error).toEqual({ message: 'Not found' });
+  });
+});
+
+describe('updateOrganizationVisibility', () => {
+  it('should update visibility for admin user', async () => {
+    (isAdmin as jest.Mock).mockReturnValue(true);
+    (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, role: { name: 'admin' } });
+    mockSupabase.single.mockReturnValue({ data: { id: '1', name: 'Test Org', is_public: true }, error: null });
+    const result = await updateOrganizationVisibility('1', true);
+    expect(result).toEqual({ data: { id: '1', name: 'Test Org', is_public: true }, error: null });
+  });
+
+  it('should update visibility for non-admin with membership', async () => {
+    (isAdmin as jest.Mock).mockReturnValue(false);
+    (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, role: { name: 'owner' } });
+    // First single() call is the membership check, second is the update
+    mockSupabase.single
+      .mockReturnValueOnce({ data: { id: 10 }, error: null }) // membership found
+      .mockReturnValueOnce({ data: { id: '1', name: 'Test Org', is_public: false }, error: null }); // update
+    const result = await updateOrganizationVisibility('1', false);
+    expect(result).toEqual({ data: { id: '1', name: 'Test Org', is_public: false }, error: null });
+  });
+
+  it('should return forbidden for non-admin without membership', async () => {
+    (isAdmin as jest.Mock).mockReturnValue(false);
+    (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, role: { name: 'owner' } });
+    mockSupabase.single.mockReturnValue({ data: null, error: null });
+    const result = await updateOrganizationVisibility('1', true);
+    expect(result).toEqual({ error: 'Forbidden' });
+  });
+
+  it('should return not authenticated when user is null', async () => {
+    (getCurrentUser as jest.Mock).mockResolvedValue(null);
+    const result = await updateOrganizationVisibility('1', true);
+    expect(result).toEqual({ error: 'Not authenticated' });
+  });
+
+  it('should return error when update fails', async () => {
+    (isAdmin as jest.Mock).mockReturnValue(true);
+    (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, role: { name: 'admin' } });
+    mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Update failed' } });
+    const result = await updateOrganizationVisibility('1', true);
+    expect(result).toEqual({ error: 'Update failed' });
+  });
+
+  it('should return invalid input for non-boolean', async () => {
+    const result = await updateOrganizationVisibility('1', 'not-boolean' as unknown as boolean);
+    expect(result).toEqual({ error: 'Invalid input' });
   });
 });

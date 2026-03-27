@@ -161,7 +161,9 @@
     "planTrial": "Plan Gratis",
     "planAdvance": "Plan Advance",
     "planPro": "Plan Pro",
-    "managePlan": "Gestionar plan"
+    "managePlan": "Gestionar plan",
+    "orgSettings": "Configuración de organización",
+    "switchOrganization": "Cambiar organización"
   },
   "Sidebar": {
     "addresses": "Direcciones",
@@ -190,6 +192,7 @@
     "notifications": "Notificaciones",
     "summary": "Resumen",
     "panel": "Panel",
+    "home": "Inicio",
     "points": "Puntos",
     "clients": "Clientes",
     "sales": "Ventas",
@@ -227,7 +230,9 @@
     "organization_plan_limits": "Límites de Plan por Org",
     "user-role": "Roles de Usuario",
     "users": "Usuarios",
-    "qr": "Código QR"
+    "qr": "Código QR",
+    "settings": "Configuración",
+    "organization-settings": "Configuración de Organización"
   },
   "Dashboard": {
     "profile": {
@@ -1120,6 +1125,22 @@
       },
       "noStock": "Sin stock"
     },
+    "orgSettings": {
+      "title": "Configuración de Organización",
+      "description": "Administra las preferencias de tu organización",
+      "visibilityTitle": "Visibilidad",
+      "visibilityDescription": "Controla si tu organización es visible para los usuarios que exploran la app PuntosClub",
+      "visibilityPublic": "Pública",
+      "visibilityPrivate": "Privada",
+      "visibilityPublicDescription": "Tu organización es visible para todos los usuarios que exploran la app PuntosClub",
+      "visibilityPrivateDescription": "Tu organización está oculta en la pantalla de exploración, pero los miembros pueden unirse con el código QR",
+      "visibilityToggleLabel": "Alternar visibilidad de la organización",
+      "qrNoteTitle": "El acceso por código QR siempre está disponible",
+      "qrNoteDescription": "Independientemente de la visibilidad, los beneficiarios siempre pueden unirse a tu organización escaneando tu código QR.",
+      "updateError": "Error al actualizar la visibilidad. Por favor, intentá de nuevo.",
+      "madePublicSuccess": "La organización ahora es pública",
+      "madePrivateSuccess": "La organización ahora es privada"
+    },
     "linkAllBeneficiaries": {
       "title": "Vincular Beneficiarios No Vinculados",
       "description": "Esta utilidad vinculará a todos los beneficiarios que no están actualmente asociados a tu organización. Es útil para corregir beneficiarios creados antes de la vinculación automática.",
@@ -1565,6 +1586,7 @@
       "submit": "Enviar mensaje",
       "loading": "Cargando...",
       "success": "El mensaje fue enviado con éxito. Nos estaremos comunicando a la brevedad.",
+      "error": "Ocurrió un error al enviar el mensaje. Por favor intentá de nuevo.",
       "validation": {
         "firstNameRequired": "El nombre es obligatorio",
         "firstNameMinLength": "El nombre debe tener al menos 2 caracteres",

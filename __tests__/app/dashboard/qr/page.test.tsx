@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import QRPage from '@/app/dashboard/qr/page';
+import QRPage, { generateMetadata } from '@/app/dashboard/qr/page';
 
 const mockSingle = jest.fn().mockResolvedValue({ data: { id: 1, name: 'Test Org', logo_url: null } });
 const mockEq = jest.fn(() => ({ single: mockSingle }));
@@ -56,5 +56,11 @@ describe('QRPage', () => {
     mockEq.mockReturnValueOnce({ single: jest.fn().mockResolvedValue({ data: null }) });
     const result = await QRPage();
     expect(result).toBeTruthy();
+  });
+
+  it('generateMetadata returns correct metadata', async () => {
+    const metadata = await generateMetadata();
+    expect(metadata).toBeDefined();
+    expect(metadata.title).toBeDefined();
   });
 });

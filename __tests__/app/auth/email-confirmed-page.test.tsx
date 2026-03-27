@@ -1,5 +1,5 @@
 import { render } from '@testing-library/react';
-import EmailConfirmedPage from '@/app/auth/email-confirmed/page';
+import EmailConfirmedPage, { generateMetadata } from '@/app/auth/email-confirmed/page';
 
 jest.mock('next-intl/server', () => ({ getTranslations: jest.fn(() => Promise.resolve((key: string) => key)) }));
 jest.mock('@/components/ui/card', () => ({ Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>, CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>, CardTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>, CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div> }));
@@ -15,5 +15,11 @@ describe('Email Confirmed Page', () => {
     expect(container.textContent).toContain('title');
     expect(container.textContent).toContain('message');
     expect(container.textContent).toContain('openApp');
+  });
+
+  it('generateMetadata returns correct metadata', async () => {
+    const metadata = await generateMetadata();
+    expect(metadata).toBeDefined();
+    expect(metadata.title).toBeDefined();
   });
 });

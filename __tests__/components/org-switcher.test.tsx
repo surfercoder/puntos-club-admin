@@ -3,7 +3,7 @@ import { OrgSwitcher } from '@/components/org-switcher';
 
 jest.mock('next/image', () => {
   const MockImage = ({ alt, ...props }: { alt: string; [key: string]: unknown }) => (
-    <img alt={alt} {...props} />
+    <div role="img" aria-label={alt} {...props} />
   );
   MockImage.displayName = 'Image';
   return MockImage;
@@ -215,7 +215,7 @@ describe('OrgSwitcher', () => {
       />
     );
     const images = screen.getAllByRole('img');
-    expect(images.some(img => img.getAttribute('alt') === 'Beta Org')).toBe(true);
+    expect(images.some(img => img.getAttribute('aria-label') === 'Beta Org')).toBe(true);
   });
 
   it('closes dialog when onCancel is called from the form', () => {
@@ -239,6 +239,31 @@ describe('OrgSwitcher', () => {
 
     // Dialog should close
     expect(screen.queryByTestId('dialog')).not.toBeInTheDocument();
+  });
+
+  it('navigates to organization settings when orgSettings menu item is clicked', () => {
+    const { useRouter } = require('next/navigation');
+    const pushMock = jest.fn();
+    (useRouter as jest.Mock).mockReturnValue({
+      push: pushMock,
+      replace: jest.fn(),
+      prefetch: jest.fn(),
+      back: jest.fn(),
+      forward: jest.fn(),
+      refresh: jest.fn(),
+    });
+
+    render(
+      <OrgSwitcher
+        orgs={orgs}
+        activeOrgId="org-1"
+        onChangeOrg={jest.fn()}
+      />
+    );
+
+    const settingsButton = screen.getByText('orgSettings');
+    fireEvent.click(settingsButton);
+    expect(pushMock).toHaveBeenCalledWith('/dashboard/settings/organization');
   });
 
   it('closes dialog and refreshes router when onSuccess is called from the form', () => {

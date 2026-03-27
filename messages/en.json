@@ -161,7 +161,9 @@
     "planTrial": "Free Plan",
     "planAdvance": "Advance Plan",
     "planPro": "Pro Plan",
-    "managePlan": "Manage plan"
+    "managePlan": "Manage plan",
+    "orgSettings": "Organization Settings",
+    "switchOrganization": "Switch organization"
   },
   "Sidebar": {
     "addresses": "Addresses",
@@ -190,6 +192,7 @@
     "notifications": "Notifications",
     "summary": "Summary",
     "panel": "Dashboard",
+    "home": "Home",
     "points": "Points",
     "clients": "Clients",
     "sales": "Sales",
@@ -227,7 +230,9 @@
     "organization_plan_limits": "Org Plan Limits",
     "user-role": "User Roles",
     "users": "Users",
-    "qr": "QR Code"
+    "qr": "QR Code",
+    "settings": "Settings",
+    "organization-settings": "Organization Settings"
   },
   "Dashboard": {
     "profile": {
@@ -1120,6 +1125,22 @@
       },
       "noStock": "No stock"
     },
+    "orgSettings": {
+      "title": "Organization Settings",
+      "description": "Manage your organization preferences",
+      "visibilityTitle": "Visibility",
+      "visibilityDescription": "Control whether your organization is discoverable in the PuntosClub app",
+      "visibilityPublic": "Public",
+      "visibilityPrivate": "Private",
+      "visibilityPublicDescription": "Your organization is visible to all users exploring the PuntosClub app",
+      "visibilityPrivateDescription": "Your organization is hidden from the explore screen but members can still join via QR",
+      "visibilityToggleLabel": "Toggle organization visibility",
+      "qrNoteTitle": "QR code access is always available",
+      "qrNoteDescription": "Regardless of visibility, beneficiaries can always join your organization by scanning your QR code.",
+      "updateError": "Failed to update visibility. Please try again.",
+      "madePublicSuccess": "Organization is now public",
+      "madePrivateSuccess": "Organization is now private"
+    },
     "linkAllBeneficiaries": {
       "title": "Link Unlinked Beneficiaries",
       "description": "This utility will link all beneficiaries that are not currently associated with your organization. This is useful for fixing beneficiaries created before the automatic linking was implemented.",
@@ -1565,6 +1586,7 @@
       "submit": "Send message",
       "loading": "Loading...",
       "success": "The message was sent successfully. We will be in touch shortly.",
+      "error": "An error occurred while sending the message. Please try again.",
       "validation": {
         "firstNameRequired": "First name is required",
         "firstNameMinLength": "First name must be at least 2 characters",

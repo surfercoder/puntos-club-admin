@@ -1,5 +1,7 @@
 const mockRpc = jest.fn();
-const mockSupabase = { rpc: mockRpc };
+const mockSelect = jest.fn();
+const mockFrom = jest.fn(() => ({ select: mockSelect }));
+const mockSupabase = { rpc: mockRpc, from: mockFrom };
 
 jest.mock('@/lib/supabase/server', () => ({
   createClient: jest.fn(() => mockSupabase),
@@ -9,6 +11,7 @@ import {
   getOrganizationUsageSummary,
   checkPlanLimit,
   enforcePlanLimit,
+  getAllPlanLimits,
 } from '@/lib/plans/usage';
 
 describe('getOrganizationUsageSummary', () => {
@@ -99,6 +102,45 @@ describe('enforcePlanLimit', () => {
     mockRpc.mockResolvedValue({ data: null, error: { message: 'db error' } });
 
     const result = await enforcePlanLimit(1, 'cashiers');
+    expect(result).toBeNull();
+  });
+});
+
+describe('getAllPlanLimits', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockFrom.mockReturnValue({ select: mockSelect });
+  });
+
+  it('returns grouped data by plan and feature on success', async () => {
+    mockSelect.mockResolvedValue({
+      data: [
+        { plan: 'trial', feature: 'branches', limit_value: 1 },
+        { plan: 'trial', feature: 'cashiers', limit_value: 2 },
+        { plan: 'pro', feature: 'branches', limit_value: 10 },
+      ],
+      error: null,
+    });
+
+    const result = await getAllPlanLimits();
+    expect(mockFrom).toHaveBeenCalledWith('plan_limits');
+    expect(result).toEqual({
+      trial: { branches: 1, cashiers: 2 },
+      pro: { branches: 10 },
+    });
+  });
+
+  it('returns null on error', async () => {
+    mockSelect.mockResolvedValue({ data: null, error: { message: 'fail' } });
+
+    const result = await getAllPlanLimits();
+    expect(result).toBeNull();
+  });
+
+  it('returns null when data is null without error', async () => {
+    mockSelect.mockResolvedValue({ data: null, error: null });
+
+    const result = await getAllPlanLimits();
     expect(result).toBeNull();
   });
 });

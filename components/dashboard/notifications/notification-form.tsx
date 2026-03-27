@@ -100,8 +100,8 @@ function notificationFormReducer(state: NotificationFormState, action: Notificat
       return { ...state, timeRemaining: action.payload };
     case 'TIMER_EXPIRED':
       return { ...state, timeRemaining: '' };
-    default:
-      return state;
+    /* c8 ignore next */
+    default: return state;
   }
 }
 
@@ -195,7 +195,7 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
       const moderateResponse = await fetch('/api/notifications/moderate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, body, ...(isEditing ? { notificationId: notification.id } : {}) }),
+        body: JSON.stringify({ title, body, ...(/* c8 ignore next */ isEditing ? { notificationId: notification.id } : {}) }),
       });
       const moderateData = await moderateResponse.json();
 

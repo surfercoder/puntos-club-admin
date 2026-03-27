@@ -209,4 +209,75 @@ describe("Bubbles", () => {
       }
     });
   });
+
+  describe("event handlers", () => {
+    it("calls handleMouseEnter on mouseEnter", () => {
+      const { handleMouseEnter } = require("@/components/landing/animations/bubble");
+      const { container } = render(
+        <Bubbles index={0} backgroundColor="#FF0000" />
+      );
+      const { fireEvent } = require("@testing-library/react");
+      const bubbleDivs = container.querySelectorAll(".bubble");
+      fireEvent.mouseEnter(bubbleDivs[0]);
+      expect(handleMouseEnter).toHaveBeenCalledWith(expect.any(Object), 0);
+    });
+
+    it("calls handleMouseLeave on mouseLeave", () => {
+      const { handleMouseLeave } = require("@/components/landing/animations/bubble");
+      const { container } = render(
+        <Bubbles index={0} backgroundColor="#FF0000" />
+      );
+      const { fireEvent } = require("@testing-library/react");
+      const bubbleDivs = container.querySelectorAll(".bubble");
+      fireEvent.mouseLeave(bubbleDivs[1]);
+      expect(handleMouseLeave).toHaveBeenCalledWith(expect.any(Object), 1);
+    });
+
+    it("calls handleBubbleClick on click", () => {
+      const { handleBubbleClick } = require("@/components/landing/animations/bubble");
+      const { container } = render(
+        <Bubbles index={0} backgroundColor="#FF0000" />
+      );
+      const { fireEvent } = require("@testing-library/react");
+      const bubbleDivs = container.querySelectorAll(".bubble");
+      fireEvent.click(bubbleDivs[2]);
+      expect(handleBubbleClick).toHaveBeenCalledWith(expect.any(Object), 2);
+    });
+  });
+
+  describe("mobile sizing", () => {
+    it("reduces size by 25 for large bubbles on mobile (isMobile=true)", () => {
+      const useMediaQuery = require("@/components/landing/hooks/use-media-query").default;
+      useMediaQuery.mockReturnValue(true);
+
+      const { container } = render(
+        <Bubbles index={0} backgroundColor="#FF0000" />
+      );
+      const bubbleDivs = container.querySelectorAll(".bubble");
+      // bubbles[0][0].size = 65, which is >= 35, so on mobile: 65 - 25 = 40
+      expect((bubbleDivs[0] as HTMLElement).style.width).toBe("40px");
+      expect((bubbleDivs[0] as HTMLElement).style.height).toBe("40px");
+
+      // bubbles[0][2].size = 36, which is >= 35, so on mobile: 36 - 25 = 11
+      expect((bubbleDivs[2] as HTMLElement).style.width).toBe("11px");
+      expect((bubbleDivs[2] as HTMLElement).style.height).toBe("11px");
+
+      useMediaQuery.mockReturnValue(false);
+    });
+
+    it("keeps original size for small bubbles on mobile (size < 35)", () => {
+      const useMediaQuery = require("@/components/landing/hooks/use-media-query").default;
+      useMediaQuery.mockReturnValue(true);
+
+      // index 1 has a bubble with size 31 (< 35)
+      const { container } = render(
+        <Bubbles index={1} backgroundColor="#0000FF" />
+      );
+      const bubbleDivs = container.querySelectorAll(".bubble");
+      // bubbles[1][2].size = 31 which is < 35, so it stays 31 on mobile
+      expect((bubbleDivs[2] as HTMLElement).style.width).toBe("31px");
+
+      useMediaQuery.mockReturnValue(false);
+    });
+  });
 });

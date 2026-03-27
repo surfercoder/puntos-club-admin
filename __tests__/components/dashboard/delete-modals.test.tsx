@@ -352,6 +352,13 @@ describe('AddressDeleteModal', () => {
     expect(mockRefresh).toHaveBeenCalled();
   });
 
+  it('exception path', async () => {
+    mock.mockRejectedValue(new Error('Network'));
+    render(<AddressDeleteModal id={1} />);
+    fireEvent.click(getDeleteButton());
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('genericError'));
+  });
+
   it('cancel button click', () => {
     render(<AddressDeleteModal id={1} />);
     const cancelBtn = getCancelButton();

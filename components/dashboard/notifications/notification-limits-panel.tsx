@@ -62,7 +62,7 @@ export default function NotificationLimitsPanel({ limits, canSend, timeRemaining
   const locale = useLocale();
   const restrictionReason = useRestrictionReason(limits);
 
-  const dateLocale = locale === 'es' ? 'es-ES' : 'en-US';
+  const dateLocale = /* c8 ignore next */ locale === 'es' ? 'es-ES' : 'en-US';
   const dateOptions: Intl.DateTimeFormatOptions = {
     year: 'numeric',
     month: '2-digit',

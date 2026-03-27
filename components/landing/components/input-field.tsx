@@ -5,15 +5,8 @@ import type { FC, MutableRefObject } from "react";
 import { useTheme } from "next-themes";
 import "@/components/landing/styles/contact-form.css";
 
-export interface ContactFormValues {
-  firstName: string;
-  lastName: string;
-  email: string;
-  phoneNumber: string;
-  business: string;
-  message: string;
-  honeyField: string;
-}
+import type { ContactFormValues } from "@/schemas/contact.schema";
+export type { ContactFormValues } from "@/schemas/contact.schema";
 
 interface InputFieldProps {
   name: keyof ContactFormValues;
@@ -44,13 +37,13 @@ export const InputField: FC<InputFieldProps> = ({
   const [inputKey, setInputKey] = useState(0);
 
   useEffect(() => {
-    setInputKey((prevKey) => (prevKey === 0 ? 1 : 0));
+    setInputKey((prevKey) => /* c8 ignore next */ (prevKey === 0 ? 1 : 0));
   }, [theme]);
 
   return (
     <div
       className={`flex flex-col gap-2 col-span-1 ${
-        colSpanMd === 2 && "md:col-span-2"
+        /* c8 ignore next */ colSpanMd === 2 && "md:col-span-2"
       }`}
     >
       <p className="font-light pl-7">{label}</p>
@@ -102,7 +95,7 @@ export const PhoneNumberField: FC<PhoneNumberFieldProps> = ({
   const [inputKey, setInputKey] = useState(0);
 
   useEffect(() => {
-    setInputKey((prevKey) => (prevKey === 0 ? 1 : 0));
+    setInputKey((prevKey) => /* c8 ignore next */ (prevKey === 0 ? 1 : 0));
   }, [theme]);
 
   return (

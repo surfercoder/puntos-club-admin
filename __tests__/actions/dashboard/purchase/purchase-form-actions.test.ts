@@ -67,6 +67,14 @@ describe('purchaseFormAction', () => {
     expect(result.status).toBe('error');
   });
 
+  it('should return error from supabase on update', async () => {
+    mockSupabase.single.mockReturnValue({ error: new Error('Update DB error') });
+    const fd = createFormData({ id: '1', beneficiary_id: 'ben-1', cashier_id: 'cash-1', total_amount: '100.50' });
+    const result = await purchaseFormAction(EMPTY_ACTION_STATE, fd);
+    expect(result.status).toBe('error');
+    expect(mockSupabase.update).toHaveBeenCalled();
+  });
+
   it('should handle unexpected thrown error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const fd = createFormData({ beneficiary_id: 'ben-1', cashier_id: 'cash-1', total_amount: '100.50' });

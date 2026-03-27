@@ -20,6 +20,7 @@ jest.mock('@/components/ui/tooltip', () => ({
 jest.mock('lucide-react', () => ({
   EyeOff: () => <span data-testid="eye-off-icon" />,
   Eye: () => <span data-testid="eye-icon" />,
+  Loader2: ({ className }: { className?: string }) => <span data-testid="loader-icon" className={className} />,
 }));
 
 describe('HideButton', () => {
@@ -123,6 +124,20 @@ describe('HideButton', () => {
     });
 
     expect(mockRefresh).not.toHaveBeenCalled();
+  });
+
+  it('shows toast.error when fetch throws an exception', async () => {
+    mockFetch.mockRejectedValue(new Error('Network error'));
+
+    render(
+      <HideButton beneficiaryId="b-1" organizationId="org-1" isHidden={false} />
+    );
+
+    fireEvent.click(screen.getByRole('button'));
+
+    await waitFor(() => {
+      expect(require('sonner').toast.error).toHaveBeenCalledWith('error');
+    });
   });
 
   it('re-enables button after fetch completes', async () => {

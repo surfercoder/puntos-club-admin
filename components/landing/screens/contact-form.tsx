@@ -1,19 +1,84 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useReducer } from "react";
 import type { MutableRefObject } from "react";
 import {
   InputField,
   InputTextArea,
   PhoneNumberField,
 } from "@/components/landing/components/input-field";
-import type { ContactFormValues } from "@/components/landing/components/input-field";
+import type { ContactFormValues } from "@/schemas/contact.schema";
+import { ContactSchema, contactFieldSchemas } from "@/schemas/contact.schema";
+import { sendContactEmail } from "@/actions/contact/send-contact-email";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useTranslations } from "next-intl";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
+
+type ValidatableField = keyof typeof contactFieldSchemas;
+
+const INITIAL_FORM: ContactFormValues = {
+  firstName: "",
+  lastName: "",
+  email: "",
+  phoneNumber: "",
+  business: "",
+  message: "",
+  honeyField: "",
+};
+
+type FormState = {
+  formValues: ContactFormValues;
+  errors: Partial<ContactFormValues>;
+  success: string;
+  error: string;
+  loading: boolean;
+};
+
+type FormAction =
+  | { type: "SET_FIELD"; name: keyof ContactFormValues; value: string }
+  | { type: "SET_ERRORS"; errors: Partial<ContactFormValues> }
+  | { type: "SET_FIELD_ERROR"; name: keyof ContactFormValues; message: string | undefined }
+  | { type: "SUBMIT_START" }
+  | { type: "SUBMIT_SUCCESS"; message: string }
+  | { type: "SUBMIT_ERROR"; message: string }
+  | { type: "SUBMIT_END" };
+
+const initialState: FormState = {
+  formValues: INITIAL_FORM,
+  errors: {},
+  success: "",
+  error: "",
+  loading: false,
+};
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case "SET_FIELD":
+      return { ...state, formValues: { ...state.formValues, [action.name]: action.value } };
+    case "SET_ERRORS":
+      return { ...state, errors: action.errors };
+    case "SET_FIELD_ERROR": {
+      const next = { ...state.errors };
+      if (action.message) {
+        next[action.name] = action.message;
+      } else {
+        delete next[action.name];
+      }
+      return { ...state, errors: next };
+    }
+    case "SUBMIT_START":
+      return { ...state, loading: true, success: "", error: "" };
+    case "SUBMIT_SUCCESS":
+      return { ...state, success: action.message, formValues: INITIAL_FORM, errors: {} };
+    case "SUBMIT_ERROR":
+      return { ...state, error: action.message };
+    case "SUBMIT_END":
+      return { ...state, loading: false };
+  }
+}
 
 const ContactForm = ({
   circleRefs,
@@ -22,157 +87,74 @@ const ContactForm = ({
 }) => {
   const t = useTranslations("Landing.contact");
 
-  const [formValues, setFormValues] = useState<ContactFormValues>({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phoneNumber: "",
-    business: "",
-    message: "",
-    honeyField: "",
-  });
+  const [state, dispatch] = useReducer(formReducer, initialState);
+  const { formValues, errors, success, error, loading } = state;
 
-  const [errors, setErrors] = useState<Partial<ContactFormValues>>({});
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
+  const validateField = (name: string, value: string): string | undefined => {
+    if (!(name in contactFieldSchemas)) return undefined;
+
+    const schema = contactFieldSchemas[name as ValidatableField];
+    const fieldResult = schema.safeParse(value);
+
+    if (!fieldResult.success) {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return t(fieldResult.error.issues[0].message as any);
+    }
+    return undefined;
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setFormValues({
-      ...formValues,
-      [e.target.name]: e.target.value,
-    });
-    validateForm(e.target.value, e.target.name);
+    const { name, value } = e.target;
+    dispatch({ type: "SET_FIELD", name: name as keyof ContactFormValues, value });
+    dispatch({ type: "SET_FIELD_ERROR", name: name as keyof ContactFormValues, message: validateField(name, value) });
   };
 
-  const handlePhoneChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
-    setFormValues({
-      ...formValues,
-      phoneNumber: e.target.value,
-    });
-    validateForm(e.target.value, "phoneNumber");
-  };
-
-  const validateForm = (value: string, name: string) => {
-    const newErrors: Partial<ContactFormValues> = { ...errors };
-    delete newErrors[name as keyof ContactFormValues];
-
-    switch (name) {
-      case "firstName": {
-        if (value.trim() === "") {
-          newErrors.firstName = t("validation.firstNameRequired");
-          break;
-        }
-        if (value.length < 2) {
-          newErrors.firstName = t("validation.firstNameMinLength");
-          break;
-        }
-        break;
-      }
-      case "lastName": {
-        if (value.trim() === "") {
-          newErrors.lastName = t("validation.lastNameRequired");
-          break;
-        }
-        if (value.length < 2) {
-          newErrors.lastName = t("validation.lastNameMinLength");
-          break;
-        }
-        break;
-      }
-      case "email": {
-        if (value.trim() === "") {
-          newErrors.email = t("validation.emailRequired");
-          break;
-        }
-        if (!/\S+@\S+\.\S+/.test(value)) {
-          newErrors.email = t("validation.emailInvalid");
-          break;
-        }
-        break;
-      }
-      case "phoneNumber": {
-        if (value.trim() === "") {
-          newErrors.phoneNumber = t("validation.phoneRequired");
-          break;
-        }
-        if (!/^[^a-zA-Z]*$/.test(value)) {
-          newErrors.phoneNumber = t("validation.phoneNoLetters");
-          break;
-        }
-        if (value.length < 10) {
-          newErrors.phoneNumber = t("validation.phoneMinLength");
-          break;
-        }
-        break;
-      }
-      case "business": {
-        if (value.trim() === "") {
-          newErrors.business = t("validation.businessRequired");
-          break;
-        }
-        if (value.length < 4) {
-          newErrors.business = t("validation.businessMinLength");
-          break;
-        }
-        break;
-      }
-      case "message": {
-        if (value.trim() === "") {
-          newErrors.message = t("validation.messageRequired");
-          break;
-        }
-        if (value.length < 50) {
-          newErrors.message = t("validation.messageMinLength");
-          break;
-        }
-        break;
-      }
-      case "honeyField": {
-        if (value.trim() !== "") {
-          newErrors.honeyField = "";
-        }
-        break;
-      }
-    }
-    setErrors(newErrors);
-    return newErrors[name as keyof ContactFormValues];
+  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { value } = e.target;
+    dispatch({ type: "SET_FIELD", name: "phoneNumber", value });
+    dispatch({ type: "SET_FIELD_ERROR", name: "phoneNumber", message: validateField("phoneNumber", value) });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setLoading(true);
-    setSuccess("");
-    setError("");
 
-    if (formValues.honeyField) {
-      setLoading(false);
+    if (formValues.honeyField) return;
+
+    const result = ContactSchema.safeParse({
+      firstName: formValues.firstName,
+      lastName: formValues.lastName,
+      email: formValues.email,
+      phoneNumber: formValues.phoneNumber,
+      business: formValues.business || undefined, // empty string → undefined (optional field)
+      message: formValues.message,
+    });
+
+    if (!result.success) {
+      const newErrors: Partial<ContactFormValues> = {};
+      for (const issue of result.error.issues) {
+        const field = issue.path[0] as keyof ContactFormValues;
+        if (!newErrors[field]) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          newErrors[field] = t(issue.message as any);
+        }
+      }
+      dispatch({ type: "SET_ERRORS", errors: newErrors });
       return;
     }
 
-    if (Object.keys(errors).length === 0) {
-      const newErrors: Partial<ContactFormValues> = {};
+    dispatch({ type: "SUBMIT_START" });
 
-      (Object.keys(formValues) as Array<keyof ContactFormValues>).forEach(
-        (key) => {
-          const err = validateForm(formValues[key], key);
-          if (err) {
-            newErrors[key] = err;
-          }
-        }
-      );
+    const emailResult = await sendContactEmail(result.data);
 
-      if (Object.keys(newErrors).length === 0) {
-        setSuccess(t("success"));
-      } else {
-        setErrors(newErrors);
-      }
+    if (emailResult.success) {
+      dispatch({ type: "SUBMIT_SUCCESS", message: t("success") });
+    } else {
+      dispatch({ type: "SUBMIT_ERROR", message: t("error") });
     }
-    setLoading(false);
+
+    dispatch({ type: "SUBMIT_END" });
   };
 
   return (
@@ -312,12 +294,10 @@ const ContactForm = ({
             <button
               type="submit"
               className={`text-white px-8 py-4 rounded-full ${
-                Object.keys(errors).length > 0 || loading
-                  ? "opacity-50"
-                  : ""
+                loading ? "opacity-50 cursor-not-allowed" : ""
               }`}
               style={{ backgroundColor: "#FD7E14" }}
-              disabled={Object.keys(errors).length > 0 || loading}
+              disabled={loading}
             >
               {loading && (
                 <div

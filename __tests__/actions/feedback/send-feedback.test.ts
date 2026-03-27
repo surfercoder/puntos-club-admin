@@ -101,6 +101,23 @@ describe('sendFeedback', () => {
     expect(call.html).toContain('Feedback');
   });
 
+  it('uses type as label and default color when type is unknown', async () => {
+    process.env.GMAIL_USER = 'test@gmail.com';
+    process.env.GMAIL_APP_PASSWORD = 'app-password';
+    mockSendMail.mockResolvedValue({});
+
+    await sendFeedback({ ...validInput, type: 'unknown_type' as any });
+
+    expect(mockSendMail).toHaveBeenCalledWith(
+      expect.objectContaining({
+        subject: '[unknown_type] Feedback de Test User',
+      })
+    );
+    // The HTML should contain the unknown type as the label
+    const call = mockSendMail.mock.calls[0][0];
+    expect(call.html).toContain('unknown_type');
+  });
+
   it.each([
     ['comment', 'Comentario'],
     ['feedback', 'Feedback'],

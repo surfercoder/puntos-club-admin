@@ -1,3 +1,11 @@
+jest.mock('@/lib/env', () => ({
+  env: {
+    NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
+    NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
+    NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'test-maps-key',
+  },
+}));
+
 import { POST } from '@/app/api/mercadopago/create-subscription/route';
 
 const mockGetUser = jest.fn();
@@ -6,6 +14,20 @@ const mockCreate = jest.fn();
 jest.mock('@/lib/supabase/server', () => ({
   createClient: jest.fn(() => Promise.resolve({
     auth: { getUser: mockGetUser },
+  })),
+}));
+
+jest.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: jest.fn(() => ({
+    from: jest.fn(() => ({
+      select: jest.fn().mockReturnThis(),
+      insert: jest.fn().mockReturnThis(),
+      update: jest.fn().mockReturnThis(),
+      upsert: jest.fn().mockResolvedValue({ data: null, error: null }),
+      eq: jest.fn().mockReturnThis(),
+      single: jest.fn().mockResolvedValue({ data: null, error: null }),
+      maybeSingle: jest.fn().mockResolvedValue({ data: null, error: null }),
+    })),
   })),
 }));
 
@@ -218,6 +240,38 @@ describe('MercadoPago Create Subscription Route', () => {
     const data = await response.json();
     expect(response.status).toBe(500);
     expect(data.error).toBe('42');
+  });
+
+  it('upserts subscription to DB when appUser has organization_id', async () => {
+    // Need to override the admin client mock so maybeSingle returns an org
+    const mockUpsert = jest.fn().mockResolvedValue({ data: null, error: null });
+    const mockMaybeSingle = jest.fn().mockResolvedValue({ data: { organization_id: 42 } });
+    const { createAdminClient } = require('@/lib/supabase/admin');
+    createAdminClient.mockReturnValue({
+      from: jest.fn(() => ({
+        select: jest.fn().mockReturnThis(),
+        eq: jest.fn().mockReturnThis(),
+        maybeSingle: mockMaybeSingle,
+        upsert: mockUpsert,
+      })),
+    });
+
+    const request = {
+      json: () => Promise.resolve({ planId: 'advance' }),
+      headers: { get: () => null },
+    } as any;
+    const response = await POST(request);
+    const data = await response.json();
+    expect(response.status).toBe(200);
+    expect(data.initPoint).toBe('https://mp.com/checkout');
+    expect(mockUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({
+        organization_id: 42,
+        mp_preapproval_id: 'pa_123',
+        status: 'pending',
+      }),
+      { onConflict: 'mp_preapproval_id' }
+    );
   });
 
   it('appends ngrok hint when error mentions back_url', async () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useLayoutEffect, useRef, useState, useEffect, Component, type ErrorInfo, type ReactNode } from "react";
+import React, { useLayoutEffect, useRef, useReducer, useSyncExternalStore, Component, type ErrorInfo, type ReactNode } from "react";
 import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import dynamic from "next/dynamic";
@@ -11,7 +11,11 @@ const Smartphone3D = dynamic(() => import("./smartphone-3d"), {
   loading: () => null,
 });
 
-class Smartphone3DErrorBoundary extends Component<
+export function handleDerivedError() {
+  return { hasError: true };
+}
+
+export class Smartphone3DErrorBoundary extends Component<
   { children: ReactNode },
   { hasError: boolean }
 > {
@@ -19,9 +23,7 @@ class Smartphone3DErrorBoundary extends Component<
     super(props);
     this.state = { hasError: false };
   }
-  static getDerivedStateFromError() {
-    return { hasError: true };
-  }
+  static getDerivedStateFromError = handleDerivedError;
   componentDidCatch(error: Error, _info: ErrorInfo) {
     console.warn("Smartphone3D failed to load:", error.message);
   }
@@ -32,6 +34,13 @@ class Smartphone3DErrorBoundary extends Component<
 }
 
 gsap.registerPlugin(ScrollTrigger);
+
+export const mobileMediaSubscribe = (callback: () => void) => {
+  window.addEventListener('resize', callback);
+  return () => window.removeEventListener('resize', callback);
+};
+export const getMobileSnapshot = () => window.innerWidth < 800;
+export const getMobileServerSnapshot = () => false;
 
 const ParallaxSection: React.FC = () => {
   const t = useTranslations("Landing.parallax");
@@ -55,15 +64,23 @@ const ParallaxSection: React.FC = () => {
   const messageRef = useRef<HTMLDivElement>(null);
   const smartphoneRef = useRef<HTMLDivElement>(null);
   const iconRef = useRef<HTMLDivElement>(null);
-  const [currentMessageIndex, setCurrentMessageIndex] = useState(0);
-  const [rotateSmartphone, setRotateSmartphone] = useState(false);
+
+  type AnimState = { messageIndex: number; rotating: boolean };
+  type AnimAction = { type: 'START_ROTATION' } | { type: 'NEXT_MESSAGE'; total: number } | { type: 'END_ROTATION' };
+  const [anim, dispatch] = useReducer(
+    (state: AnimState, action: AnimAction): AnimState => {
+      switch (action.type) {
+        case 'START_ROTATION': return { ...state, rotating: true };
+        case 'NEXT_MESSAGE': return { ...state, messageIndex: (state.messageIndex + 1) % action.total };
+        case 'END_ROTATION': return { ...state, rotating: false };
+      }
+    },
+    { messageIndex: 0, rotating: false }
+  );
+
   const messageTimeline = useRef<gsap.core.Timeline | null>(null);
 
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    setIsMobile(window.innerWidth < 800);
-  }, []);
+  const isMobile = useSyncExternalStore(mobileMediaSubscribe, getMobileSnapshot, getMobileServerSnapshot);
 
   useLayoutEffect(() => {
     const section = sectionRef.current;
@@ -109,11 +126,9 @@ const ParallaxSection: React.FC = () => {
             opacity: 0,
             duration: 0.8,
             ease: "power2.in",
-            onStart: () => setRotateSmartphone(true),
+            onStart: () => dispatch({ type: 'START_ROTATION' }),
             onComplete: () => {
-              setCurrentMessageIndex(
-                (prevIndex) => (prevIndex + 1) % messages.length
-              );
+              dispatch({ type: 'NEXT_MESSAGE', total: messages.length });
             },
           })
           .fromTo(
@@ -124,7 +139,7 @@ const ParallaxSection: React.FC = () => {
               opacity: 1,
               duration: 0.8,
               ease: "power2.out",
-              onComplete: () => setRotateSmartphone(false),
+              onComplete: () => dispatch({ type: 'END_ROTATION' }),
             }
           );
       },
@@ -143,8 +158,8 @@ const ParallaxSection: React.FC = () => {
     return { restOfMessage, lastWord };
   };
 
-  const currentMessage = splitMessage(messages[currentMessageIndex].text);
-  const currentIcon = messages[currentMessageIndex].icon;
+  const currentMessage = splitMessage(messages[anim.messageIndex].text);
+  const currentIcon = messages[anim.messageIndex].icon;
 
   return (
     <div
@@ -169,8 +184,8 @@ const ParallaxSection: React.FC = () => {
       >
         <Smartphone3DErrorBoundary>
           <Smartphone3D
-            triggerRotation={rotateSmartphone}
-            onCompleteRotation={() => setRotateSmartphone(false)}
+            triggerRotation={anim.rotating}
+            onCompleteRotation={() => dispatch({ type: 'END_ROTATION' })}
           />
         </Smartphone3DErrorBoundary>
       </div>

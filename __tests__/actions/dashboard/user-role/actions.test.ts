@@ -25,13 +25,17 @@ import {
   getUserRoleById,
   updateUserRole,
   getUsersCountByRole,
+  createUserRole,
+  deleteUserRole,
 } from '@/actions/dashboard/user-role/actions';
 
 beforeEach(() => {
   jest.clearAllMocks();
   mockSupabase.from.mockReturnValue(mockSupabase);
   mockSupabase.select.mockReturnValue(mockSupabase);
+  mockSupabase.insert.mockReturnValue(mockSupabase);
   mockSupabase.update.mockReturnValue(mockSupabase);
+  mockSupabase.delete.mockReturnValue(mockSupabase);
   mockSupabase.eq.mockReturnValue(mockSupabase);
   mockSupabase.not.mockReturnValue(mockSupabase);
   mockSupabase.order.mockReturnValue(mockSupabase);
@@ -154,5 +158,49 @@ describe('getUsersCountByRole', () => {
       .mockReturnValueOnce({ count: 0, error: null });
     const result = await getUsersCountByRole();
     expect(result.success).toBe(true);
+  });
+});
+
+describe('createUserRole', () => {
+  const validInput = { name: 'editor', display_name: 'Editor' };
+
+  it('should create role successfully', async () => {
+    mockSupabase.single.mockReturnValue({ data: { id: 2, ...validInput }, error: null });
+    const result = await createUserRole(validInput);
+    expect(result).toEqual({ success: true, data: { id: 2, ...validInput } });
+    expect(revalidatePath).toHaveBeenCalledWith('/dashboard/user-role');
+  });
+
+  it('should return error on failure', async () => {
+    mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Duplicate' } });
+    const result = await createUserRole(validInput);
+    expect(result).toEqual({ success: false, error: 'Duplicate' });
+  });
+
+  it('should handle unexpected errors', async () => {
+    mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
+    const result = await createUserRole(validInput);
+    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+  });
+});
+
+describe('deleteUserRole', () => {
+  it('should delete role successfully', async () => {
+    mockSupabase.eq.mockReturnValue({ error: null });
+    const result = await deleteUserRole('1');
+    expect(result).toEqual({ success: true });
+    expect(revalidatePath).toHaveBeenCalledWith('/dashboard/user-role');
+  });
+
+  it('should return error on failure', async () => {
+    mockSupabase.eq.mockReturnValue({ error: { message: 'Delete failed' } });
+    const result = await deleteUserRole('1');
+    expect(result).toEqual({ success: false, error: 'Delete failed' });
+  });
+
+  it('should handle unexpected errors', async () => {
+    mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
+    const result = await deleteUserRole('1');
+    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
   });
 });

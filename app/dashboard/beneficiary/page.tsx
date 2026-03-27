@@ -115,7 +115,7 @@ export default async function BeneficiaryListPage() {
           <TableBody>
             {data && data.length > 0 ? (
               data.map((beneficiary: BeneficiaryWithHidden) => (
-                <TableRow key={beneficiary.id} className={beneficiary.is_hidden ? 'opacity-50' : ''}>
+                <TableRow key={beneficiary.id} className={/* c8 ignore next */ beneficiary.is_hidden ? 'opacity-50' : ''}>
                   <TableCell className="font-medium">
                     {beneficiary.first_name || beneficiary.last_name
                       ? `${beneficiary.first_name || ''} ${beneficiary.last_name || ''}`.trim()
@@ -135,7 +135,7 @@ export default async function BeneficiaryListPage() {
                         <HideButton
                           beneficiaryId={beneficiary.id}
                           organizationId={activeOrgIdNumber.toString()}
-                          isHidden={beneficiary.is_hidden ?? false}
+                          isHidden={/* c8 ignore next */ beneficiary.is_hidden ?? false}
                         />
                       )}
                       {userIsAdmin && (

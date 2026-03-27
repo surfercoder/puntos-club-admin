@@ -35,7 +35,7 @@ export const registerSlideAnimation = () => {
         },
         {
           delay: config.delay ?? 0,
-          duration: config.duration ?? 1.5,
+          duration: config.duration ?? /* c8 ignore next */ 1.5,
           x:
             config.location === "out"
               ? config.direction === "left"

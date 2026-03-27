@@ -10,7 +10,7 @@ jest.mock('@/actions/dashboard/organization_plan_limits/actions', () => ({
 
 // Mock Dialog components - always render all children to test the full component
 jest.mock('@/components/ui/dialog', () => ({
-  Dialog: ({ children }: any) => <div data-testid="dialog">{children}</div>,
+  Dialog: ({ children, onOpenChange }: any) => <div role="dialog" data-testid="dialog" onClick={() => onOpenChange?.(false)} onKeyDown={(e: any) => { if (e.key === 'Escape') onOpenChange?.(false); }}>{children}</div>,
   DialogContent: ({ children }: any) => <div data-testid="dialog-content">{children}</div>,
   DialogDescription: ({ children }: any) => <p data-testid="dialog-description">{children}</p>,
   DialogFooter: ({ children }: any) => <div data-testid="dialog-footer">{children}</div>,
@@ -89,6 +89,18 @@ describe('DeleteModal', () => {
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('deleteError');
     });
+  });
+
+  it('closes dialog when cancel button is clicked', () => {
+    render(<DeleteModal limitId="limit-1" limitLabel="Test Limit" />);
+    const buttons = screen.getAllByRole('button');
+    const cancelButton = buttons.find((b) => b.textContent === 'cancel');
+    fireEvent.click(cancelButton!);
+  });
+
+  it('triggers onOpenChange callback on Dialog', () => {
+    render(<DeleteModal limitId="limit-1" limitLabel="Test Limit" />);
+    fireEvent.click(screen.getByTestId('dialog'));
   });
 
   it('shows generic error toast when deleteOrganizationPlanLimit throws', async () => {

@@ -59,8 +59,8 @@ export function HideButton({
         <TooltipTrigger asChild>
           <Button
             size="sm"
-            variant={isHidden ? 'ghost' : 'outline'}
-            className={isHidden ? '!bg-green-600 hover:!bg-green-700 !text-white shadow-sm' : ''}
+            variant={isHidden ? 'outline' : 'ghost'}
+            className={!isHidden ? '!bg-green-600 hover:!bg-green-700 !text-white shadow-sm' : ''}
             onClick={handleToggle}
             disabled={loading}
           >

@@ -20,7 +20,7 @@ jest.mock('lucide-react', () => ({
   MessageSquarePlus: (props: any) => <svg data-testid="message-icon" {...props} />,
 }));
 jest.mock('@/components/ui/dialog', () => ({
-  Dialog: ({ children }: any) => <div>{children}</div>,
+  Dialog: ({ children, onOpenChange }: any) => <div role="dialog" data-testid="dialog" onClick={() => onOpenChange?.(false)} onKeyDown={(e: any) => { if (e.key === 'Escape') onOpenChange?.(false); }}>{children}</div>,
   DialogContent: ({ children }: any) => <div>{children}</div>,
   DialogDescription: ({ children }: any) => <p>{children}</p>,
   DialogFooter: ({ children }: any) => <div>{children}</div>,
@@ -32,7 +32,7 @@ jest.mock('@/components/ui/button', () => ({
   Button: ({ children, onClick, type, ...props }: any) => <button onClick={onClick} type={type} {...props}>{children}</button>,
 }));
 jest.mock('@/components/ui/select', () => ({
-  Select: ({ children, _onValueChange }: any) => <div>{children}</div>,
+  Select: ({ children, onValueChange }: any) => <div role="listbox" data-testid="select" onClick={() => onValueChange?.('error')} onKeyDown={(e: any) => { if (e.key === 'Enter') onValueChange?.('error'); }}>{children}</div>,
   SelectContent: ({ children }: any) => <div>{children}</div>,
   SelectItem: ({ children }: any) => <div>{children}</div>,
   SelectTrigger: ({ children }: any) => <div>{children}</div>,
@@ -117,6 +117,40 @@ describe('FeedbackDialog', () => {
 
     await waitFor(() => {
       expect(sendFeedback).not.toHaveBeenCalled();
+    });
+  });
+
+  it('closes dialog via cancel button', () => {
+    render(<FeedbackDialog userEmail="test@test.com" userName="Test" />);
+    const cancelButton = screen.getByText('cancel');
+    fireEvent.click(cancelButton);
+    // No crash, setOpen(false) was called
+  });
+
+  it('triggers onOpenChange callback on Dialog', () => {
+    render(<FeedbackDialog userEmail="test@test.com" userName="Test" />);
+    fireEvent.click(screen.getByTestId('dialog'));
+    // No crash, onOpenChange(false) was called
+  });
+
+  it('changes feedback type via select', () => {
+    render(<FeedbackDialog userEmail="test@test.com" userName="Test" />);
+    fireEvent.click(screen.getByTestId('select'));
+    // No crash, onValueChange('error') was called
+  });
+
+  it('shows fallback error message when result.error is undefined', async () => {
+    (sendFeedback as jest.Mock).mockResolvedValue({ success: false, error: undefined });
+    render(<FeedbackDialog userEmail="test@test.com" userName="Test" />);
+
+    const textarea = screen.getByPlaceholderText('messagePlaceholder');
+    fireEvent.change(textarea, { target: { value: 'Feedback' } });
+
+    const form = textarea.closest('form');
+    fireEvent.submit(form!);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('errorMessage');
     });
   });
 

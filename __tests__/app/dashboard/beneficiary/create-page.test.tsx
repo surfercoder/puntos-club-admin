@@ -20,4 +20,12 @@ jest.mock('@/components/ui/card', () => ({
 describe('CreateBeneficiaryPage', () => {
   it('exports a default async function', () => { expect(typeof CreateBeneficiaryPage).toBe('function'); });
   it('renders without crashing', async () => { const result = await CreateBeneficiaryPage(); expect(result).toBeTruthy(); });
+
+  it('redirects to /dashboard/beneficiary when user is not admin', async () => {
+    const { isAdmin } = require('@/lib/auth/roles');
+    const { redirect } = require('next/navigation');
+    (isAdmin as jest.Mock).mockReturnValueOnce(false);
+    await CreateBeneficiaryPage();
+    expect(redirect).toHaveBeenCalledWith('/dashboard/beneficiary');
+  });
 });

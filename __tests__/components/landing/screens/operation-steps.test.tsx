@@ -163,4 +163,58 @@ describe("OperationSteps", () => {
     const spans = container.querySelectorAll("h3 span");
     expect(spans.length).toBeGreaterThan(0);
   });
+
+  it("calls handleMouseEnter on bubble mouseEnter", () => {
+    const { handleMouseEnter } = require("@/components/landing/animations/bubble");
+    const { fireEvent } = require("@testing-library/react");
+    const { container } = render(<OperationSteps />);
+    const bubbleDivs = container.querySelectorAll(".bubble");
+    // There should be bubble elements rendered
+    expect(bubbleDivs.length).toBeGreaterThan(0);
+    fireEvent.mouseEnter(bubbleDivs[0]);
+    expect(handleMouseEnter).toHaveBeenCalled();
+  });
+
+  it("calls handleMouseLeave on bubble mouseLeave", () => {
+    const { handleMouseLeave } = require("@/components/landing/animations/bubble");
+    const { fireEvent } = require("@testing-library/react");
+    const { container } = render(<OperationSteps />);
+    const bubbleDivs = container.querySelectorAll(".bubble");
+    fireEvent.mouseLeave(bubbleDivs[0]);
+    expect(handleMouseLeave).toHaveBeenCalled();
+  });
+
+  it("calls handleBubbleClick on bubble click", () => {
+    const { handleBubbleClick } = require("@/components/landing/animations/bubble");
+    const { fireEvent } = require("@testing-library/react");
+    const { container } = render(<OperationSteps />);
+    const bubbleDivs = container.querySelectorAll(".bubble");
+    fireEvent.click(bubbleDivs[0]);
+    expect(handleBubbleClick).toHaveBeenCalled();
+  });
+
+  it("renders with small screen size (isSmall=true)", () => {
+    const useMediaQuery = require("@/components/landing/hooks/use-media-query").default;
+    useMediaQuery.mockReturnValue(true);
+
+    const { getByTestId } = render(<OperationSteps />);
+    // Gift should still render
+    expect(getByTestId("gift-svg")).toBeInTheDocument();
+    // Gift should have smaller size on small screens (width: 280)
+    const gift = getByTestId("gift-svg");
+    expect(gift).toHaveStyle({ width: "280px", height: "280px" });
+
+    useMediaQuery.mockReturnValue(false);
+  });
+
+  it("renders with dark theme", () => {
+    const { useTheme } = require("next-themes");
+    useTheme.mockReturnValue({ resolvedTheme: "dark" });
+
+    const { container } = render(<OperationSteps />);
+    // Should render without crashing and use dark theme colors
+    expect(container).toBeTruthy();
+
+    useTheme.mockReturnValue({ resolvedTheme: "light" });
+  });
 });

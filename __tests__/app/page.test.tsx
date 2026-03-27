@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import Home from '@/app/page';
+import Home, { generateMetadata } from '@/app/page';
 
 jest.mock('next-intl/server', () => ({
   getTranslations: jest.fn(() => {
@@ -37,5 +37,11 @@ describe('Home page', () => {
     render(<Home />);
     expect(screen.getByTestId('public-header')).toBeInTheDocument();
     expect(screen.getByTestId('landing-app')).toBeInTheDocument();
+  });
+
+  it('generateMetadata returns correct metadata', async () => {
+    const metadata = await generateMetadata();
+    expect(metadata).toBeDefined();
+    expect(metadata.title).toBeDefined();
   });
 });

@@ -1,8 +1,9 @@
-import RootLayout from '@/app/layout';
+import RootLayout, { generateMetadata } from '@/app/layout';
 
 jest.mock('next-intl/server', () => ({
   getLocale: jest.fn(() => Promise.resolve('es')),
   getMessages: jest.fn(() => Promise.resolve({})),
+  getTranslations: jest.fn(() => Promise.resolve((key: string) => key)),
 }));
 
 
@@ -40,6 +41,12 @@ describe('RootLayout', () => {
   it('renders children', async () => {
     const result = await RootLayout({ children: <div>Test</div> });
     expect(result).toBeTruthy();
+  });
+
+  it('generateMetadata returns correct metadata', async () => {
+    const metadata = await generateMetadata();
+    expect(metadata).toBeDefined();
+    expect(metadata.title).toBeDefined();
   });
 
   it('uses VERCEL_URL when available', async () => {

@@ -1,7 +1,7 @@
 "use server";
 
 import { createClient } from '@/lib/supabase/server';
-import { OrganizationSchema } from '@/schemas/organization.schema';
+import { OrganizationSchema, OrganizationVisibilitySchema } from '@/schemas/organization.schema';
 import type { Organization } from '@/types/organization';
 import { isAdmin } from '@/lib/auth/roles';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
@@ -113,6 +113,59 @@ export async function getOrganization(id: string) {
   const { data, error } = await supabase.from('organization').select('*').eq('id', id).single();
 
   return { data, error };
+}
+
+export async function getOrganizationSettings(id: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('organization')
+    .select('id, name, is_public')
+    .eq('id', id)
+    .single();
+
+  return { data, error };
+}
+
+export async function updateOrganizationVisibility(id: string, isPublic: boolean) {
+  const parsed = OrganizationVisibilitySchema.safeParse({ is_public: isPublic });
+
+  if (!parsed.success) {
+    return { error: 'Invalid input' };
+  }
+
+  const currentUser = await getCurrentUser();
+  if (!currentUser) {
+    return { error: 'Not authenticated' };
+  }
+
+  const supabase = await createClient();
+
+  if (!isAdmin(currentUser)) {
+    const { data: membership } = await supabase
+      .from('app_user_organization')
+      .select('id')
+      .eq('app_user_id', currentUser.id)
+      .eq('organization_id', id)
+      .eq('is_active', true)
+      .single();
+
+    if (!membership) {
+      return { error: 'Forbidden' };
+    }
+  }
+
+  const { data, error } = await supabase
+    .from('organization')
+    .update({ is_public: parsed.data.is_public })
+    .eq('id', id)
+    .select('id, name, is_public')
+    .single();
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  return { data, error: null };
 }
 
 export async function getOrganizationProducts(organizationId: string) {

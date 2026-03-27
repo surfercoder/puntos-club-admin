@@ -1,6 +1,6 @@
 import React from "react";
 import { render, act } from "@testing-library/react";
-import ParallaxSection from "@/components/landing/screens/parallax-section";
+import ParallaxSection, { Smartphone3DErrorBoundary, handleDerivedError, mobileMediaSubscribe, getMobileSnapshot, getMobileServerSnapshot } from "@/components/landing/screens/parallax-section";
 
 /* ── mock gsap with callback capture ── */
 const mockTimelineTo = jest.fn().mockReturnThis();
@@ -85,15 +85,23 @@ jest.mock("next-intl", () => ({
   useTranslations: jest.fn(() => (key: string) => key),
 }));
 
-jest.mock("next/dynamic", () => () => {
-  return function MockSmartphone3D() {
-    return <div data-testid="smartphone-3d" />;
+let shouldThrowIn3D = false;
+
+jest.mock("next/dynamic", () => (loader: any, opts: any) => {
+  // Exercise the loading function if provided
+  if (opts?.loading) opts.loading();
+  return function MockSmartphone3D(props: any) {
+    if (shouldThrowIn3D) {
+      throw new Error("3D load failed");
+    }
+    return <button data-testid="smartphone-3d" onClick={() => props.onCompleteRotation?.()} />;
   };
 });
 
 describe("ParallaxSection", () => {
   beforeEach(() => {
     capturedScrollTriggerOnEnter = null;
+    shouldThrowIn3D = false;
     jest.clearAllMocks();
     Object.defineProperty(window, "innerWidth", {
       writable: true,
@@ -240,5 +248,91 @@ describe("ParallaxSection", () => {
         }),
       })
     );
+  });
+
+  it("renders the Smartphone3DErrorBoundary fallback for children", () => {
+    const { container } = render(<ParallaxSection />);
+    // The mock Smartphone3D should render inside the section
+    expect(container.querySelector("[data-testid='smartphone-3d']")).toBeInTheDocument();
+  });
+
+  it("renders the gradient overlay div", () => {
+    const { container } = render(<ParallaxSection />);
+    // Check for the gradient div with specific class
+    const gradientDiv = container.querySelector("div[style*='linear-gradient']");
+    expect(gradientDiv).toBeInTheDocument();
+  });
+
+  it("splitMessage splits last word correctly", () => {
+    const { container } = render(<ParallaxSection />);
+    const whiteSpan = container.querySelector(".text-white");
+    expect(whiteSpan).toBeInTheDocument();
+    expect(whiteSpan?.textContent).toBeTruthy();
+  });
+
+  it("Smartphone3DErrorBoundary catches errors and renders null", () => {
+    const originalConsoleWarn = console.warn;
+    const originalConsoleError = console.error;
+    console.warn = jest.fn();
+    console.error = jest.fn(); // Suppress React error boundary console.error
+
+    shouldThrowIn3D = true;
+
+    const { container } = render(<ParallaxSection />);
+
+    // The error boundary should catch and render null for the 3D component
+    expect(container.querySelector("[data-testid='smartphone-3d']")).toBeNull();
+    expect(console.warn).toHaveBeenCalledWith(
+      "Smartphone3D failed to load:",
+      "3D load failed"
+    );
+
+    console.warn = originalConsoleWarn;
+    console.error = originalConsoleError;
+  });
+
+  it("getDerivedStateFromError returns hasError true", () => {
+    const result = Smartphone3DErrorBoundary.getDerivedStateFromError();
+    expect(result).toEqual({ hasError: true });
+  });
+
+  it("handleDerivedError returns hasError true", () => {
+    expect(handleDerivedError()).toEqual({ hasError: true });
+  });
+
+  it("onCompleteRotation callback sets rotateSmartphone to false", () => {
+    const { getByTestId } = render(<ParallaxSection />);
+    const smartphone = getByTestId("smartphone-3d");
+    act(() => {
+      smartphone.click();
+    });
+    // The callback was invoked (no error thrown)
+    expect(smartphone).toBeInTheDocument();
+  });
+
+  it("mobileMediaSubscribe adds and removes resize listener", () => {
+    const addSpy = jest.spyOn(window, "addEventListener");
+    const removeSpy = jest.spyOn(window, "removeEventListener");
+    const cb = jest.fn();
+
+    const unsub = mobileMediaSubscribe(cb);
+    expect(addSpy).toHaveBeenCalledWith("resize", cb);
+
+    unsub();
+    expect(removeSpy).toHaveBeenCalledWith("resize", cb);
+
+    addSpy.mockRestore();
+    removeSpy.mockRestore();
+  });
+
+  it("getMobileSnapshot returns true when width < 800", () => {
+    Object.defineProperty(window, "innerWidth", { writable: true, configurable: true, value: 600 });
+    expect(getMobileSnapshot()).toBe(true);
+    Object.defineProperty(window, "innerWidth", { writable: true, configurable: true, value: 1024 });
+    expect(getMobileSnapshot()).toBe(false);
+  });
+
+  it("getMobileServerSnapshot returns false", () => {
+    expect(getMobileServerSnapshot()).toBe(false);
   });
 });

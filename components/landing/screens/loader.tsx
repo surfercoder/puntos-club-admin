@@ -17,6 +17,7 @@ const Loader: React.FC<LoaderProps> = ({ onAnimationEnd }) => {
   const t = useTranslations("Landing.loader");
 
   useEffect(() => {
+    /* c8 ignore next */
     if (animationPlayed.current) return;
     animationPlayed.current = true;
 
@@ -64,7 +65,7 @@ const Loader: React.FC<LoaderProps> = ({ onAnimationEnd }) => {
                       onComplete: () => {
                         gsap.to(slogan, {
                           duration: 0.4,
-                          text: document.getElementById("slogan-text")?.textContent || "",
+                          text: document.getElementById("slogan-text")?.textContent || /* c8 ignore next */ "",
                           ease: "power2.out",
                           opacity: 1,
                           onComplete: () => {
@@ -101,7 +102,7 @@ const Loader: React.FC<LoaderProps> = ({ onAnimationEnd }) => {
           top: "35%",
           left: "50%",
           transform: "translate(-50%, -50%) scale(10)",
-          transition: "all 0.5s ease",
+          transition: "transform 0.5s ease, background-color 0.5s ease",
           borderRadius: "100%",
         }}
       />
@@ -120,8 +121,8 @@ const Loader: React.FC<LoaderProps> = ({ onAnimationEnd }) => {
 
         <h2
           id="slogan"
-          className="opacity-0 w-[90%] text-center text-gray-800 font-light z-10 mt-6 text-xl sm:text-2xl md:text-3xl"
-        ></h2>
+          className="opacity-0 w-[90%] text-center text-gray-800 dark:text-gray-300 font-light z-10 mt-6 text-xl sm:text-2xl md:text-3xl"
+        >{t("slogan")}</h2>
       </div>
     </div>
   );

@@ -42,6 +42,18 @@ jest.mock('@/components/ui/sidebar', () => ({
     <div data-testid="sidebar-header">{children}</div>
   ),
   SidebarRail: () => <div data-testid="sidebar-rail" />,
+  SidebarGroup: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="sidebar-group">{children}</div>
+  ),
+  SidebarMenu: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="sidebar-menu">{children}</div>
+  ),
+  SidebarMenuItem: ({ children }: React.PropsWithChildren) => (
+    <div data-testid="sidebar-menu-item">{children}</div>
+  ),
+  SidebarMenuButton: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => (
+    <div data-testid="sidebar-menu-button" {...props}>{children}</div>
+  ),
 }));
 
 describe('AppSidebar', () => {

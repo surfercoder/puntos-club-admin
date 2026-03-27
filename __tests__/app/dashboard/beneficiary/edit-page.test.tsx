@@ -35,6 +35,14 @@ describe('EditBeneficiaryPage', () => {
     expect(notFound).toHaveBeenCalled();
   });
 
+  it('redirects to /dashboard/beneficiary when user is not admin', async () => {
+    const { isAdmin } = require('@/lib/auth/roles');
+    const { redirect } = require('next/navigation');
+    (isAdmin as jest.Mock).mockReturnValueOnce(false);
+    await EditBeneficiaryPage({ params: Promise.resolve({ id: '1' }) });
+    expect(redirect).toHaveBeenCalledWith('/dashboard/beneficiary');
+  });
+
   it('renders error when fetch fails', async () => {
     const { createClient } = require('@/lib/supabase/server');
     createClient.mockResolvedValueOnce({
