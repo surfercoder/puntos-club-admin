@@ -1,9 +1,15 @@
+import type { Metadata } from 'next';
 import { redirect } from 'next/navigation';
 
 import { OnboardingWizard } from '@/components/onboarding/onboarding-wizard';
 import { getOnboardingStatus } from '@/actions/onboarding/actions';
 import { createClient } from '@/lib/supabase/server';
 import type { Step1CompletedData } from '@/components/onboarding/onboarding-wizard';
+
+export const metadata: Metadata = {
+  title: 'Onboarding',
+  description: 'Complete your organization onboarding.',
+};
 
 interface PageProps {
   searchParams: Promise<{ step?: string }>;

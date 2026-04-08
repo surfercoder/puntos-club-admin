@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { Check, Star, Zap, Rocket, Loader2, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
-import { useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
@@ -136,7 +135,6 @@ export function PlanSelectorInner() {
   const [loading, setLoading] = useState(false);
   const [verifying, setVerifying] = useState(false);
   const [planLimits, setPlanLimits] = useState<Record<PlanType, Record<PlanFeatureKey, number>> | null>(null);
-  const searchParams = useSearchParams();
   const verifiedRef = useRef(false);
 
   useEffect(() => {
@@ -147,7 +145,7 @@ export function PlanSelectorInner() {
 
   // Verify subscription status when returning from MercadoPago
   useEffect(() => {
-    const preapprovalId = searchParams.get('preapproval_id');
+    const preapprovalId = new URL(window.location.href).searchParams.get('preapproval_id');
     if (!preapprovalId || verifiedRef.current) return;
     verifiedRef.current = true;
     setVerifying(true);
@@ -172,7 +170,7 @@ export function PlanSelectorInner() {
     };
 
     verify();
-  }, [searchParams, invalidate, tSettings]);
+  }, [invalidate, tSettings]);
 
   // Sync selected with current plan when data loads
   if (selected === null && currentPlan !== null) {

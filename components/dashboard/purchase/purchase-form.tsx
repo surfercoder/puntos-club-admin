@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState, useEffect, useReducer } from 'react';
 
 import { purchaseFormAction } from '@/actions/dashboard/purchase/purchase-form-actions';
 import { Button } from '@/components/ui/button';
@@ -20,12 +20,39 @@ interface PurchaseFormProps {
   purchase?: Purchase;
 }
 
+type Person = { id: string; first_name: string; last_name: string };
+type NamedEntity = { id: string; name: string };
+
+type FormDataState = {
+  beneficiaries: Person[];
+  cashiers: Person[];
+  branches: NamedEntity[];
+  organizations: NamedEntity[];
+};
+
+const initialFormData: FormDataState = {
+  beneficiaries: [],
+  cashiers: [],
+  branches: [],
+  organizations: [],
+};
+
+function formDataReducer(
+  state: FormDataState,
+  action: { type: 'set'; payload: Partial<FormDataState> },
+): FormDataState {
+  /* c8 ignore start */
+  if (action.type !== 'set') {
+    return state;
+  }
+  /* c8 ignore stop */
+  return { ...state, ...action.payload };
+}
+
 export default function PurchaseForm({ purchase }: PurchaseFormProps) {
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [beneficiaries, setBeneficiaries] = useState<Array<{ id: string; first_name: string; last_name: string }>>([]);
-  const [cashiers, setCashiers] = useState<Array<{ id: string; first_name: string; last_name: string }>>([]);
-  const [branches, setBranches] = useState<Array<{ id: string; name: string }>>([]);
-  const [organizations, setOrganizations] = useState<Array<{ id: string; name: string }>>([]);
+  const [formState, dispatch] = useReducer(formDataReducer, initialFormData);
+  const { beneficiaries, cashiers, branches, organizations } = formState;
 
   useEffect(() => {
     async function loadData() {
@@ -36,10 +63,15 @@ export default function PurchaseForm({ purchase }: PurchaseFormProps) {
         supabase.from('branch').select('id, name').order('name'),
         supabase.from('organization').select('id, name').order('name'),
       ]);
-      if (bRes.data) setBeneficiaries(bRes.data);
-      if (cRes.data) setCashiers(cRes.data);
-      if (brRes.data) setBranches(brRes.data);
-      if (oRes.data) setOrganizations(oRes.data);
+      dispatch({
+        type: 'set',
+        payload: {
+          beneficiaries: bRes.data ?? [],
+          cashiers: cRes.data ?? [],
+          branches: brRes.data ?? [],
+          organizations: oRes.data ?? [],
+        },
+      });
     }
     loadData();
   }, []);

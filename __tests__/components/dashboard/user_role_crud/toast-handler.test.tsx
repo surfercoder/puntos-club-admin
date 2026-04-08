@@ -1,58 +1,60 @@
 import { render } from '@testing-library/react';
 import ToastHandler from '@/components/dashboard/user_role_crud/toast-handler';
-import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 describe('ToastHandler', () => {
-  const mockReplace = jest.fn();
+  let replaceStateSpy: jest.SpyInstance;
+
+  const setSearch = (search: string) => {
+    window.history.replaceState(null, '', `/dashboard/user_role${search}`);
+  };
 
   beforeEach(() => {
-    (useRouter as jest.Mock).mockReturnValue({
-      push: jest.fn(),
-      replace: mockReplace,
-      prefetch: jest.fn(),
-      back: jest.fn(),
-      forward: jest.fn(),
-      refresh: jest.fn(),
-    });
+    setSearch('');
+    replaceStateSpy = jest.spyOn(window.history, 'replaceState');
+  });
+
+  afterEach(() => {
+    replaceStateSpy.mockRestore();
   });
 
   it('renders nothing (returns null)', () => {
-    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
     const { container } = render(<ToastHandler />);
     expect(container.innerHTML).toBe('');
   });
 
   it('shows toast.success when success param is present', () => {
-    const params = new URLSearchParams('success=Role+created');
-    (useSearchParams as jest.Mock).mockReturnValue(params);
+    setSearch('?success=Role+created');
+    replaceStateSpy.mockClear();
 
     render(<ToastHandler />);
 
     expect(toast.success).toHaveBeenCalledWith('Role created');
   });
 
-  it('calls router.replace after showing toast', () => {
-    const params = new URLSearchParams('success=Role+created');
-    (useSearchParams as jest.Mock).mockReturnValue(params);
+  it('calls window.history.replaceState after showing toast', () => {
+    setSearch('?success=Role+created');
+    replaceStateSpy.mockClear();
 
     render(<ToastHandler />);
 
-    expect(mockReplace).toHaveBeenCalled();
+    expect(replaceStateSpy).toHaveBeenCalled();
+    const lastCall = replaceStateSpy.mock.calls[replaceStateSpy.mock.calls.length - 1];
+    expect(lastCall[2]).not.toContain('success=');
   });
 
   it('does not show toast when success param is absent', () => {
-    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
+    setSearch('');
+    replaceStateSpy.mockClear();
 
     render(<ToastHandler />);
 
     expect(toast.success).not.toHaveBeenCalled();
-    expect(mockReplace).not.toHaveBeenCalled();
+    expect(replaceStateSpy).not.toHaveBeenCalled();
   });
 
-  it('does not show the same toast message twice', () => {
-    const params = new URLSearchParams('success=Role+created');
-    (useSearchParams as jest.Mock).mockReturnValue(params);
+  it('does not show the same toast message twice on rerender', () => {
+    setSearch('?success=Role+created');
 
     const { rerender } = render(<ToastHandler />);
     expect(toast.success).toHaveBeenCalledTimes(1);
@@ -61,21 +63,23 @@ describe('ToastHandler', () => {
     expect(toast.success).toHaveBeenCalledTimes(1);
   });
 
-  it('resets ref and allows new toast when success param is removed then re-added', () => {
-    const params = new URLSearchParams('success=Role+created');
-    (useSearchParams as jest.Mock).mockReturnValue(params);
-
-    const { rerender } = render(<ToastHandler />);
+  it('shows a new toast when remounted with a different success param', () => {
+    setSearch('?success=Role+created');
+    const { unmount } = render(<ToastHandler />);
     expect(toast.success).toHaveBeenCalledTimes(1);
+    unmount();
 
-    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
-    rerender(<ToastHandler />);
-
-    const newParams = new URLSearchParams('success=Another+message');
-    (useSearchParams as jest.Mock).mockReturnValue(newParams);
-    rerender(<ToastHandler />);
+    setSearch('?success=Another+message');
+    render(<ToastHandler />);
 
     expect(toast.success).toHaveBeenCalledTimes(2);
     expect(toast.success).toHaveBeenCalledWith('Another message');
+  });
+
+  it('resets ref when success param is absent (no success branch)', () => {
+    setSearch('');
+    const { container } = render(<ToastHandler />);
+    expect(container.innerHTML).toBe('');
+    expect(toast.success).not.toHaveBeenCalled();
   });
 });

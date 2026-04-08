@@ -1,0 +1,17 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignore": [
+    "__tests__/**",
+    "**/*.test.{ts,tsx,js,jsx}",
+    "e2e/**",
+    "scripts/**",
+    "playwright-report/**",
+    "test-results/**",
+    "coverage/**",
+    "types/**",
+    "schemas/**",
+    "components/ui/**"
+  ],
+  "ignoreExportsUsedInFile": true,
+  "ignoreDependencies": []
+}

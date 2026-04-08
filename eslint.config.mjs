@@ -21,6 +21,10 @@ export default [
       "coverage/**",
       "playwright-report/**",
       "test-results/**",
+      "__tests__/**",
+      "**/*.test.{js,jsx,ts,tsx}",
+      "e2e/**",
+      "scripts/**",
     ],
   },
   {

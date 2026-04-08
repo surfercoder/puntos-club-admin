@@ -7,42 +7,40 @@ import NotificationForm from '@/components/dashboard/notifications/notification-
 import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
 
-export default async function EditNotificationPage({ params }: { params: Promise<{ id: string }> }) {
+async function loadData(id: string) {
   const supabase = await createClient();
-  const t = await getTranslations('Dashboard.notifications');
-  const tCommon = await getTranslations('Common');
-
-  const id = (await params).id;
-
   const {
     data: { user },
   } = await supabase.auth.getUser();
-
   const { data: appUser } = await supabase
     .from('app_user')
     .select('organization_id')
     .eq('auth_user_id', user?.id)
     .single();
+  const [{ data: notification, error }, { data: limits }, { data: canSend }] = await Promise.all([
+    supabase.from('push_notifications').select('*').eq('id', id).single(),
+    supabase
+      .from('organization_notification_limits')
+      .select('*')
+      .eq('organization_id', appUser?.organization_id)
+      .single(),
+    supabase.rpc('can_send_notification', { org_id: appUser?.organization_id }),
+  ]);
+  return { notification, error, limits, canSend };
+}
 
-  const { data: notification, error } = await supabase
-    .from('push_notifications')
-    .select('*')
-    .eq('id', id)
-    .single();
+export default async function EditNotificationPage({ params }: { params: Promise<{ id: string }> }) {
+  const [t, tCommon, { id }] = await Promise.all([
+    getTranslations('Dashboard.notifications'),
+    getTranslations('Common'),
+    params,
+  ]);
+
+  const { notification, error, limits, canSend } = await loadData(id);
 
   if (error || !notification) {
     notFound();
   }
-
-  const { data: limits } = await supabase
-    .from('organization_notification_limits')
-    .select('*')
-    .eq('organization_id', appUser?.organization_id)
-    .single();
-
-  const { data: canSend } = await supabase.rpc('can_send_notification', {
-    org_id: appUser?.organization_id,
-  });
 
   return (
     <div className="space-y-6">

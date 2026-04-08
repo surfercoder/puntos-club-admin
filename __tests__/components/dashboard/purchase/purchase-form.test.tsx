@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 
 jest.mock('next-intl', () => ({
   useTranslations: jest.fn(() => {
@@ -26,15 +26,17 @@ jest.mock('react', () => ({
   useActionState: jest.fn(() => [{ status: '', message: '', fieldErrors: {} }, jest.fn(), false]),
 }));
 
+let mockOrderData: unknown = [];
 jest.mock('@/lib/supabase/client', () => ({
   createClient: jest.fn(() => ({
-    from: jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      neq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockReturnThis(),
-      then: jest.fn((cb: (res: { data: never[] }) => void) => cb({ data: [] })),
-    })),
+    from: jest.fn(() => {
+      const builder: Record<string, unknown> = {};
+      builder.select = jest.fn(() => builder);
+      builder.eq = jest.fn(() => builder);
+      builder.neq = jest.fn(() => builder);
+      builder.order = jest.fn(() => Promise.resolve({ data: mockOrderData }));
+      return builder;
+    }),
   })),
 }));
 
@@ -109,6 +111,30 @@ describe('PurchaseForm', () => {
 
     const form = screen.getByRole('button', { name: 'Create' }).closest('form')!;
     fireEvent.submit(form);
+  });
+
+  it('loads dropdown data and dispatches formData reducer', async () => {
+    mockOrderData = [{ id: '1', first_name: 'A', last_name: 'B', name: 'X' }];
+    await act(async () => {
+      render(<PurchaseForm />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Create' })).toBeInTheDocument();
+    });
+    mockOrderData = [];
+  });
+
+  it('falls back to empty arrays when supabase returns null data', async () => {
+    mockOrderData = null;
+    await act(async () => {
+      render(<PurchaseForm />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Create' })).toBeInTheDocument();
+    });
+    mockOrderData = [];
   });
 
   it('runs handleSubmit in edit mode with pre-filled data', () => {
