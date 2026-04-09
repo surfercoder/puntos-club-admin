@@ -5,10 +5,12 @@ import { LandingApp } from "@/components/landing/landing-app";
 
 /* ── shared mocks ── */
 jest.mock("gsap", () => {
+  const scrollTriggerInstance = { kill: jest.fn() };
   const toMock = jest.fn((_target: unknown, config: Record<string, unknown>) => {
     if (typeof config?.onComplete === "function") {
       (config.onComplete as () => void)();
     }
+    return { scrollTrigger: scrollTriggerInstance };
   });
 
   const makeGsapObj = () => ({

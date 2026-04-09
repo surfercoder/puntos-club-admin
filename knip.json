@@ -1,5 +1,5 @@
 {
-  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": [
     "app/**/{page,layout,template,loading,error,not-found,route}.{ts,tsx}",
     "app/**/{default,global-error,forbidden,unauthorized}.{ts,tsx}",

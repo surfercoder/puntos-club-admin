@@ -1,5 +1,4 @@
 "use client";
-/* eslint_disable react/no-unknown-property */
 
 import React, {
   Suspense,
@@ -107,26 +106,19 @@ function Model({ url, rotateAndChangeTexture, onCompleteRotation }: ModelProps) 
   return (
     <>
       <primitive
-        // react-doctor-disable-next-line react/no-unknown-property
         object={scene}
-        // react-doctor-disable-next-line react/no-unknown-property
         scale={[scaleValue, scaleValue, scaleValue]}
       />
       <mesh
-        // react-doctor-disable-next-line react/no-unknown-property
         rotation={[-Math.PI / 2, 0, 0]}
-        // react-doctor-disable-next-line react/no-unknown-property
         position={[0, shadowPosition, 0]}
       >
-        {/* recharts/r3f primitive props are not DOM attrs */}
+        {/* react-three-fiber/r3f primitive props are not DOM attrs */}
         <circleGeometry
-          // react-doctor-disable-next-line react/no-unknown-property
           args={[shadowSize, 32]}
         />
         <meshBasicMaterial
-          // react-doctor-disable-next-line react/no-unknown-property
           transparent
-          // react-doctor-disable-next-line react/no-unknown-property
           opacity={0.2}
           color="black"
         />
@@ -147,13 +139,10 @@ const Smartphone3D: React.FC<Smartphone3DProps> = ({
   return (
     <Canvas camera={{ position: [0, 0, 8] }} shadows>
       <ambientLight
-        // react-doctor-disable-next-line react/no-unknown-property
         intensity={1}
       />
       <directionalLight
-        // react-doctor-disable-next-line react/no-unknown-property
         position={[5, 5, 5]}
-        // react-doctor-disable-next-line react/no-unknown-property
         intensity={1.5}
       />
       <Suspense fallback={null}>

@@ -35,16 +35,18 @@ export default async function EditNotificationPage({ params }: { params: Promise
     .eq('auth_user_id', user?.id)
     .single();
 
-  const [{ data: limits }, { data: canSend }] = await Promise.all([
-    supabase
-      .from('organization_notification_limits')
-      .select('*')
-      .eq('organization_id', appUser?.organization_id)
-      .single(),
-    supabase.rpc('can_send_notification', {
-      org_id: appUser?.organization_id,
-    }),
-  ]);
+  const [{ data: limits }, { data: canSend }] = appUser?.organization_id
+    ? await Promise.all([
+        supabase
+          .from('organization_notification_limits')
+          .select('*')
+          .eq('organization_id', appUser.organization_id)
+          .single(),
+        supabase.rpc('can_send_notification', {
+          org_id: appUser.organization_id,
+        }),
+      ])
+    : [{ data: null }, { data: null }];
 
   return (
     <div className="space-y-6">

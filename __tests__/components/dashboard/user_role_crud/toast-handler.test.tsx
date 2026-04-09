@@ -18,13 +18,13 @@ describe('ToastHandler', () => {
   });
 
   it('shows toast.success when success param is present', () => {
-    setSearch('?success=Category+created');
+    setSearch('?success=Role+created');
     render(<ToastHandler />);
-    expect(toast.success).toHaveBeenCalledWith('Category created');
+    expect(toast.success).toHaveBeenCalledWith('Role created');
   });
 
   it('cleans the success param from the URL after showing toast', () => {
-    setSearch('?success=Category+created');
+    setSearch('?success=Role+created');
     render(<ToastHandler />);
     expect(window.location.search).not.toContain('success');
   });
@@ -36,10 +36,10 @@ describe('ToastHandler', () => {
   });
 
   it('does not show the same toast message twice on re-render', () => {
-    setSearch('?success=Category+created');
+    setSearch('?success=Role+created');
     const { rerender } = render(<ToastHandler />);
     expect(toast.success).toHaveBeenCalledTimes(1);
-    setSearch('?success=Category+created');
+    setSearch('?success=Role+created');
     rerender(<ToastHandler />);
     expect(toast.success).toHaveBeenCalledTimes(1);
   });

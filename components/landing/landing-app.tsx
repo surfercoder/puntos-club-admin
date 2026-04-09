@@ -26,6 +26,7 @@ export function LandingApp() {
 
   const [animationComplete, setAnimationComplete] = useState<boolean>(false);
   const loaderRef = useRef<HTMLDivElement | null>(null);
+  const triggersRef = useRef<ScrollTrigger[]>([]);
 
   registerSlideAnimation();
 
@@ -36,7 +37,7 @@ export function LandingApp() {
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         if (weDoRef.current) {
-          ScrollTrigger.create({
+          const weDotrigger = ScrollTrigger.create({
             trigger: weDoRef.current,
             start: "bottom bottom",
             end: "bottom 10%",
@@ -47,9 +48,10 @@ export function LandingApp() {
               });
             },
           });
+          triggersRef.current.push(weDotrigger);
         }
         if (operationStepsRef.current) {
-          gsap.to(operationStepsRef.current, {
+          const opsTween = gsap.to(operationStepsRef.current, {
             scrollTrigger: {
               trigger: operationStepsRef.current,
               start: "top 80%",
@@ -59,6 +61,7 @@ export function LandingApp() {
             opacity: 0,
             duration: 2,
           });
+          if (opsTween.scrollTrigger) triggersRef.current.push(opsTween.scrollTrigger);
         }
         if (lineRef.current && contactFormRef.current) {
           const scrollTriggerConfig = {
@@ -68,13 +71,14 @@ export function LandingApp() {
             toggleActions: "none play none reverse" as const,
           };
 
-          gsap.to(lineRef.current, {
+          const lineTween = gsap.to(lineRef.current, {
             scrollTrigger: scrollTriggerConfig,
             x: "100%",
             duration: 2,
           });
+          if (lineTween.scrollTrigger) triggersRef.current.push(lineTween.scrollTrigger);
 
-          gsap.to(contactFormRef.current, {
+          const contactTween = gsap.to(contactFormRef.current, {
             scrollTrigger: scrollTriggerConfig,
             x: 0,
             duration: 2,
@@ -88,10 +92,18 @@ export function LandingApp() {
               });
             },
           });
+          if (contactTween.scrollTrigger) triggersRef.current.push(contactTween.scrollTrigger);
         }
       });
     });
   };
+
+  useEffect(() => {
+    return () => {
+      triggersRef.current.forEach((t) => t.kill());
+      triggersRef.current = [];
+    };
+  }, []);
 
   useEffect(() => {
     if (loaderRef.current) {
