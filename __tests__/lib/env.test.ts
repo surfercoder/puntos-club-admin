@@ -137,6 +137,28 @@ describe('lib/env', () => {
     expect(env.NEXT_PUBLIC_SITE_URL).toBeUndefined();
   });
 
+  it('treats empty-string optionalString fields as undefined', () => {
+    process.env = {
+      ...originalEnv,
+      NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
+      NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'maps-api-key',
+      SUPABASE_SERVICE_ROLE_KEY: '',
+      REGISTRATION_SECRET: '',
+      MERCADOPAGO_ACCESS_TOKEN: '',
+      MP_PLAN_ID_ADVANCE: '',
+      MP_PLAN_ID_PRO: '',
+      MP_WEBHOOK_SECRET: '',
+    };
+    const { env } = require('@/lib/env');
+    expect(env.SUPABASE_SERVICE_ROLE_KEY).toBeUndefined();
+    expect(env.REGISTRATION_SECRET).toBeUndefined();
+    expect(env.MERCADOPAGO_ACCESS_TOKEN).toBeUndefined();
+    expect(env.MP_PLAN_ID_ADVANCE).toBeUndefined();
+    expect(env.MP_PLAN_ID_PRO).toBeUndefined();
+    expect(env.MP_WEBHOOK_SECRET).toBeUndefined();
+  });
+
   it('throws when NEXT_PUBLIC_SITE_URL is provided but not a valid URL', () => {
     process.env = {
       ...originalEnv,

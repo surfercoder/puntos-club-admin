@@ -117,7 +117,9 @@
       "Bash(git commit -m ':*)",
       "Bash(git commit:*)",
       "Bash(git push:*)",
-      "Bash(gh pr create --title 'chore: quality pass — react-doctor 100, checks green, 100% coverage' --body ':*)"
+      "Bash(gh pr create --title 'chore: quality pass — react-doctor 100, checks green, 100% coverage' --body ':*)",
+      "Read(//Users/agustincassani/.claude/skills/**)",
+      "Read(//Users/agustincassani/.claude/**)"
     ],
     "deny": []
   },
