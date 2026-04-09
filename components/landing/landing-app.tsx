@@ -107,7 +107,7 @@ export function LandingApp() {
 
   useEffect(() => {
     if (loaderRef.current) {
-      gsap.to(loaderRef.current, {
+      const loaderTween = gsap.to(loaderRef.current, {
         scrollTrigger: {
           trigger: loaderRef.current,
           start: "top top",
@@ -117,6 +117,9 @@ export function LandingApp() {
         opacity: 0,
         ease: "none",
       });
+      if (loaderTween.scrollTrigger) {
+        triggersRef.current.push(loaderTween.scrollTrigger);
+      }
     }
   }, []);
 
