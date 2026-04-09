@@ -1,3 +1,4 @@
+import type * as ReactNS from 'react';
 import OrganizationListPage from '@/app/dashboard/organization/page';
 
 const mockOrder = jest.fn().mockResolvedValue({ data: [], error: null });
@@ -9,7 +10,12 @@ jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => Promise.
 jest.mock('@/components/dashboard/organization/delete-modal', () => function Mock() { return <div />; });
 jest.mock('@/components/ui/button', () => ({ Button: ({ children }: { children: React.ReactNode }) => <button>{children}</button> }));
 jest.mock('@/components/ui/table', () => ({ Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>, TableHeader: ({ children }: { children: React.ReactNode }) => <thead>{children}</thead>, TableRow: ({ children }: { children: React.ReactNode }) => <tr>{children}</tr>, TableHead: ({ children }: { children: React.ReactNode }) => <th>{children}</th>, TableBody: ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>, TableCell: ({ children }: { children: React.ReactNode }) => <td>{children}</td> }));
-jest.mock('next/image', () => function MockImage(props: Record<string, unknown>) { return <img {...props} />; });
+jest.mock('next/image', () => {
+  const React = jest.requireActual('react') as typeof ReactNS;
+  return function MockImage(props: Record<string, unknown>) {
+    return React.createElement('img', { alt: '', ...props });
+  };
+});
 
 describe('OrganizationListPage', () => {
   beforeEach(() => { jest.clearAllMocks(); });

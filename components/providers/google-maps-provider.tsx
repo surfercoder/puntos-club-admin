@@ -1,13 +1,46 @@
 'use client';
 
 import { importLibrary, setOptions } from '@googlemaps/js-api-loader';
-import { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { createContext, useContext, useEffect, useReducer, useRef } from 'react';
 
 interface GoogleMapsContextType {
   placesLibrary: google.maps.PlacesLibrary | null;
   sessionToken: google.maps.places.AutocompleteSessionToken | null;
   isLoaded: boolean;
   error: string | null;
+}
+
+type MapsState = GoogleMapsContextType;
+
+type MapsAction =
+  | {
+      type: 'loaded';
+      placesLibrary: google.maps.PlacesLibrary;
+      sessionToken: google.maps.places.AutocompleteSessionToken;
+    }
+  | { type: 'error'; error: string };
+
+const initialMapsState: MapsState = {
+  placesLibrary: null,
+  sessionToken: null,
+  isLoaded: false,
+  error: null,
+};
+
+function mapsReducer(state: MapsState, action: MapsAction): MapsState {
+  switch (action.type) {
+    case 'loaded':
+      return {
+        placesLibrary: action.placesLibrary,
+        sessionToken: action.sessionToken,
+        isLoaded: true,
+        error: null,
+      };
+    case 'error':
+      return { ...state, error: action.error };
+    default:
+      return state;
+  }
 }
 
 const GoogleMapsContext = createContext<GoogleMapsContextType | null>(null);
@@ -27,14 +60,11 @@ interface GoogleMapsProviderProps {
 
 export const GoogleMapsProvider: React.FC<GoogleMapsProviderProps> = ({ apiKey, children }) => {
   const initialized = useRef(false);
-  const [placesLibrary, setPlacesLibrary] = useState<google.maps.PlacesLibrary | null>(null);
-  const [sessionToken, setSessionToken] = useState<google.maps.places.AutocompleteSessionToken | null>(null);
-  const [isLoaded, setIsLoaded] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [state, dispatch] = useReducer(mapsReducer, initialMapsState);
 
   useEffect(() => {
     if (!apiKey) {
-      setError('Google Maps API key is not configured');
+      dispatch({ type: 'error', error: 'Google Maps API key is not configured' });
       return;
     }
 
@@ -48,19 +78,20 @@ export const GoogleMapsProvider: React.FC<GoogleMapsProviderProps> = ({ apiKey, 
     importLibrary('places')
       .then((lib) => {
         const placesLib = lib as google.maps.PlacesLibrary;
-        setPlacesLibrary(placesLib);
-        setSessionToken(new placesLib.AutocompleteSessionToken());
-        setIsLoaded(true);
-        setError(null);
+        dispatch({
+          type: 'loaded',
+          placesLibrary: placesLib,
+          sessionToken: new placesLib.AutocompleteSessionToken(),
+        });
       })
       .catch((_err: Error) => {
-        setError('Failed to load Google Maps API');
+        dispatch({ type: 'error', error: 'Failed to load Google Maps API' });
         initialized.current = false;
       });
   }, [apiKey]);
 
   return (
-    <GoogleMapsContext.Provider value={{ placesLibrary, sessionToken, isLoaded, error }}>
+    <GoogleMapsContext.Provider value={state}>
       {children}
     </GoogleMapsContext.Provider>
   );

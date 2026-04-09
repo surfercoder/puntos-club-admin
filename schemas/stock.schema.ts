@@ -14,5 +14,3 @@ export const StockSchema = z.object({
   }),
 });
 
-export type StockInput = z.input<typeof StockSchema>;
-export type Stock = z.infer<typeof StockSchema>;

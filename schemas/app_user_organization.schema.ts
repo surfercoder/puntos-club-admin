@@ -15,5 +15,4 @@ export const AppUserOrganizationSchema = z.object({
   updated_at: z.string().optional(),
 });
 
-export type AppUserOrganizationInput = z.input<typeof AppUserOrganizationSchema>;
 export type AppUserOrganization = z.infer<typeof AppUserOrganizationSchema>;

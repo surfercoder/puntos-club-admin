@@ -193,6 +193,34 @@ describe("OperationSteps", () => {
     expect(handleBubbleClick).toHaveBeenCalled();
   });
 
+  it("calls handleBubbleClick on Enter keydown", () => {
+    const { handleBubbleClick } = require("@/components/landing/animations/bubble");
+    const { fireEvent } = require("@testing-library/react");
+    const { container } = render(<OperationSteps />);
+    const bubbleDivs = container.querySelectorAll(".bubble");
+    fireEvent.keyDown(bubbleDivs[0], { key: "Enter" });
+    expect(handleBubbleClick).toHaveBeenCalled();
+  });
+
+  it("calls handleBubbleClick on Space keydown", () => {
+    const { handleBubbleClick } = require("@/components/landing/animations/bubble");
+    const { fireEvent } = require("@testing-library/react");
+    const { container } = render(<OperationSteps />);
+    const bubbleDivs = container.querySelectorAll(".bubble");
+    fireEvent.keyDown(bubbleDivs[0], { key: " " });
+    expect(handleBubbleClick).toHaveBeenCalled();
+  });
+
+  it("does nothing on other keydown keys", () => {
+    const { handleBubbleClick } = require("@/components/landing/animations/bubble");
+    const { fireEvent } = require("@testing-library/react");
+    const { container } = render(<OperationSteps />);
+    const bubbleDivs = container.querySelectorAll(".bubble");
+    handleBubbleClick.mockClear();
+    fireEvent.keyDown(bubbleDivs[0], { key: "a" });
+    expect(handleBubbleClick).not.toHaveBeenCalled();
+  });
+
   it("renders with small screen size (isSmall=true)", () => {
     const useMediaQuery = require("@/components/landing/hooks/use-media-query").default;
     useMediaQuery.mockReturnValue(true);

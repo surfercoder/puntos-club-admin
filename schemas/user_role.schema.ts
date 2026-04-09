@@ -7,5 +7,3 @@ export const UserRoleSchema = z.object({
   description: z.string().optional().nullable().transform(val => val === '' ? null : val),
 });
 
-export type UserRoleInput = z.input<typeof UserRoleSchema>;
-export type UserRoleFormData = z.infer<typeof UserRoleSchema>;

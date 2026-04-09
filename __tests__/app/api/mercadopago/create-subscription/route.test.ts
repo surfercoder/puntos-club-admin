@@ -51,6 +51,7 @@ describe('MercadoPago Create Subscription Route', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env = { ...originalEnv, NEXT_PUBLIC_SITE_URL: 'https://puntos-club-admin.vercel.app' };
+    delete process.env.MP_TEST_PAYER_EMAIL;
     mockGetUser.mockResolvedValue({ data: { user: { id: 'u1', email: 'test@test.com' } }, error: null });
     mockCreate.mockResolvedValue({ init_point: 'https://mp.com/checkout', id: 'pa_123' });
   });
@@ -104,6 +105,22 @@ describe('MercadoPago Create Subscription Route', () => {
     expect(response.status).toBe(200);
     expect(data.initPoint).toBe('https://mp.com/checkout');
     expect(data.preapprovalId).toBe('pa_123');
+  });
+
+  it('uses MP_TEST_PAYER_EMAIL when set instead of the user email', async () => {
+    process.env.MP_TEST_PAYER_EMAIL = 'test_payer@mp.com';
+    const request = {
+      json: () => Promise.resolve({ planId: 'advance' }),
+      headers: { get: () => null },
+    } as any;
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({ payer_email: 'test_payer@mp.com' }),
+      }),
+    );
+    delete process.env.MP_TEST_PAYER_EMAIL;
   });
 
   it('creates subscription successfully for pro plan', async () => {

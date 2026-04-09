@@ -26,16 +26,88 @@ export function LandingApp() {
 
   const [animationComplete, setAnimationComplete] = useState<boolean>(false);
   const loaderRef = useRef<HTMLDivElement | null>(null);
+  const triggersRef = useRef<ScrollTrigger[]>([]);
 
   registerSlideAnimation();
 
   const handleAnimationEnd = () => {
     setAnimationComplete(true);
+    // Wait two frames so the conditional children (WeDo, OperationSteps, ...)
+    // have mounted and their refs are populated before wiring up scroll triggers.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        if (weDoRef.current) {
+          const weDotrigger = ScrollTrigger.create({
+            trigger: weDoRef.current,
+            start: "bottom bottom",
+            end: "bottom 10%",
+            onEnter: () => {
+              gsap.effects.slide(weDoRef.current, {
+                direction: "top",
+                location: "in",
+              });
+            },
+          });
+          triggersRef.current.push(weDotrigger);
+        }
+        if (operationStepsRef.current) {
+          const opsTween = gsap.to(operationStepsRef.current, {
+            scrollTrigger: {
+              trigger: operationStepsRef.current,
+              start: "top 80%",
+              end: "bottom 50%",
+              toggleActions: "none play reverse none",
+            },
+            opacity: 0,
+            duration: 2,
+          });
+          if (opsTween.scrollTrigger) triggersRef.current.push(opsTween.scrollTrigger);
+        }
+        if (lineRef.current && contactFormRef.current) {
+          const scrollTriggerConfig = {
+            trigger: lineRef.current,
+            start: "top 30%",
+            end: "top 50%",
+            toggleActions: "none play none reverse" as const,
+          };
+
+          const lineTween = gsap.to(lineRef.current, {
+            scrollTrigger: scrollTriggerConfig,
+            x: "100%",
+            duration: 2,
+          });
+          if (lineTween.scrollTrigger) triggersRef.current.push(lineTween.scrollTrigger);
+
+          const contactTween = gsap.to(contactFormRef.current, {
+            scrollTrigger: scrollTriggerConfig,
+            x: 0,
+            duration: 2,
+            onComplete: () => {
+              circleRefs.current.forEach((circle, index) => {
+                gsap.to(circle, {
+                  keyframes: [{ scale: 1.3 }, { scale: 1 }],
+                  duration: 0.8,
+                  delay: 0.5 * index + 0.5,
+                });
+              });
+            },
+          });
+          if (contactTween.scrollTrigger) triggersRef.current.push(contactTween.scrollTrigger);
+        }
+      });
+    });
   };
 
   useEffect(() => {
+    return () => {
+      triggersRef.current.forEach((t) => t.kill());
+      triggersRef.current = [];
+    };
+  }, []);
+
+  useEffect(() => {
     if (loaderRef.current) {
-      gsap.to(loaderRef.current, {
+      const loaderTween = gsap.to(loaderRef.current, {
         scrollTrigger: {
           trigger: loaderRef.current,
           start: "top top",
@@ -45,67 +117,11 @@ export function LandingApp() {
         opacity: 0,
         ease: "none",
       });
+      if (loaderTween.scrollTrigger) {
+        triggersRef.current.push(loaderTween.scrollTrigger);
+      }
     }
   }, []);
-
-  useEffect(() => {
-    if (animationComplete) {
-      if (weDoRef.current) {
-        ScrollTrigger.create({
-          trigger: weDoRef.current,
-          start: "bottom bottom",
-          end: "bottom 10%",
-          onEnter: () => {
-            gsap.effects.slide(weDoRef.current, {
-              direction: "top",
-              location: "in",
-            });
-          },
-        });
-      }
-      if (operationStepsRef.current) {
-        gsap.to(operationStepsRef.current, {
-          scrollTrigger: {
-            trigger: operationStepsRef.current,
-            start: "top 80%",
-            end: "bottom 50%",
-            toggleActions: "none play reverse none",
-          },
-          opacity: 0,
-          duration: 2,
-        });
-      }
-      if (lineRef.current && contactFormRef.current) {
-        const scrollTriggerConfig = {
-          trigger: lineRef.current,
-          start: "top 30%",
-          end: "top 50%",
-          toggleActions: "none play none reverse" as const,
-        };
-
-        gsap.to(lineRef.current, {
-          scrollTrigger: scrollTriggerConfig,
-          x: "100%",
-          duration: 2,
-        });
-
-        gsap.to(contactFormRef.current, {
-          scrollTrigger: scrollTriggerConfig,
-          x: 0,
-          duration: 2,
-          onComplete: () => {
-            circleRefs.current.forEach((circle, index) => {
-              gsap.to(circle, {
-                keyframes: [{ scale: 1.3 }, { scale: 1 }],
-                duration: 0.8,
-                delay: 0.5 * index + 0.5,
-              });
-            });
-          },
-        });
-      }
-    }
-  }, [animationComplete]);
 
   return (
     <>

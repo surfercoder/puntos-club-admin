@@ -1,6 +1,3 @@
-import type { Branch } from './branch';
-import type { Product } from './product';
-
 export type Stock = {
   id: string;
   branch_id: string;
@@ -9,7 +6,3 @@ export type Stock = {
   minimum_quantity: number;
 };
 
-export type StockWithRelations = Stock & {
-  branch?: Branch;
-  product?: Product;
-};

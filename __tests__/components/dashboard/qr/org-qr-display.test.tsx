@@ -1,3 +1,4 @@
+import type * as ReactNS from 'react';
 import { render, screen } from '@testing-library/react';
 
 jest.mock('next-intl', () => ({
@@ -22,8 +23,9 @@ jest.mock('qrcode.react', () => ({
 }));
 
 jest.mock('next/image', () => {
+  const React = jest.requireActual('react') as typeof ReactNS;
   return function MockImage({ alt, ...props }: { alt: string; [key: string]: unknown }) {
-    return <img alt={alt} {...props} />;
+    return React.createElement('img', { alt, ...props });
   };
 });
 

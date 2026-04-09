@@ -1,13 +1,16 @@
 import React from "react";
+import type * as ReactNS from "react";
 import { render, act, waitFor } from "@testing-library/react";
 import { LandingApp } from "@/components/landing/landing-app";
 
 /* ── shared mocks ── */
 jest.mock("gsap", () => {
+  const scrollTriggerInstance = { kill: jest.fn() };
   const toMock = jest.fn((_target: unknown, config: Record<string, unknown>) => {
     if (typeof config?.onComplete === "function") {
       (config.onComplete as () => void)();
     }
+    return { scrollTrigger: scrollTriggerInstance };
   });
 
   const makeGsapObj = () => ({
@@ -116,17 +119,29 @@ jest.mock("@/components/landing/animations/slide", () => ({
 
 /* ── Loader mock: default version does NOT call onAnimationEnd ── */
 let loaderAutoFire = false;
-jest.mock("@/components/landing/screens/loader", () => ({
-  __esModule: true,
-  default: ({ onAnimationEnd }: { onAnimationEnd: () => void }) => {
-    React.useEffect(() => {
+jest.mock("@/components/landing/screens/loader", () => {
+  const ReactModule = jest.requireActual("react") as typeof ReactNS;
+  function MockLoader({ onAnimationEnd }: { onAnimationEnd: () => void }) {
+    ReactModule.useEffect(() => {
       if (loaderAutoFire) {
         onAnimationEnd();
       }
     }, [onAnimationEnd]);
-    return <div data-testid="loader" onClick={onAnimationEnd} />;
-  },
-}));
+    return (
+      <div
+        data-testid="loader"
+        role="button"
+        tabIndex={0}
+        onClick={onAnimationEnd}
+        onKeyDown={onAnimationEnd}
+      />
+    );
+  }
+  return {
+    __esModule: true,
+    default: MockLoader,
+  };
+});
 
 describe("LandingApp", () => {
   beforeEach(() => {

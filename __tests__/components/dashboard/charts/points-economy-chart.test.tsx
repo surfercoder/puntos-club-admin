@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { PointsEconomyChart } from '@/components/dashboard/charts/points-economy-chart';
+import { PointsEconomyChart } from '@/components/dashboard/charts/points-economy-chart-view';
 import type { MonthlyPointsStat } from '@/actions/dashboard/analytics/actions';
 
 jest.mock('recharts', () => {

@@ -40,11 +40,3 @@ export const PLAN_CONFIG: Record<PlanId, PlanConfig> = {
   },
 };
 
-export function getMpPlanId(planId: PlanId): string {
-  const config = PLAN_CONFIG[planId];
-  const mpPlanId = process.env[config.mpPlanIdEnvVar];
-  if (!mpPlanId) {
-    throw new Error(`${config.mpPlanIdEnvVar} env var is not set. Run: npm run setup:mp-plans`);
-  }
-  return mpPlanId;
-}

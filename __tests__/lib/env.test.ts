@@ -125,6 +125,18 @@ describe('lib/env', () => {
     expect(() => require('@/lib/env')).toThrow();
   });
 
+  it('treats empty NEXT_PUBLIC_SITE_URL as undefined', () => {
+    process.env = {
+      ...originalEnv,
+      NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
+      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
+      NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'maps-api-key',
+      NEXT_PUBLIC_SITE_URL: '',
+    };
+    const { env } = require('@/lib/env');
+    expect(env.NEXT_PUBLIC_SITE_URL).toBeUndefined();
+  });
+
   it('throws when NEXT_PUBLIC_SITE_URL is provided but not a valid URL', () => {
     process.env = {
       ...originalEnv,

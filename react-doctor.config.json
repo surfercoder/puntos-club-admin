@@ -1,0 +1,9 @@
+{
+  "ignore": {
+    "files": [
+      "__tests__/**",
+      "e2e/**",
+      "components/landing/screens/smartphone-3d.tsx"
+    ]
+  }
+}

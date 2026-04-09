@@ -149,8 +149,17 @@ export function ImageUpload({
         </div>
       ) : (
         <div
+          role="button"
+          tabIndex={0}
+          aria-label="Upload image"
           className="flex w-full max-w-xs cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 p-8 transition-colors hover:border-muted-foreground/50 hover:bg-muted"
           onClick={() => fileInputRef.current?.click()}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              fileInputRef.current?.click();
+            }
+          }}
         >
           {uploading ? (
             <div className="flex flex-col items-center gap-2">

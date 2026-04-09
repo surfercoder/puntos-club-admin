@@ -1,6 +1,3 @@
-import type { Beneficiary } from './beneficiary';
-import type { Organization } from './organization';
-
 export type Purchase = {
   id: string;
   purchase_number: string;
@@ -16,9 +13,3 @@ export type Purchase = {
   updated_at: string;
 };
 
-export type PurchaseWithRelations = Purchase & {
-  beneficiary?: Beneficiary;
-  cashier?: { first_name: string; last_name: string };
-  branch?: { name: string; organization_id?: number };
-  organization?: Organization;
-};

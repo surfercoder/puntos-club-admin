@@ -244,4 +244,5 @@ describe("Smartphone3D", () => {
     // The traverse is called in a useEffect on mount
     expect(mockScene.traverse).toHaveBeenCalled();
   });
+
 });

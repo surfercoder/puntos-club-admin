@@ -1,5 +1,3 @@
-import type { Organization } from './organization';
-
 export type SubscriptionStatus = 'pending' | 'authorized' | 'paused' | 'cancelled';
 export type SubscriptionPlan = 'advance' | 'pro';
 
@@ -17,6 +15,3 @@ export type Subscription = {
   updated_at: string;
 };
 
-export type SubscriptionWithRelations = Subscription & {
-  organization?: Organization;
-};

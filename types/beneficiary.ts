@@ -1,7 +1,3 @@
-import type { Redemption } from './redemption';
-import type { UserRole } from './user_role';
-import type { Address } from './address';
-
 export type Beneficiary = {
   id: string;
   first_name?: string | null;
@@ -16,8 +12,3 @@ export type Beneficiary = {
   updated_at: string;
 };
 
-export type BeneficiaryWithRelations = Beneficiary & {
-  redemptions?: Redemption[];
-  role?: UserRole;
-  address?: Address;
-};

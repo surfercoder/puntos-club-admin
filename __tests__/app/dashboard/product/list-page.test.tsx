@@ -1,3 +1,4 @@
+import type * as ReactNS from 'react';
 import ProductListPage from '@/app/dashboard/product/page';
 
 jest.mock('next-intl/server', () => ({
@@ -37,7 +38,10 @@ jest.mock('@/components/ui/table', () => ({
 }));
 
 jest.mock('next/image', () => {
-  return function MockImage(props: Record<string, unknown>) { return <img {...props} />; };
+  const React = jest.requireActual('react') as typeof ReactNS;
+  return function MockImage(props: Record<string, unknown>) {
+    return React.createElement('img', { alt: '', ...props });
+  };
 });
 
 describe('ProductListPage', () => {

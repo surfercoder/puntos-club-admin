@@ -16,5 +16,3 @@ export const PlanLimitSchema = z.object({
   }).default(0.8),
 });
 
-export type PlanLimitInput = z.input<typeof PlanLimitSchema>;
-export type PlanLimitFormData = z.infer<typeof PlanLimitSchema>;

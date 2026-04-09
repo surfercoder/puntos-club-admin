@@ -53,9 +53,9 @@ export const CallToAction = () => {
       <h3 className="mb-3 md:mb-2 text-center text-xl font-bold">
         {t("callToAction")}
       </h3>
-      {[...Array(3)].map((_, index) => (
+      {["chev-0", "chev-1", "chev-2"].map((chevKey, index) => (
         <div
-          key={index}
+          key={chevKey}
           className="w-8 h-8 md:w-[28px] md:h-[28px] flex justify-center items-center -mt-4 md:-mt-3 transition-all duration-1000 ease-in-out"
           style={{
             transition: "border-color 1s ease-in-out",

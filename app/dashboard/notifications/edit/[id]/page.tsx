@@ -8,21 +8,20 @@ import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function EditNotificationPage({ params }: { params: Promise<{ id: string }> }) {
-  const supabase = await createClient();
-  const t = await getTranslations('Dashboard.notifications');
-  const tCommon = await getTranslations('Common');
-
-  const id = (await params).id;
+  const [supabase, t, tCommon, { id }] = await Promise.all([
+    createClient(),
+    getTranslations('Dashboard.notifications'),
+    getTranslations('Common'),
+    params,
+  ]);
 
   const {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const { data: appUser } = await supabase
-    .from('app_user')
-    .select('organization_id')
-    .eq('auth_user_id', user?.id)
-    .single();
+  if (!user) {
+    return notFound();
+  }
 
   const { data: notification, error } = await supabase
     .from('push_notifications')
@@ -34,15 +33,41 @@ export default async function EditNotificationPage({ params }: { params: Promise
     notFound();
   }
 
-  const { data: limits } = await supabase
-    .from('organization_notification_limits')
-    .select('*')
-    .eq('organization_id', appUser?.organization_id)
+  const { data: appUser } = await supabase
+    .from('app_user')
+    .select('organization_id')
+    .eq('auth_user_id', user.id)
     .single();
 
-  const { data: canSend } = await supabase.rpc('can_send_notification', {
-    org_id: appUser?.organization_id,
-  });
+  let limits = null;
+  let canSend = null;
+
+  if (appUser?.organization_id) {
+    const [limitsResult, canSendResult] = await Promise.all([
+      supabase
+        .from('organization_notification_limits')
+        .select('*')
+        .eq('organization_id', appUser.organization_id)
+        .single(),
+      supabase.rpc('can_send_notification', {
+        org_id: appUser.organization_id,
+      }),
+    ]);
+
+    if (limitsResult.error && limitsResult.error.code !== 'PGRST116') {
+      throw new Error(
+        `Failed to fetch organization_notification_limits for organization ${appUser.organization_id}: ${limitsResult.error.message}`,
+      );
+    }
+    if (canSendResult.error) {
+      throw new Error(
+        `Failed to call can_send_notification for organization ${appUser.organization_id}: ${canSendResult.error.message}`,
+      );
+    }
+
+    limits = limitsResult.data;
+    canSend = canSendResult.data;
+  }
 
   return (
     <div className="space-y-6">

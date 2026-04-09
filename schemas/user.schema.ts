@@ -27,5 +27,3 @@ export const UserSchema = z.object({
   path: ['password'],
 });
 
-export type UserInput = z.input<typeof UserSchema>;
-export type User = z.infer<typeof UserSchema>;

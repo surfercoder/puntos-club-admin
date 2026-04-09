@@ -243,6 +243,20 @@ describe("Bubbles", () => {
       fireEvent.click(bubbleDivs[2]);
       expect(handleBubbleClick).toHaveBeenCalledWith(expect.any(Object), 2);
     });
+
+    it("calls handleBubbleClick on Enter and Space keydown, ignores other keys", () => {
+      const { handleBubbleClick } = require("@/components/landing/animations/bubble");
+      const { fireEvent } = require("@testing-library/react");
+      const { container } = render(
+        <Bubbles index={0} backgroundColor="#FF0000" />
+      );
+      const bubbleDivs = container.querySelectorAll(".bubble");
+      handleBubbleClick.mockClear();
+      fireEvent.keyDown(bubbleDivs[0], { key: "Enter" });
+      fireEvent.keyDown(bubbleDivs[1], { key: " " });
+      fireEvent.keyDown(bubbleDivs[2], { key: "a" });
+      expect(handleBubbleClick).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe("mobile sizing", () => {

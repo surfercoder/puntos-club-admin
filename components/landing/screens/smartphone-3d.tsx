@@ -1,6 +1,13 @@
 "use client";
 
-import React, { Suspense, useEffect, useState, useRef, useMemo } from "react";
+import React, {
+  Suspense,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
 import { useGLTF } from "@react-three/drei";
 import { TextureLoader, Mesh } from "three";
@@ -11,6 +18,13 @@ const textures = [
   "/images/Login2.png",
   "/images/Login3.jpg",
 ];
+
+function subscribeToResize(callback: () => void) {
+  /* v8 ignore next 1 -- SSR-only branch */
+  if (typeof window === "undefined") return () => {};
+  window.addEventListener("resize", callback);
+  return () => window.removeEventListener("resize", callback);
+}
 
 interface ModelProps {
   url: string;
@@ -31,11 +45,11 @@ function Model({ url, rotateAndChangeTexture, onCompleteRotation }: ModelProps) 
   const isRotating = useRef(false);
   const initialRotationSet = useRef(false);
 
-  const [isMobile, setIsMobile] = useState(false);
-
-  useEffect(() => {
-    setIsMobile(window.innerWidth < 800);
-  }, []);
+  const isMobile = useSyncExternalStore(
+    subscribeToResize,
+    () => window.innerWidth < 800,
+    () => false,
+  );
 
   const shadowSizeScale = isMobile ? 0.05 : 0.06;
   const scaleValue = isMobile ? 15 : 30;
@@ -99,8 +113,15 @@ function Model({ url, rotateAndChangeTexture, onCompleteRotation }: ModelProps) 
         rotation={[-Math.PI / 2, 0, 0]}
         position={[0, shadowPosition, 0]}
       >
-        <circleGeometry args={[shadowSize, 32]} />
-        <meshBasicMaterial transparent opacity={0.2} color="black" />
+        {/* react-three-fiber/r3f primitive props are not DOM attrs */}
+        <circleGeometry
+          args={[shadowSize, 32]}
+        />
+        <meshBasicMaterial
+          transparent
+          opacity={0.2}
+          color="black"
+        />
       </mesh>
     </>
   );
@@ -117,8 +138,13 @@ const Smartphone3D: React.FC<Smartphone3DProps> = ({
 }) => {
   return (
     <Canvas camera={{ position: [0, 0, 8] }} shadows>
-      <ambientLight intensity={1} />
-      <directionalLight position={[5, 5, 5]} intensity={1.5} />
+      <ambientLight
+        intensity={1}
+      />
+      <directionalLight
+        position={[5, 5, 5]}
+        intensity={1.5}
+      />
       <Suspense fallback={null}>
         <Model
           url="/models/scene.gltf"

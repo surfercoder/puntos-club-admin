@@ -45,9 +45,13 @@ const Bubbles = ({
   });
 
   return bubbles[index].map((bubble, bIdx) => {
+    const bubbleKey = `bubble-${index}-${bubble.size}-${bubble.top}-${bubble.left}`;
     return (
       <div
-        key={bIdx}
+        key={bubbleKey}
+        role="button"
+        tabIndex={0}
+        aria-label="Decorative bubble"
         className="absolute flex items-center justify-center z-10 rounded-full bubble"
         ref={(el) => {
           bubbleRefs.current[bIdx] = el;
@@ -60,11 +64,22 @@ const Bubbles = ({
           top: bubble.top,
           left: bubble.left,
           backgroundColor,
-          willChange: "transform",
         }}
-        onMouseEnter={() => handleMouseEnter(bubbleRefs, bIdx)}
-        onMouseLeave={() => handleMouseLeave(bubbleRefs, bIdx)}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.willChange = "transform";
+          handleMouseEnter(bubbleRefs, bIdx);
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.willChange = "auto";
+          handleMouseLeave(bubbleRefs, bIdx);
+        }}
         onClick={() => handleBubbleClick(bubbleRefs, bIdx)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            handleBubbleClick(bubbleRefs, bIdx);
+          }
+        }}
       />
     );
   });

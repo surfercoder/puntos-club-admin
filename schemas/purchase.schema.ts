@@ -19,5 +19,3 @@ export const PurchaseSchema = z.object({
   organization_id: z.string().optional().nullable().transform(val => val === '' ? null : val),
 });
 
-export type PurchaseInput = z.input<typeof PurchaseSchema>;
-export type PurchaseFormData = z.infer<typeof PurchaseSchema>;

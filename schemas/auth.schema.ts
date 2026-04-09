@@ -20,7 +20,3 @@ export const UpdatePasswordSchema = z.object({
   password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
 });
 
-export type LoginInput = z.infer<typeof LoginSchema>;
-export type ProfileInput = z.infer<typeof ProfileSchema>;
-export type ForgotPasswordInput = z.infer<typeof ForgotPasswordSchema>;
-export type UpdatePasswordInput = z.infer<typeof UpdatePasswordSchema>;
