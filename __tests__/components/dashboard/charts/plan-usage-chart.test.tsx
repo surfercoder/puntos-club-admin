@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { PlanUsageChart } from '@/components/dashboard/charts/plan-usage-chart';
+import { PlanUsageChart } from '@/components/dashboard/charts/plan-usage-chart-view';
 import type { OrganizationUsageSummary } from '@/types/plan';
 
 jest.mock('recharts', () => {

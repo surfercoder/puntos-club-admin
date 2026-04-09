@@ -1,5 +1,3 @@
-import type { Organization } from './organization';
-
 export type NotificationPlanType = 'free' | 'light' | 'pro' | 'premium';
 
 export type OrganizationNotificationLimit = {
@@ -18,9 +16,6 @@ export type OrganizationNotificationLimit = {
   updated_at: string;
 };
 
-export type OrganizationNotificationLimitWithRelations = OrganizationNotificationLimit & {
-  organization?: Organization;
-};
 
 export const PLAN_LIMITS: Record<NotificationPlanType, { daily: number; monthly: number; minHours: number }> = {
   free: { daily: 1, monthly: 5, minHours: 24 },

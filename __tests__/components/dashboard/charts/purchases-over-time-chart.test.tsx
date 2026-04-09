@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { PurchasesOverTimeChart } from '@/components/dashboard/charts/purchases-over-time-chart';
+import { PurchasesOverTimeChart } from '@/components/dashboard/charts/purchases-over-time-chart-view';
 import type { MonthlyPurchaseStat } from '@/actions/dashboard/analytics/actions';
 
 jest.mock('recharts', () => {

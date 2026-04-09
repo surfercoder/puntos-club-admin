@@ -1,6 +1,7 @@
 "use client";
 
 import "@/components/landing/styles/footer.css";
+import Link from "next/link";
 import { useTranslations } from "next-intl";
 
 const Footer = () => {
@@ -12,27 +13,27 @@ const Footer = () => {
       {/* Legal links and copyright */}
       <div className="flex flex-col md:flex-row w-full items-center gap-2 md:gap-5">
         <div className="flex flex-1 flex-col md:flex-row items-center gap-2 md:gap-5">
-          <a
+          <Link
             className="font-light landing-footer-link text-sm"
             href="/legal/Aviso_Legal.pdf"
             download="Aviso legal"
           >
             {t("terms")}
-          </a>
-          <a
+          </Link>
+          <Link
             className="font-light landing-footer-link text-sm"
             href="/legal/Aviso_Legal.pdf"
             download="Aviso legal"
           >
             {t("legal")}
-          </a>
-          <a
+          </Link>
+          <Link
             className="font-light landing-footer-link text-sm"
             href="/legal/Politica_de_Privacidad_y_Politica_de_Cookies.pdf"
             download="Politica de Privacidad y Politica de Cookies"
           >
             {t("privacy")}
-          </a>
+          </Link>
         </div>
         <p className="font-light text-sm">
           {t("copyright", { year: currentYear })}

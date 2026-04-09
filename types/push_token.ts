@@ -1,5 +1,3 @@
-import type { Beneficiary } from './beneficiary';
-
 export type PushToken = {
   id: string;
   beneficiary_id: string;
@@ -11,6 +9,3 @@ export type PushToken = {
   updated_at: string;
 };
 
-export type PushTokenWithRelations = PushToken & {
-  beneficiary?: Beneficiary;
-};

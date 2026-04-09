@@ -16,5 +16,3 @@ export const OrganizationNotificationLimitSchema = z.object({
   updated_at: z.string().optional(),
 });
 
-export type OrganizationNotificationLimitInput = z.input<typeof OrganizationNotificationLimitSchema>;
-export type OrganizationNotificationLimitFormData = z.infer<typeof OrganizationNotificationLimitSchema>;

@@ -1,6 +1,3 @@
-import type { Organization } from './organization';
-import type { AppUser } from './app_user';
-
 export type PushNotificationStatus = 'draft' | 'sending' | 'sent' | 'failed';
 
 export type PushNotification = {
@@ -20,7 +17,3 @@ export type PushNotification = {
   updated_at: string;
 };
 
-export type PushNotificationWithRelations = PushNotification & {
-  organization?: Organization;
-  creator?: AppUser;
-};

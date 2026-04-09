@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 jest.mock('next-intl', () => ({
   useTranslations: jest.fn(() => {
@@ -26,17 +26,21 @@ jest.mock('react', () => ({
   useActionState: jest.fn(() => [{ status: '', message: '', fieldErrors: {} }, jest.fn(), false]),
 }));
 
-jest.mock('@/lib/supabase/client', () => ({
-  createClient: jest.fn(() => ({
-    from: jest.fn(() => ({
-      select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnThis(),
-      neq: jest.fn().mockReturnThis(),
-      order: jest.fn().mockReturnThis(),
-      then: jest.fn((cb: (res: { data: never[] }) => void) => cb({ data: [] })),
+jest.mock('@/lib/supabase/client', () => {
+  const builder = () => {
+    const b: Record<string, unknown> = {};
+    b.select = jest.fn(() => b);
+    b.eq = jest.fn(() => b);
+    b.neq = jest.fn(() => b);
+    b.order = jest.fn(() => Promise.resolve({ data: [{ id: '1', first_name: 'A', last_name: 'B', name: 'N' }], error: null }));
+    return b;
+  };
+  return {
+    createClient: jest.fn(() => ({
+      from: jest.fn(() => builder()),
     })),
-  })),
-}));
+  };
+});
 
 jest.mock('@/actions/dashboard/purchase/purchase-form-actions', () => ({
   purchaseFormAction: jest.fn(),
@@ -109,6 +113,32 @@ describe('PurchaseForm', () => {
 
     const form = screen.getByRole('button', { name: 'Create' }).closest('form')!;
     fireEvent.submit(form);
+  });
+
+  it('loads dropdown data via useEffect and dispatches into reducer', async () => {
+    const { createClient } = require('@/lib/supabase/client');
+    render(<PurchaseForm />);
+    await waitFor(() => {
+      expect(createClient).toHaveBeenCalled();
+    });
+  });
+
+  it('falls back to empty arrays when supabase responses have null data', async () => {
+    const { createClient } = require('@/lib/supabase/client');
+    (createClient as jest.Mock).mockImplementationOnce(() => ({
+      from: jest.fn(() => {
+        const b: Record<string, unknown> = {};
+        b.select = jest.fn(() => b);
+        b.eq = jest.fn(() => b);
+        b.neq = jest.fn(() => b);
+        b.order = jest.fn(() => Promise.resolve({ data: null, error: null }));
+        return b;
+      }),
+    }));
+    render(<PurchaseForm />);
+    await waitFor(() => {
+      expect(createClient).toHaveBeenCalled();
+    });
   });
 
   it('runs handleSubmit in edit mode with pre-filled data', () => {

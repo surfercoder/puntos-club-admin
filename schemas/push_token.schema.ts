@@ -14,5 +14,3 @@ export const PushTokenSchema = z.object({
   updated_at: z.string().optional(),
 });
 
-export type PushTokenInput = z.input<typeof PushTokenSchema>;
-export type PushTokenFormData = z.infer<typeof PushTokenSchema>;

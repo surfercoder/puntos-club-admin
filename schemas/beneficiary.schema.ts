@@ -11,5 +11,3 @@ export const BeneficiarySchema = z.object({
   address_id: z.string().nullable().optional(),
 });
 
-export type BeneficiaryInput = z.input<typeof BeneficiarySchema>;
-export type Beneficiary = z.infer<typeof BeneficiarySchema>;

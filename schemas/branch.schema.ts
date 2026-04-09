@@ -9,5 +9,3 @@ export const BranchSchema = z.object({
   active: z.union([z.boolean(), z.string()]).transform((val) => val === true || val === 'true').default(true),
 });
 
-export type BranchInput = z.input<typeof BranchSchema>;
-export type Branch = z.infer<typeof BranchSchema>;

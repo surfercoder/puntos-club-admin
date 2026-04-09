@@ -1,3 +1,4 @@
+import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import { NavUser } from '@/components/nav-user';
 
@@ -8,7 +9,8 @@ jest.mock('@/components/ui/avatar', () => ({
   AvatarFallback: ({ children }: React.PropsWithChildren) => (
     <span data-testid="avatar-fallback">{children}</span>
   ),
-  AvatarImage: ({ alt }: { alt: string }) => <img data-testid="avatar-image" alt={alt} />,
+  AvatarImage: ({ alt }: { alt: string }) =>
+    React.createElement('img', { 'data-testid': 'avatar-image', alt }),
 }));
 
 jest.mock('@/components/ui/dropdown-menu', () => ({

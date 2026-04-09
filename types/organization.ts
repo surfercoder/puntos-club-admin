@@ -1,5 +1,3 @@
-import type { AppUser } from './app_user';
-import type { Branch } from './branch';
 import type { PlanType } from './plan';
 
 export type Organization = {
@@ -14,7 +12,3 @@ export type Organization = {
   is_public?: boolean;
 };
 
-export type OrganizationWithRelations = Organization & {
-  branches?: Branch[];
-  users?: AppUser[];
-};

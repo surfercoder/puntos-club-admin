@@ -1,0 +1,41 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "entry": [
+    "app/**/{page,layout,template,loading,error,not-found,route}.{ts,tsx}",
+    "app/**/{default,global-error,forbidden,unauthorized}.{ts,tsx}",
+    "app/**/{opengraph-image,twitter-image,icon,apple-icon,sitemap,robots,manifest}.{ts,tsx}",
+    "middleware.ts",
+    "proxy.ts",
+    "instrumentation.ts",
+    "instrumentation-client.ts",
+    "sentry.{edge,server,client}.config.ts",
+    "next.config.ts",
+    "playwright.config.ts",
+    "jest.config.js",
+    "jest.setup.js",
+    "postcss.config.mjs",
+    "tailwind.config.ts",
+    "eslint.config.mjs",
+    "e2e/**/*.setup.ts",
+    "e2e/**/*.spec.ts",
+    "e2e/**/*.test.ts",
+    "scripts/**/*.ts",
+    "__tests__/**/*.{ts,tsx}",
+    "i18n/**/*.ts"
+  ],
+  "project": [
+    "**/*.{ts,tsx}",
+    "!node_modules/**",
+    "!.next/**",
+    "!playwright-report/**",
+    "!coverage/**",
+    "!types/supabase.ts"
+  ],
+  "ignore": [
+    "components/ui/**",
+    "types/supabase.ts",
+    "next-env.d.ts"
+  ],
+  "ignoreDependencies": [],
+  "ignoreExportsUsedInFile": true
+}

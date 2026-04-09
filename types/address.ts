@@ -1,5 +1,3 @@
-import type { Branch } from './branch';
-
 export type Address = {
   city: string;
   id: string;
@@ -14,6 +12,3 @@ export type Address = {
   longitude?: number;
 };
 
-export type AddressWithRelations = Address & {
-  branch?: Branch;
-};

@@ -15,5 +15,3 @@ export const PushNotificationSchema = z.object({
   updated_at: z.string().optional(),
 });
 
-export type PushNotificationInput = z.input<typeof PushNotificationSchema>;
-export type PushNotificationFormData = z.infer<typeof PushNotificationSchema>;

@@ -1,7 +1,9 @@
 "use client"
 
 import * as React from "react"
+// react-doctor-disable-next-line react-doctor/prefer-dynamic-import
 import * as RechartsPrimitive from "recharts"
+// react-doctor-disable-next-line react-doctor/prefer-dynamic-import
 import type {
   TooltipContentProps,
   LegendPayload,
@@ -78,8 +80,10 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 
   if (!colorConfig.length) return null
 
+  // react-doctor-disable-next-line react/no-danger
   return (
     <style
+      // react-doctor-disable-next-line react/no-danger
       dangerouslySetInnerHTML={{
         __html: Object.entries(THEMES)
           .map(

@@ -17,5 +17,3 @@ export const ProductSchema = z.object({
   image_urls: z.array(z.string()).max(3, 'Maximum 3 images allowed').optional(),
 });
 
-export type ProductInput = z.input<typeof ProductSchema>;
-export type Product = z.infer<typeof ProductSchema>;

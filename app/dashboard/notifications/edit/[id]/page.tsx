@@ -8,15 +8,26 @@ import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function EditNotificationPage({ params }: { params: Promise<{ id: string }> }) {
-  const supabase = await createClient();
-  const t = await getTranslations('Dashboard.notifications');
-  const tCommon = await getTranslations('Common');
+  const [supabase, t, tCommon, { id }] = await Promise.all([
+    createClient(),
+    getTranslations('Dashboard.notifications'),
+    getTranslations('Common'),
+    params,
+  ]);
 
-  const id = (await params).id;
+  const [
+    {
+      data: { user },
+    },
+    { data: notification, error },
+  ] = await Promise.all([
+    supabase.auth.getUser(),
+    supabase.from('push_notifications').select('*').eq('id', id).single(),
+  ]);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  if (error || !notification) {
+    notFound();
+  }
 
   const { data: appUser } = await supabase
     .from('app_user')
@@ -24,25 +35,16 @@ export default async function EditNotificationPage({ params }: { params: Promise
     .eq('auth_user_id', user?.id)
     .single();
 
-  const { data: notification, error } = await supabase
-    .from('push_notifications')
-    .select('*')
-    .eq('id', id)
-    .single();
-
-  if (error || !notification) {
-    notFound();
-  }
-
-  const { data: limits } = await supabase
-    .from('organization_notification_limits')
-    .select('*')
-    .eq('organization_id', appUser?.organization_id)
-    .single();
-
-  const { data: canSend } = await supabase.rpc('can_send_notification', {
-    org_id: appUser?.organization_id,
-  });
+  const [{ data: limits }, { data: canSend }] = await Promise.all([
+    supabase
+      .from('organization_notification_limits')
+      .select('*')
+      .eq('organization_id', appUser?.organization_id)
+      .single(),
+    supabase.rpc('can_send_notification', {
+      org_id: appUser?.organization_id,
+    }),
+  ]);
 
   return (
     <div className="space-y-6">

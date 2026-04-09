@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { BranchPerformanceChart } from '@/components/dashboard/charts/branch-performance-chart';
+import { BranchPerformanceChart } from '@/components/dashboard/charts/branch-performance-chart-view';
 import type { BranchPerformanceStat } from '@/actions/dashboard/analytics/actions';
 
 jest.mock('recharts', () => {

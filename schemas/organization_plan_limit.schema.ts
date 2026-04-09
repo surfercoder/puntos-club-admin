@@ -17,5 +17,3 @@ export const OrganizationPlanLimitSchema = z.object({
   }).default(0.8),
 });
 
-export type OrganizationPlanLimitInput = z.input<typeof OrganizationPlanLimitSchema>;
-export type OrganizationPlanLimitFormData = z.infer<typeof OrganizationPlanLimitSchema>;

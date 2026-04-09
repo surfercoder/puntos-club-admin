@@ -7,7 +7,3 @@ export type Category = {
   active: boolean;
 };
 
-export type CategoryWithRelations = Category & {
-  parent?: Category;
-  children?: Category[];
-};

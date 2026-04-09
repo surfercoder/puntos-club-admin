@@ -18,6 +18,7 @@ import Bubbles from "@/components/landing/components/bubbles";
 import React from "react";
 import { Gift } from "@/components/landing/components/gift-svg";
 import useMediaQuery from "@/components/landing/hooks/use-media-query";
+import Image from "next/image";
 import { useTranslations } from "next-intl";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
@@ -108,10 +109,11 @@ const OperationSteps = () => {
         const highlightedWord = t(`${index}.highlightedWord`);
         const content = t(`${index}.content`);
         const contentLines = content.includes("\n") ? content.split("\n") : null;
+        const stepKey = `step-${step.logo_url}`;
 
         return (
           <div
-            key={index}
+            key={stepKey}
             className="flex flex-col items-center w-full sm:w-[95%] lg:w-[90%] gap-6"
           >
             <div
@@ -122,7 +124,6 @@ const OperationSteps = () => {
                   theme === "dark" ? step.lightColor : step.darkColor,
                 backgroundColor:
                   theme === "dark" ? step.darkColor : step.lightColor,
-                willChange: "transform",
               }}
               ref={(el) => {
                 numberStepRefs.current[index] = el;
@@ -149,7 +150,6 @@ const OperationSteps = () => {
                   ref={(el) => {
                     textRefs.current[index] = el;
                   }}
-                  style={{ willChange: "transform" }}
                 >
                   <h3
                     className={`${
@@ -160,10 +160,11 @@ const OperationSteps = () => {
                       .split(
                         new RegExp(`(${highlightedWord})`, "gi")
                       )
-                      .map((word, wIdx) =>
-                        word.toLowerCase() === highlightedWord.toLowerCase() ? (
+                      .map((word, wIdx) => {
+                        const wordKey = `${stepKey}-word-${wIdx}-${word}`;
+                        return word.toLowerCase() === highlightedWord.toLowerCase() ? (
                           <span
-                            key={wIdx}
+                            key={wordKey}
                             style={{
                               color:
                                 theme === "dark"
@@ -174,9 +175,9 @@ const OperationSteps = () => {
                             {word}
                           </span>
                         ) : (
-                          <span key={wIdx}>{word}</span>
-                        )
-                      )}
+                          <span key={wordKey}>{word}</span>
+                        );
+                      })}
                   </h3>
 
                   <p
@@ -187,7 +188,7 @@ const OperationSteps = () => {
                     {contentLines
                       ? contentLines.map(
                           (c: string, subindex: number) => (
-                            <React.Fragment key={subindex}>
+                            <React.Fragment key={`${stepKey}-line-${subindex}-${c.slice(0, 10)}`}>
                               {c}
                               <br />
                             </React.Fragment>
@@ -203,7 +204,6 @@ const OperationSteps = () => {
                   style={{
                     backgroundColor:
                       theme === "dark" ? step.lightColor : step.darkColor,
-                    willChange: "transform",
                   }}
                   ref={(el) => {
                     lineRefs.current[index] = el;
@@ -215,18 +215,34 @@ const OperationSteps = () => {
                   ref={(el) => {
                     bubbleRefs.current[index] = el;
                   }}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={title}
                   className="flex items-center justify-center w-32 h-32 sm:w-44 sm:h-44 md:w-56 md:h-56 lg:w-64 lg:h-64 rounded-full z-[1] bubble"
                   style={{
                     backgroundColor: step.lightColor,
-                    willChange: "transform",
                   }}
-                  onMouseEnter={() => handleMouseEnter(bubbleRefs, index)}
-                  onMouseLeave={() => handleMouseLeave(bubbleRefs, index)}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.willChange = "transform";
+                    handleMouseEnter(bubbleRefs, index);
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.willChange = "auto";
+                    handleMouseLeave(bubbleRefs, index);
+                  }}
                   onClick={() => handleBubbleClick(bubbleRefs, index)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" || e.key === " ") {
+                      e.preventDefault();
+                      handleBubbleClick(bubbleRefs, index);
+                    }
+                  }}
                 >
-                  <img
+                  <Image
                     src={`/icons/cromatico/${step.logo_url}`}
                     alt={title}
+                    width={144}
+                    height={144}
                     className="w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36"
                   />
                 </div>

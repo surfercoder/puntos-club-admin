@@ -210,101 +210,22 @@ export default function Profit() {
             className="z-[3]"
           />
 
-          {points.map((point, index) => (
-            <g key={index}>
-              <circle
-                ref={(el) => {
-                  pointRefs.current[index] = el;
-                }}
-                cx={point.x}
-                cy={point.y}
-                r={isSmall ? "15" : "10"}
-                fill={point.color}
-                className="z-[1] opacity-0"
-                onClick={() =>
-                  handleCircleClick(
-                    point.descKey
-                      ? getDescriptionLines(point.descKey)
-                      : [],
-                    point.color
-                  )
-                }
-              />
-              {index > 0 && index < points.length - 1 && (
-                <g
-                  ref={(el) => {
-                    handRefs.current[index] = el;
-                  }}
-                  transform={`translate(${point.x - 10}, ${point.y - 12})`}
-                  className="opacity-0 absolute"
-                >
-                  <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth="1"
-                    stroke="currentColor"
-                    width="34"
-                    height="34"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59"
-                    />
-                  </svg>
-                </g>
-              )}
-            </g>
-          ))}
+          <ProfitPoints
+            points={points}
+            isSmall={isSmall}
+            pointRefs={pointRefs}
+            handRefs={handRefs}
+            onCircleClick={handleCircleClick}
+            getDescriptionLines={getDescriptionLines}
+          />
 
-          {points.map((point, index) => {
-            if (point.titleKey && point.descKey) {
-              const title = t(`title${point.titleKey}`);
-              const descLines = getDescriptionLines(point.descKey);
-              return (
-                <g
-                  key={index}
-                  ref={(el) => {
-                    textRefs.current[index] = el;
-                  }}
-                  transform={`translate(${point.x}, ${
-                    index % 2 === 0
-                      ? isMobile
-                        ? point.y - 55
-                        : descLines.length > 2
-                        ? point.y - 98
-                        : point.y - 75
-                      : isMobile
-                      ? point.y + 25
-                      : point.y + 45
-                  })`}
-                  textAnchor="middle"
-                  className={`opacity-0 x-${point.x} y-${point.y}`}
-                >
-                  <text
-                    y="-5"
-                    className="translate-y-7 sm:translate-y-0 text-2xl sm:text-2xl font-bold fill-black dark:fill-white w-full text-center"
-                  >
-                    {title}
-                  </text>
-
-                  {descLines.map(
-                    (word: string, dIdx: number) => (
-                      <text
-                        key={dIdx}
-                        y={25 * (dIdx + 1)}
-                        className="text-lg md:text-base fill-black dark:fill-white hidden sm:block"
-                      >
-                        {word}
-                      </text>
-                    )
-                  )}
-                </g>
-              );
-            }
-            return null;
-          })}
+          <ProfitLabels
+            points={points}
+            isMobile={isMobile}
+            textRefs={textRefs}
+            t={t}
+            getDescriptionLines={getDescriptionLines}
+          />
         </svg>
       </div>
 
@@ -316,11 +237,153 @@ export default function Profit() {
         className="flex flex-col w-80 min-h-20 justify-center py-3 px-4 border-black border-2 rounded-xl sm:hidden"
       >
         {currentDescription.map((descr, dIdx) => (
-          <p key={dIdx} className="text-center text-sm">
+          <p key={`descr-${dIdx}-${descr}`} className="text-center text-sm">
             {descr}
           </p>
         ))}
       </div>
     </div>
+  );
+}
+
+type ProfitPoint = {
+  x: number;
+  y: number;
+  color: string;
+  titleKey?: string;
+  descKey?: string;
+};
+
+type Translator = ReturnType<typeof useTranslations>;
+
+interface ProfitPointsProps {
+  points: ProfitPoint[];
+  isSmall: boolean;
+  pointRefs: React.MutableRefObject<(SVGCircleElement | null)[]>;
+  handRefs: React.MutableRefObject<(SVGGElement | null)[]>;
+  onCircleClick: (descLines: string[], color: string) => void;
+  getDescriptionLines: (descKey: string) => string[];
+}
+
+function ProfitPoints({
+  points,
+  isSmall,
+  pointRefs,
+  handRefs,
+  onCircleClick,
+  getDescriptionLines,
+}: ProfitPointsProps) {
+  return (
+    <>
+      {points.map((point, index) => (
+        <g key={`point-${point.x}-${point.y}`}>
+          <circle
+            ref={(el) => {
+              pointRefs.current[index] = el;
+            }}
+            cx={point.x}
+            cy={point.y}
+            r={isSmall ? "15" : "10"}
+            fill={point.color}
+            className="z-[1] opacity-0"
+            onClick={() =>
+              onCircleClick(
+                point.descKey ? getDescriptionLines(point.descKey) : [],
+                point.color,
+              )
+            }
+          />
+          {index > 0 && index < points.length - 1 && (
+            <g
+              ref={(el) => {
+                handRefs.current[index] = el;
+              }}
+              transform={`translate(${point.x - 10}, ${point.y - 12})`}
+              className="opacity-0 absolute"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth="1"
+                stroke="currentColor"
+                width="34"
+                height="34"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.042 21.672 13.684 16.6m0 0-2.51 2.225.569-9.47 5.227 7.917-3.286-.672ZM12 2.25V4.5m5.834.166-1.591 1.591M20.25 10.5H18M7.757 14.743l-1.59 1.59M6 10.5H3.75m4.007-4.243-1.59-1.59"
+                />
+              </svg>
+            </g>
+          )}
+        </g>
+      ))}
+    </>
+  );
+}
+
+interface ProfitLabelsProps {
+  points: ProfitPoint[];
+  isMobile: boolean;
+  textRefs: React.MutableRefObject<(SVGGElement | null)[]>;
+  t: Translator;
+  getDescriptionLines: (descKey: string) => string[];
+}
+
+function ProfitLabels({
+  points,
+  isMobile,
+  textRefs,
+  t,
+  getDescriptionLines,
+}: ProfitLabelsProps) {
+  return (
+    <>
+      {points.map((point, index) => {
+        if (!point.titleKey || !point.descKey) return null;
+        const title = t(`title${point.titleKey}`);
+        const descLines = getDescriptionLines(point.descKey);
+        const translateY =
+          index % 2 === 0
+            ? isMobile
+              ? point.y - 55
+              : descLines.length > 2
+                ? point.y - 98
+                : point.y - 75
+            : isMobile
+              ? point.y + 25
+              : point.y + 45;
+        return (
+          <g
+            key={`text-${point.x}-${point.y}`}
+            ref={(el) => {
+              textRefs.current[index] = el;
+            }}
+            transform={`translate(${point.x}, ${translateY})`}
+            textAnchor="middle"
+            className={`opacity-0 x-${point.x} y-${point.y}`}
+          >
+            <text
+              y="-5"
+              className="translate-y-7 sm:translate-y-0 text-2xl sm:text-2xl font-bold fill-black dark:fill-white w-full text-center"
+            >
+              {title}
+            </text>
+
+            {descLines.map((word: string, dIdx: number) => (
+              <text
+                key={`line-${dIdx}-${word}`}
+                y={25 * (dIdx + 1)}
+                className="text-lg md:text-base fill-black dark:fill-white hidden sm:block"
+              >
+                {word}
+              </text>
+            ))}
+          </g>
+        );
+      })}
+    </>
   );
 }

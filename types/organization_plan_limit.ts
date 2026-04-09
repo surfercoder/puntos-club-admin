@@ -1,4 +1,3 @@
-import type { Organization } from './organization';
 import type { PlanType, PlanFeatureKey } from './plan';
 
 export type OrganizationPlanLimit = {
@@ -13,6 +12,3 @@ export type OrganizationPlanLimit = {
   updated_at: string;
 };
 
-export type OrganizationPlanLimitWithRelations = OrganizationPlanLimit & {
-  organization?: Organization;
-};

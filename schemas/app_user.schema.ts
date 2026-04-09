@@ -15,5 +15,3 @@ export const AppUserSchema = z.object({
   role_id: z.string().optional().nullable(),
 });
 
-export type AppUserInput = z.input<typeof AppUserSchema>;
-export type AppUser = z.infer<typeof AppUserSchema>;

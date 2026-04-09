@@ -335,8 +335,7 @@ describe('PlanSelector', () => {
   });
 
   it('verifies subscription when preapproval_id is in search params (authorized)', async () => {
-    const { useSearchParams } = require('next/navigation');
-    useSearchParams.mockReturnValue(new URLSearchParams('preapproval_id=test-123'));
+    window.history.replaceState(null, '', '/dashboard/settings/plan?preapproval_id=test-123');
     const { verifySubscriptionAction } = require('@/actions/dashboard/subscription/verify-subscription');
     (verifySubscriptionAction as jest.Mock).mockResolvedValue({ status: 'authorized', plan: 'pro' });
 
@@ -353,13 +352,11 @@ describe('PlanSelector', () => {
       expect(toast.success).toHaveBeenCalledWith('planUpgraded');
     });
 
-    // Restore default
-    useSearchParams.mockReturnValue(new URLSearchParams());
+    window.history.replaceState(null, '', '/');
   });
 
   it('shows pending toast when subscription status is pending', async () => {
-    const { useSearchParams } = require('next/navigation');
-    useSearchParams.mockReturnValue(new URLSearchParams('preapproval_id=test-456'));
+    window.history.replaceState(null, '', '/dashboard/settings/plan?preapproval_id=test-456');
     const { verifySubscriptionAction } = require('@/actions/dashboard/subscription/verify-subscription');
     (verifySubscriptionAction as jest.Mock).mockResolvedValue({ status: 'pending' });
 
@@ -375,12 +372,11 @@ describe('PlanSelector', () => {
       expect(toast.info).toHaveBeenCalledWith('paymentPending');
     });
 
-    useSearchParams.mockReturnValue(new URLSearchParams());
+    window.history.replaceState(null, '', '/');
   });
 
   it('handles verify subscription error silently', async () => {
-    const { useSearchParams } = require('next/navigation');
-    useSearchParams.mockReturnValue(new URLSearchParams('preapproval_id=test-789'));
+    window.history.replaceState(null, '', '/dashboard/settings/plan?preapproval_id=test-789');
     const { verifySubscriptionAction } = require('@/actions/dashboard/subscription/verify-subscription');
     (verifySubscriptionAction as jest.Mock).mockRejectedValue(new Error('Network error'));
 
@@ -400,7 +396,7 @@ describe('PlanSelector', () => {
     expect(toast.success).not.toHaveBeenCalled();
     expect(toast.info).not.toHaveBeenCalled();
 
-    useSearchParams.mockReturnValue(new URLSearchParams());
+    window.history.replaceState(null, '', '/');
   });
 
   it('shows error when initPoint is missing from response', async () => {

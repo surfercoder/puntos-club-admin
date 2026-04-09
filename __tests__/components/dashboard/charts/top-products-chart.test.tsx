@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { TopProductsChart } from '@/components/dashboard/charts/top-products-chart';
+import { TopProductsChart } from '@/components/dashboard/charts/top-products-chart-view';
 import type { TopProductStat } from '@/actions/dashboard/analytics/actions';
 
 jest.mock('recharts', () => {

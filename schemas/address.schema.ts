@@ -14,5 +14,3 @@ export const AddressSchema = z.object({
   longitude: z.number().optional(),
 });
 
-export type AddressInput = z.input<typeof AddressSchema>;
-export type Address = z.infer<typeof AddressSchema>;

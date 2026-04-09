@@ -11,5 +11,3 @@ export const AppOrderSchema = z.object({
   observations: z.string().optional().or(z.literal('')).transform(val => val === '' ? null : val),
 });
 
-export type AppOrderInput = z.input<typeof AppOrderSchema>;
-export type AppOrder = z.infer<typeof AppOrderSchema>;

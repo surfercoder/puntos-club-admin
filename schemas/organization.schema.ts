@@ -14,5 +14,3 @@ export const OrganizationVisibilitySchema = z.object({
   is_public: z.boolean(),
 });
 
-export type OrganizationInput = z.input<typeof OrganizationSchema>;
-export type Organization = z.infer<typeof OrganizationSchema>;

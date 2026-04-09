@@ -1,5 +1,3 @@
-import type { Redemption } from './redemption';
-
 export type AppOrder = {
   id: string;
   order_number: string;
@@ -8,6 +6,3 @@ export type AppOrder = {
   observations?: string | null;
 };
 
-export type AppOrderWithRelations = AppOrder & {
-  redemptions?: Redemption[];
-};

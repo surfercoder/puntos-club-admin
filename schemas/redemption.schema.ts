@@ -16,5 +16,3 @@ export const RedemptionSchema = z.object({
   redemption_date: z.string().optional(),
 });
 
-export type RedemptionInput = z.input<typeof RedemptionSchema>;
-export type Redemption = z.infer<typeof RedemptionSchema>;

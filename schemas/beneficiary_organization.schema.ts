@@ -20,5 +20,4 @@ export const BeneficiaryOrganizationSchema = z.object({
   updated_at: z.string().optional(),
 });
 
-export type BeneficiaryOrganizationInput = z.input<typeof BeneficiaryOrganizationSchema>;
 export type BeneficiaryOrganization = z.infer<typeof BeneficiaryOrganizationSchema>;

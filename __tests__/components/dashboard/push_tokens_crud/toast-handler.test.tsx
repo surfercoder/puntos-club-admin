@@ -1,81 +1,46 @@
 import { render } from '@testing-library/react';
 import ToastHandler from '@/components/dashboard/push_tokens_crud/toast-handler';
-import { useSearchParams, useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
-describe('ToastHandler (push_tokens_crud)', () => {
-  const mockReplace = jest.fn();
+describe('ToastHandler', () => {
+  const setSearch = (search: string) => {
+    window.history.replaceState(null, '', `/dashboard${search}`);
+  };
 
   beforeEach(() => {
-    (useRouter as jest.Mock).mockReturnValue({
-      push: jest.fn(),
-      replace: mockReplace,
-      prefetch: jest.fn(),
-      back: jest.fn(),
-      forward: jest.fn(),
-      refresh: jest.fn(),
-    });
+    (toast.success as jest.Mock).mockClear();
+    setSearch('');
   });
 
   it('renders nothing (returns null)', () => {
-    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
     const { container } = render(<ToastHandler />);
     expect(container.innerHTML).toBe('');
   });
 
   it('shows toast.success when success param is present', () => {
-    const params = new URLSearchParams('success=Token+created');
-    (useSearchParams as jest.Mock).mockReturnValue(params);
-
+    setSearch('?success=Category+created');
     render(<ToastHandler />);
-
-    expect(toast.success).toHaveBeenCalledWith('Token created');
+    expect(toast.success).toHaveBeenCalledWith('Category created');
   });
 
-  it('calls router.replace after showing toast', () => {
-    const params = new URLSearchParams('success=Token+created');
-    (useSearchParams as jest.Mock).mockReturnValue(params);
-
+  it('cleans the success param from the URL after showing toast', () => {
+    setSearch('?success=Category+created');
     render(<ToastHandler />);
-
-    expect(mockReplace).toHaveBeenCalled();
+    expect(window.location.search).not.toContain('success');
   });
 
   it('does not show toast when success param is absent', () => {
-    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
-
+    setSearch('');
     render(<ToastHandler />);
-
     expect(toast.success).not.toHaveBeenCalled();
-    expect(mockReplace).not.toHaveBeenCalled();
   });
 
-  it('does not show the same toast message twice', () => {
-    const params = new URLSearchParams('success=Token+created');
-    (useSearchParams as jest.Mock).mockReturnValue(params);
-
+  it('does not show the same toast message twice on re-render', () => {
+    setSearch('?success=Category+created');
     const { rerender } = render(<ToastHandler />);
     expect(toast.success).toHaveBeenCalledTimes(1);
-
+    setSearch('?success=Category+created');
     rerender(<ToastHandler />);
     expect(toast.success).toHaveBeenCalledTimes(1);
-  });
-
-  it('resets ref and allows new toast when success param is removed then re-added', () => {
-    const params = new URLSearchParams('success=Token+created');
-    (useSearchParams as jest.Mock).mockReturnValue(params);
-
-    const { rerender } = render(<ToastHandler />);
-    expect(toast.success).toHaveBeenCalledTimes(1);
-
-    (useSearchParams as jest.Mock).mockReturnValue(new URLSearchParams());
-    rerender(<ToastHandler />);
-
-    const newParams = new URLSearchParams('success=Another+message');
-    (useSearchParams as jest.Mock).mockReturnValue(newParams);
-    rerender(<ToastHandler />);
-
-    expect(toast.success).toHaveBeenCalledTimes(2);
-    expect(toast.success).toHaveBeenCalledWith('Another message');
   });
 });

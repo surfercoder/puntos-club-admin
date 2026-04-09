@@ -16,5 +16,3 @@ export const SubscriptionSchema = z.object({
   currency: z.string().default('ARS'),
 });
 
-export type SubscriptionInput = z.input<typeof SubscriptionSchema>;
-export type SubscriptionFormData = z.infer<typeof SubscriptionSchema>;
