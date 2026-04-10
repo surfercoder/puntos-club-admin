@@ -107,7 +107,18 @@ describe('MercadoPago Create Subscription Route', () => {
     expect(data.preapprovalId).toBe('pa_123');
   });
 
-  it('uses MP_TEST_PAYER_EMAIL when set instead of the user email', async () => {
+  it('does not send payer_email in production (lets MP use the payer own account)', async () => {
+    const request = {
+      json: () => Promise.resolve({ planId: 'advance' }),
+      headers: { get: () => null },
+    } as any;
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+    const calledBody = mockCreate.mock.calls[0][0].body;
+    expect(calledBody).not.toHaveProperty('payer_email');
+  });
+
+  it('uses MP_TEST_PAYER_EMAIL when set (sandbox mode)', async () => {
     process.env.MP_TEST_PAYER_EMAIL = 'test_payer@mp.com';
     const request = {
       json: () => Promise.resolve({ planId: 'advance' }),

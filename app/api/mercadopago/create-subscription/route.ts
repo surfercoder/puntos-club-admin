@@ -56,8 +56,10 @@ export async function POST(request: NextRequest) {
     const subscription = await preApproval.create({
       body: {
         reason: `Puntos Club — ${config.name}`,
-        // When MP_TEST_PAYER_EMAIL is set, use it to avoid test/production party mismatch
-        payer_email: testPayerEmail ?? user.email!,
+        // Only set payer_email in test/sandbox mode; in production, let MercadoPago
+        // use whatever account the user logs in with (their MP email may differ from
+        // their puntos-club email).
+        ...(testPayerEmail ? { payer_email: testPayerEmail } : {}),
         external_reference: `${user.id}|${typedPlanId}`, // webhook parses plan from here
         back_url: backUrl,
         status: 'pending',
@@ -86,7 +88,7 @@ export async function POST(request: NextRequest) {
           mp_plan_id: typedPlanId,
           plan: typedPlanId,
           status: 'pending',
-          payer_email: /* c8 ignore next */ user.email ?? '',
+          payer_email: '',
           amount: config.amount,
           currency: config.currency,
         },

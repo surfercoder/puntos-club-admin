@@ -357,6 +357,20 @@ describe('MercadoPago Webhook Route', () => {
     expect(response.status).toBe(200);
   });
 
+  it('skips payer_email update on existing subscription when payer_email is null', async () => {
+    mockGet.mockResolvedValueOnce({
+      status: 'authorized',
+      external_reference: 'u1|advance',
+      payer_email: null,
+    });
+    mockMaybeSingle.mockResolvedValueOnce({
+      data: { id: 1, organization_id: 1, plan: 'advance' },
+    });
+
+    const response = await POST(makeRequest({ type: 'subscription_preapproval', data: { id: 'pa_123' } }));
+    expect(response.status).toBe(200);
+  });
+
   it('handles new subscription with pending status (no org update)', async () => {
     mockGet.mockResolvedValueOnce({
       status: 'pending',

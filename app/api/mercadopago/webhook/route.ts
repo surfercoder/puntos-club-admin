@@ -104,10 +104,15 @@ export async function POST(request: NextRequest) {
       .maybeSingle();
 
     if (existing) {
-      // Update status
+      // Update status and payer_email (MP is the source of truth for the payer's email)
+      const payerEmail = (subscription.payer_email as string) ?? '';
       await admin
         .from('subscription')
-        .update({ status: mappedStatus, updated_at: new Date().toISOString() })
+        .update({
+          status: mappedStatus,
+          ...(payerEmail ? { payer_email: payerEmail } : {}),
+          updated_at: new Date().toISOString(),
+        })
         .eq('id', existing.id);
 
       // If subscription is now authorized, update org plan too
