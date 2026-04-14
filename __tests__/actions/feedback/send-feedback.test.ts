@@ -1,12 +1,10 @@
-import { sendFeedback } from '@/actions/feedback/send-feedback';
-
-// Mock nodemailer
-const mockSendMail = jest.fn();
-jest.mock('nodemailer', () => ({
-  createTransport: jest.fn(() => ({
-    sendMail: mockSendMail,
-  })),
+const mockSend = jest.fn();
+jest.mock('@/lib/resend', () => ({
+  resend: { emails: { send: (...args: unknown[]) => mockSend(...args) } },
+  EMAIL_FROM: 'Puntos Club <no-reply@puntosclub.com.ar>',
 }));
+
+import { sendFeedback } from '@/actions/feedback/send-feedback';
 
 describe('sendFeedback', () => {
   const validInput = {
@@ -17,8 +15,8 @@ describe('sendFeedback', () => {
   };
 
   beforeEach(() => {
-    delete process.env.GMAIL_USER;
-    delete process.env.GMAIL_APP_PASSWORD;
+    jest.clearAllMocks();
+    delete process.env.RESEND_API_KEY;
   });
 
   it('returns error when message is empty', async () => {
@@ -30,29 +28,28 @@ describe('sendFeedback', () => {
     expect(result).toEqual({ success: false, error: 'Message is required.' });
   });
 
-  it('returns success without sending email when GMAIL credentials are not set', async () => {
+  it('returns success without sending email when RESEND_API_KEY is not set', async () => {
     const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
 
     const result = await sendFeedback(validInput);
 
     expect(result).toEqual({ success: true });
     expect(consoleSpy).toHaveBeenCalled();
-    expect(mockSendMail).not.toHaveBeenCalled();
+    expect(mockSend).not.toHaveBeenCalled();
 
     consoleSpy.mockRestore();
   });
 
-  it('sends email and returns success when credentials are set', async () => {
-    process.env.GMAIL_USER = 'test@gmail.com';
-    process.env.GMAIL_APP_PASSWORD = 'app-password';
-    mockSendMail.mockResolvedValue({});
+  it('sends email and returns success when RESEND_API_KEY is set', async () => {
+    process.env.RESEND_API_KEY = 're_test_key';
+    mockSend.mockResolvedValue({ data: { id: 'msg-123' }, error: null });
 
     const result = await sendFeedback(validInput);
 
     expect(result).toEqual({ success: true });
-    expect(mockSendMail).toHaveBeenCalledWith(
+    expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
-        from: '"Puntos Club Feedback" <test@gmail.com>',
+        from: 'Puntos Club <no-reply@puntosclub.com.ar>',
         to: 'acassani@puntosclub.com.ar',
         replyTo: 'user@example.com',
         subject: '[Feedback] Feedback de Test User',
@@ -61,22 +58,33 @@ describe('sendFeedback', () => {
   });
 
   it('uses correct type labels in subject', async () => {
-    process.env.GMAIL_USER = 'test@gmail.com';
-    process.env.GMAIL_APP_PASSWORD = 'app-password';
-    mockSendMail.mockResolvedValue({});
+    process.env.RESEND_API_KEY = 're_test_key';
+    mockSend.mockResolvedValue({ data: { id: 'msg-123' }, error: null });
 
     await sendFeedback({ ...validInput, type: 'error' });
-    expect(mockSendMail).toHaveBeenCalledWith(
+    expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         subject: '[Error] Feedback de Test User',
       })
     );
   });
 
-  it('returns error when sendMail throws', async () => {
-    process.env.GMAIL_USER = 'test@gmail.com';
-    process.env.GMAIL_APP_PASSWORD = 'app-password';
-    mockSendMail.mockRejectedValue(new Error('SMTP error'));
+  it('returns error when Resend returns an error object', async () => {
+    process.env.RESEND_API_KEY = 're_test_key';
+    mockSend.mockResolvedValue({ data: null, error: { message: 'API error' } });
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+
+    const result = await sendFeedback(validInput);
+
+    expect(result).toEqual({ success: false, error: 'Failed to send feedback.' });
+    expect(consoleSpy).toHaveBeenCalled();
+
+    consoleSpy.mockRestore();
+  });
+
+  it('returns error when send throws', async () => {
+    process.env.RESEND_API_KEY = 're_test_key';
+    mockSend.mockRejectedValue(new Error('Network error'));
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
 
     const result = await sendFeedback(validInput);
@@ -88,13 +96,12 @@ describe('sendFeedback', () => {
   });
 
   it('includes message content in HTML body', async () => {
-    process.env.GMAIL_USER = 'test@gmail.com';
-    process.env.GMAIL_APP_PASSWORD = 'app-password';
-    mockSendMail.mockResolvedValue({});
+    process.env.RESEND_API_KEY = 're_test_key';
+    mockSend.mockResolvedValue({ data: { id: 'msg-123' }, error: null });
 
     await sendFeedback(validInput);
 
-    const call = mockSendMail.mock.calls[0][0];
+    const call = mockSend.mock.calls[0][0];
     expect(call.html).toContain('Great app!');
     expect(call.html).toContain('Test User');
     expect(call.html).toContain('user@example.com');
@@ -102,19 +109,17 @@ describe('sendFeedback', () => {
   });
 
   it('uses type as label and default color when type is unknown', async () => {
-    process.env.GMAIL_USER = 'test@gmail.com';
-    process.env.GMAIL_APP_PASSWORD = 'app-password';
-    mockSendMail.mockResolvedValue({});
+    process.env.RESEND_API_KEY = 're_test_key';
+    mockSend.mockResolvedValue({ data: { id: 'msg-123' }, error: null });
 
     await sendFeedback({ ...validInput, type: 'unknown_type' as any });
 
-    expect(mockSendMail).toHaveBeenCalledWith(
+    expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         subject: '[unknown_type] Feedback de Test User',
       })
     );
-    // The HTML should contain the unknown type as the label
-    const call = mockSendMail.mock.calls[0][0];
+    const call = mockSend.mock.calls[0][0];
     expect(call.html).toContain('unknown_type');
   });
 
@@ -125,13 +130,12 @@ describe('sendFeedback', () => {
     ['improvement', 'Mejora'],
     ['question', 'Pregunta'],
   ] as const)('maps type "%s" to label "%s"', async (type, label) => {
-    process.env.GMAIL_USER = 'test@gmail.com';
-    process.env.GMAIL_APP_PASSWORD = 'app-password';
-    mockSendMail.mockResolvedValue({});
+    process.env.RESEND_API_KEY = 're_test_key';
+    mockSend.mockResolvedValue({ data: { id: 'msg-123' }, error: null });
 
     await sendFeedback({ ...validInput, type: type as any });
 
-    expect(mockSendMail).toHaveBeenCalledWith(
+    expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
         subject: `[${label}] Feedback de Test User`,
       })

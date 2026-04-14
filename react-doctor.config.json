@@ -3,7 +3,9 @@
     "files": [
       "__tests__/**",
       "e2e/**",
-      "components/landing/screens/smartphone-3d.tsx"
+      "components/landing/screens/smartphone-3d.tsx",
+      "components/ui/sidebar.tsx",
+      "components/dashboard/organization/org-visibility-toggle.tsx"
     ]
   }
 }

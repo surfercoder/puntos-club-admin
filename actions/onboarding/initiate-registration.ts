@@ -1,12 +1,11 @@
 'use server';
 
-import nodemailer from 'nodemailer';
-
 import {
   createRegistrationToken,
   type PendingRegistration,
 } from '@/lib/registration-token';
 import { brandedEmailLayout, ctaButton } from '@/lib/email-template';
+import { resend, EMAIL_FROM } from '@/lib/resend';
 
 export async function initiateRegistration(input: {
   email: string;
@@ -36,9 +35,9 @@ export async function initiateRegistration(input: {
 
   const verificationUrl = `${siteUrl}/auth/complete-registration?token=${token}`;
 
-  // Dev fallback: no email credentials configured → print link to server console
-  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
-    console.warn('\n📧  [DEV] Verification URL (no GMAIL_USER / GMAIL_APP_PASSWORD set):\n');
+  // Dev fallback: no Resend API key → print link to server console
+  if (!process.env.RESEND_API_KEY) {
+    console.warn('\n📧  [DEV] Verification URL (no RESEND_API_KEY set):\n');
     console.warn(' ', verificationUrl, '\n');
     return { success: true };
   }
@@ -73,23 +72,36 @@ export async function initiateRegistration(input: {
 
   const html = brandedEmailLayout(body, footer);
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
-  });
+  const text = [
+    `¡Hola, ${input.firstName}!`,
+    '',
+    'Gracias por registrarte en Puntos Club.',
+    'Un último paso: confirmá tu dirección de email para activar tu cuenta.',
+    '',
+    'Hacé clic en el siguiente enlace para confirmar:',
+    verificationUrl,
+    '',
+    'Este enlace expira en 1 hora.',
+    'Si no creaste esta cuenta, podés ignorar este mensaje sin problema.',
+    '',
+    `© ${new Date().getFullYear()} Puntos Club. Todos los derechos reservados.`,
+  ].join('\n');
 
   try {
-    await transporter.sendMail({
-      from: `"Puntos Club" <${process.env.GMAIL_USER}>`,
+    const { error } = await resend.emails.send({
+      from: EMAIL_FROM,
       to: input.email,
-      subject: 'Confirma tu email – Puntos Club',
+      subject: 'Confirma tu email - Puntos Club',
       html,
+      text,
     });
+
+    if (error) {
+      console.error('[initiateRegistration] Resend error:', error);
+      return { success: false, error: 'No se pudo enviar el email de verificación.' };
+    }
   } catch (err) {
-    console.error('[initiateRegistration] Nodemailer error:', err);
+    console.error('[initiateRegistration] Resend error:', err);
     return { success: false, error: 'No se pudo enviar el email de verificación.' };
   }
 

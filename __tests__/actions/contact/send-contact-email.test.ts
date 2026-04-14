@@ -1,6 +1,7 @@
-const mockSendMail = jest.fn();
-jest.mock('nodemailer', () => ({
-  createTransport: jest.fn(() => ({ sendMail: mockSendMail })),
+const mockSend = jest.fn();
+jest.mock('@/lib/resend', () => ({
+  resend: { emails: { send: (...args: unknown[]) => mockSend(...args) } },
+  EMAIL_FROM: 'Puntos Club <no-reply@puntosclub.com.ar>',
 }));
 
 jest.mock('@/lib/email-template', () => ({
@@ -23,8 +24,7 @@ const validInput = {
 
 beforeEach(() => {
   jest.clearAllMocks();
-  delete process.env.GMAIL_USER;
-  delete process.env.GMAIL_APP_PASSWORD;
+  delete process.env.RESEND_API_KEY;
 });
 
 describe('sendContactEmail', () => {
@@ -39,21 +39,21 @@ describe('sendContactEmail', () => {
     expect(result).toEqual({ success: false, error: 'Invalid form data.' });
   });
 
-  it('should succeed without sending email when no GMAIL credentials', async () => {
+  it('should succeed without sending email when no RESEND_API_KEY', async () => {
     const result = await sendContactEmail(validInput);
     expect(result).toEqual({ success: true });
-    expect(mockSendMail).not.toHaveBeenCalled();
+    expect(mockSend).not.toHaveBeenCalled();
   });
 
-  it('should send email when GMAIL credentials are set', async () => {
-    process.env.GMAIL_USER = 'test@gmail.com';
-    process.env.GMAIL_APP_PASSWORD = 'secret';
-    mockSendMail.mockResolvedValue({ messageId: '123' });
+  it('should send email when RESEND_API_KEY is set', async () => {
+    process.env.RESEND_API_KEY = 're_test_key';
+    mockSend.mockResolvedValue({ data: { id: 'msg-123' }, error: null });
 
     const result = await sendContactEmail(validInput);
     expect(result).toEqual({ success: true });
-    expect(mockSendMail).toHaveBeenCalledWith(
+    expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
+        from: 'Puntos Club <no-reply@puntosclub.com.ar>',
         to: 'acassani@puntosclub.com.ar',
         subject: 'Nueva consulta de John Doe',
       })
@@ -61,19 +61,25 @@ describe('sendContactEmail', () => {
   });
 
   it('should send email with business field in rows when provided', async () => {
-    process.env.GMAIL_USER = 'test@gmail.com';
-    process.env.GMAIL_APP_PASSWORD = 'secret';
-    mockSendMail.mockResolvedValue({ messageId: '123' });
+    process.env.RESEND_API_KEY = 're_test_key';
+    mockSend.mockResolvedValue({ data: { id: 'msg-123' }, error: null });
 
     const result = await sendContactEmail({ ...validInput, business: 'ACME Corp' });
     expect(result).toEqual({ success: true });
-    expect(mockSendMail).toHaveBeenCalled();
+    expect(mockSend).toHaveBeenCalled();
   });
 
-  it('should return error when nodemailer fails', async () => {
-    process.env.GMAIL_USER = 'test@gmail.com';
-    process.env.GMAIL_APP_PASSWORD = 'secret';
-    mockSendMail.mockRejectedValue(new Error('SMTP error'));
+  it('should return error when Resend returns an error object', async () => {
+    process.env.RESEND_API_KEY = 're_test_key';
+    mockSend.mockResolvedValue({ data: null, error: { message: 'API error' } });
+
+    const result = await sendContactEmail(validInput);
+    expect(result).toEqual({ success: false, error: 'Failed to send contact email.' });
+  });
+
+  it('should return error when send throws', async () => {
+    process.env.RESEND_API_KEY = 're_test_key';
+    mockSend.mockRejectedValue(new Error('Network error'));
 
     const result = await sendContactEmail(validInput);
     expect(result).toEqual({ success: false, error: 'Failed to send contact email.' });

@@ -1,7 +1,7 @@
-jest.mock('nodemailer', () => ({
-  createTransport: jest.fn(() => ({
-    sendMail: jest.fn().mockResolvedValue({}),
-  })),
+const mockSend = jest.fn();
+jest.mock('@/lib/resend', () => ({
+  resend: { emails: { send: (...args: unknown[]) => mockSend(...args) } },
+  EMAIL_FROM: 'Puntos Club <no-reply@puntosclub.com.ar>',
 }));
 jest.mock('@/lib/registration-token', () => ({
   createRegistrationToken: jest.fn(() => 'mock-token-123'),
@@ -9,7 +9,6 @@ jest.mock('@/lib/registration-token', () => ({
 
 import { initiateRegistration } from '@/actions/onboarding/initiate-registration';
 import { createRegistrationToken } from '@/lib/registration-token';
-import nodemailer from 'nodemailer';
 
 const originalEnv = process.env;
 
@@ -32,9 +31,8 @@ const validInput = {
 };
 
 describe('initiateRegistration', () => {
-  it('should succeed in dev mode (no email credentials)', async () => {
-    delete process.env.GMAIL_USER;
-    delete process.env.GMAIL_APP_PASSWORD;
+  it('should succeed in dev mode (no RESEND_API_KEY)', async () => {
+    delete process.env.RESEND_API_KEY;
     const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
     const result = await initiateRegistration(validInput);
     expect(result).toEqual({ success: true });
@@ -42,15 +40,18 @@ describe('initiateRegistration', () => {
     consoleSpy.mockRestore();
   });
 
-  it('should send email when credentials configured', async () => {
-    process.env.GMAIL_USER = 'test@gmail.com';
-    process.env.GMAIL_APP_PASSWORD = 'app-password';
+  it('should send email when RESEND_API_KEY is configured', async () => {
+    process.env.RESEND_API_KEY = 're_test_key';
+    mockSend.mockResolvedValue({ data: { id: 'msg-123' }, error: null });
     const result = await initiateRegistration(validInput);
     expect(result).toEqual({ success: true });
-    expect(nodemailer.createTransport).toHaveBeenCalledWith({
-      service: 'gmail',
-      auth: { user: 'test@gmail.com', pass: 'app-password' },
-    });
+    expect(mockSend).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: 'Puntos Club <no-reply@puntosclub.com.ar>',
+        to: 'test@test.com',
+        subject: 'Confirma tu email - Puntos Club',
+      })
+    );
   });
 
   it('should return error when token creation fails', async () => {
@@ -63,11 +64,18 @@ describe('initiateRegistration', () => {
     consoleSpy.mockRestore();
   });
 
-  it('should return error when email sending fails', async () => {
-    process.env.GMAIL_USER = 'test@gmail.com';
-    process.env.GMAIL_APP_PASSWORD = 'app-password';
-    const mockSendMail = jest.fn().mockRejectedValue(new Error('SMTP error'));
-    (nodemailer.createTransport as jest.Mock).mockReturnValue({ sendMail: mockSendMail });
+  it('should return error when Resend returns an error object', async () => {
+    process.env.RESEND_API_KEY = 're_test_key';
+    mockSend.mockResolvedValue({ data: null, error: { message: 'Invalid API key' } });
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
+    const result = await initiateRegistration(validInput);
+    expect(result).toEqual({ success: false, error: 'No se pudo enviar el email de verificación.' });
+    consoleSpy.mockRestore();
+  });
+
+  it('should return error when email sending throws', async () => {
+    process.env.RESEND_API_KEY = 're_test_key';
+    mockSend.mockRejectedValue(new Error('Network error'));
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
     const result = await initiateRegistration(validInput);
     expect(result).toEqual({ success: false, error: 'No se pudo enviar el email de verificación.' });
@@ -76,8 +84,7 @@ describe('initiateRegistration', () => {
 
   it('should use default site URL when env not set', async () => {
     delete process.env.NEXT_PUBLIC_SITE_URL;
-    delete process.env.GMAIL_USER;
-    delete process.env.GMAIL_APP_PASSWORD;
+    delete process.env.RESEND_API_KEY;
     const consoleSpy = jest.spyOn(console, 'warn').mockImplementation();
     const result = await initiateRegistration(validInput);
     expect(result).toEqual({ success: true });

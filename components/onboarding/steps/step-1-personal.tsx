@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { Step1CompletedData } from '@/components/onboarding/onboarding-wizard';
+import { PasswordStrengthChecklist, allRulesPass } from '@/components/onboarding/password-strength-checklist';
 
 interface Step1Props {
   onNext: (data?: Step1CompletedData) => void;
@@ -151,7 +152,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
     if (!email.trim()) newErrors.email = tCommon('email');
     else if (!/\S+@\S+\.\S+/.test(email)) newErrors.email = tCommon('email');
     if (!password) newErrors.password = tCommon('password');
-    else if (password.length < 8) newErrors.password = t('minPassword');
+    else if (!allRulesPass(password)) newErrors.password = t('passwordWeak');
     return newErrors;
   };
 
@@ -297,9 +298,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
           </button>
         </div>
         {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
-        <p className="text-xs text-muted-foreground">
-          {t('passwordHint')}
-        </p>
+        <PasswordStrengthChecklist password={password} />
       </div>
 
       <Button type="submit" className="w-full" disabled={loading}>

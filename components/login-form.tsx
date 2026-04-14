@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { useReducer } from "react";
 import { useTranslations } from "next-intl";
 
+import { Eye, EyeOff } from "lucide-react";
+
 import { signInAdminPortal } from "@/actions/auth/actions";
 import { Button } from "@/components/ui/button";
 import {
@@ -25,6 +27,7 @@ type LoginFormState = {
   error: string | null;
   fieldErrors: Record<string, string>;
   isLoading: boolean;
+  showPassword: boolean;
 };
 
 type LoginFormAction =
@@ -33,6 +36,7 @@ type LoginFormAction =
   | { type: "SET_ERROR"; payload: string | null }
   | { type: "SET_FIELD_ERRORS"; payload: Record<string, string> }
   | { type: "SET_IS_LOADING"; payload: boolean }
+  | { type: "TOGGLE_SHOW_PASSWORD" }
   | { type: "CLEAR_ERRORS" };
 
 const initialState: LoginFormState = {
@@ -41,6 +45,7 @@ const initialState: LoginFormState = {
   error: null,
   fieldErrors: {},
   isLoading: false,
+  showPassword: false,
 };
 
 function loginFormReducer(
@@ -58,6 +63,8 @@ function loginFormReducer(
       return { ...state, fieldErrors: action.payload };
     case "SET_IS_LOADING":
       return { ...state, isLoading: action.payload };
+    case "TOGGLE_SHOW_PASSWORD":
+      return { ...state, showPassword: !state.showPassword };
     case "CLEAR_ERRORS":
       return { ...state, error: null, fieldErrors: {} };
     default:
@@ -73,7 +80,7 @@ export function LoginForm({
   const tCommon = useTranslations("Common");
 
   const [state, dispatch] = useReducer(loginFormReducer, initialState);
-  const { email, password, error, fieldErrors, isLoading } = state;
+  const { email, password, error, fieldErrors, isLoading, showPassword } = state;
   const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -150,14 +157,25 @@ export function LoginForm({
                     {t("forgotPassword")}
                   </Link>
                 </div>
-                <Input
-                  id="password"
-                  onChange={(e) => dispatch({ type: "SET_PASSWORD", payload: e.target.value })}
-                  type="password"
-                  value={password}
-                  aria-invalid={!!fieldErrors.password}
-                  aria-describedby="password-error"
-                />
+                <div className="relative">
+                  <Input
+                    id="password"
+                    onChange={(e) => dispatch({ type: "SET_PASSWORD", payload: e.target.value })}
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    className="pr-10"
+                    aria-invalid={!!fieldErrors.password}
+                    aria-describedby="password-error"
+                  />
+                  <button
+                    type="button"
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                    onClick={() => dispatch({ type: "TOGGLE_SHOW_PASSWORD" })}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                  >
+                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
                 {fieldErrors.password && (
                   <p id="password-error" className="text-destructive text-sm">
                     {fieldErrors.password}

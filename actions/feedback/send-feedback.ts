@@ -1,6 +1,5 @@
 'use server';
 
-import nodemailer from 'nodemailer';
 import {
   brandedEmailLayout,
   sectionHeading,
@@ -9,6 +8,7 @@ import {
   messageBox,
   typeBadge,
 } from '@/lib/email-template';
+import { resend, EMAIL_FROM } from '@/lib/resend';
 
 type FeedbackType = 'comment' | 'feedback' | 'error' | 'improvement' | 'question';
 
@@ -44,9 +44,9 @@ export async function sendFeedback(
     return { success: false, error: 'Message is required.' };
   }
 
-  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+  if (!process.env.RESEND_API_KEY) {
     console.warn(
-      '\n📧  [DEV] Feedback received (no GMAIL credentials set):',
+      '\n📧  [DEV] Feedback received (no RESEND_API_KEY set):',
       JSON.stringify({ type, message, userEmail, userName }, null, 2),
       '\n'
     );
@@ -71,24 +71,21 @@ export async function sendFeedback(
 
   const html = brandedEmailLayout(body);
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
-  });
-
   try {
-    await transporter.sendMail({
-      from: `"Puntos Club Feedback" <${process.env.GMAIL_USER}>`,
+    const { error } = await resend.emails.send({
+      from: EMAIL_FROM,
       to: 'acassani@puntosclub.com.ar',
       replyTo: userEmail,
       subject: `[${typeLabel}] Feedback de ${userName}`,
       html,
     });
+
+    if (error) {
+      console.error('[sendFeedback] Resend error:', error);
+      return { success: false, error: 'Failed to send feedback.' };
+    }
   } catch (err) {
-    console.error('[sendFeedback] Nodemailer error:', err);
+    console.error('[sendFeedback] Resend error:', err);
     return { success: false, error: 'Failed to send feedback.' };
   }
 

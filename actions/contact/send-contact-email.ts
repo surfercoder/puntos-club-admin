@@ -1,6 +1,5 @@
 'use server';
 
-import nodemailer from 'nodemailer';
 import { ContactSchema } from '@/schemas/contact.schema';
 import type { ContactFormData } from '@/schemas/contact.schema';
 import {
@@ -10,6 +9,7 @@ import {
   dataTable,
   messageBox,
 } from '@/lib/email-template';
+import { resend, EMAIL_FROM } from '@/lib/resend';
 
 const CONTACT_RECIPIENT = 'acassani@puntosclub.com.ar';
 
@@ -26,9 +26,9 @@ export async function sendContactEmail(
 
   const fullName = `${firstName} ${lastName}`;
 
-  if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+  if (!process.env.RESEND_API_KEY) {
     console.warn(
-      '\n📧  [DEV] Contact form submission (no GMAIL credentials set):',
+      '\n📧  [DEV] Contact form submission (no RESEND_API_KEY set):',
       JSON.stringify({ firstName, lastName, email, phoneNumber, business, message }, null, 2),
       '\n'
     );
@@ -51,24 +51,21 @@ export async function sendContactEmail(
 
   const html = brandedEmailLayout(body);
 
-  const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-      user: process.env.GMAIL_USER,
-      pass: process.env.GMAIL_APP_PASSWORD,
-    },
-  });
-
   try {
-    await transporter.sendMail({
-      from: `"Puntos Club Contact" <${process.env.GMAIL_USER}>`,
+    const { error } = await resend.emails.send({
+      from: EMAIL_FROM,
       to: CONTACT_RECIPIENT,
       replyTo: email,
       subject: `Nueva consulta de ${fullName}`,
       html,
     });
+
+    if (error) {
+      console.error('[sendContactEmail] Resend error:', error);
+      return { success: false, error: 'Failed to send contact email.' };
+    }
   } catch (err) {
-    console.error('[sendContactEmail] Nodemailer error:', err);
+    console.error('[sendContactEmail] Resend error:', err);
     return { success: false, error: 'Failed to send contact email.' };
   }
 

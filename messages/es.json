@@ -1191,7 +1191,15 @@
       "creating": "Creando cuenta...",
       "genericError": "Ocurrió un error. Por favor intenta de nuevo.",
       "spamNote": "Revisa tu carpeta de spam o correo no deseado.",
-      "passwordHint": "Usa al menos 8 caracteres con una mezcla de letras y números."
+      "passwordHint": "Usa al menos 8 caracteres con una mezcla de letras y números.",
+      "passwordWeak": "La contraseña no cumple todos los requisitos",
+      "passwordStrength": {
+        "minLength": "Al menos 8 caracteres",
+        "hasLowercase": "Una letra minúscula",
+        "hasUppercase": "Una letra mayúscula",
+        "hasDigit": "Un número",
+        "hasSpecial": "Un carácter especial (!@#$%...)"
+      }
     },
     "step2": {
       "businessName": "Nombre del negocio",

@@ -139,17 +139,31 @@ describe('LoginForm', () => {
     render(<LoginForm />);
     fireEvent.change(screen.getByLabelText('email'), { target: { value: 'test@test.com' } });
     fireEvent.change(screen.getByLabelText('password'), { target: { value: 'password123' } });
-    fireEvent.click(screen.getByRole('button'));
+    fireEvent.click(screen.getByRole('button', { name: 'title' }));
 
     await waitFor(() => {
-      expect(screen.getByRole('button')).toBeDisabled();
+      expect(screen.getByRole('button', { name: /submitting/i })).toBeDisabled();
     });
 
     resolveLogin!({ success: true });
 
     await waitFor(() => {
-      expect(screen.getByRole('button')).not.toBeDisabled();
+      expect(screen.getByRole('button', { name: 'title' })).not.toBeDisabled();
     });
+  });
+
+  it('toggles password visibility when clicking the eye button', () => {
+    render(<LoginForm />);
+    const passwordInput = screen.getByLabelText('password');
+    expect(passwordInput).toHaveAttribute('type', 'password');
+
+    // Click to show password
+    fireEvent.click(screen.getByRole('button', { name: 'Show password' }));
+    expect(passwordInput).toHaveAttribute('type', 'text');
+
+    // Click to hide password
+    fireEvent.click(screen.getByRole('button', { name: 'Hide password' }));
+    expect(passwordInput).toHaveAttribute('type', 'password');
   });
 
   it('reducer default case returns state unchanged', () => {
@@ -165,7 +179,7 @@ describe('LoginForm', () => {
     spy.mockRestore();
 
     expect(capturedReducer).not.toBeNull();
-    const state = { email: '', password: '', error: null, fieldErrors: {}, isLoading: false };
+    const state = { email: '', password: '', error: null, fieldErrors: {}, isLoading: false, showPassword: false };
     const result = capturedReducer!(state, { type: 'UNKNOWN_ACTION' });
     expect(result).toBe(state);
   });

@@ -1191,7 +1191,15 @@
       "creating": "Creating account...",
       "genericError": "An error occurred. Please try again.",
       "spamNote": "Check your spam or junk mail folder.",
-      "passwordHint": "Use at least 8 characters with a mix of letters and numbers."
+      "passwordHint": "Use at least 8 characters with a mix of letters and numbers.",
+      "passwordWeak": "Password doesn't meet all requirements",
+      "passwordStrength": {
+        "minLength": "At least 8 characters",
+        "hasLowercase": "One lowercase letter",
+        "hasUppercase": "One uppercase letter",
+        "hasDigit": "One number",
+        "hasSpecial": "One special character (!@#$%...)"
+      }
     },
     "step2": {
       "businessName": "Business name",
