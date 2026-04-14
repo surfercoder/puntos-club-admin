@@ -119,7 +119,9 @@
       "Bash(git push:*)",
       "Bash(gh pr create --title 'chore: quality pass — react-doctor 100, checks green, 100% coverage' --body ':*)",
       "Read(//Users/agustincassani/.claude/skills/**)",
-      "Read(//Users/agustincassani/.claude/**)"
+      "Read(//Users/agustincassani/.claude/**)",
+      "Bash(npm uninstall:*)",
+      "mcp__supabase__search_docs"
     ],
     "deny": []
   },

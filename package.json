@@ -20,7 +20,7 @@
     "types:supabase": "supabase gen types typescript --local > types/supabase.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.88.0",
+    "@anthropic-ai/sdk": "^0.89.0",
     "@fontsource/lexend": "^5.2.11",
     "@fontsource/poppins": "^5.2.7",
     "@googlemaps/js-api-loader": "^2.0.2",
