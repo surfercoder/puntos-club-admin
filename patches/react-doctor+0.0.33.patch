@@ -1,0 +1,28 @@
+diff --git a/node_modules/react-doctor/dist/cli.js b/node_modules/react-doctor/dist/cli.js
+index ea3c5e5..ca08554 100755
+--- a/node_modules/react-doctor/dist/cli.js
++++ b/node_modules/react-doctor/dist/cli.js
+@@ -1201,7 +1201,8 @@ const runKnip = async (rootDirectory) => {
+ 	} else knipResult = await runKnipWithOptions(rootDirectory);
+ 	const { issues } = knipResult;
+ 	const diagnostics = [];
+-	for (const unusedFile of issues.files) diagnostics.push({
++	const filesIterable = Array.isArray(issues.files) ? issues.files : (issues.files && typeof issues.files === 'object' ? Object.keys(issues.files) : []);
++	for (const unusedFile of filesIterable) diagnostics.push({
+ 		filePath: path.relative(rootDirectory, unusedFile),
+ 		plugin: "knip",
+ 		rule: "files",
+diff --git a/node_modules/react-doctor/dist/index.js b/node_modules/react-doctor/dist/index.js
+index e1a2155..63e06fa 100644
+--- a/node_modules/react-doctor/dist/index.js
++++ b/node_modules/react-doctor/dist/index.js
+@@ -866,7 +866,8 @@ const runKnip = async (rootDirectory) => {
+ 	} else knipResult = await runKnipWithOptions(rootDirectory);
+ 	const { issues } = knipResult;
+ 	const diagnostics = [];
+-	for (const unusedFile of issues.files) diagnostics.push({
++	const filesIterable = Array.isArray(issues.files) ? issues.files : (issues.files && typeof issues.files === 'object' ? Object.keys(issues.files) : []);
++	for (const unusedFile of filesIterable) diagnostics.push({
+ 		filePath: path.relative(rootDirectory, unusedFile),
+ 		plugin: "knip",
+ 		rule: "files",

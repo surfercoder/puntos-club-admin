@@ -30,7 +30,7 @@ export async function POST(request: NextRequest) {
     const typedPlanId = planId as PlanId;
     const config = PLAN_CONFIG[typedPlanId];
 
-    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://puntos-club-admin.vercel.app').trim().replace(/\/+$/, '');
+    const siteUrl = (process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.puntosclub.com.ar').trim().replace(/\/+$/, '');
     const backUrl = customBackUrl
       ? `${siteUrl}${customBackUrl}`
       : `${siteUrl}/owner/onboarding?step=4`;

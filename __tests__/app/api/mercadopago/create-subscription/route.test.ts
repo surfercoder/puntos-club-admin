@@ -50,7 +50,7 @@ describe('MercadoPago Create Subscription Route', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    process.env = { ...originalEnv, NEXT_PUBLIC_SITE_URL: 'https://puntos-club-admin.vercel.app' };
+    process.env = { ...originalEnv, NEXT_PUBLIC_SITE_URL: 'https://www.puntosclub.com.ar' };
     delete process.env.MP_TEST_PAYER_EMAIL;
     mockGetUser.mockResolvedValue({ data: { user: { id: 'u1', email: 'test@test.com' } }, error: null });
     mockCreate.mockResolvedValue({ init_point: 'https://mp.com/checkout', id: 'pa_123' });
@@ -173,7 +173,7 @@ describe('MercadoPago Create Subscription Route', () => {
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
         body: expect.objectContaining({
-          back_url: expect.stringContaining('puntos-club-admin.vercel.app'),
+          back_url: expect.stringContaining('www.puntosclub.com.ar'),
         }),
       })
     );

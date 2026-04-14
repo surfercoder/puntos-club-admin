@@ -24,7 +24,7 @@ if (!accessToken) {
 const mp = new MercadoPago({ accessToken });
 const preApprovalPlan = new PreApprovalPlan(mp);
 
-const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://puntos-club-admin.vercel.app';
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.puntosclub.com.ar';
 
 const plans = [
   {
