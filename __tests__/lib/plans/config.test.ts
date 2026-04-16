@@ -38,7 +38,7 @@ describe('PLAN_FEATURE_LABELS', () => {
     expect(PLAN_FEATURE_LABELS.cashiers).toBe('Cajeros');
     expect(PLAN_FEATURE_LABELS.branches).toBe('Sucursales');
     expect(PLAN_FEATURE_LABELS.collaborators).toBe('Usuarios colaboradores');
-    expect(PLAN_FEATURE_LABELS.redeemable_products).toBe('Premios canjeables');
+    expect(PLAN_FEATURE_LABELS.redeemable_products).toBe('Premios disponibles por catálogo');
   });
 });
 

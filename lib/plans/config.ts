@@ -10,7 +10,7 @@ export const PLAN_FEATURE_LABELS: Record<PlanFeatureKey, string> = {
   cashiers:                   'Cajeros',
   branches:                   'Sucursales',
   collaborators:               'Usuarios colaboradores',
-  redeemable_products:        'Premios canjeables',
+  redeemable_products:        'Premios disponibles por catálogo',
 };
 
 /** Lucide icon name for each feature (used in UI components) */

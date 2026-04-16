@@ -1261,7 +1261,7 @@
       "dashboardBasic": "Basic",
       "adaptedMessaging": "Adapted messaging",
       "features": {
-        "rewards": "Redeemable rewards",
+        "rewards": "Catalog rewards",
         "beneficiaries": "Beneficiaries",
         "notificationsPerMonth": "Notifications / month",
         "cashiers": "Cashiers",
@@ -1492,7 +1492,7 @@
     "featureQrTitle": "QR Code",
     "featureQrDescription": "Your customers scan a QR at your store to join and earn points automatically on every purchase.",
     "featureRewardsTitle": "Rewards Catalog",
-    "featureRewardsDescription": "Create redeemable rewards with custom point values. Motivate your customers to come back.",
+    "featureRewardsDescription": "Create catalog rewards with custom point values. Motivate your customers to come back.",
     "featureNotificationsTitle": "Push Notifications",
     "featureNotificationsDescription": "Send targeted messages, promotions, and updates directly to your customers' phones.",
     "featureDashboardTitle": "Admin Dashboard",

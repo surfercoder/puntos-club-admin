@@ -1261,7 +1261,7 @@
       "dashboardBasic": "Básico",
       "adaptedMessaging": "Mensajería adaptada",
       "features": {
-        "rewards": "Premios canjeables",
+        "rewards": "Premios disponibles por catálogo",
         "beneficiaries": "Beneficiarios",
         "notificationsPerMonth": "Notificaciones / mes",
         "cashiers": "Cajeros",
@@ -1492,7 +1492,7 @@
     "featureQrTitle": "Código QR",
     "featureQrDescription": "Tus clientes escanean un QR en tu local para unirse y acumular puntos automáticamente en cada compra.",
     "featureRewardsTitle": "Catálogo de Premios",
-    "featureRewardsDescription": "Creá premios canjeables con valores de puntos personalizados. Motivá a tus clientes a volver.",
+    "featureRewardsDescription": "Creá premios disponibles por catálogo con valores de puntos personalizados. Motivá a tus clientes a volver.",
     "featureNotificationsTitle": "Notificaciones Push",
     "featureNotificationsDescription": "Enviá mensajes dirigidos, promociones y novedades directamente al celular de tus clientes.",
     "featureDashboardTitle": "Panel de Administración",
