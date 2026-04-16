@@ -121,7 +121,17 @@
       "Read(//Users/agustincassani/.claude/skills/**)",
       "Read(//Users/agustincassani/.claude/**)",
       "Bash(npm uninstall:*)",
-      "mcp__supabase__search_docs"
+      "mcp__supabase__search_docs",
+      "Bash(chmod +x /tmp/check_deps.sh)",
+      "Bash(/tmp/check_deps.sh)",
+      "Bash(chmod +x /tmp/check_dev_deps.sh)",
+      "Bash(/tmp/check_dev_deps.sh)",
+      "Bash(chmod +x /tmp/verify_types.sh)",
+      "Bash(/tmp/verify_types.sh)",
+      "Bash(chmod +x /tmp/final_check.sh)",
+      "Bash(/tmp/final_check.sh)",
+      "Bash(chmod +x /tmp/comprehensive_report.sh)",
+      "Bash(/tmp/comprehensive_report.sh)"
     ],
     "deny": []
   },

@@ -58,7 +58,11 @@ DELETE FROM auth.users;
 DELETE FROM branch;
 DELETE FROM address;
 
--- 11. Delete organization data
+-- 11. Delete subscription and plan limits data
+DELETE FROM subscription;
+DELETE FROM organization_plan_limits;
+
+-- 12. Delete organization data
 DELETE FROM organization_notification_limits;
 DELETE FROM organization;
 
@@ -101,6 +105,8 @@ DECLARE
     'app_user_id_seq',
     'branch_id_seq',
     'address_id_seq',
+    'subscription_id_seq',
+    'organization_plan_limits_id_seq',
     'organization_notification_limits_id_seq',
     'organization_id_seq'
   ];
