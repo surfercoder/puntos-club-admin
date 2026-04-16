@@ -11,6 +11,7 @@ const mockSupabase = {
   select: jest.fn(() => mockSupabase),
   eq: jest.fn(() => mockSupabase),
   single: jest.fn(() => ({ error: null })),
+  rpc: jest.fn(() => Promise.resolve({ data: 10, error: null })),
 };
 jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => mockSupabase) }));
 
@@ -27,6 +28,7 @@ beforeEach(() => {
   mockSupabase.select.mockReturnValue(mockSupabase);
   mockSupabase.eq.mockReturnValue(mockSupabase);
   mockSupabase.single.mockReturnValue({ error: null });
+  mockSupabase.rpc.mockResolvedValue({ data: 10, error: null });
 });
 
 function createFormData(data: Record<string, string>): FormData {
@@ -79,5 +81,35 @@ describe('purchaseFormAction', () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const fd = createFormData({ beneficiary_id: 'ben-1', cashier_id: 'cash-1', total_amount: '100.50' });
     await expect(purchaseFormAction(EMPTY_ACTION_STATE, fd)).rejects.toThrow('Unexpected');
+  });
+
+  it('should set orgIdNumber to null when active_org_id cookie is missing', async () => {
+    const { cookies } = require('next/headers');
+    (cookies as jest.Mock).mockResolvedValueOnce({ get: jest.fn(() => undefined), set: jest.fn() });
+    const fd = createFormData({ beneficiary_id: 'ben-1', cashier_id: 'cash-1', total_amount: '100.50' });
+    await purchaseFormAction(EMPTY_ACTION_STATE, fd);
+    expect(mockSupabase.rpc).toHaveBeenCalledWith('calculate_points_for_amount', expect.objectContaining({ p_organization_id: null }));
+    expect(redirect).toHaveBeenCalled();
+  });
+
+  it('should set orgIdNumber to null when active_org_id cookie is non-numeric', async () => {
+    const { cookies } = require('next/headers');
+    (cookies as jest.Mock).mockResolvedValueOnce({ get: jest.fn(() => ({ value: 'abc' })), set: jest.fn() });
+    const fd = createFormData({ beneficiary_id: 'ben-1', cashier_id: 'cash-1', total_amount: '100.50' });
+    await purchaseFormAction(EMPTY_ACTION_STATE, fd);
+    expect(mockSupabase.rpc).toHaveBeenCalledWith('calculate_points_for_amount', expect.objectContaining({ p_organization_id: null }));
+  });
+
+  it('should parse branch_id when provided', async () => {
+    const fd = createFormData({ beneficiary_id: 'ben-1', cashier_id: 'cash-1', total_amount: '100.50', branch_id: '42' });
+    await purchaseFormAction(EMPTY_ACTION_STATE, fd);
+    expect(mockSupabase.rpc).toHaveBeenCalledWith('calculate_points_for_amount', expect.objectContaining({ p_branch_id: 42 }));
+  });
+
+  it('should default pointsEarned to 0 when rpc returns null', async () => {
+    mockSupabase.rpc.mockResolvedValueOnce({ data: null, error: null });
+    const fd = createFormData({ beneficiary_id: 'ben-1', cashier_id: 'cash-1', total_amount: '100.50' });
+    await purchaseFormAction(EMPTY_ACTION_STATE, fd);
+    expect(mockSupabase.insert).toHaveBeenCalledWith([expect.objectContaining({ points_earned: 0 })]);
   });
 });

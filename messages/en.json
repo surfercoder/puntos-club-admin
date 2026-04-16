@@ -1004,6 +1004,8 @@
     "purchase": {
       "title": "Purchases",
       "description": "Manage system purchases",
+      "createTitle": "Create Purchase",
+      "editTitle": "Edit Purchase",
       "newButton": "+ New Purchase",
       "error": "Error loading purchases",
       "empty": "No purchases found.",
@@ -1023,6 +1025,16 @@
         "deleteError": "Error deleting purchase",
         "deleteSuccess": "Purchase deleted successfully",
         "genericError": "An unexpected error occurred"
+      },
+      "form": {
+        "beneficiaryLabel": "Beneficiary",
+        "selectBeneficiary": "Select beneficiary",
+        "cashierLabel": "Cashier",
+        "selectCashier": "Select cashier",
+        "branchLabel": "Branch",
+        "selectBranch": "Select branch (optional)",
+        "totalAmountLabel": "Total Amount",
+        "pointsEarnedLabel": "Points Earned"
       }
     },
     "subscription": {

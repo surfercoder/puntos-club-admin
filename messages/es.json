@@ -1004,6 +1004,8 @@
     "purchase": {
       "title": "Compras",
       "description": "Administrar compras del sistema",
+      "createTitle": "Crear Compra",
+      "editTitle": "Editar Compra",
       "newButton": "+ Nueva Compra",
       "error": "Error al obtener compras",
       "empty": "No se encontraron compras.",
@@ -1023,6 +1025,16 @@
         "deleteError": "Error al eliminar la compra",
         "deleteSuccess": "Compra eliminada correctamente",
         "genericError": "Ocurrió un error al eliminar"
+      },
+      "form": {
+        "beneficiaryLabel": "Beneficiario",
+        "selectBeneficiary": "Seleccionar beneficiario",
+        "cashierLabel": "Cajero",
+        "selectCashier": "Seleccionar cajero",
+        "branchLabel": "Sucursal",
+        "selectBranch": "Seleccionar sucursal (opcional)",
+        "totalAmountLabel": "Monto Total",
+        "pointsEarnedLabel": "Puntos Ganados"
       }
     },
     "subscription": {

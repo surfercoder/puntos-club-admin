@@ -8,14 +8,13 @@ describe('PurchaseSchema', () => {
   };
 
   describe('valid input', () => {
-    it('should accept minimal valid input with defaults', () => {
+    it('should accept minimal valid input', () => {
       const result = PurchaseSchema.safeParse(validInput);
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.beneficiary_id).toBe('ben-1');
         expect(result.data.cashier_id).toBe('cashier-1');
         expect(result.data.total_amount).toBe(1500.50);
-        expect(result.data.points_earned).toBe(0);
       }
     });
 
@@ -24,17 +23,11 @@ describe('PurchaseSchema', () => {
         ...validInput,
         id: 'pur-1',
         branch_id: 'branch-1',
-        points_earned: 150,
-        notes: 'Test purchase',
-        organization_id: 'org-1',
       });
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.id).toBe('pur-1');
         expect(result.data.branch_id).toBe('branch-1');
-        expect(result.data.points_earned).toBe(150);
-        expect(result.data.notes).toBe('Test purchase');
-        expect(result.data.organization_id).toBe('org-1');
       }
     });
   });
@@ -94,30 +87,6 @@ describe('PurchaseSchema', () => {
       expect(() => PurchaseSchema.parse({ ...validInput, total_amount: 'abc' })).toThrow();
     });
 
-    it('should transform string points_earned to number', () => {
-      const result = PurchaseSchema.safeParse({ ...validInput, points_earned: '50' });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.points_earned).toBe(50);
-      }
-    });
-
-    it('should transform non-numeric string points_earned to 0', () => {
-      const result = PurchaseSchema.safeParse({ ...validInput, points_earned: 'abc' });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.points_earned).toBe(0);
-      }
-    });
-
-    it('should transform negative points_earned to 0', () => {
-      const result = PurchaseSchema.safeParse({ ...validInput, points_earned: -5 });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.points_earned).toBe(0);
-      }
-    });
-
     it('should transform empty branch_id to null', () => {
       const result = PurchaseSchema.safeParse({ ...validInput, branch_id: '' });
       expect(result.success).toBe(true);
@@ -141,33 +110,9 @@ describe('PurchaseSchema', () => {
         expect(result.data.branch_id).toBeNull();
       }
     });
-
-    it('should transform empty notes to null', () => {
-      const result = PurchaseSchema.safeParse({ ...validInput, notes: '' });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.notes).toBeNull();
-      }
-    });
-
-    it('should transform empty organization_id to null', () => {
-      const result = PurchaseSchema.safeParse({ ...validInput, organization_id: '' });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.organization_id).toBeNull();
-      }
-    });
   });
 
   describe('edge cases', () => {
-    it('should default points_earned to 0 when omitted', () => {
-      const result = PurchaseSchema.safeParse(validInput);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.points_earned).toBe(0);
-      }
-    });
-
     it('should leave id undefined when omitted', () => {
       const result = PurchaseSchema.safeParse(validInput);
       expect(result.success).toBe(true);
@@ -181,22 +126,6 @@ describe('PurchaseSchema', () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.total_amount).toBe(0);
-      }
-    });
-
-    it('should accept null notes', () => {
-      const result = PurchaseSchema.safeParse({ ...validInput, notes: null });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.notes).toBeNull();
-      }
-    });
-
-    it('should accept null organization_id', () => {
-      const result = PurchaseSchema.safeParse({ ...validInput, organization_id: null });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.organization_id).toBeNull();
       }
     });
   });
