@@ -1,5 +1,5 @@
 import React from "react";
-import { render, screen, act } from "@testing-library/react";
+import { render, screen, fireEvent } from "@testing-library/react";
 
 jest.mock("gsap", () => ({
   __esModule: true,
@@ -53,16 +53,9 @@ jest.mock("next-intl", () => ({
 }));
 
 import { CallToAction } from "@/components/landing/components/call-to-action";
+import { gsap } from "gsap";
 
 describe("CallToAction", () => {
-  beforeEach(() => {
-    jest.useFakeTimers();
-  });
-
-  afterEach(() => {
-    jest.useRealTimers();
-  });
-
   it("renders without crashing", () => {
     const { container } = render(<CallToAction />);
     expect(container).toBeTruthy();
@@ -73,56 +66,40 @@ describe("CallToAction", () => {
     expect(screen.getByText("callToAction")).toBeInTheDocument();
   });
 
-  it("renders three chevron elements", () => {
-    const { container } = render(<CallToAction />);
-    // The component renders 3 chevron wrapper divs each containing a rotated div
-    const chevrons = container.querySelectorAll(".rotate-45");
-    expect(chevrons).toHaveLength(3);
+  it("renders a button element", () => {
+    render(<CallToAction />);
+    expect(screen.getByRole("button")).toBeInTheDocument();
   });
 
-  it("cycles chevron colors via setInterval", () => {
+  it("renders a ChevronDown icon (svg)", () => {
     const { container } = render(<CallToAction />);
-
-    // Capture initial border colors
-    const getChevronColors = () => {
-      const chevrons = container.querySelectorAll(".rotate-45");
-      return Array.from(chevrons).map(
-        (el) => (el as HTMLElement).style.borderColor
-      );
-    };
-
-    const initialColors = getChevronColors();
-
-    // Advance time to trigger the interval callback (interval is 500ms)
-    act(() => {
-      jest.advanceTimersByTime(500);
-    });
-
-    const updatedColors = getChevronColors();
-    // The colors should have shifted after the interval fires
-    expect(updatedColors).not.toEqual(initialColors);
+    const svg = container.querySelector("svg");
+    expect(svg).toBeInTheDocument();
   });
 
-  it("cycles colors multiple times", () => {
-    const { container } = render(<CallToAction />);
+  it("sets up gsap scroll animation via useEffect", () => {
+    render(<CallToAction />);
+    expect(gsap.to).toHaveBeenCalled();
+  });
 
-    const getChevronColors = () => {
-      const chevrons = container.querySelectorAll(".rotate-45");
-      return Array.from(chevrons).map(
-        (el) => (el as HTMLElement).style.borderColor
-      );
-    };
-
-    // Advance through multiple intervals
-    act(() => {
-      jest.advanceTimersByTime(1500);
+  it("scrolls the page when the button is clicked", () => {
+    const scrollBySpy = jest.fn();
+    Object.defineProperty(window, "scrollBy", {
+      value: scrollBySpy,
+      writable: true,
+    });
+    Object.defineProperty(window, "innerHeight", {
+      value: 1000,
+      writable: true,
     });
 
-    const colors = getChevronColors();
-    // Colors should still be valid (3 chevrons with colors)
-    expect(colors).toHaveLength(3);
-    colors.forEach((color) => {
-      expect(color).toBeTruthy();
+    render(<CallToAction />);
+    const button = screen.getByRole("button");
+    fireEvent.click(button);
+
+    expect(scrollBySpy).toHaveBeenCalledWith({
+      top: 800,
+      behavior: "smooth",
     });
   });
 });

@@ -88,11 +88,25 @@ describe("bubble animations", () => {
       expect(mockedTo).toHaveBeenCalledWith(el, {
         keyframes: [
           { scale: 1.5, opacity: 0, duration: 0.005 },
-          { scale: 0, opacity: 0, duration: 1 },
-          { scale: 1, opacity: 1, delay: 2 },
+          { scale: 0, opacity: 0, duration: 0.3 },
         ],
         ease: "power3.inOut",
+        onComplete: expect.any(Function),
       });
+    });
+
+    it("onComplete callback executes without error", () => {
+      const el = document.createElement("div");
+      const refs = makeBubbleRefs([el]);
+
+      handleBubbleClick(refs, 0);
+
+      const call = mockedTo.mock.calls[0];
+      const options = call[1];
+
+      // Verify onComplete is a function and executes (covers lines 43-44)
+      expect(typeof options.onComplete).toBe("function");
+      expect(() => options.onComplete()).not.toThrow();
     });
 
     it("does not call gsap.to when bubbleRefs.current is null", () => {

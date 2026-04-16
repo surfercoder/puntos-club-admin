@@ -15,7 +15,9 @@ export default function Home() {
   return (
     <>
       <PublicHeader />
-      <LandingApp />
+      <div className="relative z-0">
+        <LandingApp />
+      </div>
     </>
   );
 }

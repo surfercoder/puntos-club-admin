@@ -1,16 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { gsap } from "gsap";
-import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 
-gsap.registerPlugin(useGSAP, ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger);
 
 export const CallToAction = () => {
-  const [activeColorIndex, setActiveColorIndex] = useState(0);
-  const ref = useRef<HTMLDivElement | null>(null);
+  const ref = useRef<HTMLButtonElement | null>(null);
   const t = useTranslations("Landing");
 
   useEffect(() => {
@@ -28,50 +27,19 @@ export const CallToAction = () => {
     }
   }, []);
 
-  const chevronColors = [
-    "#FCD2DC",
-    "#FF7D9D",
-    "#FF4573",
-  ];
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setActiveColorIndex(
-        (prevIndex) =>
-          (prevIndex - 1 + chevronColors.length) % chevronColors.length
-      );
-    }, 500);
-
-    return () => clearInterval(interval);
-  }, []);
-
   return (
-    <div
+    <button
+      type="button"
       ref={ref}
-      className="fixed bottom-6 left-1/2 transform -translate-x-1/2 flex flex-col items-center z-5 transition-opacity duration-500 ease-in-out"
+      className="fixed bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center z-5 cursor-pointer bg-transparent border-none p-0"
+      onClick={() => window.scrollBy({ top: window.innerHeight * 0.8, behavior: "smooth" })}
     >
-      <h3 className="mb-3 md:mb-2 text-center text-xl font-bold">
+      <p className="mb-1 text-center text-sm font-medium text-muted-foreground tracking-wide">
         {t("callToAction")}
-      </h3>
-      {["chev-0", "chev-1", "chev-2"].map((chevKey, index) => (
-        <div
-          key={chevKey}
-          className="w-8 h-8 md:w-[28px] md:h-[28px] flex justify-center items-center -mt-4 md:-mt-3 transition-all duration-1000 ease-in-out"
-          style={{
-            transition: "border-color 1s ease-in-out",
-          }}
-        >
-          <div
-            className="w-8 h-8 md:w-[28px] md:h-[28px] border-b-[6px] border-r-[6px] transform rotate-45"
-            style={{
-              borderColor:
-                chevronColors[
-                  (activeColorIndex + index) % chevronColors.length
-                ],
-            }}
-          ></div>
-        </div>
-      ))}
-    </div>
+      </p>
+      <div className="animate-bounce">
+        <ChevronDown className="h-6 w-6 text-brand-pink" strokeWidth={2.5} />
+      </div>
+    </button>
   );
 };

@@ -36,10 +36,12 @@ export const handleBubbleClick = (
     gsap.to(bubbleRefs.current[index], {
       keyframes: [
         { scale: 1.5, opacity: 0, duration: 0.005 },
-        { scale: 0, opacity: 0, duration: 1 },
-        { scale: 1, opacity: 1, delay: 2 },
+        { scale: 0, opacity: 0, duration: 0.3 },
       ],
       ease: "power3.inOut",
+      onComplete: () => {
+        window.location.href = "/owner/onboarding";
+      },
     });
   }
 };
