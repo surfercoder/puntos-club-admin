@@ -27,8 +27,7 @@
     "tw-animate-css",
     "shadcn",
     "babel-jest",
-    "jsdom",
-    "react-doctor"
+    "jsdom"
   ],
   "ignoreBinaries": [
     "dotenv",

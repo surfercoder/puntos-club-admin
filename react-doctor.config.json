@@ -5,7 +5,9 @@
       "e2e/**",
       "components/landing/screens/smartphone-3d.tsx",
       "components/ui/sidebar.tsx",
-      "components/dashboard/organization/org-visibility-toggle.tsx"
+      "components/dashboard/organization/org-visibility-toggle.tsx",
+      "components/dashboard/charts/*-chart-view.tsx",
+      "components/ui/chart.tsx"
     ]
   }
 }

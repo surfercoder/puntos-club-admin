@@ -10,7 +10,19 @@
     "onboardingTitle": "Registro de Propietario - Puntos Club",
     "onboardingDescription": "Crea tu cuenta como propietario de negocio en Puntos Club. Configura tu organización, productos y empieza a fidelizar a tus clientes con puntos de recompensa.",
     "qrTitle": "Código QR | Panel",
-    "qrDescription": "Código QR de tu organización para que los clientes se unan al programa de puntos"
+    "qrDescription": "Código QR de tu organización para que los clientes se unan al programa de puntos",
+    "mobileAppsTitle": "Apps Móviles - Puntos Club",
+    "mobileAppsDescription": "Descarga las apps móviles de Puntos Club para Android"
+  },
+  "MobileApps": {
+    "title": "Apps Móviles",
+    "subtitle": "Descarga las apps de Puntos Club para Android escaneando los códigos QR.",
+    "puntosClubTitle": "PuntosClub",
+    "puntosClubDescription": "App móvil para beneficiarios.",
+    "puntosClubCajaTitle": "PuntosClubCaja",
+    "puntosClubCajaDescription": "App móvil para cajeros.",
+    "scanToDownload": "Escanea este código QR para descargar",
+    "androidOnly": "Estas apps están disponibles actualmente solo para Android. Soporte para iOS próximamente."
   },
   "Common": {
     "cancel": "Cancelar",

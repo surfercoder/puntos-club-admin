@@ -1,6 +1,5 @@
 "use client";
 
-// react-doctor-disable-next-line react-doctor/prefer-dynamic-import
 import { PolarAngleAxis, RadialBar, RadialBarChart } from "recharts";
 import {
   Card,

@@ -1,9 +1,7 @@
 "use client"
 
 import * as React from "react"
-// react-doctor-disable-next-line react-doctor/prefer-dynamic-import
 import * as RechartsPrimitive from "recharts"
-// react-doctor-disable-next-line react-doctor/prefer-dynamic-import
 import type {
   TooltipContentProps,
   LegendPayload,
@@ -80,14 +78,9 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 
   if (!colorConfig.length) return null
 
-  // react-doctor-disable-next-line react/no-danger
-  return (
-    <style
-      // react-doctor-disable-next-line react/no-danger
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
+  const cssText = Object.entries(THEMES)
+    .map(
+      ([theme, prefix]) => `
 ${prefix} [data-chart=${id}] {
 ${colorConfig
   .map(([key, itemConfig]) => {
@@ -99,11 +92,10 @@ ${colorConfig
   .join("\n")}
 }
 `
-          )
-          .join("\n"),
-      }}
-    />
-  )
+    )
+    .join("\n")
+
+  return <style>{cssText}</style>
 }
 
 const ChartTooltip = RechartsPrimitive.Tooltip

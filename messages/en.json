@@ -10,7 +10,19 @@
     "onboardingTitle": "Owner Registration - Puntos Club",
     "onboardingDescription": "Create your business owner account on Puntos Club. Set up your organization, products, and start retaining your customers with reward points.",
     "qrTitle": "QR Code | Dashboard",
-    "qrDescription": "Your organization's QR code for customers to join the loyalty program"
+    "qrDescription": "Your organization's QR code for customers to join the loyalty program",
+    "mobileAppsTitle": "Mobile Apps - Puntos Club",
+    "mobileAppsDescription": "Download the Puntos Club mobile apps for Android"
+  },
+  "MobileApps": {
+    "title": "Mobile Apps",
+    "subtitle": "Download the Puntos Club apps for Android by scanning the QR codes below.",
+    "puntosClubTitle": "PuntosClub",
+    "puntosClubDescription": "Mobile app for beneficiaries.",
+    "puntosClubCajaTitle": "PuntosClubCaja",
+    "puntosClubCajaDescription": "Mobile app for cashiers.",
+    "scanToDownload": "Scan this QR code to download",
+    "androidOnly": "These apps are currently available for Android only. iOS support coming soon."
   },
   "Common": {
     "cancel": "Cancel",

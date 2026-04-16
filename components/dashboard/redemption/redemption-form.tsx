@@ -132,7 +132,7 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
         if (orgIdNumber) {
           // Extract nested beneficiary objects from join
           const nested = beneficiariesResult.data as unknown as { beneficiary: Beneficiary }[];
-          loadedBeneficiaries = nested.map(r => r.beneficiary).filter(Boolean);
+          loadedBeneficiaries = nested.flatMap(r => r.beneficiary ? [r.beneficiary] : []);
         } else {
           loadedBeneficiaries = beneficiariesResult.data as unknown as Beneficiary[];
         }
