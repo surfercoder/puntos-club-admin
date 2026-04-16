@@ -7,4 +7,5 @@ export const AppUserSchema = z.object({
   email: z.string().email('Invalid email').optional().or(z.literal('')).transform(val => val === '' ? null : val),
   password: z.string().optional().or(z.literal('')).transform(val => val === '' ? null : val),
   role_id: z.string().optional().nullable(),
+  active: z.union([z.boolean(), z.literal('true'), z.literal('false')]).transform(val => val === 'true' || val === true).optional(),
 });

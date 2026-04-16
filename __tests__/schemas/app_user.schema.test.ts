@@ -89,4 +89,46 @@ describe('AppUserSchema', () => {
       }
     });
   });
+
+  describe('active field', () => {
+    it('should accept boolean true', () => {
+      const result = AppUserSchema.safeParse({ ...validAppUser, active: true });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.active).toBe(true);
+      }
+    });
+
+    it('should accept boolean false', () => {
+      const result = AppUserSchema.safeParse({ ...validAppUser, active: false });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.active).toBe(false);
+      }
+    });
+
+    it('should transform string "true" to boolean true', () => {
+      const result = AppUserSchema.safeParse({ ...validAppUser, active: 'true' });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.active).toBe(true);
+      }
+    });
+
+    it('should transform string "false" to boolean false', () => {
+      const result = AppUserSchema.safeParse({ ...validAppUser, active: 'false' });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.active).toBe(false);
+      }
+    });
+
+    it('should accept undefined (optional)', () => {
+      const result = AppUserSchema.safeParse(validAppUser);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.active).toBeUndefined();
+      }
+    });
+  });
 });

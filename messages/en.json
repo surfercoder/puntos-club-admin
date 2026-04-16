@@ -551,7 +551,13 @@
         "passwordPlaceholder": "Enter password (optional)",
         "roleLabel": "Role",
         "selectRole": "Select a role",
-        "roleLimitReached": "{role} (limit reached)"
+        "roleLimitReached": "{role} (limit reached)",
+        "activeLabel": "Active",
+        "activeDescription": "Inactive users do not count toward plan limits"
+      },
+      "roles": {
+        "cashier": "Cashier",
+        "collaborator": "Collaborator"
       },
       "deleteModal": {
         "title": "Delete User",

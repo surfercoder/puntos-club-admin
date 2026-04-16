@@ -341,4 +341,72 @@ describe('AppUserForm', () => {
     // Should render without crashing
     expect(screen.getByText('form.firstNameLabel')).toBeInTheDocument();
   });
+
+  it('loads only cashier roles when currentUserRole is collaborator', async () => {
+    mockRoleData = [
+      { id: 'role-1', name: 'cashier', display_name: 'Cashier' },
+    ];
+    setupSupabaseMock();
+
+    await act(async () => {
+      render(<AppUserForm currentUserRole="collaborator" />);
+    });
+
+    await waitFor(() => {
+      expect(mockFrom).toHaveBeenCalledWith('user_role');
+    });
+  });
+
+  it('loads cashier and collaborator roles when currentUserRole is not collaborator', async () => {
+    mockRoleData = [
+      { id: 'role-1', name: 'cashier', display_name: 'Cashier' },
+      { id: 'role-2', name: 'collaborator', display_name: 'Collaborator' },
+    ];
+    setupSupabaseMock();
+
+    await act(async () => {
+      render(<AppUserForm currentUserRole="owner" />);
+    });
+
+    await waitFor(() => {
+      expect(mockFrom).toHaveBeenCalledWith('user_role');
+    });
+  });
+
+  it('renders active toggle in edit mode', async () => {
+    const appUser = {
+      id: '1',
+      first_name: 'Jane',
+      last_name: 'Smith',
+      email: 'jane@example.com',
+      active: true,
+      organization_id: 'org-1',
+      created_at: '2024-01-01',
+    };
+
+    render(<AppUserForm appUser={appUser} />);
+
+    expect(screen.getByText('form.activeLabel')).toBeInTheDocument();
+    expect(screen.getByText('form.activeDescription')).toBeInTheDocument();
+  });
+
+  it('does not render active toggle in create mode', () => {
+    render(<AppUserForm />);
+    expect(screen.queryByText('form.activeLabel')).not.toBeInTheDocument();
+  });
+
+  it('renders with inactive appUser (active=false)', () => {
+    const appUser = {
+      id: '1',
+      first_name: 'Jane',
+      last_name: 'Smith',
+      email: 'jane@example.com',
+      active: false,
+      organization_id: 'org-1',
+      created_at: '2024-01-01',
+    };
+
+    render(<AppUserForm appUser={appUser} />);
+    expect(screen.getByText('form.activeLabel')).toBeInTheDocument();
+  });
 });

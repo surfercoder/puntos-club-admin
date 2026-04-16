@@ -551,7 +551,13 @@
         "passwordPlaceholder": "Ingresa la contraseña (opcional)",
         "roleLabel": "Rol",
         "selectRole": "Seleccionar un rol",
-        "roleLimitReached": "{role} (límite alcanzado)"
+        "roleLimitReached": "{role} (límite alcanzado)",
+        "activeLabel": "Activo",
+        "activeDescription": "Los usuarios inactivos no cuentan para los límites del plan"
+      },
+      "roles": {
+        "cashier": "Cajero",
+        "collaborator": "Colaborador"
       },
       "deleteModal": {
         "title": "Eliminar Usuario",

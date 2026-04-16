@@ -6,6 +6,7 @@ import { getTranslations } from 'next-intl/server';
 import DeleteModal from '@/components/dashboard/app_user/delete-modal';
 import { NewUserButton } from '@/components/dashboard/app_user/new-user-button';
 import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -16,7 +17,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
-import { isAdmin } from '@/lib/auth/roles';
+import { isAdmin, isCollaborator } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 
 interface AppUserWithOrganization {
@@ -44,6 +45,7 @@ export default async function AppUserListPage() {
     cookies(),
   ]);
   const userIsAdmin = isAdmin(currentUser);
+  const userIsCollaborator = isCollaborator(currentUser);
   const activeOrgId = cookieStore.get('active_org_id')?.value;
   const activeOrgIdNumber = /* c8 ignore next */ activeOrgId ? Number(activeOrgId) : null;
 
@@ -58,6 +60,18 @@ export default async function AppUserListPage() {
 
   if (!userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
     query = query.eq('organization_id', activeOrgIdNumber);
+  }
+
+  // Collaborators can only see and manage cashier users
+  if (userIsCollaborator) {
+    const { data: cashierRole } = await supabase
+      .from('user_role')
+      .select('id')
+      .eq('name', 'cashier')
+      .single();
+    if (cashierRole) {
+      query = query.eq('role_id', cashierRole.id);
+    }
   }
 
   const { data: rawData, error } = await query;
@@ -78,7 +92,7 @@ export default async function AppUserListPage() {
           <h1 className="text-2xl font-bold flex items-center gap-2">
             {t('title')}
             <PlanUsageBadge feature="cashiers" showLabel />
-            <PlanUsageBadge feature="collaborators" showLabel />
+            {!userIsCollaborator && <PlanUsageBadge feature="collaborators" showLabel />}
           </h1>
           <p className="text-muted-foreground">{t('description')}</p>
         </div>
@@ -108,17 +122,19 @@ export default async function AppUserListPage() {
                   </TableCell>
                   <TableCell>{user.email || 'N/A'}</TableCell>
                   <TableCell>
-                    <span className="capitalize">{user.role?.name || 'N/A'}</span>
+                    {user.role?.name === 'cashier' ? (
+                      <Badge variant="default">{t('roles.cashier')}</Badge>
+                    ) : user.role?.name === 'collaborator' ? (
+                      <Badge variant="secondary">{t('roles.collaborator')}</Badge>
+                    ) : (
+                      <span className="text-muted-foreground text-sm">N/A</span>
+                    )}
                   </TableCell>
                   <TableCell>{user.organization?.name || 'N/A'}</TableCell>
                   <TableCell>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      user.active
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
+                    <Badge variant={user.active ? 'outline' : 'destructive'}>
                       {user.active ? tCommon('active') : tCommon('inactive')}
-                    </span>
+                    </Badge>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
