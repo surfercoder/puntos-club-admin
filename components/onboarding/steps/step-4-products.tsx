@@ -28,8 +28,8 @@ function createProduct(): ProductRow {
     id: crypto.randomUUID(),
     name: '',
     description: '',
-    required_points: 100,
-    quantity: 10,
+    required_points: '' as unknown as number,
+    quantity: '' as unknown as number,
     minimum_quantity: 1,
   };
 }
@@ -75,11 +75,11 @@ function ProductRowCard({ product, prodIndex, categoryId, canRemove, onRemove, o
         </div>
         <div className="space-y-1">
           <Label className="text-xs">{t('pointsRequired')}</Label>
-          <Input type="number" min={1} placeholder="100" value={product.required_points} onChange={(e) => onUpdate(categoryId, product.id, 'required_points', parseInt(e.target.value) || 100)} className="h-8 text-sm" />
+          <Input type="number" min={1} placeholder="100" value={product.required_points} onChange={(e) => onUpdate(categoryId, product.id, 'required_points', e.target.value === '' ? '' : parseInt(e.target.value))} className="h-8 text-sm" />
         </div>
         <div className="space-y-1">
           <Label className="text-xs">{t('initialStock')}</Label>
-          <Input type="number" min={0} placeholder="10" value={product.quantity} onChange={(e) => onUpdate(categoryId, product.id, 'quantity', parseInt(e.target.value) || 0)} className="h-8 text-sm" />
+          <Input type="number" min={0} placeholder="10" value={product.quantity} onChange={(e) => onUpdate(categoryId, product.id, 'quantity', e.target.value === '' ? '' : parseInt(e.target.value))} className="h-8 text-sm" />
         </div>
       </div>
     </div>
