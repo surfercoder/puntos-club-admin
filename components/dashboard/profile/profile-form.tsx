@@ -35,7 +35,6 @@ export function ProfileForm({ user }: ProfileFormProps) {
     first_name: user.first_name || '',
     last_name: user.last_name || '',
     email: user.email || '',
-    username: user.username || '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -64,7 +63,6 @@ export function ProfileForm({ user }: ProfileFormProps) {
         .update({
           first_name: formData.first_name,
           last_name: formData.last_name,
-          username: formData.username /* c8 ignore next */ || null,
         })
         .eq('id', user.id);
 
@@ -151,24 +149,6 @@ export function ProfileForm({ user }: ProfileFormProps) {
             {fieldErrors.email && (
               <p id="email-error" className="text-destructive text-sm">
                 {fieldErrors.email}
-              </p>
-            )}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="username">{t('username')}</Label>
-            <Input
-              id="username"
-              value={formData.username}
-              onChange={(e) =>
-                setFormData({ ...formData, username: e.target.value })
-              }
-              aria-invalid={!!fieldErrors.username}
-              aria-describedby="username-error"
-            />
-            {fieldErrors.username && (
-              <p id="username-error" className="text-destructive text-sm">
-                {fieldErrors.username}
               </p>
             )}
           </div>

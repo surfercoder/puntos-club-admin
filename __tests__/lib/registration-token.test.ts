@@ -69,8 +69,10 @@ describe('registration-token', () => {
       const { createRegistrationToken, verifyRegistrationToken } = getModule();
       const token = createRegistrationToken(validData);
       const [combined, hmac] = token.split('.');
-      // Tamper with the combined part
-      const tampered = 'A' + combined.slice(1) + '.' + hmac;
+      // Tamper with the combined part (ensure we actually change the first char)
+      const firstChar = combined[0];
+      const newChar = firstChar === 'A' ? 'B' : 'A';
+      const tampered = newChar + combined.slice(1) + '.' + hmac;
       const result = verifyRegistrationToken(tampered);
       expect(result).toBeNull();
     });

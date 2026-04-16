@@ -102,6 +102,7 @@ export function DashboardShell({
 
       let label: string;
       if (seg === "new") label = tBreadcrumb("new");
+      else if (seg === "create") label = tBreadcrumb("create");
       else if (seg === "edit") label = tBreadcrumb("edit");
       else if (isUuidLike(seg) || /^\d+$/.test(seg)) label = tBreadcrumb("details");
       else if (isKnownSegment(seg)) label = tBreadcrumb(seg);

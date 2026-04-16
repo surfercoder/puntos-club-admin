@@ -20,7 +20,7 @@ export default async function EditAppUserPage({ params }: { params: Promise<{ id
   }
 
   return (
-    <div className="max-w-2xl mx-auto">
+    <div className="w-full max-w-3xl mx-auto">
       <Card>
         <CardHeader>
           <CardTitle>{t('editTitle')}</CardTitle>

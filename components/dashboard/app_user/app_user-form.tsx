@@ -1,5 +1,6 @@
 "use client";
 
+import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { redirect } from 'next/navigation';
@@ -7,6 +8,7 @@ import { useActionState, useState, useEffect } from 'react';
 import { toast } from "sonner";
 
 import { appUserFormAction } from '@/actions/dashboard/app_user/app_user-form-actions';
+import { usePlanUsage } from '@/components/providers/plan-usage-provider';
 import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
@@ -17,40 +19,46 @@ import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler'
 import { createClient } from '@/lib/supabase/client';
 import { AppUserSchema } from '@/schemas/app_user.schema';
 import type { AppUser } from '@/types/app_user';
+import type { UserRole } from '@/types/user_role';
 
 interface AppUserFormProps {
   appUser?: AppUser;
-}
-
-interface Organization {
-  id: string;
-  name: string;
 }
 
 export default function AppUserForm({ appUser }: AppUserFormProps) {
   const t = useTranslations('Dashboard.appUser');
   const tCommon = useTranslations('Common');
 
+  const { isAtLimit, invalidate } = usePlanUsage();
+
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [organizations, setOrganizations] = useState<Organization[]>([]);
+  const [roles, setRoles] = useState<UserRole[]>([]);
+  const [showPassword, setShowPassword] = useState(false);
 
   // Utils
   const [actionState, formAction, pending] = useActionState(appUserFormAction, EMPTY_ACTION_STATE);
 
-  // Load organizations
+  // Map role names to plan feature keys
+  const roleToPlanFeature: Record<string, 'cashiers' | 'collaborators'> = {
+    cashier: 'cashiers',
+    collaborator: 'collaborators',
+  };
+
+  // Load roles
   useEffect(() => {
-    async function loadOrganizations() {
-      const supabase = createClient();
+    const supabase = createClient();
+    async function loadRoles() {
       const { data } = await supabase
-        .from('organization')
-        .select('id, name')
+        .from('user_role')
+        .select('*')
+        .in('name', ['cashier', 'collaborator'])
         .order('name');
       if (data) {
-        setOrganizations(data);
+        setRoles(data as UserRole[]);
       }
     }
-    loadOrganizations();
+    loadRoles();
   }, []);
 
   useEffect(() => {
@@ -61,6 +69,7 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
 
   if (actionState.status === 'success') {
     toast.success(actionState.message);
+    invalidate();
     redirect("/dashboard/app_user");
   }
 
@@ -80,22 +89,34 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
       {appUser?.id && <input name="id" type="hidden" value={appUser.id} />}
-      
+
       <div>
-        <Label htmlFor="organization_id">{t('form.organizationLabel')}</Label>
-        <Select defaultValue={appUser?.organization_id ?? ''} name="organization_id">
+        <Label htmlFor="role_id">{t('form.roleLabel')}</Label>
+        <Select defaultValue={appUser?.role_id ? String(appUser.role_id) : ''} name="role_id">
           <SelectTrigger>
-            <SelectValue placeholder={t('form.selectOrganization')} />
+            <SelectValue placeholder={t('form.selectRole')} />
           </SelectTrigger>
           <SelectContent>
-            {organizations.map((organization) => (
-              <SelectItem key={organization.id} value={organization.id}>
-                {organization.name}
-              </SelectItem>
-            ))}
+            {roles.map((role) => {
+              const feature = roleToPlanFeature[role.name];
+              const atLimit = feature ? isAtLimit(feature) : false;
+              const roleId = String(role.id);
+              const isCurrentRole = String(appUser?.role_id) === roleId;
+              return (
+                <SelectItem
+                  key={roleId}
+                  value={roleId}
+                  disabled={atLimit && !isCurrentRole}
+                >
+                  {atLimit && !isCurrentRole
+                    ? t('form.roleLimitReached', { role: role.display_name })
+                    : role.display_name}
+                </SelectItem>
+              );
+            })}
           </SelectContent>
         </Select>
-        <FieldError actionState={validation ?? actionState} name="organization_id" />
+        <FieldError actionState={validation ?? actionState} name="role_id" />
       </div>
 
       <div>
@@ -141,42 +162,27 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="username">{t('form.usernameLabel')}</Label>
-        <Input
-          aria-describedby="username-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.username}
-          defaultValue={appUser?.username ?? ''}
-          id="username"
-          name="username"
-          placeholder={t('form.usernamePlaceholder')}
-          type="text"
-        />
-        <FieldError actionState={validation ?? actionState} name="username" />
-      </div>
-
-      <div>
         <Label htmlFor="password">{t('form.passwordLabel')}</Label>
-        <Input
-          aria-describedby="password-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.password}
-          id="password"
-          name="password"
-          placeholder={t('form.passwordPlaceholder')}
-          type="password"
-        />
+        <div className="relative">
+          <Input
+            aria-describedby="password-error"
+            aria-invalid={!!(validation ?? actionState).fieldErrors?.password}
+            className="pr-10"
+            id="password"
+            name="password"
+            placeholder={t('form.passwordPlaceholder')}
+            type={showPassword ? 'text' : 'password'}
+          />
+          <button
+            type="button"
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+            onClick={() => setShowPassword(!showPassword)}
+            aria-label={showPassword ? 'Hide password' : 'Show password'}
+          >
+            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+          </button>
+        </div>
         <FieldError actionState={validation ?? actionState} name="password" />
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <input
-          className="rounded"
-          defaultChecked={appUser?.active ?? true}
-          id="active"
-          name="active"
-          type="checkbox"
-        />
-        <Label htmlFor="active">{t('form.activeLabel')}</Label>
-        <FieldError actionState={validation ?? actionState} name="active" />
       </div>
 
       <div className="grid grid-cols-2 gap-2">

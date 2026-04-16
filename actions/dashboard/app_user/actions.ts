@@ -1,5 +1,7 @@
 "use server";
 
+import { cookies } from 'next/headers';
+
 import { createClient } from '@/lib/supabase/server';
 import { AppUserSchema } from '@/schemas/app_user.schema';
 import type { AppUser } from '@/types/app_user';
@@ -19,9 +21,17 @@ export async function createAppUser(input: AppUser) {
   }
 
   const supabase = await createClient();
+  const cookieStore = await cookies();
+  const activeOrgId = cookieStore.get('active_org_id')?.value;
+  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
+  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
+
+  if (!activeOrgIdNumber) {
+    return { data: null, error: { message: 'No active organization selected' } };
+  }
 
   // Enforce cashier / collaborator quotas before inserting
-  if (parsed.data.role_id && parsed.data.organization_id) {
+  if (parsed.data.role_id) {
     const { data: roleData } = await supabase
       .from('user_role')
       .select('name')
@@ -35,14 +45,18 @@ export async function createAppUser(input: AppUser) {
     const feature = roleData?.name ? roleFeatureMap[roleData.name as string] : undefined;
 
     if (feature) {
-      const limitError = await enforcePlanLimit(Number(parsed.data.organization_id), feature);
+      const limitError = await enforcePlanLimit(activeOrgIdNumber, feature);
       if (limitError) {
         return { data: null, error: { message: limitError.message } };
       }
     }
   }
 
-  const { data, error } = await supabase.from('app_user').insert([parsed.data]).select().single();
+  const { data, error } = await supabase
+    .from('app_user')
+    .insert([{ ...parsed.data, organization_id: activeOrgIdNumber }])
+    .select()
+    .single();
 
   return { data, error };
 }

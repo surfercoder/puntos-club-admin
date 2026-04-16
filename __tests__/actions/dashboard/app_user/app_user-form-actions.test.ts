@@ -26,7 +26,7 @@ function createFormData(data: Record<string, string>): FormData {
 
 describe('appUserFormAction', () => {
   it('should create app user successfully', async () => {
-    const fd = createFormData({ organization_id: '10', email: 'test@test.com' });
+    const fd = createFormData({ email: 'test@test.com' });
     const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
     expect(createAppUser).toHaveBeenCalled();
     expect(revalidatePath).toHaveBeenCalledWith('/dashboard/app_user');
@@ -34,21 +34,21 @@ describe('appUserFormAction', () => {
   });
 
   it('should update app user successfully', async () => {
-    const fd = createFormData({ id: '1', organization_id: '10', email: 'test@test.com' });
+    const fd = createFormData({ id: '1', email: 'test@test.com' });
     const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
     expect(updateAppUser).toHaveBeenCalledWith('1', expect.any(Object));
     expect(result.status).toBe('success');
   });
 
   it('should return validation error', async () => {
-    const fd = createFormData({ organization_id: '' });
+    const fd = createFormData({ email: 'not-an-email' });
     const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
   });
 
   it('should handle thrown error', async () => {
     (createAppUser as jest.Mock).mockImplementation(() => { throw new Error('Error'); });
-    const fd = createFormData({ organization_id: '10' });
+    const fd = createFormData({ email: 'test@test.com' });
     const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
   });

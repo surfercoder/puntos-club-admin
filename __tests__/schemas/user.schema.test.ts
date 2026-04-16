@@ -32,14 +32,12 @@ describe('UserSchema', () => {
       const result = UserSchema.safeParse({
         ...validUser,
         id: 'user-1',
-        username: 'johndoe',
         password: 'secret123',
         phone: '+5491112345678',
         document_id: 'DNI123',
       });
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.username).toBe('johndoe');
         expect(result.data.password).toBe('secret123');
         expect(result.data.phone).toBe('+5491112345678');
         expect(result.data.document_id).toBe('DNI123');
@@ -106,14 +104,6 @@ describe('UserSchema', () => {
   });
 
   describe('type transforms', () => {
-    it('should transform empty username to null', () => {
-      const result = UserSchema.safeParse({ ...validUser, username: '' });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.username).toBeNull();
-      }
-    });
-
     it('should transform empty password to null', () => {
       const result = UserSchema.safeParse({ ...validUser, password: '' });
       expect(result.success).toBe(true);
@@ -251,19 +241,6 @@ describe('UserSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should reject username shorter than 3 characters (non-empty)', () => {
-      const result = UserSchema.safeParse({ ...validUser, username: 'ab' });
-      expect(result.success).toBe(false);
-    });
-
-    it('should accept username with exactly 3 characters', () => {
-      const result = UserSchema.safeParse({ ...validUser, username: 'abc' });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.username).toBe('abc');
-      }
-    });
-
     it('should reject password shorter than 6 characters (non-empty)', () => {
       const result = UserSchema.safeParse({ ...validUser, password: '12345' });
       expect(result.success).toBe(false);
@@ -281,7 +258,6 @@ describe('UserSchema', () => {
       const result = UserSchema.safeParse(validUser);
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.username).toBeUndefined();
         expect(result.data.password).toBeUndefined();
         expect(result.data.phone).toBeUndefined();
         expect(result.data.document_id).toBeUndefined();

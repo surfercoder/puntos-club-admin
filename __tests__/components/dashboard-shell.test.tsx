@@ -154,6 +154,20 @@ describe('DashboardShell', () => {
     expect(screen.getByText('new')).toBeInTheDocument();
   });
 
+  it('generates create breadcrumb segment', () => {
+    const { usePathname } = require('next/navigation');
+    (usePathname as jest.Mock).mockReturnValue('/dashboard/product/create');
+
+    render(
+      <DashboardShell {...defaultProps}>
+        <div>Content</div>
+      </DashboardShell>
+    );
+
+    expect(screen.getByText('product')).toBeInTheDocument();
+    expect(screen.getByText('create')).toBeInTheDocument();
+  });
+
   it('generates edit breadcrumb segment', () => {
     const { usePathname } = require('next/navigation');
     (usePathname as jest.Mock).mockReturnValue('/dashboard/product/edit');

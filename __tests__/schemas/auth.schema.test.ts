@@ -56,16 +56,7 @@ describe('ProfileSchema', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should accept optional username', () => {
-      const result = ProfileSchema.safeParse({ ...validProfile, username: 'johndoe' });
-      expect(result.success).toBe(true);
-    });
-
-    it('should accept empty username', () => {
-      const result = ProfileSchema.safeParse({ ...validProfile, username: '' });
-      expect(result.success).toBe(true);
-    });
-  });
+});
 
   describe('missing required fields', () => {
     it('should reject missing first_name', () => {

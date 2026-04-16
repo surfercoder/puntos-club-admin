@@ -33,7 +33,6 @@ export async function GET() {
       first_name: 'Test',
       last_name: 'User',
       email: `test${Date.now()}@example.com`,
-      username: `testuser${Date.now()}`,
       password: 'password123',
       active: true,
     };

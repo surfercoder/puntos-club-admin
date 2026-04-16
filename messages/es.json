@@ -216,6 +216,7 @@
   "Breadcrumb": {
     "panel": "Panel",
     "new": "Nuevo",
+    "create": "Crear",
     "edit": "Editar",
     "details": "Detalles",
     "address": "Direcciones",
@@ -252,7 +253,6 @@
       "description": "Administra tu información personal y preferencias",
       "section": "Información Personal",
       "sectionDescription": "Actualiza tus datos personales y de contacto",
-      "username": "Usuario",
       "organization": "Organización",
       "role": "Rol"
     },
@@ -532,7 +532,6 @@
       "tableHeaders": {
         "name": "Nombre",
         "email": "Correo",
-        "username": "Usuario",
         "role": "Rol",
         "organization": "Organización",
         "status": "Estado",
@@ -542,19 +541,17 @@
       "editTitle": "Editar Usuario",
       "fetchError": "Error al obtener el usuario",
       "form": {
-        "organizationLabel": "Organización",
-        "selectOrganization": "Seleccionar una organización",
         "firstNameLabel": "Nombre",
         "firstNamePlaceholder": "Ingresa el nombre (opcional)",
         "lastNameLabel": "Apellido",
         "lastNamePlaceholder": "Ingresa el apellido (opcional)",
         "emailLabel": "Correo electrónico",
         "emailPlaceholder": "Ingresa el correo electrónico (opcional)",
-        "usernameLabel": "Usuario",
-        "usernamePlaceholder": "Ingresa el nombre de usuario (opcional)",
         "passwordLabel": "Contraseña",
         "passwordPlaceholder": "Ingresa la contraseña (opcional)",
-        "activeLabel": "Activo"
+        "roleLabel": "Rol",
+        "selectRole": "Seleccionar un rol",
+        "roleLimitReached": "{role} (límite alcanzado)"
       },
       "deleteModal": {
         "title": "Eliminar Usuario",
@@ -681,8 +678,6 @@
         "lastNamePlaceholder": "Ingresa el apellido",
         "emailLabel": "Correo electrónico *",
         "emailPlaceholder": "Ingresa el correo electrónico",
-        "usernameLabel": "Usuario",
-        "usernamePlaceholder": "Ingresa el nombre de usuario (opcional)",
         "phoneLabel": "Teléfono",
         "phonePlaceholder": "Ingresa el número de teléfono (opcional)",
         "documentIdLabel": "DNI / RUT",

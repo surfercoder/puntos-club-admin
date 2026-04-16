@@ -216,6 +216,7 @@
   "Breadcrumb": {
     "panel": "Dashboard",
     "new": "New",
+    "create": "Create",
     "edit": "Edit",
     "details": "Details",
     "address": "Addresses",
@@ -252,7 +253,6 @@
       "description": "Manage your personal information and preferences",
       "section": "Personal Information",
       "sectionDescription": "Update your personal and contact details",
-      "username": "Username",
       "organization": "Organization",
       "role": "Role"
     },
@@ -532,7 +532,6 @@
       "tableHeaders": {
         "name": "Name",
         "email": "Email",
-        "username": "Username",
         "role": "Role",
         "organization": "Organization",
         "status": "Status",
@@ -542,19 +541,17 @@
       "editTitle": "Edit User",
       "fetchError": "Error fetching user",
       "form": {
-        "organizationLabel": "Organization",
-        "selectOrganization": "Select an organization",
         "firstNameLabel": "First Name",
         "firstNamePlaceholder": "Enter first name (optional)",
         "lastNameLabel": "Last Name",
         "lastNamePlaceholder": "Enter last name (optional)",
         "emailLabel": "Email",
         "emailPlaceholder": "Enter email address (optional)",
-        "usernameLabel": "Username",
-        "usernamePlaceholder": "Enter username (optional)",
         "passwordLabel": "Password",
         "passwordPlaceholder": "Enter password (optional)",
-        "activeLabel": "Active"
+        "roleLabel": "Role",
+        "selectRole": "Select a role",
+        "roleLimitReached": "{role} (limit reached)"
       },
       "deleteModal": {
         "title": "Delete User",
@@ -681,8 +678,6 @@
         "lastNamePlaceholder": "Enter last name",
         "emailLabel": "Email *",
         "emailPlaceholder": "Enter email address",
-        "usernameLabel": "Username",
-        "usernamePlaceholder": "Enter username (optional)",
         "phoneLabel": "Phone",
         "phonePlaceholder": "Enter phone number (optional)",
         "documentIdLabel": "ID / Tax Number",

@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/app_user/delete-modal';
+import { NewUserButton } from '@/components/dashboard/app_user/new-user-button';
 import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { Button } from '@/components/ui/button';
 import {
@@ -24,7 +25,6 @@ interface AppUserWithOrganization {
   first_name?: string | null;
   last_name?: string | null;
   email?: string | null;
-  username?: string | null;
   password?: string | null;
   active: boolean;
   organization: {
@@ -82,9 +82,7 @@ export default async function AppUserListPage() {
           </h1>
           <p className="text-muted-foreground">{t('description')}</p>
         </div>
-        <Button asChild>
-          <Link href="/dashboard/app_user/create">{t('newButton')}</Link>
-        </Button>
+        <NewUserButton />
       </div>
 
       <div className="border rounded-lg">
@@ -93,7 +91,6 @@ export default async function AppUserListPage() {
             <TableRow>
               <TableHead>{t('tableHeaders.name')}</TableHead>
               <TableHead>{t('tableHeaders.email')}</TableHead>
-              <TableHead>{t('tableHeaders.username')}</TableHead>
               <TableHead>{t('tableHeaders.role')}</TableHead>
               <TableHead>{t('tableHeaders.organization')}</TableHead>
               <TableHead>{t('tableHeaders.status')}</TableHead>
@@ -110,7 +107,6 @@ export default async function AppUserListPage() {
                       : 'N/A'}
                   </TableCell>
                   <TableCell>{user.email || 'N/A'}</TableCell>
-                  <TableCell>{user.username || 'N/A'}</TableCell>
                   <TableCell>
                     <span className="capitalize">{user.role?.name || 'N/A'}</span>
                   </TableCell>
@@ -135,7 +131,7 @@ export default async function AppUserListPage() {
                         appUserId={user.id}
                         appUserName={user.first_name && user.last_name
                           ? `${user.first_name} ${user.last_name}`
-                          : user.username || user.email || 'User'}
+                          : user.email || 'User'}
                       />
                     </div>
                   </TableCell>
@@ -143,7 +139,7 @@ export default async function AppUserListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={7}>{t('empty')}</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

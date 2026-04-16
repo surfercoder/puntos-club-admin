@@ -44,11 +44,9 @@ beforeEach(() => {
 });
 
 const validAppUser = {
-  organization_id: '10',
   first_name: 'John',
   last_name: 'Doe',
   email: 'john@example.com',
-  active: true,
 };
 
 describe('createAppUser', () => {
@@ -59,13 +57,19 @@ describe('createAppUser', () => {
   });
 
   it('should return field errors on invalid input', async () => {
-    const result = await createAppUser({ ...validAppUser, organization_id: '' });
+    const schema = require('@/schemas/app_user.schema').AppUserSchema;
+    const orig = schema.safeParse;
+    schema.safeParse = jest.fn(() => ({
+      success: false,
+      error: { issues: [{ path: ['email'], message: 'Bad email' }] },
+    }));
+    const result = await createAppUser({ ...validAppUser, email: 'bad' });
     expect(result.error).toHaveProperty('fieldErrors');
+    schema.safeParse = orig;
   });
 
   it('should enforce plan limit for cashier role', async () => {
     (enforcePlanLimit as jest.Mock).mockReturnValue({ message: 'Limit reached' });
-    // role_id triggers the role lookup which returns 'cashier'
     const result = await createAppUser({ ...validAppUser, role_id: '5' });
     expect(result).toEqual({ data: null, error: { message: 'Limit reached' } });
   });
@@ -78,10 +82,17 @@ describe('createAppUser', () => {
     expect(result.data).toBeDefined();
   });
 
-  it('should skip plan limit when no role_id or organization_id', async () => {
+  it('should skip plan limit when no role_id', async () => {
     const result = await createAppUser(validAppUser);
     expect(enforcePlanLimit).not.toHaveBeenCalled();
     expect(result.data).toBeDefined();
+  });
+
+  it('should return error when no active organization', async () => {
+    const { cookies } = require('next/headers');
+    cookies.mockReturnValueOnce({ get: jest.fn(() => undefined), set: jest.fn() });
+    const result = await createAppUser(validAppUser);
+    expect(result.error).toEqual({ message: 'No active organization selected' });
   });
 });
 
@@ -93,7 +104,7 @@ describe('createAppUser - empty path validation', () => {
       success: false,
       error: { issues: [{ path: [], message: 'Root' }, { path: ['email'], message: 'Bad email' }] },
     }));
-    const result = await createAppUser({ ...validAppUser, organization_id: '' });
+    const result = await createAppUser({ ...validAppUser, email: 'bad' });
     expect((result.error as { fieldErrors: Record<string, string> }).fieldErrors).toEqual({ email: 'Bad email' });
     schema.safeParse = orig;
   });
@@ -107,7 +118,7 @@ describe('updateAppUser - empty path validation', () => {
       success: false,
       error: { issues: [{ path: [], message: 'Root' }] },
     }));
-    const result = await updateAppUser('1', { ...validAppUser, organization_id: '' });
+    const result = await updateAppUser('1', { ...validAppUser, email: 'bad' });
     expect((result.error as { fieldErrors: Record<string, string> }).fieldErrors).toEqual({});
     schema.safeParse = orig;
   });
@@ -129,7 +140,7 @@ describe('createAppUser - enforcePlanLimit returns null (no limit error)', () =>
       .mockReturnValue({ data: { id: '1' }, error: null });
     (enforcePlanLimit as jest.Mock).mockReturnValue(null);
     const result = await createAppUser({ ...validAppUser, role_id: '5' });
-    expect(enforcePlanLimit).toHaveBeenCalledWith(10, 'collaborators');
+    expect(enforcePlanLimit).toHaveBeenCalledWith(123, 'collaborators');
     expect(result.data).toBeDefined();
   });
 });
@@ -142,8 +153,15 @@ describe('updateAppUser', () => {
   });
 
   it('should return field errors on invalid input', async () => {
-    const result = await updateAppUser('1', { ...validAppUser, organization_id: '' });
+    const schema = require('@/schemas/app_user.schema').AppUserSchema;
+    const orig = schema.safeParse;
+    schema.safeParse = jest.fn(() => ({
+      success: false,
+      error: { issues: [{ path: ['email'], message: 'Bad email' }] },
+    }));
+    const result = await updateAppUser('1', { ...validAppUser, email: 'bad' });
     expect(result.error).toHaveProperty('fieldErrors');
+    schema.safeParse = orig;
   });
 });
 

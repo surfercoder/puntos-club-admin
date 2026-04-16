@@ -26,23 +26,22 @@ jest.mock('react', () => ({
   useActionState: jest.fn(() => [{ status: '', message: '', fieldErrors: {} }, jest.fn(), false]),
 }));
 
-let mockOrgData: { id: string; name: string }[] = [];
-const mockOrder = jest.fn();
-const mockSelect = jest.fn();
+let mockRoleData: { id: string; name: string; display_name: string }[] = [];
 const mockFrom = jest.fn();
 
 function setupSupabaseMock() {
-  const queryObj: Record<string, jest.Mock> = {
-    select: mockSelect,
-    order: mockOrder,
-    then: jest.fn((resolve: (val: { data: typeof mockOrgData }) => void) => {
-      resolve({ data: mockOrgData });
-      return Promise.resolve({ data: mockOrgData });
-    }),
-  };
-  mockSelect.mockReturnValue(queryObj);
-  mockOrder.mockReturnValue(queryObj);
-  mockFrom.mockReturnValue(queryObj);
+  mockFrom.mockImplementation(() => {
+    const data = mockRoleData;
+    const chainObj: Record<string, jest.Mock> = {};
+    const terminal = {
+      then: jest.fn((resolve: (val: { data: typeof data }) => void) => {
+        resolve({ data });
+        return Promise.resolve({ data });
+      }),
+    };
+    chainObj.select = jest.fn().mockReturnValue({ ...chainObj, ...terminal, in: jest.fn().mockReturnValue({ ...chainObj, ...terminal, order: jest.fn().mockReturnValue({ ...terminal }) }), order: jest.fn().mockReturnValue({ ...terminal }) });
+    return chainObj;
+  });
 }
 
 jest.mock('@/lib/supabase/client', () => ({
@@ -53,6 +52,19 @@ jest.mock('@/lib/supabase/client', () => ({
 
 jest.mock('@/actions/dashboard/app_user/app_user-form-actions', () => ({
   appUserFormAction: jest.fn(),
+}));
+
+const mockIsAtLimit = jest.fn(() => false);
+jest.mock('@/components/providers/plan-usage-provider', () => ({
+  usePlanUsage: () => ({
+    isAtLimit: mockIsAtLimit,
+    shouldWarn: jest.fn(() => false),
+    getFeature: jest.fn(),
+    summary: null,
+    isLoading: false,
+    invalidate: jest.fn(),
+    plan: null,
+  }),
 }));
 
 jest.mock('next/link', () => {
@@ -70,7 +82,8 @@ const { redirect } = require('next/navigation');
 describe('AppUserForm', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockOrgData = [];
+    mockRoleData = [];
+    mockIsAtLimit.mockReturnValue(false);
     setupSupabaseMock();
   });
 
@@ -88,10 +101,8 @@ describe('AppUserForm', () => {
     expect(screen.getByText('form.firstNameLabel')).toBeInTheDocument();
     expect(screen.getByText('form.lastNameLabel')).toBeInTheDocument();
     expect(screen.getByText('form.emailLabel')).toBeInTheDocument();
-    expect(screen.getByText('form.usernameLabel')).toBeInTheDocument();
     expect(screen.getByText('form.passwordLabel')).toBeInTheDocument();
-    expect(screen.getByText('form.activeLabel')).toBeInTheDocument();
-    expect(screen.getByText('form.organizationLabel')).toBeInTheDocument();
+    expect(screen.getByText('form.roleLabel')).toBeInTheDocument();
   });
 
   it('renders correct submit button text in create mode', () => {
@@ -106,7 +117,6 @@ describe('AppUserForm', () => {
       first_name: 'Jane',
       last_name: 'Smith',
       email: 'jane@example.com',
-      username: 'janesmith',
       active: true,
       organization_id: 'org-1',
       created_at: '2024-01-01',
@@ -123,7 +133,6 @@ describe('AppUserForm', () => {
       first_name: 'Jane',
       last_name: 'Smith',
       email: 'jane@example.com',
-      username: 'janesmith',
       active: true,
       organization_id: 'org-1',
       created_at: '2024-01-01',
@@ -134,7 +143,6 @@ describe('AppUserForm', () => {
     expect(screen.getByDisplayValue('Jane')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Smith')).toBeInTheDocument();
     expect(screen.getByDisplayValue('jane@example.com')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('janesmith')).toBeInTheDocument();
   });
 
   it('renders without initial data in create mode', () => {
@@ -188,7 +196,40 @@ describe('AppUserForm', () => {
     expect(screen.getByRole('button', { name: 'create' })).toBeDisabled();
   });
 
-  it('validates form on submit and prevents default for invalid data', async () => {
+  it('toggles password visibility', () => {
+    render(<AppUserForm />);
+
+    const passwordInput = screen.getByPlaceholderText('form.passwordPlaceholder');
+    expect(passwordInput).toHaveAttribute('type', 'password');
+
+    const toggleButton = screen.getByRole('button', { name: 'Show password' });
+    fireEvent.click(toggleButton);
+    expect(passwordInput).toHaveAttribute('type', 'text');
+
+    fireEvent.click(screen.getByRole('button', { name: 'Hide password' }));
+    expect(passwordInput).toHaveAttribute('type', 'password');
+  });
+
+  it('validates form on submit', async () => {
+    render(<AppUserForm />);
+
+    const form = screen.getByRole('textbox', { name: 'form.firstNameLabel' }).closest('form')!;
+
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+  });
+
+  it('shows validation errors when schema parse fails', async () => {
+    const { ZodError } = require('zod');
+    const { AppUserSchema } = require('@/schemas/app_user.schema');
+    const originalParse = AppUserSchema.parse;
+    AppUserSchema.parse = jest.fn(() => {
+      throw new ZodError([
+        { code: 'invalid_type', expected: 'string', received: 'undefined', path: ['email'], message: 'Invalid email' },
+      ]);
+    });
+
     render(<AppUserForm />);
 
     const form = screen.getByRole('textbox', { name: 'form.firstNameLabel' }).closest('form')!;
@@ -197,13 +238,16 @@ describe('AppUserForm', () => {
       fireEvent.submit(form);
     });
 
-    // Validation fails because organization_id is required but empty
+    // The catch block was hit - validation state was set
+    expect(AppUserSchema.parse).toHaveBeenCalled();
+
+    AppUserSchema.parse = originalParse;
   });
 
-  it('loads organizations on mount', async () => {
-    mockOrgData = [
-      { id: 'org-1', name: 'Org Alpha' },
-      { id: 'org-2', name: 'Org Beta' },
+  it('shows roleLimitReached text for roles at plan limit', async () => {
+    mockIsAtLimit.mockReturnValue(true);
+    mockRoleData = [
+      { id: 'role-1', name: 'cashier', display_name: 'Cashier' },
     ];
     setupSupabaseMock();
 
@@ -212,22 +256,83 @@ describe('AppUserForm', () => {
     });
 
     await waitFor(() => {
-      expect(mockFrom).toHaveBeenCalledWith('organization');
+      expect(screen.getByText('form.roleLimitReached')).toBeInTheDocument();
+    });
+  });
+
+  it('does not disable the current role even when at limit', async () => {
+    mockIsAtLimit.mockReturnValue(true);
+    mockRoleData = [
+      { id: 'role-1', name: 'cashier', display_name: 'Cashier' },
+    ];
+    setupSupabaseMock();
+
+    const appUser = {
+      id: '1',
+      first_name: 'Jane',
+      last_name: 'Doe',
+      email: 'jane@example.com',
+      role_id: 'role-1',
+      organization_id: 'org-1',
+    };
+
+    await act(async () => {
+      render(<AppUserForm appUser={appUser} />);
+    });
+
+    await waitFor(() => {
+      // The current role should show display_name, not roleLimitReached
+      const matches = screen.getAllByText('Cashier');
+      expect(matches.length).toBeGreaterThanOrEqual(1);
+      // roleLimitReached should NOT appear since this is the current role
+      expect(screen.queryByText('form.roleLimitReached')).not.toBeInTheDocument();
+    });
+  });
+
+  it('handles roles with unknown feature names (no plan feature mapping)', async () => {
+    mockIsAtLimit.mockReturnValue(false);
+    mockRoleData = [
+      { id: 'role-3', name: 'admin', display_name: 'Admin' },
+    ];
+    setupSupabaseMock();
+
+    await act(async () => {
+      render(<AppUserForm />);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Admin')).toBeInTheDocument();
+    });
+  });
+
+  it('loads roles on mount', async () => {
+    mockRoleData = [
+      { id: 'role-1', name: 'cashier', display_name: 'Cashier' },
+      { id: 'role-2', name: 'collaborator', display_name: 'Collaborator' },
+    ];
+    setupSupabaseMock();
+
+    await act(async () => {
+      render(<AppUserForm />);
+    });
+
+    await waitFor(() => {
+      expect(mockFrom).toHaveBeenCalledWith('user_role');
     });
   });
 
   it('handles null data from supabase gracefully', async () => {
-    const queryObj: Record<string, jest.Mock> = {
-      select: mockSelect,
-      order: mockOrder,
-      then: jest.fn((resolve: (val: { data: null }) => void) => {
-        resolve({ data: null });
-        return Promise.resolve({ data: null });
-      }),
-    };
-    mockSelect.mockReturnValue(queryObj);
-    mockOrder.mockReturnValue(queryObj);
-    mockFrom.mockReturnValue(queryObj);
+    mockFrom.mockImplementation(() => {
+      const terminal = {
+        then: jest.fn((resolve: (val: { data: null }) => void) => {
+          resolve({ data: null });
+          return Promise.resolve({ data: null });
+        }),
+      };
+      const chainObj: Record<string, jest.Mock> = {};
+      chainObj.select = jest.fn().mockReturnValue({ ...chainObj, ...terminal, in: jest.fn().mockReturnValue({ ...chainObj, ...terminal, order: jest.fn().mockReturnValue({ ...terminal }) }), order: jest.fn().mockReturnValue({ ...terminal }) });
+      return chainObj;
+    });
 
     await act(async () => {
       render(<AppUserForm />);

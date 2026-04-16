@@ -88,7 +88,7 @@ export default async function DashboardLayout({
     return (
       <DashboardShell
         user={{
-          name: name || currentUser.username || 'User',
+          name: name || currentUser.email || 'User',
           email: currentUser.email || 'unknown',
         }}
         userId={currentUser.id}

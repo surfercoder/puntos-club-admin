@@ -31,7 +31,6 @@ const mockUser = {
   first_name: 'John',
   last_name: 'Doe',
   email: 'john@example.com',
-  username: 'johndoe',
   active: true,
   organization_id: 'org-1',
   created_at: '2024-01-01',
@@ -45,7 +44,6 @@ describe('ProfileForm', () => {
     expect(screen.getByText('name')).toBeInTheDocument();
     expect(screen.getByText('lastName')).toBeInTheDocument();
     expect(screen.getByText('email')).toBeInTheDocument();
-    expect(screen.getByText('username')).toBeInTheDocument();
     expect(screen.getByText('organization')).toBeInTheDocument();
     expect(screen.getByText('role')).toBeInTheDocument();
   });
@@ -55,7 +53,6 @@ describe('ProfileForm', () => {
     expect(screen.getByDisplayValue('John')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Doe')).toBeInTheDocument();
     expect(screen.getByDisplayValue('john@example.com')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('johndoe')).toBeInTheDocument();
   });
 
   it('renders organization name as disabled field', () => {
@@ -161,7 +158,6 @@ describe('ProfileForm', () => {
       first_name: null,
       last_name: null,
       email: null,
-      username: null,
     };
     render(<ProfileForm user={userWithNulls as any} />);
     // Fields should render with empty strings
@@ -209,10 +205,4 @@ describe('ProfileForm', () => {
     });
   });
 
-  it('updates username field when changed', () => {
-    render(<ProfileForm user={mockUser} />);
-    const usernameInput = screen.getByDisplayValue('johndoe');
-    fireEvent.change(usernameInput, { target: { value: 'newusername' } });
-    expect(screen.getByDisplayValue('newusername')).toBeInTheDocument();
-  });
 });
