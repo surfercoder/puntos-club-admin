@@ -7,8 +7,6 @@ export type AppUser = {
   first_name?: string | null;
   last_name?: string | null;
   email?: string | null;
-  password?: string | null;
-  active: boolean;
   tour_completed: boolean;
   role_id?: string | null;
   created_by?: string | null;

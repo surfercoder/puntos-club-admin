@@ -4,12 +4,11 @@ import { cookies } from 'next/headers';
 
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { AppUserSchema } from '@/schemas/app_user.schema';
-import type { AppUser } from '@/types/app_user';
+import { AppUserSchema, type AppUserInput } from '@/schemas/app_user.schema';
 import { enforcePlanLimit } from '@/lib/plans/usage';
 import type { PlanFeatureKey } from '@/types/plan';
 
-export async function createAppUser(input: AppUser) {
+export async function createAppUser(input: AppUserInput) {
   const parsed = AppUserSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -79,10 +78,16 @@ export async function createAppUser(input: AppUser) {
     authUserId = authData.user?.id ?? null;
   }
 
-  const { data, error } = await supabase
+  // Strip password — it's only used for Supabase Auth, never stored in app_user
+  const { password: _password, ...insertData } = parsed.data;
+
+  // Use admin client to bypass RLS for the insert (permissions are already
+  // validated above via plan limits and role checks).
+  const adminClient = createAdminClient();
+  const { data, error } = await adminClient
     .from('app_user')
     .insert([{
-      ...parsed.data,
+      ...insertData,
       organization_id: activeOrgIdNumber,
       ...(authUserId ? { auth_user_id: authUserId } : {}),
     }])
@@ -92,7 +97,7 @@ export async function createAppUser(input: AppUser) {
   return { data, error };
 }
 
-export async function updateAppUser(id: string, input: AppUser) {
+export async function updateAppUser(id: string, input: AppUserInput) {
   const parsed = AppUserSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -173,7 +178,10 @@ export async function updateAppUser(id: string, input: AppUser) {
     }
   }
 
-  const { data, error } = await supabase.from('app_user').update(updateData).eq('id', id).select().single();
+  // Strip password — it's only used for Supabase Auth, never stored in app_user
+  const { password: _pw, ...dbUpdateData } = updateData;
+
+  const { data, error } = await supabase.from('app_user').update(dbUpdateData).eq('id', id).select().single();
 
   return { data, error };
 }

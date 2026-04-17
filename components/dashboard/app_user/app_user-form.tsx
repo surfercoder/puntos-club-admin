@@ -14,7 +14,6 @@ import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import type { ActionState} from '@/lib/error-handler';
 import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { createClient } from '@/lib/supabase/client';
@@ -37,7 +36,6 @@ export default function AppUserForm({ appUser, currentUserRole }: AppUserFormPro
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [roles, setRoles] = useState<UserRole[]>([]);
   const [showPassword, setShowPassword] = useState(false);
-  const [isActive, setIsActive] = useState(appUser?.active ?? true);
 
   // Utils
   const [actionState, formAction, pending] = useActionState(appUserFormAction, EMPTY_ACTION_STATE);
@@ -190,21 +188,6 @@ export default function AppUserForm({ appUser, currentUserRole }: AppUserFormPro
         </div>
         <FieldError actionState={validation ?? actionState} name="password" />
       </div>
-
-      {appUser && (
-        <div className="flex items-center justify-between rounded-lg border p-3">
-          <div className="space-y-0.5">
-            <Label htmlFor="active">{t('form.activeLabel')}</Label>
-            <p className="text-sm text-muted-foreground">{t('form.activeDescription')}</p>
-          </div>
-          <Switch
-            id="active"
-            checked={isActive}
-            onCheckedChange={setIsActive}
-          />
-          <input type="hidden" name="active" value={String(isActive)} />
-        </div>
-      )}
 
       <div className="grid grid-cols-2 gap-2">
         <Button asChild type="button" variant="secondary">

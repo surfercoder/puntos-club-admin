@@ -41,7 +41,7 @@ describe('AppUserListPage', () => {
 
   it('renders user rows with cashier role badge', async () => {
     mockOrder.mockResolvedValueOnce({
-      data: [{ id: '1', organization_id: '1', first_name: 'John', last_name: 'Doe', email: 'john@test.com', active: true, organization: { name: 'Org1' }, role: { name: 'cashier' } }],
+      data: [{ id: '1', organization_id: '1', first_name: 'John', last_name: 'Doe', email: 'john@test.com', organization: { name: 'Org1' }, role: { name: 'cashier' } }],
       error: null,
     });
     const result = await AppUserListPage();
@@ -50,7 +50,7 @@ describe('AppUserListPage', () => {
 
   it('renders user rows with collaborator role badge', async () => {
     mockOrder.mockResolvedValueOnce({
-      data: [{ id: '1', organization_id: '1', first_name: 'John', last_name: 'Doe', email: 'john@test.com', active: true, organization: { name: 'Org1' }, role: { name: 'collaborator' } }],
+      data: [{ id: '1', organization_id: '1', first_name: 'John', last_name: 'Doe', email: 'john@test.com', organization: { name: 'Org1' }, role: { name: 'collaborator' } }],
       error: null,
     });
     const result = await AppUserListPage();
@@ -59,16 +59,7 @@ describe('AppUserListPage', () => {
 
   it('renders user rows with unknown role (N/A fallback)', async () => {
     mockOrder.mockResolvedValueOnce({
-      data: [{ id: '1', organization_id: '1', first_name: 'John', last_name: 'Doe', email: 'john@test.com', active: true, organization: { name: 'Org1' }, role: { name: 'unknown_role' } }],
-      error: null,
-    });
-    const result = await AppUserListPage();
-    expect(result).toBeTruthy();
-  });
-
-  it('renders inactive user with destructive badge', async () => {
-    mockOrder.mockResolvedValueOnce({
-      data: [{ id: '1', organization_id: '1', first_name: 'John', last_name: 'Doe', email: 'john@test.com', active: false, organization: { name: 'Org1' }, role: { name: 'cashier' } }],
+      data: [{ id: '1', organization_id: '1', first_name: 'John', last_name: 'Doe', email: 'john@test.com', organization: { name: 'Org1' }, role: { name: 'unknown_role' } }],
       error: null,
     });
     const result = await AppUserListPage();
@@ -83,7 +74,7 @@ describe('AppUserListPage', () => {
 
   it('renders user with no name fields (N/A fallback)', async () => {
     mockOrder.mockResolvedValueOnce({
-      data: [{ id: '2', organization_id: '1', first_name: null, last_name: null, email: null, active: false, organization: null, role: null }],
+      data: [{ id: '2', organization_id: '1', first_name: null, last_name: null, email: null, organization: null, role: null }],
       error: null,
     });
     const result = await AppUserListPage();
@@ -92,7 +83,7 @@ describe('AppUserListPage', () => {
 
   it('renders user with only first_name (no last_name)', async () => {
     mockOrder.mockResolvedValueOnce({
-      data: [{ id: '3', organization_id: '1', first_name: 'Solo', last_name: null, email: 'solo@test.com', active: true, organization: { name: 'Org1' }, role: { name: 'cashier' } }],
+      data: [{ id: '3', organization_id: '1', first_name: 'Solo', last_name: null, email: 'solo@test.com', organization: { name: 'Org1' }, role: { name: 'cashier' } }],
       error: null,
     });
     const result = await AppUserListPage();
@@ -101,7 +92,7 @@ describe('AppUserListPage', () => {
 
   it('renders user with only email for delete modal name', async () => {
     mockOrder.mockResolvedValueOnce({
-      data: [{ id: '5', organization_id: '1', first_name: null, last_name: null, email: 'email@test.com', active: true, organization: { name: 'Org1' }, role: null }],
+      data: [{ id: '5', organization_id: '1', first_name: null, last_name: null, email: 'email@test.com', organization: { name: 'Org1' }, role: null }],
       error: null,
     });
     const result = await AppUserListPage();
@@ -130,8 +121,8 @@ describe('AppUserListPage', () => {
     getCurrentUser.mockResolvedValueOnce({ id: 'current-user', role: { name: 'admin' } });
     mockOrder.mockResolvedValueOnce({
       data: [
-        { id: 'current-user', organization_id: '1', first_name: 'Me', last_name: 'Owner', email: 'me@test.com', active: true, organization: { name: 'Org1' }, role: { name: 'owner' } },
-        { id: 'other-user', organization_id: '1', first_name: 'Other', last_name: 'User', email: 'other@test.com', active: true, organization: { name: 'Org1' }, role: { name: 'cashier' } },
+        { id: 'current-user', organization_id: '1', first_name: 'Me', last_name: 'Owner', email: 'me@test.com', organization: { name: 'Org1' }, role: { name: 'owner' } },
+        { id: 'other-user', organization_id: '1', first_name: 'Other', last_name: 'User', email: 'other@test.com', organization: { name: 'Org1' }, role: { name: 'cashier' } },
       ],
       error: null,
     });
@@ -141,7 +132,7 @@ describe('AppUserListPage', () => {
 
   it('renders user with only last_name (no first_name)', async () => {
     mockOrder.mockResolvedValueOnce({
-      data: [{ id: '6', organization_id: '1', first_name: null, last_name: 'OnlyLast', email: null, active: true, organization: { name: 'Org1' }, role: null }],
+      data: [{ id: '6', organization_id: '1', first_name: null, last_name: 'OnlyLast', email: null, organization: { name: 'Org1' }, role: null }],
       error: null,
     });
     const result = await AppUserListPage();
@@ -209,7 +200,7 @@ describe('AppUserListPage', () => {
 
   it('renders user with null first_name and non-null last_name for delete modal', async () => {
     mockOrder.mockResolvedValueOnce({
-      data: [{ id: '7', organization_id: '1', first_name: null, last_name: 'LastOnly', email: null, active: true, organization: { name: 'Org1' }, role: null }],
+      data: [{ id: '7', organization_id: '1', first_name: null, last_name: 'LastOnly', email: null, organization: { name: 'Org1' }, role: null }],
       error: null,
     });
     const result = await AppUserListPage();

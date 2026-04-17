@@ -117,7 +117,6 @@ describe('AppUserForm', () => {
       first_name: 'Jane',
       last_name: 'Smith',
       email: 'jane@example.com',
-      active: true,
       organization_id: 'org-1',
       created_at: '2024-01-01',
     };
@@ -133,7 +132,6 @@ describe('AppUserForm', () => {
       first_name: 'Jane',
       last_name: 'Smith',
       email: 'jane@example.com',
-      active: true,
       organization_id: 'org-1',
       created_at: '2024-01-01',
     };
@@ -373,40 +371,4 @@ describe('AppUserForm', () => {
     });
   });
 
-  it('renders active toggle in edit mode', async () => {
-    const appUser = {
-      id: '1',
-      first_name: 'Jane',
-      last_name: 'Smith',
-      email: 'jane@example.com',
-      active: true,
-      organization_id: 'org-1',
-      created_at: '2024-01-01',
-    };
-
-    render(<AppUserForm appUser={appUser} />);
-
-    expect(screen.getByText('form.activeLabel')).toBeInTheDocument();
-    expect(screen.getByText('form.activeDescription')).toBeInTheDocument();
-  });
-
-  it('does not render active toggle in create mode', () => {
-    render(<AppUserForm />);
-    expect(screen.queryByText('form.activeLabel')).not.toBeInTheDocument();
-  });
-
-  it('renders with inactive appUser (active=false)', () => {
-    const appUser = {
-      id: '1',
-      first_name: 'Jane',
-      last_name: 'Smith',
-      email: 'jane@example.com',
-      active: false,
-      organization_id: 'org-1',
-      created_at: '2024-01-01',
-    };
-
-    render(<AppUserForm appUser={appUser} />);
-    expect(screen.getByText('form.activeLabel')).toBeInTheDocument();
-  });
 });

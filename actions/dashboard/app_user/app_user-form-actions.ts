@@ -5,9 +5,8 @@ import { revalidatePath } from 'next/cache';
 import { createAppUser, updateAppUser } from '@/actions/dashboard/app_user/actions';
 import { cleanFormData, fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
 import { AppUserSchema } from '@/schemas/app_user.schema';
-import type { AppUser } from '@/types/app_user';
 
-export async function appUserFormAction(_prevState: ActionState, formData: FormData) {
+export async function appUserFormAction(_prevState: ActionState, formData: FormData): Promise<ActionState> {
   try {
     const formDataObject = cleanFormData(formData);
     const parsed = AppUserSchema.safeParse(formDataObject);
@@ -16,10 +15,15 @@ export async function appUserFormAction(_prevState: ActionState, formData: FormD
       return fromErrorToActionState(parsed.error);
     }
 
-    if (formDataObject.id) {
-      await updateAppUser(formDataObject.id as string, parsed.data as AppUser);
-    } else {
-      await createAppUser(parsed.data as AppUser);
+    const result = formDataObject.id
+      ? await updateAppUser(formDataObject.id as string, parsed.data)
+      : await createAppUser(parsed.data);
+
+    if (result.error) {
+      const message = 'message' in result.error
+        ? (result.error.message ?? 'An unexpected error occurred')
+        : 'An unexpected error occurred';
+      return { status: 'error' as const, message, fieldErrors: {} };
     }
 
     // Revalidate the app user list page

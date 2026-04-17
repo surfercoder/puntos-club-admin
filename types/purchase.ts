@@ -2,7 +2,7 @@ export type Purchase = {
   id: string;
   purchase_number: string;
   beneficiary_id: string;
-  cashier_id: string;
+  cashier_id: string | null;
   branch_id?: string | null;
   total_amount: number;
   points_earned: number;

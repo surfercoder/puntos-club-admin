@@ -21,7 +21,15 @@ jest.mock('@/lib/plans/usage', () => ({
   enforcePlanLimit: jest.fn(() => null),
 }));
 
-const mockAdminClient = {
+const mockAdminClient: any = {
+  from: jest.fn(() => mockAdminClient),
+  select: jest.fn(() => mockAdminClient),
+  insert: jest.fn(() => mockAdminClient),
+  update: jest.fn(() => mockAdminClient),
+  delete: jest.fn(() => mockAdminClient),
+  eq: jest.fn(() => mockAdminClient),
+  order: jest.fn(() => mockAdminClient),
+  single: jest.fn(() => ({ data: { id: '1' }, error: null })),
   auth: {
     admin: {
       createUser: jest.fn(() => ({ data: { user: { id: 'auth-new-id' } }, error: null })),
@@ -51,6 +59,14 @@ beforeEach(() => {
   mockSupabase.order.mockReturnValue(mockSupabase);
   mockSupabase.single.mockReturnValue({ data: { id: '1', name: 'cashier' }, error: null });
   (enforcePlanLimit as jest.Mock).mockReturnValue(null);
+  mockAdminClient.from.mockReturnValue(mockAdminClient);
+  mockAdminClient.select.mockReturnValue(mockAdminClient);
+  mockAdminClient.insert.mockReturnValue(mockAdminClient);
+  mockAdminClient.update.mockReturnValue(mockAdminClient);
+  mockAdminClient.delete.mockReturnValue(mockAdminClient);
+  mockAdminClient.eq.mockReturnValue(mockAdminClient);
+  mockAdminClient.order.mockReturnValue(mockAdminClient);
+  mockAdminClient.single.mockReturnValue({ data: { id: '1' }, error: null });
   mockAdminClient.auth.admin.createUser.mockReturnValue({ data: { user: { id: 'auth-new-id' } }, error: null });
   mockAdminClient.auth.admin.updateUserById.mockReturnValue({ data: {}, error: null });
 });
@@ -64,7 +80,7 @@ const validAppUser = {
 describe('createAppUser', () => {
   it('should create app user successfully', async () => {
     const result = await createAppUser(validAppUser);
-    expect(mockSupabase.from).toHaveBeenCalledWith('app_user');
+    expect(mockAdminClient.from).toHaveBeenCalledWith('app_user');
     expect(result.data).toBeDefined();
   });
 

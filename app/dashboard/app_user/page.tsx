@@ -26,8 +26,6 @@ interface AppUserWithOrganization {
   first_name?: string | null;
   last_name?: string | null;
   email?: string | null;
-  password?: string | null;
-  active: boolean;
   organization: {
     name: string;
   };
@@ -37,9 +35,8 @@ interface AppUserWithOrganization {
 }
 
 export default async function AppUserListPage() {
-  const [t, tCommon, supabase, currentUser, cookieStore] = await Promise.all([
+  const [t, supabase, currentUser, cookieStore] = await Promise.all([
     getTranslations('Dashboard.appUser'),
-    getTranslations('Common'),
     createClient(),
     getCurrentUser(),
     cookies(),
@@ -107,7 +104,6 @@ export default async function AppUserListPage() {
               <TableHead>{t('tableHeaders.email')}</TableHead>
               <TableHead>{t('tableHeaders.role')}</TableHead>
               <TableHead>{t('tableHeaders.organization')}</TableHead>
-              <TableHead>{t('tableHeaders.status')}</TableHead>
               <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
@@ -131,11 +127,6 @@ export default async function AppUserListPage() {
                     )}
                   </TableCell>
                   <TableCell>{user.organization?.name || 'N/A'}</TableCell>
-                  <TableCell>
-                    <Badge variant={user.active ? 'outline' : 'destructive'}>
-                      {user.active ? tCommon('active') : tCommon('inactive')}
-                    </Badge>
-                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">
@@ -155,7 +146,7 @@ export default async function AppUserListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={6}>{t('empty')}</TableCell>
+                <TableCell className="text-center py-4" colSpan={5}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

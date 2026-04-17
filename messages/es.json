@@ -535,7 +535,6 @@
         "email": "Correo",
         "role": "Rol",
         "organization": "Organización",
-        "status": "Estado",
         "actions": "Acciones"
       },
       "createTitle": "Crear Usuario",
@@ -552,9 +551,7 @@
         "passwordPlaceholder": "Ingresa la contraseña (opcional)",
         "roleLabel": "Rol",
         "selectRole": "Seleccionar un rol",
-        "roleLimitReached": "{role} (límite alcanzado)",
-        "activeLabel": "Activo",
-        "activeDescription": "Los usuarios inactivos no cuentan para los límites del plan"
+        "roleLimitReached": "{role} (límite alcanzado)"
       },
       "roles": {
         "cashier": "Cajero",

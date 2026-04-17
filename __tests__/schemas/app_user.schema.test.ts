@@ -15,7 +15,6 @@ describe('AppUserSchema', () => {
         first_name: 'John',
         last_name: 'Doe',
         email: 'john@example.com',
-        password: 'secret123',
         role_id: 'role-1',
       });
       expect(result.success).toBe(true);
@@ -55,11 +54,11 @@ describe('AppUserSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should transform empty password to null', () => {
+    it('should transform empty password to undefined', () => {
       const result = AppUserSchema.safeParse({ ...validAppUser, password: '' });
       expect(result.success).toBe(true);
       if (result.success) {
-        expect(result.data.password).toBeNull();
+        expect(result.data.password).toBeUndefined();
       }
     });
   });
@@ -90,45 +89,4 @@ describe('AppUserSchema', () => {
     });
   });
 
-  describe('active field', () => {
-    it('should accept boolean true', () => {
-      const result = AppUserSchema.safeParse({ ...validAppUser, active: true });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.active).toBe(true);
-      }
-    });
-
-    it('should accept boolean false', () => {
-      const result = AppUserSchema.safeParse({ ...validAppUser, active: false });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.active).toBe(false);
-      }
-    });
-
-    it('should transform string "true" to boolean true', () => {
-      const result = AppUserSchema.safeParse({ ...validAppUser, active: 'true' });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.active).toBe(true);
-      }
-    });
-
-    it('should transform string "false" to boolean false', () => {
-      const result = AppUserSchema.safeParse({ ...validAppUser, active: 'false' });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.active).toBe(false);
-      }
-    });
-
-    it('should accept undefined (optional)', () => {
-      const result = AppUserSchema.safeParse(validAppUser);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.active).toBeUndefined();
-      }
-    });
-  });
 });

@@ -535,7 +535,6 @@
         "email": "Email",
         "role": "Role",
         "organization": "Organization",
-        "status": "Status",
         "actions": "Actions"
       },
       "createTitle": "Create User",
@@ -552,9 +551,7 @@
         "passwordPlaceholder": "Enter password (optional)",
         "roleLabel": "Role",
         "selectRole": "Select a role",
-        "roleLimitReached": "{role} (limit reached)",
-        "activeLabel": "Active",
-        "activeDescription": "Inactive users do not count toward plan limits"
+        "roleLimitReached": "{role} (limit reached)"
       },
       "roles": {
         "cashier": "Cashier",

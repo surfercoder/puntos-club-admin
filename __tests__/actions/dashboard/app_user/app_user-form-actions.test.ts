@@ -52,4 +52,28 @@ describe('appUserFormAction', () => {
     const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
   });
+
+  it('should return error message when result.error has message', async () => {
+    (createAppUser as jest.Mock).mockReturnValueOnce({ data: null, error: { message: 'Limit reached' } });
+    const fd = createFormData({ email: 'test@test.com' });
+    const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
+    expect(result.status).toBe('error');
+    expect(result.message).toBe('Limit reached');
+  });
+
+  it('should return default error message when result.error has no message property', async () => {
+    (createAppUser as jest.Mock).mockReturnValueOnce({ data: null, error: { fieldErrors: { email: 'bad' } } });
+    const fd = createFormData({ email: 'test@test.com' });
+    const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
+    expect(result.status).toBe('error');
+    expect(result.message).toBe('An unexpected error occurred');
+  });
+
+  it('should return default error message when result.error.message is null', async () => {
+    (createAppUser as jest.Mock).mockReturnValueOnce({ data: null, error: { message: null } });
+    const fd = createFormData({ email: 'test@test.com' });
+    const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
+    expect(result.status).toBe('error');
+    expect(result.message).toBe('An unexpected error occurred');
+  });
 });
