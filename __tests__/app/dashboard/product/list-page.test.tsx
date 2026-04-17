@@ -7,7 +7,7 @@ jest.mock('next-intl/server', () => ({
 
 jest.mock('@/actions/dashboard/product/actions', () => ({
   getProducts: jest.fn(() => Promise.resolve({
-    data: [{ id: '1', name: 'Test Product', description: 'Desc', required_points: 100, active: true, image_urls: [] }],
+    data: [{ id: '1', name: 'Test Product', description: 'Desc', required_points: 100, image_urls: [] }],
     error: null,
   })),
 }));
@@ -57,7 +57,7 @@ describe('ProductListPage', () => {
   it('renders product with image_urls', async () => {
     const { getProducts } = require('@/actions/dashboard/product/actions');
     getProducts.mockResolvedValueOnce({
-      data: [{ id: '1', name: 'P1', description: null, required_points: 50, active: true, image_urls: ['https://example.com/img.jpg'] }],
+      data: [{ id: '1', name: 'P1', description: null, required_points: 50, image_urls: ['https://example.com/img.jpg'] }],
       error: null,
     });
     const result = await ProductListPage();
@@ -78,10 +78,10 @@ describe('ProductListPage', () => {
     expect(result).toBeTruthy();
   });
 
-  it('renders inactive product with no image_urls', async () => {
+  it('renders product with no image_urls', async () => {
     const { getProducts } = require('@/actions/dashboard/product/actions');
     getProducts.mockResolvedValueOnce({
-      data: [{ id: '2', name: 'P2', description: 'Desc', required_points: 200, active: false, image_urls: null }],
+      data: [{ id: '2', name: 'P2', description: 'Desc', required_points: 200, image_urls: null }],
       error: null,
     });
     const result = await ProductListPage();

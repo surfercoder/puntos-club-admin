@@ -8,7 +8,7 @@ export type Product = {
   name: string;
   description?: string | null;
   required_points: number;
-  active: boolean;
+
   creation_date: string;
   image_urls?: string[] | null;
 };

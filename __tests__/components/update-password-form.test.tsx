@@ -4,8 +4,7 @@ import { useRouter } from 'next/navigation';
 import { UpdatePasswordForm } from '@/components/update-password-form';
 import { createClient } from '@/lib/supabase/client';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-let capturedReducer: ((state: any, action: any) => any) | null = null;
+let capturedReducer: ((state: Record<string, unknown>, action: Record<string, unknown>) => Record<string, unknown>) | null = null;
 
 describe('UpdatePasswordForm', () => {
   const mockPush = jest.fn();
@@ -160,8 +159,7 @@ describe('UpdatePasswordForm', () => {
   it('returns unchanged state for unknown action type in reducer', () => {
     const originalUseReducer = React.useReducer.bind(React);
     jest.spyOn(React, 'useReducer').mockImplementation(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (reducer: any, initialArg: any, init?: any) => {
+      (reducer: Parameters<typeof React.useReducer>[0], initialArg: Parameters<typeof React.useReducer>[1], init?: Parameters<typeof React.useReducer>[2]) => {
         capturedReducer = reducer;
         return originalUseReducer(reducer, initialArg, init);
       },
@@ -172,8 +170,7 @@ describe('UpdatePasswordForm', () => {
 
     expect(capturedReducer).not.toBeNull();
     const state = { password: '', showPassword: false, error: null, submitted: false, isLoading: false };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = capturedReducer!(state, { type: 'UNKNOWN_ACTION' } as any);
+    const result = capturedReducer!(state, { type: 'UNKNOWN_ACTION' } as Record<string, unknown>);
     expect(result).toBe(state);
   });
 });

@@ -764,7 +764,6 @@
         "name": "Name",
         "description": "Description",
         "requiredPoints": "Required Points",
-        "status": "Status",
         "actions": "Actions"
       },
       "empty": "No products found.",
@@ -777,8 +776,7 @@
         "descriptionPlaceholder": "Enter product description (optional)",
         "pointsLabel": "Required Points",
         "pointsPlaceholder": "Enter required points",
-        "imagesLabel": "Product Images (up to 3)",
-        "activeLabel": "Active"
+        "imagesLabel": "Product Images (up to 3)"
       },
       "deleteModal": {
         "title": "Delete Product",

@@ -109,7 +109,6 @@ describe('ProductForm', () => {
     expect(screen.getByText('descriptionLabel')).toBeInTheDocument();
     expect(screen.getByText('pointsLabel')).toBeInTheDocument();
     expect(screen.getByText('categoryLabel')).toBeInTheDocument();
-    expect(screen.getByText('activeLabel')).toBeInTheDocument();
     expect(screen.getByText('imagesLabel')).toBeInTheDocument();
   });
 
@@ -125,7 +124,6 @@ describe('ProductForm', () => {
       name: 'Test Product',
       description: 'A product',
       required_points: 100,
-      active: true,
       category_id: 'cat-1',
       image_urls: [],
       organization_id: '1',
@@ -143,7 +141,6 @@ describe('ProductForm', () => {
       name: 'Test Product',
       description: 'A product',
       required_points: 100,
-      active: true,
       category_id: 'cat-1',
       image_urls: [],
       organization_id: '1',

@@ -11,7 +11,7 @@ jest.mock('@/lib/supabase/server', () => ({
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
           single: jest.fn(() => Promise.resolve({
-            data: { id: '1', name: 'Test Product', description: 'Desc', required_points: 100, active: true },
+            data: { id: '1', name: 'Test Product', description: 'Desc', required_points: 100 },
             error: null,
           })),
         })),

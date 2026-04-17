@@ -20,7 +20,7 @@ import {
 import type { Product } from '@/types/product';
 
 export default async function ProductListPage() {
-  const [{ data, error }, t, tCommon] = await Promise.all([
+  const [{ data, error }, t, _tCommon] = await Promise.all([
     getProducts(),
     getTranslations('Dashboard.product'),
     getTranslations('Common'),
@@ -57,7 +57,7 @@ export default async function ProductListPage() {
               <TableHead>{t('tableHeaders.name')}</TableHead>
               <TableHead>{t('tableHeaders.description')}</TableHead>
               <TableHead>{t('tableHeaders.requiredPoints')}</TableHead>
-              <TableHead>{t('tableHeaders.status')}</TableHead>
+
               <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
@@ -94,15 +94,6 @@ export default async function ProductListPage() {
                   </TableCell>
                   <TableCell>{product.description || 'N/A'}</TableCell>
                   <TableCell>{product.required_points}</TableCell>
-                  <TableCell>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                      product.active
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-red-100 text-red-800'
-                    }`}>
-                      {product.active ? tCommon('active') : tCommon('inactive')}
-                    </span>
-                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">

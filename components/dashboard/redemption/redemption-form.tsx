@@ -142,7 +142,6 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
       const productsPromise = supabase
         .from('product')
         .select('id, name, required_points')
-        .eq('active', true)
         .eq('organization_id', orgIdNumber)
         .order('name');
 
@@ -174,12 +173,11 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
     if (actionState.status === 'error' && actionState.message) {
       toast.error(actionState.message);
     }
+    if (actionState.status === 'success') {
+      toast.success(actionState.message);
+      redirect("/dashboard/redemption");
+    }
   }, [actionState]);
-
-  if (actionState.status === 'success') {
-    toast.success(actionState.message);
-    redirect("/dashboard/redemption");
-  }
 
   // Handlers
   const handleProductChange = (productId: string) => {

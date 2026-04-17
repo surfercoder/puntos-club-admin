@@ -76,15 +76,11 @@ export default function ProductForm({ product }: ProductFormProps) {
     if (actionState.status === 'error' && actionState.message) {
       toast.error(actionState.message);
     }
+    if (actionState.status === 'success') {
+      toast.success(actionState.message);
+      redirect("/dashboard/product");
+    }
   }, [actionState]);
-
-  if (actionState.status === 'success') {
-    toast.success(actionState.message);
-    // Redirect first, then invalidate plan usage cache.
-    // If invalidate() runs before redirect(), the PlanLimitGuard may
-    // re-render and block the page before the navigation occurs.
-    redirect("/dashboard/product");
-  }
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -175,18 +171,6 @@ export default function ProductForm({ product }: ProductFormProps) {
           onImagesChange={setImageUrls}
         />
         <FieldError actionState={validation ?? actionState} name="image_urls" />
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <input
-          className="rounded"
-          defaultChecked={product?.active ?? true}
-          id="active"
-          name="active"
-          type="checkbox"
-        />
-        <Label htmlFor="active">{t('activeLabel')}</Label>
-        <FieldError actionState={validation ?? actionState} name="active" />
       </div>
 
       <div className="grid grid-cols-2 gap-2">

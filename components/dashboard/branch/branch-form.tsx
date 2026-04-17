@@ -40,6 +40,10 @@ export default function BranchForm({ branch }: BranchFormProps) {
     if (actionState.status === 'error' && actionState.message) {
       toast.error(actionState.message);
     }
+    if (actionState.status === 'success') {
+      toast.success(actionState.message);
+      redirect("/dashboard/branch");
+    }
   }, [actionState]);
 
   useEffect(() => {
@@ -70,11 +74,6 @@ export default function BranchForm({ branch }: BranchFormProps) {
 
     fetchData();
   }, []);
-
-  if (actionState.status === 'success') {
-    toast.success(actionState.message);
-    redirect("/dashboard/branch");
-  }
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

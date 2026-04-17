@@ -40,12 +40,11 @@ export default function AddressForm({ address }: { address?: Address }) {
     if (actionState.status === 'error' && actionState.message) {
       toast.error(actionState.message);
     }
-  }, [actionState])
-
-  if (actionState.status === 'success') {
-    toast.success(actionState.message)
-    redirect("/dashboard/address")
-  }
+    if (actionState.status === 'success') {
+      toast.success(actionState.message);
+      redirect("/dashboard/address");
+    }
+  }, [actionState]);
 
   // Handlers
   const handlePlaceSelected = (components: GoogleAddressComponents) => {

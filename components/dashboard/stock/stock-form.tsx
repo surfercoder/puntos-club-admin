@@ -103,7 +103,6 @@ export default function StockForm({ stock }: StockFormProps) {
           .from('product')
           .select('id, name')
           .eq("organization_id", activeOrgIdNumber)
-          .eq('active', true)
           .order('name'),
       ]);
 
@@ -127,12 +126,11 @@ export default function StockForm({ stock }: StockFormProps) {
     if (actionState.status === 'error' && actionState.message) {
       toast.error(actionState.message);
     }
+    if (actionState.status === 'success') {
+      toast.success(actionState.message);
+      redirect("/dashboard/stock");
+    }
   }, [actionState]);
-
-  if (actionState.status === 'success') {
-    toast.success(actionState.message);
-    redirect("/dashboard/stock");
-  }
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

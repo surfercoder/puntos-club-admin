@@ -183,7 +183,6 @@ export async function getOrganizationProducts(organizationId: string) {
       )
     `)
     .eq('organization_id', organizationId)
-    .eq('active', true)
     .order('required_points', { ascending: true });
 
   return { data, error };

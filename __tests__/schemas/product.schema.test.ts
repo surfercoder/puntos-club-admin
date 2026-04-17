@@ -11,9 +11,6 @@ describe('ProductSchema', () => {
     it('should accept minimal valid input', () => {
       const result = ProductSchema.safeParse(validProduct);
       expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.active).toBe(true);
-      }
     });
 
     it('should accept all optional fields', () => {
@@ -21,7 +18,6 @@ describe('ProductSchema', () => {
         ...validProduct,
         id: 'prod-1',
         description: 'A nice mug',
-        active: false,
         creation_date: '2024-01-01',
         image_urls: ['https://example.com/img1.png', 'https://example.com/img2.png'],
       });
@@ -101,45 +97,6 @@ describe('ProductSchema', () => {
       }
     });
 
-    it('should transform string "true" to boolean true for active', () => {
-      const result = ProductSchema.safeParse({ ...validProduct, active: 'true' });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.active).toBe(true);
-      }
-    });
-
-    it('should transform string "on" to boolean true for active', () => {
-      const result = ProductSchema.safeParse({ ...validProduct, active: 'on' });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.active).toBe(true);
-      }
-    });
-
-    it('should transform string "false" to boolean false for active', () => {
-      const result = ProductSchema.safeParse({ ...validProduct, active: 'false' });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.active).toBe(false);
-      }
-    });
-
-    it('should keep boolean values for active', () => {
-      const result = ProductSchema.safeParse({ ...validProduct, active: false });
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.active).toBe(false);
-      }
-    });
-
-    it('should default active to true when omitted', () => {
-      const result = ProductSchema.safeParse(validProduct);
-      expect(result.success).toBe(true);
-      if (result.success) {
-        expect(result.data.active).toBe(true);
-      }
-    });
   });
 
   describe('image_urls', () => {

@@ -170,7 +170,6 @@ describe('generateQRBlob', () => {
     // Make measureText return wide width to force line breaks
     mockCtx.measureText.mockReturnValue({ width: 9999 });
     const ref = makeRef(true);
-    const longTagline = 'word1 word2 word3 word4 word5';
     const result = await generateQRBlob(ref, mockT, 'Test Org');
     expect(result).toBeInstanceOf(Blob);
     // Reset

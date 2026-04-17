@@ -9,10 +9,7 @@ export const ProductSchema = z.object({
     if (typeof val === 'number') return val;
     return parseInt(val) || 0;
   }),
-  active: z.union([z.boolean(), z.string()]).transform(val => {
-    if (typeof val === 'boolean') return val;
-    return val === 'true' || val === 'on';
-  }).default(true),
+
   creation_date: z.string().optional(),
   image_urls: z.array(z.string()).max(3, 'Maximum 3 images allowed').optional(),
 });

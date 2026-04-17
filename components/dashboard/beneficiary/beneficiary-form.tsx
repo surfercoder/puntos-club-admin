@@ -36,12 +36,11 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
     if (actionState.status === 'error' && actionState.message) {
       toast.error(actionState.message);
     }
+    if (actionState.status === 'success') {
+      toast.success(actionState.message);
+      redirect("/dashboard/beneficiary");
+    }
   }, [actionState]);
-
-  if (actionState.status === 'success') {
-    toast.success(actionState.message);
-    redirect("/dashboard/beneficiary");
-  }
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {

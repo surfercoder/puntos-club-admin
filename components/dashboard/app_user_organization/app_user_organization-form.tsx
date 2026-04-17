@@ -62,12 +62,11 @@ export default function AppUserOrganizationForm({ appUserOrganization }: AppUser
     if (actionState.status === 'error' && actionState.message) {
       toast.error(actionState.message);
     }
+    if (actionState.status === 'success') {
+      toast.success(actionState.message);
+      redirect('/dashboard/app_user_organization');
+    }
   }, [actionState]);
-
-  if (actionState.status === 'success') {
-    toast.success(actionState.message);
-    redirect('/dashboard/app_user_organization');
-  }
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     const formData = Object.fromEntries(new FormData(event.currentTarget));
