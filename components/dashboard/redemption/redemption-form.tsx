@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { redirect } from 'next/navigation';
-import { useActionState, useState, useEffect, useReducer } from 'react';
+import { useActionState, useEffect, useReducer } from 'react';
 import { toast } from "sonner";
 
 import { redemptionFormAction } from '@/actions/dashboard/redemption/redemption-form-actions';
@@ -32,123 +32,143 @@ interface Beneficiary {
 interface Product {
   id: string;
   name: string;
+  required_points: number;
 }
 
-interface AppOrder {
-  id: string;
-  order_number: string;
+interface BeneficiaryWithPoints extends Beneficiary {
+  available_points: number;
 }
 
-interface FormDataState {
-  beneficiaries: Beneficiary[];
+interface FormState {
+  beneficiaries: BeneficiaryWithPoints[];
   products: Product[];
-  orders: AppOrder[];
+  validation: ActionState | null;
+  selectedProductId: string;
+  selectedBeneficiaryId: string;
+  pointsUsed: number;
+  orgId: string | null;
 }
 
-type FormDataAction = {
-  type: 'SET_FORM_DATA';
-  payload: FormDataState;
-};
+type FormAction =
+  | { type: 'SET_FORM_DATA'; payload: { beneficiaries: BeneficiaryWithPoints[]; products: Product[] } }
+  | { type: 'SET_VALIDATION'; payload: ActionState | null }
+  | { type: 'SET_SELECTED_PRODUCT'; payload: { productId: string; requiredPoints: number | null } }
+  | { type: 'SET_SELECTED_BENEFICIARY'; payload: string }
+  | { type: 'SET_POINTS_USED'; payload: number }
+  | { type: 'SET_ORG_ID'; payload: string };
 
-function formDataReducer(_state: FormDataState, action: FormDataAction): FormDataState {
+function formReducer(state: FormState, action: FormAction): FormState {
   switch (action.type) {
     case 'SET_FORM_DATA':
-      return action.payload;
+      return { ...state, beneficiaries: action.payload.beneficiaries, products: action.payload.products };
+    case 'SET_VALIDATION':
+      return { ...state, validation: action.payload };
+    case 'SET_SELECTED_PRODUCT':
+      return {
+        ...state,
+        selectedProductId: action.payload.productId,
+        ...(action.payload.requiredPoints !== null ? { pointsUsed: action.payload.requiredPoints } : {}),
+      };
+    case 'SET_SELECTED_BENEFICIARY':
+      return { ...state, selectedBeneficiaryId: action.payload };
+    case 'SET_POINTS_USED':
+      return { ...state, pointsUsed: action.payload };
+    case 'SET_ORG_ID':
+      return { ...state, orgId: action.payload };
     /* c8 ignore next 2 */
     default:
-      return _state;
+      return state;
   }
 }
-
-const initialFormDataState: FormDataState = {
-  beneficiaries: [],
-  products: [],
-  orders: [],
-};
 
 export default function RedemptionForm({ redemption }: RedemptionFormProps) {
   const t = useTranslations('Dashboard.redemption');
   const tCommon = useTranslations('Common');
 
   // State
-  const [validation, setValidation] = useState<ActionState | null>(null);
-  const [formData, dispatchFormData] = useReducer(formDataReducer, initialFormDataState);
-  const { beneficiaries, products, orders } = formData;
+  const [state, dispatch] = useReducer(formReducer, {
+    beneficiaries: [],
+    products: [],
+    validation: null,
+    selectedProductId: redemption?.product_id ? String(redemption.product_id) : '',
+    selectedBeneficiaryId: redemption?.beneficiary_id ? String(redemption.beneficiary_id) : '',
+    pointsUsed: redemption?.points_used ?? 0,
+    orgId: null,
+  });
+
+  const { beneficiaries, products, validation, selectedProductId, selectedBeneficiaryId, pointsUsed, orgId } = state;
+
+  // Derived state
+  const selectedProduct = products.find(p => String(p.id) === selectedProductId);
+  const selectedBeneficiary = beneficiaries.find(b => String(b.id) === selectedBeneficiaryId);
+  const hasProduct = selectedProductId !== '' && !!selectedProduct;
+  const insufficientPoints = !!selectedBeneficiary && pointsUsed > selectedBeneficiary.available_points;
 
   // Utils
   const [actionState, formAction, pending] = useActionState(redemptionFormAction, EMPTY_ACTION_STATE);
 
-  // Load beneficiaries, products, and orders
   useEffect(() => {
+    try {
+      const activeOrgId = document.cookie
+        .split('; ')
+        .find(row => row.startsWith('active_org_id='))
+        ?.split('=')[1];
+      if (activeOrgId) {
+        dispatch({ type: 'SET_ORG_ID', payload: activeOrgId });
+      }
+    } /* c8 ignore next 2 */ catch {
+      // ignore
+    }
+  }, []);
+
+  // Load beneficiaries and products (only when orgId is available)
+  useEffect(() => {
+    if (!orgId) return;
+
     async function loadData() {
       const supabase = createClient();
 
-      // Get active organization ID
-      let orgIdNumber: number | null = null;
-      try {
-        const activeOrgId = document.cookie
-          .split('; ')
-          .find(row => row.startsWith('active_org_id='))
-          ?.split('=')[1];
-        if (activeOrgId) {
-          const parsed = Number(activeOrgId);
-          if (!Number.isNaN(parsed)) {
-            orgIdNumber = parsed;
-          }
-        }
-      } /* c8 ignore next 2 */ catch {
-        // ignore
-      }
+      const orgIdNumber = Number(orgId);
+      if (Number.isNaN(orgIdNumber)) return;
 
-      // Build beneficiaries query filtered by organization
-      let beneficiariesPromise;
-      if (orgIdNumber) {
-        beneficiariesPromise = supabase
-          .from('beneficiary_organization')
-          .select('beneficiary:beneficiary_id(id, first_name, last_name, email)')
-          .eq('organization_id', orgIdNumber)
-          .eq('is_active', true);
-      } else {
-        beneficiariesPromise = supabase
-          .from('beneficiary')
-          .select('id, first_name, last_name, email')
-          .order('first_name');
-      }
+      // Beneficiaries filtered by organization, including available_points
+      const beneficiariesPromise = supabase
+        .from('beneficiary_organization')
+        .select('available_points, beneficiary:beneficiary_id(id, first_name, last_name, email)')
+        .eq('organization_id', orgIdNumber)
+        .eq('is_active', true);
 
-      // Build products query filtered by organization
-      let productsQuery = supabase.from('product').select('id, name').eq('active', true).order('name');
-      if (orgIdNumber) {
-        productsQuery = productsQuery.eq('organization_id', orgIdNumber);
-      }
+      // Products filtered by organization, including required_points
+      const productsPromise = supabase
+        .from('product')
+        .select('id, name, required_points')
+        .eq('active', true)
+        .eq('organization_id', orgIdNumber)
+        .order('name');
 
-      const [beneficiariesResult, productsResult, ordersResult] = await Promise.all([
+      const [beneficiariesResult, productsResult] = await Promise.all([
         beneficiariesPromise,
-        productsQuery,
-        supabase.from('app_order').select('id, order_number').order('order_number')
+        productsPromise,
       ]);
 
-      let loadedBeneficiaries: Beneficiary[] = [];
+      let loadedBeneficiaries: BeneficiaryWithPoints[] = [];
       if (beneficiariesResult.data) {
-        if (orgIdNumber) {
-          // Extract nested beneficiary objects from join
-          const nested = beneficiariesResult.data as unknown as { beneficiary: Beneficiary }[];
-          loadedBeneficiaries = nested.flatMap(r => r.beneficiary ? [r.beneficiary] : []);
-        } else {
-          loadedBeneficiaries = beneficiariesResult.data as unknown as Beneficiary[];
-        }
+        const nested = beneficiariesResult.data as unknown as { beneficiary: Beneficiary; available_points: number }[];
+        loadedBeneficiaries = nested.flatMap(r =>
+          r.beneficiary ? [{ ...r.beneficiary, available_points: r.available_points ?? 0 }] : []
+        );
       }
 
-      dispatchFormData({
+      dispatch({
         type: 'SET_FORM_DATA',
         payload: {
           beneficiaries: loadedBeneficiaries,
           products: productsResult.data ? (productsResult.data as unknown as Product[]) : [],
-          orders: ordersResult.data ? (ordersResult.data as unknown as AppOrder[]) : [],
         },
       });
     }
     loadData();
-  }, []);
+  }, [orgId]);
 
   useEffect(() => {
     if (actionState.status === 'error' && actionState.message) {
@@ -162,25 +182,56 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
   }
 
   // Handlers
+  const handleProductChange = (productId: string) => {
+    const product = products.find(p => String(p.id) === productId);
+    dispatch({
+      type: 'SET_SELECTED_PRODUCT',
+      payload: { productId, requiredPoints: product ? product.required_points : null },
+    });
+  };
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     const formData = Object.fromEntries(new FormData(event.currentTarget));
-    setValidation(null);
+    dispatch({ type: 'SET_VALIDATION', payload: null });
 
     try {
       RedemptionSchema.parse(formData);
     } catch (error) {
-      setValidation(fromErrorToActionState(error));
+      dispatch({ type: 'SET_VALIDATION', payload: fromErrorToActionState(error) });
       event.preventDefault();
+      return;
+    }
+
+    // Check if beneficiary has enough points
+    if (selectedBeneficiary) {
+      const totalPoints = pointsUsed;
+      if (totalPoints > selectedBeneficiary.available_points) {
+        dispatch({
+          type: 'SET_VALIDATION',
+          payload: {
+            status: 'error',
+            message: t('form.insufficientPoints', { available: selectedBeneficiary.available_points, required: totalPoints }),
+            fieldErrors: { points_used: [t('form.insufficientPointsField')] },
+          },
+        });
+        event.preventDefault();
+        return;
+      }
     }
   };
 
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
       {redemption?.id && <input name="id" type="hidden" value={redemption.id} />}
+      {orgId && <input name="organization_id" type="hidden" value={orgId} />}
 
       <div>
         <Label htmlFor="beneficiary_id">{t('form.beneficiaryLabel')}</Label>
-        <Select defaultValue={redemption?.beneficiary_id ? String(redemption.beneficiary_id) : ''} name="beneficiary_id">
+        <Select
+          defaultValue={redemption?.beneficiary_id ? String(redemption.beneficiary_id) : ''}
+          name="beneficiary_id"
+          onValueChange={(value) => dispatch({ type: 'SET_SELECTED_BENEFICIARY', payload: value })}
+        >
           <SelectTrigger>
             <SelectValue placeholder={t('form.selectBeneficiary')} />
           </SelectTrigger>
@@ -194,17 +245,25 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
             ))}
           </SelectContent>
         </Select>
+        {selectedBeneficiary && (
+          <p className="text-sm text-muted-foreground mt-1">
+            {t('form.availablePoints')}: {selectedBeneficiary.available_points}
+          </p>
+        )}
         <FieldError actionState={validation ?? actionState} name="beneficiary_id" />
       </div>
 
       <div>
         <Label htmlFor="product_id">{t('form.productLabel')}</Label>
-        <Select defaultValue={redemption?.product_id ? String(redemption.product_id) : 'none'} name="product_id">
+        <Select
+          defaultValue={redemption?.product_id ? String(redemption.product_id) : ''}
+          name="product_id"
+          onValueChange={handleProductChange}
+        >
           <SelectTrigger>
             <SelectValue placeholder={t('form.selectProduct')} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="none">{t('form.none')}</SelectItem>
             {products.map((product) => (
               <SelectItem key={product.id} value={String(product.id)}>
                 {product.name}
@@ -216,55 +275,28 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="order_id">{t('form.orderLabel')}</Label>
-        <Select defaultValue={redemption?.order_id ? String(redemption.order_id) : ''} name="order_id">
-          <SelectTrigger>
-            <SelectValue placeholder={t('form.selectOrder')} />
-          </SelectTrigger>
-          <SelectContent>
-            {orders.map((order) => (
-              <SelectItem key={order.id} value={String(order.id)}>
-                {order.order_number}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <FieldError actionState={validation ?? actionState} name="order_id" />
-      </div>
-
-      <div>
-        <Label htmlFor="points_used">{t('form.pointsUsed')}</Label>
+        <Label htmlFor="points_used">{t('form.points')}</Label>
         <Input
           aria-describedby="points_used-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.points_used}
-          defaultValue={redemption?.points_used ?? 0}
           id="points_used"
           name="points_used"
-          placeholder={t('form.pointsUsedPlaceholder')}
+          onChange={hasProduct ? undefined : (e) => dispatch({ type: 'SET_POINTS_USED', payload: Number(e.target.value) || 0 })}
+          readOnly={hasProduct}
           type="number"
+          value={pointsUsed}
         />
+        {insufficientPoints && (
+          <p className="text-sm text-destructive mt-1">{t('form.insufficientPointsField')}</p>
+        )}
         <FieldError actionState={validation ?? actionState} name="points_used" />
-      </div>
-
-      <div>
-        <Label htmlFor="quantity">{t('form.quantityLabel')}</Label>
-        <Input
-          aria-describedby="quantity-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.quantity}
-          defaultValue={redemption?.quantity ?? 0}
-          id="quantity"
-          name="quantity"
-          placeholder={t('form.quantityPlaceholder')}
-          type="number"
-        />
-        <FieldError actionState={validation ?? actionState} name="quantity" />
       </div>
 
       <div className="grid grid-cols-2 gap-2">
         <Button asChild type="button" variant="secondary">
           <Link href="/dashboard/redemption">{tCommon('cancel')}</Link>
         </Button>
-        <Button disabled={pending} type="submit">
+        <Button disabled={pending || insufficientPoints} type="submit">
           {redemption ? tCommon('update') : tCommon('create')}
         </Button>
       </div>

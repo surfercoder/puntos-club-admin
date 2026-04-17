@@ -221,7 +221,6 @@
     "edit": "Editar",
     "details": "Detalles",
     "address": "Direcciones",
-    "app_order": "Pedidos",
     "app_user": "Usuarios de la App",
     "app_user_organization": "Usuarios por Organización",
     "beneficiary": "Beneficiarios",
@@ -796,38 +795,6 @@
         "imageCount": "{count} de 3 imágenes subidas"
       }
     },
-    "appOrder": {
-      "title": "Pedidos",
-      "description": "Administrar pedidos del sistema",
-      "newButton": "+ Nuevo Pedido",
-      "error": "Error al obtener pedidos",
-      "empty": "No se encontraron pedidos.",
-      "tableHeaders": {
-        "orderNumber": "Número de Pedido",
-        "creationDate": "Fecha de Creación",
-        "totalPoints": "Puntos Totales",
-        "observations": "Observaciones",
-        "actions": "Acciones"
-      },
-      "createTitle": "Crear Pedido",
-      "editTitle": "Editar Pedido",
-      "fetchError": "Error al obtener el pedido",
-      "deleteModal": {
-        "title": "Eliminar Pedido",
-        "confirm": "¿Estás seguro de que deseas eliminar el pedido <strong>{name}</strong>? Esta acción no se puede deshacer.",
-        "deleteSuccess": "Pedido eliminado correctamente",
-        "genericError": "Ocurrió un error al eliminar"
-      },
-      "form": {
-        "orderNumber": "Número de Pedido",
-        "orderNumberPlaceholder": "Ingresa el número de pedido",
-        "creationDate": "Fecha de Creación",
-        "totalPoints": "Puntos Totales",
-        "totalPointsPlaceholder": "Ingresa los puntos totales",
-        "observations": "Observaciones",
-        "observationsPlaceholder": "Ingresa observaciones (opcional)"
-      }
-    },
     "redemption": {
       "title": "Canjes",
       "description": "Administrar canjes del sistema",
@@ -837,9 +804,7 @@
       "tableHeaders": {
         "beneficiary": "Beneficiario",
         "product": "Producto",
-        "order": "Pedido",
-        "pointsUsed": "Puntos Usados",
-        "quantity": "Cantidad",
+        "pointsUsed": "Puntos",
         "date": "Fecha",
         "actions": "Acciones"
       },
@@ -857,15 +822,13 @@
         "beneficiaryLabel": "Beneficiario",
         "selectBeneficiary": "Seleccionar un beneficiario",
         "noName": "Beneficiario sin nombre",
-        "productLabel": "Producto (Opcional)",
-        "selectProduct": "Seleccionar un producto (opcional)",
-        "none": "Ninguno",
-        "orderLabel": "Pedido",
-        "selectOrder": "Seleccionar un pedido",
-        "pointsUsed": "Puntos Usados",
-        "pointsUsedPlaceholder": "Ingresa los puntos usados",
-        "quantityLabel": "Cantidad",
-        "quantityPlaceholder": "Ingresa la cantidad"
+        "productLabel": "Producto",
+        "selectProduct": "Seleccionar un producto",
+        "points": "Puntos",
+        "pointsUsedPlaceholder": "Ingresa los puntos",
+        "availablePoints": "Puntos disponibles",
+        "insufficientPoints": "El beneficiario no tiene suficientes puntos. Disponibles: {available}, requeridos: {required}",
+        "insufficientPointsField": "Puntos insuficientes"
       }
     },
     "appUserOrganization": {

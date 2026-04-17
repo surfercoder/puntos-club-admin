@@ -68,9 +68,8 @@ describe('RedemptionForm', () => {
 
     expect(screen.getByText('form.beneficiaryLabel')).toBeInTheDocument();
     expect(screen.getByText('form.productLabel')).toBeInTheDocument();
-    expect(screen.getByText('form.orderLabel')).toBeInTheDocument();
-    expect(screen.getByText('form.pointsUsed')).toBeInTheDocument();
-    expect(screen.getByText('form.quantityLabel')).toBeInTheDocument();
+
+    expect(screen.getByText('form.points')).toBeInTheDocument();
   });
 
   it('renders correct submit button text in create mode', () => {
@@ -84,9 +83,8 @@ describe('RedemptionForm', () => {
       id: '1',
       beneficiary_id: 'ben-1',
       product_id: 'prod-1',
-      order_id: 'order-1',
+
       points_used: 100,
-      quantity: 2,
       organization_id: '1',
       created_at: '2024-01-01',
     };
@@ -101,9 +99,8 @@ describe('RedemptionForm', () => {
       id: '1',
       beneficiary_id: 'ben-1',
       product_id: 'prod-1',
-      order_id: 'order-1',
+
       points_used: 100,
-      quantity: 2,
       organization_id: '1',
       created_at: '2024-01-01',
     };
@@ -111,13 +108,12 @@ describe('RedemptionForm', () => {
     render(<RedemptionForm redemption={redemption} />);
 
     expect(screen.getByDisplayValue('100')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('2')).toBeInTheDocument();
   });
 
   it('renders without initial data in create mode', () => {
     render(<RedemptionForm />);
 
-    const pointsInput = screen.getByRole('spinbutton', { name: 'form.pointsUsed' });
+    const pointsInput = screen.getByRole('spinbutton', { name: 'form.points' });
     expect(pointsInput).toHaveValue(0);
   });
 
@@ -182,9 +178,8 @@ describe('RedemptionForm', () => {
       id: '1',
       beneficiary_id: 'ben-1',
       product_id: 'prod-1',
-      order_id: 'order-1',
+
       points_used: 100,
-      quantity: 2,
       organization_id: '1',
       created_at: '2024-01-01',
     };
@@ -216,19 +211,21 @@ describe('RedemptionForm', () => {
     const originalUseReducer = jest.requireActual('react').useReducer;
     const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialState: any) => {
       // Check if this is the formDataReducer by inspecting the initial state shape
-      if (initialState && 'beneficiaries' in initialState && 'products' in initialState && 'orders' in initialState) {
+      if (initialState && 'beneficiaries' in initialState && 'products' in initialState) {
         return [{
           beneficiaries: [
-            { id: 'ben-1', first_name: 'John', last_name: 'Doe', email: 'john@test.com' },
-            { id: 'ben-2', first_name: null, last_name: null, email: 'noname@test.com' },
-            { id: 'ben-3', first_name: null, last_name: null, email: null },
+            { id: 'ben-1', first_name: 'John', last_name: 'Doe', email: 'john@test.com', available_points: 500 },
+            { id: 'ben-2', first_name: null, last_name: null, email: 'noname@test.com', available_points: 100 },
+            { id: 'ben-3', first_name: null, last_name: null, email: null, available_points: 0 },
           ],
           products: [
-            { id: 'prod-1', name: 'Widget' },
+            { id: 'prod-1', name: 'Widget', required_points: 50 },
           ],
-          orders: [
-            { id: 'order-1', order_number: 'ORD-001' },
-          ],
+          validation: null,
+          selectedProductId: '',
+          selectedBeneficiaryId: '',
+          pointsUsed: 0,
+          orgId: null,
         }, jest.fn()];
       }
       return originalUseReducer(reducer, initialState);
@@ -244,8 +241,7 @@ describe('RedemptionForm', () => {
     expect(screen.getByText('form.noName')).toBeInTheDocument();
     // Product
     expect(screen.getByText('Widget')).toBeInTheDocument();
-    // Order
-    expect(screen.getByText('ORD-001')).toBeInTheDocument();
+
 
     useReducerSpy.mockRestore();
   });
@@ -255,7 +251,7 @@ describe('RedemptionForm', () => {
     const originalUseReducer = jest.requireActual('react').useReducer;
     let capturedReducer: any;
     const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialState: any) => {
-      if (initialState && 'beneficiaries' in initialState && 'products' in initialState && 'orders' in initialState) {
+      if (initialState && 'beneficiaries' in initialState && 'products' in initialState && 'validation' in initialState) {
         capturedReducer = reducer;
       }
       return originalUseReducer(reducer, initialState);
@@ -264,13 +260,39 @@ describe('RedemptionForm', () => {
     render(<RedemptionForm />);
 
     if (capturedReducer) {
-      const state = { beneficiaries: [], products: [], orders: [] };
-      // Test SET_FORM_DATA action (covers line 56)
-      const newPayload = { beneficiaries: [{ id: '1' }], products: [], orders: [] };
+      const state = { beneficiaries: [], products: [], validation: null, selectedProductId: '', selectedBeneficiaryId: '', pointsUsed: 0, orgId: null };
+      // Test SET_FORM_DATA action
+      const newPayload = { beneficiaries: [{ id: '1' }], products: [] };
       const setResult = capturedReducer(state, { type: 'SET_FORM_DATA', payload: newPayload });
-      expect(setResult).toBe(newPayload);
+      expect(setResult.beneficiaries).toEqual(newPayload.beneficiaries);
 
-      // Test default case (covers lines 57-58)
+      // Test SET_VALIDATION action
+      const valResult = capturedReducer(state, { type: 'SET_VALIDATION', payload: { status: 'error', message: 'err' } });
+      expect(valResult.validation).toEqual({ status: 'error', message: 'err' });
+
+      // Test SET_SELECTED_PRODUCT action with requiredPoints
+      const prodResult = capturedReducer(state, { type: 'SET_SELECTED_PRODUCT', payload: { productId: 'p1', requiredPoints: 50 } });
+      expect(prodResult.selectedProductId).toBe('p1');
+      expect(prodResult.pointsUsed).toBe(50);
+
+      // Test SET_SELECTED_PRODUCT action without requiredPoints
+      const prodResult2 = capturedReducer(state, { type: 'SET_SELECTED_PRODUCT', payload: { productId: 'p2', requiredPoints: null } });
+      expect(prodResult2.selectedProductId).toBe('p2');
+      expect(prodResult2.pointsUsed).toBe(0);
+
+      // Test SET_SELECTED_BENEFICIARY action
+      const benResult = capturedReducer(state, { type: 'SET_SELECTED_BENEFICIARY', payload: 'b1' });
+      expect(benResult.selectedBeneficiaryId).toBe('b1');
+
+      // Test SET_POINTS_USED action
+      const ptsResult = capturedReducer(state, { type: 'SET_POINTS_USED', payload: 99 });
+      expect(ptsResult.pointsUsed).toBe(99);
+
+      // Test SET_ORG_ID action
+      const orgResult = capturedReducer(state, { type: 'SET_ORG_ID', payload: '42' });
+      expect(orgResult.orgId).toBe('42');
+
+      // Test default case
       const defaultResult = capturedReducer(state, { type: 'UNKNOWN_ACTION' } as any);
       expect(defaultResult).toBe(state);
     }
@@ -320,7 +342,7 @@ describe('RedemptionForm', () => {
   });
 
   // -- Cover null data results from supabase (lines 144-145 branches) --
-  it('handles null data from supabase for products and orders', async () => {
+  it('handles null data from supabase for products', async () => {
     Object.defineProperty(document, 'cookie', {
       writable: true,
       value: 'active_org_id=42',
@@ -353,28 +375,32 @@ describe('RedemptionForm', () => {
     });
   });
 
-  // -- Cover no active_org_id cookie at all (line 94 - orgIdNumber stays null) --
-  it('loads data without org cookie, uses beneficiary table directly (line 110-114)', () => {
+  // -- Cover no active_org_id cookie at all (orgId stays null, data not loaded) --
+  it('does not load data without org cookie', () => {
     Object.defineProperty(document, 'cookie', {
       writable: true,
       value: '',
     });
 
     render(<RedemptionForm />);
-    // When no active_org_id, loadData queries 'beneficiary' table directly
+    // When no active_org_id, loadData is not called
   });
 
   // -- Cover beneficiary with only first_name (line 190 branch) --
   it('renders beneficiary with only first_name', () => {
     const originalUseReducer = jest.requireActual('react').useReducer;
     const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialState: any) => {
-      if (initialState && 'beneficiaries' in initialState && 'products' in initialState && 'orders' in initialState) {
+      if (initialState && 'beneficiaries' in initialState && 'products' in initialState) {
         return [{
           beneficiaries: [
-            { id: 'ben-1', first_name: 'Alice', last_name: null, email: null },
+            { id: 'ben-1', first_name: 'Alice', last_name: null, email: null, available_points: 100 },
           ],
           products: [],
-          orders: [],
+          validation: null,
+          selectedProductId: '',
+          selectedBeneficiaryId: '',
+          pointsUsed: 0,
+          orgId: null,
         }, jest.fn()];
       }
       return originalUseReducer(reducer, initialState);
@@ -390,13 +416,17 @@ describe('RedemptionForm', () => {
   it('renders beneficiary with only last_name', () => {
     const originalUseReducer = jest.requireActual('react').useReducer;
     const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialState: any) => {
-      if (initialState && 'beneficiaries' in initialState && 'products' in initialState && 'orders' in initialState) {
+      if (initialState && 'beneficiaries' in initialState && 'products' in initialState) {
         return [{
           beneficiaries: [
-            { id: 'ben-1', first_name: null, last_name: 'Smith', email: null },
+            { id: 'ben-1', first_name: null, last_name: 'Smith', email: null, available_points: 200 },
           ],
           products: [],
-          orders: [],
+          validation: null,
+          selectedProductId: '',
+          selectedBeneficiaryId: '',
+          pointsUsed: 0,
+          orgId: null,
         }, jest.fn()];
       }
       return originalUseReducer(reducer, initialState);

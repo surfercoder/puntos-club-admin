@@ -44,9 +44,8 @@ beforeEach(() => {
 const validRedemption = {
   beneficiary_id: '1',
   product_id: '2',
-  order_id: '3',
+
   points_used: 100,
-  quantity: 1,
 };
 
 describe('createRedemption', () => {
@@ -58,7 +57,7 @@ describe('createRedemption', () => {
   });
 
   it('should return field errors on invalid input', async () => {
-    const result = await createRedemption({ beneficiary_id: '', product_id: '', order_id: '', points_used: 0, quantity: 0 });
+    const result = await createRedemption({ beneficiary_id: '', product_id: '', points_used: 0 } as any);
     expect(result.error).toHaveProperty('fieldErrors');
   });
 
@@ -77,7 +76,7 @@ describe('updateRedemption', () => {
   });
 
   it('should return field errors on invalid input', async () => {
-    const result = await updateRedemption('1', { beneficiary_id: '', product_id: '', order_id: '', points_used: 0, quantity: 0 });
+    const result = await updateRedemption('1', { beneficiary_id: '', product_id: '', points_used: 0 } as any);
     expect(result.error).toHaveProperty('fieldErrors');
   });
 });
@@ -90,7 +89,7 @@ describe('createRedemption - empty path validation', () => {
       success: false,
       error: { issues: [{ path: [], message: 'Root' }] },
     }));
-    const result = await createRedemption({ beneficiary_id: '', product_id: '', order_id: '', points_used: 0, quantity: 0 });
+    const result = await createRedemption({ beneficiary_id: '', product_id: '', points_used: 0 } as any);
     expect((result.error as { fieldErrors: Record<string, string> }).fieldErrors).toEqual({});
     schema.safeParse = orig;
   });
@@ -104,7 +103,7 @@ describe('updateRedemption - empty path validation', () => {
       success: false,
       error: { issues: [{ path: [], message: 'Root' }] },
     }));
-    const result = await updateRedemption('1', { beneficiary_id: '', product_id: '', order_id: '', points_used: 0, quantity: 0 });
+    const result = await updateRedemption('1', { beneficiary_id: '', product_id: '', points_used: 0 } as any);
     expect((result.error as { fieldErrors: Record<string, string> }).fieldErrors).toEqual({});
     schema.safeParse = orig;
   });

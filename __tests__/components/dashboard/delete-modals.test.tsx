@@ -22,7 +22,7 @@ jest.mock('@/actions/dashboard/beneficiary/actions', () => ({ deleteBeneficiary:
 jest.mock('@/actions/dashboard/redemption/actions', () => ({ deleteRedemption: jest.fn() }));
 jest.mock('@/actions/dashboard/address/actions', () => ({ deleteAddress: jest.fn() }));
 jest.mock('@/actions/dashboard/organization/actions', () => ({ deleteOrganization: jest.fn() }));
-jest.mock('@/actions/dashboard/app_order/actions', () => ({ deleteAppOrder: jest.fn() }));
+
 jest.mock('@/actions/dashboard/app_user/actions', () => ({ deleteAppUser: jest.fn() }));
 jest.mock('@/actions/dashboard/app_user_organization/actions', () => ({ deleteAppUserOrganization: jest.fn() }));
 jest.mock('@/actions/dashboard/beneficiary_organization/actions', () => ({ deleteBeneficiaryOrganization: jest.fn() }));
@@ -36,7 +36,7 @@ import { deleteBeneficiary } from '@/actions/dashboard/beneficiary/actions';
 import { deleteRedemption } from '@/actions/dashboard/redemption/actions';
 import { deleteAddress } from '@/actions/dashboard/address/actions';
 import { deleteOrganization } from '@/actions/dashboard/organization/actions';
-import { deleteAppOrder } from '@/actions/dashboard/app_order/actions';
+
 import { deleteAppUser } from '@/actions/dashboard/app_user/actions';
 import { deleteAppUserOrganization } from '@/actions/dashboard/app_user_organization/actions';
 import { deleteBeneficiaryOrganization } from '@/actions/dashboard/beneficiary_organization/actions';
@@ -50,7 +50,7 @@ import BeneficiaryDeleteModal from '@/components/dashboard/beneficiary/delete-mo
 import RedemptionDeleteModal from '@/components/dashboard/redemption/delete-modal';
 import AddressDeleteModal from '@/components/dashboard/address/delete-modal';
 import OrganizationDeleteModal from '@/components/dashboard/organization/delete-modal';
-import AppOrderDeleteModal from '@/components/dashboard/app_order/delete-modal';
+
 import AppUserDeleteModal from '@/components/dashboard/app_user/delete-modal';
 import AppUserOrganizationDeleteModal from '@/components/dashboard/app_user_organization/delete-modal';
 import BeneficiaryOrganizationDeleteModal from '@/components/dashboard/beneficiary_organization/delete-modal';
@@ -401,36 +401,6 @@ describe('OrganizationDeleteModal', () => {
 
   it('cancel button click', () => {
     render(<OrganizationDeleteModal organizationId="1" organizationName="Org" />);
-    fireEvent.click(getCancelButton());
-  });
-});
-
-// ---- AppOrder ----
-describe('AppOrderDeleteModal', () => {
-  const mock = deleteAppOrder as jest.Mock;
-
-  it('renders', () => {
-    render(<AppOrderDeleteModal appOrderId="1" appOrderNumber="ORD-1" />);
-    expectRendered();
-  });
-
-  it('success path', async () => {
-    mock.mockResolvedValue(undefined);
-    render(<AppOrderDeleteModal appOrderId="1" appOrderNumber="ORD-1" />);
-    fireEvent.click(getDeleteButton());
-    await waitFor(() => expect(toast.success).toHaveBeenCalled());
-    expect(mockRefresh).toHaveBeenCalled();
-  });
-
-  it('exception path', async () => {
-    mock.mockRejectedValue(new Error('Net'));
-    render(<AppOrderDeleteModal appOrderId="1" appOrderNumber="ORD-1" />);
-    fireEvent.click(getDeleteButton());
-    await waitFor(() => expect(toast.error).toHaveBeenCalled());
-  });
-
-  it('cancel button click', () => {
-    render(<AppOrderDeleteModal appOrderId="1" appOrderNumber="ORD-1" />);
     fireEvent.click(getCancelButton());
   });
 });

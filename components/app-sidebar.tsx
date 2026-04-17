@@ -4,7 +4,6 @@ import * as React from "react"
 import Link from "next/link"
 import {
   MapPin,
-  ShoppingBag,
   Smartphone,
   UserCog,
   HeartHandshake,
@@ -22,7 +21,6 @@ import {
   Boxes,
   Shield,
   Users,
-  ClipboardList,
   HandHeart,
   Tags,
   Bell,
@@ -93,7 +91,7 @@ export function AppSidebar({
     if (portalMode === "admin") {
       const adminEntities = [
         { title: t("addresses"), url: "/dashboard/address", icon: MapPin },
-        { title: t("orders"), url: "/dashboard/app_order", icon: ShoppingBag },
+
         { title: t("appUsers"), url: "/dashboard/app_user", icon: Smartphone },
         { title: t("usersByOrg"), url: "/dashboard/app_user_organization", icon: UserCog },
         { title: t("beneficiaries"), url: "/dashboard/beneficiary", icon: HeartHandshake },
@@ -123,7 +121,7 @@ export function AppSidebar({
     if (isOwnerOrCollaborator) {
       const ownerEntities = [
         { title: t("qrCode"), url: "/dashboard/qr", icon: QrCode },
-        { title: t("orders"), url: "/dashboard/app_order", icon: ClipboardList },
+
         { title: t("beneficiaries"), url: "/dashboard/beneficiary", icon: HandHeart },
         { title: t("branches"), url: "/dashboard/branch", icon: Store },
         { title: t("categories"), url: "/dashboard/category", icon: Tags },

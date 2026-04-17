@@ -26,7 +26,7 @@ function createFormData(data: Record<string, string>): FormData {
 
 describe('redemptionFormAction', () => {
   it('should create redemption successfully', async () => {
-    const fd = createFormData({ beneficiary_id: '1', order_id: '3', points_used: '100', quantity: '1' });
+    const fd = createFormData({ beneficiary_id: '1', product_id: 'prod-1', points_used: '100' });
     const result = await redemptionFormAction(EMPTY_ACTION_STATE, fd);
     expect(createRedemption).toHaveBeenCalled();
     expect(revalidatePath).toHaveBeenCalledWith('/dashboard/redemption');
@@ -34,21 +34,21 @@ describe('redemptionFormAction', () => {
   });
 
   it('should update redemption successfully', async () => {
-    const fd = createFormData({ id: '1', beneficiary_id: '1', order_id: '3', points_used: '100', quantity: '1' });
+    const fd = createFormData({ id: '1', beneficiary_id: '1', product_id: 'prod-1', points_used: '100' });
     const result = await redemptionFormAction(EMPTY_ACTION_STATE, fd);
     expect(updateRedemption).toHaveBeenCalled();
     expect(result.status).toBe('success');
   });
 
   it('should return validation error', async () => {
-    const fd = createFormData({ beneficiary_id: '', order_id: '' });
+    const fd = createFormData({ beneficiary_id: '' });
     const result = await redemptionFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
   });
 
   it('should handle thrown error', async () => {
     (createRedemption as jest.Mock).mockImplementation(() => { throw new Error('Error'); });
-    const fd = createFormData({ beneficiary_id: '1', order_id: '3', points_used: '100', quantity: '1' });
+    const fd = createFormData({ beneficiary_id: '1', product_id: 'prod-1', points_used: '100' });
     const result = await redemptionFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
   });

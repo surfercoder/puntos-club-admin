@@ -67,7 +67,7 @@ export function DashboardShell({
 
   const breadcrumbItems = React.useMemo(() => {
     const knownSegments = [
-      "address", "app_order", "app_user", "app_user_organization",
+      "address", "app_user", "app_user_organization",
       "beneficiary", "beneficiary_organization", "branch", "category",
       "notifications", "organization", "organization_notification_limits",
       "points-rules", "product", "profile", "purchase", "push_notifications",

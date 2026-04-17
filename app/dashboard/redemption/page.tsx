@@ -22,9 +22,8 @@ interface RedemptionWithRelations {
   id: string;
   beneficiary_id: string;
   product_id?: string | null;
-  order_id: string;
+  organization_id?: number | null;
   points_used: number;
-  quantity: number;
   redemption_date: string;
   beneficiary: {
     first_name?: string | null;
@@ -35,9 +34,6 @@ interface RedemptionWithRelations {
     name: string;
     organization_id?: number;
   } | null;
-  app_order: {
-    order_number: string;
-  };
 }
 
 export default async function RedemptionListPage() {
@@ -52,29 +48,28 @@ export default async function RedemptionListPage() {
   const activeOrgId = cookieStore.get('active_org_id')?.value;
   const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
 
-  const { data, error } = await supabase
+  let query = supabase
     .from('redemption')
     .select(`
       *,
       beneficiary:beneficiary(first_name, last_name, email),
-      product:product(name, organization_id),
-      app_order:app_order(order_number)
+      product:product(name, organization_id)
     `)
     .order('redemption_date', { ascending: false });
+
+  // Filter by organization for non-admin users
+  if (!userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
+    query = query.eq('organization_id', activeOrgIdNumber);
+  }
+
+  const { data, error } = await query;
 
   if (error) {
     return <div>{t('error')}</div>;
   }
 
-  // Only filter by organization for non-admin users
-  const filteredData = !userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)
-    ? data?.filter((redemption: RedemptionWithRelations) =>
-        redemption.product?.organization_id === activeOrgIdNumber
-      )
-    : data;
-
   return (
-    <div className="space-y-6">      
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">{t('title')}</h1>
@@ -91,28 +86,24 @@ export default async function RedemptionListPage() {
             <TableRow>
               <TableHead>{t('tableHeaders.beneficiary')}</TableHead>
               <TableHead>{t('tableHeaders.product')}</TableHead>
-              <TableHead>{t('tableHeaders.order')}</TableHead>
               <TableHead>{t('tableHeaders.pointsUsed')}</TableHead>
-              <TableHead>{t('tableHeaders.quantity')}</TableHead>
               <TableHead>{t('tableHeaders.date')}</TableHead>
               <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {filteredData && filteredData.length > 0 ? (
-              filteredData.map((redemption: RedemptionWithRelations) => (
+            {data && data.length > 0 ? (
+              data.map((redemption: RedemptionWithRelations) => (
                 <TableRow key={redemption.id}>
                   <TableCell className="font-medium">
-                    {redemption.beneficiary?.first_name || redemption.beneficiary?.last_name 
+                    {redemption.beneficiary?.first_name || redemption.beneficiary?.last_name
                       ? `${redemption.beneficiary.first_name || ''} ${redemption.beneficiary.last_name || ''}`.trim()
                       : redemption.beneficiary?.email || 'N/A'}
                   </TableCell>
                   <TableCell>{redemption.product?.name || 'N/A'}</TableCell>
-                  <TableCell>{redemption.app_order?.order_number || 'N/A'}</TableCell>
                   <TableCell>{redemption.points_used}</TableCell>
-                  <TableCell>{redemption.quantity}</TableCell>
                   <TableCell>
-                    {new Date(redemption.redemption_date).toLocaleString('es-AR', { 
+                    {new Date(redemption.redemption_date).toLocaleString('es-AR', {
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric',
@@ -128,7 +119,7 @@ export default async function RedemptionListPage() {
                           <Pencil className="h-4 w-4" />
                         </Link>
                       </Button>
-                      <DeleteModal 
+                      <DeleteModal
                         redemptionDescription={`${redemption.product?.name || 'Product'} - ${redemption.points_used} points`}
                         redemptionId={redemption.id}
                       />
@@ -138,7 +129,7 @@ export default async function RedemptionListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={7}>{t('empty')}</TableCell>
+                <TableCell className="text-center py-4" colSpan={5}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

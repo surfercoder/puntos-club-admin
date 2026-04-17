@@ -19,6 +19,36 @@ export async function createRedemption(input: Redemption) {
   const supabase = await createClient();
   const { data, error } = await supabase.from('redemption').insert([parsed.data]).select().single();
 
+  if (error) {
+    return { data, error };
+  }
+
+  // Deduct points from beneficiary_organization
+  if (parsed.data.organization_id && parsed.data.points_used > 0) {
+    const orgId = Number(parsed.data.organization_id);
+    const beneficiaryId = Number(parsed.data.beneficiary_id);
+
+    if (!Number.isNaN(orgId) && !Number.isNaN(beneficiaryId)) {
+      const { data: membership } = await supabase
+        .from('beneficiary_organization')
+        .select('available_points, total_points_redeemed')
+        .eq('organization_id', orgId)
+        .eq('beneficiary_id', beneficiaryId)
+        .single();
+
+      if (membership) {
+        await supabase
+          .from('beneficiary_organization')
+          .update({
+            available_points: (membership.available_points ?? 0) - parsed.data.points_used,
+            total_points_redeemed: (membership.total_points_redeemed ?? 0) + parsed.data.points_used,
+          })
+          .eq('organization_id', orgId)
+          .eq('beneficiary_id', beneficiaryId);
+      }
+    }
+  }
+
   return { data, error };
 }
 
@@ -54,8 +84,7 @@ export async function getRedemptions() {
     .select(`
       *,
       beneficiary:beneficiary(first_name, last_name, email),
-      product:product(name),
-      app_order:app_order(order_number)
+      product:product(name, organization_id)
     `)
     .order('redemption_date', { ascending: false });
 

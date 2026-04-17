@@ -13,7 +13,7 @@ export type EntityName =
   | 'organization'
   | 'category'
   | 'product'
-  | 'app_order'
+
   | 'app_user'
   | 'app_user_organization'
   | 'redemption'
@@ -45,7 +45,6 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     organization: { view: true, create: true, edit: true, delete: true },
     category: { view: true, create: true, edit: true, delete: true },
     product: { view: true, create: true, edit: true, delete: true },
-    app_order: { view: true, create: true, edit: true, delete: true },
     app_user: { view: true, create: true, edit: true, delete: true },
     app_user_organization: { view: true, create: true, edit: true, delete: true },
     redemption: { view: true, create: true, edit: true, delete: true },
@@ -62,7 +61,6 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     organization: { view: true, create: false, edit: true, delete: false }, // Can view/edit their org, not create/delete
     category: { view: true, create: true, edit: true, delete: true },
     product: { view: true, create: true, edit: true, delete: true },
-    app_order: { view: true, create: true, edit: true, delete: true },
     app_user: { view: true, create: true, edit: true, delete: true },
     app_user_organization: { view: true, create: true, edit: true, delete: true },
     redemption: { view: true, create: true, edit: true, delete: true },
@@ -79,7 +77,6 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     organization: { view: true, create: false, edit: false, delete: false }, // Read-only
     category: { view: true, create: true, edit: true, delete: false },
     product: { view: true, create: true, edit: true, delete: false },
-    app_order: { view: true, create: true, edit: true, delete: false },
     app_user: { view: true, create: false, edit: false, delete: false }, // Read-only, cannot manage users
     app_user_organization: { view: false, create: false, edit: false, delete: false },
     redemption: { view: true, create: true, edit: true, delete: false },
@@ -96,7 +93,6 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     organization: { view: false, create: false, edit: false, delete: false },
     category: { view: true, create: false, edit: false, delete: false }, // Read-only
     product: { view: true, create: false, edit: false, delete: false }, // Read-only
-    app_order: { view: true, create: true, edit: true, delete: false },
     app_user: { view: false, create: false, edit: false, delete: false },
     app_user_organization: { view: false, create: false, edit: false, delete: false },
     redemption: { view: true, create: true, edit: false, delete: false },
@@ -113,7 +109,6 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     organization: { view: false, create: false, edit: false, delete: false },
     category: { view: false, create: false, edit: false, delete: false },
     product: { view: false, create: false, edit: false, delete: false },
-    app_order: { view: false, create: false, edit: false, delete: false },
     app_user: { view: false, create: false, edit: false, delete: false },
     app_user_organization: { view: false, create: false, edit: false, delete: false },
     redemption: { view: false, create: false, edit: false, delete: false },

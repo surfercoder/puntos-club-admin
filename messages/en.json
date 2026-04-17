@@ -221,7 +221,6 @@
     "edit": "Edit",
     "details": "Details",
     "address": "Addresses",
-    "app_order": "Orders",
     "app_user": "App Users",
     "app_user_organization": "Users by Organization",
     "beneficiary": "Beneficiaries",
@@ -796,38 +795,6 @@
         "imageCount": "{count} of 3 images uploaded"
       }
     },
-    "appOrder": {
-      "title": "Orders",
-      "description": "Manage system orders",
-      "newButton": "+ New Order",
-      "error": "Error loading orders",
-      "empty": "No orders found.",
-      "tableHeaders": {
-        "orderNumber": "Order Number",
-        "creationDate": "Creation Date",
-        "totalPoints": "Total Points",
-        "observations": "Observations",
-        "actions": "Actions"
-      },
-      "createTitle": "Create Order",
-      "editTitle": "Edit Order",
-      "fetchError": "Error fetching order",
-      "deleteModal": {
-        "title": "Delete Order",
-        "confirm": "Are you sure you want to delete order <strong>{name}</strong>? This action cannot be undone.",
-        "deleteSuccess": "Order deleted successfully",
-        "genericError": "An error occurred while deleting"
-      },
-      "form": {
-        "orderNumber": "Order Number",
-        "orderNumberPlaceholder": "Enter order number",
-        "creationDate": "Creation Date",
-        "totalPoints": "Total Points",
-        "totalPointsPlaceholder": "Enter total points",
-        "observations": "Observations",
-        "observationsPlaceholder": "Enter observations (optional)"
-      }
-    },
     "redemption": {
       "title": "Redemptions",
       "description": "Manage system redemptions",
@@ -837,9 +804,7 @@
       "tableHeaders": {
         "beneficiary": "Beneficiary",
         "product": "Product",
-        "order": "Order",
-        "pointsUsed": "Points Used",
-        "quantity": "Quantity",
+        "pointsUsed": "Points",
         "date": "Date",
         "actions": "Actions"
       },
@@ -857,15 +822,13 @@
         "beneficiaryLabel": "Beneficiary",
         "selectBeneficiary": "Select a beneficiary",
         "noName": "Unnamed beneficiary",
-        "productLabel": "Product (Optional)",
-        "selectProduct": "Select a product (optional)",
-        "none": "None",
-        "orderLabel": "Order",
-        "selectOrder": "Select an order",
-        "pointsUsed": "Points Used",
-        "pointsUsedPlaceholder": "Enter points used",
-        "quantityLabel": "Quantity",
-        "quantityPlaceholder": "Enter quantity"
+        "productLabel": "Product",
+        "selectProduct": "Select a product",
+        "points": "Points",
+        "pointsUsedPlaceholder": "Enter points",
+        "availablePoints": "Available points",
+        "insufficientPoints": "The beneficiary does not have enough points. Available: {available}, required: {required}",
+        "insufficientPointsField": "Insufficient points"
       }
     },
     "appUserOrganization": {

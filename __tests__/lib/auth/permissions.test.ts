@@ -14,7 +14,7 @@ const ALL_ENTITIES: EntityName[] = [
   'organization',
   'category',
   'product',
-  'app_order',
+
   'app_user',
   'app_user_organization',
   'redemption',
@@ -92,7 +92,7 @@ describe('ROLE_ENTITY_ACCESS', () => {
     expect(ROLE_ENTITY_ACCESS.cashier.address.view).toBe(false);
     expect(ROLE_ENTITY_ACCESS.cashier.beneficiary.view).toBe(true);
     expect(ROLE_ENTITY_ACCESS.cashier.beneficiary.create).toBe(true);
-    expect(ROLE_ENTITY_ACCESS.cashier.app_order.create).toBe(true);
+
     expect(ROLE_ENTITY_ACCESS.cashier.product.view).toBe(true);
     expect(ROLE_ENTITY_ACCESS.cashier.product.create).toBe(false);
     expect(ROLE_ENTITY_ACCESS.cashier.users.view).toBe(false);
@@ -111,8 +111,8 @@ describe('canAccessEntity', () => {
     expect(canAccessEntity('owner', 'organization', 'edit')).toBe(true);
     expect(canAccessEntity('collaborator', 'beneficiary', 'create')).toBe(true);
     expect(canAccessEntity('collaborator', 'beneficiary', 'delete')).toBe(false);
-    expect(canAccessEntity('cashier', 'app_order', 'create')).toBe(true);
-    expect(canAccessEntity('cashier', 'app_order', 'delete')).toBe(false);
+    expect(canAccessEntity('cashier', 'redemption', 'create')).toBe(true);
+    expect(canAccessEntity('cashier', 'redemption', 'delete')).toBe(false);
   });
 
   it('returns false for null role', () => {
@@ -156,7 +156,7 @@ describe('getAccessibleEntities', () => {
   it('cashier can view limited entities', () => {
     const entities = getAccessibleEntities('cashier');
     expect(entities).toContain('beneficiary');
-    expect(entities).toContain('app_order');
+    expect(entities).toContain('redemption');
     expect(entities).toContain('product');
     expect(entities).toContain('stock');
     expect(entities).not.toContain('address');

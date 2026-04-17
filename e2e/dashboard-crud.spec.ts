@@ -3,7 +3,7 @@ import { test, expect, type Page } from '@playwright/test';
 /**
  * E2E CRUD tests for the Owner Dashboard.
  *
- * Dependency order: Category → Product → Stock, AppOrder, Beneficiary, PointsRule
+ * Dependency order: Category → Product → Stock, Beneficiary, PointsRule
  * Cleanup in reverse order to leave DB pristine.
  */
 
@@ -82,7 +82,7 @@ async function deleteRowByText(page: Page, text: string): Promise<boolean> {
 const state = {
   categoryRows: 0,
   productRows: 0,
-  orderRows: 0,
+
   beneficiaryRows: 0,
   stockRows: 0,
 };
@@ -201,58 +201,7 @@ test.describe.serial('Owner Dashboard CRUD Tests', () => {
     await expect(page.getByText('E2E Product Updated')).toBeVisible({ timeout: 10000 });
   });
 
-  // ━━━ 3. APP ORDER ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  test('App Order: list', async ({ page }) => {
-    await navigateTo(page, '/dashboard/app_order');
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    state.orderRows = await getTableRowCount(page);
-  });
-
-  test('App Order: create', async ({ page }) => {
-    await navigateTo(page, '/dashboard/app_order/create');
-
-    await page.locator('input[name="order_number"]').fill('E2E-ORD-001');
-
-    const dateInput = page.locator('input[name="creation_date"], input[type="date"]').first();
-    if (await dateInput.isVisible()) {
-      await dateInput.fill('2026-03-15');
-    }
-
-    await page.locator('input[name="total_points"]').fill('100');
-
-    const obs = page.locator('textarea[name="observations"], input[name="observations"]').first();
-    if (await obs.isVisible().catch(() => false)) {
-      await obs.fill('E2E test order');
-    }
-
-    await page.getByRole('button', { name: /^crear$/i }).click();
-
-    await page.waitForURL(/\/dashboard\/app_order(?:\?|$)/, { timeout: 20000 });
-    await waitForPageLoad(page);
-    await expect(page.getByText('E2E-ORD-001')).toBeVisible({ timeout: 10000 });
-  });
-
-  test('App Order: edit', async ({ page }) => {
-    await navigateTo(page, '/dashboard/app_order');
-
-    const row = page.locator('table tbody tr', { hasText: 'E2E-ORD-001' });
-    await row.locator('td').last().locator('a').first().click();
-    await waitForPageLoad(page);
-
-    const obs = page.locator('textarea[name="observations"], input[name="observations"]').first();
-    if (await obs.isVisible().catch(() => false)) {
-      await obs.clear();
-      await obs.fill('E2E order updated');
-    }
-
-    await page.getByRole('button', { name: /actualizar|update/i }).click();
-
-    await page.waitForURL(/\/dashboard\/app_order(?:\?|$)/, { timeout: 20000 });
-    await waitForPageLoad(page);
-  });
-
-  // ━━━ 4. BENEFICIARY ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // ━━━ 3. BENEFICIARY ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   test('Beneficiary: list', async ({ page }) => {
     await navigateTo(page, '/dashboard/beneficiary');
@@ -487,11 +436,6 @@ test.describe.serial('Owner Dashboard CRUD Tests', () => {
     await deleteRowByText(page, 'E2ETest');
   });
 
-  test('Cleanup: app order', async ({ page }) => {
-    await navigateTo(page, '/dashboard/app_order');
-    await deleteRowByText(page, 'E2E-ORD-001');
-  });
-
   test('Cleanup: product', async ({ page }) => {
     await navigateTo(page, '/dashboard/product');
     const d = await deleteRowByText(page, 'E2E Product Updated');
@@ -512,9 +456,6 @@ test.describe.serial('Owner Dashboard CRUD Tests', () => {
 
     await navigateTo(page, '/dashboard/product');
     expect(await getTableRowCount(page)).toBe(state.productRows);
-
-    await navigateTo(page, '/dashboard/app_order');
-    expect(await getTableRowCount(page)).toBe(state.orderRows);
 
     await navigateTo(page, '/dashboard/beneficiary');
     expect(await getTableRowCount(page)).toBe(state.beneficiaryRows);
