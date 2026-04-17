@@ -1,7 +1,7 @@
 const mockSend = jest.fn();
 jest.mock('@/lib/resend', () => ({
   resend: { emails: { send: (...args: unknown[]) => mockSend(...args) } },
-  EMAIL_FROM: 'Puntos Club <hola@puntosclub.com.ar>',
+  EMAIL_FROM: 'Puntos Club <soporte@puntosclub.com.ar>',
 }));
 
 import { sendFeedback } from '@/actions/feedback/send-feedback';
@@ -49,7 +49,7 @@ describe('sendFeedback', () => {
     expect(result).toEqual({ success: true });
     expect(mockSend).toHaveBeenCalledWith(
       expect.objectContaining({
-        from: 'Puntos Club <hola@puntosclub.com.ar>',
+        from: 'Puntos Club <soporte@puntosclub.com.ar>',
         to: 'acassani@puntosclub.com.ar',
         replyTo: 'user@example.com',
         subject: '[Feedback] Feedback de Test User',

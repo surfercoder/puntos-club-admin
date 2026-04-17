@@ -48,6 +48,21 @@ jest.mock('next/link', () => {
   );
 });
 
+// Capture onValueChange callbacks from Select components
+const selectCallbacks: Record<string, (value: string) => void> = {};
+jest.mock('@/components/ui/select', () => {
+  const actual = jest.requireActual('@/components/ui/select');
+  return {
+    ...actual,
+    Select: ({ children, onValueChange, name, defaultValue, ...props }: any) => {
+      if (name && onValueChange) {
+        selectCallbacks[name] = onValueChange;
+      }
+      return actual.Select({ children, onValueChange, name, defaultValue, ...props });
+    },
+  };
+});
+
 import RedemptionForm from '@/components/dashboard/redemption/redemption-form';
 
 const React = require('react');
@@ -410,6 +425,226 @@ describe('RedemptionForm', () => {
     expect(screen.getByText('Alice')).toBeInTheDocument();
 
     useReducerSpy.mockRestore();
+  });
+
+  // -- Cover handleProductChange (lines 185-191) by using captured onValueChange --
+  it('covers handleProductChange with found product', () => {
+    const originalUseReducer = jest.requireActual('react').useReducer;
+    const mockDispatch = jest.fn();
+    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialState: any) => {
+      if (initialState && 'beneficiaries' in initialState && 'products' in initialState) {
+        return [{
+          beneficiaries: [],
+          products: [
+            { id: 'prod-1', name: 'Widget', required_points: 50 },
+            { id: 'prod-2', name: 'Gadget', required_points: 75 },
+          ],
+          validation: null,
+          selectedProductId: '',
+          selectedBeneficiaryId: '',
+          pointsUsed: 0,
+          orgId: '42',
+        }, mockDispatch];
+      }
+      return originalUseReducer(reducer, initialState);
+    });
+
+    render(<RedemptionForm />);
+
+    // Call the captured onValueChange for product_id select
+    expect(selectCallbacks['product_id']).toBeDefined();
+    selectCallbacks['product_id']('prod-1');
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'SET_SELECTED_PRODUCT',
+      payload: { productId: 'prod-1', requiredPoints: 50 },
+    });
+
+    // Also test with a product not in the list (null requiredPoints)
+    mockDispatch.mockClear();
+    selectCallbacks['product_id']('prod-unknown');
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'SET_SELECTED_PRODUCT',
+      payload: { productId: 'prod-unknown', requiredPoints: null },
+    });
+
+    useReducerSpy.mockRestore();
+  });
+
+  // -- Cover beneficiary onValueChange (inline arrow function on beneficiary Select) --
+  it('covers beneficiary onValueChange callback', () => {
+    const originalUseReducer = jest.requireActual('react').useReducer;
+    const mockDispatch = jest.fn();
+    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialState: any) => {
+      if (initialState && 'beneficiaries' in initialState && 'products' in initialState) {
+        return [{
+          beneficiaries: [
+            { id: 'ben-1', first_name: 'John', last_name: 'Doe', email: 'john@test.com', available_points: 500 },
+          ],
+          products: [],
+          validation: null,
+          selectedProductId: '',
+          selectedBeneficiaryId: '',
+          pointsUsed: 0,
+          orgId: '42',
+        }, mockDispatch];
+      }
+      return originalUseReducer(reducer, initialState);
+    });
+
+    render(<RedemptionForm />);
+
+    expect(selectCallbacks['beneficiary_id']).toBeDefined();
+    selectCallbacks['beneficiary_id']('ben-1');
+
+    expect(mockDispatch).toHaveBeenCalledWith({
+      type: 'SET_SELECTED_BENEFICIARY',
+      payload: 'ben-1',
+    });
+
+    useReducerSpy.mockRestore();
+  });
+
+  // -- Cover points_used onChange (inline arrow on Input, when hasProduct is false) --
+  it('covers points_used onChange callback when no product selected', () => {
+    render(<RedemptionForm />);
+
+    const pointsInput = screen.getByRole('spinbutton', { name: 'form.points' });
+    fireEvent.change(pointsInput, { target: { value: '25' } });
+
+    // The onChange dispatches SET_POINTS_USED with Number(e.target.value) || 0
+    // Since no product is selected (hasProduct = false), onChange is defined
+
+    // Also test with empty/invalid value to cover the `|| 0` fallback branch
+    fireEvent.change(pointsInput, { target: { value: '' } });
+  });
+
+  // -- Cover hasProduct=true branch on line 284 (onChange={hasProduct ? undefined : ...}) --
+  it('renders readOnly points input when a product is selected (hasProduct=true)', () => {
+    const originalUseReducer = jest.requireActual('react').useReducer;
+    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialState: any) => {
+      if (initialState && 'beneficiaries' in initialState && 'products' in initialState) {
+        return [{
+          beneficiaries: [],
+          products: [
+            { id: 'prod-1', name: 'Widget', required_points: 50 },
+          ],
+          validation: null,
+          selectedProductId: 'prod-1',
+          selectedBeneficiaryId: '',
+          pointsUsed: 50,
+          orgId: '42',
+        }, jest.fn()];
+      }
+      return originalUseReducer(reducer, initialState);
+    });
+
+    render(<RedemptionForm />);
+
+    const pointsInput = screen.getByRole('spinbutton', { name: 'form.points' });
+    // When hasProduct is true, input should be readOnly
+    expect(pointsInput).toHaveAttribute('readonly');
+    // Trigger change - it should do nothing since onChange is undefined
+    fireEvent.change(pointsInput, { target: { value: '99' } });
+
+    useReducerSpy.mockRestore();
+  });
+
+  // -- Cover insufficient points check in handleSubmit (lines 204-220) --
+  it('prevents submission when beneficiary has insufficient points', () => {
+    const originalUseReducer = jest.requireActual('react').useReducer;
+    const mockDispatch = jest.fn();
+    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialState: any) => {
+      if (initialState && 'beneficiaries' in initialState && 'products' in initialState) {
+        return [{
+          beneficiaries: [
+            { id: 'ben-1', first_name: 'John', last_name: 'Doe', email: 'john@test.com', available_points: 10 },
+          ],
+          products: [
+            { id: 'prod-1', name: 'Widget', required_points: 50 },
+          ],
+          validation: null,
+          selectedProductId: 'prod-1',
+          selectedBeneficiaryId: 'ben-1',
+          pointsUsed: 50,
+          orgId: '42',
+        }, mockDispatch];
+      }
+      return originalUseReducer(reducer, initialState);
+    });
+
+    render(<RedemptionForm />);
+
+    const form = screen.getByRole('button', { name: 'create' }).closest('form')!;
+    fireEvent.submit(form);
+
+    // The handleSubmit should call dispatch with SET_VALIDATION containing insufficientPoints error
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({
+        type: 'SET_VALIDATION',
+        payload: expect.objectContaining({
+          status: 'error',
+          fieldErrors: expect.objectContaining({
+            points_used: expect.any(Array),
+          }),
+        }),
+      })
+    );
+
+    useReducerSpy.mockRestore();
+  });
+
+  // -- Cover the beneficiary null check in flatMap (line 158 falsy branch) --
+  it('covers loadData with beneficiary data including null beneficiary entries', async () => {
+    Object.defineProperty(document, 'cookie', {
+      writable: true,
+      value: 'active_org_id=42',
+    });
+
+    const { createClient } = require('@/lib/supabase/client');
+
+    const makeChain = (resolvedValue: any) => {
+      // Create a chain that is also a thenable (Promise-like)
+      const promise = Promise.resolve(resolvedValue);
+      const chain: any = {
+        select: jest.fn(),
+        eq: jest.fn(),
+        order: jest.fn(),
+        then: promise.then.bind(promise),
+        catch: promise.catch.bind(promise),
+      };
+      chain.select.mockReturnValue(chain);
+      chain.eq.mockReturnValue(chain);
+      chain.order.mockReturnValue(chain);
+      return chain;
+    };
+
+    (createClient as jest.Mock).mockReturnValue({
+      from: jest.fn().mockImplementation((table: string) => {
+        if (table === 'beneficiary_organization') {
+          return makeChain({
+            data: [
+              { beneficiary: { id: 'b1', first_name: 'A', last_name: 'B', email: 'a@b.com' }, available_points: 100 },
+              { beneficiary: null, available_points: 0 },
+              { beneficiary: { id: 'b2', first_name: 'C', last_name: 'D', email: 'c@d.com' }, available_points: null },
+            ],
+          });
+        }
+        // products
+        return makeChain({ data: [{ id: 'p1', name: 'Prod', required_points: 10 }] });
+      }),
+    });
+
+    const { unmount } = render(<RedemptionForm />);
+
+    // Wait for async loadData to complete
+    await new Promise(resolve => setTimeout(resolve, 50));
+    unmount();
+
+    Object.defineProperty(document, 'cookie', {
+      writable: true,
+      value: '',
+    });
   });
 
   // -- Cover beneficiary with only last_name (line 190 branch) --

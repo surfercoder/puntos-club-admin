@@ -131,7 +131,9 @@
       "Bash(chmod +x /tmp/final_check.sh)",
       "Bash(/tmp/final_check.sh)",
       "Bash(chmod +x /tmp/comprehensive_report.sh)",
-      "Bash(/tmp/comprehensive_report.sh)"
+      "Bash(/tmp/comprehensive_report.sh)",
+      "Bash(git branch:*)",
+      "Bash(git worktree:*)"
     ],
     "deny": []
   },
