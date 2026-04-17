@@ -16,6 +16,6 @@ export const ForgotPasswordSchema = z.object({
 });
 
 export const UpdatePasswordSchema = z.object({
-  password: z.string().min(6, 'La contraseña debe tener al menos 6 caracteres'),
+  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
 });
 

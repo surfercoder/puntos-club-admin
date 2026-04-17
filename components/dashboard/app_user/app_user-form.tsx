@@ -18,6 +18,7 @@ import type { ActionState} from '@/lib/error-handler';
 import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { createClient } from '@/lib/supabase/client';
 import { AppUserSchema } from '@/schemas/app_user.schema';
+import { PasswordStrengthChecklist, allRulesPass } from '@/components/onboarding/password-strength-checklist';
 import type { AppUser } from '@/types/app_user';
 import type { UserRole } from '@/types/user_role';
 
@@ -36,6 +37,7 @@ export default function AppUserForm({ appUser, currentUserRole }: AppUserFormPro
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [roles, setRoles] = useState<UserRole[]>([]);
   const [showPassword, setShowPassword] = useState(false);
+  const [passwordValue, setPasswordValue] = useState('');
 
   // Utils
   const [actionState, formAction, pending] = useActionState(appUserFormAction, EMPTY_ACTION_STATE);
@@ -86,6 +88,16 @@ export default function AppUserForm({ appUser, currentUserRole }: AppUserFormPro
       AppUserSchema.parse(formData);
     } catch (error) {
       setValidation(fromErrorToActionState(error));
+      event.preventDefault();
+      return;
+    }
+
+    if (passwordValue && !allRulesPass(passwordValue)) {
+      setValidation({
+        status: 'error',
+        message: '',
+        fieldErrors: { password: [tCommon('passwordWeak')] },
+      });
       event.preventDefault();
     }
   };
@@ -176,6 +188,8 @@ export default function AppUserForm({ appUser, currentUserRole }: AppUserFormPro
             name="password"
             placeholder={t('form.passwordPlaceholder')}
             type={showPassword ? 'text' : 'password'}
+            value={passwordValue}
+            onChange={(e) => setPasswordValue(e.target.value)}
           />
           <button
             type="button"
@@ -186,6 +200,7 @@ export default function AppUserForm({ appUser, currentUserRole }: AppUserFormPro
             {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
           </button>
         </div>
+        <PasswordStrengthChecklist password={passwordValue} />
         <FieldError actionState={validation ?? actionState} name="password" />
       </div>
 

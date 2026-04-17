@@ -75,7 +75,15 @@
       "uploading": "Subiendo...",
       "clickToUpload": "Haz clic para subir imagen",
       "maxSize": "Tamaño máximo: {maxSize}MB"
-    }
+    },
+    "passwordStrength": {
+      "minLength": "Al menos 8 caracteres",
+      "hasLowercase": "Una letra minúscula",
+      "hasUppercase": "Una letra mayúscula",
+      "hasDigit": "Un número",
+      "hasSpecial": "Un carácter especial (!@#$%...)"
+    },
+    "passwordWeak": "La contraseña no cumple todos los requisitos"
   },
   "NotFound": {
     "title": "404 - Página no encontrada",
@@ -1220,7 +1228,7 @@
         "cashierEmailRequired": "El email del cajero es requerido",
         "cashierEmailInvalid": "El email no es válido",
         "passwordRequired": "La contraseña es requerida",
-        "passwordMinLength": "La contraseña debe tener al menos 6 caracteres",
+        "passwordWeak": "La contraseña no cumple todos los requisitos",
         "passwordsMismatch": "Las contraseñas no coinciden"
       }
     },

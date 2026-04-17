@@ -75,7 +75,15 @@
       "uploading": "Uploading...",
       "clickToUpload": "Click to upload image",
       "maxSize": "Max size: {maxSize}MB"
-    }
+    },
+    "passwordStrength": {
+      "minLength": "At least 8 characters",
+      "hasLowercase": "One lowercase letter",
+      "hasUppercase": "One uppercase letter",
+      "hasDigit": "One number",
+      "hasSpecial": "One special character (!@#$%...)"
+    },
+    "passwordWeak": "Password doesn't meet all requirements"
   },
   "NotFound": {
     "title": "404 - Page Not Found",
@@ -1220,7 +1228,7 @@
         "cashierEmailRequired": "Cashier email is required",
         "cashierEmailInvalid": "Invalid email address",
         "passwordRequired": "Password is required",
-        "passwordMinLength": "Password must be at least 6 characters",
+        "passwordWeak": "Password doesn't meet all requirements",
         "passwordsMismatch": "Passwords do not match"
       }
     },

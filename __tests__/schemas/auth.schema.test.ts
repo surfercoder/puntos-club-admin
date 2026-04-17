@@ -129,13 +129,13 @@ describe('UpdatePasswordSchema', () => {
     expect(result.success).toBe(false);
   });
 
-  it('should reject password shorter than 6 characters', () => {
-    const result = UpdatePasswordSchema.safeParse({ password: '12345' });
+  it('should reject password shorter than 8 characters', () => {
+    const result = UpdatePasswordSchema.safeParse({ password: '1234567' });
     expect(result.success).toBe(false);
   });
 
-  it('should accept password with exactly 6 characters', () => {
-    const result = UpdatePasswordSchema.safeParse({ password: '123456' });
+  it('should accept password with exactly 8 characters', () => {
+    const result = UpdatePasswordSchema.safeParse({ password: '12345678' });
     expect(result.success).toBe(true);
   });
 });

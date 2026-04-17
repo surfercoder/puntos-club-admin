@@ -21,7 +21,7 @@ interface PasswordStrengthChecklistProps {
 }
 
 export function PasswordStrengthChecklist({ password }: PasswordStrengthChecklistProps) {
-  const t = useTranslations('Onboarding.step1.passwordStrength');
+  const t = useTranslations('Common.passwordStrength');
 
   if (!password) return null;
 

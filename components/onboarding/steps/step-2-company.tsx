@@ -11,6 +11,7 @@ import { ImageUpload } from '@/components/ui/image-upload';
 import { GoogleAddressAutocomplete } from '@/components/ui/google-address-autocomplete';
 import type { GoogleAddressComponents } from '@/components/ui/google-address-autocomplete';
 import type { OnboardingStep2Data } from '@/actions/onboarding/actions';
+import { PasswordStrengthChecklist, allRulesPass } from '@/components/onboarding/password-strength-checklist';
 
 // ── State & Reducer ──────────────────────────────────────────────────────────
 
@@ -222,6 +223,7 @@ function CashierSection({ state, dispatch, t, tCommon }: CashierSectionProps) {
                   {state.showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
+              <PasswordStrengthChecklist password={state.cashierPassword} />
               {state.errors.cashierPassword && (
                 <p className="text-xs text-destructive">{state.errors.cashierPassword}</p>
               )}
@@ -293,8 +295,8 @@ export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.cashierEmail))
         errs.cashierEmail = t('validation.cashierEmailInvalid');
       if (!state.cashierPassword) errs.cashierPassword = t('validation.passwordRequired');
-      else if (state.cashierPassword.length < 6)
-        errs.cashierPassword = t('validation.passwordMinLength');
+      else if (!allRulesPass(state.cashierPassword))
+        errs.cashierPassword = t('validation.passwordWeak');
       if (state.cashierPassword !== state.cashierConfirmPassword)
         errs.cashierConfirmPassword = t('validation.passwordsMismatch');
     }
