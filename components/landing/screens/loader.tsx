@@ -94,17 +94,7 @@ const Loader: React.FC<LoaderProps> = ({ onAnimationEnd }) => {
       <span id="slogan-text" className="hidden">{t("slogan")}</span>
       <div
         id="bg"
-        style={{
-          width: "300px",
-          height: "300px",
-          backgroundColor: "#2DA9E2",
-          position: "absolute",
-          top: "35%",
-          left: "50%",
-          transform: "translate(-50%, -50%) scale(10)",
-          transition: "transform 0.5s ease, background-color 0.5s ease",
-          borderRadius: "100%",
-        }}
+        className="loader-bg"
       />
 
       <Gift

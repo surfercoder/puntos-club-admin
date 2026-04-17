@@ -37,7 +37,7 @@ export const CallToAction = () => {
       <p className="mb-1 text-center text-sm font-medium text-muted-foreground tracking-wide">
         {t("callToAction")}
       </p>
-      <div className="animate-bounce">
+      <div className="animate-[nudge_2s_cubic-bezier(0.16,1,0.3,1)_infinite]">
         <ChevronDown className="h-6 w-6 text-brand-pink" strokeWidth={2.5} />
       </div>
     </button>

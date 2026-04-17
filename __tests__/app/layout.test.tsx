@@ -23,6 +23,14 @@ jest.mock('@/components/providers/google-maps-provider', () => ({
   GoogleMapsProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
+jest.mock('@vercel/analytics/next', () => ({
+  Analytics: () => <div data-testid="vercel-analytics" />,
+}));
+
+jest.mock('@vercel/speed-insights/next', () => ({
+  SpeedInsights: () => <div data-testid="vercel-speed-insights" />,
+}));
+
 jest.mock('@/lib/env', () => ({
   env: { NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'test-key' },
 }));
@@ -68,6 +76,8 @@ describe('RootLayout', () => {
       GoogleMapsProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     }));
     jest.mock('@/lib/env', () => ({ env: { NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'test-key' } }));
+    jest.mock('@vercel/analytics/next', () => ({ Analytics: () => <div /> }));
+    jest.mock('@vercel/speed-insights/next', () => ({ SpeedInsights: () => <div /> }));
     const { default: Layout } = require('@/app/layout');
     const result = await Layout({ children: <div>Test</div> });
     expect(result).toBeTruthy();

@@ -40,6 +40,14 @@ jest.mock('@/components/ui/breadcrumb', () => ({
   BreadcrumbSeparator: () => <span>/</span>,
 }));
 
+jest.mock('@/components/feedback-dialog', () => ({
+  FeedbackDialog: () => <div data-testid="feedback-dialog">Feedback</div>,
+}));
+
+jest.mock('@/components/theme-toggle', () => ({
+  ThemeToggle: () => <div data-testid="theme-toggle">Theme</div>,
+}));
+
 jest.mock('@/components/ui/separator', () => ({
   Separator: () => <hr />,
 }));
