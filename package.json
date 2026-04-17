@@ -17,8 +17,7 @@
     "test:watch": "jest --watch",
     "test": "jest",
     "type-check": "tsc -p tsconfig.typecheck.json --noEmit",
-    "types:supabase": "supabase gen types typescript --local > types/supabase.ts",
-    "postinstall": "npx patch-package"
+    "types:supabase": "supabase gen types typescript --local > types/supabase.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.90.0",
@@ -76,7 +75,6 @@
     "jest-environment-jsdom": "^30.3.0",
     "knip": "^6.4.1",
     "postcss": "^8.5.10",
-    "react-doctor": "^0.0.37",
     "shadcn": "^4.3.0",
     "tailwindcss": "^4.2.2",
     "tsx": "^4.21.0",
