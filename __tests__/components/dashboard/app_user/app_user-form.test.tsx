@@ -355,6 +355,22 @@ describe('AppUserForm', () => {
     });
   });
 
+  it('shows password weak error when password fails strength rules', async () => {
+    render(<AppUserForm />);
+
+    const passwordInput = screen.getByPlaceholderText('form.passwordPlaceholder');
+    fireEvent.change(passwordInput, { target: { value: 'weak' } });
+
+    const form = passwordInput.closest('form')!;
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('passwordWeak')).toBeInTheDocument();
+    });
+  });
+
   it('loads cashier and collaborator roles when currentUserRole is not collaborator', async () => {
     mockRoleData = [
       { id: 'role-1', name: 'cashier', display_name: 'Cashier' },

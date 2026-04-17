@@ -44,16 +44,10 @@ describe('OrgQRDisplay', () => {
     expect(screen.getByTestId('qr-code')).toBeInTheDocument();
   });
 
-  it('renders the organization name', () => {
+  it('renders the organization name when no logo', () => {
     render(<OrgQRDisplay {...defaultProps} />);
 
     expect(screen.getByText('Test Organization')).toBeInTheDocument();
-  });
-
-  it('renders the organization ID', () => {
-    render(<OrgQRDisplay {...defaultProps} />);
-
-    expect(screen.getByText('ID: 1')).toBeInTheDocument();
   });
 
   it('renders download, print, and share buttons', () => {
@@ -96,10 +90,24 @@ describe('OrgQRDisplay', () => {
     expect(logo).toBeInTheDocument();
   });
 
-  it('does not render logo when logoUrl is null', () => {
+  it('renders org name instead of logo when logoUrl is null', () => {
     render(<OrgQRDisplay {...defaultProps} />);
 
     expect(screen.queryByAltText('Test Organization')).not.toBeInTheDocument();
+    expect(screen.getByText('Test Organization')).toBeInTheDocument();
+  });
+
+  it('renders tagline and footer text', () => {
+    render(<OrgQRDisplay {...defaultProps} />);
+
+    expect(screen.getByText('printTagline')).toBeInTheDocument();
+    expect(screen.getByText('printFooter')).toBeInTheDocument();
+  });
+
+  it('renders LogoTitle image', () => {
+    render(<OrgQRDisplay {...defaultProps} />);
+
+    expect(screen.getByAltText('Puntos Club')).toBeInTheDocument();
   });
 
   it('encodes correct QR data', () => {

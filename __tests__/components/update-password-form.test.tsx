@@ -1,7 +1,11 @@
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import React from 'react';
 import { useRouter } from 'next/navigation';
 import { UpdatePasswordForm } from '@/components/update-password-form';
 import { createClient } from '@/lib/supabase/client';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let capturedReducer: ((state: any, action: any) => any) | null = null;
 
 describe('UpdatePasswordForm', () => {
   const mockPush = jest.fn();
@@ -151,5 +155,25 @@ describe('UpdatePasswordForm', () => {
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'submitButton' })).not.toBeDisabled();
     });
+  });
+
+  it('returns unchanged state for unknown action type in reducer', () => {
+    const originalUseReducer = React.useReducer.bind(React);
+    jest.spyOn(React, 'useReducer').mockImplementation(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (reducer: any, initialArg: any, init?: any) => {
+        capturedReducer = reducer;
+        return originalUseReducer(reducer, initialArg, init);
+      },
+    );
+
+    render(<UpdatePasswordForm />);
+    jest.restoreAllMocks();
+
+    expect(capturedReducer).not.toBeNull();
+    const state = { password: '', showPassword: false, error: null, submitted: false, isLoading: false };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const result = capturedReducer!(state, { type: 'UNKNOWN_ACTION' } as any);
+    expect(result).toBe(state);
   });
 });

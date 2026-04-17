@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useReducer } from "react";
 import { useTranslations } from "next-intl";
 
 import { Eye, EyeOff } from "lucide-react";
@@ -20,6 +20,46 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { PasswordStrengthChecklist, allRulesPass } from "@/components/onboarding/password-strength-checklist";
 
+interface FormState {
+  password: string;
+  showPassword: boolean;
+  error: string | null;
+  submitted: boolean;
+  isLoading: boolean;
+}
+
+type FormAction =
+  | { type: 'SET_PASSWORD'; payload: string }
+  | { type: 'TOGGLE_PASSWORD_VISIBILITY' }
+  | { type: 'SUBMIT' }
+  | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'SET_LOADING'; payload: boolean };
+
+const initialState: FormState = {
+  password: '',
+  showPassword: false,
+  error: null,
+  submitted: false,
+  isLoading: false,
+};
+
+function formReducer(state: FormState, action: FormAction): FormState {
+  switch (action.type) {
+    case 'SET_PASSWORD':
+      return { ...state, password: action.payload };
+    case 'TOGGLE_PASSWORD_VISIBILITY':
+      return { ...state, showPassword: !state.showPassword };
+    case 'SUBMIT':
+      return { ...state, submitted: true, error: null };
+    case 'SET_ERROR':
+      return { ...state, error: action.payload };
+    case 'SET_LOADING':
+      return { ...state, isLoading: action.payload };
+    default:
+      return state;
+  }
+}
+
 export function UpdatePasswordForm({
   className,
   ...props
@@ -27,33 +67,29 @@ export function UpdatePasswordForm({
   const t = useTranslations("Auth.updatePassword");
   const tCommon = useTranslations("Common");
 
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [state, dispatch] = useReducer(formReducer, initialState);
+  const { password, showPassword, error, submitted, isLoading } = state;
   const router = useRouter();
 
   const passwordValid = allRulesPass(password);
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSubmitted(true);
+    dispatch({ type: 'SUBMIT' });
 
     if (!passwordValid) return;
 
     const supabase = createClient();
-    setIsLoading(true);
+    dispatch({ type: 'SET_LOADING', payload: true });
 
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) { throw updateError; }
       router.push("/dashboard");
     } catch (err: unknown) {
-      setError(err instanceof Error ? err.message : tCommon("error"));
+      dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? err.message : tCommon("error") });
     } finally {
-      setIsLoading(false);
+      dispatch({ type: 'SET_LOADING', payload: false });
     }
   };
 
@@ -72,7 +108,7 @@ export function UpdatePasswordForm({
                 <div className="relative">
                   <Input
                     id="password"
-                    onChange={(e) => setPassword(e.target.value)}
+                    onChange={(e) => dispatch({ type: 'SET_PASSWORD', payload: e.target.value })}
                     placeholder={t("newPasswordPlaceholder")}
                     type={showPassword ? "text" : "password"}
                     value={password}
@@ -81,7 +117,7 @@ export function UpdatePasswordForm({
                   <button
                     type="button"
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={() => dispatch({ type: 'TOGGLE_PASSWORD_VISIBILITY' })}
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
                     {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
