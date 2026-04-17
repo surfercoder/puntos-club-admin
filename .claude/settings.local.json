@@ -133,7 +133,11 @@
       "Bash(chmod +x /tmp/comprehensive_report.sh)",
       "Bash(/tmp/comprehensive_report.sh)",
       "Bash(git branch:*)",
-      "Bash(git worktree:*)"
+      "Bash(git worktree:*)",
+      "Bash(brew list:*)",
+      "Bash(python3 -c \"from PIL import Image; print\\('Pillow available'\\)\")",
+      "Bash(pip3 install:*)",
+      "Bash(python3:*)"
     ],
     "deny": []
   },
