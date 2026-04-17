@@ -3,7 +3,13 @@ import MobileAppsPage, { generateMetadata } from '@/app/mobile-apps/page';
 
 jest.mock('next-intl/server', () => ({ getTranslations: jest.fn(() => Promise.resolve((key: string) => key)) }));
 jest.mock('qrcode.react', () => ({ QRCodeSVG: (props: Record<string, unknown>) => <svg data-testid="qr" data-value={props.value as string} /> }));
-jest.mock('lucide-react', () => ({ Smartphone: () => <svg data-testid="smartphone-icon" /> }));
+jest.mock('lucide-react', () => ({
+  Smartphone: () => <svg data-testid="smartphone-icon" />,
+  Download: () => <svg data-testid="download-icon" />,
+}));
+jest.mock('@/components/ui/button', () => ({
+  Button: ({ children, ...props }: { children: React.ReactNode } & Record<string, unknown>) => <button {...props}>{children}</button>,
+}));
 jest.mock('@/components/ui/card', () => ({
   Card: ({ children, ...props }: { children: React.ReactNode } & Record<string, unknown>) => <div {...props}>{children}</div>,
   CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,

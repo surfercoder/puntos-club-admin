@@ -1,8 +1,9 @@
 import { QRCodeSVG } from "qrcode.react";
-import { Smartphone } from "lucide-react";
+import { Download, Smartphone } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const apps = [
@@ -60,6 +61,12 @@ export default async function MobileAppsPage() {
                 />
               </div>
               <p className="text-xs text-muted-foreground">{t("scanToDownload")}</p>
+              <Button asChild className="w-full sm:hidden">
+                <a href={app.url} target="_blank" rel="noopener noreferrer">
+                  <Download className="mr-2 h-4 w-4" />
+                  {t("download")}
+                </a>
+              </Button>
             </CardContent>
           </Card>
         ))}

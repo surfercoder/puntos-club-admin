@@ -22,6 +22,7 @@
     "puntosClubCajaTitle": "PuntosClubCaja",
     "puntosClubCajaDescription": "Mobile app for cashiers.",
     "scanToDownload": "Scan this QR code to download",
+    "download": "Download APK",
     "androidOnly": "These apps are currently available for Android only. iOS support coming soon."
   },
   "Common": {

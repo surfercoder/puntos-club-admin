@@ -22,6 +22,7 @@
     "puntosClubCajaTitle": "PuntosClubCaja",
     "puntosClubCajaDescription": "App móvil para cajeros.",
     "scanToDownload": "Escanea este código QR para descargar",
+    "download": "Descargar APK",
     "androidOnly": "Estas apps están disponibles actualmente solo para Android. Soporte para iOS próximamente."
   },
   "Common": {

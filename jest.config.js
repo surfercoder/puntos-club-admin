@@ -114,6 +114,7 @@ const config = {
     '<rootDir>/.next/',
     '<rootDir>/node_modules/',
     '<rootDir>/e2e/',
+    '<rootDir>/.claude/',
   ],
   
   // Transform configuration
