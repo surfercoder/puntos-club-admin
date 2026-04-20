@@ -188,9 +188,31 @@ export async function updateAppUser(id: string, input: AppUserInput) {
 
 export async function deleteAppUser(id: string) {
   const supabase = await createClient();
+
+  // Fetch the auth_user_id before deleting so we can remove the auth record
+  const { data: appUser } = await supabase
+    .from('app_user')
+    .select('auth_user_id')
+    .eq('id', id)
+    .single();
+
   const { error } = await supabase.from('app_user').delete().eq('id', id);
 
-  return { error };
+  if (error) {
+    return { error };
+  }
+
+  // Delete the associated Supabase Auth user to avoid dangling auth records
+  if (appUser?.auth_user_id) {
+    const adminClient = createAdminClient();
+    const { error: authError } = await adminClient.auth.admin.deleteUser(appUser.auth_user_id);
+
+    if (authError) {
+      return { error: { message: `User deleted but failed to remove auth record: ${authError.message}` } };
+    }
+  }
+
+  return { error: null };
 }
 
 export async function getAppUsers() {

@@ -16,7 +16,6 @@ SET session_replication_role = 'replica';
 -- 1. Delete most dependent data first
 DELETE FROM redemption;
 DELETE FROM purchase;
-DELETE FROM app_order;
 
 -- 2. Delete stock data
 DELETE FROM stock;
@@ -40,6 +39,7 @@ DELETE FROM push_notifications;
 -- 8. Delete user data
 DELETE FROM beneficiary;
 DELETE FROM app_user_organization;
+DELETE FROM user_role;
 DELETE FROM app_user;
 
 -- ============================================================================
@@ -61,6 +61,7 @@ DELETE FROM address;
 -- 11. Delete subscription and plan limits data
 DELETE FROM subscription;
 DELETE FROM organization_plan_limits;
+DELETE FROM plan_limits;
 
 -- 12. Delete organization data
 DELETE FROM organization_notification_limits;
@@ -92,7 +93,6 @@ DECLARE
   seq_names text[] := ARRAY[
     'redemption_id_seq',
     'purchase_id_seq',
-    'app_order_id_seq',
     'stock_id_seq',
     'product_id_seq',
     'category_id_seq',

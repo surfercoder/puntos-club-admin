@@ -34,6 +34,7 @@ const mockAdminClient: any = {
     admin: {
       createUser: jest.fn(() => ({ data: { user: { id: 'auth-new-id' } }, error: null })),
       updateUserById: jest.fn(() => ({ data: {}, error: null })),
+      deleteUser: jest.fn(() => ({ error: null })),
     },
   },
 };
@@ -69,6 +70,7 @@ beforeEach(() => {
   mockAdminClient.single.mockReturnValue({ data: { id: '1' }, error: null });
   mockAdminClient.auth.admin.createUser.mockReturnValue({ data: { user: { id: 'auth-new-id' } }, error: null });
   mockAdminClient.auth.admin.updateUserById.mockReturnValue({ data: {}, error: null });
+  mockAdminClient.auth.admin.deleteUser.mockReturnValue({ error: null });
 });
 
 const validAppUser = {
@@ -426,9 +428,52 @@ describe('updateAppUser', () => {
 });
 
 describe('deleteAppUser', () => {
-  it('should delete app user successfully', async () => {
-    mockSupabase.eq.mockReturnValue({ error: null });
+  it('should delete app user with auth_user_id and remove auth record', async () => {
+    mockSupabase.single.mockReturnValueOnce({ data: { auth_user_id: 'auth-123' }, error: null });
+    mockSupabase.eq
+      .mockReturnValueOnce(mockSupabase) // first eq -> .single() for select
+      .mockReturnValueOnce({ error: null }); // second eq -> delete result
     const result = await deleteAppUser('1');
+    expect(mockAdminClient.auth.admin.deleteUser).toHaveBeenCalledWith('auth-123');
+    expect(result.error).toBeNull();
+  });
+
+  it('should delete app user without auth_user_id (skip auth deletion)', async () => {
+    mockSupabase.single.mockReturnValueOnce({ data: { auth_user_id: null }, error: null });
+    mockSupabase.eq
+      .mockReturnValueOnce(mockSupabase)
+      .mockReturnValueOnce({ error: null });
+    const result = await deleteAppUser('1');
+    expect(mockAdminClient.auth.admin.deleteUser).not.toHaveBeenCalled();
+    expect(result.error).toBeNull();
+  });
+
+  it('should return error when delete fails', async () => {
+    mockSupabase.single.mockReturnValueOnce({ data: { auth_user_id: null }, error: null });
+    mockSupabase.eq
+      .mockReturnValueOnce(mockSupabase)
+      .mockReturnValueOnce({ error: { message: 'Delete failed' } });
+    const result = await deleteAppUser('1');
+    expect(result.error).toEqual({ message: 'Delete failed' });
+  });
+
+  it('should return error when auth user deletion fails', async () => {
+    mockSupabase.single.mockReturnValueOnce({ data: { auth_user_id: 'auth-456' }, error: null });
+    mockSupabase.eq
+      .mockReturnValueOnce(mockSupabase)
+      .mockReturnValueOnce({ error: null });
+    mockAdminClient.auth.admin.deleteUser.mockReturnValueOnce({ error: { message: 'Auth delete failed' } });
+    const result = await deleteAppUser('1');
+    expect(result).toEqual({ error: { message: 'User deleted but failed to remove auth record: Auth delete failed' } });
+  });
+
+  it('should handle missing appUser data (no auth_user_id to delete)', async () => {
+    mockSupabase.single.mockReturnValueOnce({ data: null, error: null });
+    mockSupabase.eq
+      .mockReturnValueOnce(mockSupabase)
+      .mockReturnValueOnce({ error: null });
+    const result = await deleteAppUser('1');
+    expect(mockAdminClient.auth.admin.deleteUser).not.toHaveBeenCalled();
     expect(result.error).toBeNull();
   });
 });
