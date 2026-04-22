@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { MessageSquarePlus } from "lucide-react";
+import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -43,6 +44,7 @@ interface FeedbackDialogProps {
 export function FeedbackDialog({ userEmail, userName }: FeedbackDialogProps) {
   const t = useTranslations("Feedback");
   const tCommon = useTranslations("Common");
+  const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
   const [type, setType] = React.useState<FeedbackType>("feedback");
   const [message, setMessage] = React.useState("");
@@ -59,6 +61,7 @@ export function FeedbackDialog({ userEmail, userName }: FeedbackDialogProps) {
         message,
         userEmail,
         userName,
+        pageUrl: pathname,
       });
 
       if (result.success) {

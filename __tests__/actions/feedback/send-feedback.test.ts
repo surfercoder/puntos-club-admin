@@ -12,6 +12,7 @@ describe('sendFeedback', () => {
     message: 'Great app!',
     userEmail: 'user@example.com',
     userName: 'Test User',
+    pageUrl: '/es/dashboard',
   };
 
   beforeEach(() => {

@@ -4,6 +4,9 @@ import { FeedbackDialog } from '@/components/feedback-dialog';
 import { sendFeedback } from '@/actions/feedback/send-feedback';
 import { toast } from 'sonner';
 
+jest.mock('next/navigation', () => ({
+  usePathname: jest.fn(() => '/es/dashboard'),
+}));
 jest.mock('next-intl', () => ({
   useTranslations: jest.fn(() => (key: string) => key),
 }));

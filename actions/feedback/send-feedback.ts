@@ -17,6 +17,7 @@ interface SendFeedbackInput {
   message: string;
   userEmail: string;
   userName: string;
+  pageUrl: string;
 }
 
 const TYPE_LABELS: Record<FeedbackType, string> = {
@@ -38,7 +39,7 @@ const TYPE_COLORS: Record<FeedbackType, string> = {
 export async function sendFeedback(
   input: SendFeedbackInput
 ): Promise<{ success: boolean; error?: string }> {
-  const { type, message, userEmail, userName } = input;
+  const { type, message, userEmail, userName, pageUrl } = input;
 
   if (!message.trim()) {
     return { success: false, error: 'Message is required.' };
@@ -47,7 +48,7 @@ export async function sendFeedback(
   if (!process.env.RESEND_API_KEY) {
     console.warn(
       '\n📧  [DEV] Feedback received (no RESEND_API_KEY set):',
-      JSON.stringify({ type, message, userEmail, userName }, null, 2),
+      JSON.stringify({ type, message, userEmail, userName, pageUrl }, null, 2),
       '\n'
     );
     return { success: true };
@@ -60,6 +61,7 @@ export async function sendFeedback(
     { label: 'Tipo', value: typeBadge(typeLabel, typeColor) },
     { label: 'Usuario', value: userName },
     { label: 'Email', value: `<a href="mailto:${userEmail}" style="color:#FD7E14;text-decoration:none">${userEmail}</a>` },
+    { label: 'Página', value: pageUrl },
   ];
 
   const body = `
