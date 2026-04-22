@@ -169,14 +169,16 @@ describe('AppUserForm', () => {
     expect(toast.error).toHaveBeenCalledWith('Something went wrong');
   });
 
-  it('calls redirect on success state', () => {
+  it('calls redirect on success state', async () => {
     (React.useActionState as jest.Mock).mockReturnValue([
       { status: 'success', message: 'User created', fieldErrors: {} },
       jest.fn(),
       false,
     ]);
 
-    render(<AppUserForm />);
+    await act(async () => {
+      render(<AppUserForm />);
+    });
 
     expect(toast.success).toHaveBeenCalledWith('User created');
     expect(redirect).toHaveBeenCalledWith('/dashboard/app_user');

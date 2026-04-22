@@ -137,7 +137,14 @@
       "Bash(brew list:*)",
       "Bash(python3 -c \"from PIL import Image; print\\('Pillow available'\\)\")",
       "Bash(pip3 install:*)",
-      "Bash(python3:*)"
+      "Bash(python3:*)",
+      "Bash(cp \"/Users/agustincassani/Desktop/Screenshot 2026-04-21 at 9.53.00 AM \\(2\\).png\" /tmp/dns1.png)",
+      "Bash(cp \"/Users/agustincassani/Desktop/Screenshot 2026-04-21 at 9.53.04 AM \\(2\\).png\" /tmp/dns2.png)",
+      "Bash(xxd)",
+      "mcp__sentry__find_organizations",
+      "mcp__sentry__find_projects",
+      "mcp__sentry__search_issues",
+      "mcp__sentry__get_sentry_resource"
     ],
     "deny": []
   },

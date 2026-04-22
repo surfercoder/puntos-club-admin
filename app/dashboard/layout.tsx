@@ -104,5 +104,21 @@ export default async function DashboardLayout({
   }
 
   // Any other roles: keep current look & feel for now.
-  return children
+  // Still wrap with DashboardShell so providers (e.g. PlanUsageProvider) are available
+  const name = `${currentUser?.first_name ?? ''} ${currentUser?.last_name ?? ''}`.trim()
+  return (
+    <DashboardShell
+      user={{
+        name: name || currentUser?.email || 'User',
+        email: currentUser?.email || 'unknown',
+      }}
+      userId={currentUser?.id ?? ''}
+      userRole={currentUser?.role?.name ?? null}
+      tourCompleted={currentUser?.tour_completed ?? false}
+      orgs={currentUser?.organization ? [{ id: currentUser.organization.id, name: currentUser.organization.name, logo_url: currentUser.organization.logo_url ?? null }] : []}
+      portalMode="org"
+    >
+      {children}
+    </DashboardShell>
+  )
 }

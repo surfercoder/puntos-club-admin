@@ -30,7 +30,6 @@ interface AppUserFormProps {
 export default function AppUserForm({ appUser, currentUserRole }: AppUserFormProps) {
   const t = useTranslations('Dashboard.appUser');
   const tCommon = useTranslations('Common');
-
   const { isAtLimit, invalidate } = usePlanUsage();
 
   // State
@@ -75,9 +74,12 @@ export default function AppUserForm({ appUser, currentUserRole }: AppUserFormPro
     if (actionState.status === 'success') {
       toast.success(actionState.message);
       invalidate();
-      redirect("/dashboard/app_user");
     }
   }, [actionState, invalidate]);
+
+  if (actionState.status === 'success') {
+    redirect("/dashboard/app_user");
+  }
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
