@@ -338,7 +338,6 @@ export async function completeOnboarding(input: {
               required_points: prod.required_points || 100,
               category_id: Number(categoryData.id),
               organization_id: organizationId,
-              active: true,
               creation_date: new Date().toISOString().split('T')[0],
             })
             .select()

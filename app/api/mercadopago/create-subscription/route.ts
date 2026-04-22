@@ -50,16 +50,17 @@ export async function POST(request: NextRequest) {
     const mp = getMercadoPagoClient();
     const preApproval = new PreApproval(mp);
 
-    const testPayerEmail = process.env.MP_TEST_PAYER_EMAIL;
+    const payerEmail = process.env.MP_TEST_PAYER_EMAIL || user.email;
+
+    if (!payerEmail) {
+      return NextResponse.json({ error: 'payer_email is required' }, { status: 400 });
+    }
 
     // Subscription WITHOUT plan + status pending = redirect to MP checkout, no card_token_id
     const subscription = await preApproval.create({
       body: {
         reason: `Puntos Club — ${config.name}`,
-        // Only set payer_email in test/sandbox mode; in production, let MercadoPago
-        // use whatever account the user logs in with (their MP email may differ from
-        // their puntos-club email).
-        ...(testPayerEmail ? { payer_email: testPayerEmail } : {}),
+        payer_email: payerEmail,
         external_reference: `${user.id}|${typedPlanId}`, // webhook parses plan from here
         back_url: backUrl,
         status: 'pending',

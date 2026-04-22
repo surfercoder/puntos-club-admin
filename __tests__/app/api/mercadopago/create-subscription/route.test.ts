@@ -107,7 +107,7 @@ describe('MercadoPago Create Subscription Route', () => {
     expect(data.preapprovalId).toBe('pa_123');
   });
 
-  it('does not send payer_email in production (lets MP use the payer own account)', async () => {
+  it('uses authenticated user email as payer_email when MP_TEST_PAYER_EMAIL is not set', async () => {
     const request = {
       json: () => Promise.resolve({ planId: 'advance' }),
       headers: { get: () => null },
@@ -115,7 +115,7 @@ describe('MercadoPago Create Subscription Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(200);
     const calledBody = mockCreate.mock.calls[0][0].body;
-    expect(calledBody).not.toHaveProperty('payer_email');
+    expect(calledBody.payer_email).toBe('test@test.com');
   });
 
   it('uses MP_TEST_PAYER_EMAIL when set (sandbox mode)', async () => {
@@ -300,6 +300,19 @@ describe('MercadoPago Create Subscription Route', () => {
       }),
       { onConflict: 'mp_preapproval_id' }
     );
+  });
+
+  it('returns 400 when user has no email and MP_TEST_PAYER_EMAIL is not set', async () => {
+    mockGetUser.mockResolvedValueOnce({ data: { user: { id: 'u1', email: undefined } }, error: null });
+
+    const request = {
+      json: () => Promise.resolve({ planId: 'advance' }),
+      headers: { get: () => null },
+    } as any;
+    const response = await POST(request);
+    expect(response.status).toBe(400);
+    const data = await response.json();
+    expect(data.error).toBe('payer_email is required');
   });
 
   it('appends ngrok hint when error mentions back_url', async () => {

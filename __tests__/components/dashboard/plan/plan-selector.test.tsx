@@ -132,6 +132,34 @@ describe('PlanSelector', () => {
     expect(stopSpy).toHaveBeenCalled();
   });
 
+  it('selects a plan via keyboard Enter key', async () => {
+    (usePlanUsage as jest.Mock).mockReturnValue({
+      summary: mockSummary,
+      isLoading: false,
+    });
+
+    await act(async () => { render(<PlanSelector />); });
+
+    const advanceCard = screen.getByText('advancePlan').closest('[role="button"]')!;
+    fireEvent.keyDown(advanceCard, { key: 'Enter' });
+
+    expect(screen.getByText(/upgradeTo/)).toBeInTheDocument();
+  });
+
+  it('selects a plan via keyboard Space key', async () => {
+    (usePlanUsage as jest.Mock).mockReturnValue({
+      summary: mockSummary,
+      isLoading: false,
+    });
+
+    await act(async () => { render(<PlanSelector />); });
+
+    const proCard = screen.getByText('proPlan').closest('[role="button"]')!;
+    fireEvent.keyDown(proCard, { key: ' ' });
+
+    expect(screen.getByText(/upgradeTo/)).toBeInTheDocument();
+  });
+
   it('shows downgrade message when selecting a lower plan from advance', async () => {
     (usePlanUsage as jest.Mock).mockReturnValue({
       summary: { ...mockSummary, plan: 'advance' },
