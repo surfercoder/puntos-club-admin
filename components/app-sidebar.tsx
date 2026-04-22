@@ -89,6 +89,7 @@ export function AppSidebar({
     const isOwnerOrCollaborator = userRole === "owner" || userRole === "collaborator"
 
     if (portalMode === "admin") {
+      const stockItem = { title: t("stock"), url: "/dashboard/stock", icon: Boxes }
       const adminEntities = [
         { title: t("addresses"), url: "/dashboard/address", icon: MapPin },
 
@@ -108,17 +109,20 @@ export function AppSidebar({
         { title: t("pushNotifications"), url: "/dashboard/push_notifications", icon: BellRing },
         { title: t("pushTokens"), url: "/dashboard/push_tokens", icon: KeyRound },
         { title: t("redemptions"), url: "/dashboard/redemption", icon: Ticket },
-        { title: t("stock"), url: "/dashboard/stock", icon: Boxes },
         { title: t("subscriptions"), url: "/dashboard/subscription", icon: Wallet },
         { title: t("userRoles"), url: "/dashboard/user-role", icon: Shield },
       ]
         .slice()
         .sort((a, b) => a.title.localeCompare(b.title))
 
+      const productsIdx = adminEntities.findIndex((e) => e.url === "/dashboard/product")
+      adminEntities.splice(productsIdx + 1, 0, stockItem)
+
       return adminEntities
     }
 
     if (isOwnerOrCollaborator) {
+      const ownerStockItem = { title: t("stock"), url: "/dashboard/stock", icon: Boxes }
       const ownerEntities = [
         { title: t("qrCode"), url: "/dashboard/qr", icon: QrCode },
 
@@ -130,11 +134,13 @@ export function AppSidebar({
         { title: t("products"), url: "/dashboard/product", icon: Package },
         { title: t("purchases"), url: "/dashboard/purchase", icon: Receipt },
         { title: t("redemptions"), url: "/dashboard/redemption", icon: Gift },
-        { title: t("stock"), url: "/dashboard/stock", icon: Boxes },
         { title: t("appUsers"), url: "/dashboard/app_user", icon: Users },
       ]
         .slice()
         .sort((a, b) => a.title.localeCompare(b.title))
+
+      const ownerProductsIdx = ownerEntities.findIndex((e) => e.url === "/dashboard/product")
+      ownerEntities.splice(ownerProductsIdx + 1, 0, ownerStockItem)
 
       return ownerEntities
     }
