@@ -37,9 +37,9 @@ DELETE FROM push_tokens;
 DELETE FROM push_notifications;
 
 -- 8. Delete user data
+-- NOTE: user_role is a reference table required for the app to function — NEVER delete it
 DELETE FROM beneficiary;
 DELETE FROM app_user_organization;
-DELETE FROM user_role;
 DELETE FROM app_user;
 
 -- ============================================================================
@@ -59,9 +59,9 @@ DELETE FROM branch;
 DELETE FROM address;
 
 -- 11. Delete subscription and plan limits data
+-- NOTE: plan_limits is a reference table required for the app to function — NEVER delete it
 DELETE FROM subscription;
 DELETE FROM organization_plan_limits;
-DELETE FROM plan_limits;
 
 -- 12. Delete organization data
 DELETE FROM organization_notification_limits;

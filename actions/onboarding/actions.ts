@@ -261,13 +261,17 @@ export async function completeOnboarding(input: {
     }
 
     // ── 6. Create app_user_organization association ───────────────────────────
-    await adminClient.from('app_user_organization').upsert(
+    const { error: auoError } = await adminClient.from('app_user_organization').upsert(
       { app_user_id: appUserId, organization_id: organizationId, is_active: true },
       { onConflict: 'app_user_id,organization_id' }
     );
 
+    if (auoError) {
+      console.error('[onboarding] app_user_organization upsert failed:', auoError.message);
+    }
+
     // ── 7. Create default points rule ─────────────────────────────────────────
-    await adminClient.from('points_rule').insert({
+    const { error: pointsRuleError } = await adminClient.from('points_rule').insert({
       name: 'Regla de puntos base',
       description: 'Por cada $1 de compra, el cliente gana 1 punto',
       rule_type: 'fixed_amount',
@@ -282,6 +286,10 @@ export async function completeOnboarding(input: {
       display_color: '#059669',
       show_in_app: true,
     });
+
+    if (pointsRuleError) {
+      console.error('[onboarding] points_rule insert failed:', pointsRuleError.message);
+    }
 
     // ── 8. Create subscription record for paid plans ─────────────────────────
     if (input.mpPreapprovalId && (plan === 'advance' || plan === 'pro')) {

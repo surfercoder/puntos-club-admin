@@ -275,9 +275,17 @@ export function OnboardingWizard({
   }, [currentStep, maxReachedStep]);
 
   useEffect(() => {
+    // If the user has no existing organization but localStorage shows a previous
+    // attempt that reached the creation step, clear stale data so they start fresh.
+    const storedMaxRaw = parseInt(localStorage.getItem(LS_MAX_STEP) ?? '0', 10);
+    if (!initialOrganizationId && storedMaxRaw >= 6) {
+      clearOnboardingLocalStorage();
+      return;
+    }
+
     const payload: Partial<WizardState> = {};
 
-    const storedMax = parseInt(localStorage.getItem(LS_MAX_STEP) ?? '0', 10);
+    const storedMax = storedMaxRaw;
     if (storedMax > clampedStep) payload.maxReachedStep = storedMax;
 
     if (!initialUserInfo) {

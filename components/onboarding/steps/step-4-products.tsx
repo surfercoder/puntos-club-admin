@@ -131,7 +131,10 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
     initialData?.categories.length ? restoreCategories(initialData) : [createCategory()]
   );
 
-  const totalProducts = categories.reduce((sum, cat) => sum + cat.products.length, 0);
+  const totalProducts = categories.reduce(
+    (sum, cat) => sum + cat.products.filter((p) => p.name.trim()).length,
+    0
+  );
   const limitReached = totalProducts >= maxProducts;
 
   const handleBack = () => {

@@ -1299,6 +1299,7 @@
       "step1": "Muestra el QR a tus clientes en el punto de venta",
       "step2": "El cliente escanea con la app PuntosClub",
       "step3": "¡Listo! El cliente acumula puntos automáticamente",
+      "shareText": "Unite a {name} en Puntos Club y acumula puntos en cada compra.",
       "viewQRInPanel": "Ver QR en el panel",
       "goToDashboard": "Ir al panel de control"
     }

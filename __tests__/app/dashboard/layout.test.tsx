@@ -70,6 +70,44 @@ describe('DashboardLayout', () => {
     expect(result).toBeTruthy();
   });
 
+  it('renders DashboardShell for unrecognized role with organization and logo_url (line 118 truthy branch)', async () => {
+    getCurrentUser.mockResolvedValue({
+      id: '1',
+      first_name: 'Cash',
+      last_name: 'Ier',
+      email: 'cashier@test.com',
+      role: { name: 'cashier' },
+      organization_id: '10',
+      organization: { id: '10', name: 'Cashier Org', logo_url: 'http://logo.png' },
+      tour_completed: false,
+    });
+    isOwner.mockReturnValue(false);
+    isAdmin.mockReturnValue(false);
+    isCollaborator.mockReturnValue(false);
+
+    const result = await DashboardLayout({ children: <div>Cashier Content</div> });
+    expect(result).toBeTruthy();
+  });
+
+  it('renders DashboardShell for unrecognized role with organization and null logo_url (line 118 ?? branch)', async () => {
+    getCurrentUser.mockResolvedValue({
+      id: '1',
+      first_name: 'Cash',
+      last_name: 'Ier',
+      email: 'cashier@test.com',
+      role: { name: 'cashier' },
+      organization_id: '10',
+      organization: { id: '10', name: 'Cashier Org', logo_url: null },
+      tour_completed: false,
+    });
+    isOwner.mockReturnValue(false);
+    isAdmin.mockReturnValue(false);
+    isCollaborator.mockReturnValue(false);
+
+    const result = await DashboardLayout({ children: <div>Cashier Content</div> });
+    expect(result).toBeTruthy();
+  });
+
   it('renders DashboardShell for owner role with memberships', async () => {
     const user = {
       id: '1',

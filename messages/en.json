@@ -1299,6 +1299,7 @@
       "step1": "Show the QR to your customers at the point of sale",
       "step2": "The customer scans with the PuntosClub app",
       "step3": "Done! The customer earns points automatically",
+      "shareText": "Join {name} on Puntos Club and earn points on every purchase.",
       "viewQRInPanel": "View QR in dashboard",
       "goToDashboard": "Go to dashboard"
     }

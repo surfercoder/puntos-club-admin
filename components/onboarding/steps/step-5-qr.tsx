@@ -161,6 +161,67 @@ function QRSuccessView({
     img.src = url;
   };
 
+  const handleShare = async () => {
+    const svgEl = qrContainerRef.current?.querySelector('svg');
+    if (!svgEl) return;
+    const canvas = document.createElement('canvas');
+    const size = 400;
+    canvas.width = size;
+    canvas.height = size;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+    const svgData = new XMLSerializer().serializeToString(svgEl);
+    const img = new window.Image();
+    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(svgBlob);
+
+    const blob = await new Promise<Blob | null>((resolve) => {
+      img.onload = () => {
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, size, size);
+        ctx.drawImage(img, 0, 0, size, size);
+        URL.revokeObjectURL(url);
+        canvas.toBlob((b) => resolve(b), 'image/png');
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        resolve(null);
+      };
+      img.src = url;
+    });
+
+    if (!blob) return;
+
+    const file = new File(
+      [blob],
+      `qr-${orgName.toLowerCase().replace(/\s+/g, '-')}-puntosclub.png`,
+      { type: 'image/png' },
+    );
+
+    if (navigator.share && navigator.canShare?.({ files: [file] })) {
+      try {
+        await navigator.share({
+          title: `${orgName} - Puntos Club`,
+          text: t('shareText', { name: orgName }),
+          files: [file],
+        });
+      } catch {
+        // User cancelled
+      }
+    } else if (navigator.share) {
+      try {
+        await navigator.share({
+          title: `${orgName} - Puntos Club`,
+          text: t('shareText', { name: orgName }),
+        });
+      } catch {
+        // User cancelled
+      }
+    } else {
+      handleDownload();
+    }
+  };
+
   const handlePrint = () => {
     const svgEl = qrContainerRef.current?.querySelector('svg');
     if (!svgEl) return;
@@ -201,7 +262,7 @@ function QRSuccessView({
         <Button type="button" variant="outline" className="gap-2" onClick={handlePrint}>
           <Printer className="h-4 w-4" /> {t('print')}
         </Button>
-        <Button type="button" variant="outline" className="gap-2 col-span-2 sm:col-span-1" onClick={() => toast.info(t('viewQRInPanel'))}>
+        <Button type="button" variant="outline" className="gap-2 col-span-2 sm:col-span-1" onClick={handleShare}>
           <Share2 className="h-4 w-4" /> {t('share')}
         </Button>
       </div>
@@ -278,7 +339,7 @@ export function Step5QR({
       }
       setState(nextState);
     })();
-  }, []);
+  }, [state.status]);
 
   useEffect(() => {
     if (prevStatusRef.current === 'creating' && state.status === 'success') {

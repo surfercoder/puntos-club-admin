@@ -608,6 +608,69 @@ describe('completeOnboarding', () => {
     expect(result.success).toBe(true);
   });
 
+  it('should log error when app_user_organization upsert fails (lines 270-271)', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockSupabase.maybeSingle
+      .mockReturnValueOnce({ data: null, error: null }) // existing app_user
+      .mockReturnValueOnce({ data: { id: 1 }, error: null }); // owner role
+    mockSupabase.single
+      .mockReturnValueOnce({ data: { id: 1, name: 'Org' }, error: null }) // org
+      .mockReturnValueOnce({ data: { id: 2 }, error: null }) // address
+      .mockReturnValueOnce({ data: { id: 3 }, error: null }) // branch
+      .mockReturnValueOnce({ data: { id: 4 }, error: null }); // app_user
+
+    // Make from() return a failing upsert for app_user_organization and failing insert for points_rule
+    const originalFrom = mockSupabase.from;
+    mockSupabase.from = jest.fn((table: string) => {
+      if (table === 'app_user_organization') {
+        return {
+          upsert: jest.fn(() => ({ error: { message: 'AUO upsert failed' } })),
+        };
+      }
+      return originalFrom(table);
+    });
+
+    const result = await completeOnboarding({ step2: step2Data });
+    expect(result.success).toBe(true);
+    expect(consoleSpy).toHaveBeenCalledWith(
+      '[onboarding] app_user_organization upsert failed:',
+      'AUO upsert failed'
+    );
+    consoleSpy.mockRestore();
+    mockSupabase.from = originalFrom;
+  });
+
+  it('should log error when points_rule insert fails (lines 291-292)', async () => {
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+    mockSupabase.maybeSingle
+      .mockReturnValueOnce({ data: null, error: null }) // existing app_user
+      .mockReturnValueOnce({ data: { id: 1 }, error: null }); // owner role
+    mockSupabase.single
+      .mockReturnValueOnce({ data: { id: 1, name: 'Org' }, error: null }) // org
+      .mockReturnValueOnce({ data: { id: 2 }, error: null }) // address
+      .mockReturnValueOnce({ data: { id: 3 }, error: null }) // branch
+      .mockReturnValueOnce({ data: { id: 4 }, error: null }); // app_user
+
+    const originalFrom = mockSupabase.from;
+    mockSupabase.from = jest.fn((table: string) => {
+      if (table === 'points_rule') {
+        return {
+          insert: jest.fn(() => ({ error: { message: 'Points rule insert failed' } })),
+        };
+      }
+      return originalFrom(table);
+    });
+
+    const result = await completeOnboarding({ step2: step2Data });
+    expect(result.success).toBe(true);
+    expect(consoleSpy).toHaveBeenCalledWith(
+      '[onboarding] points_rule insert failed:',
+      'Points rule insert failed'
+    );
+    consoleSpy.mockRestore();
+    mockSupabase.from = originalFrom;
+  });
+
   it('should use org name from input when org query returns no name', async () => {
     mockSupabase.maybeSingle
       .mockReturnValueOnce({ data: { id: 10, organization_id: 5 }, error: null })
