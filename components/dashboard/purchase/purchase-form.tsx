@@ -35,7 +35,7 @@ const initialFormData: FormDataState = {
   branches: [],
 };
 
-const CASHIER_ROLE_ID = 3;
+const CASHIER_ROLE_NAME = 'cashier';
 
 function formDataReducer(state: FormDataState, action: Partial<FormDataState>): FormDataState {
   return { ...state, ...action };
@@ -89,11 +89,18 @@ export default function PurchaseForm({ purchase }: PurchaseFormProps) {
           .order('first_name');
       }
 
+      // Look up cashier role ID dynamically
+      const { data: cashierRole } = await supabase
+        .from('user_role')
+        .select('id')
+        .eq('name', CASHIER_ROLE_NAME)
+        .single();
+
       // Build cashiers query filtered by organization and cashier role
       let cashiersQuery = supabase
         .from('app_user')
         .select('id, first_name, last_name')
-        .eq('role_id', CASHIER_ROLE_ID)
+        .eq('role_id', cashierRole?.id ?? -1)
         .order('first_name');
       let branchesQuery = supabase.from('branch').select('id, name').order('name');
       if (orgIdNumber) {

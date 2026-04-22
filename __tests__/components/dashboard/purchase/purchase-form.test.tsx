@@ -33,6 +33,7 @@ jest.mock('@/lib/supabase/client', () => {
     b.eq = jest.fn(() => b);
     b.neq = jest.fn(() => b);
     b.order = jest.fn(() => Promise.resolve({ data: [{ id: '1', first_name: 'A', last_name: 'B', name: 'N' }], error: null }));
+    b.single = jest.fn(() => Promise.resolve({ data: { id: 4 }, error: null }));
     return b;
   };
   return {
@@ -100,6 +101,7 @@ function makeThenableBuilder(resolveData: unknown = []) {
   b.eq = jest.fn(() => b);
   b.neq = jest.fn(() => b);
   b.order = jest.fn(() => b);
+  b.single = jest.fn(() => Promise.resolve({ data: resolveData, error: null }));
   return b;
 }
 
@@ -137,6 +139,9 @@ function makeOrgAwareClient(opts: {
     }
     if (table === 'beneficiary') {
       return makeThenableBuilder(beneficiaryData);
+    }
+    if (table === 'user_role') {
+      return makeThenableBuilder({ id: 4 });
     }
     if (table === 'app_user') {
       return makeThenableBuilder(cashierData);
@@ -233,6 +238,7 @@ describe('PurchaseForm', () => {
         b.eq = jest.fn(() => b);
         b.neq = jest.fn(() => b);
         b.order = jest.fn(() => Promise.resolve({ data: null, error: null }));
+        b.single = jest.fn(() => Promise.resolve({ data: { id: 4 }, error: null }));
         return b;
       }),
       rpc: jest.fn(() => Promise.resolve({ data: 0, error: null })),
