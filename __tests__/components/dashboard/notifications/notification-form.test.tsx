@@ -808,6 +808,58 @@ describe('NotificationForm', () => {
     });
   });
 
+  it('clears approved moderation result when emoji is added to body', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({ data: { isApproved: true, reasons: [], severity: 'low' } }),
+    });
+
+    render(<NotificationForm {...defaultProps} />);
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Title' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'Body' } });
+
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(screen.getByText(/contentApproved/)).toBeInTheDocument());
+
+    // Open body emoji picker and click an emoji
+    const emojiButtons = screen.getAllByTitle('addEmoji');
+    fireEvent.click(emojiButtons[1]);
+    const pickBtns = screen.getAllByTestId('emoji-btn');
+    fireEvent.click(pickBtns[pickBtns.length - 1]);
+
+    // Approved moderation result should be cleared
+    await waitFor(() => {
+      expect(screen.queryByText(/contentApproved/)).not.toBeInTheDocument();
+    });
+  });
+
+  it('keeps rejected moderation result when emoji is added to body', async () => {
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: true,
+      json: async () => ({
+        data: { isApproved: false, reasons: ['Bad content'], severity: 'high' },
+      }),
+    });
+
+    render(<NotificationForm {...defaultProps} />);
+    fireEvent.change(screen.getByLabelText(/titleLabel/), { target: { value: 'Title' } });
+    fireEvent.change(screen.getByLabelText(/messageLabel/), { target: { value: 'Body' } });
+
+    fireEvent.click(screen.getByRole('button', { name: /verifyWithAI/ }));
+    await waitFor(() => expect(screen.getByText(/contentNeedsReview/)).toBeInTheDocument());
+
+    // Open body emoji picker and click an emoji
+    const emojiButtons = screen.getAllByTitle('addEmoji');
+    fireEvent.click(emojiButtons[1]);
+    const pickBtns = screen.getAllByTestId('emoji-btn');
+    fireEvent.click(pickBtns[pickBtns.length - 1]);
+
+    // Rejected moderation result should NOT be cleared
+    await waitFor(() => {
+      expect(screen.getByText(/contentNeedsReview/)).toBeInTheDocument();
+    });
+  });
+
   // -- Direct handler invocation to cover validation branches (lines 190-191, 230-231, 235-236, 240-241) --
   // These are defensive validation guards that duplicate the button disabled conditions.
   // To cover them, we fill valid data, then mock safeParse to return failure AFTER the button is enabled.

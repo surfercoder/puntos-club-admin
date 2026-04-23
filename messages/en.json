@@ -50,6 +50,7 @@
     "actions": "Actions",
     "createdAt": "Created at",
     "createdBy": "Created by",
+    "sentAt": "Sent at",
     "logo": "Logo",
     "description": "Description",
     "send": "Send",
@@ -317,6 +318,10 @@
       "editPage": {
         "title": "Edit Push Notification",
         "description": "Edit and resend a notification to all your active beneficiaries"
+      },
+      "viewPage": {
+        "title": "View Push Notification",
+        "description": "Details of the sent notification"
       },
       "deleteModal": {
         "title": "Delete Notification",

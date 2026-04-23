@@ -1,4 +1,4 @@
-import { Bell, Pencil } from 'lucide-react';
+import { Bell, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
@@ -113,8 +113,8 @@ export default async function NotificationsPage() {
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">
-                        <Link href={`/dashboard/notifications/edit/${notification.id}`}>
-                          <Pencil className="h-4 w-4" />
+                        <Link href={`/dashboard/notifications/view/${notification.id}`}>
+                          <Eye className="h-4 w-4" />
                         </Link>
                       </Button>
                       <DeleteModal

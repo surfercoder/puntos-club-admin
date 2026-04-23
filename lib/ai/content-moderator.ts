@@ -27,6 +27,7 @@ El contenido APROBADO debe ser:
 - Profesional y respetuoso
 - Relacionado con recompensas de lealtad, puntos, descuentos o beneficios de compra
 - Informativo sobre nuevas funciones o actualizaciones
+- Escrito con ortografía correcta en español
 
 RECHAZA contenido que contenga:
 - Contenido sexual o para adultos
@@ -37,6 +38,15 @@ RECHAZA contenido que contenga:
 - Temas políticos o controversiales
 - Ataques personales o comentarios ofensivos
 - Cualquier cosa no relacionada con el propósito comercial
+- Errores de ortografía (palabras mal escritas o acentos/tildes faltantes)
+
+IMPORTANTE sobre ortografía:
+- SOLO revisa ortografía (palabras mal escritas y tildes/acentos faltantes). NO revises gramática, puntuación, espacios, concordancia de género/número ni estructura de oraciones.
+- Los emojis son permitidos y no deben considerarse errores.
+- Revisa tildes/acentos (ej: "información" no "informacion", "también" no "tambien").
+- Abreviaciones comunes y coloquiales son aceptables si son claras (ej: "promo", "info").
+- Acepta todas las variantes regionales del español, especialmente español rioplatense/argentino. El voseo es completamente válido (ej: "vení", "mirá", "comprá", "aprovechá", "conocé", "descubrí" son formas correctas del imperativo con vos).
+- Si encuentras errores de ortografía, indica exactamente cuáles son y sugiere la corrección.
 
 Responde ÚNICAMENTE con un objeto JSON válido en este formato exacto:
 {
@@ -46,7 +56,8 @@ Responde ÚNICAMENTE con un objeto JSON válido en este formato exacto:
 }
 
 Si está aprobado, establece isApproved en true, reasons como un array vacío, y severity en "low".
-Si está rechazado, establece isApproved en false, proporciona razones específicas en español de por qué fue rechazado, y establece severity según qué tan inapropiado sea el contenido.`;
+Si está rechazado, establece isApproved en false, proporciona razones específicas en español de por qué fue rechazado, y establece severity según qué tan inapropiado sea el contenido.
+Para errores de ortografía, usa severity "low" y en las razones indica el error y la corrección sugerida (ej: "Error ortográfico: 'prodcutos' debería ser 'productos'").`;
 
     const message = await client.messages.create({
       model: 'claude-sonnet-4-20250514',

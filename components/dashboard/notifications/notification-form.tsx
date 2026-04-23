@@ -62,16 +62,17 @@ function notificationFormReducer(state: NotificationFormState, action: Notificat
       const value = action.field === 'title'
         ? action.value.slice(0, TITLE_MAX_LENGTH)
         : action.value.slice(0, BODY_MAX_LENGTH);
+      const wasApproved = state.moderationResult?.isApproved;
       return {
         ...state,
         [action.field]: value,
-        moderationResult: state.moderationResult ? null : state.moderationResult,
+        moderationResult: wasApproved ? null : state.moderationResult,
       };
     }
     case 'SET_TITLE_WITH_EMOJI':
-      return { ...state, title: action.value, showTitleEmojiPicker: false, moderationResult: null };
+      return { ...state, title: action.value, showTitleEmojiPicker: false, moderationResult: state.moderationResult?.isApproved ? null : state.moderationResult };
     case 'SET_BODY_WITH_EMOJI':
-      return { ...state, body: action.value, showEmojiPicker: false, moderationResult: null };
+      return { ...state, body: action.value, showEmojiPicker: false, moderationResult: state.moderationResult?.isApproved ? null : state.moderationResult };
     case 'TOGGLE_TITLE_EMOJI_PICKER':
       return { ...state, showTitleEmojiPicker: !state.showTitleEmojiPicker };
     case 'CLOSE_TITLE_EMOJI_PICKER':
