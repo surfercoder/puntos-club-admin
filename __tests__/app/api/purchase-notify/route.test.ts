@@ -36,7 +36,7 @@ jest.mock('@/lib/email-template', () => ({
 
 global.fetch = jest.fn();
 
-function buildUserChain(singleResult: any) {
+function _buildUserChain(singleResult: any) {
   const chain: any = {};
   chain.eq = jest.fn(() => chain);
   chain.single = jest.fn(() => Promise.resolve(singleResult));
@@ -46,7 +46,7 @@ function buildUserChain(singleResult: any) {
   };
 }
 
-function buildAdminSelectChain(result: any, isPromise = false) {
+function _buildAdminSelectChain(result: any, isPromise = false) {
   const chain: any = {};
   chain.eq = jest.fn(() => chain);
   chain.single = jest.fn(() => Promise.resolve(result));

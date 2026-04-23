@@ -222,7 +222,7 @@ export function Step3Plan({ onNext, onBack, initialPlan = 'trial' }: Step3Props)
               <ul className="space-y-2 flex-1">
                 {plan.features.map((feature) => (
                   <li key={feature.label} className="flex items-center justify-between gap-2">
-                    <span className="text-xs text-muted-foreground">{feature.label}</span>
+                    <span className="text-xs text-muted-foreground whitespace-nowrap">{feature.label}</span>
                     <FeatureValue value={feature.value} />
                   </li>
                 ))}
