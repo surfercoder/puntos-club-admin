@@ -169,4 +169,50 @@ describe('PlanUsageBanner', () => {
     render(<PlanUsageBanner />);
     expect(screen.getByText('upgradePlan')).toBeInTheDocument();
   });
+
+  it('shows upgrade button when plan is not pro', () => {
+    (usePlanUsage as jest.Mock).mockReturnValue({
+      summary: {
+        plan: 'trial',
+        features: [
+          {
+            feature: 'beneficiaries',
+            limit_value: 100,
+            current_usage: 85,
+            usage_percentage: 85,
+            is_at_limit: false,
+            should_warn: true,
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    render(<PlanUsageBanner />);
+    const button = screen.getByRole('link', { name: 'upgradePlanButton' });
+    expect(button).toBeInTheDocument();
+    expect(button).toHaveAttribute('href', '/dashboard/settings/plan');
+  });
+
+  it('does not show upgrade button when plan is pro', () => {
+    (usePlanUsage as jest.Mock).mockReturnValue({
+      summary: {
+        plan: 'pro',
+        features: [
+          {
+            feature: 'beneficiaries',
+            limit_value: 100,
+            current_usage: 85,
+            usage_percentage: 85,
+            is_at_limit: false,
+            should_warn: true,
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    render(<PlanUsageBanner />);
+    expect(screen.queryByRole('link', { name: 'upgradePlanButton' })).not.toBeInTheDocument();
+  });
 });

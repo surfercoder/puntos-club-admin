@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 
 import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
 import { usePlanUsage } from '@/components/providers/plan-usage-provider';
 import { PLAN_FEATURE_LABELS, PLAN_DISPLAY_NAMES } from '@/lib/plans/config';
 import type { FeatureUsage, PlanFeatureKey } from '@/types/plan';
@@ -63,40 +64,49 @@ export function PlanUsageBanner({ features, className }: PlanUsageBannerProps) {
       )}
       role="alert"
     >
-      <button
-        type="button"
-        onClick={() => setDismissed(true)}
-        className="absolute right-3 top-3 opacity-60 hover:opacity-100 transition-opacity"
-        aria-label={t('closeBanner')}
-      >
-        <X className="h-4 w-4" />
-      </button>
-
-      <div className="flex gap-3 pr-6">
-        <TrendingUp className="h-5 w-5 mt-0.5 shrink-0" />
-        <div className="space-y-1.5">
-          <p className="font-semibold text-sm">
-            {hasAtLimit
-              ? t('limitReachedBanner', { plan: planName })
-              : t('nearingLimitBanner', { plan: planName })}
-          </p>
-
-          <div className="flex flex-wrap gap-x-4 gap-y-1">
-            {warnings.map((w) => (
-              <FeatureWarning key={w.feature} usage={w} />
-            ))}
-          </div>
-
-          {summary.plan !== 'pro' && (
-            <p className="text-xs mt-2 opacity-80">
-              <Link
-                href="/dashboard/settings/plan"
-                className="underline underline-offset-2 font-medium hover:opacity-100"
-              >
-                {t('upgradePlan')}
-              </Link>{' '}
-              {t('upgradeSuffix')}
+      <div className="flex items-center gap-3">
+        <div className="flex gap-3 flex-1 min-w-0">
+          <TrendingUp className="h-5 w-5 mt-0.5 shrink-0" />
+          <div className="space-y-1.5">
+            <p className="font-semibold text-sm">
+              {hasAtLimit
+                ? t('limitReachedBanner', { plan: planName })
+                : t('nearingLimitBanner', { plan: planName })}
             </p>
+
+            <div className="flex flex-wrap gap-x-4 gap-y-1">
+              {warnings.map((w) => (
+                <FeatureWarning key={w.feature} usage={w} />
+              ))}
+            </div>
+
+            {summary.plan !== 'pro' && (
+              <p className="text-xs mt-2 opacity-80">
+                <Link
+                  href="/dashboard/settings/plan"
+                  className="underline underline-offset-2 font-medium hover:opacity-100"
+                >
+                  {t('upgradePlan')}
+                </Link>{' '}
+                {t('upgradeSuffix')}
+              </p>
+            )}
+          </div>
+        </div>
+
+        <div className="flex flex-col items-center gap-2 shrink-0">
+          <button
+            type="button"
+            onClick={() => setDismissed(true)}
+            className="opacity-60 hover:opacity-100 transition-opacity"
+            aria-label={t('closeBanner')}
+          >
+            <X className="h-4 w-4" />
+          </button>
+          {summary.plan !== 'pro' && (
+            <Button size="sm" variant={hasAtLimit ? 'destructive' : 'default'} asChild>
+              <Link href="/dashboard/settings/plan">{t('upgradePlanButton')}</Link>
+            </Button>
           )}
         </div>
       </div>

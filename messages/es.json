@@ -607,7 +607,7 @@
       "limitReachedSuffix": "— límite alcanzado",
       "closeBanner": "Cerrar aviso",
       "usageTitle": "Uso del plan",
-      "upgradePlanButton": "Mejorar plan",
+      "upgradePlanButton": "Actualizar Plan",
       "nearingLimitWarning": "Uno o más recursos están cerca del límite de tu plan.",
       "limitReachedTitle": "Límite de plan alcanzado",
       "limitReachedDescription": "Has alcanzado el límite de tu {plan}. Mejora tu plan para continuar creando recursos.",
