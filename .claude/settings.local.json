@@ -145,7 +145,16 @@
       "mcp__sentry__find_projects",
       "mcp__sentry__search_issues",
       "mcp__sentry__get_sentry_resource",
-      "mcp__supabase__list_migrations"
+      "mcp__supabase__list_migrations",
+      "mcp__supabase__list_extensions",
+      "mcp__supabase__list_edge_functions",
+      "Bash(supabase --version)",
+      "Bash(psql --version)",
+      "Bash(pg_dump --version)",
+      "Bash(chmod +x /Users/agustincassani/Documents/projects/surfercoder/puntos-club/puntos-club-admin/supabase/migration/*.sh)",
+      "mcp__supabase__get_advisors",
+      "mcp__supabase__get_publishable_keys",
+      "Bash(git restore *)"
     ],
     "deny": []
   },
