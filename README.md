@@ -251,10 +251,10 @@ Auth is handled by **Supabase Auth** (email + password). The cookie session is r
 ```mermaid
 flowchart LR
     subgraph Web[Web Admin Portal]
-        FORM[Form / button] -->|server action| SA[/actions/*]
+        FORM[Form / button] -->|server action| SA["/actions/*"]
     end
     subgraph Mobile[Mobile Apps + 3rd parties]
-        APP[App / webhook] -->|HTTP| API[/app/api/*]
+        APP[App / webhook] -->|HTTP| API["/app/api/*"]
     end
     SA --> DB[(Supabase)]
     API --> DB
@@ -314,7 +314,7 @@ flowchart LR
     O[Owner] -->|select plan| P[Settings / Plan page]
     P -->|create preapproval| MP[Mercado Pago]
     MP -->|redirect| O
-    MP -.webhook.-> WH[/api/mercadopago/webhook]
+    MP -.webhook.-> WH["/api/mercadopago/webhook"]
     WH --> DB[(subscriptions)]
     DB --> LIM[organization_plan_limits<br/>+ notification limits]
     LIM --> APP[gate features in app]
