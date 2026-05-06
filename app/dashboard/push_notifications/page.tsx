@@ -1,6 +1,5 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/push_notifications_crud/delete-modal';
@@ -13,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import {
   Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
 } from '@/components/ui/table';
+import { getActiveOrgIdFilter } from '@/lib/auth/get-active-org-id';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
@@ -25,17 +25,15 @@ export default async function PushNotificationsListPage() {
 
   const supabase = userIsAdmin ? createAdminClient() : await createClient();
 
-  const cookieStore = await cookies();
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+  const orgIdFilter = await getActiveOrgIdFilter(currentUser);
 
   let query = supabase
     .from('push_notifications')
     .select('*, organization:organization_id(name), creator:created_by(first_name, last_name)')
     .order('created_at', { ascending: false });
 
-  if (!userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
-    query = query.eq('organization_id', activeOrgIdNumber);
+  if (orgIdFilter) {
+    query = query.eq('organization_id', orgIdFilter);
   }
 
   const { data, error } = await query;

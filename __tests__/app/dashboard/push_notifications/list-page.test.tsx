@@ -10,6 +10,7 @@ jest.mock('next/headers', () => ({ cookies: jest.fn(() => Promise.resolve({ get:
 jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => Promise.resolve({ from: mockFrom })) }));
 jest.mock('@/lib/supabase/admin', () => ({ createAdminClient: jest.fn(() => ({ from: mockFrom })) }));
 jest.mock('@/lib/auth/get-current-user', () => ({ getCurrentUser: jest.fn(() => Promise.resolve({ id: '1', role: { name: 'admin' } })) }));
+jest.mock('@/lib/auth/get-active-org-id', () => ({ getActiveOrgIdFilter: jest.fn(() => Promise.resolve(null)) }));
 jest.mock('@/lib/auth/roles', () => ({ isAdmin: jest.fn(() => true) }));
 jest.mock('@/components/dashboard/plan/plan-limit-create-button', () => ({ PlanLimitCreateButton: () => <div /> }));
 jest.mock('@/components/dashboard/plan/plan-usage-banner', () => ({ PlanUsageBanner: () => <div /> }));
@@ -29,11 +30,14 @@ describe('PushNotificationsListPage', () => {
 
   it('filters by organization for non-admin users', async () => {
     const { isAdmin } = require('@/lib/auth/roles');
+    const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
     isAdmin.mockReturnValueOnce(false);
+    getActiveOrgIdFilter.mockResolvedValueOnce(1);
     mockOrder.mockReturnValueOnce({ eq: mockEq });
     mockEq.mockResolvedValueOnce({ data: [], error: null });
     const result = await PushNotificationsListPage();
     expect(result).toBeTruthy();
+    expect(mockEq).toHaveBeenCalledWith('organization_id', 1);
   });
 
   it('renders notification rows when data is returned', async () => {

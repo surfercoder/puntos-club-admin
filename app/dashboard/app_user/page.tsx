@@ -1,6 +1,5 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/app_user/delete-modal';
@@ -16,8 +15,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { getActiveOrgIdFilter } from '@/lib/auth/get-active-org-id';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
-import { isAdmin, isCollaborator } from '@/lib/auth/roles';
+import { isCollaborator } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 
 interface AppUserWithOrganization {
@@ -35,16 +35,13 @@ interface AppUserWithOrganization {
 }
 
 export default async function AppUserListPage() {
-  const [t, supabase, currentUser, cookieStore] = await Promise.all([
+  const [t, supabase, currentUser] = await Promise.all([
     getTranslations('Dashboard.appUser'),
     createClient(),
     getCurrentUser(),
-    cookies(),
   ]);
-  const userIsAdmin = isAdmin(currentUser);
   const userIsCollaborator = isCollaborator(currentUser);
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const activeOrgIdNumber = /* c8 ignore next */ activeOrgId ? Number(activeOrgId) : null;
+  const orgIdFilter = await getActiveOrgIdFilter(currentUser);
 
   let query = supabase
     .from('app_user')
@@ -55,8 +52,8 @@ export default async function AppUserListPage() {
     `)
     .order('first_name', { nullsFirst: false });
 
-  if (!userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
-    query = query.eq('organization_id', activeOrgIdNumber);
+  if (orgIdFilter) {
+    query = query.eq('organization_id', orgIdFilter);
   }
 
   // Collaborators can only see and manage cashier users

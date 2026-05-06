@@ -15,6 +15,7 @@ jest.mock('next/headers', () => ({ cookies: jest.fn(() => Promise.resolve({ get:
 jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => Promise.resolve({ from: mockFrom })) }));
 jest.mock('@/lib/supabase/admin', () => ({ createAdminClient: jest.fn(() => ({ from: mockFrom })) }));
 jest.mock('@/lib/auth/get-current-user', () => ({ getCurrentUser: jest.fn(() => Promise.resolve({ id: '1', role: { name: 'admin' } })) }));
+jest.mock('@/lib/auth/get-active-org-id', () => ({ getActiveOrgIdFilter: jest.fn(() => Promise.resolve(null)) }));
 jest.mock('@/lib/auth/roles', () => ({ isAdmin: jest.fn(() => true) }));
 jest.mock('@/components/dashboard/redemption/delete-modal', () => function Mock() { return <div />; });
 jest.mock('@/components/ui/button', () => ({ Button: ({ children }: { children: React.ReactNode }) => <button>{children}</button> }));
@@ -42,7 +43,9 @@ describe('RedemptionListPage', () => {
 
   it('filters by organization for non-admin users', async () => {
     const { isAdmin } = require('@/lib/auth/roles');
+    const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
     isAdmin.mockReturnValueOnce(false);
+    getActiveOrgIdFilter.mockResolvedValueOnce(1);
     resolveData = {
       data: [
         { id: '1', beneficiary_id: 'b1', product_id: 'p1', organization_id: 1, points_used: 50,  redemption_date: '2024-01-01T00:00:00Z', beneficiary: { first_name: 'A', last_name: 'B', email: 'a@b.com' }, product: { name: 'P1', organization_id: 1 } },
@@ -52,6 +55,7 @@ describe('RedemptionListPage', () => {
     };
     const result = await RedemptionListPage();
     expect(result).toBeTruthy();
+    expect(mockEq).toHaveBeenCalledWith('organization_id', 1);
   });
 
   it('renders redemption rows when data is returned', async () => {

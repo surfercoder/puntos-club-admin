@@ -1,6 +1,5 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/stock/delete-modal';
@@ -13,6 +12,7 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
+import { getActiveOrgIdFilter } from '@/lib/auth/get-active-org-id';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
@@ -41,9 +41,7 @@ export default async function StockListPage() {
   // Use admin client to bypass RLS for admin users
   const supabase = userIsAdmin ? createAdminClient() : await createClient();
 
-  const cookieStore = await cookies();
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+  const orgIdFilter = await getActiveOrgIdFilter(currentUser);
 
   const { data, error } = await supabase
     .from('stock')
@@ -57,9 +55,8 @@ export default async function StockListPage() {
     return <div>{t('error')}</div>;
   }
 
-  // Only filter by organization for non-admin users
-  const filteredData = !userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)
-    ? data?.filter((stock: StockWithRelations) => stock.branch?.organization_id === activeOrgIdNumber)
+  const filteredData = orgIdFilter
+    ? data?.filter((stock: StockWithRelations) => stock.branch?.organization_id === orgIdFilter)
     : data;
 
   return (

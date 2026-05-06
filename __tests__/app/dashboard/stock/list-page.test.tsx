@@ -15,6 +15,9 @@ jest.mock('@/lib/supabase/admin', () => ({
 jest.mock('@/lib/auth/get-current-user', () => ({
   getCurrentUser: jest.fn(() => Promise.resolve({ id: '1', role: { name: 'admin' } })),
 }));
+jest.mock('@/lib/auth/get-active-org-id', () => ({
+  getActiveOrgIdFilter: jest.fn(() => Promise.resolve(null)),
+}));
 jest.mock('@/lib/auth/roles', () => ({ isAdmin: jest.fn(() => true) }));
 jest.mock('@/components/dashboard/stock/delete-modal', () => function Mock() { return <div />; });
 jest.mock('@/components/ui/button', () => ({ Button: ({ children }: { children: React.ReactNode }) => <button>{children}</button> }));
@@ -39,12 +42,24 @@ describe('StockListPage', () => {
 
   it('filters by organization for non-admin users', async () => {
     const { isAdmin } = require('@/lib/auth/roles');
+    const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
     isAdmin.mockReturnValueOnce(false);
+    getActiveOrgIdFilter.mockResolvedValueOnce(1);
     const stockData = [
       { id: '1', branch_id: 'b1', product_id: 'p1', quantity: 10, minimum_quantity: 5, branch: { name: 'B1', organization_id: 1 }, product: { name: 'P1' } },
       { id: '2', branch_id: 'b2', product_id: 'p2', quantity: 3, minimum_quantity: 5, branch: { name: 'B2', organization_id: 2 }, product: { name: 'P2' } },
     ];
     mockSelect.mockResolvedValueOnce({ data: stockData, error: null });
+    const result = await StockListPage();
+    expect(result).toBeTruthy();
+  });
+
+  it('handles null data with org filter set (covers data?.filter fallback)', async () => {
+    const { isAdmin } = require('@/lib/auth/roles');
+    const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
+    isAdmin.mockReturnValueOnce(false);
+    getActiveOrgIdFilter.mockResolvedValueOnce(1);
+    mockSelect.mockResolvedValueOnce({ data: null, error: null });
     const result = await StockListPage();
     expect(result).toBeTruthy();
   });

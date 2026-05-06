@@ -20,7 +20,7 @@ describe('getEnvironmentInfo', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: `https://${PRODUCTION_PROJECT_ID}.supabase.co`,
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'some-key-here-1234567890',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'some-key-here-1234567890',
       NEXT_PUBLIC_SITE_URL: 'https://production.example.com',
     };
     const { getEnvironmentInfo } = loadModule();
@@ -38,7 +38,7 @@ describe('getEnvironmentInfo', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: `https://${TEST_PROJECT_ID}.supabase.co`,
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-key-abcdefghij12',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'test-key-abcdefghij12',
       NEXT_PUBLIC_SITE_URL: 'https://test.example.com',
     };
     const { getEnvironmentInfo } = loadModule();
@@ -53,7 +53,7 @@ describe('getEnvironmentInfo', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: 'https://unknownproject.supabase.co',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'some-key-abcdefghij12',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'some-key-abcdefghij12',
     };
     const { getEnvironmentInfo } = loadModule();
     const info = getEnvironmentInfo();
@@ -66,7 +66,7 @@ describe('getEnvironmentInfo', () => {
   it('handles missing env vars', () => {
     process.env = { ...originalEnv };
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
     delete process.env.NEXT_PUBLIC_SITE_URL;
     const { getEnvironmentInfo } = loadModule();
     const info = getEnvironmentInfo();
@@ -83,7 +83,7 @@ describe('getEnvironmentInfo', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: 'https://localhost:54321',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'local-key-abcdef1234',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'local-key-abcdef1234',
     };
     const { getEnvironmentInfo } = loadModule();
     const info = getEnvironmentInfo();
@@ -107,7 +107,7 @@ describe('logEnvironmentInfo', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: `https://${TEST_PROJECT_ID}.supabase.co`,
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'some-key-abcdefghij12',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'some-key-abcdefghij12',
     };
     const { getEnvironmentInfo, logEnvironmentInfo } = require('@/lib/utils/environment-check');
     const envInfo = getEnvironmentInfo();

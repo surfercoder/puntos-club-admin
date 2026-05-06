@@ -1,7 +1,7 @@
 // Environment verification utility
 export function getEnvironmentInfo() {
   const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL;
 
   // Extract project ID from Supabase URL

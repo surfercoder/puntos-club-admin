@@ -1,6 +1,5 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/address/delete-modal';
@@ -13,26 +12,22 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
+import { getActiveOrgIdFilter } from '@/lib/auth/get-active-org-id';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
-import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import type { Address } from '@/types/address';
 
 export default async function AddressListPage() {
-  const [t, supabase, currentUser, cookieStore] = await Promise.all([
+  const [t, supabase, currentUser] = await Promise.all([
     getTranslations('Dashboard.address'),
     createClient(),
     getCurrentUser(),
-    cookies(),
   ]);
-  const userIsAdmin = isAdmin(currentUser);
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+  const orgIdFilter = await getActiveOrgIdFilter(currentUser);
 
   let query = supabase.from('address').select('*').order('street');
-  // Only filter by organization for non-admin users
-  if (!userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
-    query = query.eq('organization_id', activeOrgIdNumber);
+  if (orgIdFilter) {
+    query = query.eq('organization_id', orgIdFilter);
   }
 
   const { data, error } = await query;

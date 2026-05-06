@@ -13,13 +13,13 @@ describe('lib/env', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'test-anon-key',
       NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'maps-api-key',
       MERCADOPAGO_ACCESS_TOKEN: 'TEST-mp-access-token',
     };
     const { env } = require('@/lib/env');
     expect(env.NEXT_PUBLIC_SUPABASE_URL).toBe('https://test.supabase.co');
-    expect(env.NEXT_PUBLIC_SUPABASE_ANON_KEY).toBe('test-anon-key');
+    expect(env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY).toBe('test-anon-key');
     expect(env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY).toBe('maps-api-key');
     expect(env.MERCADOPAGO_ACCESS_TOKEN).toBe('TEST-mp-access-token');
   });
@@ -28,7 +28,7 @@ describe('lib/env', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'test-anon-key',
       NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'maps-api-key',
       MERCADOPAGO_ACCESS_TOKEN: 'TEST-mp-access-token',
       NEXT_PUBLIC_SITE_URL: 'https://mysite.com',
@@ -51,7 +51,7 @@ describe('lib/env', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'test-anon-key',
       NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'maps-api-key',
       MERCADOPAGO_ACCESS_TOKEN: 'TEST-mp-access-token',
     };
@@ -73,7 +73,7 @@ describe('lib/env', () => {
   it('throws when NEXT_PUBLIC_SUPABASE_URL is missing', () => {
     process.env = {
       ...originalEnv,
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'test-anon-key',
       NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'maps-api-key',
       MERCADOPAGO_ACCESS_TOKEN: 'TEST-mp-access-token',
     };
@@ -85,29 +85,29 @@ describe('lib/env', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: 'not-a-url',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'test-anon-key',
       NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'maps-api-key',
       MERCADOPAGO_ACCESS_TOKEN: 'TEST-mp-access-token',
     };
     expect(() => require('@/lib/env')).toThrow();
   });
 
-  it('throws when NEXT_PUBLIC_SUPABASE_ANON_KEY is missing', () => {
+  it('throws when NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is missing', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
       NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'maps-api-key',
       MERCADOPAGO_ACCESS_TOKEN: 'TEST-mp-access-token',
     };
-    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
     expect(() => require('@/lib/env')).toThrow();
   });
 
-  it('throws when NEXT_PUBLIC_SUPABASE_ANON_KEY is empty', () => {
+  it('throws when NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is empty', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: '',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: '',
       NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'maps-api-key',
       MERCADOPAGO_ACCESS_TOKEN: 'TEST-mp-access-token',
     };
@@ -118,7 +118,7 @@ describe('lib/env', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'test-anon-key',
       MERCADOPAGO_ACCESS_TOKEN: 'TEST-mp-access-token',
     };
     delete process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
@@ -129,7 +129,7 @@ describe('lib/env', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'test-anon-key',
       NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'maps-api-key',
       NEXT_PUBLIC_SITE_URL: '',
     };
@@ -141,7 +141,7 @@ describe('lib/env', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'test-anon-key',
       NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'maps-api-key',
       SUPABASE_SERVICE_ROLE_KEY: '',
       REGISTRATION_SECRET: '',
@@ -163,7 +163,7 @@ describe('lib/env', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-anon-key',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'test-anon-key',
       NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: 'maps-api-key',
       MERCADOPAGO_ACCESS_TOKEN: 'TEST-mp-access-token',
       NEXT_PUBLIC_SITE_URL: 'not-a-url',

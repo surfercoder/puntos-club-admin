@@ -1,6 +1,5 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/beneficiary/delete-modal';
@@ -17,29 +16,29 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { getActiveOrgIdFilter } from '@/lib/auth/get-active-org-id';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import type { Beneficiary } from '@/types/beneficiary';
 
 export default async function BeneficiaryListPage() {
-  const [supabase, currentUser, t, _tCommon, cookieStore] = await Promise.all([
+  const [supabase, currentUser, t, _tCommon] = await Promise.all([
     createClient(),
     getCurrentUser(),
     getTranslations('Dashboard.beneficiary'),
     getTranslations('Common'),
-    cookies(),
   ]);
   const userIsAdmin = isAdmin(currentUser);
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+  const orgIdFilter = await getActiveOrgIdFilter(currentUser);
 
   type BeneficiaryWithHidden = Beneficiary & { is_hidden?: boolean; available_points?: number };
   let data: BeneficiaryWithHidden[] | null = null;
   let error = null;
 
-  // Only filter by organization for non-admin users
-  if (!userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
+  // Scope to a single org when we have one (always true for non-admins; true for
+  // admins only if they explicitly selected one via the org switcher).
+  if (orgIdFilter) {
     // Filter beneficiaries by organization, include is_hidden status
     const result = await supabase
       .from('beneficiary_organization')
@@ -48,7 +47,7 @@ export default async function BeneficiaryListPage() {
         available_points,
         beneficiary:beneficiary_id(*)
       `)
-      .eq('organization_id', activeOrgIdNumber);
+      .eq('organization_id', orgIdFilter);
 
     if (result.error) {
       error = result.error;
@@ -131,10 +130,10 @@ export default async function BeneficiaryListPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      {!userIsAdmin && activeOrgIdNumber && (
+                      {!userIsAdmin && orgIdFilter && (
                         <HideButton
                           beneficiaryId={beneficiary.id}
-                          organizationId={activeOrgIdNumber.toString()}
+                          organizationId={orgIdFilter.toString()}
                           isHidden={/* c8 ignore next */ beneficiary.is_hidden ?? false}
                         />
                       )}

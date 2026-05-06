@@ -69,7 +69,7 @@ describe('Purchase Notify API Route', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'anon-key',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'anon-key',
       RESEND_API_KEY: 'test-resend-key',
     };
 

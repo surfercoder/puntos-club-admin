@@ -46,7 +46,7 @@ describe('hasEnvVars', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
-      NEXT_PUBLIC_SUPABASE_ANON_KEY: 'test-key',
+      NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: 'test-key',
     };
     jest.resetModules();
     const { hasEnvVars } = require('@/lib/utils');
@@ -56,18 +56,18 @@ describe('hasEnvVars', () => {
   it('is falsy when NEXT_PUBLIC_SUPABASE_URL is missing', () => {
     process.env = { ...originalEnv };
     delete process.env.NEXT_PUBLIC_SUPABASE_URL;
-    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
     jest.resetModules();
     const { hasEnvVars } = require('@/lib/utils');
     expect(hasEnvVars).toBeFalsy();
   });
 
-  it('is falsy when NEXT_PUBLIC_SUPABASE_ANON_KEY is missing', () => {
+  it('is falsy when NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY is missing', () => {
     process.env = {
       ...originalEnv,
       NEXT_PUBLIC_SUPABASE_URL: 'https://test.supabase.co',
     };
-    delete process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+    delete process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
     jest.resetModules();
     const { hasEnvVars } = require('@/lib/utils');
     expect(hasEnvVars).toBeFalsy();

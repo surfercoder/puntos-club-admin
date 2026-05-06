@@ -14,6 +14,7 @@ jest.mock('next/headers', () => ({ cookies: jest.fn(() => Promise.resolve({ get:
 jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => Promise.resolve({ from: mockFrom })) }));
 jest.mock('@/lib/supabase/admin', () => ({ createAdminClient: jest.fn(() => ({ from: mockFrom })) }));
 jest.mock('@/lib/auth/get-current-user', () => ({ getCurrentUser: jest.fn(() => Promise.resolve({ id: '1', role: { name: 'admin' } })) }));
+jest.mock('@/lib/auth/get-active-org-id', () => ({ getActiveOrgIdFilter: jest.fn(() => Promise.resolve(null)) }));
 jest.mock('@/lib/auth/roles', () => ({ isAdmin: jest.fn(() => true) }));
 jest.mock('@/components/dashboard/purchase/delete-modal', () => function Mock() { return <div />; });
 jest.mock('@/components/dashboard/purchase/toast-handler', () => function Mock() { return <div />; });
@@ -112,9 +113,12 @@ describe('PurchaseListPage', () => {
 
   it('filters by org for non-admin users', async () => {
     const { isAdmin } = require('@/lib/auth/roles');
+    const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
     isAdmin.mockReturnValueOnce(false);
+    getActiveOrgIdFilter.mockResolvedValueOnce(1);
     mockEq.mockResolvedValueOnce({ data: [], error: null });
     const result = await PurchaseListPage();
     expect(result).toBeTruthy();
+    expect(mockEq).toHaveBeenCalledWith('organization_id', 1);
   });
 });

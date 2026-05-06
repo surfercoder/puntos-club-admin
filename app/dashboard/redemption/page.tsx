@@ -1,6 +1,5 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/redemption/delete-modal';
@@ -13,6 +12,7 @@ import {
   TableBody,
   TableCell,
 } from '@/components/ui/table';
+import { getActiveOrgIdFilter } from '@/lib/auth/get-active-org-id';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
@@ -44,9 +44,7 @@ export default async function RedemptionListPage() {
   // Use admin client to bypass RLS for admin users
   const supabase = userIsAdmin ? createAdminClient() : await createClient();
 
-  const cookieStore = await cookies();
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+  const orgIdFilter = await getActiveOrgIdFilter(currentUser);
 
   let query = supabase
     .from('redemption')
@@ -57,9 +55,8 @@ export default async function RedemptionListPage() {
     `)
     .order('redemption_date', { ascending: false });
 
-  // Filter by organization for non-admin users
-  if (!userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
-    query = query.eq('organization_id', activeOrgIdNumber);
+  if (orgIdFilter) {
+    query = query.eq('organization_id', orgIdFilter);
   }
 
   const { data, error } = await query;

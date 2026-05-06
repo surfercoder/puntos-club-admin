@@ -1,6 +1,5 @@
 import { Pencil } from 'lucide-react';
 import Link from 'next/link';
-import { cookies } from 'next/headers';
 import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/purchase/delete-modal';
@@ -10,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import {
   Table, TableHeader, TableRow, TableHead, TableBody, TableCell,
 } from '@/components/ui/table';
+import { getActiveOrgIdFilter } from '@/lib/auth/get-active-org-id';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
@@ -21,9 +21,7 @@ export default async function PurchaseListPage() {
   const userIsAdmin = isAdmin(currentUser);
   const supabase = userIsAdmin ? createAdminClient() : await createClient();
 
-  const cookieStore = await cookies();
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const activeOrgIdNumber = /* c8 ignore next */ activeOrgId ? Number(activeOrgId) : null;
+  const orgIdFilter = await getActiveOrgIdFilter(currentUser);
 
   let query = supabase
     .from('purchase')
@@ -35,8 +33,8 @@ export default async function PurchaseListPage() {
     `)
     .order('purchase_date', { ascending: false });
 
-  if (!userIsAdmin && activeOrgIdNumber && !Number.isNaN(activeOrgIdNumber)) {
-    query = query.eq('organization_id', activeOrgIdNumber);
+  if (orgIdFilter) {
+    query = query.eq('organization_id', orgIdFilter);
   }
 
   const { data, error } = await query;

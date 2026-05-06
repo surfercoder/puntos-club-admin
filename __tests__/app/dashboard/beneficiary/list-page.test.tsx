@@ -10,6 +10,7 @@ jest.mock('@/lib/supabase/server', () => ({
   createClient: jest.fn(() => Promise.resolve({ from: mockFrom })),
 }));
 jest.mock('@/lib/auth/get-current-user', () => ({ getCurrentUser: jest.fn(() => Promise.resolve({ id: '1', role: { name: 'admin' } })) }));
+jest.mock('@/lib/auth/get-active-org-id', () => ({ getActiveOrgIdFilter: jest.fn(() => Promise.resolve(null)) }));
 jest.mock('@/lib/auth/roles', () => ({ isAdmin: jest.fn(() => true) }));
 jest.mock('@/components/dashboard/beneficiary/delete-modal', () => function Mock() { return <div />; });
 jest.mock('@/components/dashboard/plan/plan-limit-create-button', () => ({ PlanLimitCreateButton: () => <div /> }));
@@ -38,10 +39,33 @@ describe('BeneficiaryListPage', () => {
 
   it('filters beneficiaries by organization for non-admin users', async () => {
     const { isAdmin } = require('@/lib/auth/roles');
+    const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
     isAdmin.mockReturnValueOnce(false);
-    // The non-admin path queries beneficiary_organization with eq
+    getActiveOrgIdFilter.mockResolvedValueOnce(1);
     const mockEqOrg = jest.fn().mockResolvedValue({
-      data: [{ beneficiary: { id: '1', first_name: 'Ben', last_name: 'Doe', email: 'ben@test.com', phone: '123', document_id: 'D1', registration_date: '2024-01-01' } }],
+      data: [{
+        is_hidden: true,
+        available_points: 42,
+        beneficiary: { id: '1', first_name: 'Ben', last_name: 'Doe', email: 'ben@test.com', phone: '123', document_id: 'D1', registration_date: '2024-01-01' },
+      }],
+      error: null,
+    });
+    const mockSelectOrg = jest.fn(() => ({ eq: mockEqOrg }));
+    mockFrom.mockReturnValueOnce({ select: mockSelectOrg });
+    const result = await BeneficiaryListPage();
+    expect(result).toBeTruthy();
+    expect(mockEqOrg).toHaveBeenCalledWith('organization_id', 1);
+  });
+
+  it('uses default available_points/is_hidden when missing in join row', async () => {
+    const { isAdmin } = require('@/lib/auth/roles');
+    const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
+    isAdmin.mockReturnValueOnce(false);
+    getActiveOrgIdFilter.mockResolvedValueOnce(1);
+    const mockEqOrg = jest.fn().mockResolvedValue({
+      data: [{
+        beneficiary: { id: '7', first_name: 'No', last_name: 'Defaults', email: null, phone: null, document_id: null, registration_date: '2024-01-01' },
+      }],
       error: null,
     });
     const mockSelectOrg = jest.fn(() => ({ eq: mockEqOrg }));
@@ -52,7 +76,9 @@ describe('BeneficiaryListPage', () => {
 
   it('handles error from beneficiary_organization query for non-admin', async () => {
     const { isAdmin } = require('@/lib/auth/roles');
+    const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
     isAdmin.mockReturnValueOnce(false);
+    getActiveOrgIdFilter.mockResolvedValueOnce(1);
     const mockEqOrg = jest.fn().mockResolvedValue({ data: null, error: { message: 'fail' } });
     const mockSelectOrg = jest.fn(() => ({ eq: mockEqOrg }));
     mockFrom.mockReturnValueOnce({ select: mockSelectOrg });
@@ -124,7 +150,9 @@ describe('BeneficiaryListPage', () => {
 
   it('handles non-admin with data that has null result.data (covers ?? null)', async () => {
     const { isAdmin } = require('@/lib/auth/roles');
+    const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
     isAdmin.mockReturnValueOnce(false);
+    getActiveOrgIdFilter.mockResolvedValueOnce(1);
     const mockEqOrg = jest.fn().mockResolvedValue({
       data: null,
       error: null,
@@ -137,9 +165,11 @@ describe('BeneficiaryListPage', () => {
 
   it('handles non-admin with null beneficiary in join result', async () => {
     const { isAdmin } = require('@/lib/auth/roles');
+    const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
     isAdmin.mockReturnValueOnce(false);
+    getActiveOrgIdFilter.mockResolvedValueOnce(1);
     const mockEqOrg = jest.fn().mockResolvedValue({
-      data: [{ beneficiary: null }, { beneficiary: { id: '1', first_name: 'A', last_name: 'B', email: 'a@b.com', phone: null, document_id: null, registration_date: '2024-01-01' } }],
+      data: [{ beneficiary: null, is_hidden: false, available_points: 0 }, { beneficiary: { id: '1', first_name: 'A', last_name: 'B', email: 'a@b.com', phone: null, document_id: null, registration_date: '2024-01-01' }, is_hidden: false, available_points: 5 }],
       error: null,
     });
     const mockSelectOrg = jest.fn(() => ({ eq: mockEqOrg }));
