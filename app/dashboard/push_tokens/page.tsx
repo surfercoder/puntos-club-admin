@@ -13,10 +13,13 @@ import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { formatDateTime } from '@/lib/utils';
 
 export default async function PushTokensListPage() {
-  const t = await getTranslations('Dashboard.pushTokensCrud');
-  const currentUser = await getCurrentUser();
+  const [t, currentUser] = await Promise.all([
+    getTranslations('Dashboard.pushTokensCrud'),
+    getCurrentUser(),
+  ]);
   const userIsAdmin = isAdmin(currentUser);
   const supabase = userIsAdmin ? createAdminClient() : await createClient();
 
@@ -74,7 +77,7 @@ export default async function PushTokensListPage() {
                         {token.is_active ? t('statusActive') : t('statusInactive')}
                       </Badge>
                     </TableCell>
-                    <TableCell>{new Date(token.created_at).toLocaleString()}</TableCell>
+                    <TableCell><span suppressHydrationWarning>{formatDateTime(token.created_at)}</span></TableCell>
                     <TableCell className="text-right">
                       <div className="flex items-center justify-end gap-2">
                         <Button asChild size="sm" variant="secondary">

@@ -63,16 +63,11 @@ export default async function DashboardLayout({
     }
 
     const orgs = (membershipsData ?? [])
-      .map((m) => {
+      .flatMap((m) => {
         const org = Array.isArray(m.organization) ? m.organization[0] : m.organization
-        return org
+        if (!org || !org.id || !org.name) return []
+        return [{ id: org.id, name: org.name, logo_url: org.logo_url ?? null }]
       })
-      .filter((o): o is { id: string; name: string; logo_url: string | null } => Boolean(o && o.id && o.name))
-      .map((o) => ({
-        id: o.id,
-        name: o.name,
-        logo_url: o.logo_url ?? null,
-      }))
       .sort((a, b) => a.name.localeCompare(b.name))
 
     const name = `${currentUser.first_name ?? ''} ${currentUser.last_name ?? ''}`.trim()

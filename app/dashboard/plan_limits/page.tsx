@@ -12,8 +12,10 @@ import {
 import { createClient } from '@/lib/supabase/server';
 
 export default async function PlanLimitsListPage() {
-  const t = await getTranslations('Dashboard.planLimits');
-  const supabase = await createClient();
+  const [t, supabase] = await Promise.all([
+    getTranslations('Dashboard.planLimits'),
+    createClient(),
+  ]);
   const { data, error } = await supabase
     .from('plan_limits')
     .select('*')

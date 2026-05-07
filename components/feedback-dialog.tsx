@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { MessageSquarePlus } from "lucide-react";
-import { usePathname } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 
@@ -44,39 +43,37 @@ interface FeedbackDialogProps {
 export function FeedbackDialog({ userEmail, userName }: FeedbackDialogProps) {
   const t = useTranslations("Feedback");
   const tCommon = useTranslations("Common");
-  const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
   const [type, setType] = React.useState<FeedbackType>("feedback");
   const [message, setMessage] = React.useState("");
-  const [isPending, setIsPending] = React.useState(false);
+  const [isPending, startTransition] = React.useTransition();
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!message.trim()) return;
 
-    setIsPending(true);
-    try {
-      const result = await sendFeedback({
-        type,
-        message,
-        userEmail,
-        userName,
-        pageUrl: pathname,
-      });
+    startTransition(async () => {
+      try {
+        const result = await sendFeedback({
+          type,
+          message,
+          userEmail,
+          userName,
+          pageUrl: window.location.pathname,
+        });
 
-      if (result.success) {
-        toast.success(t("successMessage"));
-        setOpen(false);
-        setMessage("");
-        setType("feedback");
-      } else {
-        toast.error(result.error || t("errorMessage"));
+        if (result.success) {
+          toast.success(t("successMessage"));
+          setOpen(false);
+          setMessage("");
+          setType("feedback");
+        } else {
+          toast.error(result.error || t("errorMessage"));
+        }
+      } catch {
+        toast.error(t("errorMessage"));
       }
-    } catch {
-      toast.error(t("errorMessage"));
-    } finally {
-      setIsPending(false);
-    }
+    });
   };
 
   return (

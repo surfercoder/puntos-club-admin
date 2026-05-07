@@ -69,7 +69,7 @@ export function UpdatePasswordForm({
 
   const [state, dispatch] = useReducer(formReducer, initialState);
   const { password, showPassword, error, submitted, isLoading } = state;
-  const router = useRouter();
+  const { push } = useRouter();
 
   const passwordValid = allRulesPass(password);
 
@@ -85,7 +85,7 @@ export function UpdatePasswordForm({
     try {
       const { error: updateError } = await supabase.auth.updateUser({ password });
       if (updateError) { throw updateError; }
-      router.push("/dashboard");
+      push("/dashboard");
     } catch (err: unknown) {
       dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? err.message : tCommon("error") });
     } finally {

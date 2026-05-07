@@ -2,16 +2,20 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { DashboardKpis } from "@/actions/dashboard/analytics/actions";
 import { Users, ShoppingCart, Star, TrendingUp, Gift, Coins } from "lucide-react";
 
+const CURRENCY_FORMATTER = new Intl.NumberFormat("es-AR", {
+  style: "currency",
+  currency: "ARS",
+  maximumFractionDigits: 0,
+});
+
+const NUMBER_FORMATTER = new Intl.NumberFormat("es-AR");
+
 function formatCurrency(value: number) {
-  return new Intl.NumberFormat("es-AR", {
-    style: "currency",
-    currency: "ARS",
-    maximumFractionDigits: 0,
-  }).format(value);
+  return CURRENCY_FORMATTER.format(value);
 }
 
 function formatNumber(value: number) {
-  return new Intl.NumberFormat("es-AR").format(value);
+  return NUMBER_FORMATTER.format(value);
 }
 
 type KpiCardProps = {

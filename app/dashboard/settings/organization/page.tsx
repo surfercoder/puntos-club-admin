@@ -9,9 +9,10 @@ import { getCurrentUser } from "@/lib/auth/get-current-user"
 import { isOwner, isAdmin } from "@/lib/auth/roles"
 
 export default async function OrgSettingsPage() {
-  const t = await getTranslations("Dashboard.orgSettings")
-
-  const currentUser = await getCurrentUser()
+  const [t, currentUser] = await Promise.all([
+    getTranslations("Dashboard.orgSettings"),
+    getCurrentUser(),
+  ])
   if (!currentUser || (!isOwner(currentUser) && !isAdmin(currentUser))) {
     redirect("/dashboard")
   }

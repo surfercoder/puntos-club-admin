@@ -119,7 +119,7 @@ const initialState: NotificationFormState = {
 };
 
 export default function NotificationForm({ limits, canSend, organizationId, redirectPath = '/dashboard/notifications', notification }: NotificationFormProps) {
-  const router = useRouter();
+  const { push, refresh } = useRouter();
   const isEditing = !!notification;
   const hasPreApprovedModeration = isEditing && notification.moderation_approved;
   const [state, dispatch] = useReducer(notificationFormReducer, {
@@ -277,7 +277,7 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
       }
 
       toast.success(t('sendSuccess', { sent: sendData.sent, failed: sendData.failed }));
-      setTimeout(() => { router.push(redirectPath); router.refresh(); }, 1500);
+      setTimeout(() => { push(redirectPath); refresh(); }, 1500);
     } catch (_error) {
       toast.error(t('unexpectedError'));
       dispatch({ type: 'RESET_PROCESSING' });
@@ -330,7 +330,7 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
         {moderationResult && <ModerationResultPanel result={moderationResult} />}
 
         <div className="flex items-center justify-between pt-4 border-t gap-3">
-          <Button type="button" variant="outline" onClick={() => router.push(redirectPath)} disabled={isProcessing || isModerating}>
+          <Button type="button" variant="outline" onClick={() => push(redirectPath)} disabled={isProcessing || isModerating}>
             {tCommon('cancel')}
           </Button>
           <div className="flex gap-2">

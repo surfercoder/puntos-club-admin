@@ -34,9 +34,11 @@ interface BeneficiaryOrganizationWithRelations {
 }
 
 export default async function BeneficiaryOrganizationListPage() {
-  const t = await getTranslations('Dashboard.beneficiaryOrganization');
-  const tCommon = await getTranslations('Common');
-  const supabase = await createClient();
+  const [t, tCommon, supabase] = await Promise.all([
+    getTranslations('Dashboard.beneficiaryOrganization'),
+    getTranslations('Common'),
+    createClient(),
+  ]);
   const { data, error } = await supabase
     .from('beneficiary_organization')
     .select(`

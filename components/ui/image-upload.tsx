@@ -33,7 +33,7 @@ export function ImageUpload({
 }: ImageUploadProps) {
   const [uploading, setUploading] = useState(false);
   const [preview, setPreview] = useState<string | null>(value || null);
-  const [uploadedPath, setUploadedPath] = useState<string | null>(null);
+  const uploadedPathRef = useRef<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const t = useTranslations('Common.imageUpload');
 
@@ -71,7 +71,7 @@ export function ImageUpload({
 
       const { url, path: filePath } = await response.json();
       setPreview(url);
-      setUploadedPath(filePath);
+      uploadedPathRef.current = filePath;
       onChange(url);
       toast.success(t('uploadSuccess'));
     } catch (error) {
@@ -88,16 +88,16 @@ export function ImageUpload({
     if (!preview) return;
 
     try {
-      if (uploadedPath) {
+      if (uploadedPathRef.current) {
         await fetch('/api/upload', {
           method: 'DELETE',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ bucket, path: uploadedPath }),
+          body: JSON.stringify({ bucket, path: uploadedPathRef.current }),
         });
       }
 
       setPreview(null);
-      setUploadedPath(null);
+      uploadedPathRef.current = null;
       onChange(null);
       toast.success(t('removeSuccess'));
     } catch (_error) {

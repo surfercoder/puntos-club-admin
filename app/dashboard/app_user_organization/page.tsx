@@ -30,9 +30,11 @@ interface AppUserOrganizationWithRelations {
 }
 
 export default async function AppUserOrganizationListPage() {
-  const t = await getTranslations('Dashboard.appUserOrganization');
-  const tCommon = await getTranslations('Common');
-  const supabase = await createClient();
+  const [t, tCommon, supabase] = await Promise.all([
+    getTranslations('Dashboard.appUserOrganization'),
+    getTranslations('Common'),
+    createClient(),
+  ]);
   const { data, error } = await supabase
     .from('app_user_organization')
     .select(`

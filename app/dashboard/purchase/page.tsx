@@ -14,14 +14,20 @@ import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { formatDateTime } from '@/lib/utils';
+
+const CURRENCY_FORMATTER = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
 
 export default async function PurchaseListPage() {
-  const t = await getTranslations('Dashboard.purchase');
-  const currentUser = await getCurrentUser();
+  const [t, currentUser] = await Promise.all([
+    getTranslations('Dashboard.purchase'),
+    getCurrentUser(),
+  ]);
   const userIsAdmin = isAdmin(currentUser);
-  const supabase = userIsAdmin ? createAdminClient() : await createClient();
-
-  const orgIdFilter = await getActiveOrgIdFilter(currentUser);
+  const [supabase, orgIdFilter] = await Promise.all([
+    userIsAdmin ? Promise.resolve(createAdminClient()) : createClient(),
+    getActiveOrgIdFilter(currentUser),
+  ]);
 
   let query = supabase
     .from('purchase')
@@ -45,7 +51,7 @@ export default async function PurchaseListPage() {
 
   const formatCurrency = (amount: string | number) => {
     const num = /* c8 ignore next */ typeof amount === 'string' ? parseFloat(amount) : amount;
-    return new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' }).format(num);
+    return CURRENCY_FORMATTER.format(num);
   };
 
   return (
@@ -85,7 +91,7 @@ export default async function PurchaseListPage() {
                 return (
                   <TableRow key={purchase.id}>
                     <TableCell className="font-mono font-medium">{purchase.purchase_number}</TableCell>
-                    <TableCell>{new Date(purchase.purchase_date).toLocaleString()}</TableCell>
+                    <TableCell><span suppressHydrationWarning>{formatDateTime(purchase.purchase_date)}</span></TableCell>
                     <TableCell>
                       {beneficiary ? `${beneficiary.first_name} ${beneficiary.last_name}` : 'N/A'}
                     </TableCell>

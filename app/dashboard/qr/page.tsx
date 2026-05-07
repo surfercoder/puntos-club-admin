@@ -17,8 +17,10 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function QRPage() {
-  const supabase = await createClient();
-  const t = await getTranslations('Dashboard.qr');
+  const [supabase, t] = await Promise.all([
+    createClient(),
+    getTranslations('Dashboard.qr'),
+  ]);
 
   const {
     data: { user },
@@ -28,9 +30,7 @@ export default async function QRPage() {
     redirect('/auth/login');
   }
 
-  const currentUser = await getCurrentUser();
-
-  const cookieStore = await cookies();
+  const [currentUser, cookieStore] = await Promise.all([getCurrentUser(), cookies()]);
   const activeOrgId = cookieStore.get('active_org_id')?.value;
   const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
 

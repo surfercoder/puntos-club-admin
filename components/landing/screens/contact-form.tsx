@@ -103,7 +103,7 @@ const ContactForm = ({
     return undefined;
   };
 
-  const handleChange = (
+  const updateField = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { name, value } = e.target;
@@ -181,7 +181,7 @@ const ContactForm = ({
             label={t("firstName")}
             color="#FF4573"
             errors={errors}
-            onChange={handleChange}
+            onChange={updateField}
             circleRefs={circleRefs}
             index={0}
           />
@@ -191,7 +191,7 @@ const ContactForm = ({
             label={t("lastName")}
             color="#31A1D6"
             errors={errors}
-            onChange={handleChange}
+            onChange={updateField}
             circleRefs={circleRefs}
             index={1}
           />
@@ -201,7 +201,7 @@ const ContactForm = ({
             label={t("email")}
             color="#FD7E14"
             errors={errors}
-            onChange={handleChange}
+            onChange={updateField}
             circleRefs={circleRefs}
             index={2}
           />
@@ -219,7 +219,7 @@ const ContactForm = ({
             label={t("business")}
             color="#31A1D6"
             errors={errors}
-            onChange={handleChange}
+            onChange={updateField}
             circleRefs={circleRefs}
             index={4}
             colSpanMd={2}
@@ -230,7 +230,7 @@ const ContactForm = ({
             label={t("message")}
             color="#FD7E14"
             errors={errors}
-            onChange={handleChange}
+            onChange={updateField}
             circleRefs={circleRefs}
             index={5}
           />
@@ -244,7 +244,7 @@ const ContactForm = ({
               name="honeyField"
               id="honeyField"
               value={formValues.honeyField}
-              onChange={handleChange}
+              onChange={updateField}
               tabIndex={-1}
               autoComplete="off"
             />

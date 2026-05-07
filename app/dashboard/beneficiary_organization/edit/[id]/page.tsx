@@ -6,9 +6,11 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function EditBeneficiaryOrganizationPage({ params }: { params: Promise<{ id: string }> }) {
-  const supabase = await createClient();
-  const t = await getTranslations('Dashboard.beneficiaryOrganization');
-  const id = (await params).id;
+  const [supabase, t, { id }] = await Promise.all([
+    createClient(),
+    getTranslations('Dashboard.beneficiaryOrganization'),
+    params,
+  ]);
 
   const { data, error } = await supabase
     .from('beneficiary_organization')

@@ -17,6 +17,7 @@ import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { formatDateTime } from '@/lib/utils';
 
 interface RedemptionWithRelations {
   id: string;
@@ -37,8 +38,10 @@ interface RedemptionWithRelations {
 }
 
 export default async function RedemptionListPage() {
-  const t = await getTranslations('Dashboard.redemption');
-  const currentUser = await getCurrentUser();
+  const [t, currentUser] = await Promise.all([
+    getTranslations('Dashboard.redemption'),
+    getCurrentUser(),
+  ]);
   const userIsAdmin = isAdmin(currentUser);
 
   // Use admin client to bypass RLS for admin users
@@ -100,14 +103,14 @@ export default async function RedemptionListPage() {
                   <TableCell>{redemption.product?.name || 'N/A'}</TableCell>
                   <TableCell>{redemption.points_used}</TableCell>
                   <TableCell>
-                    {new Date(redemption.redemption_date).toLocaleString('es-AR', {
+                    <span suppressHydrationWarning>{formatDateTime(redemption.redemption_date, 'es-AR', {
                       year: 'numeric',
                       month: 'short',
                       day: 'numeric',
                       hour: '2-digit',
                       minute: '2-digit',
-                      hour12: true
-                    })}
+                      hour12: true,
+                    })}</span>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">

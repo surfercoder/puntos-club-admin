@@ -39,6 +39,7 @@ function FeatureWarning({ usage }: { usage: FeatureUsage }) {
 export function PlanUsageBanner({ features, className }: PlanUsageBannerProps) {
   const t = useTranslations('Dashboard.plan');
   const { summary, isLoading } = usePlanUsage();
+  // react-doctor-disable-next-line react-doctor/rerender-state-only-in-handlers
   const [dismissed, setDismissed] = useState(false);
 
   if (isLoading || !summary || dismissed) return null;

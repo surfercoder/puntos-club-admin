@@ -1,4 +1,4 @@
-import { cn } from '@/lib/utils';
+import { cn, formatDateTime, formatDateOnly } from '@/lib/utils';
 
 describe('cn', () => {
   it('merges simple class strings', () => {
@@ -71,5 +71,31 @@ describe('hasEnvVars', () => {
     jest.resetModules();
     const { hasEnvVars } = require('@/lib/utils');
     expect(hasEnvVars).toBeFalsy();
+  });
+});
+
+describe('formatDateTime', () => {
+  it('formats with no locale or options (system default)', () => {
+    const out = formatDateTime('2026-05-06T12:34:56Z');
+    expect(typeof out).toBe('string');
+    expect(out.length).toBeGreaterThan(0);
+  });
+
+  it('formats with explicit locale and options', () => {
+    const out = formatDateTime('2026-05-06T12:34:56Z', 'en-US', { timeZone: 'UTC', year: 'numeric' });
+    expect(out).toMatch(/2026/);
+  });
+});
+
+describe('formatDateOnly', () => {
+  it('formats date with no locale or options', () => {
+    const out = formatDateOnly('2026-05-06T12:34:56Z');
+    expect(typeof out).toBe('string');
+    expect(out.length).toBeGreaterThan(0);
+  });
+
+  it('formats date with explicit locale and options', () => {
+    const out = formatDateOnly('2026-05-06T12:34:56Z', 'es-AR', { timeZone: 'UTC' });
+    expect(out).toMatch(/2026/);
   });
 });

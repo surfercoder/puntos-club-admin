@@ -521,7 +521,7 @@ function DisplaySettingsSection({
 export default function EditPointsRulePage() {
   const t = useTranslations("PointsRules");
   const tCommon = useTranslations("Common");
-  const router = useRouter();
+  const { push } = useRouter();
   const params = useParams();
   const id = params.id as string;
 
@@ -569,7 +569,7 @@ export default function EditPointsRulePage() {
       }
     }
     fetchRule();
-  }, [id, router]);
+  }, [id]);
 
   useEffect(() => {
     async function loadBranches(resetBranch = false) {
@@ -657,7 +657,7 @@ export default function EditPointsRulePage() {
     dispatch({ type: "SET_LOADING", loading: false });
 
     if (result.success) {
-      router.push("/dashboard/points-rules");
+      push("/dashboard/points-rules");
     } else {
       alert(`Error: ${result.error}`);
     }

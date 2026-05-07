@@ -9,7 +9,7 @@ import { linkAllUnlinkedBeneficiaries } from '@/actions/dashboard/beneficiary/li
 export default function LinkAllBeneficiariesPage() {
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
-  const router = useRouter();
+  const { push } = useRouter();
 
   const handleLinkAll = async () => {
     setLoading(true);
@@ -66,7 +66,7 @@ export default function LinkAllBeneficiariesPage() {
             </Button>
             <Button
               variant="secondary"
-              onClick={() => router.push('/dashboard/beneficiary')}
+              onClick={() => push('/dashboard/beneficiary')}
               disabled={loading}
             >
               Back to Beneficiaries

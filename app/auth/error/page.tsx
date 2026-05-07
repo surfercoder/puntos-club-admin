@@ -16,8 +16,7 @@ export default async function Page({
 }: {
   searchParams: Promise<{ error: string }>;
 }) {
-  const params = await searchParams;
-  const t = await getTranslations("Auth.error");
+  const [params, t] = await Promise.all([searchParams, getTranslations("Auth.error")]);
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">

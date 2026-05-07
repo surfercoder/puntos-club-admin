@@ -14,12 +14,15 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { createClient } from '@/lib/supabase/server';
+import { formatDateOnly } from '@/lib/utils';
 import type { Organization } from '@/types/organization';
 
 export default async function OrganizationListPage() {
-  const supabase = await createClient();
-  const t = await getTranslations('Dashboard.organization');
-  const tCommon = await getTranslations('Common');
+  const [supabase, t, tCommon] = await Promise.all([
+    createClient(),
+    getTranslations('Dashboard.organization'),
+    getTranslations('Common'),
+  ]);
 
   const { data, error } = await supabase.from('organization').select('*').order('name');
 
@@ -81,7 +84,7 @@ export default async function OrganizationListPage() {
                   <TableCell>{organization.business_name || 'N/A'}</TableCell>
                   <TableCell>{organization.tax_id || 'N/A'}</TableCell>
                   <TableCell>
-                    {new Date(organization.creation_date).toLocaleDateString('es-AR', { timeZone: 'UTC' })}
+                    <span suppressHydrationWarning>{formatDateOnly(organization.creation_date, 'es-AR', { timeZone: 'UTC' })}</span>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">

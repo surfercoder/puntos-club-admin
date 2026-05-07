@@ -5,8 +5,10 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function CreateOrganizationNotificationLimitPage() {
-  const supabase = await createClient();
-  const t = await getTranslations('Dashboard.organizationNotificationLimit');
+  const [supabase, t] = await Promise.all([
+    createClient(),
+    getTranslations('Dashboard.organizationNotificationLimit'),
+  ]);
   const { data: organizations } = await supabase
     .from('organization')
     .select('id, name')

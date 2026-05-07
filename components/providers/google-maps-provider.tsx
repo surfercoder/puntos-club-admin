@@ -1,7 +1,7 @@
 'use client';
 
 import { importLibrary, setOptions } from '@googlemaps/js-api-loader';
-import { createContext, useContext, useEffect, useReducer, useRef } from 'react';
+import { createContext, use, useEffect, useReducer, useRef } from 'react';
 
 interface GoogleMapsContextType {
   placesLibrary: google.maps.PlacesLibrary | null;
@@ -46,7 +46,7 @@ function mapsReducer(state: MapsState, action: MapsAction): MapsState {
 const GoogleMapsContext = createContext<GoogleMapsContextType | null>(null);
 
 export const useGoogleMaps = (): GoogleMapsContextType => {
-  const context = useContext(GoogleMapsContext);
+  const context = use(GoogleMapsContext);
   if (context === null) {
     throw new Error('useGoogleMaps must be used within GoogleMapsProvider');
   }

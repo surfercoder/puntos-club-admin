@@ -9,6 +9,8 @@ import { toast } from 'sonner';
 
 const EMPTY_IMAGES: string[] = [];
 
+const SUPPORTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']);
+
 interface ProductImageUploadProps {
   productId?: string;
   initialImages?: string[];
@@ -36,9 +38,8 @@ export default function ProductImageUpload({
     }
 
     // Validate all files first
-    const supportedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif'];
     for (const file of filesArray) {
-      if (!supportedTypes.includes(file.type)) {
+      if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {
         toast.error(t('formatError', { name: file.name }));
         return;
       }
@@ -50,9 +51,9 @@ export default function ProductImageUpload({
 
     setUploading(true);
     const uploadedUrls: string[] = [];
-    
+
     try {
-      for (const file of filesArray) {
+      const results = await Promise.all(filesArray.map(async (file) => {
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         const filePath = `${fileName}`;
@@ -72,8 +73,9 @@ export default function ProductImageUpload({
           .from('product-images')
           .getPublicUrl(filePath);
 
-        uploadedUrls.push(publicUrl);
-      }
+        return publicUrl;
+      }));
+      uploadedUrls.push(...results);
 
       const newImages = [...images, ...uploadedUrls];
       setImages(newImages);
@@ -83,12 +85,12 @@ export default function ProductImageUpload({
       toast.error(t('uploadError'));
 
       // Clean up any successfully uploaded images on error
-      for (const url of uploadedUrls) {
+      await Promise.all(uploadedUrls.map(async (url) => {
         const fileName = url.split('/').pop();
         if (fileName) {
           await supabase.storage.from('product-images').remove([fileName]);
         }
-      }
+      }));
     } finally {
       setUploading(false);
     }

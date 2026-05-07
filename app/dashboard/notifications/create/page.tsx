@@ -8,29 +8,34 @@ import { Button } from '@/components/ui/button';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function CreateNotificationPage() {
-  const supabase = await createClient();
-  const t = await getTranslations('Dashboard.notifications');
-  const tCommon = await getTranslations('Common');
+  const supabasePromise = createClient();
+  const userPromise = supabasePromise.then((s) => s.auth.getUser());
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const [supabase, { data: { user } }, t, tCommon] = await Promise.all([
+    supabasePromise,
+    userPromise,
+    getTranslations('Dashboard.notifications'),
+    getTranslations('Common'),
+  ]);
 
-  const { data: appUser } = await supabase
+  const limitsPromise = supabase
     .from('app_user')
     .select('organization_id')
     .eq('auth_user_id', user?.id)
-    .single();
+    .single()
+    .then(async ({ data: appUser }) => {
+      const [{ data: limits }, { data: canSend }] = await Promise.all([
+        supabase
+          .from('organization_notification_limits')
+          .select('*')
+          .eq('organization_id', appUser?.organization_id)
+          .single(),
+        supabase.rpc('can_send_notification', { org_id: appUser?.organization_id }),
+      ]);
+      return { limits, canSend };
+    });
 
-  const { data: limits } = await supabase
-    .from('organization_notification_limits')
-    .select('*')
-    .eq('organization_id', appUser?.organization_id)
-    .single();
-
-  const { data: canSend } = await supabase.rpc('can_send_notification', {
-    org_id: appUser?.organization_id,
-  });
+  const { limits, canSend } = await limitsPromise;
 
   return (
     <PlanLimitGuard features={['push_notifications_monthly']} backHref="/dashboard/notifications">

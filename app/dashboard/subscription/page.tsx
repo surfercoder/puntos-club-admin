@@ -15,10 +15,13 @@ import {
   TableCell,
 } from '@/components/ui/table';
 import { createClient } from '@/lib/supabase/server';
+import { formatDateOnly } from '@/lib/utils';
 
 export default async function SubscriptionListPage() {
-  const t = await getTranslations('Dashboard.subscription');
-  const supabase = await createClient();
+  const [t, supabase] = await Promise.all([
+    getTranslations('Dashboard.subscription'),
+    createClient(),
+  ]);
 
   const { data, error } = await supabase
     .from('subscription')
@@ -76,7 +79,7 @@ export default async function SubscriptionListPage() {
                   </TableCell>
                   <TableCell>{sub.payer_email}</TableCell>
                   <TableCell>{sub.amount} {sub.currency}</TableCell>
-                  <TableCell>{new Date(sub.created_at).toLocaleDateString()}</TableCell>
+                  <TableCell><span suppressHydrationWarning>{formatDateOnly(sub.created_at)}</span></TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">

@@ -6,18 +6,21 @@ import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function ProfilePage() {
-  const supabase = await createClient();
-  const t = await getTranslations('Dashboard.profile');
+  const [supabase, t] = await Promise.all([
+    createClient(),
+    getTranslations('Dashboard.profile'),
+  ]);
 
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
+  const [
+    {
+      data: { user },
+    },
+    currentUser,
+  ] = await Promise.all([supabase.auth.getUser(), getCurrentUser()]);
 
   if (!user) {
     redirect('/auth/login');
   }
-
-  const currentUser = await getCurrentUser();
 
   if (!currentUser) {
     redirect('/auth/login');

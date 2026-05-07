@@ -6,9 +6,11 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function EditCategoryPage({ params }: { params: Promise<{ id: string }> }) {
-  const supabase = await createClient();
-  const t = await getTranslations('Dashboard.category');
-  const id = (await params).id;
+  const [supabase, t, { id }] = await Promise.all([
+    createClient(),
+    getTranslations('Dashboard.category'),
+    params,
+  ]);
   const { data, error } = await supabase.from('category').select('*').eq('id', id).single();
 
   if (error) {

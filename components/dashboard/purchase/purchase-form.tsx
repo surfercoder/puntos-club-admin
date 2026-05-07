@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useActionState, useState, useEffect, useReducer, useCallback } from 'react';
+import { useActionState, useState, useEffect, useReducer, useCallback, useRef } from 'react';
 
 import { purchaseFormAction } from '@/actions/dashboard/purchase/purchase-form-actions';
 import { Button } from '@/components/ui/button';
@@ -63,7 +63,7 @@ export default function PurchaseForm({ purchase }: PurchaseFormProps) {
 
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [pointsPreview, setPointsPreview] = useState<number | null>(purchase?.points_earned ?? null);
-  const [selectedBranchId, setSelectedBranchId] = useState<string>(purchase?.branch_id ? String(purchase.branch_id) : '');
+  const selectedBranchIdRef = useRef<string>(purchase?.branch_id ? String(purchase.branch_id) : '');
   const [{ beneficiaries, cashiers, branches }, dispatchFormData] = useReducer(
     formDataReducer,
     initialFormData,
@@ -154,14 +154,14 @@ export default function PurchaseForm({ purchase }: PurchaseFormProps) {
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const amount = parseFloat(e.target.value);
     if (!isNaN(amount)) {
-      calculatePoints(amount, selectedBranchId);
+      calculatePoints(amount, selectedBranchIdRef.current);
     } else {
       setPointsPreview(null);
     }
   };
 
   const handleBranchChange = (value: string) => {
-    setSelectedBranchId(value);
+    selectedBranchIdRef.current = value;
     const amountInput = document.querySelector<HTMLInputElement>('input[name="total_amount"]');
     const amount = parseFloat(amountInput?.value ?? '');
     if (!isNaN(amount) && amount > 0) {

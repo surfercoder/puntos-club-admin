@@ -12,8 +12,10 @@ import {
 import { createClient } from '@/lib/supabase/server';
 
 export default async function UserRoleListPage() {
-  const t = await getTranslations('UserRole');
-  const supabase = await createClient();
+  const [t, supabase] = await Promise.all([
+    getTranslations('UserRole'),
+    createClient(),
+  ]);
   const { data, error } = await supabase
     .from('user_role')
     .select('*')

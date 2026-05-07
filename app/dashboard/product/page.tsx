@@ -20,15 +20,15 @@ import {
 import type { Product } from '@/types/product';
 
 export default async function ProductListPage() {
-  const [{ data, error }, t, _tCommon] = await Promise.all([
-    getProducts(),
-    getTranslations('Dashboard.product'),
-    getTranslations('Common'),
-  ]);
+  const tPromise = getTranslations('Dashboard.product');
+  const { data, error } = await getProducts();
 
   if (error) {
+    const t = await tPromise;
     return <div>{t('error')}</div>;
   }
+
+  const t = await tPromise;
 
   return (
     <div className="space-y-6">

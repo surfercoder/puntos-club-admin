@@ -22,13 +22,13 @@ const LOCALE_META: Record<Locale, { flag: string; label: string }> = {
 export function LanguageSwitcher() {
   const t = useTranslations("LanguageSwitcher");
   const locale = useLocale() as Locale;
-  const router = useRouter();
+  const { refresh } = useRouter();
   const [isPending, startTransition] = useTransition();
 
   const handleChange = (newLocale: string) => {
     startTransition(async () => {
       await setLocale(newLocale as Locale);
-      router.refresh();
+      refresh();
     });
   };
 

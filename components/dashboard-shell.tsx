@@ -60,7 +60,7 @@ export function DashboardShell({
   portalMode: DashboardShellPortalMode;
   initialPlanUsage?: OrganizationUsageSummary | null;
 }) {
-  const router = useRouter();
+  const { push } = useRouter();
   const pathname = usePathname();
   const tBreadcrumb = useTranslations("Breadcrumb");
   const [activeOrgId, setActiveOrgId] = React.useState<string | null>(null);
@@ -154,8 +154,8 @@ export function DashboardShell({
   const onLogout = React.useCallback(async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/auth/login");
-  }, [router]);
+    push("/auth/login");
+  }, [push]);
 
   return (
     <PlanUsageProvider initialSummary={initialPlanUsage}>

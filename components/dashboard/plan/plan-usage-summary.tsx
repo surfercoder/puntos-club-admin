@@ -98,9 +98,10 @@ export function PlanUsageSummary({ className, compact = false, hideUpgradeLink =
 
   if (!summary) return null;
 
-  const orderedFeatures = PLAN_FEATURE_ORDER
-    .map((key) => summary.features.find((f) => f.feature === key))
-    .filter((f): f is FeatureUsage => Boolean(f));
+  const orderedFeatures = PLAN_FEATURE_ORDER.flatMap((key) => {
+    const f = summary.features.find((feat) => feat.feature === key);
+    return f ? [f] : [];
+  });
 
   const planName = PLAN_DISPLAY_NAMES[summary.plan];
   const anyWarning = summary.features.some((f) => f.should_warn || f.is_at_limit);

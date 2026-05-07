@@ -20,7 +20,7 @@ import {
 export default function DeleteModal({ id }: { id: number }) {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const { refresh } = useRouter();
   const t = useTranslations('Dashboard.address.deleteModal');
   const tCommon = useTranslations('Common');
 
@@ -30,7 +30,7 @@ export default function DeleteModal({ id }: { id: number }) {
       await deleteAddress(id);
       toast.success(t('deleteSuccess'));
       setOpen(false);
-      router.refresh();
+      refresh();
     } catch {
       toast.error(t('genericError'));
     } finally {

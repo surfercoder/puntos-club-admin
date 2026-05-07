@@ -17,6 +17,7 @@ import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { formatDateTime } from '@/lib/utils';
 
 export default async function PushNotificationsListPage() {
   const currentUser = await getCurrentUser();
@@ -97,7 +98,7 @@ export default async function PushNotificationsListPage() {
                   </TableCell>
                   <TableCell>{notification.sent_count}</TableCell>
                   <TableCell>{notification.failed_count}</TableCell>
-                  <TableCell>{new Date(notification.created_at).toLocaleString()}</TableCell>
+                  <TableCell><span suppressHydrationWarning>{formatDateTime(notification.created_at)}</span></TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">

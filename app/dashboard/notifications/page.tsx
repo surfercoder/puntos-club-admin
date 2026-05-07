@@ -17,12 +17,15 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { createClient } from '@/lib/supabase/server';
+import { formatDateTime } from '@/lib/utils';
 import type { PushNotification } from '@/types/push_notification';
 
 export default async function NotificationsPage() {
-  const supabase = await createClient();
-  const t = await getTranslations('Dashboard.notifications');
-  const tCommon = await getTranslations('Common');
+  const [supabase, t, tCommon] = await Promise.all([
+    createClient(),
+    getTranslations('Dashboard.notifications'),
+    getTranslations('Common'),
+  ]);
 
   const { data: notifications, error } = await supabase
     .from('push_notifications')
@@ -108,7 +111,7 @@ export default async function NotificationsPage() {
                     }
                   </TableCell>
                   <TableCell>
-                    {new Date(notification.created_at).toLocaleString()}
+                    <span suppressHydrationWarning>{formatDateTime(notification.created_at)}</span>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">

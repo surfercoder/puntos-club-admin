@@ -69,8 +69,7 @@ const Loader: React.FC<LoaderProps> = ({ onAnimationEnd }) => {
                           ease: "power2.out",
                           opacity: 1,
                           onComplete: () => {
-                            document.body.style.overflowY = "auto";
-                            document.body.style.overflowX = "hidden";
+                            document.body.style.cssText = "overflow-y: auto; overflow-x: hidden;";
                             if (onAnimationEnd) {
                               onAnimationEnd();
                             }

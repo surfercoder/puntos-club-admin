@@ -71,6 +71,12 @@ export default function NotificationLimitsPanel({ limits, canSend, timeRemaining
     minute: '2-digit',
   };
 
+  const lastSentDisplay = limits.last_notification_sent_at
+    ? new Date(limits.last_notification_sent_at).toLocaleString(dateLocale, dateOptions)
+    : null;
+  const nextAvailableDisplay = restrictionReason?.nextAvailable?.toLocaleString(dateLocale, dateOptions) ?? null;
+  const resetTimeDisplay = restrictionReason?.resetTime?.toLocaleString(dateLocale, dateOptions) ?? null;
+
   return (
     <div className={`p-4 rounded-lg border ${canSend ? 'bg-green-50 border-green-200' : 'bg-yellow-50 border-yellow-200'}`}>
       <div className="flex items-start gap-3">
@@ -95,7 +101,7 @@ export default function NotificationLimitsPanel({ limits, canSend, timeRemaining
             </p>
             {limits.last_notification_sent_at && (
               <p>
-                <strong>{t('lastSent')}</strong> {new Date(limits.last_notification_sent_at).toLocaleString(dateLocale, dateOptions)}
+                <strong>{t('lastSent')}</strong> <span suppressHydrationWarning>{lastSentDisplay}</span>
               </p>
             )}
 
@@ -115,7 +121,7 @@ export default function NotificationLimitsPanel({ limits, canSend, timeRemaining
                       ⏱️ {t('timeRemaining')} {timeRemaining}
                     </p>
                     <p className="text-xs text-yellow-700 mt-1">
-                      {t('nextAvailable')} {restrictionReason.nextAvailable?.toLocaleString(dateLocale, dateOptions)}
+                      {t('nextAvailable')} {nextAvailableDisplay}
                     </p>
                   </div>
                 )}
@@ -123,7 +129,7 @@ export default function NotificationLimitsPanel({ limits, canSend, timeRemaining
                 {restrictionReason.type === 'daily_limit' && (
                   <div className="bg-yellow-100 rounded-md p-2 mt-2">
                     <p className="text-xs text-yellow-700">
-                      ⏱️ {t('dailyReset')} {restrictionReason.resetTime?.toLocaleString(dateLocale, dateOptions)}
+                      ⏱️ {t('dailyReset')} {resetTimeDisplay}
                     </p>
                   </div>
                 )}
@@ -131,7 +137,7 @@ export default function NotificationLimitsPanel({ limits, canSend, timeRemaining
                 {restrictionReason.type === 'monthly_limit' && (
                   <div className="bg-yellow-100 rounded-md p-2 mt-2">
                     <p className="text-xs text-yellow-700">
-                      ⏱️ {t('monthlyReset')} {restrictionReason.resetTime?.toLocaleString(dateLocale, dateOptions)}
+                      ⏱️ {t('monthlyReset')} {resetTimeDisplay}
                     </p>
                   </div>
                 )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 
@@ -25,11 +25,11 @@ type ProfileFormProps = {
 };
 
 export function ProfileForm({ user }: ProfileFormProps) {
-  const router = useRouter();
+  const { refresh, back } = useRouter();
   const t = useTranslations('Dashboard.profile');
   const tCommon = useTranslations('Common');
 
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, startTransition] = useTransition();
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState({
     first_name: user.first_name || '',
@@ -53,40 +53,38 @@ export function ProfileForm({ user }: ProfileFormProps) {
       return;
     }
 
-    setIsLoading(true);
+    startTransition(async () => {
+      try {
+        const supabase = createClient();
 
-    try {
-      const supabase = createClient();
+        const { error: updateError } = await supabase
+          .from('app_user')
+          .update({
+            first_name: formData.first_name,
+            last_name: formData.last_name,
+          })
+          .eq('id', user.id);
 
-      const { error: updateError } = await supabase
-        .from('app_user')
-        .update({
-          first_name: formData.first_name,
-          last_name: formData.last_name,
-        })
-        .eq('id', user.id);
-
-      if (updateError) {
-        throw updateError;
-      }
-
-      if (formData.email !== user.email) {
-        const { error: emailError } = await supabase.auth.updateUser({
-          email: formData.email,
-        });
-
-        if (emailError) {
-          throw emailError;
+        if (updateError) {
+          throw updateError;
         }
-      }
 
-      toast.success(tCommon('saveChanges'));
-      router.refresh();
-    } catch (error) {
-      toast.error(error instanceof Error ? error.message : tCommon('error'));
-    } finally {
-      setIsLoading(false);
-    }
+        if (formData.email !== user.email) {
+          const { error: emailError } = await supabase.auth.updateUser({
+            email: formData.email,
+          });
+
+          if (emailError) {
+            throw emailError;
+          }
+        }
+
+        toast.success(tCommon('saveChanges'));
+        refresh();
+      } catch (error) {
+        toast.error(error instanceof Error ? error.message : tCommon('error'));
+      }
+    });
   };
 
   return (
@@ -175,7 +173,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => router.back()}
+              onClick={() => back()}
               disabled={isLoading}
             >
               {tCommon('cancel')}

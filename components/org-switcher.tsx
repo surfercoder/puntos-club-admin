@@ -49,7 +49,7 @@ export function OrgSwitcher({
   canAddOrganization,
 }: OrgSwitcherProps) {
   const { isMobile } = useSidebar()
-  const router = useRouter()
+  const { push, refresh } = useRouter()
   const t = useTranslations("Navigation")
   const activeOrg = orgs.find((o) => o.id === activeOrgId) ?? orgs[0]
   const [isAddOrgOpen, setIsAddOrgOpen] = React.useState(false)
@@ -122,7 +122,7 @@ export function OrgSwitcher({
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="gap-2 p-2"
-                onClick={() => router.push("/dashboard/settings/organization")}
+                onClick={() => push("/dashboard/settings/organization")}
               >
                 <div className="flex size-6 items-center justify-center rounded-md border">
                   <Settings className="h-3.5 w-3.5" />
@@ -153,7 +153,7 @@ export function OrgSwitcher({
               onCancel={() => setIsAddOrgOpen(false)}
               onSuccess={() => {
                 setIsAddOrgOpen(false)
-                router.refresh()
+                refresh()
               }}
               redirectTo={""}
             />

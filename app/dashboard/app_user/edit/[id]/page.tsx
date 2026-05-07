@@ -7,16 +7,16 @@ import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function EditAppUserPage({ params }: { params: Promise<{ id: string }> }) {
-  const supabase = await createClient();
-  const [t, currentUser] = await Promise.all([
+  const [supabase, t, currentUser, { id }] = await Promise.all([
+    createClient(),
     getTranslations('Dashboard.appUser'),
     getCurrentUser(),
+    params,
   ]);
   const currentUserRole = currentUser?.role && typeof currentUser.role === 'object' && 'name' in currentUser.role
     ? (currentUser.role as { name: string }).name
     : undefined;
 
-  const id = (await params).id;
   const { data, error } = await supabase.from('app_user').select('*').eq('id', id).single();
 
   if (error) {

@@ -233,7 +233,7 @@ export function OnboardingWizard({
   initialOrganizationId = null,
   initialOrgName = '',
 }: OnboardingWizardProps) {
-  const router = useRouter();
+  const { push } = useRouter();
   const t = useTranslations('Onboarding.wizard');
 
   const steps = [
@@ -348,7 +348,7 @@ export function OnboardingWizard({
 
   const handleFinish = () => {
     clearOnboardingLocalStorage();
-    router.push('/dashboard');
+    push('/dashboard');
   };
 
   const canNavigateToStep = (step: number) => {

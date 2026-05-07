@@ -9,23 +9,24 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { createClient } from '@/lib/supabase/server';
+import { formatDateTime } from '@/lib/utils';
 
 export default async function ViewNotificationPage({ params }: { params: Promise<{ id: string }> }) {
+  const supabasePromise = createClient();
+  // react-doctor-disable-next-line react-doctor/async-defer-await
+  const { data: { user } } = await supabasePromise.then((s) => s.auth.getUser());
+
+  if (!user) {
+    return notFound();
+  }
+
   const [supabase, t, tForm, tCommon, { id }] = await Promise.all([
-    createClient(),
+    supabasePromise,
     getTranslations('Dashboard.notifications'),
     getTranslations('Dashboard.notifications.form'),
     getTranslations('Common'),
     params,
   ]);
-
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return notFound();
-  }
 
   const { data: notification, error } = await supabase
     .from('push_notifications')
@@ -48,6 +49,8 @@ export default async function ViewNotificationPage({ params }: { params: Promise
   const creatorName = creator
     ? (`${creator.first_name} ${creator.last_name}`.trim() || creator.email)
     : '';
+  const createdAtDisplay = formatDateTime(notification.created_at);
+  const sentAtDisplay = notification.sent_at ? formatDateTime(notification.sent_at) : null;
 
   const statusVariants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
     sent: 'default',
@@ -131,12 +134,12 @@ export default async function ViewNotificationPage({ params }: { params: Promise
             </div>
             <div>
               <p className="text-muted-foreground">{tCommon('createdAt')}</p>
-              <p className="font-medium mt-1">{new Date(notification.created_at).toLocaleString()}</p>
+              <p className="font-medium mt-1"><span suppressHydrationWarning>{createdAtDisplay}</span></p>
             </div>
-            {notification.sent_at && (
+            {sentAtDisplay && (
               <div>
                 <p className="text-muted-foreground">{tCommon('sentAt')}</p>
-                <p className="font-medium mt-1">{new Date(notification.sent_at).toLocaleString()}</p>
+                <p className="font-medium mt-1"><span suppressHydrationWarning>{sentAtDisplay}</span></p>
               </div>
             )}
           </div>

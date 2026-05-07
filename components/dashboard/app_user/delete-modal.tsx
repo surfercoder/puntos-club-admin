@@ -27,7 +27,7 @@ interface DeleteModalProps {
 export default function DeleteModal({ appUserId, appUserName }: DeleteModalProps) {
   const [open, setOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-  const router = useRouter();
+  const { refresh } = useRouter();
   const { invalidate } = usePlanUsage();
   const t = useTranslations('Dashboard.appUser.deleteModal');
   const tCommon = useTranslations('Common');
@@ -41,7 +41,7 @@ export default function DeleteModal({ appUserId, appUserName }: DeleteModalProps
       } else {
         toast.success(t('deleteSuccess'));
         invalidate();
-        router.refresh();
+        refresh();
         setOpen(false);
       }
     } catch {

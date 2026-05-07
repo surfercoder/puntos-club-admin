@@ -24,7 +24,7 @@ export function HideButton({
   isHidden: boolean;
 }) {
   const [loading, setLoading] = useState(false);
-  const router = useRouter();
+  const { refresh } = useRouter();
   const t = useTranslations('Dashboard.beneficiary.hide');
 
   const handleToggle = async () => {
@@ -42,7 +42,7 @@ export function HideButton({
 
       if (res.ok) {
         toast.success(isHidden ? t('unhideSuccess') : t('hideSuccess'));
-        router.refresh();
+        refresh();
       } else {
         toast.error(t('error'));
       }

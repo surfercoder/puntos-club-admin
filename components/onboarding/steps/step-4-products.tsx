@@ -113,6 +113,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
   const t = useTranslations('Onboarding.step4');
   const tCommon = useTranslations('Common');
 
+  // react-doctor-disable-next-line react-doctor/rerender-state-only-in-handlers
   const [planLimits, setPlanLimits] = useState<Record<PlanType, Record<PlanFeatureKey, number>> | null>(null);
 
   useEffect(() => {
@@ -139,20 +140,19 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
 
   const handleBack = () => {
     if (onAutoSave) {
-      const snapshot = categories
-        .filter((cat) => cat.name.trim() || cat.products.some((p) => p.name.trim()))
-        .map((cat) => ({
+      const snapshot = categories.flatMap((cat) => {
+        if (!cat.name.trim() && !cat.products.some((p) => p.name.trim())) return [];
+        return [{
           name: cat.name.trim(),
-          products: cat.products
-            .filter((p) => p.name.trim())
-            .map((p) => ({
-              name: p.name.trim(),
-              description: p.description || undefined,
-              required_points: Number(p.required_points) || 100,
-              quantity: Number(p.quantity) || 0,
-              minimum_quantity: Number(p.minimum_quantity) || 1,
-            })),
-        }));
+          products: cat.products.flatMap((p) => p.name.trim() ? [{
+            name: p.name.trim(),
+            description: p.description || undefined,
+            required_points: Number(p.required_points) || 100,
+            quantity: Number(p.quantity) || 0,
+            minimum_quantity: Number(p.minimum_quantity) || 1,
+          }] : []),
+        }];
+      });
       if (snapshot.length > 0) onAutoSave({ categories: snapshot });
     }
     onBack();
@@ -215,29 +215,26 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    const validCategories = categories.filter(
-      (cat) => cat.name.trim() && cat.products.some((p) => p.name.trim())
-    );
+    const validCategoriesPayload = categories.flatMap((cat) => {
+      if (!cat.name.trim() || !cat.products.some((p) => p.name.trim())) return [];
+      return [{
+        name: cat.name.trim(),
+        products: cat.products.flatMap((p) => p.name.trim() ? [{
+          name: p.name.trim(),
+          description: p.description || undefined,
+          required_points: Number(p.required_points) || 100,
+          quantity: Number(p.quantity) || 0,
+          minimum_quantity: Number(p.minimum_quantity) || 1,
+        }] : []),
+      }];
+    });
 
-    if (validCategories.length === 0) {
+    if (validCategoriesPayload.length === 0) {
       toast.error(t('validationError'));
       return;
     }
 
-    onNext({
-      categories: validCategories.map((cat) => ({
-        name: cat.name.trim(),
-        products: cat.products
-          .filter((p) => p.name.trim())
-          .map((p) => ({
-            name: p.name.trim(),
-            description: p.description || undefined,
-            required_points: Number(p.required_points) || 100,
-            quantity: Number(p.quantity) || 0,
-            minimum_quantity: Number(p.minimum_quantity) || 1,
-          })),
-      })),
-    });
+    onNext({ categories: validCategoriesPayload });
   };
 
   if (!planLimits) {

@@ -18,8 +18,10 @@ import {
 
 export default async function OrganizationDetailsPage({ params }: { params: Promise<{ id: string }> }) {
   const id = (await params).id;
-  const { data: organization, error: orgError } = await getOrganization(id);
-  const { data: products, error: productsError } = await getOrganizationProducts(id);
+  const [
+    { data: organization, error: orgError },
+    { data: products, error: productsError },
+  ] = await Promise.all([getOrganization(id), getOrganizationProducts(id)]);
 
   if (orgError || !organization) {
     notFound();
@@ -60,7 +62,7 @@ export default async function OrganizationDetailsPage({ params }: { params: Prom
             </div>
             <div>
               <p className="text-sm font-medium text-muted-foreground">Fecha de Creación</p>
-              <p className="text-base">
+              <p className="text-base" suppressHydrationWarning>
                 {new Date(organization.creation_date).toLocaleDateString('es-AR', { timeZone: 'UTC' })}
               </p>
             </div>

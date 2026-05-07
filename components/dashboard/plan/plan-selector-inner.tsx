@@ -133,7 +133,9 @@ export function PlanSelectorInner() {
   const currentPlan = usageSummary?.plan ?? null;
   const [selected, setSelected] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  // react-doctor-disable-next-line react-doctor/rerender-state-only-in-handlers
   const [verifying, setVerifying] = useState(false);
+  // react-doctor-disable-next-line react-doctor/rerender-state-only-in-handlers
   const [planLimits, setPlanLimits] = useState<Record<PlanType, Record<PlanFeatureKey, number>> | null>(null);
   const verifiedRef = useRef(false);
 

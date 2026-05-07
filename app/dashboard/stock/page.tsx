@@ -34,14 +34,16 @@ interface StockWithRelations {
 }
 
 export default async function StockListPage() {
-  const t = await getTranslations('Dashboard.stock');
-  const currentUser = await getCurrentUser();
+  const [t, currentUser] = await Promise.all([
+    getTranslations('Dashboard.stock'),
+    getCurrentUser(),
+  ]);
   const userIsAdmin = isAdmin(currentUser);
 
-  // Use admin client to bypass RLS for admin users
-  const supabase = userIsAdmin ? createAdminClient() : await createClient();
-
-  const orgIdFilter = await getActiveOrgIdFilter(currentUser);
+  const [supabase, orgIdFilter] = await Promise.all([
+    userIsAdmin ? Promise.resolve(createAdminClient()) : createClient(),
+    getActiveOrgIdFilter(currentUser),
+  ]);
 
   const { data, error } = await supabase
     .from('stock')

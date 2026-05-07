@@ -21,6 +21,6 @@ describe('lib/resend', () => {
 
   it('exports EMAIL_FROM constant', () => {
     const { EMAIL_FROM } = require('@/lib/resend');
-    expect(EMAIL_FROM).toBe('Puntos Club <soporte@puntosclub.com.ar>');
+    expect(EMAIL_FROM).toBe('Puntos Club <onboarding@resend.dev>');
   });
 });

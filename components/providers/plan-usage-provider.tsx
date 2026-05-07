@@ -2,8 +2,8 @@
 
 import {
   createContext,
+  use,
   useCallback,
-  useContext,
   useEffect,
   useRef,
   useState,
@@ -115,7 +115,7 @@ export function PlanUsageProvider({ children, initialSummary }: PlanUsageProvide
 }
 
 export function usePlanUsage() {
-  const ctx = useContext(PlanUsageContext);
+  const ctx = use(PlanUsageContext);
   if (!ctx) {
     throw new Error('usePlanUsage must be used within a PlanUsageProvider');
   }

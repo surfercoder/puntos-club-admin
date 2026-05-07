@@ -20,6 +20,7 @@ import { getActiveOrgIdFilter } from '@/lib/auth/get-active-org-id';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
+import { formatDateOnly } from '@/lib/utils';
 import type { Beneficiary } from '@/types/beneficiary';
 
 export default async function BeneficiaryListPage() {
@@ -126,7 +127,7 @@ export default async function BeneficiaryListPage() {
                   <TableCell>{beneficiary.document_id || 'N/A'}</TableCell>
                   <TableCell>{beneficiary.available_points ?? '-'}</TableCell>
                   <TableCell>
-                    {new Date(beneficiary.registration_date).toLocaleDateString('es-AR', { timeZone: 'UTC' })}
+                    <span suppressHydrationWarning>{formatDateOnly(beneficiary.registration_date, 'es-AR', { timeZone: 'UTC' })}</span>
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">

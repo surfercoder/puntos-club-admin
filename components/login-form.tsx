@@ -81,7 +81,7 @@ export function LoginForm({
 
   const [state, dispatch] = useReducer(loginFormReducer, initialState);
   const { email, password, error, fieldErrors, isLoading, showPassword } = state;
-  const router = useRouter();
+  const { push, refresh } = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -108,8 +108,8 @@ export function LoginForm({
         throw new Error(loginResult.error || t("noPermission"));
       }
 
-      router.push("/dashboard");
-      router.refresh();
+      push("/dashboard");
+      refresh();
     } catch (err: unknown) {
       dispatch({
         type: "SET_ERROR",

@@ -387,7 +387,7 @@ function DisplaySettingsSection({ formData, setFormData }: SectionProps) {
 export default function NewPointsRulePage() {
   const t = useTranslations("PointsRules");
   const tCommon = useTranslations("Common");
-  const router = useRouter();
+  const { push } = useRouter();
   const [loading, setLoading] = useState(false);
   const [branches, setBranches] = useState<Array<{ id: string; name: string }>>([]);
   const [formData, setFormData] = useState<FormData>({
@@ -505,7 +505,7 @@ export default function NewPointsRulePage() {
     setLoading(false);
 
     if (result.success) {
-      router.push("/dashboard/points-rules");
+      push("/dashboard/points-rules");
     } else {
       alert(`Error: ${result.error}`);
     }
