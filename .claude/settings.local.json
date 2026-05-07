@@ -155,7 +155,10 @@
       "mcp__supabase__get_advisors",
       "mcp__supabase__get_publishable_keys",
       "Bash(git restore *)",
-      "Bash(xargs cat *)"
+      "Bash(xargs cat *)",
+      "Bash(echo \"EXIT=$?\")",
+      "Bash(gh auth *)",
+      "Bash(git remote *)"
     ],
     "deny": []
   },

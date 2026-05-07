@@ -20,15 +20,15 @@
     "types:supabase": "supabase gen types typescript --local > types/supabase.ts"
   },
   "dependencies": {
-    "@anthropic-ai/sdk": "^0.95.0",
+    "@anthropic-ai/sdk": "^0.95.1",
     "@fontsource/lexend": "^5.2.11",
     "@fontsource/poppins": "^5.2.7",
     "@googlemaps/js-api-loader": "^2.0.2",
     "@gsap/react": "^2.1.2",
     "@react-three/drei": "^10.7.7",
     "@react-three/fiber": "^9.6.1",
-    "@sentry/nextjs": "^10.51.0",
-    "@supabase/ssr": "^0.10.2",
+    "@sentry/nextjs": "^10.52.0",
+    "@supabase/ssr": "^0.10.3",
     "@supabase/supabase-js": "^2.105.3",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
