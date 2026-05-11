@@ -19,10 +19,10 @@ describe('lib/resend', () => {
     expect(resend).toBeDefined();
   });
 
-  it('falls back to onboarding@resend.dev when EMAIL_FROM env is unset', () => {
+  it('falls back to acassani@puntosclub.com.ar when EMAIL_FROM env is unset', () => {
     delete process.env.EMAIL_FROM;
     const { EMAIL_FROM } = require('@/lib/resend');
-    expect(EMAIL_FROM).toBe('Puntos Club <onboarding@resend.dev>');
+    expect(EMAIL_FROM).toBe('Puntos Club <acassani@puntosclub.com.ar>');
   });
 
   it('uses EMAIL_FROM env value when set', () => {
