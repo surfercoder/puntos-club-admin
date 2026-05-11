@@ -1,3 +1,4 @@
+import * as Sentry from "@sentry/nextjs";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { NextRequest } from "next/server";
@@ -267,6 +268,10 @@ export async function POST(request: NextRequest) {
           emailSent = !emailError;
           if (emailError) {
             console.error("[purchase/notify] Email error:", emailError);
+            Sentry.captureException(emailError, {
+              tags: { area: "purchase.notify.email" },
+              extra: { recipient: beneficiary.email },
+            });
           }
         } else {
           console.warn(
@@ -275,6 +280,10 @@ export async function POST(request: NextRequest) {
         }
       } catch (err) {
         console.error("[purchase/notify] Email error:", err);
+        Sentry.captureException(err, {
+          tags: { area: "purchase.notify.email" },
+          extra: { recipient: beneficiary.email },
+        });
       }
     }
 

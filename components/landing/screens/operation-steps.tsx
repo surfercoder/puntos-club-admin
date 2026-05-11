@@ -117,7 +117,7 @@ const OperationSteps = () => {
             className="flex flex-col items-center w-full sm:w-[95%] lg:w-[90%] gap-6"
           >
             <div
-              className="scale-0 flex items-center justify-center text-4xl sm:text-5xl font-bold w-20 h-20 sm:w-24 sm:h-24 rounded-full border-4"
+              className="scale-0 flex items-center justify-center text-4xl sm:text-5xl font-bold size-20 sm:size-24 rounded-full border-4"
               style={{
                 color: theme === "dark" ? step.lightColor : step.darkColor,
                 borderColor:
@@ -218,7 +218,7 @@ const OperationSteps = () => {
                   role="button"
                   tabIndex={0}
                   aria-label={title}
-                  className="flex items-center justify-center w-32 h-32 sm:w-44 sm:h-44 md:w-56 md:h-56 lg:w-64 lg:h-64 rounded-full z-[1] bubble"
+                  className="flex items-center justify-center size-32 sm:size-44 md:size-56 lg:size-64 rounded-full z-[1] bubble"
                   style={{
                     backgroundColor: step.lightColor,
                   }}
@@ -243,7 +243,7 @@ const OperationSteps = () => {
                     alt={title}
                     width={144}
                     height={144}
-                    className="w-20 h-20 sm:w-28 sm:h-28 md:w-36 md:h-36"
+                    className="size-20 sm:size-28 md:size-36"
                   />
                 </div>
 

@@ -83,7 +83,7 @@ export default async function AppUserListPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl font-semibold flex items-center gap-2">
             {t('title')}
             <PlanUsageBadge feature="cashiers" showLabel />
             {!userIsCollaborator && <PlanUsageBadge feature="collaborators" showLabel />}
@@ -128,7 +128,7 @@ export default async function AppUserListPage() {
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">
                         <Link href={`/dashboard/app_user/edit/${user.id}`}>
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="size-4" />
                         </Link>
                       </Button>
                       <DeleteModal

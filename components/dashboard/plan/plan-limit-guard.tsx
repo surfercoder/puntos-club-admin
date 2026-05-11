@@ -44,9 +44,9 @@ export function PlanLimitGuard({ features, backHref, mode = 'any', children }: P
   const planName = PLAN_DISPLAY_NAMES[summary.plan];
 
   return (
-    <div className="flex flex-col items-center justify-center py-16 px-4 text-center space-y-4">
+    <div className="flex flex-col items-center justify-center py-16 px-4 text-center gap-4">
       <div className="rounded-full bg-red-100 p-3 dark:bg-red-950/40">
-        <AlertTriangle className="h-8 w-8 text-red-600 dark:text-red-400" />
+        <AlertTriangle className="size-8 text-red-600 dark:text-red-400" />
       </div>
 
       <h2 className="text-xl font-semibold">

@@ -58,7 +58,7 @@ export function PlanBadge() {
           <Link
             href="/dashboard/settings/plan"
             className={cn(
-              'flex h-8 w-8 items-center justify-center rounded-md transition-colors mx-auto',
+              'flex size-8 items-center justify-center rounded-md transition-colors mx-auto',
               config.colorClass,
             )}
           >

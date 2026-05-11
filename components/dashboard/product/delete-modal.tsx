@@ -55,7 +55,7 @@ export default function DeleteModal({ productId, productName }: DeleteModalProps
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
         <Button size="sm" variant="destructive">
-          <Trash2 className="h-4 w-4" />
+          <Trash2 className="size-4" />
         </Button>
       </DialogTrigger>
       <DialogContent>

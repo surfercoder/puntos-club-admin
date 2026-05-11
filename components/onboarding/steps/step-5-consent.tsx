@@ -74,8 +74,8 @@ function consentReducer(state: ConsentState, action: ConsentAction): ConsentStat
 function TermsContent() {
   return (
     <>
-      <h2 className="text-base font-bold text-foreground">
-        Términos y Condiciones de Uso — Puntos Club
+      <h2 className="text-base font-semibold text-foreground">
+        Términos y Condiciones de Uso: Puntos Club
       </h2>
       <p className="text-xs text-muted-foreground">Última actualización: enero de 2025</p>
 
@@ -241,7 +241,7 @@ function CaptchaVerification({ status, error, onSuccess, onError, onExpire, reca
   return (
     <div className="rounded-xl border bg-muted/30 p-4 space-y-3 transition-all">
       <div className="flex items-center gap-2">
-        <ShieldCheck className="h-4 w-4 text-primary shrink-0" />
+        <ShieldCheck className="size-4 text-primary shrink-0" />
         <p className="text-sm font-medium text-foreground">
           Confirmá que no sos un robot
         </p>
@@ -270,7 +270,7 @@ function CaptchaVerification({ status, error, onSuccess, onError, onExpire, reca
 
       {status === 'success' && !error && (
         <div className="flex items-center gap-2 text-xs text-brand-green font-medium">
-          <CheckCircle2 className="h-3.5 w-3.5" />
+          <CheckCircle2 className="size-3.5" />
           Verificación completada.
         </div>
       )}
@@ -351,7 +351,7 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
   return (
     <div className="space-y-5">
       <div className="flex items-start gap-2 rounded-md bg-brand-orange/10 border border-brand-orange/30 px-3 py-2 text-xs text-brand-orange">
-        <ScrollText className="h-4 w-4 mt-0.5 shrink-0" />
+        <ScrollText className="size-4 mt-0.5 shrink-0" />
         <span>
           Por favor leé los términos y condiciones completos. Debés desplazarte hasta el final
           para poder aceptarlos y continuar.
@@ -422,7 +422,7 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
 
       {canContinue && (
         <div className="flex items-center gap-2 text-sm text-brand-green font-medium">
-          <CheckCircle2 className="h-4 w-4" />
+          <CheckCircle2 className="size-4" />
           {t('allDone')}
         </div>
       )}
@@ -435,7 +435,7 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
           disabled={state.isVerifying}
           className="sm:flex-1"
         >
-          <ArrowLeft className="mr-2 h-4 w-4" />
+          <ArrowLeft className="mr-2 size-4" />
           {tCommon('back')}
         </Button>
         <Button
@@ -449,12 +449,12 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
         >
           {state.isVerifying ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 size-4 animate-spin" />
               {t('verifying')}
             </>
           ) : (
             <>
-              <FileText className="mr-2 h-4 w-4" />
+              <FileText className="mr-2 size-4" />
               {tCommon('continue')}
             </>
           )}

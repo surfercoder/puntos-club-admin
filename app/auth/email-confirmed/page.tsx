@@ -24,7 +24,7 @@ export default async function EmailConfirmedPage() {
           <Card>
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
-                <CheckCircle2 className="h-16 w-16 text-green-500" />
+                <CheckCircle2 className="size-16 text-green-500" />
               </div>
               <CardTitle className="text-2xl">{t("title")}</CardTitle>
             </CardHeader>

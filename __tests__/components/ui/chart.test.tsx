@@ -205,8 +205,7 @@ describe('ChartTooltipContent', () => {
     );
     const indicator = container.querySelector('[style*="--color-bg"]');
     expect(indicator).toBeInTheDocument();
-    expect(indicator?.className).toContain('h-2.5');
-    expect(indicator?.className).toContain('w-2.5');
+    expect(indicator?.className).toContain('size-2.5');
   });
 
   it('handles indicator type line', () => {

@@ -55,7 +55,7 @@ function FeatureRow({ usage }: { usage: FeatureUsage }) {
     <div className="space-y-1">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5 min-w-0">
-          <Icon className="h-3.5 w-3.5 text-muted-foreground shrink-0" />
+          <Icon className="size-3.5 text-muted-foreground shrink-0" />
           <span className="text-xs font-medium truncate">{label}</span>
         </div>
         <span className={cn('text-[11px] font-mono shrink-0', pctText)}>
@@ -91,7 +91,7 @@ export function PlanUsageSummary({ className, compact = false, hideUpgradeLink =
   if (isLoading) {
     return (
       <div className={cn('flex items-center justify-center py-8', className)}>
-        <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+        <Loader2 className="size-5 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -125,7 +125,7 @@ export function PlanUsageSummary({ className, compact = false, hideUpgradeLink =
     >
       <div className="flex items-center justify-between px-4 py-2.5 border-b">
         <div className="flex items-center gap-2">
-          <TrendingUp className="h-3.5 w-3.5 text-muted-foreground" />
+          <TrendingUp className="size-3.5 text-muted-foreground" />
           <span className="font-semibold text-xs">{t('usageTitle')}</span>
           <span className="rounded-full bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
             {planName}
@@ -138,14 +138,14 @@ export function PlanUsageSummary({ className, compact = false, hideUpgradeLink =
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
           >
             {t('upgradePlanButton')}
-            <ExternalLink className="h-3 w-3" />
+            <ExternalLink className="size-3" />
           </Link>
         )}
       </div>
 
       {anyWarning && (
         <div className="mx-4 mt-2.5 flex items-center gap-2 rounded-md bg-brand-orange/10 px-3 py-1.5 text-brand-orange">
-          <TrendingUp className="h-3 w-3 shrink-0" />
+          <TrendingUp className="size-3 shrink-0" />
           <span className="text-[11px]">{t('nearingLimitWarning')}</span>
         </div>
       )}

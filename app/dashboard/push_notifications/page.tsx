@@ -48,7 +48,7 @@ export default async function PushNotificationsListPage() {
       <ToastHandler />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl font-semibold flex items-center gap-2">
             {t('title')}
             <PlanUsageBadge feature="push_notifications_monthly" />
           </h1>
@@ -103,7 +103,7 @@ export default async function PushNotificationsListPage() {
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">
                         <Link href={`/dashboard/push_notifications/edit/${notification.id}`}>
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="size-4" />
                         </Link>
                       </Button>
                       <DeleteModal

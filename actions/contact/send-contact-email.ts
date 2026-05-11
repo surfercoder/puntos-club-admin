@@ -1,5 +1,6 @@
 'use server';
 
+import * as Sentry from '@sentry/nextjs';
 import { ContactSchema } from '@/schemas/contact.schema';
 import type { ContactFormData } from '@/schemas/contact.schema';
 import {
@@ -62,10 +63,18 @@ export async function sendContactEmail(
 
     if (error) {
       console.error('[sendContactEmail] Resend error:', error);
+      Sentry.captureException(error, {
+        tags: { area: 'contact.email' },
+        extra: { sender: email },
+      });
       return { success: false, error: 'Failed to send contact email.' };
     }
   } catch (err) {
     console.error('[sendContactEmail] Resend error:', err);
+    Sentry.captureException(err, {
+      tags: { area: 'contact.email' },
+      extra: { sender: email },
+    });
     return { success: false, error: 'Failed to send contact email.' };
   }
 

@@ -156,7 +156,7 @@ function BasicInfoSection({
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <Switch
             id="is_active"
             checked={formData.is_active}
@@ -167,7 +167,7 @@ function BasicInfoSection({
           <Label htmlFor="is_active">{t("form.active")}</Label>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <Switch
             id="is_default"
             checked={formData.is_default}
@@ -193,7 +193,7 @@ function BasicInfoSection({
           <Label htmlFor="is_default">{t("form.default")}</Label>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <Switch
             id="show_in_app"
             checked={formData.show_in_app}
@@ -423,7 +423,7 @@ function ScheduleSection({
         <Label>{t("form.activeDays")}</Label>
         <div className="grid grid-cols-4 gap-2 mt-2">
           {DAY_OPTIONS.map((day) => (
-            <div key={day.value} className="flex items-center space-x-2">
+            <div key={day.value} className="flex items-center gap-2">
               <Checkbox
                 id={`day-${day.value}`}
                 checked={formData.days_of_week.includes(day.value)}
@@ -677,7 +677,7 @@ export default function EditPointsRulePage() {
   if (fetching) {
     return (
       <div className="container mx-auto py-8 px-4 max-w-4xl flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin" />
+        <Loader2 className="size-8 animate-spin" />
       </div>
     );
   }
@@ -687,7 +687,7 @@ export default function EditPointsRulePage() {
       <div className="mb-6">
         <Link href="/dashboard/points-rules">
           <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="mr-2 size-4" />
             {t("backToList")}
           </Button>
         </Link>
@@ -712,7 +712,7 @@ export default function EditPointsRulePage() {
 
             <div className="flex gap-4 pt-4">
               <Button type="submit" disabled={loading}>
-                <Save className="mr-2 h-4 w-4" />
+                <Save className="mr-2 size-4" />
                 {loading ? t("form.saving") : t("form.saveRule")}
               </Button>
               <Link href="/dashboard/points-rules">

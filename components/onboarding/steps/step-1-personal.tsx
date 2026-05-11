@@ -38,7 +38,7 @@ function Step1CompletedView({
     <div className="space-y-6">
       {/* Verified banner */}
       <div className="flex items-center gap-3 rounded-xl border border-brand-green/30 bg-brand-green/10 px-4 py-3">
-        <ShieldCheck className="h-5 w-5 shrink-0 text-brand-green" />
+        <ShieldCheck className="size-5 shrink-0 text-brand-green" />
         <div>
           <p className="text-sm font-semibold text-brand-green dark:text-brand-green">
             {t('emailVerified')}
@@ -53,8 +53,8 @@ function Step1CompletedView({
       <div className="rounded-xl border bg-muted/50 p-5">
         <div className="flex items-center gap-4">
           {/* Avatar */}
-          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-lg font-bold shadow-sm">
-            {initials || <User className="h-6 w-6" />}
+          <div className="flex size-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground text-lg font-bold shadow-sm">
+            {initials || <User className="size-6" />}
           </div>
 
           <div className="min-w-0 flex-1 space-y-1">
@@ -62,11 +62,11 @@ function Step1CompletedView({
               <p className="text-base font-semibold text-foreground truncate">
                 {data.firstName} {data.lastName}
               </p>
-              <BadgeCheck className="h-4 w-4 shrink-0 text-brand-green" />
+              <BadgeCheck className="size-4 shrink-0 text-brand-green" />
             </div>
 
             <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-              <Mail className="h-3.5 w-3.5 shrink-0" />
+              <Mail className="size-3.5 shrink-0" />
               <span className="truncate">{data.email}</span>
             </div>
           </div>
@@ -192,11 +192,11 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
   if (emailSent) {
     return (
       <div className="flex flex-col items-center gap-6 py-6 text-center">
-        <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-          <Mail className="h-10 w-10 text-primary" />
+        <div className="flex size-20 items-center justify-center rounded-full bg-primary/10">
+          <Mail className="size-10 text-primary" />
         </div>
         <div className="space-y-2">
-          <h2 className="text-2xl font-bold text-foreground">
+          <h2 className="text-2xl font-semibold text-foreground">
             {t('checkEmail')}
           </h2>
           <p className="text-muted-foreground max-w-sm">
@@ -225,7 +225,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
         <div className="space-y-2">
           <Label htmlFor="firstName">{tCommon('name')}</Label>
           <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
               id="firstName"
               placeholder="Juan"
@@ -242,7 +242,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
         <div className="space-y-2">
           <Label htmlFor="lastName">{tCommon('lastName')}</Label>
           <div className="relative">
-            <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
               id="lastName"
               placeholder="García"
@@ -261,7 +261,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>
         <div className="relative">
-          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             id="email"
             type="email"
@@ -294,7 +294,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             onClick={() => dispatch({ type: 'TOGGLE_SHOW_PASSWORD' })}
           >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
           </button>
         </div>
         {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
@@ -304,7 +304,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? (
           <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            <Loader2 className="mr-2 size-4 animate-spin" />
             {t('creating')}
           </>
         ) : (

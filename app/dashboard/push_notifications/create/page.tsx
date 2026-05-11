@@ -53,12 +53,12 @@ export default async function AdminCreateNotificationPage() {
         <div className="flex items-center gap-4">
           <Button asChild variant="ghost" size="sm">
             <Link href="/dashboard/push_notifications">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="size-4 mr-2" />
               {tCommon('back')}
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">{t('createTitle')}</h1>
+            <h1 className="text-2xl font-semibold">{t('createTitle')}</h1>
             <p className="text-muted-foreground">
               {t('createDescription')}
             </p>

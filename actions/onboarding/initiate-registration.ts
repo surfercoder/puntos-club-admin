@@ -1,5 +1,6 @@
 'use server';
 
+import * as Sentry from '@sentry/nextjs';
 import {
   createRegistrationToken,
   type PendingRegistration,
@@ -30,6 +31,7 @@ export async function initiateRegistration(input: {
     token = createRegistrationToken(pending);
   } catch (err) {
     console.error('[initiateRegistration] Token creation failed:', err);
+    Sentry.captureException(err, { tags: { area: 'onboarding.token' } });
     return { success: false, error: 'Error de configuración del servidor.' };
   }
 
@@ -98,10 +100,18 @@ export async function initiateRegistration(input: {
 
     if (error) {
       console.error('[initiateRegistration] Resend error:', error);
+      Sentry.captureException(error, {
+        tags: { area: 'onboarding.email' },
+        extra: { recipient: input.email },
+      });
       return { success: false, error: 'No se pudo enviar el email de verificación.' };
     }
   } catch (err) {
     console.error('[initiateRegistration] Resend error:', err);
+    Sentry.captureException(err, {
+      tags: { area: 'onboarding.email' },
+      extra: { recipient: input.email },
+    });
     return { success: false, error: 'No se pudo enviar el email de verificación.' };
   }
 

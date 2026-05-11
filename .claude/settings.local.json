@@ -158,7 +158,15 @@
       "Bash(xargs cat *)",
       "Bash(echo \"EXIT=$?\")",
       "Bash(gh auth *)",
-      "Bash(git remote *)"
+      "Bash(git remote *)",
+      "Bash(dig TXT resend._domainkey.puntosclub.com.ar +short)",
+      "Bash(dig TXT resend._domainkey.puntosclub.com.ar @8.8.8.8 +short)",
+      "Bash(dig TXT resend._domainkey.puntosclub.com.ar @ns3.hostmar.com +short)",
+      "Bash(tee /tmp/checks-output.log)",
+      "Bash(echo \"EXIT_CODE=$?\")",
+      "Bash(dig TXT *)",
+      "Bash(awk *)",
+      "Bash(echo \"---EXIT: $?\")"
     ],
     "deny": []
   },

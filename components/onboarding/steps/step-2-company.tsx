@@ -111,7 +111,7 @@ function AddressSection({ state, dispatch, t }: AddressSectionProps) {
         </div>
       )}
       <div className="flex items-start gap-2 rounded-md bg-primary/10 border border-primary/30 px-3 py-2 text-xs text-primary">
-        <Info className="h-4 w-4 mt-0.5 shrink-0" />
+        <Info className="size-4 mt-0.5 shrink-0" />
         <span>{t('firstBranchHint')}</span>
       </div>
     </div>
@@ -137,8 +137,8 @@ function CashierSection({ state, dispatch, t, tCommon }: CashierSectionProps) {
         className="flex w-full items-center justify-between gap-3 px-4 py-3 text-left hover:bg-muted/50 transition-colors"
       >
         <div className="flex items-center gap-2.5">
-          <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-brand-pink/10">
-            <UserCog className="h-4 w-4 text-brand-pink" />
+          <div className="flex size-7 shrink-0 items-center justify-center rounded-lg bg-brand-pink/10">
+            <UserCog className="size-4 text-brand-pink" />
           </div>
           <div>
             <p className="text-sm font-medium text-foreground">
@@ -150,16 +150,16 @@ function CashierSection({ state, dispatch, t, tCommon }: CashierSectionProps) {
           </div>
         </div>
         {state.showCashier ? (
-          <ChevronUp className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <ChevronUp className="size-4 shrink-0 text-muted-foreground" />
         ) : (
-          <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
+          <ChevronDown className="size-4 shrink-0 text-muted-foreground" />
         )}
       </button>
 
       {state.showCashier && (
-        <div className="border-t border-dashed border-border px-4 py-4 space-y-4 bg-muted/30">
+        <div className="border-t border-dashed border-border p-4 space-y-4 bg-muted/30">
           <div className="flex items-start gap-2 rounded-md bg-brand-pink/10 border border-brand-pink/30 px-3 py-2 text-xs text-brand-pink">
-            <Info className="h-4 w-4 mt-0.5 shrink-0" />
+            <Info className="size-4 mt-0.5 shrink-0" />
             <span>{t('cashierHint')}</span>
           </div>
 
@@ -220,7 +220,7 @@ function CashierSection({ state, dispatch, t, tCommon }: CashierSectionProps) {
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   tabIndex={-1}
                 >
-                  {state.showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  {state.showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                 </button>
               </div>
               <PasswordStrengthChecklist password={state.cashierPassword} />
@@ -248,9 +248,9 @@ function CashierSection({ state, dispatch, t, tCommon }: CashierSectionProps) {
                   tabIndex={-1}
                 >
                   {state.showConfirmPassword ? (
-                    <EyeOff className="h-4 w-4" />
+                    <EyeOff className="size-4" />
                   ) : (
-                    <Eye className="h-4 w-4" />
+                    <Eye className="size-4" />
                   )}
                 </button>
               </div>
@@ -353,7 +353,7 @@ export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
           {t('businessName')} <span className="text-destructive">*</span>
         </Label>
         <div className="relative">
-          <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             id="orgName"
             placeholder={t('businessNamePlaceholder')}
@@ -405,7 +405,7 @@ export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
           {t('branchName')} <span className="text-destructive">*</span>
         </Label>
         <div className="relative">
-          <Store className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Store className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             id="branchName"
             placeholder={t('branchNamePlaceholder')}
@@ -422,7 +422,7 @@ export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
       <div className="space-y-2">
         <Label htmlFor="branchPhone">{t('branchPhone')}</Label>
         <div className="relative">
-          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+          <Phone className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             id="branchPhone"
             type="tel"

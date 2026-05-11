@@ -67,7 +67,7 @@ export function PlanUsageChart({ data }: Props) {
             <div key={item.feature} className="flex flex-col items-center gap-1">
               <ChartContainer
                 config={chartConfig}
-                className="h-[100px] w-[100px]"
+                className="size-[100px]"
               >
                 <RadialBarChart
                   data={[item]}

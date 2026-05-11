@@ -43,11 +43,11 @@ type State =
 function CreatingScreen({ t }: { t: ReturnType<typeof useTranslations> }) {
   return (
     <div className="flex flex-col items-center gap-6 py-12 text-center">
-      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary/10">
-        <Loader2 className="h-10 w-10 animate-spin text-primary" />
+      <div className="flex size-20 items-center justify-center rounded-full bg-primary/10">
+        <Loader2 className="size-10 animate-spin text-primary" />
       </div>
       <div className="space-y-2">
-        <h3 className="text-xl font-bold text-foreground">{t('settingUp')}</h3>
+        <h3 className="text-xl font-semibold text-foreground">{t('settingUp')}</h3>
         <p className="text-sm text-muted-foreground max-w-sm">{t('settingUpDescription')}</p>
       </div>
       <div className="flex flex-col gap-1.5 text-xs text-muted-foreground">
@@ -72,20 +72,20 @@ function ErrorScreen({
 }) {
   return (
     <div className="flex flex-col items-center gap-6 py-10 text-center">
-      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
-        <AlertCircle className="h-10 w-10 text-red-600" />
+      <div className="flex size-20 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+        <AlertCircle className="size-10 text-red-600" />
       </div>
       <div className="space-y-2">
-        <h3 className="text-xl font-bold text-foreground">{t('somethingWentWrong')}</h3>
+        <h3 className="text-xl font-semibold text-foreground">{t('somethingWentWrong')}</h3>
         <p className="text-sm text-muted-foreground max-w-sm">{message}</p>
       </div>
       <div className="flex flex-col gap-3 w-full sm:flex-row sm:justify-center">
         <Button type="button" variant="outline" className="gap-2" onClick={onBack}>
-          <ArrowLeft className="h-4 w-4" />
+          <ArrowLeft className="size-4" />
           {t('reviewBack')}
         </Button>
         <Button type="button" className="gap-2" onClick={onRetry}>
-          <RefreshCw className="h-4 w-4" />
+          <RefreshCw className="size-4" />
           {t('tryAgain')}
         </Button>
       </div>
@@ -96,14 +96,14 @@ function ErrorScreen({
 function MissingDataScreen({ onBack, t }: { onBack: () => void; t: ReturnType<typeof useTranslations> }) {
   return (
     <div className="flex flex-col items-center gap-6 py-10 text-center">
-      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-brand-orange/10">
-        <AlertCircle className="h-10 w-10 text-brand-orange" />
+      <div className="flex size-20 items-center justify-center rounded-full bg-brand-orange/10">
+        <AlertCircle className="size-10 text-brand-orange" />
       </div>
       <div className="space-y-2">
-        <h3 className="text-xl font-bold text-foreground">{t('somethingWentWrong')}</h3>
+        <h3 className="text-xl font-semibold text-foreground">{t('somethingWentWrong')}</h3>
       </div>
       <Button type="button" variant="outline" className="gap-2" onClick={onBack}>
-        <ArrowLeft className="h-4 w-4" />
+        <ArrowLeft className="size-4" />
         {t('reviewBack')}
       </Button>
     </div>
@@ -237,10 +237,10 @@ function QRSuccessView({
   return (
     <div className="space-y-8">
       <div className="flex flex-col items-center gap-3 text-center">
-        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-green/10">
-          <PartyPopper className="h-8 w-8 text-brand-green" />
+        <div className="flex size-16 items-center justify-center rounded-full bg-brand-green/10">
+          <PartyPopper className="size-8 text-brand-green" />
         </div>
-        <h3 className="text-xl font-bold text-foreground">{t('businessReady')}</h3>
+        <h3 className="text-xl font-semibold text-foreground">{t('businessReady')}</h3>
       </div>
 
       <div className="flex justify-center">
@@ -257,13 +257,13 @@ function QRSuccessView({
 
       <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
         <Button type="button" variant="outline" className="gap-2" onClick={handleDownload}>
-          <Download className="h-4 w-4" /> {t('download')}
+          <Download className="size-4" /> {t('download')}
         </Button>
         <Button type="button" variant="outline" className="gap-2" onClick={handlePrint}>
-          <Printer className="h-4 w-4" /> {t('print')}
+          <Printer className="size-4" /> {t('print')}
         </Button>
         <Button type="button" variant="outline" className="gap-2 col-span-2 sm:col-span-1" onClick={handleShare}>
-          <Share2 className="h-4 w-4" /> {t('share')}
+          <Share2 className="size-4" /> {t('share')}
         </Button>
       </div>
 
@@ -276,7 +276,7 @@ function QRSuccessView({
             { key: 'step3', text: t('step3') },
           ].map((step, idx) => (
             <li key={step.key} className="flex gap-2">
-              <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold">
+              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold">
                 {idx + 1}
               </span>
               <span>{step.text}</span>
@@ -287,7 +287,7 @@ function QRSuccessView({
 
       <div className="flex flex-col gap-3 pt-2 sm:flex-row">
         <Button type="button" variant="outline" className="gap-2 flex-1" onClick={() => window.open('/dashboard/qr', '_blank')}>
-          <ExternalLink className="h-4 w-4" /> {t('viewQRInPanel')}
+          <ExternalLink className="size-4" /> {t('viewQRInPanel')}
         </Button>
         <Button type="button" className="flex-1" onClick={onFinish}>
           {t('goToDashboard')}

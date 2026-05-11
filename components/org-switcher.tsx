@@ -125,7 +125,7 @@ export function OrgSwitcher({
                 onClick={() => push("/dashboard/settings/organization")}
               >
                 <div className="flex size-6 items-center justify-center rounded-md border">
-                  <Settings className="h-3.5 w-3.5" />
+                  <Settings className="size-3.5" />
                 </div>
                 {t("orgSettings")}
               </DropdownMenuItem>
@@ -135,7 +135,7 @@ export function OrgSwitcher({
                   onClick={() => setIsAddOrgOpen(true)}
                 >
                   <div className="flex size-6 items-center justify-center rounded-md border">
-                    <Plus className="h-4 w-4" />
+                    <Plus className="size-4" />
                   </div>
                   {t("addNewOrganization")}
                 </DropdownMenuItem>

@@ -103,14 +103,14 @@ const Loader: React.FC<LoaderProps> = ({ onAnimationEnd }) => {
       <div className="flex flex-col w-full items-center justify-center absolute top-1/2 left-1/2 transform -translate-x-1/2">
         <h1
           id="title"
-          className="opacity-0 font-extrabold z-10 text-center text-5xl sm:text-7xl md:text-8xl"
+          className="opacity-0 font-semibold z-10 text-center text-5xl sm:text-7xl md:text-8xl"
         >
           Puntos <span style={{ color: "#E25380" }}>Club</span>
         </h1>
 
         <h2
           id="slogan"
-          className="opacity-0 w-[90%] text-center text-gray-800 dark:text-gray-300 font-light z-10 mt-6 text-xl sm:text-2xl md:text-3xl"
+          className="opacity-0 w-[90%] text-center text-neutral-800 dark:text-neutral-300 font-light z-10 mt-6 text-xl sm:text-2xl md:text-3xl"
         >{t("slogan")}</h2>
       </div>
     </div>

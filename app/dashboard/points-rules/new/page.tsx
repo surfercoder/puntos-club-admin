@@ -57,7 +57,7 @@ function BasicInfoSection({ formData, setFormData }: SectionProps) {
         <Input
           id="name"
           value={formData.name}
-          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+          onChange={(e) => setFormData((prev) => ({ ...prev, name: e.target.value }))}
           placeholder={t("form.ruleNamePlaceholder")}
           required
         />
@@ -68,29 +68,29 @@ function BasicInfoSection({ formData, setFormData }: SectionProps) {
         <Textarea
           id="description"
           value={formData.description}
-          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+          onChange={(e) => setFormData((prev) => ({ ...prev, description: e.target.value }))}
           placeholder={t("form.descriptionPlaceholder")}
           rows={3}
         />
       </div>
 
       <div className="flex items-center gap-4">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <Switch
             id="is_active"
             checked={formData.is_active}
-            onCheckedChange={(checked) => setFormData({ ...formData, is_active: checked })}
+            onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, is_active: checked }))}
           />
           <Label htmlFor="is_active">{t("form.active")}</Label>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <Switch
             id="is_default"
             checked={formData.is_default}
             onCheckedChange={(checked) =>
-              setFormData({
-                ...formData,
+              setFormData((prev) => ({
+                ...prev,
                 is_default: checked,
                 ...(checked
                   ? {
@@ -102,17 +102,17 @@ function BasicInfoSection({ formData, setFormData }: SectionProps) {
                       show_in_app: false,
                     }
                   : {}),
-              })
+              }))
             }
           />
           <Label htmlFor="is_default">{t("form.default")}</Label>
         </div>
 
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center gap-2">
           <Switch
             id="show_in_app"
             checked={formData.show_in_app}
-            onCheckedChange={(checked) => setFormData({ ...formData, show_in_app: checked })}
+            onCheckedChange={(checked) => setFormData((prev) => ({ ...prev, show_in_app: checked }))}
             disabled={formData.is_default}
           />
           <Label htmlFor="show_in_app">{t("form.showInApp")}</Label>
@@ -138,7 +138,7 @@ function PointsCalculationSection({
         <Label htmlFor="branch_id">{t("calculator.branch")}</Label>
         <Select
           value={formData.branch_id}
-          onValueChange={(value) => setFormData({ ...formData, branch_id: value })}
+          onValueChange={(value) => setFormData((prev) => ({ ...prev, branch_id: value }))}
         >
           <SelectTrigger>
             <SelectValue placeholder={t("form.selectBranch")} />
@@ -160,7 +160,7 @@ function PointsCalculationSection({
           type="number"
           min="0"
           value={formData.priority}
-          onChange={(e) => setFormData({ ...formData, priority: e.target.value })}
+          onChange={(e) => setFormData((prev) => ({ ...prev, priority: e.target.value }))}
           placeholder="0"
           required
         />
@@ -173,7 +173,7 @@ function PointsCalculationSection({
           value={formData.rule_type}
           onValueChange={(
             value: "fixed_amount" | "percentage" | "fixed_per_item" | "tiered"
-          ) => setFormData({ ...formData, rule_type: value })}
+          ) => setFormData((prev) => ({ ...prev, rule_type: value }))}
         >
           <SelectTrigger>
             <SelectValue />
@@ -195,7 +195,7 @@ function PointsCalculationSection({
             step="0.1"
             value={formData.points_per_dollar}
             onChange={(e) =>
-              setFormData({ ...formData, points_per_dollar: e.target.value })
+              setFormData((prev) => ({ ...prev, points_per_dollar: e.target.value }))
             }
             placeholder="2"
             required
@@ -214,7 +214,7 @@ function PointsCalculationSection({
             type="number"
             step="0.1"
             value={formData.percentage}
-            onChange={(e) => setFormData({ ...formData, percentage: e.target.value })}
+            onChange={(e) => setFormData((prev) => ({ ...prev, percentage: e.target.value }))}
             placeholder="10"
             required
           />
@@ -259,7 +259,7 @@ function ScheduleSection({ formData, setFormData }: SectionProps) {
             id="start_date"
             type="date"
             value={formData.start_date}
-            onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
+            onChange={(e) => setFormData((prev) => ({ ...prev, start_date: e.target.value }))}
             disabled={formData.is_default}
           />
         </div>
@@ -269,7 +269,7 @@ function ScheduleSection({ formData, setFormData }: SectionProps) {
             id="end_date"
             type="date"
             value={formData.end_date}
-            onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
+            onChange={(e) => setFormData((prev) => ({ ...prev, end_date: e.target.value }))}
             disabled={formData.is_default}
           />
         </div>
@@ -282,7 +282,7 @@ function ScheduleSection({ formData, setFormData }: SectionProps) {
             id="time_start"
             type="time"
             value={formData.time_start}
-            onChange={(e) => setFormData({ ...formData, time_start: e.target.value })}
+            onChange={(e) => setFormData((prev) => ({ ...prev, time_start: e.target.value }))}
             disabled={formData.is_default}
           />
         </div>
@@ -292,7 +292,7 @@ function ScheduleSection({ formData, setFormData }: SectionProps) {
             id="time_end"
             type="time"
             value={formData.time_end}
-            onChange={(e) => setFormData({ ...formData, time_end: e.target.value })}
+            onChange={(e) => setFormData((prev) => ({ ...prev, time_end: e.target.value }))}
             disabled={formData.is_default}
           />
         </div>
@@ -303,7 +303,7 @@ function ScheduleSection({ formData, setFormData }: SectionProps) {
         <Label>{t("form.activeDays")}</Label>
         <div className="grid grid-cols-4 gap-2 mt-2">
           {DAY_OPTIONS.map((day) => (
-            <div key={day.value} className="flex items-center space-x-2">
+            <div key={day.value} className="flex items-center gap-2">
               <Checkbox
                 id={`day-${day.value}`}
                 checked={formData.days_of_week.includes(day.value)}
@@ -335,7 +335,7 @@ function DisplaySettingsSection({ formData, setFormData }: SectionProps) {
         <Input
           id="display_name"
           value={formData.display_name}
-          onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
+          onChange={(e) => setFormData((prev) => ({ ...prev, display_name: e.target.value }))}
           placeholder={t("form.displayNamePlaceholder")}
         />
         <p className="text-sm text-muted-foreground mt-1">{t("form.displayNameHint")}</p>
@@ -348,7 +348,7 @@ function DisplaySettingsSection({ formData, setFormData }: SectionProps) {
             <button
               key={emoji}
               type="button"
-              onClick={() => setFormData({ ...formData, display_icon: emoji })}
+              onClick={() => setFormData((prev) => ({ ...prev, display_icon: emoji }))}
               className={`text-2xl p-2 rounded border-2 transition-all ${
                 formData.display_icon === emoji
                   ? "border-primary bg-primary/20 ring-2 ring-primary ring-offset-2 shadow-md scale-110"
@@ -368,13 +368,13 @@ function DisplaySettingsSection({ formData, setFormData }: SectionProps) {
             id="display_color"
             type="color"
             value={formData.display_color}
-            onChange={(e) => setFormData({ ...formData, display_color: e.target.value })}
+            onChange={(e) => setFormData((prev) => ({ ...prev, display_color: e.target.value }))}
             className="w-20 h-10"
           />
           <Input
             type="text"
             value={formData.display_color}
-            onChange={(e) => setFormData({ ...formData, display_color: e.target.value })}
+            onChange={(e) => setFormData((prev) => ({ ...prev, display_color: e.target.value }))}
             placeholder="#3B82F6"
           />
         </div>
@@ -516,7 +516,7 @@ export default function NewPointsRulePage() {
       <div className="mb-6">
         <Link href="/dashboard/points-rules">
           <Button variant="ghost" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="mr-2 size-4" />
             {t("backToList")}
           </Button>
         </Link>
@@ -536,7 +536,7 @@ export default function NewPointsRulePage() {
 
             <div className="flex gap-4 pt-4">
               <Button type="submit" disabled={loading}>
-                <Save className="mr-2 h-4 w-4" />
+                <Save className="mr-2 size-4" />
                 {loading ? t("form.creating") : t("form.createRule")}
               </Button>
               <Link href="/dashboard/points-rules">

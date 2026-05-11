@@ -102,7 +102,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 id="first_name"
                 value={formData.first_name}
                 onChange={(e) =>
-                  setFormData({ ...formData, first_name: e.target.value })
+                  setFormData((prev) => ({ ...prev, first_name: e.target.value }))
                 }
                 aria-invalid={!!fieldErrors.first_name}
                 aria-describedby="first_name-error"
@@ -119,7 +119,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
                 id="last_name"
                 value={formData.last_name}
                 onChange={(e) =>
-                  setFormData({ ...formData, last_name: e.target.value })
+                  setFormData((prev) => ({ ...prev, last_name: e.target.value }))
                 }
                 aria-invalid={!!fieldErrors.last_name}
                 aria-describedby="last_name-error"
@@ -139,7 +139,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
               type="email"
               value={formData.email}
               onChange={(e) =>
-                setFormData({ ...formData, email: e.target.value })
+                setFormData((prev) => ({ ...prev, email: e.target.value }))
               }
               aria-invalid={!!fieldErrors.email}
               aria-describedby="email-error"

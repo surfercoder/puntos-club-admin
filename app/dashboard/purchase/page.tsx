@@ -59,7 +59,7 @@ export default async function PurchaseListPage() {
       <ToastHandler />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <h1 className="text-2xl font-semibold">{t('title')}</h1>
           <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
@@ -109,7 +109,7 @@ export default async function PurchaseListPage() {
                       <div className="flex items-center justify-end gap-2">
                         <Button asChild size="sm" variant="secondary">
                           <Link href={`/dashboard/purchase/edit/${purchase.id}`}>
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="size-4" />
                           </Link>
                         </Button>
                         <DeleteModal purchaseId={String(purchase.id)} purchaseNumber={purchase.purchase_number} />

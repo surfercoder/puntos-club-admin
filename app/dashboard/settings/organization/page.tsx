@@ -39,7 +39,7 @@ export default async function OrgSettingsPage() {
           <Settings className="size-5 text-muted-foreground" />
         </div>
         <div>
-          <h1 className="text-lg font-bold">{org.name}</h1>
+          <h1 className="text-lg font-semibold">{org.name}</h1>
           <p className="text-sm text-muted-foreground">{t("description")}</p>
         </div>
       </div>

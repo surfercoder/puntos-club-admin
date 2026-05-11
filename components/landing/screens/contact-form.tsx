@@ -258,7 +258,7 @@ const ContactForm = ({
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 16 16"
                     fill="currentColor"
-                    className="h-5 w-5"
+                    className="size-5"
                     style={{ color: "#4BB562" }}
                   >
                     <path
@@ -276,7 +276,7 @@ const ContactForm = ({
                     xmlns="http://www.w3.org/2000/svg"
                     viewBox="0 0 16 16"
                     fill="currentColor"
-                    className="h-5 w-5"
+                    className="size-5"
                     style={{ color: "#FF0000" }}
                   >
                     <path
@@ -301,7 +301,7 @@ const ContactForm = ({
             >
               {loading && (
                 <div
-                  className="inline-block h-4 w-4 animate-spin rounded-full border-2 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white mr-2"
+                  className="inline-block size-4 animate-spin rounded-full border-2 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white mr-2"
                   role="status"
                 >
                   <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">

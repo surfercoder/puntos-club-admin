@@ -29,11 +29,11 @@ type KpiCardProps = {
 export function KpiCard({ title, value, subtitle, icon: Icon, iconClassName }: KpiCardProps) {
   return (
     <Card>
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+      <CardHeader className="flex flex-row items-center justify-between gap-0 pb-2">
         <CardTitle className="text-sm font-medium text-muted-foreground">
           {title}
         </CardTitle>
-        <Icon className={`h-4 w-4 ${iconClassName ?? "text-muted-foreground"}`} />
+        <Icon className={`size-4 ${iconClassName ?? "text-muted-foreground"}`} />
       </CardHeader>
       <CardContent>
         <div className="text-2xl font-bold">{value}</div>

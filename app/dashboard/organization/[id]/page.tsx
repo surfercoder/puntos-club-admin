@@ -31,12 +31,12 @@ export default async function OrganizationDetailsPage({ params }: { params: Prom
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{organization.name}</h1>
+          <h1 className="text-2xl font-semibold">{organization.name}</h1>
           <p className="text-muted-foreground">Detalles de la organización y productos disponibles</p>
         </div>
         <Button asChild variant="secondary">
           <Link href={`/dashboard/organization/edit/${organization.id}`}>
-            <Pencil className="h-4 w-4 mr-2" />
+            <Pencil className="size-4 mr-2" />
             Editar Organización
           </Link>
         </Button>
@@ -75,7 +75,7 @@ export default async function OrganizationDetailsPage({ params }: { params: Prom
           <div className="flex items-center justify-between">
             <div>
               <CardTitle className="flex items-center gap-2">
-                <ShoppingCart className="h-5 w-5" />
+                <ShoppingCart className="size-5" />
                 Productos Disponibles para Canje
               </CardTitle>
               <CardDescription>
@@ -84,7 +84,7 @@ export default async function OrganizationDetailsPage({ params }: { params: Prom
             </div>
             <Button asChild size="sm">
               <Link href="/dashboard/product">
-                <Package className="h-4 w-4 mr-2" />
+                <Package className="size-4 mr-2" />
                 Administrar Productos
               </Link>
             </Button>

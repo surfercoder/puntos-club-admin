@@ -118,7 +118,7 @@ export default function AppUserOrganizationForm({ appUserOrganization }: AppUser
         <FieldError actionState={validation ?? actionState} name="organization_id" />
       </div>
 
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-2">
         <input
           className="rounded"
           defaultChecked={appUserOrganization?.is_active ?? true}

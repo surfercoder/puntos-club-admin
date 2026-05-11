@@ -92,7 +92,7 @@ export default function AddressForm({ address }: { address?: Address }) {
           aria-describedby="street-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.street}
           value={addressData.street}
-          onChange={(e) => setAddressData({ ...addressData, street: e.target.value })}
+          onChange={(e) => setAddressData((prev) => ({ ...prev, street: e.target.value }))}
           id="street"
           name="street"
         />
@@ -104,7 +104,7 @@ export default function AddressForm({ address }: { address?: Address }) {
           aria-describedby="number-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.number}
           value={addressData.number}
-          onChange={(e) => setAddressData({ ...addressData, number: e.target.value })}
+          onChange={(e) => setAddressData((prev) => ({ ...prev, number: e.target.value }))}
           id="number"
           name="number"
         />
@@ -116,7 +116,7 @@ export default function AddressForm({ address }: { address?: Address }) {
           aria-describedby="city-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.city}
           value={addressData.city}
-          onChange={(e) => setAddressData({ ...addressData, city: e.target.value })}
+          onChange={(e) => setAddressData((prev) => ({ ...prev, city: e.target.value }))}
           id="city"
           name="city"
         />
@@ -128,7 +128,7 @@ export default function AddressForm({ address }: { address?: Address }) {
           aria-describedby="state-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.state}
           value={addressData.state}
-          onChange={(e) => setAddressData({ ...addressData, state: e.target.value })}
+          onChange={(e) => setAddressData((prev) => ({ ...prev, state: e.target.value }))}
           id="state"
           name="state"
         />
@@ -140,7 +140,7 @@ export default function AddressForm({ address }: { address?: Address }) {
           aria-describedby="zip_code-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.zip_code}
           value={addressData.zip_code}
-          onChange={(e) => setAddressData({ ...addressData, zip_code: e.target.value })}
+          onChange={(e) => setAddressData((prev) => ({ ...prev, zip_code: e.target.value }))}
           id="zip_code"
           name="zip_code"
         />

@@ -28,9 +28,9 @@ export default function ModerationResultPanel({ result }: ModerationResultPanelP
     }`}>
       <div className="flex items-start gap-3">
         {result.isApproved ? (
-          <ShieldCheck className="h-5 w-5 text-green-600 mt-0.5" />
+          <ShieldCheck className="size-5 text-green-600 mt-0.5" />
         ) : (
-          <ShieldAlert className="h-5 w-5 text-red-600 mt-0.5" />
+          <ShieldAlert className="size-5 text-red-600 mt-0.5" />
         )}
         <div className="flex-1">
           <h3 className="font-semibold text-sm mb-1">

@@ -226,15 +226,15 @@ export function QRPreviewCard({ qrData, organizationName, logoUrl }: QRPreviewCa
 
         <div className="grid grid-cols-3 gap-2 w-full">
           <Button variant="outline" size="sm" className="gap-1.5" onClick={handleDownload}>
-            <Download className="h-3.5 w-3.5" />
+            <Download className="size-3.5" />
             <span className="hidden sm:inline">{t('download')}</span>
           </Button>
           <Button variant="outline" size="sm" className="gap-1.5" onClick={handlePrint}>
-            <Printer className="h-3.5 w-3.5" />
+            <Printer className="size-3.5" />
             <span className="hidden sm:inline">{t('print')}</span>
           </Button>
           <Button variant="outline" size="sm" className="gap-1.5" onClick={handleShare}>
-            <Share2 className="h-3.5 w-3.5" />
+            <Share2 className="size-3.5" />
             <span className="hidden sm:inline">{t('share')}</span>
           </Button>
         </div>

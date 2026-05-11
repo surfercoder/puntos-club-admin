@@ -32,9 +32,9 @@ export function PasswordStrengthChecklist({ password }: PasswordStrengthChecklis
         return (
           <li key={rule.key} className="flex items-center gap-2 text-xs">
             {passed ? (
-              <Check className="h-3.5 w-3.5 shrink-0 text-brand-green" />
+              <Check className="size-3.5 shrink-0 text-brand-green" />
             ) : (
-              <X className="h-3.5 w-3.5 shrink-0 text-muted-foreground" />
+              <X className="size-3.5 shrink-0 text-muted-foreground" />
             )}
             <span
               className={cn(

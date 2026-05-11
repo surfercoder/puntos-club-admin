@@ -119,7 +119,7 @@ export default function NotificationFormFields({
             disabled={isDisabled}
             title={t('addEmoji')}
           >
-            <Smile className="h-5 w-5" />
+            <Smile className="size-5" />
           </Button>
           {showTitleEmojiPicker && (
             <div className="absolute right-0 top-full mt-2 z-50">
@@ -131,7 +131,7 @@ export default function NotificationFormFields({
                   onClick={onCloseTitleEmojiPicker}
                   className="absolute -top-2 -right-2 bg-background rounded-full shadow-md z-10"
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </Button>
@@ -178,7 +178,7 @@ export default function NotificationFormFields({
             disabled={isDisabled}
             title={t('addEmoji')}
           >
-            <Smile className="h-5 w-5" />
+            <Smile className="size-5" />
           </Button>
           {showEmojiPicker && (
             <div className="absolute right-0 top-full mt-2 z-50">
@@ -190,7 +190,7 @@ export default function NotificationFormFields({
                   onClick={onCloseEmojiPicker}
                   className="absolute -top-2 -right-2 bg-background rounded-full shadow-md z-10"
                 >
-                  <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                   </svg>
                 </Button>

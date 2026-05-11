@@ -42,17 +42,19 @@ export default function OrganizationNotificationLimitForm({
   const [actionState, formAction, pending] = useActionState(organizationNotificationLimitFormAction, EMPTY_ACTION_STATE);
 
   useEffect(() => {
-    if (actionState.status === 'success' && onSuccess) {
+    if (actionState.status === 'success') {
       toast.success(actionState.message);
-      onSuccess();
     } else if (actionState.status === 'error' && actionState.message) {
       toast.error(actionState.message);
     }
-  }, [actionState, onSuccess]);
+  }, [actionState]);
 
-  if (actionState.status === 'success' && !onSuccess && redirectTo) {
-    toast.success(actionState.message);
-    redirect(redirectTo);
+  if (actionState.status === 'success') {
+    if (onSuccess) {
+      onSuccess();
+    } else if (redirectTo) {
+      redirect(redirectTo);
+    }
   }
 
   const handlePlanChange = (value: string) => {

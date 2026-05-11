@@ -120,7 +120,7 @@ export function UpdatePasswordForm({
                     onClick={() => dispatch({ type: 'TOGGLE_PASSWORD_VISIBILITY' })}
                     aria-label={showPassword ? "Hide password" : "Show password"}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
                   </button>
                 </div>
                 <PasswordStrengthChecklist password={password} />

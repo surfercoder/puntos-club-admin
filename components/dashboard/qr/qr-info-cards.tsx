@@ -18,7 +18,7 @@ export function QRHowItWorksCard() {
     <Card>
       <CardHeader className="pb-3">
         <CardTitle className="text-base flex items-center gap-2">
-          <Info className="h-4 w-4 text-primary" />
+          <Info className="size-4 text-primary" />
           {t('howItWorks')}
         </CardTitle>
       </CardHeader>
@@ -26,7 +26,7 @@ export function QRHowItWorksCard() {
         <ol className="space-y-4">
           {steps.map((item, idx) => (
             <li key={item.id} className="flex gap-3">
-              <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold">
+              <span className="flex size-6 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold">
                 {idx + 1}
               </span>
               <div>

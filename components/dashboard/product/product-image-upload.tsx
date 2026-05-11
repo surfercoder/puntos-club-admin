@@ -139,7 +139,7 @@ export default function ProductImageUpload({
               onClick={() => removeImage(imageUrl, index)}
               className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
             >
-              <X className="w-4 h-4" />
+              <X className="size-4" />
             </button>
           </div>
         ))}
@@ -156,12 +156,12 @@ export default function ProductImageUpload({
             />
             {uploading ? (
               <div className="flex flex-col items-center gap-2">
-                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-foreground" />
+                <div className="animate-spin rounded-full size-8 border-b-2 border-foreground" />
                 <span className="text-sm text-muted-foreground">{t('uploading')}</span>
               </div>
             ) : (
               <div className="flex flex-col items-center gap-2">
-                <Upload className="w-8 h-8 text-muted-foreground" />
+                <Upload className="size-8 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">{t('uploadButton')}</span>
                 <span className="text-xs text-muted-foreground/70">{t('formats')}</span>
                 <span className="text-xs text-muted-foreground/70">{t('maxSize')}</span>
@@ -173,7 +173,7 @@ export default function ProductImageUpload({
 
       {images.length === 0 && (
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <ImageIcon className="w-4 h-4" />
+          <ImageIcon className="size-4" />
           <span>{t('noImages')}</span>
         </div>
       )}

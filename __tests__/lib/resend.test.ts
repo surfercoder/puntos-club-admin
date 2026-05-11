@@ -19,8 +19,15 @@ describe('lib/resend', () => {
     expect(resend).toBeDefined();
   });
 
-  it('exports EMAIL_FROM constant', () => {
+  it('falls back to onboarding@resend.dev when EMAIL_FROM env is unset', () => {
+    delete process.env.EMAIL_FROM;
     const { EMAIL_FROM } = require('@/lib/resend');
     expect(EMAIL_FROM).toBe('Puntos Club <onboarding@resend.dev>');
+  });
+
+  it('uses EMAIL_FROM env value when set', () => {
+    process.env.EMAIL_FROM = 'Puntos Club <soporte@puntosclub.com.ar>';
+    const { EMAIL_FROM } = require('@/lib/resend');
+    expect(EMAIL_FROM).toBe('Puntos Club <soporte@puntosclub.com.ar>');
   });
 });

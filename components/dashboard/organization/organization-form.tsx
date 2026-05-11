@@ -36,17 +36,19 @@ export default function OrganizationForm({ organization, onSuccess, onCancel, re
   const [actionState, formAction, pending] = useActionState(organizationFormAction, EMPTY_ACTION_STATE);
 
   useEffect(() => {
-    if (actionState.status === 'success' && onSuccess) {
+    if (actionState.status === 'success') {
       toast.success(actionState.message);
-      onSuccess();
     } else if (actionState.status === 'error' && actionState.message) {
       toast.error(actionState.message);
     }
-  }, [actionState, onSuccess]);
+  }, [actionState]);
 
-  if (actionState.status === 'success' && !onSuccess) {
-    toast.success(actionState.message);
-    redirect(redirectTo /* c8 ignore next */ ?? "/dashboard/organization");
+  if (actionState.status === 'success') {
+    if (onSuccess) {
+      onSuccess();
+    } else {
+      redirect(redirectTo /* c8 ignore next */ ?? "/dashboard/organization");
+    }
   }
 
   // Handlers

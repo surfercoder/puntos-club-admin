@@ -89,7 +89,7 @@ export default function PushTokenForm({ pushToken }: PushTokenFormProps) {
         <FieldError actionState={validation ?? actionState} name="platform" />
       </div>
 
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-2">
         <input className="rounded" defaultChecked={pushToken?.is_active ?? true} id="is_active" name="is_active" type="checkbox" />
         <Label htmlFor="is_active">Active</Label>
       </div>

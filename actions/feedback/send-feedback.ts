@@ -1,5 +1,6 @@
 'use server';
 
+import * as Sentry from '@sentry/nextjs';
 import {
   brandedEmailLayout,
   sectionHeading,
@@ -84,10 +85,18 @@ export async function sendFeedback(
 
     if (error) {
       console.error('[sendFeedback] Resend error:', error);
+      Sentry.captureException(error, {
+        tags: { area: 'feedback.email' },
+        extra: { type, userEmail },
+      });
       return { success: false, error: 'Failed to send feedback.' };
     }
   } catch (err) {
     console.error('[sendFeedback] Resend error:', err);
+    Sentry.captureException(err, {
+      tags: { area: 'feedback.email' },
+      extra: { type, userEmail },
+    });
     return { success: false, error: 'Failed to send feedback.' };
   }
 

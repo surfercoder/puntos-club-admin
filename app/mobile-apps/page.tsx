@@ -35,10 +35,10 @@ export default async function MobileAppsPage() {
       <div className="mb-10 text-center">
         <div className="mb-4 flex justify-center">
           <div className="rounded-full bg-primary/10 p-3">
-            <Smartphone className="h-8 w-8 text-primary" />
+            <Smartphone className="size-8 text-primary" />
           </div>
         </div>
-        <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
+        <h1 className="text-3xl font-semibold tracking-tight">{t("title")}</h1>
         <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
       </div>
 
@@ -63,7 +63,7 @@ export default async function MobileAppsPage() {
               <p className="text-xs text-muted-foreground">{t("scanToDownload")}</p>
               <Button asChild className="w-full sm:hidden">
                 <a href={app.url} target="_blank" rel="noopener noreferrer">
-                  <Download className="mr-2 h-4 w-4" />
+                  <Download className="mr-2 size-4" />
                   {t("download")}
                 </a>
               </Button>

@@ -43,12 +43,12 @@ export default async function CreateNotificationPage() {
         <div className="flex items-center gap-4">
           <Button asChild variant="ghost" size="sm">
             <Link href="/dashboard/notifications">
-              <ArrowLeft className="h-4 w-4 mr-2" />
+              <ArrowLeft className="size-4 mr-2" />
               {tCommon('back')}
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-bold">{t('createPage.title')}</h1>
+            <h1 className="text-2xl font-semibold">{t('createPage.title')}</h1>
             <p className="text-muted-foreground">{t('createPage.description')}</p>
           </div>
         </div>

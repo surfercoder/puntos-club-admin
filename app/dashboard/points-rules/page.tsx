@@ -201,7 +201,7 @@ function PointsCalculator({ state, dispatch, t }: PointsCalculatorProps) {
     <Card className="mb-6">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
-          <Calculator className="h-5 w-5" />
+          <Calculator className="size-5" />
           {t("calculator.title")}
         </CardTitle>
         <CardDescription>{t("calculator.description")}</CardDescription>
@@ -270,7 +270,7 @@ function RulesTable({ rules, loading, onRefresh, onToggleStatus, t }: RulesTable
         <div className="flex justify-between items-center">
           <CardTitle>{t("table.title")}</CardTitle>
           <Button variant="outline" size="sm" onClick={onRefresh}>
-            <RefreshCw className="h-4 w-4 mr-2" />
+            <RefreshCw className="size-4 mr-2" />
             {t("table.refresh")}
           </Button>
         </div>
@@ -355,7 +355,7 @@ function RulesTable({ rules, loading, onRefresh, onToggleStatus, t }: RulesTable
                       <div className="flex items-center justify-end gap-2">
                         <Button asChild size="sm" variant="secondary">
                           <Link href={`/dashboard/points-rules/edit/${rule.id}`}>
-                            <Pencil className="h-4 w-4" />
+                            <Pencil className="size-4" />
                           </Link>
                         </Button>
                         {!rule.is_default && (
@@ -453,12 +453,12 @@ export default function PointsRulesPage() {
     <div className="space-y-6">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold">{t("title")}</h1>
+          <h1 className="text-3xl font-semibold">{t("title")}</h1>
           <p className="text-muted-foreground mt-2">{t("description")}</p>
         </div>
         <Link href="/dashboard/points-rules/new">
           <Button>
-            <Plus className="mr-2 h-4 w-4" />
+            <Plus className="mr-2 size-4" />
             {t("createButton")}
           </Button>
         </Link>

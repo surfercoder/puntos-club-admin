@@ -40,7 +40,7 @@ export default async function AddressListPage() {
     <div className="space-y-6">    
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <h1 className="text-2xl font-semibold">{t('title')}</h1>
           <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
@@ -71,7 +71,7 @@ export default async function AddressListPage() {
                   <TableCell className="flex gap-2">
                     <Button asChild size="sm" variant="secondary">
                       <Link href={`/dashboard/address/edit/${address.id}`}>
-                        <Pencil className="h-4 w-4" />
+                        <Pencil className="size-4" />
                       </Link>
                     </Button>
                     <DeleteModal id={Number(address.id)} />

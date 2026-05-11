@@ -57,8 +57,8 @@ export default async function NotificationsPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Bell className="h-6 w-6" />
+          <h1 className="text-2xl font-semibold flex items-center gap-2">
+            <Bell className="size-6" />
             {t('title')}
             <PlanUsageBadge feature="push_notifications_monthly" />
           </h1>
@@ -117,7 +117,7 @@ export default async function NotificationsPage() {
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">
                         <Link href={`/dashboard/notifications/view/${notification.id}`}>
-                          <Eye className="h-4 w-4" />
+                          <Eye className="size-4" />
                         </Link>
                       </Button>
                       <DeleteModal
@@ -132,7 +132,7 @@ export default async function NotificationsPage() {
               <TableRow>
                 <TableCell className="text-center py-8" colSpan={8}>
                   <div className="flex flex-col items-center gap-2">
-                    <Bell className="h-12 w-12 text-muted-foreground" />
+                    <Bell className="size-12 text-muted-foreground" />
                     <p className="text-muted-foreground">{t('empty')}</p>
                     <Button asChild variant="outline" size="sm">
                       <Link href="/dashboard/notifications/create">

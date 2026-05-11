@@ -144,7 +144,7 @@ export function ImageUpload({
             variant="destructive"
             onClick={handleRemove}
           >
-            <X className="h-4 w-4" />
+            <X className="size-4" />
           </Button>
         </div>
       ) : (
@@ -163,13 +163,13 @@ export function ImageUpload({
         >
           {uploading ? (
             <div className="flex flex-col items-center gap-2">
-              <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+              <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
               <p className="text-sm text-muted-foreground">{t('uploading')}</p>
             </div>
           ) : (
             <>
               <div className="rounded-full bg-primary/10 p-4">
-                <ImageIcon className="h-8 w-8 text-primary" />
+                <ImageIcon className="size-8 text-primary" />
               </div>
               <div className="mt-4 flex flex-col items-center gap-1">
                 <p className="text-sm font-medium">{t('clickToUpload')}</p>
@@ -177,7 +177,7 @@ export function ImageUpload({
                   {t('maxSize', { maxSize: maxSizeMB })}
                 </p>
               </div>
-              <Upload className="mt-2 h-4 w-4 text-muted-foreground" />
+              <Upload className="mt-2 size-4 text-muted-foreground" />
             </>
           )}
         </div>

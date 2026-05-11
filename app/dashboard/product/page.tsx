@@ -34,7 +34,7 @@ export default async function ProductListPage() {
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
+          <h1 className="text-2xl font-semibold flex items-center gap-2">
             {t('title')}
             <PlanUsageBadge feature="redeemable_products" />
           </h1>
@@ -71,7 +71,7 @@ export default async function ProductListPage() {
                         product.image_urls.map((url, index) => (
                           <div
                             key={url}
-                            className="relative w-12 h-12 rounded border overflow-hidden bg-muted"
+                            className="relative size-12 rounded border overflow-hidden bg-muted"
                           >
                             <Image
                               src={url}
@@ -83,8 +83,8 @@ export default async function ProductListPage() {
                           </div>
                         ))
                       ) : (
-                        <div className="w-12 h-12 rounded border bg-muted flex items-center justify-center">
-                          <ImageIcon className="w-5 h-5 text-muted-foreground" />
+                        <div className="size-12 rounded border bg-muted flex items-center justify-center">
+                          <ImageIcon className="size-5 text-muted-foreground" />
                         </div>
                       )}
                     </div>
@@ -98,7 +98,7 @@ export default async function ProductListPage() {
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">
                         <Link href={`/dashboard/product/edit/${product.id}`}>
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="size-4" />
                         </Link>
                       </Button>
                       <DeleteModal

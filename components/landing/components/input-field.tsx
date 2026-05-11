@@ -52,7 +52,7 @@ export const InputField: FC<InputFieldProps> = ({
           ref={(el) => {
             circleRefs.current[index] = el;
           }}
-          className={`absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full`}
+          className={`absolute left-4 top-1/2 transform -translate-y-1/2 size-6 rounded-full`}
           style={{ backgroundColor: color }}
         />
         <input
@@ -106,7 +106,7 @@ export const PhoneNumberField: FC<PhoneNumberFieldProps> = ({
           ref={(el) => {
             circleRefs.current[index] = el;
           }}
-          className="absolute left-4 top-1/2 transform -translate-y-1/2 w-6 h-6 rounded-full z-10"
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 size-6 rounded-full z-10"
           style={{ backgroundColor: "#FF4573" }}
         />
         <input
@@ -145,7 +145,7 @@ export const InputTextArea: FC<InputFieldProps> = ({
           ref={(el) => {
             circleRefs.current[index] = el;
           }}
-          className="absolute left-4 top-5 w-6 h-6 rounded-full"
+          className="absolute left-4 top-5 size-6 rounded-full"
           style={{ backgroundColor: color }}
         />
         <textarea

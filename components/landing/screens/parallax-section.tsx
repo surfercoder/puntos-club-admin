@@ -175,7 +175,7 @@ const ParallaxSection: React.FC = () => {
         }}
       />
       <div
-        className="absolute h-0 w-0 -bottom-[99px] left-0 border-x-[50vw] border-x-transparent border-t-[100px] -z-10"
+        className="absolute size-0 -bottom-[99px] left-0 border-x-[50vw] border-x-transparent border-t-[100px] -z-10"
         style={{ borderTopColor: "#31A1D6" }}
       />
       <div
@@ -193,10 +193,10 @@ const ParallaxSection: React.FC = () => {
       <div className="absolute left-[5%] top-[39%] lg:left-[10%] lg:top-[35%] flex flex-col font-black text-center items-center justify-center w-[45%] lg:w-[50%]">
         <div
           ref={iconRef}
-          className="w-[60px] h-[60px] md:w-[80px] md:h-[80px] lg:w-[100px] lg:h-[100px] bg-white mb-5 rounded-[50%]"
+          className="size-[60px] md:size-[80px] lg:size-[100px] bg-white mb-5 rounded-[50%]"
         >
           <div
-            className="w-[80%] h-[80%] m-[10%] bg-contain bg-no-repeat bg-center"
+            className="size-[80%] m-[10%] bg-contain bg-no-repeat bg-center"
             style={{
               backgroundImage: `url(${currentIcon})`,
             }}

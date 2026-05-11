@@ -129,7 +129,7 @@ export default function CategoryForm({ category }: CategoryFormProps) {
         <FieldError actionState={validation ?? actionState} name="description" />
       </div>
 
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-2">
         <input
           className="rounded"
           defaultChecked={category?.active ?? true}

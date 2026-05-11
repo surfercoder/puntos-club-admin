@@ -64,12 +64,12 @@ export default async function ViewNotificationPage({ params }: { params: Promise
       <div className="flex items-center gap-4">
         <Button asChild variant="ghost" size="sm">
           <Link href="/dashboard/notifications">
-            <ArrowLeft className="h-4 w-4 mr-2" />
+            <ArrowLeft className="size-4 mr-2" />
             {tCommon('back')}
           </Link>
         </Button>
         <div>
-          <h1 className="text-2xl font-bold">{t('viewPage.title')}</h1>
+          <h1 className="text-2xl font-semibold">{t('viewPage.title')}</h1>
           <p className="text-muted-foreground">{t('viewPage.description')}</p>
         </div>
       </div>
@@ -98,7 +98,7 @@ export default async function ViewNotificationPage({ params }: { params: Promise
 
           <div className="bg-muted/50 border rounded-lg p-4">
             <div className="flex items-start gap-3">
-              <Bell className="h-5 w-5 text-primary mt-0.5" />
+              <Bell className="size-5 text-primary mt-0.5" />
               <div className="flex-1 text-sm min-w-0">
                 <p className="font-semibold text-foreground mb-1">{tForm('preview')}</p>
                 <div className="bg-background rounded-lg p-3 shadow-sm border min-w-0">

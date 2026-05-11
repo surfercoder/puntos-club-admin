@@ -163,7 +163,7 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
             aria-describedby="street-error"
             aria-invalid={!!((validation ?? actionState).fieldErrors as Record<string, string[]> | undefined)?.street}
             value={addressData.street}
-            onChange={(e) => setAddressData({ ...addressData, street: e.target.value })}
+            onChange={(e) => setAddressData((prev) => ({ ...prev, street: e.target.value }))}
             id="street"
             name="street"
             placeholder={t('streetPlaceholder')}
@@ -177,7 +177,7 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
             aria-describedby="number-error"
             aria-invalid={!!((validation ?? actionState).fieldErrors as Record<string, string[]> | undefined)?.number}
             value={addressData.number}
-            onChange={(e) => setAddressData({ ...addressData, number: e.target.value })}
+            onChange={(e) => setAddressData((prev) => ({ ...prev, number: e.target.value }))}
             id="number"
             name="number"
             placeholder={t('numberPlaceholder')}
@@ -191,7 +191,7 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
             aria-describedby="city-error"
             aria-invalid={!!((validation ?? actionState).fieldErrors as Record<string, string[]> | undefined)?.city}
             value={addressData.city}
-            onChange={(e) => setAddressData({ ...addressData, city: e.target.value })}
+            onChange={(e) => setAddressData((prev) => ({ ...prev, city: e.target.value }))}
             id="city"
             name="city"
             placeholder={t('cityPlaceholder')}
@@ -205,7 +205,7 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
             aria-describedby="state-error"
             aria-invalid={!!((validation ?? actionState).fieldErrors as Record<string, string[]> | undefined)?.state}
             value={addressData.state}
-            onChange={(e) => setAddressData({ ...addressData, state: e.target.value })}
+            onChange={(e) => setAddressData((prev) => ({ ...prev, state: e.target.value }))}
             id="state"
             name="state"
             placeholder={t('statePlaceholder')}
@@ -219,7 +219,7 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
             aria-describedby="zip_code-error"
             aria-invalid={!!((validation ?? actionState).fieldErrors as Record<string, string[]> | undefined)?.zip_code}
             value={addressData.zip_code}
-            onChange={(e) => setAddressData({ ...addressData, zip_code: e.target.value })}
+            onChange={(e) => setAddressData((prev) => ({ ...prev, zip_code: e.target.value }))}
             id="zip_code"
             name="zip_code"
             placeholder={t('zipCodePlaceholder')}

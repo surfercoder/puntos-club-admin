@@ -10,7 +10,7 @@ const StyledButton: FC<{
   return (
     <button
       onClick={onClick ? onClick : () => {}}
-      className="p-2 rounded-full transition duration-300 bg-white text-black dark:bg-gray-950 dark:text-white border-2 dark:border-white border-black hover:scale-110 focus:outline-none"
+      className="p-2 rounded-full transition duration-300 bg-white text-black dark:bg-neutral-950 dark:text-white border-2 dark:border-white border-black hover:scale-110 focus:outline-none"
       aria-label={ariaLabel}
     >
       {children}

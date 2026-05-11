@@ -194,12 +194,12 @@ function StepNav({ steps, currentStep, canNavigateToStep, onGoToStep }: {
                 aria-current={isCurrent ? 'step' : undefined}
               >
                 <span className={cn(
-                  'flex h-9 w-9 items-center justify-center rounded-full border-2 transition-all',
+                  'flex size-9 items-center justify-center rounded-full border-2 transition-all',
                   isCompleted ? 'border-primary bg-primary text-primary-foreground'
                     : isCurrent ? 'border-primary bg-white dark:bg-card text-primary'
                     : 'border-muted-foreground/30 bg-white dark:bg-card text-muted-foreground/50'
                 )}>
-                  {isCompleted ? <Check className="h-4 w-4" /> : <Icon className="h-4 w-4" />}
+                  {isCompleted ? <Check className="size-4" /> : <Icon className="size-4" />}
                 </span>
                 <span className={cn(
                   'hidden sm:block text-xs font-medium leading-tight text-center max-w-16',
@@ -433,16 +433,16 @@ export function OnboardingWizard({
       <div className="rounded-2xl border bg-card shadow-sm">
         <div className="border-b px-6 py-5">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+            <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10">
               {currentStepInfo && (
-                <currentStepInfo.icon className="h-5 w-5 text-primary" />
+                <currentStepInfo.icon className="size-5 text-primary" />
               )}
             </div>
             <div>
               <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
                 {t('step', { current: currentStep, total: steps.length })}
               </p>
-              <h1 className="text-lg font-bold text-foreground leading-tight">
+              <h1 className="text-lg font-semibold text-foreground leading-tight">
                 {currentStepInfo?.label}
               </h1>
             </div>

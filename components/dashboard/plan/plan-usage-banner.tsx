@@ -24,9 +24,9 @@ function FeatureWarning({ usage }: { usage: FeatureUsage }) {
   return (
     <span className="flex items-center gap-1.5 text-sm">
       {isAtLimit ? (
-        <XCircle className="h-3.5 w-3.5 shrink-0" />
+        <XCircle className="size-3.5 shrink-0" />
       ) : (
-        <AlertTriangle className="h-3.5 w-3.5 shrink-0" />
+        <AlertTriangle className="size-3.5 shrink-0" />
       )}
       <span>
         <strong>{label}</strong>: {usage.current_usage}/{usage.limit_value}
@@ -67,7 +67,7 @@ export function PlanUsageBanner({ features, className }: PlanUsageBannerProps) {
     >
       <div className="flex items-center gap-3">
         <div className="flex gap-3 flex-1 min-w-0">
-          <TrendingUp className="h-5 w-5 mt-0.5 shrink-0" />
+          <TrendingUp className="size-5 mt-0.5 shrink-0" />
           <div className="space-y-1.5">
             <p className="font-semibold text-sm">
               {hasAtLimit
@@ -102,7 +102,7 @@ export function PlanUsageBanner({ features, className }: PlanUsageBannerProps) {
             className="opacity-60 hover:opacity-100 transition-opacity"
             aria-label={t('closeBanner')}
           >
-            <X className="h-4 w-4" />
+            <X className="size-4" />
           </button>
           {summary.plan !== 'pro' && (
             <Button size="sm" variant={hasAtLimit ? 'destructive' : 'default'} asChild>

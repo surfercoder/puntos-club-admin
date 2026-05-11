@@ -43,7 +43,7 @@ export default async function CategoryListPage() {
       <ToastHandler />
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">{t('title')}</h1>
+          <h1 className="text-2xl font-semibold">{t('title')}</h1>
           <p className="text-muted-foreground">{t('description')}</p>
         </div>
         <Button asChild>
@@ -88,7 +88,7 @@ export default async function CategoryListPage() {
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">
                         <Link href={`/dashboard/category/edit/${categoryId}`}>
-                          <Pencil className="h-4 w-4" />
+                          <Pencil className="size-4" />
                         </Link>
                       </Button>
                       <DeleteModal 

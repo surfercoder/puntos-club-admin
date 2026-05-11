@@ -58,12 +58,12 @@ function ProductRowCard({ product, prodIndex, categoryId, canRemove, onRemove, o
     <div className="rounded-lg border border-dashed border-border p-3 space-y-3">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Package className="h-3.5 w-3.5" />
+          <Package className="size-3.5" />
           {t('rewardPlaceholder', { n: prodIndex + 1 })}
         </div>
         {canRemove && (
           <Button type="button" variant="ghost" size="sm" className="h-7 text-xs text-destructive hover:text-destructive" onClick={() => onRemove(categoryId, product.id)}>
-            <Trash2 className="h-3.5 w-3.5 mr-1" />
+            <Trash2 className="size-3.5 mr-1" />
             {tCommon('delete')}
           </Button>
         )}
@@ -240,7 +240,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
   if (!planLimits) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -248,7 +248,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="flex items-start gap-2 rounded-md bg-primary/10 border border-primary/30 px-3 py-2 text-xs text-primary">
-        <Info className="h-4 w-4 mt-0.5 shrink-0" />
+        <Info className="size-4 mt-0.5 shrink-0" />
         <span>
           Los <strong>premios</strong> son productos que tus clientes podrán canjear con sus puntos.
           Define los puntos necesarios y el stock disponible para cada premio.
@@ -266,12 +266,12 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
             className="rounded-xl border p-4 space-y-4"
           >
             <div className="flex items-center gap-3">
-              <div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold shrink-0">
+              <div className="flex size-7 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold shrink-0">
                 {catIndex + 1}
               </div>
               <div className="flex-1 space-y-1">
                 <Label htmlFor={`cat-${category.id}`} className="flex items-center gap-1.5">
-                  <Tag className="h-3.5 w-3.5" />
+                  <Tag className="size-3.5" />
                   {t('categoryName')}
                 </Label>
                 <Input
@@ -289,7 +289,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
                   className="text-destructive hover:text-destructive shrink-0"
                   onClick={() => removeCategory(category.id)}
                 >
-                  <Trash2 className="h-4 w-4" />
+                  <Trash2 className="size-4" />
                 </Button>
               )}
             </div>
@@ -317,7 +317,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
                 onClick={() => addProduct(category.id)}
                 disabled={limitReached}
               >
-                <Plus className="mr-1.5 h-3.5 w-3.5" />
+                <Plus className="mr-1.5 size-3.5" />
                 {t('addReward')}
               </Button>
             </div>
@@ -332,13 +332,13 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
         onClick={addCategory}
         disabled={limitReached}
       >
-        <Plus className="mr-2 h-4 w-4" />
+        <Plus className="mr-2 size-4" />
         {t('addCategory')}
       </Button>
 
       {limitReached && (
         <div className="flex items-start gap-2 rounded-md bg-brand-orange/10 border border-brand-orange/30 px-3 py-2 text-xs text-brand-orange">
-          <AlertTriangle className="h-4 w-4 mt-0.5 shrink-0" />
+          <AlertTriangle className="size-4 mt-0.5 shrink-0" />
           <span>
             {t('limitReached', { max: maxProducts, plan: planDisplayName })}
           </span>

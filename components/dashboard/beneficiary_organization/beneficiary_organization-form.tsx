@@ -158,7 +158,7 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
         <FieldError actionState={validation ?? actionState} name="total_points_redeemed" />
       </div>
 
-      <div className="flex items-center space-x-2">
+      <div className="flex items-center gap-2">
         <input
           className="rounded"
           defaultChecked={beneficiaryOrganization?.is_active ?? true}

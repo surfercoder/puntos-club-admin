@@ -312,7 +312,7 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
 
         <div className="bg-muted/50 border rounded-lg p-4">
           <div className="flex items-start gap-3">
-            <Bell className="h-5 w-5 text-primary mt-0.5" />
+            <Bell className="size-5 text-primary mt-0.5" />
             <div className="flex-1 text-sm min-w-0">
               <p className="font-semibold text-foreground mb-1">{t('preview')}</p>
               <div className="bg-background rounded-lg p-3 shadow-sm border min-w-0">
@@ -341,14 +341,14 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
               onClick={handleCheckContent}
               disabled={isProcessing || isModerating || !title.trim() || !body.trim() || titleCharsLeft < 0 || bodyCharsLeft < 0}
             >
-              {isModerating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {!isModerating && <ShieldCheck className="h-4 w-4 mr-2" />}
+              {isModerating && <Loader2 className="size-4 mr-2 animate-spin" />}
+              {!isModerating && <ShieldCheck className="size-4 mr-2" />}
               {isModerating ? t('verifying') : t('verifyWithAI')}
             </Button>
             <Button onClick={handleSaveAndSend} disabled={!canSendNotification} className={!canSendNotification ? 'cursor-not-allowed' : ''}>
-              {isCreating && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {isSending && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
-              {!isProcessing && <Send className="h-4 w-4 mr-2" />}
+              {isCreating && <Loader2 className="size-4 mr-2 animate-spin" />}
+              {isSending && <Loader2 className="size-4 mr-2 animate-spin" />}
+              {!isProcessing && <Send className="size-4 mr-2" />}
               {isCreating ? t('creating') : isSending ? t('sending') : isEditing ? t('resend') : t('submit')}
             </Button>
           </div>

@@ -171,7 +171,7 @@ export default function Profit() {
       <div className="flex h-fit justify-center overflow-hidden">
         <h1
           ref={titleRef}
-          className="w-fit h-fit border-solid border border-t-0 border-opacity-10 rounded-xl rounded-t-none py-5 px-6 text-2xl md:text-3xl lg:text-4xl font-extrabold"
+          className="w-fit h-fit border-solid border border-t-0 border-opacity-10 rounded-xl rounded-t-none py-5 px-6 text-2xl md:text-3xl lg:text-4xl font-semibold"
         >
           {t("sectionTitle")}
         </h1>

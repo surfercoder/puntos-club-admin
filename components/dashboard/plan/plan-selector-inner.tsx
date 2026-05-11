@@ -63,9 +63,9 @@ const currentPlanBadgeMap: Record<string, string> = {
 function FeatureValue({ value }: { value: string | boolean }) {
   if (typeof value === 'boolean') {
     return value ? (
-      <Check className="h-3.5 w-3.5 text-brand-green" />
+      <Check className="size-3.5 text-brand-green" />
     ) : (
-      <span className="text-muted-foreground text-[10px]">—</span>
+      <span className="text-muted-foreground text-[10px]">-</span>
     );
   }
   return <span className="text-[11px] font-medium">{value}</span>;
@@ -268,7 +268,7 @@ export function PlanSelectorInner() {
   if (fetching || !planLimits || verifying) {
     return (
       <div className="flex items-center justify-center py-16">
-        <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+        <Loader2 className="size-6 animate-spin text-muted-foreground" />
       </div>
     );
   }
@@ -324,7 +324,7 @@ export function PlanSelectorInner() {
 
                 <div className="flex items-center gap-2 mb-2">
                   <div className={cn('rounded-md p-1.5', iconColorMap[plan.color])}>
-                    <Icon className="h-4 w-4" />
+                    <Icon className="size-4" />
                   </div>
                   <div>
                     <p className="text-sm font-semibold text-foreground leading-tight">
@@ -359,7 +359,7 @@ export function PlanSelectorInner() {
 
                 {isSelected && !showUpgradeButton && !showDowngradeMsg && (
                   <div className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-brand-green">
-                    <Check className="h-3.5 w-3.5" />
+                    <Check className="size-3.5" />
                     {/* c8 ignore next */ isCurrent ? tSettings('currentPlan') : t('selectedPlan')}
                   </div>
                 )}
@@ -374,13 +374,13 @@ export function PlanSelectorInner() {
                     >
                       {loading ? (
                         <>
-                          <Loader2 className="mr-1.5 h-3 w-3 animate-spin" />
+                          <Loader2 className="mr-1.5 size-3 animate-spin" />
                           {t('redirectingToMP')}
                         </>
                       ) : (
                         <>
                           {tSettings('upgradeTo', { plan: selectedPlan.name })}
-                          <ArrowRight className="ml-1.5 h-3 w-3" />
+                          <ArrowRight className="ml-1.5 size-3" />
                         </>
                       )}
                     </Button>

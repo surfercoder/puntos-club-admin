@@ -50,9 +50,9 @@ const buttonColorMap: Record<string, string> = {
 function FeatureValue({ value }: { value: string | boolean }) {
   if (typeof value === 'boolean') {
     return value ? (
-      <Check className="h-4 w-4 text-brand-green" />
+      <Check className="size-4 text-brand-green" />
     ) : (
-      <span className="text-muted-foreground text-xs">—</span>
+      <span className="text-muted-foreground text-xs">-</span>
     );
   }
   return <span className="text-sm font-medium">{value}</span>;
@@ -204,7 +204,7 @@ export function Step3Plan({ onNext, onBack, initialPlan = 'trial' }: Step3Props)
 
               <div className="flex items-center gap-3 mb-4">
                 <div className={cn('rounded-lg p-2', iconColorMap[plan.color])}>
-                  <Icon className="h-5 w-5" />
+                  <Icon className="size-5" />
                 </div>
                 <div>
                   <p className="font-semibold text-foreground">{plan.name}</p>
@@ -230,7 +230,7 @@ export function Step3Plan({ onNext, onBack, initialPlan = 'trial' }: Step3Props)
 
               {isSelected && (
                 <div className="mt-4 flex items-center gap-2 text-xs font-medium text-brand-green">
-                  <Check className="h-4 w-4" />
+                  <Check className="size-4" />
                   {t('selectedPlan')}
                 </div>
               )}
@@ -260,7 +260,7 @@ export function Step3Plan({ onNext, onBack, initialPlan = 'trial' }: Step3Props)
         >
           {loading ? (
             <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              <Loader2 className="mr-2 size-4 animate-spin" />
               {t('redirectingToMP')}
             </>
           ) : (
