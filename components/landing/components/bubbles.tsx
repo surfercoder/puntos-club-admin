@@ -21,7 +21,7 @@ const Bubbles = ({
   index: number;
   backgroundColor: string;
 }) => {
-  const bubbleRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const bubbleRefs = useRef<(HTMLElement | null)[]>([]);
   const isMobile = useMediaQuery("(max-width: 500px)");
 
   useGSAP(() => {
@@ -49,9 +49,7 @@ const Bubbles = ({
     return (
       <div
         key={bubbleKey}
-        role="button"
-        tabIndex={0}
-        aria-label="Decorative bubble"
+        aria-hidden="true"
         className="absolute flex items-center justify-center z-10 rounded-full bubble"
         ref={(el) => {
           bubbleRefs.current[bIdx] = el;
@@ -74,12 +72,6 @@ const Bubbles = ({
           handleMouseLeave(bubbleRefs, bIdx);
         }}
         onClick={() => handleBubbleClick(bubbleRefs, bIdx)}
-        onKeyDown={(e) => {
-          if (e.key === "Enter" || e.key === " ") {
-            e.preventDefault();
-            handleBubbleClick(bubbleRefs, bIdx);
-          }
-        }}
       />
     );
   });

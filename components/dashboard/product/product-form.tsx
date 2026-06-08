@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState, useEffect, useReducer } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from "sonner";
 
@@ -36,7 +36,8 @@ export default function ProductForm({ product }: ProductFormProps) {
 
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [categoryState, setCategoryState] = useState<{ items: Category[]; loaded: boolean }>({ items: [], loaded: false });
+  type CategoryState = { items: Category[]; loaded: boolean };
+  const [categoryState, setCategoryState] = useReducer((_: CategoryState, next: CategoryState) => next, { items: [], loaded: false } as CategoryState);
   const [selectedCategory, setSelectedCategory] = useState<string>(product?.category_id ?? '');
   const [imageUrls, setImageUrls] = useState<string[]>(product?.image_urls ?? []);
 

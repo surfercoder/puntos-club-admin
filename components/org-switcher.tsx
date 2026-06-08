@@ -55,9 +55,9 @@ export function OrgSwitcher({
   const [isAddOrgOpen, setIsAddOrgOpen] = React.useState(false)
 
   React.useEffect(() => {
-    if (!activeOrgId && orgs[0]) {
-      onChangeOrg(orgs[0].id)
-    }
+    if (activeOrgId) return
+    if (!orgs[0]) return
+    onChangeOrg(orgs[0].id)
   }, [activeOrgId, onChangeOrg, orgs])
 
   if (!activeOrg) return null

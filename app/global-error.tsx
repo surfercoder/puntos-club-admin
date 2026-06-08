@@ -4,7 +4,7 @@ import * as Sentry from "@sentry/nextjs";
 import NextError from "next/error";
 import { useEffect, useState } from "react";
 
-import { defaultLocale, type Locale } from "@/i18n/locales";
+import type { Locale } from "@/i18n/locales";
 
 import { readLocaleCookie } from "./read-locale-cookie";
 
@@ -13,11 +13,10 @@ export default function GlobalError({
 }: {
   error: Error & { digest?: string };
 }) {
-  const [locale, setLocale] = useState<Locale>(defaultLocale);
+  const [locale] = useState<Locale>(() => readLocaleCookie());
 
   useEffect(() => {
     Sentry.captureException(error);
-    setLocale(readLocaleCookie());
   }, [error]);
 
   return (

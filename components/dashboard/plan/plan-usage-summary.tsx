@@ -63,15 +63,16 @@ function FeatureRow({ usage }: { usage: FeatureUsage }) {
         </span>
       </div>
 
-      <div className="h-1 w-full rounded-full bg-muted overflow-hidden">
+      <progress
+        className="sr-only"
+        value={usage.current_usage}
+        max={usage.limit_value}
+        aria-label={label}
+      />
+      <div aria-hidden="true" className="h-1 w-full rounded-full bg-muted overflow-hidden">
         <div
           className={cn('h-full rounded-full transition-all duration-500', color)}
           style={{ width: `${Math.min(100, usage.usage_percentage)}%` }}
-          role="progressbar"
-          aria-valuenow={usage.current_usage}
-          aria-valuemin={0}
-          aria-valuemax={usage.limit_value}
-          aria-label={label}
         />
       </div>
     </div>

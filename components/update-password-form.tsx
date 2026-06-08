@@ -18,7 +18,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
-import { PasswordStrengthChecklist, allRulesPass } from "@/components/onboarding/password-strength-checklist";
+import { PasswordStrengthChecklist } from "@/components/onboarding/password-strength-checklist";
+import { allRulesPass } from "@/components/onboarding/password-rules";
 
 interface FormState {
   password: string;

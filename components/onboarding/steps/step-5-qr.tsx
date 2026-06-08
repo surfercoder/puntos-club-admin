@@ -339,7 +339,7 @@ export function Step5QR({
       }
       setState(nextState);
     })();
-  }, [state.status]);
+  }, [state.status, step2Data, selectedPlan, mpPreapprovalId, step4Data]);
 
   useEffect(() => {
     if (prevStatusRef.current === 'creating' && state.status === 'success') {

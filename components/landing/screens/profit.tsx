@@ -38,9 +38,7 @@ export default function Profit() {
       : pointsSmallScreen
     : pointsBigScreen;
 
-  const getDescriptionLines = (descKey: string): string[] => {
-    return t(`desc${descKey}`).split("\n");
-  };
+  const getDescriptionLines = (descKey: string): string[] => t(`desc${descKey}`).split("\n");
 
   useEffect(() => {
     if (circleRef.current && points.length > 0) {
@@ -109,7 +107,7 @@ export default function Profit() {
               if (point) {
                 setCurrentDescription(
                   pointFound.descKey
-                    ? getDescriptionLines(pointFound.descKey)
+                    ? t(`desc${pointFound.descKey}`).split("\n")
                     : []
                 );
                 setCurrentColor(pointFound.color);
@@ -159,7 +157,7 @@ export default function Profit() {
           .to(handRefs.current, { scale: 1.3, opacity: 1 });
       }
     }
-  }, [isSmall, points, isMobile]);
+  }, [isSmall, points, isMobile, t]);
 
   const handleCircleClick = (descLines: string[], color: string) => {
     setCurrentDescription(descLines);

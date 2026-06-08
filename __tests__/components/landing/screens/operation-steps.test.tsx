@@ -193,32 +193,14 @@ describe("OperationSteps", () => {
     expect(handleBubbleClick).toHaveBeenCalled();
   });
 
-  it("calls handleBubbleClick on Enter keydown", () => {
-    const { handleBubbleClick } = require("@/components/landing/animations/bubble");
-    const { fireEvent } = require("@testing-library/react");
+  it("renders bubbles as native <button> elements with accessible labels", () => {
     const { container } = render(<OperationSteps />);
     const bubbleDivs = container.querySelectorAll(".bubble");
-    fireEvent.keyDown(bubbleDivs[0], { key: "Enter" });
-    expect(handleBubbleClick).toHaveBeenCalled();
-  });
-
-  it("calls handleBubbleClick on Space keydown", () => {
-    const { handleBubbleClick } = require("@/components/landing/animations/bubble");
-    const { fireEvent } = require("@testing-library/react");
-    const { container } = render(<OperationSteps />);
-    const bubbleDivs = container.querySelectorAll(".bubble");
-    fireEvent.keyDown(bubbleDivs[0], { key: " " });
-    expect(handleBubbleClick).toHaveBeenCalled();
-  });
-
-  it("does nothing on other keydown keys", () => {
-    const { handleBubbleClick } = require("@/components/landing/animations/bubble");
-    const { fireEvent } = require("@testing-library/react");
-    const { container } = render(<OperationSteps />);
-    const bubbleDivs = container.querySelectorAll(".bubble");
-    handleBubbleClick.mockClear();
-    fireEvent.keyDown(bubbleDivs[0], { key: "a" });
-    expect(handleBubbleClick).not.toHaveBeenCalled();
+    bubbleDivs.forEach((b) => {
+      expect(b.tagName).toBe("BUTTON");
+      expect(b).toHaveAttribute("aria-label");
+      expect(b).toHaveAttribute("type", "button");
+    });
   });
 
   it("renders with small screen size (isSmall=true)", () => {

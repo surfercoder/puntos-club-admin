@@ -77,6 +77,9 @@ jest.mock("@/components/landing/components/input-field", () => ({
       {errors?.[name] && <span data-testid={`error-${name}`}>{errors[name]}</span>}
     </div>
   ),
+}));
+
+jest.mock("@/components/landing/components/phone-number-field", () => ({
   PhoneNumberField: ({ value, onChange, errors, label }: any) => (
     <div>
       <label>{label}</label>
@@ -84,6 +87,9 @@ jest.mock("@/components/landing/components/input-field", () => ({
       {errors?.phoneNumber && <span data-testid="error-phoneNumber">{errors.phoneNumber}</span>}
     </div>
   ),
+}));
+
+jest.mock("@/components/landing/components/input-text-area", () => ({
   InputTextArea: ({ name, value, onChange, errors, label }: any) => (
     <div>
       <label>{label}</label>

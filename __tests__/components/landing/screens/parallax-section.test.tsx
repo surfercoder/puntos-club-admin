@@ -1,6 +1,7 @@
 import React from "react";
 import { render, act } from "@testing-library/react";
-import ParallaxSection, { Smartphone3DErrorBoundary, handleDerivedError, mobileMediaSubscribe, getMobileSnapshot, getMobileServerSnapshot } from "@/components/landing/screens/parallax-section";
+import ParallaxSection, { Smartphone3DErrorBoundary } from "@/components/landing/screens/parallax-section";
+import { handleDerivedError, mobileMediaSubscribe, getMobileSnapshot, getMobileServerSnapshot } from "@/components/landing/screens/parallax-utils";
 
 /* ── mock gsap with callback capture ── */
 const mockTimelineTo = jest.fn().mockReturnThis();

@@ -11,6 +11,14 @@ interface NotificationLimitsPanelProps {
   timeRemaining: string;
 }
 
+const dateOptions: Intl.DateTimeFormatOptions = {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  hour: '2-digit',
+  minute: '2-digit',
+};
+
 function useRestrictionReason(limits: OrganizationNotificationLimit) {
   const t = useTranslations('Dashboard.notifications.limits');
 
@@ -63,13 +71,6 @@ export default function NotificationLimitsPanel({ limits, canSend, timeRemaining
   const restrictionReason = useRestrictionReason(limits);
 
   const dateLocale = /* c8 ignore next */ locale === 'es' ? 'es-ES' : 'en-US';
-  const dateOptions: Intl.DateTimeFormatOptions = {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-  };
 
   const lastSentDisplay = limits.last_notification_sent_at
     ? new Date(limits.last_notification_sent_at).toLocaleString(dateLocale, dateOptions)

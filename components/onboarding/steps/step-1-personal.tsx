@@ -11,7 +11,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import type { Step1CompletedData } from '@/components/onboarding/onboarding-wizard';
-import { PasswordStrengthChecklist, allRulesPass } from '@/components/onboarding/password-strength-checklist';
+import { PasswordStrengthChecklist } from '@/components/onboarding/password-strength-checklist';
+import { allRulesPass } from '@/components/onboarding/password-rules';
 
 interface Step1Props {
   onNext: (data?: Step1CompletedData) => void;

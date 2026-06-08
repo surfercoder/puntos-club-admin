@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState, useEffect, useReducer } from 'react';
 
 import { categoryFormAction } from '@/actions/dashboard/category/category-form-actions';
 import { Button } from '@/components/ui/button';
@@ -27,7 +27,8 @@ export default function CategoryForm({ category }: CategoryFormProps) {
 
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [categories, setCategories] = useState<Array<{ id: string; name: string; active: boolean }>>([]);
+  type CategoryRow = { id: string; name: string; active: boolean };
+  const [categories, setCategories] = useReducer((_: CategoryRow[], next: CategoryRow[]) => next, [] as CategoryRow[]);
 
   useEffect(() => {
     async function loadCategories() {
@@ -50,10 +51,6 @@ export default function CategoryForm({ category }: CategoryFormProps) {
         // ignore
       }
 
-      if (category?.id) {
-        query = query.neq('id', category.id);
-      }
-
       const { data } = await query;
       if (data) {
         setCategories(data);
@@ -61,7 +58,11 @@ export default function CategoryForm({ category }: CategoryFormProps) {
     }
 
     loadCategories();
-  }, [category?.id]);
+  }, []);
+
+  const filteredCategories = category?.id
+    ? categories.filter((c) => c.id !== category.id)
+    : categories;
 
   // Utils
   const [actionState, formAction, pending] = useActionState(categoryFormAction, EMPTY_ACTION_STATE);
@@ -91,7 +92,7 @@ export default function CategoryForm({ category }: CategoryFormProps) {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="null">{t('form.noParent')}</SelectItem>
-            {categories.map((c) => (
+            {filteredCategories.map((c) => (
               <SelectItem key={c.id} value={c.id}>
                 {c.name}
               </SelectItem>
@@ -131,6 +132,7 @@ export default function CategoryForm({ category }: CategoryFormProps) {
 
       <div className="flex items-center gap-2">
         <input
+          aria-label={t('form.activeLabel')}
           className="rounded"
           defaultChecked={category?.active ?? true}
           id="active"

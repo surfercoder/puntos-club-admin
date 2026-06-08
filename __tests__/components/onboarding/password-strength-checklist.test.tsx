@@ -1,9 +1,6 @@
 import { render, screen } from '@testing-library/react';
-import {
-  PasswordStrengthChecklist,
-  PASSWORD_RULES,
-  allRulesPass,
-} from '@/components/onboarding/password-strength-checklist';
+import { PasswordStrengthChecklist } from '@/components/onboarding/password-strength-checklist';
+import { PASSWORD_RULES, allRulesPass } from '@/components/onboarding/password-rules';
 
 describe('PASSWORD_RULES', () => {
   it('minLength passes for 8+ chars', () => {

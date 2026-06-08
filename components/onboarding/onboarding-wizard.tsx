@@ -44,6 +44,21 @@ const LS_PLAN = 'onboarding_plan';
 const LS_MP_PREAPPROVAL_ID = 'mp_preapproval_id';
 const LS_CONSENT = 'onboarding_consent';
 
+function clearOnboardingLocalStorage() {
+  [
+    'onboarding_first_name',
+    'onboarding_last_name',
+    'onboarding_email',
+    'onboarding_org_name',
+    LS_PLAN,
+    LS_MP_PREAPPROVAL_ID,
+    LS_STEP2,
+    LS_STEP4,
+    LS_CONSENT,
+    LS_MAX_STEP,
+  ].forEach((key) => localStorage.removeItem(key));
+}
+
 function lsGet<T>(key: string): T | null {
   try {
     const raw = localStorage.getItem(key);
@@ -62,6 +77,77 @@ function lsSet(key: string, value: unknown) {
 }
 
 // ─── Reducer ──────────────────────────────────────────────────────────────────
+
+interface ComputeInitialWizardStateArgs {
+  clampedStep: number;
+  initialStep1Completed: boolean;
+  initialUserInfo: Step1CompletedData | null;
+  initialOrganizationId: number | null;
+  initialOrgName: string;
+}
+
+function computeInitialWizardState({
+  clampedStep,
+  initialStep1Completed,
+  initialUserInfo,
+  initialOrganizationId,
+  initialOrgName,
+}: ComputeInitialWizardStateArgs): WizardState {
+  const base: WizardState = {
+    currentStep: clampedStep,
+    maxReachedStep: clampedStep,
+    step1Completed: initialStep1Completed,
+    step1Data: initialUserInfo ?? null,
+    step2Data: null,
+    step4Data: null,
+    selectedPlan: 'trial',
+    mpPreapprovalId: null,
+    organizationName: initialOrgName,
+    consentGiven: false,
+  };
+
+  if (typeof window === 'undefined') return base;
+
+  const storedMaxRaw = parseInt(localStorage.getItem(LS_MAX_STEP) ?? '0', 10);
+  if (!initialOrganizationId && storedMaxRaw >= 6) {
+    clearOnboardingLocalStorage();
+    return base;
+  }
+
+  const next: WizardState = { ...base };
+
+  if (storedMaxRaw > clampedStep) next.maxReachedStep = storedMaxRaw;
+
+  if (!initialUserInfo) {
+    const firstName = localStorage.getItem('onboarding_first_name') ?? '';
+    const lastName = localStorage.getItem('onboarding_last_name') ?? '';
+    const email = localStorage.getItem('onboarding_email') ?? '';
+    if (firstName || email) next.step1Data = { firstName, lastName, email };
+  }
+
+  const saved2 = lsGet<OnboardingStep2Data>(LS_STEP2);
+  if (saved2) {
+    next.step2Data = saved2;
+    if (!initialOrgName && saved2.org.name) next.organizationName = saved2.org.name;
+  } else if (!initialOrgName) {
+    const storedOrgName = localStorage.getItem('onboarding_org_name');
+    if (storedOrgName) next.organizationName = storedOrgName;
+  }
+
+  const savedPlan = localStorage.getItem(LS_PLAN);
+  if (savedPlan) next.selectedPlan = savedPlan;
+
+  const savedMpId = localStorage.getItem(LS_MP_PREAPPROVAL_ID);
+  if (savedMpId) next.mpPreapprovalId = savedMpId;
+
+  const saved4 = lsGet<OnboardingStep4Data>(LS_STEP4);
+  if (saved4) next.step4Data = saved4;
+
+  const savedConsent = localStorage.getItem(LS_CONSENT);
+  if (savedConsent === 'true') next.consentGiven = true;
+
+  return next;
+}
 
 interface WizardState {
   currentStep: number;
@@ -247,18 +333,17 @@ export function OnboardingWizard({
 
   const clampedStep = Math.max(1, Math.min(6, initialStep));
 
-  const [state, dispatch] = useReducer(wizardReducer, {
-    currentStep: clampedStep,
-    maxReachedStep: clampedStep,
-    step1Completed: initialStep1Completed,
-    step1Data: initialUserInfo ?? null,
-    step2Data: null,
-    step4Data: null,
-    selectedPlan: 'trial',
-    mpPreapprovalId: null,
-    organizationName: initialOrgName,
-    consentGiven: false,
-  });
+  const [state, dispatch] = useReducer(
+    wizardReducer,
+    undefined,
+    () => computeInitialWizardState({
+      clampedStep,
+      initialStep1Completed,
+      initialUserInfo,
+      initialOrganizationId,
+      initialOrgName,
+    })
+  );
 
   const {
     currentStep, maxReachedStep, step1Completed, step1Data,
@@ -274,52 +359,8 @@ export function OnboardingWizard({
     window.history.replaceState({}, '', url.toString());
   }, [currentStep, maxReachedStep]);
 
+  // Clear the 'step' query param on first mount (it was hydrated above into state).
   useEffect(() => {
-    // If the user has no existing organization but localStorage shows a previous
-    // attempt that reached the creation step, clear stale data so they start fresh.
-    const storedMaxRaw = parseInt(localStorage.getItem(LS_MAX_STEP) ?? '0', 10);
-    if (!initialOrganizationId && storedMaxRaw >= 6) {
-      clearOnboardingLocalStorage();
-      return;
-    }
-
-    const payload: Partial<WizardState> = {};
-
-    const storedMax = storedMaxRaw;
-    if (storedMax > clampedStep) payload.maxReachedStep = storedMax;
-
-    if (!initialUserInfo) {
-      const firstName = localStorage.getItem('onboarding_first_name') ?? '';
-      const lastName = localStorage.getItem('onboarding_last_name') ?? '';
-      const email = localStorage.getItem('onboarding_email') ?? '';
-      if (firstName || email) payload.step1Data = { firstName, lastName, email };
-    }
-
-    const saved2 = lsGet<OnboardingStep2Data>(LS_STEP2);
-    if (saved2) {
-      payload.step2Data = saved2;
-      if (!initialOrgName && saved2.org.name) payload.organizationName = saved2.org.name;
-    } else if (!initialOrgName) {
-      const storedOrgName = localStorage.getItem('onboarding_org_name');
-      if (storedOrgName) payload.organizationName = storedOrgName;
-    }
-
-    const savedPlan = localStorage.getItem(LS_PLAN);
-    if (savedPlan) payload.selectedPlan = savedPlan;
-
-    const savedMpId = localStorage.getItem(LS_MP_PREAPPROVAL_ID);
-    if (savedMpId) payload.mpPreapprovalId = savedMpId;
-
-    const saved4 = lsGet<OnboardingStep4Data>(LS_STEP4);
-    if (saved4) payload.step4Data = saved4;
-
-    const savedConsent = localStorage.getItem(LS_CONSENT);
-    if (savedConsent === 'true') payload.consentGiven = true;
-
-    if (Object.keys(payload).length > 0) {
-      dispatch({ type: 'HYDRATE_FROM_LS', payload });
-    }
-
     const url = new URL(window.location.href);
     if (url.searchParams.has('step')) {
       url.searchParams.delete('step');
@@ -327,23 +368,9 @@ export function OnboardingWizard({
     }
   }, []);
 
+
   const goToStep = (step: number) => {
     dispatch({ type: 'GO_TO_STEP', step });
-  };
-
-  const clearOnboardingLocalStorage = () => {
-    [
-      'onboarding_first_name',
-      'onboarding_last_name',
-      'onboarding_email',
-      'onboarding_org_name',
-      LS_PLAN,
-      LS_MP_PREAPPROVAL_ID,
-      LS_STEP2,
-      LS_STEP4,
-      LS_CONSENT,
-      LS_MAX_STEP,
-    ].forEach((key) => localStorage.removeItem(key));
   };
 
   const handleFinish = () => {

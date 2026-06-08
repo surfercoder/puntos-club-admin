@@ -11,6 +11,13 @@ import { Textarea } from '@/components/ui/textarea';
 import { createClient } from '@/lib/supabase/server';
 import { formatDateTime } from '@/lib/utils';
 
+const statusVariants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  sent: 'default',
+  sending: 'outline',
+  draft: 'secondary',
+  failed: 'destructive',
+};
+
 export default async function ViewNotificationPage({ params }: { params: Promise<{ id: string }> }) {
   const supabasePromise = createClient();
   // react-doctor-disable-next-line react-doctor/async-defer-await
@@ -51,13 +58,6 @@ export default async function ViewNotificationPage({ params }: { params: Promise
     : '';
   const createdAtDisplay = formatDateTime(notification.created_at);
   const sentAtDisplay = notification.sent_at ? formatDateTime(notification.sent_at) : null;
-
-  const statusVariants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    sent: 'default',
-    sending: 'outline',
-    draft: 'secondary',
-    failed: 'destructive',
-  };
 
   return (
     <div className="space-y-6">

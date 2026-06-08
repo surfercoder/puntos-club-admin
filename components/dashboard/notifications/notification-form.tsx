@@ -148,30 +148,30 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
   const titleCharsLeft = TITLE_MAX_LENGTH - title.length;
   const bodyCharsLeft = BODY_MAX_LENGTH - body.length;
 
-  const calculateTimeRemaining = () => {
-    if (!limits?.last_notification_sent_at || !limits?.min_hours_between_notifications) {
-      return null;
-    }
-
-    const lastSent = new Date(limits.last_notification_sent_at);
-    const minHours = limits.min_hours_between_notifications;
-    const nextAvailable = new Date(lastSent.getTime() + minHours * 60 * 60 * 1000);
-    const now = new Date();
-    const diff = nextAvailable.getTime() - now.getTime();
-
-    if (diff <= 0) return null;
-
-    const hours = Math.floor(diff / (1000 * 60 * 60));
-    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-    if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
-    if (minutes > 0) return `${minutes}m ${seconds}s`;
-    return `${seconds}s`;
-  };
-
   useEffect(() => {
     if (!canSend && limits?.last_notification_sent_at) {
+      const calculateTimeRemaining = () => {
+        if (!limits?.last_notification_sent_at || !limits?.min_hours_between_notifications) {
+          return null;
+        }
+
+        const lastSent = new Date(limits.last_notification_sent_at);
+        const minHours = limits.min_hours_between_notifications;
+        const nextAvailable = new Date(lastSent.getTime() + minHours * 60 * 60 * 1000);
+        const now = new Date();
+        const diff = nextAvailable.getTime() - now.getTime();
+
+        if (diff <= 0) return null;
+
+        const hours = Math.floor(diff / (1000 * 60 * 60));
+        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+        if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
+        if (minutes > 0) return `${minutes}m ${seconds}s`;
+        return `${seconds}s`;
+      };
+
       const interval = setInterval(() => {
         const remaining = calculateTimeRemaining();
         if (remaining) {

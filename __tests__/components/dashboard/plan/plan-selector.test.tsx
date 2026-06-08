@@ -114,7 +114,7 @@ describe('PlanSelector', () => {
     expect(screen.getByText(/upgradeTo/)).toBeInTheDocument();
   });
 
-  it('stops keyDown propagation on upgrade button wrapper', async () => {
+  it('stops click and keyDown propagation on upgrade button wrapper', async () => {
     (usePlanUsage as jest.Mock).mockReturnValue({
       summary: mockSummary,
       isLoading: false,
@@ -126,13 +126,19 @@ describe('PlanSelector', () => {
 
     const upgradeButton = screen.getByText(/upgradeTo/);
     const wrapper = upgradeButton.closest('[role="presentation"]')!;
-    const event = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
-    const stopSpy = jest.spyOn(event, 'stopPropagation');
-    wrapper.dispatchEvent(event);
-    expect(stopSpy).toHaveBeenCalled();
+
+    const clickEvent = new MouseEvent('click', { bubbles: true });
+    const clickStopSpy = jest.spyOn(clickEvent, 'stopPropagation');
+    wrapper.dispatchEvent(clickEvent);
+    expect(clickStopSpy).toHaveBeenCalled();
+
+    const keyEvent = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
+    const keyStopSpy = jest.spyOn(keyEvent, 'stopPropagation');
+    wrapper.dispatchEvent(keyEvent);
+    expect(keyStopSpy).toHaveBeenCalled();
   });
 
-  it('selects a plan via keyboard Enter key', async () => {
+  it('plan cards render as native <button> elements', async () => {
     (usePlanUsage as jest.Mock).mockReturnValue({
       summary: mockSummary,
       isLoading: false,
@@ -140,24 +146,9 @@ describe('PlanSelector', () => {
 
     await act(async () => { render(<PlanSelector />); });
 
-    const advanceCard = screen.getByText('advancePlan').closest('[role="button"]')!;
-    fireEvent.keyDown(advanceCard, { key: 'Enter' });
-
-    expect(screen.getByText(/upgradeTo/)).toBeInTheDocument();
-  });
-
-  it('selects a plan via keyboard Space key', async () => {
-    (usePlanUsage as jest.Mock).mockReturnValue({
-      summary: mockSummary,
-      isLoading: false,
-    });
-
-    await act(async () => { render(<PlanSelector />); });
-
-    const proCard = screen.getByText('proPlan').closest('[role="button"]')!;
-    fireEvent.keyDown(proCard, { key: ' ' });
-
-    expect(screen.getByText(/upgradeTo/)).toBeInTheDocument();
+    const advanceCard = screen.getByText('advancePlan').closest('button');
+    expect(advanceCard).not.toBeNull();
+    expect(advanceCard?.getAttribute('type')).toBe('button');
   });
 
   it('shows downgrade message when selecting a lower plan from advance', async () => {

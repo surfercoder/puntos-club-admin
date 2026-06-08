@@ -99,9 +99,10 @@ export function LandingApp() {
   };
 
   useEffect(() => {
+    const triggers = triggersRef.current;
     return () => {
-      triggersRef.current.forEach((t) => t.kill());
-      triggersRef.current = [];
+      triggers.forEach((t) => t.kill());
+      triggers.length = 0;
     };
   }, []);
 

@@ -294,14 +294,14 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
   const [state, dispatch] = useReducer(consentReducer, initialState);
 
   useEffect(() => {
+    let stored: string | null;
     try {
-      const stored = localStorage.getItem(LS_CONSENT);
-      if (stored === 'true' || initialConsent) {
-        dispatch({ type: 'RESTORE_FROM_STORAGE' });
-      }
+      stored = localStorage.getItem(LS_CONSENT);
     } catch {
-      if (initialConsent) dispatch({ type: 'RESTORE_FROM_STORAGE' });
+      stored = null;
     }
+    if (stored !== 'true' && !initialConsent) return;
+    dispatch({ type: 'RESTORE_FROM_STORAGE' });
   }, [initialConsent]);
 
   const handleScroll = () => {

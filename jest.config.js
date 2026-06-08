@@ -48,6 +48,8 @@ const config = {
     '!components/ui/card.tsx',
     '!components/ui/checkbox.tsx',
     '!components/ui/collapsible.tsx',
+    '!components/ui/collapsible-trigger.tsx',
+    '!components/ui/collapsible-content.tsx',
     '!components/ui/dialog.tsx',
     '!components/ui/dropdown-menu.tsx',
     '!components/ui/input.tsx',

@@ -6,14 +6,18 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import dynamic from "next/dynamic";
 import { useTranslations } from "next-intl";
 
+import {
+  handleDerivedError,
+  mobileMediaSubscribe,
+  getMobileSnapshot,
+  getMobileServerSnapshot,
+  splitMessage,
+} from "./parallax-utils";
+
 const Smartphone3D = dynamic(() => import("./smartphone-3d"), {
   ssr: false,
   loading: () => null,
 });
-
-export function handleDerivedError() {
-  return { hasError: true };
-}
 
 export class Smartphone3DErrorBoundary extends Component<
   { children: ReactNode },
@@ -34,13 +38,6 @@ export class Smartphone3DErrorBoundary extends Component<
 }
 
 gsap.registerPlugin(ScrollTrigger);
-
-export const mobileMediaSubscribe = (callback: () => void) => {
-  window.addEventListener('resize', callback);
-  return () => window.removeEventListener('resize', callback);
-};
-export const getMobileSnapshot = () => window.innerWidth < 800;
-export const getMobileServerSnapshot = () => false;
 
 const ParallaxSection: React.FC = () => {
   const t = useTranslations("Landing.parallax");
@@ -82,11 +79,14 @@ const ParallaxSection: React.FC = () => {
 
   const isMobile = useSyncExternalStore(mobileMediaSubscribe, getMobileSnapshot, getMobileServerSnapshot);
 
+  const totalMessages = messages.length;
+
   useLayoutEffect(() => {
     const section = sectionRef.current;
     const message = messageRef.current;
     const smartphone = smartphoneRef.current;
     const icon = iconRef.current;
+    let localMessageTimeline: gsap.core.Timeline | null = null;
 
     gsap.fromTo(
       section,
@@ -114,13 +114,14 @@ const ParallaxSection: React.FC = () => {
           { y: "0%", opacity: 1, duration: 2, ease: "power2.out" }
         );
 
-        messageTimeline.current = gsap.timeline({
+        localMessageTimeline = gsap.timeline({
           repeat: -1,
           delay: 2,
           repeatDelay: 1.5,
         });
+        messageTimeline.current = localMessageTimeline;
 
-        messageTimeline.current
+        localMessageTimeline
           .to([message, icon], {
             y: "-100%",
             opacity: 0,
@@ -128,7 +129,7 @@ const ParallaxSection: React.FC = () => {
             ease: "power2.in",
             onStart: () => dispatch({ type: 'START_ROTATION' }),
             onComplete: () => {
-              dispatch({ type: 'NEXT_MESSAGE', total: messages.length });
+              dispatch({ type: 'NEXT_MESSAGE', total: totalMessages });
             },
           })
           .fromTo(
@@ -147,16 +148,9 @@ const ParallaxSection: React.FC = () => {
 
     return () => {
       scrollTriggerInstance.kill();
-      messageTimeline.current?.kill();
+      localMessageTimeline?.kill();
     };
-  }, [isMobile]);
-
-  const splitMessage = (message: string) => {
-    const words = message.split(" ");
-    const lastWord = words.pop();
-    const restOfMessage = words.join(" ");
-    return { restOfMessage, lastWord };
-  };
+  }, [isMobile, totalMessages]);
 
   const currentMessage = splitMessage(messages[anim.messageIndex].text);
   const currentIcon = messages[anim.messageIndex].icon;

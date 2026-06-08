@@ -2,7 +2,7 @@ import type { MutableRefObject } from "react";
 import { gsap } from "gsap";
 
 export const handleMouseEnter = (
-  bubbleRefs: MutableRefObject<(HTMLDivElement | null)[]>,
+  bubbleRefs: MutableRefObject<(HTMLElement | null)[]>,
   index: number
 ) => {
   if (bubbleRefs.current) {
@@ -16,7 +16,7 @@ export const handleMouseEnter = (
 };
 
 export const handleMouseLeave = (
-  bubbleRefs: MutableRefObject<(HTMLDivElement | null)[]>,
+  bubbleRefs: MutableRefObject<(HTMLElement | null)[]>,
   index: number
 ) => {
   if (bubbleRefs.current) {
@@ -29,7 +29,7 @@ export const handleMouseLeave = (
 };
 
 export const handleBubbleClick = (
-  bubbleRefs: MutableRefObject<(HTMLDivElement | null)[]>,
+  bubbleRefs: MutableRefObject<(HTMLElement | null)[]>,
   index: number
 ) => {
   if (bubbleRefs.current) {

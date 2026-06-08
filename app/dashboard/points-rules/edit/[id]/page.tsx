@@ -528,6 +528,8 @@ export default function EditPointsRulePage() {
   const [state, dispatch] = useReducer(reducer, initialState);
   const { loading, fetching, fetchError, branches, formData } = state;
 
+  const loadErrorPrefix = t("form.loadError");
+
   useEffect(() => {
     async function fetchRule() {
       const result = await getPointsRuleById(parseInt(id));
@@ -564,12 +566,12 @@ export default function EditPointsRulePage() {
       } else {
         dispatch({
           type: "FETCH_RULE_ERROR",
-          error: t("form.loadError") + ": " + result.error,
+          error: loadErrorPrefix + ": " + result.error,
         });
       }
     }
     fetchRule();
-  }, [id]);
+  }, [id, loadErrorPrefix]);
 
   useEffect(() => {
     async function loadBranches(resetBranch = false) {

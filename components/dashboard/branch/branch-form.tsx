@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState, useEffect, useReducer } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from "sonner";
 
@@ -28,7 +28,8 @@ export default function BranchForm({ branch }: BranchFormProps) {
 
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [addresses, setAddresses] = useState<{ id: string; street: string; city: string }[]>([]);
+  type AddressRow = { id: string; street: string; city: string };
+  const [addresses, setAddresses] = useReducer((_: AddressRow[], next: AddressRow[]) => next, [] as AddressRow[]);
   const [selectedAddress, setSelectedAddress] = useState<string>(branch?.address_id ?? '');
   const [isActive, setIsActive] = useState<boolean>(branch?.active ?? true);
 

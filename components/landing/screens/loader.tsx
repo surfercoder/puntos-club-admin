@@ -70,9 +70,7 @@ const Loader: React.FC<LoaderProps> = ({ onAnimationEnd }) => {
                           opacity: 1,
                           onComplete: () => {
                             document.body.style.cssText = "overflow-y: auto; overflow-x: hidden;";
-                            if (onAnimationEnd) {
-                              onAnimationEnd();
-                            }
+                            onAnimationEnd();
                           },
                         });
                       },

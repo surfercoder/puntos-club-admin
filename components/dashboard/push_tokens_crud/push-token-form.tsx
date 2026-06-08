@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState, useEffect, useReducer } from 'react';
 
 import { pushTokenFormAction } from '@/actions/dashboard/push_tokens/push-token-form-actions';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,8 @@ interface PushTokenFormProps {
 
 export default function PushTokenForm({ pushToken }: PushTokenFormProps) {
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [beneficiaries, setBeneficiaries] = useState<Array<{ id: string; first_name: string; last_name: string; email: string }>>([]);
+  type BeneficiaryRow = { id: string; first_name: string; last_name: string; email: string };
+  const [beneficiaries, setBeneficiaries] = useReducer((_: BeneficiaryRow[], next: BeneficiaryRow[]) => next, [] as BeneficiaryRow[]);
 
   useEffect(() => {
     async function loadBeneficiaries() {
@@ -90,7 +91,7 @@ export default function PushTokenForm({ pushToken }: PushTokenFormProps) {
       </div>
 
       <div className="flex items-center gap-2">
-        <input className="rounded" defaultChecked={pushToken?.is_active ?? true} id="is_active" name="is_active" type="checkbox" />
+        <input aria-label="Active" className="rounded" defaultChecked={pushToken?.is_active ?? true} id="is_active" name="is_active" type="checkbox" />
         <Label htmlFor="is_active">Active</Label>
       </div>
 

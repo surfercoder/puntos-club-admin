@@ -57,6 +57,18 @@ type FormAction =
   | { type: 'SET_POINTS_USED'; payload: number }
   | { type: 'SET_ORG_ID'; payload: string };
 
+function buildInitialFormState(redemption: Redemption | undefined): FormState {
+  return {
+    beneficiaries: [],
+    products: [],
+    validation: null,
+    selectedProductId: redemption?.product_id ? String(redemption.product_id) : '',
+    selectedBeneficiaryId: redemption?.beneficiary_id ? String(redemption.beneficiary_id) : '',
+    pointsUsed: redemption?.points_used ?? 0,
+    orgId: null,
+  };
+}
+
 function formReducer(state: FormState, action: FormAction): FormState {
   switch (action.type) {
     case 'SET_FORM_DATA':
@@ -86,15 +98,11 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
   const tCommon = useTranslations('Common');
 
   // State
-  const [state, dispatch] = useReducer(formReducer, {
-    beneficiaries: [],
-    products: [],
-    validation: null,
-    selectedProductId: redemption?.product_id ? String(redemption.product_id) : '',
-    selectedBeneficiaryId: redemption?.beneficiary_id ? String(redemption.beneficiary_id) : '',
-    pointsUsed: redemption?.points_used ?? 0,
-    orgId: null,
-  });
+  const [state, dispatch] = useReducer(
+    formReducer,
+    undefined,
+    () => buildInitialFormState(redemption),
+  );
 
   const { beneficiaries, products, validation, selectedProductId, selectedBeneficiaryId, pointsUsed, orgId } = state;
 
@@ -120,6 +128,18 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
       // ignore
     }
   }, []);
+
+  useEffect(() => {
+    switch (actionState.status) {
+      case 'error':
+        if (actionState.message) toast.error(actionState.message);
+        break;
+      case 'success':
+        toast.success(actionState.message);
+        redirect("/dashboard/redemption");
+        break;
+    }
+  }, [actionState]);
 
   // Load beneficiaries and products (only when orgId is available)
   useEffect(() => {
@@ -150,13 +170,10 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
         productsPromise,
       ]);
 
-      let loadedBeneficiaries: BeneficiaryWithPoints[] = [];
-      if (beneficiariesResult.data) {
-        const nested = beneficiariesResult.data as unknown as { beneficiary: Beneficiary; available_points: number }[];
-        loadedBeneficiaries = nested.flatMap(r =>
-          r.beneficiary ? [{ ...r.beneficiary, available_points: r.available_points ?? 0 }] : []
-        );
-      }
+      const nested = (beneficiariesResult.data ?? []) as unknown as { beneficiary: Beneficiary; available_points: number }[];
+      const loadedBeneficiaries: BeneficiaryWithPoints[] = nested.flatMap(r =>
+        r.beneficiary ? [{ ...r.beneficiary, available_points: r.available_points ?? 0 }] : []
+      );
 
       dispatch({
         type: 'SET_FORM_DATA',
@@ -168,16 +185,6 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
     }
     loadData();
   }, [orgId]);
-
-  useEffect(() => {
-    if (actionState.status === 'error' && actionState.message) {
-      toast.error(actionState.message);
-    }
-    if (actionState.status === 'success') {
-      toast.success(actionState.message);
-      redirect("/dashboard/redemption");
-    }
-  }, [actionState]);
 
   // Handlers
   const handleProductChange = (productId: string) => {

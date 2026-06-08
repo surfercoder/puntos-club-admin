@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { redirect } from 'next/navigation';
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useReducer, useState } from 'react';
 import { toast } from 'sonner';
 
 import { appUserOrganizationFormAction } from '@/actions/dashboard/app_user_organization/app_user_organization-form-actions';
@@ -38,8 +38,8 @@ export default function AppUserOrganizationForm({ appUserOrganization }: AppUser
   const tCommon = useTranslations('Common');
 
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [users, setUsers] = useState<AppUserOption[]>([]);
-  const [orgs, setOrgs] = useState<OrganizationOption[]>([]);
+  const [users, setUsers] = useReducer((_: AppUserOption[], next: AppUserOption[]) => next, [] as AppUserOption[]);
+  const [orgs, setOrgs] = useReducer((_: OrganizationOption[], next: OrganizationOption[]) => next, [] as OrganizationOption[]);
 
   const [actionState, formAction, pending] = useActionState(appUserOrganizationFormAction, EMPTY_ACTION_STATE);
 
@@ -120,6 +120,7 @@ export default function AppUserOrganizationForm({ appUserOrganization }: AppUser
 
       <div className="flex items-center gap-2">
         <input
+          aria-label={t('form.activeLabel')}
           className="rounded"
           defaultChecked={appUserOrganization?.is_active ?? true}
           id="is_active"

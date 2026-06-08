@@ -18,6 +18,11 @@ import { formatDateTime } from '@/lib/utils';
 
 const CURRENCY_FORMATTER = new Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS' });
 
+function formatCurrency(amount: string | number) {
+  const num = /* c8 ignore next */ typeof amount === 'string' ? parseFloat(amount) : amount;
+  return CURRENCY_FORMATTER.format(num);
+}
+
 export default async function PurchaseListPage() {
   const [t, currentUser] = await Promise.all([
     getTranslations('Dashboard.purchase'),
@@ -48,11 +53,6 @@ export default async function PurchaseListPage() {
   if (error) {
     return <div>{t('error')}</div>;
   }
-
-  const formatCurrency = (amount: string | number) => {
-    const num = /* c8 ignore next */ typeof amount === 'string' ? parseFloat(amount) : amount;
-    return CURRENCY_FORMATTER.format(num);
-  };
 
   return (
     <div className="space-y-6">

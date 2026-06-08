@@ -244,18 +244,15 @@ describe("Bubbles", () => {
       expect(handleBubbleClick).toHaveBeenCalledWith(expect.any(Object), 2);
     });
 
-    it("calls handleBubbleClick on Enter and Space keydown, ignores other keys", () => {
-      const { handleBubbleClick } = require("@/components/landing/animations/bubble");
-      const { fireEvent } = require("@testing-library/react");
+    it("decorative bubbles are aria-hidden and not keyboard-focusable", () => {
       const { container } = render(
         <Bubbles index={0} backgroundColor="#FF0000" />
       );
       const bubbleDivs = container.querySelectorAll(".bubble");
-      handleBubbleClick.mockClear();
-      fireEvent.keyDown(bubbleDivs[0], { key: "Enter" });
-      fireEvent.keyDown(bubbleDivs[1], { key: " " });
-      fireEvent.keyDown(bubbleDivs[2], { key: "a" });
-      expect(handleBubbleClick).toHaveBeenCalledTimes(2);
+      bubbleDivs.forEach((b) => {
+        expect(b).toHaveAttribute("aria-hidden", "true");
+        expect(b).not.toHaveAttribute("tabindex");
+      });
     });
   });
 

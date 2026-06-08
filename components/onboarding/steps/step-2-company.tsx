@@ -11,7 +11,8 @@ import { ImageUpload } from '@/components/ui/image-upload';
 import { GoogleAddressAutocomplete } from '@/components/ui/google-address-autocomplete';
 import type { GoogleAddressComponents } from '@/components/ui/google-address-autocomplete';
 import type { OnboardingStep2Data } from '@/actions/onboarding/actions';
-import { PasswordStrengthChecklist, allRulesPass } from '@/components/onboarding/password-strength-checklist';
+import { PasswordStrengthChecklist } from '@/components/onboarding/password-strength-checklist';
+import { allRulesPass } from '@/components/onboarding/password-rules';
 
 // ── State & Reducer ──────────────────────────────────────────────────────────
 

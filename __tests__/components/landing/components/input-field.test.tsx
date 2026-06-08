@@ -9,10 +9,10 @@ jest.mock("@/components/landing/styles/contact-form.css", () => ({}));
 
 import {
   InputField,
-  PhoneNumberField,
-  InputTextArea,
   type ContactFormValues,
 } from "@/components/landing/components/input-field";
+import { PhoneNumberField } from "@/components/landing/components/phone-number-field";
+import { InputTextArea } from "@/components/landing/components/input-text-area";
 
 const defaultErrors: Partial<ContactFormValues> = {};
 const mockOnChange = jest.fn();

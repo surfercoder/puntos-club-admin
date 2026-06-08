@@ -20,6 +20,17 @@ import { createClient } from '@/lib/supabase/server';
 import { formatDateTime } from '@/lib/utils';
 import type { PushNotification } from '@/types/push_notification';
 
+const STATUS_VARIANTS: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
+  sent: 'default',
+  sending: 'outline',
+  draft: 'secondary',
+  failed: 'destructive',
+};
+
+function getStatusVariant(status: string): 'default' | 'secondary' | 'destructive' | 'outline' {
+  return STATUS_VARIANTS[status] ?? 'secondary';
+}
+
 export default async function NotificationsPage() {
   const [supabase, t, tCommon] = await Promise.all([
     createClient(),
@@ -42,16 +53,6 @@ export default async function NotificationsPage() {
   if (error) {
     throw new Error('Failed to fetch notifications');
   }
-
-  const getStatusVariant = (status: string): 'default' | 'secondary' | 'destructive' | 'outline' => {
-    const variants: Record<string, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-      sent: 'default',
-      sending: 'outline',
-      draft: 'secondary',
-      failed: 'destructive',
-    };
-    return variants[status] ?? 'secondary';
-  };
 
   return (
     <div className="space-y-6">

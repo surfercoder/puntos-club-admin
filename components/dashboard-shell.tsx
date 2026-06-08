@@ -63,7 +63,14 @@ export function DashboardShell({
   const { push } = useRouter();
   const pathname = usePathname();
   const tBreadcrumb = useTranslations("Breadcrumb");
-  const [activeOrgId, setActiveOrgId] = React.useState<string | null>(null);
+  const [activeOrgId, setActiveOrgId] = React.useState<string | null>(() => {
+    if (typeof window === "undefined" || portalMode === "admin") return null;
+    try {
+      return window.localStorage.getItem("active_org_id");
+    } catch {
+      return null;
+    }
+  });
 
   const breadcrumbItems = React.useMemo(() => {
     const knownSegments = [
@@ -116,16 +123,6 @@ export function DashboardShell({
 
     return items;
   }, [pathname, tBreadcrumb]);
-
-  React.useEffect(() => {
-    if (portalMode === "admin") return;
-    try {
-      const stored = window.localStorage.getItem("active_org_id");
-      if (stored) setActiveOrgId(stored);
-    } catch {
-      // ignore
-    }
-  }, [portalMode]);
 
   const onChangeOrg = React.useCallback((orgId: string) => {
     if (portalMode === "admin") return;

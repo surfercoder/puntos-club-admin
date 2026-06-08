@@ -224,9 +224,10 @@ describe('RedemptionForm', () => {
   it('renders beneficiary, product, and order options when data is loaded', () => {
     // Mock useReducer to return populated state
     const originalUseReducer = jest.requireActual('react').useReducer;
-    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialState: any) => {
+    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialStateOrArg: any, init?: any) => {
+      const initialState = init ? init(initialStateOrArg) : initialStateOrArg;
       // Check if this is the formDataReducer by inspecting the initial state shape
-      if (initialState && 'beneficiaries' in initialState && 'products' in initialState) {
+      if (initialState && typeof initialState === 'object' && 'beneficiaries' in initialState && 'products' in initialState) {
         return [{
           beneficiaries: [
             { id: 'ben-1', first_name: 'John', last_name: 'Doe', email: 'john@test.com', available_points: 500 },
@@ -265,8 +266,9 @@ describe('RedemptionForm', () => {
   it('covers formDataReducer SET_FORM_DATA and default case', () => {
     const originalUseReducer = jest.requireActual('react').useReducer;
     let capturedReducer: any;
-    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialState: any) => {
-      if (initialState && 'beneficiaries' in initialState && 'products' in initialState && 'validation' in initialState) {
+    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialStateOrArg: any, init?: any) => {
+      const initialState = init ? init(initialStateOrArg) : initialStateOrArg;
+      if (initialState && typeof initialState === 'object' && 'beneficiaries' in initialState && 'products' in initialState && 'validation' in initialState) {
         capturedReducer = reducer;
       }
       return originalUseReducer(reducer, initialState);
@@ -404,8 +406,9 @@ describe('RedemptionForm', () => {
   // -- Cover beneficiary with only first_name (line 190 branch) --
   it('renders beneficiary with only first_name', () => {
     const originalUseReducer = jest.requireActual('react').useReducer;
-    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialState: any) => {
-      if (initialState && 'beneficiaries' in initialState && 'products' in initialState) {
+    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialStateOrArg: any, init?: any) => {
+      const initialState = init ? init(initialStateOrArg) : initialStateOrArg;
+      if (initialState && typeof initialState === 'object' && 'beneficiaries' in initialState && 'products' in initialState) {
         return [{
           beneficiaries: [
             { id: 'ben-1', first_name: 'Alice', last_name: null, email: null, available_points: 100 },
@@ -431,8 +434,9 @@ describe('RedemptionForm', () => {
   it('covers handleProductChange with found product', () => {
     const originalUseReducer = jest.requireActual('react').useReducer;
     const mockDispatch = jest.fn();
-    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialState: any) => {
-      if (initialState && 'beneficiaries' in initialState && 'products' in initialState) {
+    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialStateOrArg: any, init?: any) => {
+      const initialState = init ? init(initialStateOrArg) : initialStateOrArg;
+      if (initialState && typeof initialState === 'object' && 'beneficiaries' in initialState && 'products' in initialState) {
         return [{
           beneficiaries: [],
           products: [
@@ -475,8 +479,9 @@ describe('RedemptionForm', () => {
   it('covers beneficiary onValueChange callback', () => {
     const originalUseReducer = jest.requireActual('react').useReducer;
     const mockDispatch = jest.fn();
-    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialState: any) => {
-      if (initialState && 'beneficiaries' in initialState && 'products' in initialState) {
+    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialStateOrArg: any, init?: any) => {
+      const initialState = init ? init(initialStateOrArg) : initialStateOrArg;
+      if (initialState && typeof initialState === 'object' && 'beneficiaries' in initialState && 'products' in initialState) {
         return [{
           beneficiaries: [
             { id: 'ben-1', first_name: 'John', last_name: 'Doe', email: 'john@test.com', available_points: 500 },
@@ -522,8 +527,9 @@ describe('RedemptionForm', () => {
   // -- Cover hasProduct=true branch on line 284 (onChange={hasProduct ? undefined : ...}) --
   it('renders readOnly points input when a product is selected (hasProduct=true)', () => {
     const originalUseReducer = jest.requireActual('react').useReducer;
-    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialState: any) => {
-      if (initialState && 'beneficiaries' in initialState && 'products' in initialState) {
+    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialStateOrArg: any, init?: any) => {
+      const initialState = init ? init(initialStateOrArg) : initialStateOrArg;
+      if (initialState && typeof initialState === 'object' && 'beneficiaries' in initialState && 'products' in initialState) {
         return [{
           beneficiaries: [],
           products: [
@@ -554,8 +560,9 @@ describe('RedemptionForm', () => {
   it('prevents submission when beneficiary has insufficient points', () => {
     const originalUseReducer = jest.requireActual('react').useReducer;
     const mockDispatch = jest.fn();
-    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialState: any) => {
-      if (initialState && 'beneficiaries' in initialState && 'products' in initialState) {
+    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialStateOrArg: any, init?: any) => {
+      const initialState = init ? init(initialStateOrArg) : initialStateOrArg;
+      if (initialState && typeof initialState === 'object' && 'beneficiaries' in initialState && 'products' in initialState) {
         return [{
           beneficiaries: [
             { id: 'ben-1', first_name: 'John', last_name: 'Doe', email: 'john@test.com', available_points: 10 },
@@ -573,9 +580,18 @@ describe('RedemptionForm', () => {
       return originalUseReducer(reducer, initialState);
     });
 
-    render(<RedemptionForm />);
+    const redemption = {
+      id: '1',
+      beneficiary_id: 'ben-1',
+      product_id: 'prod-1',
+      points_used: 50,
+      organization_id: '42',
+      created_at: '2024-01-01',
+    };
 
-    const form = screen.getByRole('button', { name: 'create' }).closest('form')!;
+    render(<RedemptionForm redemption={redemption} />);
+
+    const form = screen.getByRole('button', { name: 'update' }).closest('form')!;
     fireEvent.submit(form);
 
     // The handleSubmit should call dispatch with SET_VALIDATION containing insufficientPoints error
@@ -650,8 +666,9 @@ describe('RedemptionForm', () => {
   // -- Cover beneficiary with only last_name (line 190 branch) --
   it('renders beneficiary with only last_name', () => {
     const originalUseReducer = jest.requireActual('react').useReducer;
-    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialState: any) => {
-      if (initialState && 'beneficiaries' in initialState && 'products' in initialState) {
+    const useReducerSpy = jest.spyOn(React, 'useReducer').mockImplementation((reducer: any, initialStateOrArg: any, init?: any) => {
+      const initialState = init ? init(initialStateOrArg) : initialStateOrArg;
+      if (initialState && typeof initialState === 'object' && 'beneficiaries' in initialState && 'products' in initialState) {
         return [{
           beneficiaries: [
             { id: 'ben-1', first_name: null, last_name: 'Smith', email: null, available_points: 200 },

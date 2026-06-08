@@ -67,16 +67,14 @@ export const GoogleMapsProvider: React.FC<GoogleMapsProviderProps> = ({ apiKey, 
       dispatch({ type: 'error', error: 'Google Maps API key is not configured' });
       return;
     }
-
-    if (initialized.current) {
-      return;
-    }
-
+    if (initialized.current) return;
     initialized.current = true;
     setOptions({ key: apiKey });
 
+    let cancelled = false;
     importLibrary('places')
       .then((lib) => {
+        if (cancelled) return;
         const placesLib = lib as google.maps.PlacesLibrary;
         dispatch({
           type: 'loaded',
@@ -85,9 +83,14 @@ export const GoogleMapsProvider: React.FC<GoogleMapsProviderProps> = ({ apiKey, 
         });
       })
       .catch((_err: Error) => {
+        if (cancelled) return;
         dispatch({ type: 'error', error: 'Failed to load Google Maps API' });
         initialized.current = false;
       });
+
+    return () => {
+      cancelled = true;
+    };
   }, [apiKey]);
 
   return (

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { redirect } from 'next/navigation';
-import { useActionState, useEffect, useState } from 'react';
+import { useActionState, useEffect, useReducer, useState } from 'react';
 import { toast } from 'sonner';
 
 import { beneficiaryOrganizationFormAction } from '@/actions/dashboard/beneficiary_organization/beneficiary_organization-form-actions';
@@ -39,8 +39,8 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
   const tCommon = useTranslations('Common');
 
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [beneficiaries, setBeneficiaries] = useState<BeneficiaryOption[]>([]);
-  const [orgs, setOrgs] = useState<OrganizationOption[]>([]);
+  const [beneficiaries, setBeneficiaries] = useReducer((_: BeneficiaryOption[], next: BeneficiaryOption[]) => next, [] as BeneficiaryOption[]);
+  const [orgs, setOrgs] = useReducer((_: OrganizationOption[], next: OrganizationOption[]) => next, [] as OrganizationOption[]);
 
   const [actionState, formAction, pending] = useActionState(beneficiaryOrganizationFormAction, EMPTY_ACTION_STATE);
 
@@ -160,6 +160,7 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
 
       <div className="flex items-center gap-2">
         <input
+          aria-label={t('form.activeLabel')}
           className="rounded"
           defaultChecked={beneficiaryOrganization?.is_active ?? true}
           id="is_active"

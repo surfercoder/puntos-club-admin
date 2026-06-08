@@ -1,20 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 
 import { getEnvironmentInfo } from '@/lib/utils/environment-check';
 
 export function EnvironmentBanner() {
-  const [envInfo, setEnvInfo] = useState<ReturnType<typeof getEnvironmentInfo> | null>(null);
+  const [envInfo] = useState(() => getEnvironmentInfo());
 
-  useEffect(() => {
-    const info = getEnvironmentInfo();
-    setEnvInfo(info);
-    
-    // Log to console for debugging
-  }, []);
-
-  if (!envInfo || envInfo.environment === 'TEST') {
+  if (envInfo.environment === 'TEST') {
     return null; // Don't show banner for test environment
   }
 

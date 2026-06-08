@@ -5,8 +5,9 @@ import {
   use,
   useCallback,
   useEffect,
+  useMemo,
+  useReducer,
   useRef,
-  useState,
 } from 'react';
 
 import { getUsageSummaryAction } from '@/actions/dashboard/usage/actions';
@@ -35,18 +36,45 @@ interface PlanUsageProviderProps {
   initialSummary?: OrganizationUsageSummary | null;
 }
 
+type UsageState = {
+  summary: OrganizationUsageSummary | null;
+  isLoading: boolean;
+};
+
+type UsageAction =
+  | { type: 'FETCH_START' }
+  | { type: 'FETCH_SUCCESS'; payload: OrganizationUsageSummary | null }
+  | { type: 'FETCH_END' };
+
+function usageReducer(state: UsageState, action: UsageAction): UsageState {
+  switch (action.type) {
+    case 'FETCH_START':
+      return { ...state, isLoading: true };
+    case 'FETCH_SUCCESS':
+      return { ...state, summary: action.payload };
+    case 'FETCH_END':
+      return { ...state, isLoading: false };
+    /* c8 ignore next 2 */
+    default:
+      return state;
+  }
+}
+
 export function PlanUsageProvider({ children, initialSummary }: PlanUsageProviderProps) {
-  const [summary, setSummary] = useState<OrganizationUsageSummary | null>(initialSummary ?? null);
-  const [isLoading, setIsLoading] = useState(!initialSummary);
+  const [state, dispatch] = useReducer(usageReducer, {
+    summary: initialSummary ?? null,
+    isLoading: !initialSummary,
+  });
+  const { summary, isLoading } = state;
   const fetchRef = useRef(0);
 
   const fetchUsage = useCallback(() => {
     const id = ++fetchRef.current;
-    setIsLoading(true);
+    dispatch({ type: 'FETCH_START' });
     getUsageSummaryAction()
       .then((data) => {
         if (id === fetchRef.current) {
-          setSummary(data);
+          dispatch({ type: 'FETCH_SUCCESS', payload: data });
         }
       })
       .catch(() => {
@@ -54,16 +82,15 @@ export function PlanUsageProvider({ children, initialSummary }: PlanUsageProvide
       })
       .finally(() => {
         if (id === fetchRef.current) {
-          setIsLoading(false);
+          dispatch({ type: 'FETCH_END' });
         }
       });
   }, []);
 
   // Only fetch on mount if we don't have initial data
   useEffect(() => {
-    if (!initialSummary) {
-      fetchUsage();
-    }
+    if (initialSummary) return;
+    fetchUsage();
   }, [fetchUsage, initialSummary]);
 
   // Re-fetch when organization changes
@@ -97,18 +124,21 @@ export function PlanUsageProvider({ children, initialSummary }: PlanUsageProvide
     [summary]
   );
 
+  const contextValue = useMemo<PlanUsageContextValue>(
+    () => ({
+      summary,
+      isLoading,
+      invalidate: fetchUsage,
+      isAtLimit,
+      shouldWarn,
+      getFeature,
+      plan: summary?.plan ?? null,
+    }),
+    [summary, isLoading, fetchUsage, isAtLimit, shouldWarn, getFeature]
+  );
+
   return (
-    <PlanUsageContext.Provider
-      value={{
-        summary,
-        isLoading,
-        invalidate: fetchUsage,
-        isAtLimit,
-        shouldWarn,
-        getFeature,
-        plan: summary?.plan ?? null,
-      }}
-    >
+    <PlanUsageContext.Provider value={contextValue}>
       {children}
     </PlanUsageContext.Provider>
   );

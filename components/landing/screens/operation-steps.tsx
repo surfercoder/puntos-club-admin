@@ -32,7 +32,7 @@ const OperationSteps = () => {
   const giftRef = useRef(null);
   const numberStepRefs = useRef<(HTMLDivElement | null)[]>([]);
   const textRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const bubbleRefs = useRef<(HTMLDivElement | null)[]>([]);
+  const bubbleRefs = useRef<(HTMLElement | null)[]>([]);
   const lineRefs = useRef<(HTMLDivElement | null)[]>([]);
 
   registerGrowAnimation();
@@ -211,12 +211,11 @@ const OperationSteps = () => {
                 />
               </div>
               <div className="w-full flex items-center justify-center relative flex-1">
-                <div
+                <button
+                  type="button"
                   ref={(el) => {
                     bubbleRefs.current[index] = el;
                   }}
-                  role="button"
-                  tabIndex={0}
                   aria-label={title}
                   className="flex items-center justify-center size-32 sm:size-44 md:size-56 lg:size-64 rounded-full z-[1] bubble"
                   style={{
@@ -231,12 +230,6 @@ const OperationSteps = () => {
                     handleMouseLeave(bubbleRefs, index);
                   }}
                   onClick={() => handleBubbleClick(bubbleRefs, index)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter" || e.key === " ") {
-                      e.preventDefault();
-                      handleBubbleClick(bubbleRefs, index);
-                    }
-                  }}
                 >
                   <Image
                     src={`/icons/cromatico/${step.logo_url}`}
@@ -245,7 +238,7 @@ const OperationSteps = () => {
                     height={144}
                     className="size-20 sm:size-28 md:size-36"
                   />
-                </div>
+                </button>
 
                 <Bubbles index={index} backgroundColor={step.lightColor} />
               </div>

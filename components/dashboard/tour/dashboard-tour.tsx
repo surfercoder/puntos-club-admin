@@ -14,7 +14,6 @@ interface DashboardTourProps {
 export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTourProps) {
   const t = useTranslations("Tour");
   const initialized = useRef(false);
-  const tourRef = useRef<Tour | null>(null);
 
   useEffect(() => {
     if (userRole !== "owner") return;
@@ -23,6 +22,8 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
 
     initialized.current = true;
 
+    let tour: Tour | null = null;
+
     const markCompleted = () => {
       completeTour(userId).catch(console.error);
     };
@@ -30,7 +31,7 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
     const initTour = async () => {
       const Shepherd = (await import("shepherd.js")).default;
 
-      const tour = new Shepherd.Tour({
+      const localTour: Tour = new Shepherd.Tour({
         useModalOverlay: true,
         defaultStepOptions: {
           cancelIcon: { enabled: false },
@@ -40,12 +41,10 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
         },
       });
 
-      tourRef.current = tour;
-
       const nextButton = {
         text: t("next"),
         action() {
-          tour.next();
+          localTour.next();
         },
         classes: "shepherd-button-primary",
       };
@@ -53,7 +52,7 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
       const backButton = {
         text: t("back"),
         action() {
-          tour.back();
+          localTour.back();
         },
         classes: "shepherd-button-secondary",
       };
@@ -62,7 +61,7 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
         text: t("done"),
         action() {
           markCompleted();
-          tour.complete();
+          localTour.complete();
         },
         classes: "shepherd-button-primary",
       };
@@ -70,7 +69,7 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
       const skipButton = {
         text: t("skip"),
         action() {
-          tour.cancel();
+          localTour.cancel();
         },
         classes: "shepherd-button-secondary",
       };
@@ -159,13 +158,12 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
         return { ...step, text: `${step.text /* c8 ignore next */ ?? ""}${progress}` };
       });
 
-      tour.addSteps(steps);
+      localTour.addSteps(steps);
+      tour = localTour;
 
       /* c8 ignore next 5 */
       const timer = setTimeout(() => {
-        if (tourRef.current) {
-          tourRef.current.start();
-        }
+        localTour.start();
       }, 800);
 
       return () => clearTimeout(timer);
@@ -181,11 +179,10 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
 
     return () => {
       cleanup?.();
-      if (tourRef.current) {
+      if (tour) {
         try {
-          tourRef.current.cancel();
+          tour.cancel();
         } catch { /* ignore */ }
-        tourRef.current = null;
       }
     };
   }, [userRole, userId, tourCompleted, t]);

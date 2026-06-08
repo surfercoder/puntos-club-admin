@@ -2,11 +2,9 @@
 
 import React, { useReducer } from "react";
 import type { MutableRefObject } from "react";
-import {
-  InputField,
-  InputTextArea,
-  PhoneNumberField,
-} from "@/components/landing/components/input-field";
+import { InputField } from "@/components/landing/components/input-field";
+import { InputTextArea } from "@/components/landing/components/input-text-area";
+import { PhoneNumberField } from "@/components/landing/components/phone-number-field";
 import type { ContactFormValues } from "@/schemas/contact.schema";
 import { ContactSchema, contactFieldSchemas } from "@/schemas/contact.schema";
 import { sendContactEmail } from "@/actions/contact/send-contact-email";
@@ -240,6 +238,7 @@ const ContactForm = ({
             aria-hidden="true"
           >
             <input
+              aria-label="honeypot"
               type="text"
               name="honeyField"
               id="honeyField"
@@ -300,14 +299,13 @@ const ContactForm = ({
               disabled={loading}
             >
               {loading && (
-                <div
+                <output
                   className="inline-block size-4 animate-spin rounded-full border-2 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white mr-2"
-                  role="status"
                 >
                   <span className="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
                     {t("loading")}
                   </span>
-                </div>
+                </output>
               )}
               {t("submit")}
             </button>

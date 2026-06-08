@@ -288,12 +288,10 @@ export function PlanSelectorInner() {
             const showUpgradeButton = isSelected && isChangingPlan && isUpgrade;
             const showDowngradeMsg = isSelected && isChangingPlan && !isUpgrade;
             return (
-              <div
+              <button
+                type="button"
                 key={plan.id}
-                role="button"
-                tabIndex={0}
                 onClick={() => setSelected(plan.id)}
-                onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setSelected(plan.id); } }}
                 className={cn(
                   'relative flex flex-col rounded-lg border-2 p-3 text-left transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 cursor-pointer',
                   isSelected
@@ -392,7 +390,7 @@ export function PlanSelectorInner() {
                     {tSettings('contactToDowngrade')}
                   </p>
                 )}
-              </div>
+              </button>
             );
           })}
         </div>

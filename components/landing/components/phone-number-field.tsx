@@ -6,32 +6,25 @@ import { useTheme } from "next-themes";
 import "@/components/landing/styles/contact-form.css";
 
 import type { ContactFormValues } from "@/schemas/contact.schema";
-export type { ContactFormValues } from "@/schemas/contact.schema";
 
-interface InputFieldProps {
-  name: keyof ContactFormValues;
-  value: string;
+interface PhoneNumberFieldProps {
   label: string;
-  color: string;
+  value: string;
   errors: Partial<ContactFormValues>;
   onChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<HTMLInputElement>
   ) => void;
   circleRefs: MutableRefObject<(HTMLDivElement | null)[]>;
   index: number;
-  colSpanMd?: number;
 }
 
-export const InputField: FC<InputFieldProps> = ({
-  name,
-  value,
+export const PhoneNumberField: FC<PhoneNumberFieldProps> = ({
   label,
-  color,
+  value,
   errors,
   onChange,
   circleRefs,
   index,
-  colSpanMd = 1,
 }) => {
   const { resolvedTheme: theme } = useTheme();
   const [inputKey, setInputKey] = useState(0);
@@ -41,33 +34,30 @@ export const InputField: FC<InputFieldProps> = ({
   }, [theme]);
 
   return (
-    <div
-      className={`flex flex-col gap-2 col-span-1 ${
-        /* c8 ignore next */ colSpanMd === 2 && "md:col-span-2"
-      }`}
-    >
+    <div className="flex flex-col gap-2">
       <p className="font-light pl-7">{label}</p>
       <div className="relative">
         <div
           ref={(el) => {
             circleRefs.current[index] = el;
           }}
-          className={`absolute left-4 top-1/2 transform -translate-y-1/2 size-6 rounded-full`}
-          style={{ backgroundColor: color }}
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 size-6 rounded-full z-10"
+          style={{ backgroundColor: "#FF4573" }}
         />
         <input
           aria-label={label}
           key={inputKey}
-          type="text"
-          name={name}
+          type="tel"
+          name="phoneNumber"
           value={value}
           onChange={onChange}
           onBlur={onChange}
+          placeholder="+54"
           className="w-full pl-14 pr-4 py-4 md:py-5 dark:border-2 dark:border-white rounded-full bg-[#D9D9D9] dark:bg-transparent shadow-sm text-black dark:text-white text-sm lg:text-base focus:outline-none"
         />
       </div>
       <p className="text-[#FF0000] font-light pl-6 text-sm lg:text-base mt-1">
-        {errors[name] && errors[name]}
+        {errors["phoneNumber"] && errors["phoneNumber"]}
       </p>
     </div>
   );

@@ -177,9 +177,9 @@ describe('PlanUsageSummary', () => {
       isLoading: false,
     });
 
-    render(<PlanUsageSummary />);
-    const progressBar = screen.getByRole('progressbar');
-    expect(progressBar.className).toContain('bg-red-500');
+    const { container: container1 } = render(<PlanUsageSummary />);
+    const progressBar1 = container1.querySelector('[aria-hidden="true"] > div');
+    expect(progressBar1?.className).toContain('bg-red-500');
   });
 
   it('shows correct color for feature at 80% (amber)', () => {
@@ -201,9 +201,9 @@ describe('PlanUsageSummary', () => {
       isLoading: false,
     });
 
-    render(<PlanUsageSummary />);
-    const progressBar = screen.getByRole('progressbar');
-    expect(progressBar.className).toContain('bg-amber-500');
+    const { container: containerAmber } = render(<PlanUsageSummary />);
+    const progressBarAmber = containerAmber.querySelector('[aria-hidden="true"] > div');
+    expect(progressBarAmber?.className).toContain('bg-amber-500');
   });
 
   it('shows correct color for feature at 60% (blue)', () => {
@@ -225,9 +225,9 @@ describe('PlanUsageSummary', () => {
       isLoading: false,
     });
 
-    render(<PlanUsageSummary />);
-    const progressBar = screen.getByRole('progressbar');
-    expect(progressBar.className).toContain('bg-blue-500');
+    const { container: containerBlue } = render(<PlanUsageSummary />);
+    const progressBarBlue = containerBlue.querySelector('[aria-hidden="true"] > div');
+    expect(progressBarBlue?.className).toContain('bg-blue-500');
   });
 
   it('shows is_at_limit warning banner', () => {

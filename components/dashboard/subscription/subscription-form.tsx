@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState, useEffect, useReducer } from 'react';
 
 import { subscriptionFormAction } from '@/actions/dashboard/subscription/subscription-form-actions';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,8 @@ interface SubscriptionFormProps {
 
 export default function SubscriptionForm({ subscription }: SubscriptionFormProps) {
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [organizations, setOrganizations] = useState<Array<{ id: string; name: string }>>([]);
+  type OrgRow = { id: string; name: string };
+  const [organizations, setOrganizations] = useReducer((_: OrgRow[], next: OrgRow[]) => next, [] as OrgRow[]);
 
   useEffect(() => {
     async function loadOrganizations() {

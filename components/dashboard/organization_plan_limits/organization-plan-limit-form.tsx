@@ -1,7 +1,7 @@
 "use client";
 
 import Link from 'next/link';
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState, useEffect, useReducer } from 'react';
 
 import { organizationPlanLimitFormAction } from '@/actions/dashboard/organization_plan_limits/organization-plan-limit-form-actions';
 import { Button } from '@/components/ui/button';
@@ -21,7 +21,8 @@ interface OrganizationPlanLimitFormProps {
 
 export default function OrganizationPlanLimitForm({ organizationPlanLimit }: OrganizationPlanLimitFormProps) {
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [organizations, setOrganizations] = useState<Array<{ id: string; name: string }>>([]);
+  type OrgRow = { id: string; name: string };
+  const [organizations, setOrganizations] = useReducer((_: OrgRow[], next: OrgRow[]) => next, [] as OrgRow[]);
 
   useEffect(() => {
     async function loadOrganizations() {

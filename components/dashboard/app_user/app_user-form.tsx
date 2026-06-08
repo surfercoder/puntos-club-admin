@@ -4,7 +4,7 @@ import { Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { redirect } from 'next/navigation';
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState, useEffect, useReducer } from 'react';
 import { toast } from "sonner";
 
 import { appUserFormAction } from '@/actions/dashboard/app_user/app_user-form-actions';
@@ -18,7 +18,8 @@ import type { ActionState} from '@/lib/error-handler';
 import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { createClient } from '@/lib/supabase/client';
 import { AppUserSchema } from '@/schemas/app_user.schema';
-import { PasswordStrengthChecklist, allRulesPass } from '@/components/onboarding/password-strength-checklist';
+import { PasswordStrengthChecklist } from '@/components/onboarding/password-strength-checklist';
+import { allRulesPass } from '@/components/onboarding/password-rules';
 import type { AppUser } from '@/types/app_user';
 import type { UserRole } from '@/types/user_role';
 
@@ -27,6 +28,11 @@ interface AppUserFormProps {
   currentUserRole?: string;
 }
 
+const roleToPlanFeature: Record<string, 'cashiers' | 'collaborators'> = {
+  cashier: 'cashiers',
+  collaborator: 'collaborators',
+};
+
 export default function AppUserForm({ appUser, currentUserRole }: AppUserFormProps) {
   const t = useTranslations('Dashboard.appUser');
   const tCommon = useTranslations('Common');
@@ -34,38 +40,33 @@ export default function AppUserForm({ appUser, currentUserRole }: AppUserFormPro
 
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
-  const [roles, setRoles] = useState<UserRole[]>([]);
+  const [roles, setRoles] = useReducer((_: UserRole[], next: UserRole[]) => next, [] as UserRole[]);
   const [showPassword, setShowPassword] = useState(false);
   const [passwordValue, setPasswordValue] = useState('');
 
   // Utils
   const [actionState, formAction, pending] = useActionState(appUserFormAction, EMPTY_ACTION_STATE);
 
-  // Map role names to plan feature keys
-  const roleToPlanFeature: Record<string, 'cashiers' | 'collaborators'> = {
-    cashier: 'cashiers',
-    collaborator: 'collaborators',
-  };
-
   // Load roles
   useEffect(() => {
     const supabase = createClient();
     async function loadRoles() {
-      // Collaborators can only create/manage cashiers
-      const allowedRoles = currentUserRole === 'collaborator'
-        ? ['cashier']
-        : ['cashier', 'collaborator'];
       const { data } = await supabase
         .from('user_role')
         .select('*')
-        .in('name', allowedRoles)
+        .in('name', ['cashier', 'collaborator'])
         .order('name');
       if (data) {
         setRoles(data as UserRole[]);
       }
     }
     loadRoles();
-  }, [currentUserRole]);
+  }, []);
+
+  // Collaborators can only create/manage cashiers
+  const visibleRoles = currentUserRole === 'collaborator'
+    ? roles.filter((r) => r.name === 'cashier')
+    : roles;
 
   useEffect(() => {
     if (actionState.status === 'error' && actionState.message) {
@@ -115,7 +116,7 @@ export default function AppUserForm({ appUser, currentUserRole }: AppUserFormPro
             <SelectValue placeholder={t('form.selectRole')} />
           </SelectTrigger>
           <SelectContent>
-            {roles.map((role) => {
+            {visibleRoles.map((role) => {
               const feature = roleToPlanFeature[role.name];
               const atLimit = feature ? isAtLimit(feature) : false;
               const roleId = String(role.id);
