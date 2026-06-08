@@ -166,7 +166,10 @@
       "Bash(echo \"EXIT_CODE=$?\")",
       "Bash(dig TXT *)",
       "Bash(awk *)",
-      "Bash(echo \"---EXIT: $?\")"
+      "Bash(echo \"---EXIT: $?\")",
+      "Bash(echo \"exit: $?\")",
+      "Read(//private/tmp/**)",
+      "Bash(git rm *)"
     ],
     "deny": []
   },
