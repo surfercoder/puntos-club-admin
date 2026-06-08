@@ -1,16 +1,25 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useReducer, useRef, useState } from 'react';
 import { Check, Star, Zap, Rocket, Loader2, ArrowRight } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { usePlanUsage } from '@/components/providers/plan-usage-provider';
 import { PlanUsageSummary } from '@/components/dashboard/plan/plan-usage-summary';
 import { getAllPlanLimitsAction } from '@/actions/dashboard/usage/actions';
 import { verifySubscriptionAction } from '@/actions/dashboard/subscription/verify-subscription';
+import { cancelSubscriptionAction } from '@/actions/dashboard/subscription/cancel-subscription';
 import type { PlanFeatureKey, PlanType } from '@/types/plan';
 
 
@@ -126,13 +135,292 @@ function buildFeatures(
   return features;
 }
 
+interface PlanCardProps {
+  plan: Plan;
+  isSelected: boolean;
+  isCurrent: boolean;
+  onSelect: () => void;
+  currentPlanLabel: string;
+  selectedPlanLabel: string;
+}
+
+function PlanCard({
+  plan,
+  isSelected,
+  isCurrent,
+  onSelect,
+  currentPlanLabel,
+  selectedPlanLabel,
+}: PlanCardProps) {
+  const Icon = plan.icon;
+  return (
+    <button
+      type="button"
+      aria-pressed={isSelected}
+      onClick={onSelect}
+      className={cn(
+        'relative flex flex-col rounded-lg border-2 p-3 text-left transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 cursor-pointer',
+        isSelected
+          ? colorMap[plan.color]
+          : 'border-border hover:border-muted-foreground/30'
+      )}
+    >
+      {isCurrent && (
+        <span
+          className={cn(
+            'absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-0.5 text-[10px] font-semibold',
+            currentPlanBadgeMap[plan.color]
+          )}
+        >
+          {currentPlanLabel}
+        </span>
+      )}
+      {!isCurrent && plan.badge && (
+        <span
+          className={cn(
+            'absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-0.5 text-[10px] font-semibold',
+            badgeColorMap[plan.color]
+          )}
+        >
+          {plan.badge}
+        </span>
+      )}
+
+      <div className="flex items-center gap-2 mb-2">
+        <div className={cn('rounded-md p-1.5', iconColorMap[plan.color])}>
+          <Icon className="size-4" />
+        </div>
+        <div>
+          <p className="text-sm font-semibold text-foreground leading-tight">
+            {plan.name}
+          </p>
+          <div className="flex items-baseline gap-1">
+            <span className="text-lg font-bold text-foreground">
+              {plan.price}
+            </span>
+            {plan.priceNote && (
+              <span className="text-[10px] text-muted-foreground">
+                {plan.priceNote}
+              </span>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <ul className="space-y-1 flex-1">
+        {plan.features.map((feature) => (
+          <li
+            key={feature.label}
+            className="flex items-center justify-between gap-1"
+          >
+            <span className="text-[11px] text-muted-foreground">
+              {feature.label}
+            </span>
+            <FeatureValue value={feature.value} />
+          </li>
+        ))}
+      </ul>
+
+      {isSelected && (
+        <div className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-brand-green">
+          <Check className="size-3.5" />
+          {isCurrent ? currentPlanLabel : selectedPlanLabel}
+        </div>
+      )}
+    </button>
+  );
+}
+
+type ChangePlanState = {
+  selected: string | null;
+  loading: boolean;
+  confirmAction: 'cancel' | 'switch' | null;
+};
+
+type ChangePlanAction =
+  | { type: 'SET_SELECTED'; payload: string | null }
+  | { type: 'SET_LOADING'; payload: boolean }
+  | { type: 'OPEN_CONFIRM'; payload: 'cancel' | 'switch' }
+  | { type: 'CLOSE_CONFIRM' };
+
+const initialChangePlanState: ChangePlanState = {
+  selected: null,
+  loading: false,
+  confirmAction: null,
+};
+
+function changePlanReducer(
+  state: ChangePlanState,
+  action: ChangePlanAction
+): ChangePlanState {
+  switch (action.type) {
+    case 'SET_SELECTED':
+      return { ...state, selected: action.payload };
+    case 'SET_LOADING':
+      return { ...state, loading: action.payload };
+    case 'OPEN_CONFIRM':
+      return { ...state, confirmAction: action.payload };
+    case 'CLOSE_CONFIRM':
+      return { ...state, confirmAction: null };
+    /* c8 ignore next 2 */
+    default:
+      return state;
+  }
+}
+
+interface PlanChangeActionsProps {
+  isUpgrade: boolean;
+  isCancelToTrial: boolean;
+  isSwitchPaidToPaid: boolean;
+  loading: boolean;
+  selectedPlan: Plan;
+  onChangePlan: () => void;
+  upgradeLabel: string;
+  cancelLabel: string;
+  switchLabel: string;
+  redirectingLabel: string;
+}
+
+function PlanChangeActions({
+  isUpgrade,
+  isCancelToTrial,
+  isSwitchPaidToPaid,
+  loading,
+  selectedPlan,
+  onChangePlan,
+  upgradeLabel,
+  cancelLabel,
+  switchLabel,
+  redirectingLabel,
+}: PlanChangeActionsProps) {
+  if (isUpgrade) {
+    return (
+      <div className="mt-3">
+        <Button
+          className={cn('w-full text-xs', buttonColorMap[selectedPlan.color])}
+          onClick={onChangePlan}
+          disabled={loading}
+        >
+          {loading ? (
+            <>
+              <Loader2 className="mr-1.5 size-3 animate-spin" />
+              {redirectingLabel}
+            </>
+          ) : (
+            <>
+              {upgradeLabel}
+              <ArrowRight className="ml-1.5 size-3" />
+            </>
+          )}
+        </Button>
+      </div>
+    );
+  }
+  if (isCancelToTrial) {
+    return (
+      <div className="mt-3">
+        <Button
+          variant="destructive"
+          className="w-full text-xs"
+          onClick={onChangePlan}
+          disabled={loading}
+        >
+          {cancelLabel}
+        </Button>
+      </div>
+    );
+  }
+  // Parent guards on `isChangingPlan`, and every plan-change transition matches
+  // one of the three flags above, so this fallthrough is unreachable. It exists
+  // only to satisfy the type checker.
+  /* c8 ignore start */
+  if (!isSwitchPaidToPaid) return null;
+  /* c8 ignore stop */
+  return (
+    <div className="mt-3">
+      <Button
+        className={cn('w-full text-xs', buttonColorMap[selectedPlan.color])}
+        onClick={onChangePlan}
+        disabled={loading}
+      >
+        {switchLabel}
+        <ArrowRight className="ml-1.5 size-3" />
+      </Button>
+    </div>
+  );
+}
+
+interface PlanChangeConfirmDialogProps {
+  confirmAction: 'cancel' | 'switch' | null;
+  loading: boolean;
+  selectedPlanName: string;
+  onClose: () => void;
+  onConfirmCancel: () => void;
+  onConfirmSwitch: () => void;
+  tSettings: ReturnType<typeof useTranslations>;
+}
+
+function PlanChangeConfirmDialog({
+  confirmAction,
+  loading,
+  selectedPlanName,
+  onClose,
+  onConfirmCancel,
+  onConfirmSwitch,
+  tSettings,
+}: PlanChangeConfirmDialogProps) {
+  const isSwitch = confirmAction === 'switch';
+  return (
+    <Dialog
+      open={confirmAction !== null}
+      onOpenChange={(open) => {
+        if (!open && !loading) onClose();
+      }}
+    >
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>
+            {isSwitch
+              ? tSettings('switchConfirmTitle', { plan: selectedPlanName })
+              : tSettings('cancelConfirmTitle')}
+          </DialogTitle>
+          <DialogDescription>
+            {isSwitch
+              ? tSettings('switchConfirmDescription', { plan: selectedPlanName })
+              : tSettings('cancelConfirmDescription')}
+          </DialogDescription>
+        </DialogHeader>
+        <DialogFooter>
+          <Button variant="outline" onClick={onClose} disabled={loading}>
+            {tSettings('keepSubscription')}
+          </Button>
+          <Button
+            variant={isSwitch ? 'default' : 'destructive'}
+            onClick={isSwitch ? onConfirmSwitch : onConfirmCancel}
+            disabled={loading}
+          >
+            {loading ? (
+              <>
+                <Loader2 className="mr-1.5 size-3 animate-spin" />
+                {isSwitch ? tSettings('switchingPlan') : tSettings('cancelling')}
+              </>
+            ) : (
+              isSwitch ? tSettings('confirmSwitch') : tSettings('confirmCancel')
+            )}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 export function PlanSelectorInner() {
   const t = useTranslations('Onboarding.step3');
   const tSettings = useTranslations('Dashboard.planSettings');
   const { summary: usageSummary, isLoading: fetching, invalidate } = usePlanUsage();
   const currentPlan = usageSummary?.plan ?? null;
-  const [selected, setSelected] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [state, dispatch] = useReducer(changePlanReducer, initialChangePlanState);
+  const { selected, loading, confirmAction } = state;
   // react-doctor-disable-next-line react-doctor/rerender-state-only-in-handlers
   const [verifying, setVerifying] = useState(false);
   // react-doctor-disable-next-line react-doctor/rerender-state-only-in-handlers
@@ -176,7 +464,7 @@ export function PlanSelectorInner() {
 
   // Sync selected with current plan when data loads
   if (selected === null && currentPlan !== null) {
-    setSelected(currentPlan);
+    dispatch({ type: 'SET_SELECTED', payload: currentPlan });
   }
 
   const f = t.raw('features') as Record<string, string>;
@@ -222,47 +510,91 @@ export function PlanSelectorInner() {
     selectedPlan.isPaid &&
     (currentPlan === 'trial' ||
       (currentPlan === 'advance' && selected === 'pro'));
+  const isCancelToTrial =
+    isChangingPlan && selected === 'trial' && (currentPlan === 'advance' || currentPlan === 'pro');
+  const isSwitchPaidToPaid =
+    isChangingPlan && currentPlan === 'pro' && selected === 'advance';
+
+  const startCheckoutForSelected = async () => {
+    const res = await fetch('/api/mercadopago/create-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        planId: selected,
+        backUrl: '/dashboard/settings/plan',
+      }),
+    });
+
+    const data = (await res.json()) as {
+      initPoint?: string;
+      preapprovalId?: string;
+      error?: string;
+    };
+
+    if (!res.ok || !data.initPoint) {
+      throw new Error(data.error ?? t('paymentInitError'));
+    }
+
+    window.location.href = data.initPoint;
+  };
 
   const handleChangePlan = async () => {
     /* c8 ignore next */
     if (!selected || !isChangingPlan) return;
 
-    const targetPlan = plans.find((p) => p.id === selected);
-    /* c8 ignore next */
-    if (!targetPlan) return;
-
-    if (targetPlan.isPaid) {
-      setLoading(true);
+    if (isUpgrade) {
+      dispatch({ type: 'SET_LOADING', payload: true });
       try {
-        const res = await fetch('/api/mercadopago/create-subscription', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            planId: selected,
-            backUrl: '/dashboard/settings/plan',
-          }),
-        });
-
-        const data = (await res.json()) as {
-          initPoint?: string;
-          preapprovalId?: string;
-          error?: string;
-        };
-
-        if (!res.ok || !data.initPoint) {
-          throw new Error(data.error ?? t('paymentInitError'));
-        }
-
-        window.location.href = data.initPoint;
+        await startCheckoutForSelected();
       } catch (err) {
-        toast.error(
-          err instanceof Error ? err.message : t('paymentError')
-        );
-        setLoading(false);
+        toast.error(err instanceof Error ? err.message : t('paymentError'));
+        dispatch({ type: 'SET_LOADING', payload: false });
       }
-    } else /* c8 ignore start */ {
-      toast.info(tSettings('contactToDowngrade'));
-    } /* c8 ignore stop */
+      return;
+    }
+
+    if (isSwitchPaidToPaid) {
+      dispatch({ type: 'OPEN_CONFIRM', payload: 'switch' });
+      return;
+    }
+
+    if (isCancelToTrial) {
+      dispatch({ type: 'OPEN_CONFIRM', payload: 'cancel' });
+    }
+  };
+
+  const handleConfirmCancel = async () => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    try {
+      const result = await cancelSubscriptionAction();
+      if (result.error) {
+        toast.error(result.error);
+        return;
+      }
+      toast.success(tSettings('cancelSuccess'));
+      dispatch({ type: 'CLOSE_CONFIRM' });
+      invalidate();
+    } catch {
+      toast.error(tSettings('cancelError'));
+    } finally {
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  };
+
+  const handleConfirmSwitch = async () => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    try {
+      const result = await cancelSubscriptionAction();
+      if (result.error) {
+        toast.error(result.error);
+        dispatch({ type: 'SET_LOADING', payload: false });
+        return;
+      }
+      await startCheckoutForSelected();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('paymentError'));
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
   };
 
   if (fetching || !planLimits || verifying) {
@@ -281,119 +613,33 @@ export function PlanSelectorInner() {
         <h2 className="text-sm font-semibold mb-2">{tSettings('availablePlans')}</h2>
 
         <div className="grid grid-cols-1 gap-3 lg:grid-cols-3">
-          {plans.map((plan) => {
-            const Icon = plan.icon;
-            const isSelected = selected === plan.id;
-            const isCurrent = currentPlan === plan.id;
-            const showUpgradeButton = isSelected && isChangingPlan && isUpgrade;
-            const showDowngradeMsg = isSelected && isChangingPlan && !isUpgrade;
-            return (
-              <button
-                type="button"
-                key={plan.id}
-                onClick={() => setSelected(plan.id)}
-                className={cn(
-                  'relative flex flex-col rounded-lg border-2 p-3 text-left transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 cursor-pointer',
-                  isSelected
-                    ? colorMap[plan.color]
-                    : 'border-border hover:border-muted-foreground/30'
-                )}
-              >
-                {isCurrent && (
-                  <span
-                    className={cn(
-                      'absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-0.5 text-[10px] font-semibold',
-                      currentPlanBadgeMap[plan.color]
-                    )}
-                  >
-                    {tSettings('currentPlan')}
-                  </span>
-                )}
-                {!isCurrent && plan.badge && (
-                  <span
-                    className={cn(
-                      'absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-0.5 text-[10px] font-semibold',
-                      badgeColorMap[plan.color]
-                    )}
-                  >
-                    {plan.badge}
-                  </span>
-                )}
-
-                <div className="flex items-center gap-2 mb-2">
-                  <div className={cn('rounded-md p-1.5', iconColorMap[plan.color])}>
-                    <Icon className="size-4" />
-                  </div>
-                  <div>
-                    <p className="text-sm font-semibold text-foreground leading-tight">
-                      {plan.name}
-                    </p>
-                    <div className="flex items-baseline gap-1">
-                      <span className="text-lg font-bold text-foreground">
-                        {plan.price}
-                      </span>
-                      {plan.priceNote && (
-                        <span className="text-[10px] text-muted-foreground">
-                          {plan.priceNote}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </div>
-
-                <ul className="space-y-1 flex-1">
-                  {plan.features.map((feature) => (
-                    <li
-                      key={feature.label}
-                      className="flex items-center justify-between gap-1"
-                    >
-                      <span className="text-[11px] text-muted-foreground">
-                        {feature.label}
-                      </span>
-                      <FeatureValue value={feature.value} />
-                    </li>
-                  ))}
-                </ul>
-
-                {isSelected && !showUpgradeButton && !showDowngradeMsg && (
-                  <div className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-brand-green">
-                    <Check className="size-3.5" />
-                    {/* c8 ignore next */ isCurrent ? tSettings('currentPlan') : t('selectedPlan')}
-                  </div>
-                )}
-
-                {showUpgradeButton && (
-                  <div className="mt-2" role="presentation" onClick={(e) => e.stopPropagation()} onKeyDown={(e) => e.stopPropagation()}>
-                    <Button
-                      size="sm"
-                      className={cn('w-full text-xs h-8', buttonColorMap[selectedPlan.color])}
-                      onClick={handleChangePlan}
-                      disabled={loading}
-                    >
-                      {loading ? (
-                        <>
-                          <Loader2 className="mr-1.5 size-3 animate-spin" />
-                          {t('redirectingToMP')}
-                        </>
-                      ) : (
-                        <>
-                          {tSettings('upgradeTo', { plan: selectedPlan.name })}
-                          <ArrowRight className="ml-1.5 size-3" />
-                        </>
-                      )}
-                    </Button>
-                  </div>
-                )}
-
-                {showDowngradeMsg && (
-                  <p className="mt-2 text-[11px] text-muted-foreground text-center">
-                    {tSettings('contactToDowngrade')}
-                  </p>
-                )}
-              </button>
-            );
-          })}
+          {plans.map((plan) => (
+            <PlanCard
+              key={plan.id}
+              plan={plan}
+              isSelected={selected === plan.id}
+              isCurrent={currentPlan === plan.id}
+              onSelect={() => dispatch({ type: 'SET_SELECTED', payload: plan.id })}
+              currentPlanLabel={tSettings('currentPlan')}
+              selectedPlanLabel={t('selectedPlan')}
+            />
+          ))}
         </div>
+
+        {isChangingPlan && (
+          <PlanChangeActions
+            isUpgrade={isUpgrade}
+            isCancelToTrial={isCancelToTrial}
+            isSwitchPaidToPaid={isSwitchPaidToPaid}
+            loading={loading}
+            selectedPlan={selectedPlan}
+            onChangePlan={handleChangePlan}
+            upgradeLabel={tSettings('upgradeTo', { plan: selectedPlan.name })}
+            cancelLabel={tSettings('cancelSubscription')}
+            switchLabel={tSettings('switchToPlan', { plan: selectedPlan.name })}
+            redirectingLabel={t('redirectingToMP')}
+          />
+        )}
       </div>
 
       <p className="text-center text-[11px] text-muted-foreground">
@@ -402,6 +648,16 @@ export function PlanSelectorInner() {
           <span className="block">{t('securePayment')}</span>
         )}
       </p>
+
+      <PlanChangeConfirmDialog
+        confirmAction={confirmAction}
+        loading={loading}
+        selectedPlanName={selectedPlan.name}
+        onClose={() => dispatch({ type: 'CLOSE_CONFIRM' })}
+        onConfirmCancel={handleConfirmCancel}
+        onConfirmSwitch={handleConfirmSwitch}
+        tSettings={tSettings}
+      />
     </div>
   );
 }

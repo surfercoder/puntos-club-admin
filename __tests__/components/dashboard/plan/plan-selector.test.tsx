@@ -11,12 +11,34 @@ jest.mock('@/actions/dashboard/subscription/verify-subscription', () => ({
   verifySubscriptionAction: jest.fn().mockResolvedValue({ status: 'authorized', plan: 'advance' }),
 }));
 
+jest.mock('@/actions/dashboard/subscription/cancel-subscription', () => ({
+  cancelSubscriptionAction: jest.fn().mockResolvedValue({ success: true, preapprovalId: 'pa_123' }),
+}));
+
 jest.mock('@/actions/dashboard/usage/actions', () => ({
   getAllPlanLimitsAction: jest.fn().mockResolvedValue({
     trial: { beneficiaries: 10, push_notifications_monthly: 3, cashiers: 1, branches: 1, collaborators: 1, redeemable_products: 2 },
     advance: { beneficiaries: 500, push_notifications_monthly: 10, cashiers: 10, branches: 5, collaborators: 3, redeemable_products: 10 },
     pro: { beneficiaries: 5000, push_notifications_monthly: 50, cashiers: 100, branches: 15, collaborators: 10, redeemable_products: 30 },
   }),
+}));
+
+// Mock @/components/ui/dialog. The backdrop drives onOpenChange(false); clicks
+// inside the content stopPropagation so buttons can fire without closing.
+jest.mock('@/components/ui/dialog', () => ({
+  Dialog: ({ open, onOpenChange, children }: { open: boolean; onOpenChange?: (open: boolean) => void; children: React.ReactNode }) =>
+    open ? (
+      <div data-testid="dialog-backdrop" onClick={() => onOpenChange?.(false)}>
+        <div data-testid="dialog" onClick={(e) => e.stopPropagation()}>
+          {children}
+        </div>
+      </div>
+    ) : null,
+  DialogContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DialogHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  DialogTitle: ({ children }: { children: React.ReactNode }) => <h2>{children}</h2>,
+  DialogDescription: ({ children }: { children: React.ReactNode }) => <p>{children}</p>,
+  DialogFooter: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
 
 const { toast } = require('sonner');
@@ -39,6 +61,8 @@ describe('PlanSelector', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     (global.fetch as jest.Mock).mockReset();
+    const { cancelSubscriptionAction } = require('@/actions/dashboard/subscription/cancel-subscription');
+    (cancelSubscriptionAction as jest.Mock).mockResolvedValue({ success: true, preapprovalId: 'pa_123' });
   });
 
   it('shows loading spinner when fetching', () => {
@@ -114,30 +138,6 @@ describe('PlanSelector', () => {
     expect(screen.getByText(/upgradeTo/)).toBeInTheDocument();
   });
 
-  it('stops click and keyDown propagation on upgrade button wrapper', async () => {
-    (usePlanUsage as jest.Mock).mockReturnValue({
-      summary: mockSummary,
-      isLoading: false,
-    });
-
-    await act(async () => { render(<PlanSelector />); });
-
-    fireEvent.click(screen.getByText('advancePlan'));
-
-    const upgradeButton = screen.getByText(/upgradeTo/);
-    const wrapper = upgradeButton.closest('[role="presentation"]')!;
-
-    const clickEvent = new MouseEvent('click', { bubbles: true });
-    const clickStopSpy = jest.spyOn(clickEvent, 'stopPropagation');
-    wrapper.dispatchEvent(clickEvent);
-    expect(clickStopSpy).toHaveBeenCalled();
-
-    const keyEvent = new KeyboardEvent('keydown', { key: 'Enter', bubbles: true });
-    const keyStopSpy = jest.spyOn(keyEvent, 'stopPropagation');
-    wrapper.dispatchEvent(keyEvent);
-    expect(keyStopSpy).toHaveBeenCalled();
-  });
-
   it('plan cards render as native <button> elements', async () => {
     (usePlanUsage as jest.Mock).mockReturnValue({
       summary: mockSummary,
@@ -151,7 +151,7 @@ describe('PlanSelector', () => {
     expect(advanceCard?.getAttribute('type')).toBe('button');
   });
 
-  it('shows downgrade message when selecting a lower plan from advance', async () => {
+  it('shows cancel button when selecting trial from advance', async () => {
     (usePlanUsage as jest.Mock).mockReturnValue({
       summary: { ...mockSummary, plan: 'advance' },
       isLoading: false,
@@ -162,7 +162,7 @@ describe('PlanSelector', () => {
     // Select trial plan (downgrade from advance)
     fireEvent.click(screen.getByText('trialPlan'));
 
-    expect(screen.getByText('contactToDowngrade')).toBeInTheDocument();
+    expect(screen.getByText('cancelSubscription')).toBeInTheDocument();
   });
 
   it('shows available plans heading', async () => {
@@ -214,8 +214,6 @@ describe('PlanSelector', () => {
         method: 'POST',
       }));
     });
-
-    // window.location.href assignment is tested implicitly - the fetch was called successfully
   });
 
   it('shows error toast when fetch fails', async () => {
@@ -287,19 +285,18 @@ describe('PlanSelector', () => {
     });
   });
 
-  it('shows contactToDowngrade when selecting non-paid plan and text is displayed', async () => {
+  it('shows cancel button when selecting trial from a paid plan', async () => {
     (usePlanUsage as jest.Mock).mockReturnValue({
-      summary: { ...mockSummary, plan: 'advance' },
+      summary: { ...mockSummary, plan: 'pro' },
       isLoading: false,
     });
 
     await act(async () => { render(<PlanSelector />); });
 
-    // Select trial plan (downgrade from advance) - trial is not paid
+    // Select trial plan (downgrade from pro) - trial is not paid
     fireEvent.click(screen.getByText('trialPlan'));
 
-    // The downgrade message is shown as text in the UI
-    expect(screen.getByText('contactToDowngrade')).toBeInTheDocument();
+    expect(screen.getByText('cancelSubscription')).toBeInTheDocument();
   });
 
 
@@ -316,41 +313,15 @@ describe('PlanSelector', () => {
     expect(screen.getByText(/upgradeTo/)).toBeInTheDocument();
   });
 
-  it('calls toast.info when handleChangePlan is invoked for non-paid downgrade (line 197)', async () => {
-    // To reach line 197, we need handleChangePlan to be called when a non-paid plan is selected.
-    // The UI only shows a button when isUpgrade is true (paid upgrade). For downgrade,
-    // there's no button. We need to test the function directly.
-
-    // Strategy: render with 'trial' as current, select 'advance' (upgrade, button exists),
-    // then immediately select 'trial' again (downgrade, button removed).
-    // Instead, mock fetch to redirect so we can test the else branch by
-    // having it return immediately with no initPoint, causing the else to fire.
-    // Actually that won't work. The else is the non-paid branch.
-
-    // The real approach: We modify the plans data or mock it. But plans are hardcoded.
-    // Simplest: test the function by exporting it or using a wrapper component.
-    // Since we can't export, let's use the React fiber approach with a state mutation.
-
-    // Render with pro as current plan, select advance (downgrade to paid - but NOT an upgrade).
-    // isUpgrade = selected !== currentPlan && selectedPlan.isPaid &&
-    //   (currentPlan === 'trial' || (currentPlan === 'advance' && selected === 'pro'))
-    // From pro -> advance: selectedPlan.isPaid=true but conditions don't match. isUpgrade=false.
-    // So no button is rendered. The contactToDowngrade text is shown.
-
-    // Since we can't reach this from UI, we acknowledge line 197 is dead code.
-    // However, for coverage purposes, we can render with advance plan, select pro (upgrade button appears),
-    // get the button, mock fetch to call the handler with isPaid=false by manipulating the plans array.
-    // But plans is internal.
-
-    // Final approach: accept this is unreachable dead code and verify the UI behavior instead.
+  it('shows switch-to-advance button when selecting advance from pro', async () => {
     (usePlanUsage as jest.Mock).mockReturnValue({
-      summary: { ...mockSummary, plan: 'advance' },
+      summary: { ...mockSummary, plan: 'pro' },
       isLoading: false,
     });
 
     await act(async () => { render(<PlanSelector />); });
-    fireEvent.click(screen.getByText('trialPlan'));
-    expect(screen.getByText('contactToDowngrade')).toBeInTheDocument();
+    fireEvent.click(screen.getByText('advancePlan'));
+    expect(screen.getByText(/switchToPlan/)).toBeInTheDocument();
   });
 
   it('verifies subscription when preapproval_id is in search params (authorized)', async () => {
@@ -440,6 +411,313 @@ describe('PlanSelector', () => {
 
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('paymentInitError');
+    });
+  });
+
+  describe('cancel flow', () => {
+    const invalidate = jest.fn();
+
+    beforeEach(() => {
+      invalidate.mockClear();
+      (usePlanUsage as jest.Mock).mockReturnValue({
+        summary: { ...mockSummary, plan: 'advance' },
+        isLoading: false,
+        invalidate,
+      });
+    });
+
+    it('opens cancel confirmation dialog when cancel button is clicked', async () => {
+      await act(async () => { render(<PlanSelector />); });
+
+      fireEvent.click(screen.getByText('trialPlan'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('cancelSubscription'));
+      });
+
+      expect(screen.getByText('cancelConfirmTitle')).toBeInTheDocument();
+      expect(screen.getByText('cancelConfirmDescription')).toBeInTheDocument();
+      expect(screen.getByText('confirmCancel')).toBeInTheDocument();
+    });
+
+    it('cancels the subscription on confirmation', async () => {
+      const { cancelSubscriptionAction } = require('@/actions/dashboard/subscription/cancel-subscription');
+
+      await act(async () => { render(<PlanSelector />); });
+
+      fireEvent.click(screen.getByText('trialPlan'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('cancelSubscription'));
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('confirmCancel'));
+      });
+
+      await waitFor(() => {
+        expect(cancelSubscriptionAction).toHaveBeenCalled();
+        expect(toast.success).toHaveBeenCalledWith('cancelSuccess');
+        expect(invalidate).toHaveBeenCalled();
+      });
+    });
+
+    it('shows error toast when cancel action returns error', async () => {
+      const { cancelSubscriptionAction } = require('@/actions/dashboard/subscription/cancel-subscription');
+      (cancelSubscriptionAction as jest.Mock).mockResolvedValueOnce({ error: 'cannot cancel' });
+
+      await act(async () => { render(<PlanSelector />); });
+
+      fireEvent.click(screen.getByText('trialPlan'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('cancelSubscription'));
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('confirmCancel'));
+      });
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith('cannot cancel');
+      });
+      expect(invalidate).not.toHaveBeenCalled();
+    });
+
+    it('shows generic cancel error toast when cancel action throws', async () => {
+      const { cancelSubscriptionAction } = require('@/actions/dashboard/subscription/cancel-subscription');
+      (cancelSubscriptionAction as jest.Mock).mockRejectedValueOnce(new Error('boom'));
+
+      await act(async () => { render(<PlanSelector />); });
+
+      fireEvent.click(screen.getByText('trialPlan'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('cancelSubscription'));
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('confirmCancel'));
+      });
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith('cancelError');
+      });
+    });
+
+    it('shows the loading label while the cancel request is in flight', async () => {
+      const { cancelSubscriptionAction } = require('@/actions/dashboard/subscription/cancel-subscription');
+      let resolveCancel: (value: { success: true }) => void = () => {};
+      (cancelSubscriptionAction as jest.Mock).mockReturnValueOnce(
+        new Promise<{ success: true }>((res) => { resolveCancel = res; })
+      );
+
+      await act(async () => { render(<PlanSelector />); });
+
+      fireEvent.click(screen.getByText('trialPlan'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('cancelSubscription'));
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('confirmCancel'));
+      });
+
+      expect(screen.getByText('cancelling')).toBeInTheDocument();
+
+      await act(async () => {
+        resolveCancel({ success: true });
+      });
+    });
+
+    it('closes the dialog when onOpenChange is triggered (not loading)', async () => {
+      await act(async () => { render(<PlanSelector />); });
+
+      fireEvent.click(screen.getByText('trialPlan'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('cancelSubscription'));
+      });
+
+      expect(screen.getByTestId('dialog-backdrop')).toBeInTheDocument();
+
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('dialog-backdrop'));
+      });
+
+      expect(screen.queryByTestId('dialog-backdrop')).not.toBeInTheDocument();
+    });
+
+    it('keeps the dialog open when onOpenChange fires while loading', async () => {
+      const { cancelSubscriptionAction } = require('@/actions/dashboard/subscription/cancel-subscription');
+      (cancelSubscriptionAction as jest.Mock).mockReturnValueOnce(
+        new Promise(() => {}) // never resolves
+      );
+
+      await act(async () => { render(<PlanSelector />); });
+
+      fireEvent.click(screen.getByText('trialPlan'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('cancelSubscription'));
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('confirmCancel'));
+      });
+
+      // Now loading is true; clicking the backdrop should NOT close
+      await act(async () => {
+        fireEvent.click(screen.getByTestId('dialog-backdrop'));
+      });
+
+      expect(screen.getByTestId('dialog-backdrop')).toBeInTheDocument();
+    });
+
+    it('closes the dialog when the "keep current plan" button is clicked', async () => {
+      await act(async () => { render(<PlanSelector />); });
+
+      fireEvent.click(screen.getByText('trialPlan'));
+      await act(async () => {
+        fireEvent.click(screen.getByText('cancelSubscription'));
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('keepSubscription'));
+      });
+
+      expect(screen.queryByTestId('dialog')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('switch flow (pro → advance)', () => {
+    const invalidate = jest.fn();
+
+    beforeEach(() => {
+      invalidate.mockClear();
+      (usePlanUsage as jest.Mock).mockReturnValue({
+        summary: { ...mockSummary, plan: 'pro' },
+        isLoading: false,
+        invalidate,
+      });
+    });
+
+    it('opens switch confirmation dialog when switch button is clicked', async () => {
+      await act(async () => { render(<PlanSelector />); });
+
+      fireEvent.click(screen.getByText('advancePlan'));
+      await act(async () => {
+        fireEvent.click(screen.getByText(/switchToPlan/));
+      });
+
+      expect(screen.getByText(/switchConfirmTitle/)).toBeInTheDocument();
+      expect(screen.getByText(/switchConfirmDescription/)).toBeInTheDocument();
+      expect(screen.getByText('confirmSwitch')).toBeInTheDocument();
+    });
+
+    it('cancels current plan then redirects to MercadoPago on confirmation', async () => {
+      const { cancelSubscriptionAction } = require('@/actions/dashboard/subscription/cancel-subscription');
+
+      (global.fetch as jest.Mock).mockResolvedValue({
+        ok: true,
+        json: () => Promise.resolve({ initPoint: 'https://mp.com/pay' }),
+      });
+
+      await act(async () => { render(<PlanSelector />); });
+
+      fireEvent.click(screen.getByText('advancePlan'));
+      await act(async () => {
+        fireEvent.click(screen.getByText(/switchToPlan/));
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('confirmSwitch'));
+      });
+
+      await waitFor(() => {
+        expect(cancelSubscriptionAction).toHaveBeenCalled();
+        expect(global.fetch).toHaveBeenCalledWith('/api/mercadopago/create-subscription', expect.objectContaining({
+          method: 'POST',
+        }));
+      });
+    });
+
+    it('shows error toast and does not call MP when cancel returns an error', async () => {
+      const { cancelSubscriptionAction } = require('@/actions/dashboard/subscription/cancel-subscription');
+      (cancelSubscriptionAction as jest.Mock).mockResolvedValueOnce({ error: 'cannot cancel' });
+
+      await act(async () => { render(<PlanSelector />); });
+
+      fireEvent.click(screen.getByText('advancePlan'));
+      await act(async () => {
+        fireEvent.click(screen.getByText(/switchToPlan/));
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('confirmSwitch'));
+      });
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith('cannot cancel');
+      });
+      expect(global.fetch).not.toHaveBeenCalled();
+    });
+
+    it('shows error toast when MercadoPago fetch throws an Error', async () => {
+      (global.fetch as jest.Mock).mockRejectedValueOnce(new Error('Network down'));
+
+      await act(async () => { render(<PlanSelector />); });
+
+      fireEvent.click(screen.getByText('advancePlan'));
+      await act(async () => {
+        fireEvent.click(screen.getByText(/switchToPlan/));
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('confirmSwitch'));
+      });
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith('Network down');
+      });
+    });
+
+    it('shows generic paymentError toast when MercadoPago fetch throws a non-Error', async () => {
+      (global.fetch as jest.Mock).mockRejectedValueOnce('plain string');
+
+      await act(async () => { render(<PlanSelector />); });
+
+      fireEvent.click(screen.getByText('advancePlan'));
+      await act(async () => {
+        fireEvent.click(screen.getByText(/switchToPlan/));
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('confirmSwitch'));
+      });
+
+      await waitFor(() => {
+        expect(toast.error).toHaveBeenCalledWith('paymentError');
+      });
+    });
+
+    it('shows the switching loading label while the request is in flight', async () => {
+      const { cancelSubscriptionAction } = require('@/actions/dashboard/subscription/cancel-subscription');
+      let resolveCancel: (value: { success: true }) => void = () => {};
+      (cancelSubscriptionAction as jest.Mock).mockReturnValueOnce(
+        new Promise<{ success: true }>((res) => { resolveCancel = res; })
+      );
+
+      await act(async () => { render(<PlanSelector />); });
+
+      fireEvent.click(screen.getByText('advancePlan'));
+      await act(async () => {
+        fireEvent.click(screen.getByText(/switchToPlan/));
+      });
+
+      await act(async () => {
+        fireEvent.click(screen.getByText('confirmSwitch'));
+      });
+
+      expect(screen.getByText('switchingPlan')).toBeInTheDocument();
+
+      await act(async () => {
+        resolveCancel({ success: true });
+      });
     });
   });
 });

@@ -625,9 +625,21 @@
       "currentPlan": "Current plan",
       "availablePlans": "Available plans",
       "upgradeTo": "Upgrade to {plan}",
-      "contactToDowngrade": "To downgrade to a lower plan, please contact support by email.",
       "planUpgraded": "Your plan has been upgraded successfully!",
-      "paymentPending": "Your payment is being processed. The plan will update shortly."
+      "paymentPending": "Your payment is being processed. The plan will update shortly.",
+      "cancelSubscription": "Cancel subscription",
+      "switchToPlan": "Switch to {plan}",
+      "switchingPlan": "Switching plan…",
+      "cancelling": "Cancelling…",
+      "cancelConfirmTitle": "Cancel your subscription?",
+      "cancelConfirmDescription": "Your plan will revert to the trial plan immediately. You'll lose access to paid features and will not be charged again. You can re-subscribe at any time.",
+      "switchConfirmTitle": "Switch to {plan}?",
+      "switchConfirmDescription": "Your current paid subscription will be cancelled and you'll be redirected to MercadoPago to authorize the new {plan} plan.",
+      "keepSubscription": "Keep current plan",
+      "confirmCancel": "Yes, cancel",
+      "confirmSwitch": "Yes, switch",
+      "cancelSuccess": "Subscription cancelled. Your plan is now trial.",
+      "cancelError": "Could not cancel your subscription. Please try again."
     },
     "branch": {
       "title": "Branches",

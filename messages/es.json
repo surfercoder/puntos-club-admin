@@ -625,9 +625,21 @@
       "currentPlan": "Plan actual",
       "availablePlans": "Planes disponibles",
       "upgradeTo": "Mejorar a {plan}",
-      "contactToDowngrade": "Para cambiar a un plan inferior, contacta a soporte por email.",
       "planUpgraded": "¡Tu plan fue actualizado correctamente!",
-      "paymentPending": "Tu pago está siendo procesado. El plan se actualizará en breve."
+      "paymentPending": "Tu pago está siendo procesado. El plan se actualizará en breve.",
+      "cancelSubscription": "Cancelar suscripción",
+      "switchToPlan": "Cambiar a {plan}",
+      "switchingPlan": "Cambiando plan…",
+      "cancelling": "Cancelando…",
+      "cancelConfirmTitle": "¿Cancelar tu suscripción?",
+      "cancelConfirmDescription": "Tu plan volverá al plan trial de inmediato. Perderás acceso a las funciones pagas y no se realizarán nuevos cargos. Podés volver a suscribirte cuando quieras.",
+      "switchConfirmTitle": "¿Cambiar a {plan}?",
+      "switchConfirmDescription": "Tu suscripción paga actual será cancelada y serás redirigido a MercadoPago para autorizar el nuevo plan {plan}.",
+      "keepSubscription": "Mantener plan actual",
+      "confirmCancel": "Sí, cancelar",
+      "confirmSwitch": "Sí, cambiar",
+      "cancelSuccess": "Suscripción cancelada. Tu plan ahora es trial.",
+      "cancelError": "No pudimos cancelar tu suscripción. Probá nuevamente."
     },
     "branch": {
       "title": "Sucursales",

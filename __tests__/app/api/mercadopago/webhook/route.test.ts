@@ -4,6 +4,7 @@ const mockGet = jest.fn();
 const mockMaybeSingle = jest.fn();
 const mockUpdateEq = jest.fn().mockResolvedValue({});
 const mockUpsert = jest.fn().mockResolvedValue({});
+const updatesByTable: Record<string, unknown[]> = {};
 
 jest.mock('@/lib/mercadopago/client', () => ({
   getMercadoPagoClient: jest.fn(() => ({})),
@@ -21,7 +22,7 @@ jest.mock('mercadopago/dist/clients/preApproval', () => ({
 
 jest.mock('@/lib/supabase/admin', () => ({
   createAdminClient: jest.fn(() => ({
-    from: jest.fn(() => ({
+    from: jest.fn((table: string) => ({
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
           maybeSingle: mockMaybeSingle,
@@ -30,7 +31,11 @@ jest.mock('@/lib/supabase/admin', () => ({
           })),
         })),
       })),
-      update: jest.fn(() => ({ eq: mockUpdateEq })),
+      update: jest.fn((payload: unknown) => {
+        if (!updatesByTable[table]) updatesByTable[table] = [];
+        updatesByTable[table].push(payload);
+        return { eq: mockUpdateEq };
+      }),
       upsert: mockUpsert,
     })),
   })),
@@ -51,6 +56,7 @@ describe('MercadoPago Webhook Route', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env = { ...originalEnv };
+    for (const key of Object.keys(updatesByTable)) delete updatesByTable[key];
     mockGet.mockResolvedValue({
       status: 'authorized',
       external_reference: 'u1|advance',
@@ -102,6 +108,60 @@ describe('MercadoPago Webhook Route', () => {
 
     const response = await POST(makeRequest({ type: 'subscription_preapproval', data: { id: 'pa_123' } }));
     expect(response.status).toBe(200);
+  });
+
+  it('cancelled webhook writes plan=trial onto the organization table', async () => {
+    mockGet.mockResolvedValueOnce({
+      status: 'cancelled',
+      external_reference: 'u1|pro',
+      payer_email: 'test@test.com',
+    });
+    mockMaybeSingle.mockResolvedValueOnce({
+      data: { id: 1, organization_id: 42, plan: 'pro' },
+    });
+
+    const response = await POST(
+      makeRequest({ type: 'subscription_preapproval', data: { id: 'pa_pro' } })
+    );
+    expect(response.status).toBe(200);
+
+    expect(updatesByTable.subscription).toEqual([
+      expect.objectContaining({ status: 'cancelled' }),
+    ]);
+    expect(updatesByTable.organization).toEqual([{ plan: 'trial' }]);
+  });
+
+  it('authorized webhook writes the resolved plan onto the organization table', async () => {
+    mockGet.mockResolvedValueOnce({
+      status: 'authorized',
+      external_reference: 'u1|advance',
+      payer_email: 'test@test.com',
+    });
+    mockMaybeSingle.mockResolvedValueOnce({
+      data: { id: 1, organization_id: 7, plan: 'advance' },
+    });
+
+    await POST(makeRequest({ type: 'subscription_preapproval', data: { id: 'pa_aut' } }));
+
+    expect(updatesByTable.organization).toEqual([{ plan: 'advance' }]);
+  });
+
+  it('paused webhook updates the subscription row but does NOT revert the org plan', async () => {
+    mockGet.mockResolvedValueOnce({
+      status: 'paused',
+      external_reference: 'u1|pro',
+      payer_email: 'test@test.com',
+    });
+    mockMaybeSingle.mockResolvedValueOnce({
+      data: { id: 1, organization_id: 99, plan: 'pro' },
+    });
+
+    await POST(makeRequest({ type: 'subscription_preapproval', data: { id: 'pa_pau' } }));
+
+    expect(updatesByTable.subscription).toEqual([
+      expect.objectContaining({ status: 'paused' }),
+    ]);
+    expect(updatesByTable.organization).toBeUndefined();
   });
 
   it('handles paused status on existing subscription', async () => {
