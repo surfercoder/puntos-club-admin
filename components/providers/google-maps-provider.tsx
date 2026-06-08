@@ -1,6 +1,5 @@
 'use client';
 
-import { importLibrary, setOptions } from '@googlemaps/js-api-loader';
 import { createContext, use, useEffect, useReducer, useRef } from 'react';
 
 interface GoogleMapsContextType {
@@ -69,10 +68,13 @@ export const GoogleMapsProvider: React.FC<GoogleMapsProviderProps> = ({ apiKey, 
     }
     if (initialized.current) return;
     initialized.current = true;
-    setOptions({ key: apiKey });
 
     let cancelled = false;
-    importLibrary('places')
+    import('@googlemaps/js-api-loader')
+      .then(({ importLibrary, setOptions }) => {
+        setOptions({ key: apiKey });
+        return importLibrary('places');
+      })
       .then((lib) => {
         if (cancelled) return;
         const placesLib = lib as google.maps.PlacesLibrary;
