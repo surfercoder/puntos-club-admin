@@ -46,8 +46,8 @@ const sampleData: TopProductStat[] = [
 describe('TopProductsChart', () => {
   it('renders the card with title and description', () => {
     render(<TopProductsChart data={sampleData} />);
-    expect(screen.getByText('Productos más canjeados')).toBeInTheDocument();
-    expect(screen.getByText(/Top 3 productos por cantidad de canjes/)).toBeInTheDocument();
+    expect(screen.getByText('title')).toBeInTheDocument();
+    expect(screen.getByText(/description/)).toBeInTheDocument();
   });
 
   it('renders chart container', () => {
@@ -57,7 +57,7 @@ describe('TopProductsChart', () => {
 
   it('renders with empty data', () => {
     render(<TopProductsChart data={[]} />);
-    expect(screen.getByText('Productos más canjeados')).toBeInTheDocument();
+    expect(screen.getByText('title')).toBeInTheDocument();
     expect(screen.getByTestId('chart-container')).toBeInTheDocument();
   });
 
@@ -70,7 +70,7 @@ describe('TopProductsChart', () => {
       { name: 'Product 5', redemptions: 10, points_used: 500 },
     ];
     render(<TopProductsChart data={fiveProducts} />);
-    expect(screen.getByText(/Top 5 productos/)).toBeInTheDocument();
+    expect(screen.getByText(/description/)).toBeInTheDocument();
   });
 
   it('truncates product names longer than 20 characters', () => {

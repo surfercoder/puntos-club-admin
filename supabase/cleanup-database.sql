@@ -1,75 +1,76 @@
 -- ============================================================================
 -- DATABASE CLEANUP SCRIPT
 -- ============================================================================
--- Description: Comprehensive script to delete all data from the PuntosClub database
--- WARNING: This will DELETE ALL DATA. Use with caution!
--- This script preserves the schema structure and only removes data.
+-- Wipes ALL application data, auth users, and storage objects.
+-- Preserves schema and the two reference tables required by the app:
+--   - public.plan_limits
+--   - public.user_role
+-- Views are derived from the wiped tables and become empty automatically.
+-- WARNING: DESTRUCTIVE. Intended for dev/staging resets only.
 -- ============================================================================
 
--- Disable triggers temporarily to avoid cascading issues
-SET session_replication_role = 'replica';
+BEGIN;
 
--- ============================================================================
--- DELETE DATA FROM ALL TABLES (in correct order to respect foreign keys)
--- ============================================================================
+-- Bypass triggers/FK checks while we wipe everything in one shot.
+SET LOCAL session_replication_role = 'replica';
 
--- 1. Delete most dependent data first
-DELETE FROM redemption;
-DELETE FROM purchase;
+-- ----------------------------------------------------------------------------
+-- 1. PUBLIC SCHEMA TABLES
+-- ----------------------------------------------------------------------------
+-- TRUNCATE ... RESTART IDENTITY CASCADE empties every listed table, resets
+-- their identity sequences, and cascades to any dependents we may have
+-- missed. plan_limits and user_role are intentionally NOT listed.
+TRUNCATE TABLE
+  public.redemption,
+  public.purchase,
+  public.stock,
+  public.product,
+  public.category,
+  public.points_rule,
+  public.beneficiary_organization,
+  public.beneficiary,
+  public.push_tokens,
+  public.push_notifications,
+  public.app_user_organization,
+  public.app_user,
+  public.branch,
+  public.address,
+  public.subscription,
+  public.organization_plan_limits,
+  public.organization_notification_limits,
+  public.organization
+RESTART IDENTITY CASCADE;
 
--- 2. Delete stock data
-DELETE FROM stock;
+-- Sequences not attached to a column identity (won't be reset by TRUNCATE).
+SELECT setval('public.purchase_number_seq', 1, false);
 
--- 3. Delete product catalog
-DELETE FROM product;
+-- ----------------------------------------------------------------------------
+-- 2. STORAGE — empty every object in every bucket, keep the buckets themselves
+-- ----------------------------------------------------------------------------
+DELETE FROM storage.objects;
 
--- 4. Delete category structure
-DELETE FROM category;
-
--- 5. Delete points rules
-DELETE FROM points_rule;
-
--- 6. Delete beneficiary-organization relationships
-DELETE FROM beneficiary_organization;
-
--- 7. Delete notification data
-DELETE FROM push_tokens;
-DELETE FROM push_notifications;
-
--- 8. Delete user data
--- NOTE: user_role is a reference table required for the app to function — NEVER delete it
-DELETE FROM beneficiary;
-DELETE FROM app_user_organization;
-DELETE FROM app_user;
-
--- ============================================================================
--- DELETE SUPABASE AUTH DATA
--- ============================================================================
--- Clear all authentication records (order matters due to foreign keys)
-DELETE FROM auth.identities;
-DELETE FROM auth.sessions;
-DELETE FROM auth.refresh_tokens;
-DELETE FROM auth.mfa_factors;
-DELETE FROM auth.mfa_challenges;
+-- ----------------------------------------------------------------------------
+-- 3. SUPABASE AUTH — wipe all users and related session/MFA state
+-- ----------------------------------------------------------------------------
+-- Child tables first; auth.users last. FK cascades cover most of this but we
+-- delete explicitly so the script keeps working even if cascades change.
 DELETE FROM auth.mfa_amr_claims;
+DELETE FROM auth.mfa_challenges;
+DELETE FROM auth.mfa_factors;
+DELETE FROM auth.refresh_tokens;
+DELETE FROM auth.sessions;
+DELETE FROM auth.identities;
+DELETE FROM auth.one_time_tokens;
+DELETE FROM auth.flow_state;
 DELETE FROM auth.users;
 
--- 10. Delete branch and address data
-DELETE FROM branch;
-DELETE FROM address;
+SET LOCAL session_replication_role = 'origin';
 
--- 11. Delete subscription and plan limits data
--- NOTE: plan_limits is a reference table required for the app to function — NEVER delete it
-DELETE FROM subscription;
-DELETE FROM organization_plan_limits;
+COMMIT;
 
--- 12. Delete organization data
-DELETE FROM organization_notification_limits;
-DELETE FROM organization;
-
--- Re-enable triggers
-SET session_replication_role = 'origin';
-
+-- ----------------------------------------------------------------------------
+-- 4. REFRESH MATERIALIZED VIEWS (no-op today, future-proof)
+-- ----------------------------------------------------------------------------
 DO $$
 DECLARE
   r record;
@@ -84,42 +85,11 @@ BEGIN
 END $$;
 
 -- ============================================================================
--- RESET SEQUENCES (only for tables that use integer sequences)
+-- DONE
 -- ============================================================================
-
-DO $$
-DECLARE
-  seq_name text;
-  seq_names text[] := ARRAY[
-    'redemption_id_seq',
-    'purchase_id_seq',
-    'stock_id_seq',
-    'product_id_seq',
-    'category_id_seq',
-    'points_rule_id_seq',
-    'beneficiary_organization_id_seq',
-    'push_tokens_id_seq',
-    'push_notifications_id_seq',
-    'beneficiary_id_seq',
-    'app_user_organization_id_seq',
-    'app_user_id_seq',
-    'branch_id_seq',
-    'address_id_seq',
-    'subscription_id_seq',
-    'organization_plan_limits_id_seq',
-    'organization_notification_limits_id_seq',
-    'organization_id_seq'
-  ];
-BEGIN
-  FOREACH seq_name IN ARRAY seq_names LOOP
-    IF EXISTS (SELECT 1 FROM pg_sequences WHERE sequencename = seq_name) THEN
-      EXECUTE format('ALTER SEQUENCE %I RESTART WITH 1', seq_name);
-    END IF;
-  END LOOP;
-END $$;
-
+-- Remaining state:
+--   * public.plan_limits and public.user_role: untouched (seed data)
+--   * Every other public table: empty, sequences reset to 1
+--   * Storage buckets: still exist, but contain zero objects
+--   * Auth: zero users, sessions, identities, MFA records
 -- ============================================================================
--- CLEANUP COMPLETE
--- ============================================================================
--- All data has been deleted and sequences have been reset.
--- The database schema remains intact and ready for fresh data.

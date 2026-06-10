@@ -50,8 +50,8 @@ const sampleData: BranchPerformanceStat[] = [
 describe('BranchPerformanceChart', () => {
   it('renders the card with title and description', () => {
     render(<BranchPerformanceChart data={sampleData} />);
-    expect(screen.getByText('Rendimiento por sucursal')).toBeInTheDocument();
-    expect(screen.getByText('Ingresos y compras totales por sucursal')).toBeInTheDocument();
+    expect(screen.getByText('title')).toBeInTheDocument();
+    expect(screen.getByText('description')).toBeInTheDocument();
   });
 
   it('renders chart container', () => {
@@ -61,7 +61,7 @@ describe('BranchPerformanceChart', () => {
 
   it('renders with empty data', () => {
     render(<BranchPerformanceChart data={[]} />);
-    expect(screen.getByText('Rendimiento por sucursal')).toBeInTheDocument();
+    expect(screen.getByText('title')).toBeInTheDocument();
     expect(screen.getByTestId('chart-container')).toBeInTheDocument();
   });
 

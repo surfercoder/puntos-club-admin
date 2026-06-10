@@ -45,8 +45,8 @@ const sampleData: MonthlyPointsStat[] = [
 describe('PointsEconomyChart', () => {
   it('renders the card with title and description', () => {
     render(<PointsEconomyChart data={sampleData} />);
-    expect(screen.getByText('Economía de puntos')).toBeInTheDocument();
-    expect(screen.getByText(/Puntos otorgados vs canjeados/)).toBeInTheDocument();
+    expect(screen.getByText('title')).toBeInTheDocument();
+    expect(screen.getByText(/description/)).toBeInTheDocument();
   });
 
   it('renders chart container', () => {
@@ -56,7 +56,7 @@ describe('PointsEconomyChart', () => {
 
   it('renders with empty data', () => {
     render(<PointsEconomyChart data={[]} />);
-    expect(screen.getByText('Economía de puntos')).toBeInTheDocument();
+    expect(screen.getByText('title')).toBeInTheDocument();
     expect(screen.getByTestId('chart-container')).toBeInTheDocument();
   });
 

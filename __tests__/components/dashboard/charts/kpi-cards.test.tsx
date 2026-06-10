@@ -59,12 +59,12 @@ describe('KpiCards', () => {
 
   it('displays the correct KPI titles', () => {
     render(<KpiCards data={sampleData} />);
-    expect(screen.getByText('Socios activos')).toBeInTheDocument();
-    expect(screen.getByText('Ingresos del mes')).toBeInTheDocument();
-    expect(screen.getByText('Compras del mes')).toBeInTheDocument();
-    expect(screen.getByText('Puntos en circulación')).toBeInTheDocument();
-    expect(screen.getByText('Canjes del mes')).toBeInTheDocument();
-    expect(screen.getByText('Puntos canjeados')).toBeInTheDocument();
+    expect(screen.getByText('activeMembers')).toBeInTheDocument();
+    expect(screen.getByText('monthlyRevenue')).toBeInTheDocument();
+    expect(screen.getByText('monthlyPurchases')).toBeInTheDocument();
+    expect(screen.getByText('pointsInCirculation')).toBeInTheDocument();
+    expect(screen.getByText('monthlyRedemptions')).toBeInTheDocument();
+    expect(screen.getByText('pointsRedeemed')).toBeInTheDocument();
   });
 
   it('displays formatted numeric values', () => {
@@ -77,12 +77,12 @@ describe('KpiCards', () => {
 
   it('displays subtitle text', () => {
     render(<KpiCards data={sampleData} />);
-    expect(screen.getByText('Total de miembros activos')).toBeInTheDocument();
-    expect(screen.getByText('Ventas registradas este mes')).toBeInTheDocument();
-    expect(screen.getByText('Transacciones este mes')).toBeInTheDocument();
-    expect(screen.getByText('Disponibles en cuentas activas')).toBeInTheDocument();
-    expect(screen.getByText('Canjes realizados este mes')).toBeInTheDocument();
-    expect(screen.getByText('Puntos usados este mes')).toBeInTheDocument();
+    expect(screen.getByText('activeMembersSubtitle')).toBeInTheDocument();
+    expect(screen.getByText('monthlyRevenueSubtitle')).toBeInTheDocument();
+    expect(screen.getByText('monthlyPurchasesSubtitle')).toBeInTheDocument();
+    expect(screen.getByText('pointsInCirculationSubtitle')).toBeInTheDocument();
+    expect(screen.getByText('monthlyRedemptionsSubtitle')).toBeInTheDocument();
+    expect(screen.getByText('pointsRedeemedSubtitle')).toBeInTheDocument();
   });
 
   it('renders with zero values', () => {

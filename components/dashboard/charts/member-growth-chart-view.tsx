@@ -22,30 +22,32 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { useTranslations } from "next-intl";
 import type { MonthlyMemberStat } from "@/actions/dashboard/analytics/actions";
-
-const chartConfig = {
-  total_members: {
-    label: "Total socios",
-    color: "var(--chart-2)",
-  },
-  new_members: {
-    label: "Nuevos socios",
-    color: "var(--chart-3)",
-  },
-} satisfies ChartConfig;
 
 type Props = {
   data: MonthlyMemberStat[];
 };
 
 export function MemberGrowthChart({ data }: Props) {
+  const t = useTranslations("Dashboard.analytics.memberGrowth");
+  const chartConfig = {
+    total_members: {
+      label: t("totalLabel"),
+      color: "var(--chart-2)",
+    },
+    new_members: {
+      label: t("newLabel"),
+      color: "var(--chart-3)",
+    },
+  } satisfies ChartConfig;
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Crecimiento de socios</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          Altas mensuales y total acumulado en los últimos 12 meses
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent>

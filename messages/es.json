@@ -200,7 +200,7 @@
     "organizations": "Organizaciones",
     "pointsRules": "Reglas de Puntos",
     "products": "Productos",
-    "purchases": "Compras",
+    "purchases": "Cajero Virtual",
     "pushNotifications": "Notificaciones Push",
     "pushTokens": "Tokens Push",
     "redemptions": "Canjes",
@@ -242,7 +242,7 @@
     "points-rules": "Reglas de Puntos",
     "product": "Productos",
     "profile": "Perfil",
-    "purchase": "Compras",
+    "purchase": "Cajero Virtual",
     "push_notifications": "Notificaciones Push",
     "push_tokens": "Tokens Push",
     "redemption": "Canjes",
@@ -257,6 +257,65 @@
     "organization-settings": "Configuración de Organización"
   },
   "Dashboard": {
+    "analytics": {
+      "noAccess": "No tienes acceso al panel de métricas.",
+      "kpi": {
+        "activeMembers": "Socios activos",
+        "activeMembersSubtitle": "Total de miembros activos",
+        "monthlyRevenue": "Ingresos del mes",
+        "monthlyRevenueSubtitle": "Ventas registradas este mes",
+        "monthlyPurchases": "Operaciones del mes",
+        "monthlyPurchasesSubtitle": "Transacciones este mes",
+        "pointsInCirculation": "Puntos en circulación",
+        "pointsInCirculationSubtitle": "Disponibles en cuentas activas",
+        "monthlyRedemptions": "Canjes del mes",
+        "monthlyRedemptionsSubtitle": "Canjes realizados este mes",
+        "pointsRedeemed": "Puntos canjeados",
+        "pointsRedeemedSubtitle": "Puntos usados este mes"
+      },
+      "purchasesOverTime": {
+        "title": "Ventas en el tiempo",
+        "description": "Ingresos y cantidad de operaciones de los últimos 6 meses",
+        "revenueLabel": "Ingresos ($)",
+        "countLabel": "Operaciones"
+      },
+      "pointsEconomy": {
+        "title": "Economía de puntos",
+        "description": "Puntos otorgados vs canjeados en los últimos 6 meses",
+        "earnedLabel": "Puntos otorgados",
+        "redeemedLabel": "Puntos canjeados"
+      },
+      "memberGrowth": {
+        "title": "Crecimiento de socios",
+        "description": "Altas mensuales y total acumulado en los últimos 12 meses",
+        "totalLabel": "Total socios",
+        "newLabel": "Nuevos socios"
+      },
+      "topProducts": {
+        "title": "Productos más canjeados",
+        "description": "Top {count} productos por cantidad de canjes",
+        "emptyMessage": "Aún no hay canjes registrados."
+      },
+      "branchPerformance": {
+        "title": "Rendimiento por sucursal",
+        "description": "Ingresos y operaciones totales por sucursal",
+        "revenueLabel": "Ingresos ($)",
+        "countLabel": "Operaciones",
+        "emptyMessage": "Aún no hay operaciones por sucursal."
+      },
+      "planUsage": {
+        "title": "Uso del plan",
+        "descriptionPrefix": "Utilización de los límites de tu plan",
+        "features": {
+          "beneficiaries": "Socios",
+          "push_notifications_monthly": "Notificaciones",
+          "cashiers": "Cajeros",
+          "branches": "Sucursales",
+          "collaborators": "Colaboradores",
+          "redeemable_products": "Productos"
+        }
+      }
+    },
     "profile": {
       "title": "Perfil",
       "description": "Administra tu información personal y preferencias",
@@ -997,15 +1056,15 @@
       }
     },
     "purchase": {
-      "title": "Compras",
-      "description": "Administrar compras del sistema",
-      "createTitle": "Crear Compra",
-      "editTitle": "Editar Compra",
-      "newButton": "+ Nueva Compra",
-      "error": "Error al obtener compras",
-      "empty": "No se encontraron compras.",
+      "title": "Cajero Virtual",
+      "description": "Administrar operaciones del cajero virtual",
+      "createTitle": "Crear Operación",
+      "editTitle": "Editar Operación",
+      "newButton": "+ Nueva Operación",
+      "error": "Error al obtener operaciones",
+      "empty": "No se encontraron operaciones.",
       "tableHeaders": {
-        "purchaseNumber": "Compra #",
+        "purchaseNumber": "Operación #",
         "date": "Fecha",
         "beneficiary": "Beneficiario",
         "cashier": "Cajero",
@@ -1015,10 +1074,10 @@
         "actions": "Acciones"
       },
       "deleteModal": {
-        "title": "Eliminar Compra",
-        "confirm": "¿Estás seguro de que deseas eliminar la compra <strong>{name}</strong>? Esta acción no se puede deshacer.",
-        "deleteError": "Error al eliminar la compra",
-        "deleteSuccess": "Compra eliminada correctamente",
+        "title": "Eliminar Operación",
+        "confirm": "¿Estás seguro de que deseas eliminar la operación <strong>{name}</strong>? Esta acción no se puede deshacer.",
+        "deleteError": "Error al eliminar la operación",
+        "deleteSuccess": "Operación eliminada correctamente",
         "genericError": "Ocurrió un error al eliminar"
       },
       "form": {

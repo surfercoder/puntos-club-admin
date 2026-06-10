@@ -22,24 +22,26 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { useTranslations } from "next-intl";
 import type { BranchPerformanceStat } from "@/actions/dashboard/analytics/actions";
-
-const chartConfig = {
-  revenue: {
-    label: "Ingresos ($)",
-    color: "var(--chart-3)",
-  },
-  purchase_count: {
-    label: "Compras",
-    color: "var(--chart-2)",
-  },
-} satisfies ChartConfig;
 
 type Props = {
   data: BranchPerformanceStat[];
 };
 
 export function BranchPerformanceChart({ data }: Props) {
+  const t = useTranslations("Dashboard.analytics.branchPerformance");
+  const chartConfig = {
+    revenue: {
+      label: t("revenueLabel"),
+      color: "var(--chart-3)",
+    },
+    purchase_count: {
+      label: t("countLabel"),
+      color: "var(--chart-2)",
+    },
+  } satisfies ChartConfig;
+
   const chartData = data.map((b) => ({
     ...b,
     branch: b.branch.length > 16 ? `${b.branch.slice(0, 14)}…` : b.branch,
@@ -48,9 +50,9 @@ export function BranchPerformanceChart({ data }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Rendimiento por sucursal</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          Ingresos y compras totales por sucursal
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent>

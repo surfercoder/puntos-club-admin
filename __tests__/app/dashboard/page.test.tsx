@@ -103,7 +103,7 @@ describe('DashboardPage', () => {
     const result = await DashboardPage();
     // The result should be the "no access" JSX
     const rendered = require('react-dom/server').renderToStaticMarkup(result);
-    expect(rendered).toContain('No tienes acceso');
+    expect(rendered).toContain('noAccess');
   });
 
   it('renders empty chart card when topProducts is empty', async () => {
@@ -117,8 +117,8 @@ describe('DashboardPage', () => {
 
     const result = await DashboardPage();
     const rendered = require('react-dom/server').renderToStaticMarkup(result);
-    expect(rendered).toContain('Productos más canjeados');
-    expect(rendered).toContain('Aún no hay canjes registrados.');
+    expect(rendered).toContain('topProducts.title');
+    expect(rendered).toContain('topProducts.emptyMessage');
   });
 
   it('renders empty chart card when branchPerformance is empty', async () => {
@@ -132,8 +132,8 @@ describe('DashboardPage', () => {
 
     const result = await DashboardPage();
     const rendered = require('react-dom/server').renderToStaticMarkup(result);
-    expect(rendered).toContain('Rendimiento por sucursal');
-    expect(rendered).toContain('Aún no hay compras por sucursal.');
+    expect(rendered).toContain('branchPerformance.title');
+    expect(rendered).toContain('branchPerformance.emptyMessage');
   });
 
   it('renders both empty chart cards when topProducts and branchPerformance are empty', async () => {
@@ -147,9 +147,9 @@ describe('DashboardPage', () => {
 
     const result = await DashboardPage();
     const rendered = require('react-dom/server').renderToStaticMarkup(result);
-    expect(rendered).toContain('Productos más canjeados');
-    expect(rendered).toContain('Aún no hay canjes registrados.');
-    expect(rendered).toContain('Rendimiento por sucursal');
-    expect(rendered).toContain('Aún no hay compras por sucursal.');
+    expect(rendered).toContain('topProducts.title');
+    expect(rendered).toContain('topProducts.emptyMessage');
+    expect(rendered).toContain('branchPerformance.title');
+    expect(rendered).toContain('branchPerformance.emptyMessage');
   });
 });

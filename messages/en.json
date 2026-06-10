@@ -200,7 +200,7 @@
     "organizations": "Organizations",
     "pointsRules": "Points Rules",
     "products": "Products",
-    "purchases": "Purchases",
+    "purchases": "Virtual Cashier",
     "pushNotifications": "Push Notifications",
     "pushTokens": "Push Tokens",
     "redemptions": "Redemptions",
@@ -242,7 +242,7 @@
     "points-rules": "Points Rules",
     "product": "Products",
     "profile": "Profile",
-    "purchase": "Purchases",
+    "purchase": "Virtual Cashier",
     "push_notifications": "Push Notifications",
     "push_tokens": "Push Tokens",
     "redemption": "Redemptions",
@@ -257,6 +257,65 @@
     "organization-settings": "Organization Settings"
   },
   "Dashboard": {
+    "analytics": {
+      "noAccess": "You don't have access to the metrics panel.",
+      "kpi": {
+        "activeMembers": "Active members",
+        "activeMembersSubtitle": "Total active members",
+        "monthlyRevenue": "Monthly revenue",
+        "monthlyRevenueSubtitle": "Sales registered this month",
+        "monthlyPurchases": "Monthly operations",
+        "monthlyPurchasesSubtitle": "Transactions this month",
+        "pointsInCirculation": "Points in circulation",
+        "pointsInCirculationSubtitle": "Available in active accounts",
+        "monthlyRedemptions": "Monthly redemptions",
+        "monthlyRedemptionsSubtitle": "Redemptions made this month",
+        "pointsRedeemed": "Points redeemed",
+        "pointsRedeemedSubtitle": "Points used this month"
+      },
+      "purchasesOverTime": {
+        "title": "Sales over time",
+        "description": "Revenue and number of operations over the last 6 months",
+        "revenueLabel": "Revenue ($)",
+        "countLabel": "Operations"
+      },
+      "pointsEconomy": {
+        "title": "Points economy",
+        "description": "Points earned vs redeemed over the last 6 months",
+        "earnedLabel": "Points earned",
+        "redeemedLabel": "Points redeemed"
+      },
+      "memberGrowth": {
+        "title": "Member growth",
+        "description": "Monthly sign-ups and cumulative total over the last 12 months",
+        "totalLabel": "Total members",
+        "newLabel": "New members"
+      },
+      "topProducts": {
+        "title": "Top redeemed products",
+        "description": "Top {count} products by number of redemptions",
+        "emptyMessage": "No redemptions registered yet."
+      },
+      "branchPerformance": {
+        "title": "Branch performance",
+        "description": "Total revenue and operations by branch",
+        "revenueLabel": "Revenue ($)",
+        "countLabel": "Operations",
+        "emptyMessage": "No operations by branch yet."
+      },
+      "planUsage": {
+        "title": "Plan usage",
+        "descriptionPrefix": "Utilization of your plan limits",
+        "features": {
+          "beneficiaries": "Members",
+          "push_notifications_monthly": "Notifications",
+          "cashiers": "Cashiers",
+          "branches": "Branches",
+          "collaborators": "Collaborators",
+          "redeemable_products": "Products"
+        }
+      }
+    },
     "profile": {
       "title": "Profile",
       "description": "Manage your personal information and preferences",
@@ -997,15 +1056,15 @@
       }
     },
     "purchase": {
-      "title": "Purchases",
-      "description": "Manage system purchases",
-      "createTitle": "Create Purchase",
-      "editTitle": "Edit Purchase",
-      "newButton": "+ New Purchase",
-      "error": "Error loading purchases",
-      "empty": "No purchases found.",
+      "title": "Virtual Cashier",
+      "description": "Manage virtual cashier operations",
+      "createTitle": "Create Operation",
+      "editTitle": "Edit Operation",
+      "newButton": "+ New Operation",
+      "error": "Error loading operations",
+      "empty": "No operations found.",
       "tableHeaders": {
-        "purchaseNumber": "Purchase #",
+        "purchaseNumber": "Operation #",
         "date": "Date",
         "beneficiary": "Beneficiary",
         "cashier": "Cashier",
@@ -1015,10 +1074,10 @@
         "actions": "Actions"
       },
       "deleteModal": {
-        "title": "Delete Purchase",
-        "confirm": "Are you sure you want to delete purchase <strong>{name}</strong>? This action cannot be undone.",
-        "deleteError": "Error deleting purchase",
-        "deleteSuccess": "Purchase deleted successfully",
+        "title": "Delete Operation",
+        "confirm": "Are you sure you want to delete operation <strong>{name}</strong>? This action cannot be undone.",
+        "deleteError": "Error deleting operation",
+        "deleteSuccess": "Operation deleted successfully",
         "genericError": "An unexpected error occurred"
       },
       "form": {

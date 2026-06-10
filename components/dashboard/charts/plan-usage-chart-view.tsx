@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { PolarAngleAxis, RadialBar, RadialBarChart } from "recharts";
 import {
   Card,
@@ -16,14 +17,16 @@ import {
 } from "@/components/ui/chart";
 import type { OrganizationUsageSummary } from "@/types/plan";
 
-const FEATURE_LABELS: Record<string, string> = {
-  beneficiaries: "Socios",
-  push_notifications_monthly: "Notificaciones",
-  cashiers: "Cajeros",
-  branches: "Sucursales",
-  collaborators: "Colaboradores",
-  redeemable_products: "Productos",
-};
+const FEATURE_KEYS = [
+  "beneficiaries",
+  "push_notifications_monthly",
+  "cashiers",
+  "branches",
+  "collaborators",
+  "redeemable_products",
+] as const;
+
+type FeatureKey = (typeof FEATURE_KEYS)[number];
 
 const FEATURE_COLORS = [
   "var(--chart-1)",
@@ -38,8 +41,16 @@ type Props = {
 };
 
 export function PlanUsageChart({ data }: Props) {
+  const t = useTranslations("Dashboard.analytics.planUsage");
+  const tFeatures = useTranslations("Dashboard.analytics.planUsage.features");
+
+  const labelForFeature = (key: string) =>
+    (FEATURE_KEYS as readonly string[]).includes(key)
+      ? tFeatures(key as FeatureKey)
+      : key;
+
   const chartData = data.features.map((f, i) => ({
-    feature: FEATURE_LABELS[f.feature] ?? f.feature,
+    feature: labelForFeature(f.feature),
     usage_percentage: Math.min(f.usage_percentage, 100),
     current: f.current_usage,
     limit: f.limit_value,
@@ -55,9 +66,9 @@ export function PlanUsageChart({ data }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Uso del plan</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          Utilización de los límites de tu plan{" "}
+          {t("descriptionPrefix")}{" "}
           <span className="capitalize font-medium">{data.plan}</span>
         </CardDescription>
       </CardHeader>

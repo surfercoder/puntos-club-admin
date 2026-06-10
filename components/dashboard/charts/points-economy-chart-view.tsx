@@ -22,30 +22,32 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { useTranslations } from "next-intl";
 import type { MonthlyPointsStat } from "@/actions/dashboard/analytics/actions";
-
-const chartConfig = {
-  points_earned: {
-    label: "Puntos otorgados",
-    color: "var(--chart-1)",
-  },
-  points_redeemed: {
-    label: "Puntos canjeados",
-    color: "var(--chart-5)",
-  },
-} satisfies ChartConfig;
 
 type Props = {
   data: MonthlyPointsStat[];
 };
 
 export function PointsEconomyChart({ data }: Props) {
+  const t = useTranslations("Dashboard.analytics.pointsEconomy");
+  const chartConfig = {
+    points_earned: {
+      label: t("earnedLabel"),
+      color: "var(--chart-1)",
+    },
+    points_redeemed: {
+      label: t("redeemedLabel"),
+      color: "var(--chart-5)",
+    },
+  } satisfies ChartConfig;
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Economía de puntos</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          Puntos otorgados vs canjeados en los últimos 6 meses
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent>

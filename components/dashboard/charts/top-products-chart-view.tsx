@@ -21,6 +21,7 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { useTranslations } from "next-intl";
 import type { TopProductStat } from "@/actions/dashboard/analytics/actions";
 
 const COLORS = [
@@ -36,6 +37,7 @@ type Props = {
 };
 
 export function TopProductsChart({ data }: Props) {
+  const t = useTranslations("Dashboard.analytics.topProducts");
   const chartConfig: ChartConfig = Object.fromEntries(
     data.map((p, i) => [
       p.name,
@@ -52,9 +54,9 @@ export function TopProductsChart({ data }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Productos más canjeados</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          Top {data.length} productos por cantidad de canjes
+          {t("description", { count: data.length })}
         </CardDescription>
       </CardHeader>
       <CardContent>

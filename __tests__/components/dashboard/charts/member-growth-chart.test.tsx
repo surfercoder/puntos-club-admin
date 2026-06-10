@@ -35,8 +35,8 @@ const sampleData: MonthlyMemberStat[] = [
 describe('MemberGrowthChart', () => {
   it('renders the card with title and description', () => {
     render(<MemberGrowthChart data={sampleData} />);
-    expect(screen.getByText('Crecimiento de socios')).toBeInTheDocument();
-    expect(screen.getByText(/Altas mensuales y total acumulado/)).toBeInTheDocument();
+    expect(screen.getByText('title')).toBeInTheDocument();
+    expect(screen.getByText(/description/)).toBeInTheDocument();
   });
 
   it('renders chart container', () => {
@@ -46,7 +46,7 @@ describe('MemberGrowthChart', () => {
 
   it('renders with empty data', () => {
     render(<MemberGrowthChart data={[]} />);
-    expect(screen.getByText('Crecimiento de socios')).toBeInTheDocument();
+    expect(screen.getByText('title')).toBeInTheDocument();
     expect(screen.getByTestId('chart-container')).toBeInTheDocument();
   });
 

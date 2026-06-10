@@ -22,30 +22,32 @@ import {
   ChartTooltipContent,
   type ChartConfig,
 } from "@/components/ui/chart";
+import { useTranslations } from "next-intl";
 import type { MonthlyPurchaseStat } from "@/actions/dashboard/analytics/actions";
-
-const chartConfig = {
-  revenue: {
-    label: "Ingresos ($)",
-    color: "var(--chart-4)",
-  },
-  purchase_count: {
-    label: "Compras",
-    color: "var(--chart-2)",
-  },
-} satisfies ChartConfig;
 
 type Props = {
   data: MonthlyPurchaseStat[];
 };
 
 export function PurchasesOverTimeChart({ data }: Props) {
+  const t = useTranslations("Dashboard.analytics.purchasesOverTime");
+  const chartConfig = {
+    revenue: {
+      label: t("revenueLabel"),
+      color: "var(--chart-4)",
+    },
+    purchase_count: {
+      label: t("countLabel"),
+      color: "var(--chart-2)",
+    },
+  } satisfies ChartConfig;
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Ventas en el tiempo</CardTitle>
+        <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          Ingresos y cantidad de compras de los últimos 6 meses
+          {t("description")}
         </CardDescription>
       </CardHeader>
       <CardContent>

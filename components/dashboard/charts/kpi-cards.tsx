@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { DashboardKpis } from "@/actions/dashboard/analytics/actions";
 import { Users, ShoppingCart, Star, TrendingUp, Gift, Coins } from "lucide-react";
@@ -48,47 +51,48 @@ type KpiCardsProps = {
 };
 
 export function KpiCards({ data }: KpiCardsProps) {
+  const t = useTranslations("Dashboard.analytics.kpi");
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
       <KpiCard
-        title="Socios activos"
+        title={t("activeMembers")}
         value={formatNumber(data.total_active_members)}
-        subtitle="Total de miembros activos"
+        subtitle={t("activeMembersSubtitle")}
         icon={Users}
         iconClassName="text-chart-2"
       />
       <KpiCard
-        title="Ingresos del mes"
+        title={t("monthlyRevenue")}
         value={formatCurrency(data.revenue_this_month)}
-        subtitle="Ventas registradas este mes"
+        subtitle={t("monthlyRevenueSubtitle")}
         icon={TrendingUp}
         iconClassName="text-chart-4"
       />
       <KpiCard
-        title="Compras del mes"
+        title={t("monthlyPurchases")}
         value={formatNumber(data.purchases_this_month)}
-        subtitle="Transacciones este mes"
+        subtitle={t("monthlyPurchasesSubtitle")}
         icon={ShoppingCart}
         iconClassName="text-chart-3"
       />
       <KpiCard
-        title="Puntos en circulación"
+        title={t("pointsInCirculation")}
         value={formatNumber(data.points_in_circulation)}
-        subtitle="Disponibles en cuentas activas"
+        subtitle={t("pointsInCirculationSubtitle")}
         icon={Coins}
         iconClassName="text-chart-1"
       />
       <KpiCard
-        title="Canjes del mes"
+        title={t("monthlyRedemptions")}
         value={formatNumber(data.redemptions_this_month)}
-        subtitle="Canjes realizados este mes"
+        subtitle={t("monthlyRedemptionsSubtitle")}
         icon={Gift}
         iconClassName="text-chart-5"
       />
       <KpiCard
-        title="Puntos canjeados"
+        title={t("pointsRedeemed")}
         value={formatNumber(data.points_redeemed_this_month)}
-        subtitle="Puntos usados este mes"
+        subtitle={t("pointsRedeemedSubtitle")}
         icon={Star}
         iconClassName="text-chart-1"
       />

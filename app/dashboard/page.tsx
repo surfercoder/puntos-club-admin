@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
@@ -28,7 +29,10 @@ export default async function DashboardPage() {
     redirect("/auth/login");
   }
 
-  const currentUser = await getCurrentUser();
+  const [t, currentUser] = await Promise.all([
+    getTranslations("Dashboard.analytics"),
+    getCurrentUser(),
+  ]);
   const hasAnalyticsAccess =
     currentUser && (isOwner(currentUser) || isCollaborator(currentUser) || isAdmin(currentUser));
 
@@ -36,7 +40,7 @@ export default async function DashboardPage() {
     return (
       <div className="flex flex-1 flex-col items-center justify-center gap-4 p-4 pt-0">
         <p className="text-muted-foreground text-sm">
-          No tienes acceso al panel de métricas.
+          {t("noAccess")}
         </p>
       </div>
     );
@@ -80,16 +84,16 @@ export default async function DashboardPage() {
           <TopProductsChart data={topProducts} />
         ) : (
           <EmptyChartCard
-            title="Productos más canjeados"
-            message="Aún no hay canjes registrados."
+            title={t("topProducts.title")}
+            message={t("topProducts.emptyMessage")}
           />
         )}
         {branchPerformance.length > 0 ? (
           <BranchPerformanceChart data={branchPerformance} />
         ) : (
           <EmptyChartCard
-            title="Rendimiento por sucursal"
-            message="Aún no hay compras por sucursal."
+            title={t("branchPerformance.title")}
+            message={t("branchPerformance.emptyMessage")}
           />
         )}
       </div>

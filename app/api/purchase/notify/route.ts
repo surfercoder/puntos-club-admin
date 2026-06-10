@@ -53,10 +53,10 @@ function buildPurchaseEmailHtml(params: {
 
   const body = `
     ${sectionHeading(`Ganaste ${pointsEarned.toLocaleString("es-AR")} puntos`)}
-    ${subtitle(`Tu compra en ${organizationName} te sumó puntos.`)}
+    ${subtitle(`Tu operación en ${organizationName} te sumó puntos.`)}
 
     <p style="margin:0 0 20px">
-      Hola <strong>${beneficiaryName}</strong>, tu compra fue registrada con éxito.
+      Hola <strong>${beneficiaryName}</strong>, tu operación fue registrada con éxito.
     </p>
 
     ${dataTable([
@@ -75,7 +75,7 @@ function buildPurchaseEmailHtml(params: {
     ])}
 
     <p style="margin:20px 0 0;font-size:13px;color:#6B7280">
-      Seguí acumulando puntos con cada compra y canjealos por premios exclusivos.
+      Seguí acumulando puntos con cada operación y canjealos por premios exclusivos.
     </p>
   `;
 

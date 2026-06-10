@@ -37,8 +37,8 @@ const sampleData: OrganizationUsageSummary = {
 describe('PlanUsageChart', () => {
   it('renders the card with title and description', () => {
     render(<PlanUsageChart data={sampleData} />);
-    expect(screen.getByText('Uso del plan')).toBeInTheDocument();
-    expect(screen.getByText(/Utilización de los límites de tu plan/)).toBeInTheDocument();
+    expect(screen.getByText('title')).toBeInTheDocument();
+    expect(screen.getByText(/descriptionPrefix/)).toBeInTheDocument();
   });
 
   it('displays the plan name', () => {
@@ -54,8 +54,8 @@ describe('PlanUsageChart', () => {
 
   it('displays translated feature labels', () => {
     render(<PlanUsageChart data={sampleData} />);
-    expect(screen.getByText('Socios')).toBeInTheDocument();
-    expect(screen.getByText('Sucursales')).toBeInTheDocument();
+    expect(screen.getByText('beneficiaries')).toBeInTheDocument();
+    expect(screen.getByText('branches')).toBeInTheDocument();
   });
 
   it('displays usage fraction for each feature', () => {
@@ -70,13 +70,13 @@ describe('PlanUsageChart', () => {
       features: [],
     };
     render(<PlanUsageChart data={emptyData} />);
-    expect(screen.getByText('Uso del plan')).toBeInTheDocument();
+    expect(screen.getByText('title')).toBeInTheDocument();
     expect(screen.queryByTestId('chart-container')).not.toBeInTheDocument();
   });
 
   it('applies warning style for features that should warn', () => {
     render(<PlanUsageChart data={sampleData} />);
-    const sucursales = screen.getByText('Sucursales');
+    const sucursales = screen.getByText('branches');
     expect(sucursales.className).toContain('text-amber-500');
   });
 
@@ -88,13 +88,13 @@ describe('PlanUsageChart', () => {
       ],
     };
     render(<PlanUsageChart data={atLimitData} />);
-    const socios = screen.getByText('Socios');
+    const socios = screen.getByText('beneficiaries');
     expect(socios.className).toContain('text-destructive');
   });
 
   it('applies default muted style for features not at limit or warning', () => {
     render(<PlanUsageChart data={sampleData} />);
-    const socios = screen.getByText('Socios');
+    const socios = screen.getByText('beneficiaries');
     expect(socios.className).toContain('text-muted-foreground');
   });
 

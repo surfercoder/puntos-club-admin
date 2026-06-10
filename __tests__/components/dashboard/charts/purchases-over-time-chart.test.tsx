@@ -49,8 +49,8 @@ const sampleData: MonthlyPurchaseStat[] = [
 describe('PurchasesOverTimeChart', () => {
   it('renders the card with title and description', () => {
     render(<PurchasesOverTimeChart data={sampleData} />);
-    expect(screen.getByText('Ventas en el tiempo')).toBeInTheDocument();
-    expect(screen.getByText(/Ingresos y cantidad de compras/)).toBeInTheDocument();
+    expect(screen.getByText('title')).toBeInTheDocument();
+    expect(screen.getByText(/description/)).toBeInTheDocument();
   });
 
   it('renders chart container', () => {
@@ -60,7 +60,7 @@ describe('PurchasesOverTimeChart', () => {
 
   it('renders with empty data', () => {
     render(<PurchasesOverTimeChart data={[]} />);
-    expect(screen.getByText('Ventas en el tiempo')).toBeInTheDocument();
+    expect(screen.getByText('title')).toBeInTheDocument();
     expect(screen.getByTestId('chart-container')).toBeInTheDocument();
   });
 
