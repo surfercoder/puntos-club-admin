@@ -5,6 +5,19 @@ import { useTranslations } from "next-intl";
 import { completeTour } from "@/actions/dashboard/tour/actions";
 import type { Tour, StepOptions } from "shepherd.js";
 
+async function loadShepherd() {
+  return (await import("shepherd.js")).default;
+}
+
+function safeCancelTour(tour: Tour | null) {
+  if (!tour) return;
+  try {
+    tour.cancel();
+  } catch {
+    // ignore
+  }
+}
+
 interface DashboardTourProps {
   userRole: string | null;
   userId: string;
@@ -29,7 +42,7 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
     };
 
     const initTour = async () => {
-      const Shepherd = (await import("shepherd.js")).default;
+      const Shepherd = await loadShepherd();
 
       const localTour: Tour = new Shepherd.Tour({
         useModalOverlay: true,
@@ -179,11 +192,7 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
 
     return () => {
       cleanup?.();
-      if (tour) {
-        try {
-          tour.cancel();
-        } catch { /* ignore */ }
-      }
+      safeCancelTour(tour);
     };
   }, [userRole, userId, tourCompleted, t]);
 

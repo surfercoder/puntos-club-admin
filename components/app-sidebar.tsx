@@ -85,7 +85,7 @@ export function AppSidebar({
 }) {
   const t = useTranslations("Sidebar")
 
-  const navMain = React.useMemo(() => {
+  const navMain = (() => {
     const isOwnerOrCollaborator = userRole === "owner" || userRole === "collaborator"
 
     if (portalMode === "admin") {
@@ -192,28 +192,25 @@ export function AppSidebar({
         ],
       },
     ]
-  }, [portalMode, userRole, t])
+  })()
 
-  const projects = React.useMemo(
-    () => [
-      {
-        name: t("designEngineering"),
-        url: "#",
-        icon: Frame,
-      },
-      {
-        name: t("salesMarketing"),
-        url: "#",
-        icon: PieChart,
-      },
-      {
-        name: t("travel"),
-        url: "#",
-        icon: Map,
-      },
-    ],
-    [t],
-  )
+  const projects = [
+    {
+      name: t("designEngineering"),
+      url: "#",
+      icon: Frame,
+    },
+    {
+      name: t("salesMarketing"),
+      url: "#",
+      icon: PieChart,
+    },
+    {
+      name: t("travel"),
+      url: "#",
+      icon: Map,
+    },
+  ]
 
   return (
     <Sidebar collapsible="icon" {...props}>

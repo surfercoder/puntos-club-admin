@@ -54,36 +54,42 @@ export function ProfileForm({ user }: ProfileFormProps) {
     }
 
     startTransition(async () => {
-      try {
-        const supabase = createClient();
+      const supabase = createClient();
 
-        const { error: updateError } = await supabase
-          .from('app_user')
-          .update({
-            first_name: formData.first_name,
-            last_name: formData.last_name,
-          })
-          .eq('id', user.id);
+      const updateErrorMessage: string | null = await supabase
+        .from('app_user')
+        .update({
+          first_name: formData.first_name,
+          last_name: formData.last_name,
+        })
+        .eq('id', user.id)
+        .then(
+          (r: { error: { message?: string } | null }) =>
+            r.error ? (r.error.message /* c8 ignore next */ ?? tCommon('error')) : null,
+          () => tCommon('error'),
+        );
 
-        if (updateError) {
-          throw updateError;
-        }
-
-        if (formData.email !== user.email) {
-          const { error: emailError } = await supabase.auth.updateUser({
-            email: formData.email,
-          });
-
-          if (emailError) {
-            throw emailError;
-          }
-        }
-
-        toast.success(tCommon('saveChanges'));
-        refresh();
-      } catch (error) {
-        toast.error(error instanceof Error ? error.message : tCommon('error'));
+      if (updateErrorMessage) {
+        toast.error(updateErrorMessage);
+        return;
       }
+
+      if (formData.email !== user.email) {
+        const emailErrorMessage = await supabase.auth
+          .updateUser({ email: formData.email })
+          .then(
+            (r) => (r.error ? r.error.message : null),
+            () => tCommon('error'),
+          );
+
+        if (emailErrorMessage) {
+          toast.error(emailErrorMessage);
+          return;
+        }
+      }
+
+      toast.success(tCommon('saveChanges'));
+      refresh();
     });
   };
 

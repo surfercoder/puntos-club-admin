@@ -70,45 +70,61 @@ jest.mock("@/actions/contact/send-contact-email", () => ({
 }));
 
 jest.mock("@/components/landing/components/input-field", () => ({
-  InputField: ({ name, value, onChange, errors, label }: any) => (
+  InputField: ({ name, value, onChange, errors, label, setCircleRef }: any) => (
     <div>
       <label>{label}</label>
-      <input name={name} value={value} onChange={onChange} data-testid={`input-${name}`} />
+      <input
+        name={name}
+        value={value}
+        onChange={onChange}
+        data-testid={`input-${name}`}
+        ref={(el) => setCircleRef?.(el)}
+      />
       {errors?.[name] && <span data-testid={`error-${name}`}>{errors[name]}</span>}
     </div>
   ),
 }));
 
 jest.mock("@/components/landing/components/phone-number-field", () => ({
-  PhoneNumberField: ({ value, onChange, errors, label }: any) => (
+  PhoneNumberField: ({ value, onChange, errors, label, setCircleRef }: any) => (
     <div>
       <label>{label}</label>
-      <input name="phoneNumber" value={value} onChange={onChange} data-testid="input-phoneNumber" />
+      <input
+        name="phoneNumber"
+        value={value}
+        onChange={onChange}
+        data-testid="input-phoneNumber"
+        ref={(el) => setCircleRef?.(el)}
+      />
       {errors?.phoneNumber && <span data-testid="error-phoneNumber">{errors.phoneNumber}</span>}
     </div>
   ),
 }));
 
 jest.mock("@/components/landing/components/input-text-area", () => ({
-  InputTextArea: ({ name, value, onChange, errors, label }: any) => (
+  InputTextArea: ({ name, value, onChange, errors, label, setCircleRef }: any) => (
     <div>
       <label>{label}</label>
-      <textarea name={name} value={value} onChange={onChange} data-testid={`input-${name}`} />
+      <textarea
+        name={name}
+        value={value}
+        onChange={onChange}
+        data-testid={`input-${name}`}
+        ref={(el) => setCircleRef?.(el)}
+      />
       {errors?.[name] && <span data-testid={`error-${name}`}>{errors[name]}</span>}
     </div>
   ),
 }));
 
 describe("ContactForm", () => {
-  const circleRefs = { current: [] };
-
   it("renders without crashing", () => {
-    const { container } = render(<ContactForm circleRefs={circleRefs as any} />);
+    const { container } = render(<ContactForm setCircleRef={jest.fn()} />);
     expect(container.querySelector("#contact-form")).toBeInTheDocument();
   });
 
   it("renders form elements", () => {
-    render(<ContactForm circleRefs={circleRefs as any} />);
+    render(<ContactForm setCircleRef={jest.fn()} />);
     expect(screen.getByTestId("input-firstName")).toBeInTheDocument();
     expect(screen.getByTestId("input-lastName")).toBeInTheDocument();
     expect(screen.getByTestId("input-email")).toBeInTheDocument();
@@ -118,7 +134,7 @@ describe("ContactForm", () => {
   });
 
   it("renders the submit button", () => {
-    render(<ContactForm circleRefs={circleRefs as any} />);
+    render(<ContactForm setCircleRef={jest.fn()} />);
     const submitButton = screen.getByRole("button", { name: /submit/i });
     expect(submitButton).toBeInTheDocument();
   });
@@ -126,35 +142,35 @@ describe("ContactForm", () => {
   /* ── handleChange tests ── */
   describe("handleChange", () => {
     it("updates firstName value on change", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-firstName");
       fireEvent.change(input, { target: { name: "firstName", value: "John" } });
       expect(input).toHaveValue("John");
     });
 
     it("updates lastName value on change", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-lastName");
       fireEvent.change(input, { target: { name: "lastName", value: "Doe" } });
       expect(input).toHaveValue("Doe");
     });
 
     it("updates email value on change", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-email");
       fireEvent.change(input, { target: { name: "email", value: "john@example.com" } });
       expect(input).toHaveValue("john@example.com");
     });
 
     it("updates business value on change", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-business");
       fireEvent.change(input, { target: { name: "business", value: "Acme Corp" } });
       expect(input).toHaveValue("Acme Corp");
     });
 
     it("updates message value on change", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-message");
       fireEvent.change(input, { target: { name: "message", value: "Hello there, this is a test message" } });
       expect(input).toHaveValue("Hello there, this is a test message");
@@ -164,7 +180,7 @@ describe("ContactForm", () => {
   /* ── handlePhoneChange tests ── */
   describe("handlePhoneChange", () => {
     it("updates phoneNumber value on change", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-phoneNumber");
       fireEvent.change(input, { target: { name: "phoneNumber", value: "1234567890" } });
       expect(input).toHaveValue("1234567890");
@@ -174,7 +190,7 @@ describe("ContactForm", () => {
   /* ── validateForm tests ── */
   describe("validateForm (via handleChange)", () => {
     it("shows error when firstName is empty", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-firstName");
       fireEvent.change(input, { target: { name: "firstName", value: "John" } });
       fireEvent.change(input, { target: { name: "firstName", value: "" } });
@@ -182,14 +198,14 @@ describe("ContactForm", () => {
     });
 
     it("shows error when firstName is too short", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-firstName");
       fireEvent.change(input, { target: { name: "firstName", value: "A" } });
       expect(screen.getByTestId("error-firstName")).toHaveTextContent("validation.firstNameMinLength");
     });
 
     it("clears firstName error when valid", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-firstName");
       fireEvent.change(input, { target: { name: "firstName", value: "J" } });
       expect(screen.getByTestId("error-firstName")).toBeInTheDocument();
@@ -198,7 +214,7 @@ describe("ContactForm", () => {
     });
 
     it("shows error when lastName is empty", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-lastName");
       fireEvent.change(input, { target: { name: "lastName", value: "Doe" } });
       fireEvent.change(input, { target: { name: "lastName", value: "" } });
@@ -206,14 +222,14 @@ describe("ContactForm", () => {
     });
 
     it("shows error when lastName is too short", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-lastName");
       fireEvent.change(input, { target: { name: "lastName", value: "D" } });
       expect(screen.getByTestId("error-lastName")).toHaveTextContent("validation.lastNameMinLength");
     });
 
     it("shows error when email is empty", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-email");
       fireEvent.change(input, { target: { name: "email", value: "test@test.com" } });
       fireEvent.change(input, { target: { name: "email", value: "" } });
@@ -221,14 +237,14 @@ describe("ContactForm", () => {
     });
 
     it("shows error when email is invalid", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-email");
       fireEvent.change(input, { target: { name: "email", value: "notanemail" } });
       expect(screen.getByTestId("error-email")).toHaveTextContent("validation.emailInvalid");
     });
 
     it("shows error when phoneNumber is empty", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-phoneNumber");
       fireEvent.change(input, { target: { name: "phoneNumber", value: "1234567890" } });
       fireEvent.change(input, { target: { name: "phoneNumber", value: "" } });
@@ -236,21 +252,21 @@ describe("ContactForm", () => {
     });
 
     it("shows error when phoneNumber contains letters", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-phoneNumber");
       fireEvent.change(input, { target: { name: "phoneNumber", value: "123abc4567" } });
       expect(screen.getByTestId("error-phoneNumber")).toHaveTextContent("validation.phoneNoLetters");
     });
 
     it("shows error when phoneNumber is too short", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-phoneNumber");
       fireEvent.change(input, { target: { name: "phoneNumber", value: "12345" } });
       expect(screen.getByTestId("error-phoneNumber")).toHaveTextContent("validation.phoneMinLength");
     });
 
     it("does not show error when business is empty (optional field)", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-business");
       fireEvent.change(input, { target: { name: "business", value: "Acme" } });
       fireEvent.change(input, { target: { name: "business", value: "" } });
@@ -258,7 +274,7 @@ describe("ContactForm", () => {
     });
 
     it("shows error when message is empty", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-message");
       fireEvent.change(input, { target: { name: "message", value: "Some text here" } });
       fireEvent.change(input, { target: { name: "message", value: "" } });
@@ -266,14 +282,14 @@ describe("ContactForm", () => {
     });
 
     it("shows error when message is too short", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-message");
       fireEvent.change(input, { target: { name: "message", value: "Short" } });
       expect(screen.getByTestId("error-message")).toHaveTextContent("validation.messageMinLength");
     });
 
     it("sets honeyField error when honeyField is filled", () => {
-      const { container } = render(<ContactForm circleRefs={circleRefs as any} />);
+      const { container } = render(<ContactForm setCircleRef={jest.fn()} />);
       const honeyInput = container.querySelector('input[name="honeyField"]') as HTMLInputElement;
       fireEvent.change(honeyInput, { target: { name: "honeyField", value: "bot-filled" } });
       // honeyField error is set to empty string (truthy check: "" is falsy so no visible error,
@@ -309,7 +325,7 @@ describe("ContactForm", () => {
     };
 
     it("shows success message when form is valid", async () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       fillValidForm();
 
       const submitButton = screen.getByRole("button", { name: /submit/i });
@@ -321,7 +337,7 @@ describe("ContactForm", () => {
     });
 
     it("returns early when honeypot field is filled", async () => {
-      const { container } = render(<ContactForm circleRefs={circleRefs as any} />);
+      const { container } = render(<ContactForm setCircleRef={jest.fn()} />);
       fillValidForm();
 
       // Fill honeypot
@@ -338,7 +354,7 @@ describe("ContactForm", () => {
     });
 
     it("shows validation errors when submitting empty form", async () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
 
       const submitButton = screen.getByRole("button", { name: /submit/i });
       fireEvent.click(submitButton);
@@ -353,7 +369,7 @@ describe("ContactForm", () => {
     });
 
     it("does not submit when there are validation errors from inline validation", () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       const input = screen.getByTestId("input-firstName");
       fireEvent.change(input, { target: { name: "firstName", value: "J" } });
 
@@ -365,7 +381,7 @@ describe("ContactForm", () => {
     });
 
     it("does not submit when there are existing errors", async () => {
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
 
       // Create an error first
       fireEvent.change(screen.getByTestId("input-firstName"), {
@@ -384,7 +400,7 @@ describe("ContactForm", () => {
       const { sendContactEmail } = require("@/actions/contact/send-contact-email");
       sendContactEmail.mockResolvedValueOnce({ success: false, error: "Failed to send" });
 
-      render(<ContactForm circleRefs={circleRefs as any} />);
+      render(<ContactForm setCircleRef={jest.fn()} />);
       fillValidForm();
 
       const submitButton = screen.getByRole("button", { name: /submit/i });

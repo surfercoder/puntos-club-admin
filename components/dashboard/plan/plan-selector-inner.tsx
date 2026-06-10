@@ -452,11 +452,10 @@ export function PlanSelectorInner() {
         }
       } catch {
         // Silent — webhook will handle it eventually
-      } finally {
-        setVerifying(false);
-        // Clean the URL without a client-side redirect
-        window.history.replaceState(null, '', '/dashboard/settings/plan');
       }
+      setVerifying(false);
+      // Clean the URL without a client-side redirect
+      window.history.replaceState(null, '', '/dashboard/settings/plan');
     };
 
     verify();
@@ -569,16 +568,15 @@ export function PlanSelectorInner() {
       const result = await cancelSubscriptionAction();
       if (result.error) {
         toast.error(result.error);
-        return;
+      } else {
+        toast.success(tSettings('cancelSuccess'));
+        dispatch({ type: 'CLOSE_CONFIRM' });
+        invalidate();
       }
-      toast.success(tSettings('cancelSuccess'));
-      dispatch({ type: 'CLOSE_CONFIRM' });
-      invalidate();
     } catch {
       toast.error(tSettings('cancelError'));
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
     }
+    dispatch({ type: 'SET_LOADING', payload: false });
   };
 
   const handleConfirmSwitch = async () => {

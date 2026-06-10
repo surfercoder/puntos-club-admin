@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useReducer } from "react";
-import type { MutableRefObject } from "react";
 import { InputField } from "@/components/landing/components/input-field";
 import { InputTextArea } from "@/components/landing/components/input-text-area";
 import { PhoneNumberField } from "@/components/landing/components/phone-number-field";
@@ -79,9 +78,9 @@ function formReducer(state: FormState, action: FormAction): FormState {
 }
 
 const ContactForm = ({
-  circleRefs,
+  setCircleRef,
 }: {
-  circleRefs: MutableRefObject<(HTMLDivElement | null)[]>;
+  setCircleRef: (index: number, el: HTMLDivElement | null) => void;
 }) => {
   const t = useTranslations("Landing.contact");
 
@@ -180,8 +179,7 @@ const ContactForm = ({
             color="#FF4573"
             errors={errors}
             onChange={updateField}
-            circleRefs={circleRefs}
-            index={0}
+            setCircleRef={(el) => setCircleRef(0, el)}
           />
           <InputField
             name="lastName"
@@ -190,8 +188,7 @@ const ContactForm = ({
             color="#31A1D6"
             errors={errors}
             onChange={updateField}
-            circleRefs={circleRefs}
-            index={1}
+            setCircleRef={(el) => setCircleRef(1, el)}
           />
           <InputField
             name="email"
@@ -200,16 +197,14 @@ const ContactForm = ({
             color="#FD7E14"
             errors={errors}
             onChange={updateField}
-            circleRefs={circleRefs}
-            index={2}
+            setCircleRef={(el) => setCircleRef(2, el)}
           />
           <PhoneNumberField
             label={t("phone")}
             value={formValues.phoneNumber}
             errors={errors}
             onChange={handlePhoneChange}
-            circleRefs={circleRefs}
-            index={3}
+            setCircleRef={(el) => setCircleRef(3, el)}
           />
           <InputField
             name="business"
@@ -218,8 +213,7 @@ const ContactForm = ({
             color="#31A1D6"
             errors={errors}
             onChange={updateField}
-            circleRefs={circleRefs}
-            index={4}
+            setCircleRef={(el) => setCircleRef(4, el)}
             colSpanMd={2}
           />
           <InputTextArea
@@ -229,8 +223,7 @@ const ContactForm = ({
             color="#FD7E14"
             errors={errors}
             onChange={updateField}
-            circleRefs={circleRefs}
-            index={5}
+            setCircleRef={(el) => setCircleRef(5, el)}
           />
           {/* Honeypot */}
           <div

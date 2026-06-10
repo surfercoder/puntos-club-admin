@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { FC, MutableRefObject } from "react";
+import type { FC } from "react";
 import { useTheme } from "next-themes";
 import "@/components/landing/styles/contact-form.css";
 
@@ -17,8 +16,7 @@ interface InputFieldProps {
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
-  circleRefs: MutableRefObject<(HTMLDivElement | null)[]>;
-  index: number;
+  setCircleRef: (el: HTMLDivElement | null) => void;
   colSpanMd?: number;
 }
 
@@ -29,16 +27,10 @@ export const InputField: FC<InputFieldProps> = ({
   color,
   errors,
   onChange,
-  circleRefs,
-  index,
+  setCircleRef,
   colSpanMd = 1,
 }) => {
   const { resolvedTheme: theme } = useTheme();
-  const [inputKey, setInputKey] = useState(0);
-
-  useEffect(() => {
-    setInputKey((prevKey) => /* c8 ignore next */ (prevKey === 0 ? 1 : 0));
-  }, [theme]);
 
   return (
     <div
@@ -49,15 +41,13 @@ export const InputField: FC<InputFieldProps> = ({
       <p className="font-light pl-7">{label}</p>
       <div className="relative">
         <div
-          ref={(el) => {
-            circleRefs.current[index] = el;
-          }}
+          ref={setCircleRef}
           className={`absolute left-4 top-1/2 transform -translate-y-1/2 size-6 rounded-full`}
           style={{ backgroundColor: color }}
         />
         <input
           aria-label={label}
-          key={inputKey}
+          key={theme}
           type="text"
           name={name}
           value={value}

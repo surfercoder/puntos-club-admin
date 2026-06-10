@@ -1,4 +1,4 @@
-import React, { createRef } from "react";
+import React from "react";
 import { render, screen, fireEvent } from "@testing-library/react";
 
 jest.mock("next-themes", () => ({
@@ -16,18 +16,10 @@ import { InputTextArea } from "@/components/landing/components/input-text-area";
 
 const defaultErrors: Partial<ContactFormValues> = {};
 const mockOnChange = jest.fn();
-
-function createCircleRefs() {
-  const ref = createRef<(HTMLDivElement | null)[]>() as React.MutableRefObject<
-    (HTMLDivElement | null)[]
-  >;
-  ref.current = [];
-  return ref;
-}
+const noopSetRef = jest.fn();
 
 describe("InputField", () => {
   it("renders without crashing", () => {
-    const circleRefs = createCircleRefs();
     const { container } = render(
       <InputField
         name="firstName"
@@ -36,15 +28,13 @@ describe("InputField", () => {
         color="#FF0000"
         errors={defaultErrors}
         onChange={mockOnChange}
-        circleRefs={circleRefs}
-        index={0}
+        setCircleRef={noopSetRef}
       />
     );
     expect(container).toBeTruthy();
   });
 
   it("renders the label text", () => {
-    const circleRefs = createCircleRefs();
     render(
       <InputField
         name="firstName"
@@ -53,15 +43,13 @@ describe("InputField", () => {
         color="#FF0000"
         errors={defaultErrors}
         onChange={mockOnChange}
-        circleRefs={circleRefs}
-        index={0}
+        setCircleRef={noopSetRef}
       />
     );
     expect(screen.getByText("First Name")).toBeInTheDocument();
   });
 
   it("renders an input element with the correct value", () => {
-    const circleRefs = createCircleRefs();
     render(
       <InputField
         name="firstName"
@@ -70,8 +58,7 @@ describe("InputField", () => {
         color="#FF0000"
         errors={defaultErrors}
         onChange={mockOnChange}
-        circleRefs={circleRefs}
-        index={0}
+        setCircleRef={noopSetRef}
       />
     );
     const input = screen.getByRole("textbox");
@@ -79,7 +66,6 @@ describe("InputField", () => {
   });
 
   it("displays error message when present", () => {
-    const circleRefs = createCircleRefs();
     const errors: Partial<ContactFormValues> = { firstName: "Required" };
     render(
       <InputField
@@ -89,15 +75,13 @@ describe("InputField", () => {
         color="#FF0000"
         errors={errors}
         onChange={mockOnChange}
-        circleRefs={circleRefs}
-        index={0}
+        setCircleRef={noopSetRef}
       />
     );
     expect(screen.getByText("Required")).toBeInTheDocument();
   });
 
   it("calls onChange when input changes", () => {
-    const circleRefs = createCircleRefs();
     render(
       <InputField
         name="firstName"
@@ -106,8 +90,7 @@ describe("InputField", () => {
         color="#FF0000"
         errors={defaultErrors}
         onChange={mockOnChange}
-        circleRefs={circleRefs}
-        index={0}
+        setCircleRef={noopSetRef}
       />
     );
     const input = screen.getByRole("textbox");
@@ -116,7 +99,6 @@ describe("InputField", () => {
   });
 
   it("applies md:col-span-2 when colSpanMd is 2", () => {
-    const circleRefs = createCircleRefs();
     const { container } = render(
       <InputField
         name="firstName"
@@ -125,57 +107,67 @@ describe("InputField", () => {
         color="#FF0000"
         errors={defaultErrors}
         onChange={mockOnChange}
-        circleRefs={circleRefs}
-        index={0}
+        setCircleRef={noopSetRef}
         colSpanMd={2}
       />
     );
     const wrapper = container.firstChild as HTMLElement;
     expect(wrapper.className).toContain("md:col-span-2");
   });
+
+  it("calls setCircleRef with the mounted element", () => {
+    const setRef = jest.fn();
+    render(
+      <InputField
+        name="firstName"
+        value=""
+        label="First Name"
+        color="#FF0000"
+        errors={defaultErrors}
+        onChange={mockOnChange}
+        setCircleRef={setRef}
+      />
+    );
+    expect(setRef).toHaveBeenCalled();
+    expect(setRef.mock.calls[0][0]).toBeInstanceOf(HTMLElement);
+  });
 });
 
 describe("PhoneNumberField", () => {
   it("renders without crashing", () => {
-    const circleRefs = createCircleRefs();
     const { container } = render(
       <PhoneNumberField
         label="Phone"
         value=""
         errors={defaultErrors}
         onChange={mockOnChange}
-        circleRefs={circleRefs}
-        index={0}
+        setCircleRef={noopSetRef}
       />
     );
     expect(container).toBeTruthy();
   });
 
   it("renders the label text", () => {
-    const circleRefs = createCircleRefs();
     render(
       <PhoneNumberField
         label="Phone"
         value=""
         errors={defaultErrors}
         onChange={mockOnChange}
-        circleRefs={circleRefs}
-        index={0}
+        setCircleRef={noopSetRef}
       />
     );
     expect(screen.getByText("Phone")).toBeInTheDocument();
   });
 
   it("renders a tel input with placeholder", () => {
-    const circleRefs = createCircleRefs();
     render(
       <PhoneNumberField
         label="Phone"
         value=""
         errors={defaultErrors}
         onChange={mockOnChange}
-        circleRefs={circleRefs}
-        index={0}
+        setCircleRef={noopSetRef}
       />
     );
     const input = screen.getByPlaceholderText("+54");
@@ -184,7 +176,6 @@ describe("PhoneNumberField", () => {
   });
 
   it("displays phone number error when present", () => {
-    const circleRefs = createCircleRefs();
     const errors: Partial<ContactFormValues> = {
       phoneNumber: "Invalid phone",
     };
@@ -194,17 +185,30 @@ describe("PhoneNumberField", () => {
         value=""
         errors={errors}
         onChange={mockOnChange}
-        circleRefs={circleRefs}
-        index={0}
+        setCircleRef={noopSetRef}
       />
     );
     expect(screen.getByText("Invalid phone")).toBeInTheDocument();
+  });
+
+  it("calls setCircleRef with the mounted element", () => {
+    const setRef = jest.fn();
+    render(
+      <PhoneNumberField
+        label="Phone"
+        value=""
+        errors={defaultErrors}
+        onChange={mockOnChange}
+        setCircleRef={setRef}
+      />
+    );
+    expect(setRef).toHaveBeenCalled();
+    expect(setRef.mock.calls[0][0]).toBeInstanceOf(HTMLElement);
   });
 });
 
 describe("InputTextArea", () => {
   it("renders without crashing", () => {
-    const circleRefs = createCircleRefs();
     const { container } = render(
       <InputTextArea
         name="message"
@@ -213,15 +217,13 @@ describe("InputTextArea", () => {
         color="#00FF00"
         errors={defaultErrors}
         onChange={mockOnChange}
-        circleRefs={circleRefs}
-        index={0}
+        setCircleRef={noopSetRef}
       />
     );
     expect(container).toBeTruthy();
   });
 
   it("renders a textarea element", () => {
-    const circleRefs = createCircleRefs();
     render(
       <InputTextArea
         name="message"
@@ -230,8 +232,7 @@ describe("InputTextArea", () => {
         color="#00FF00"
         errors={defaultErrors}
         onChange={mockOnChange}
-        circleRefs={circleRefs}
-        index={0}
+        setCircleRef={noopSetRef}
       />
     );
     const textarea = screen.getByRole("textbox");
@@ -239,7 +240,6 @@ describe("InputTextArea", () => {
   });
 
   it("renders the label text", () => {
-    const circleRefs = createCircleRefs();
     render(
       <InputTextArea
         name="message"
@@ -248,15 +248,13 @@ describe("InputTextArea", () => {
         color="#00FF00"
         errors={defaultErrors}
         onChange={mockOnChange}
-        circleRefs={circleRefs}
-        index={0}
+        setCircleRef={noopSetRef}
       />
     );
     expect(screen.getByText("Message")).toBeInTheDocument();
   });
 
   it("displays error message when present", () => {
-    const circleRefs = createCircleRefs();
     const errors: Partial<ContactFormValues> = { message: "Too short" };
     render(
       <InputTextArea
@@ -266,10 +264,26 @@ describe("InputTextArea", () => {
         color="#00FF00"
         errors={errors}
         onChange={mockOnChange}
-        circleRefs={circleRefs}
-        index={0}
+        setCircleRef={noopSetRef}
       />
     );
     expect(screen.getByText("Too short")).toBeInTheDocument();
+  });
+
+  it("calls setCircleRef with the mounted element", () => {
+    const setRef = jest.fn();
+    render(
+      <InputTextArea
+        name="message"
+        value=""
+        label="Message"
+        color="#00FF00"
+        errors={defaultErrors}
+        onChange={mockOnChange}
+        setCircleRef={setRef}
+      />
+    );
+    expect(setRef).toHaveBeenCalled();
+    expect(setRef.mock.calls[0][0]).toBeInstanceOf(HTMLElement);
   });
 });

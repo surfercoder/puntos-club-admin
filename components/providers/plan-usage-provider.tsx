@@ -3,9 +3,7 @@
 import {
   createContext,
   use,
-  useCallback,
   useEffect,
-  useMemo,
   useReducer,
   useRef,
 } from 'react';
@@ -68,7 +66,7 @@ export function PlanUsageProvider({ children, initialSummary }: PlanUsageProvide
   const { summary, isLoading } = state;
   const fetchRef = useRef(0);
 
-  const fetchUsage = useCallback(() => {
+  const fetchUsage = () => {
     const id = ++fetchRef.current;
     dispatch({ type: 'FETCH_START' });
     getUsageSummaryAction()
@@ -85,57 +83,45 @@ export function PlanUsageProvider({ children, initialSummary }: PlanUsageProvide
           dispatch({ type: 'FETCH_END' });
         }
       });
-  }, []);
+  };
 
   // Only fetch on mount if we don't have initial data
   useEffect(() => {
     if (initialSummary) return;
     fetchUsage();
-  }, [fetchUsage, initialSummary]);
+  }, [initialSummary]);
 
   // Re-fetch when organization changes
   useEffect(() => {
     const handler = () => fetchUsage();
     window.addEventListener('orgChanged', handler);
     return () => window.removeEventListener('orgChanged', handler);
-  }, [fetchUsage]);
+  }, []);
 
-  const isAtLimit = useCallback(
-    (feature: PlanFeatureKey) => {
-      if (!summary) return false;
-      return summary.features.find((f) => f.feature === feature)?.is_at_limit ?? false;
-    },
-    [summary]
-  );
+  const isAtLimit = (feature: PlanFeatureKey) => {
+    if (!summary) return false;
+    return summary.features.find((f) => f.feature === feature)?.is_at_limit ?? false;
+  };
 
-  const shouldWarn = useCallback(
-    (feature: PlanFeatureKey) => {
-      if (!summary) return false;
-      const f = summary.features.find((feat) => feat.feature === feature);
-      return f ? f.should_warn || f.is_at_limit : false;
-    },
-    [summary]
-  );
+  const shouldWarn = (feature: PlanFeatureKey) => {
+    if (!summary) return false;
+    const f = summary.features.find((feat) => feat.feature === feature);
+    return f ? f.should_warn || f.is_at_limit : false;
+  };
 
-  const getFeature = useCallback(
-    (feature: PlanFeatureKey) => {
-      return summary?.features.find((f) => f.feature === feature);
-    },
-    [summary]
-  );
+  const getFeature = (feature: PlanFeatureKey) => {
+    return summary?.features.find((f) => f.feature === feature);
+  };
 
-  const contextValue = useMemo<PlanUsageContextValue>(
-    () => ({
-      summary,
-      isLoading,
-      invalidate: fetchUsage,
-      isAtLimit,
-      shouldWarn,
-      getFeature,
-      plan: summary?.plan ?? null,
-    }),
-    [summary, isLoading, fetchUsage, isAtLimit, shouldWarn, getFeature]
-  );
+  const contextValue: PlanUsageContextValue = {
+    summary,
+    isLoading,
+    invalidate: fetchUsage,
+    isAtLimit,
+    shouldWarn,
+    getFeature,
+    plan: summary?.plan ?? null,
+  };
 
   return (
     <PlanUsageContext.Provider value={contextValue}>

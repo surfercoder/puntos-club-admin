@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useActionState, useState, useCallback } from 'react';
+import { useActionState, useState } from 'react';
 import { useTranslations } from 'next-intl';
 import { toast } from "sonner";
 
@@ -51,7 +51,7 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
 
   const [actionState, formAction, pending] = useActionState(wrappedAction, EMPTY_ACTION_STATE);
 
-  const handlePlaceSelected = useCallback((components: GoogleAddressComponents) => {
+  const handlePlaceSelected = (components: GoogleAddressComponents) => {
     setAddressData({
       street: components.street,
       number: components.number,
@@ -63,7 +63,7 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
       latitude: components.latitude,
       longitude: components.longitude,
     });
-  }, []);
+  };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     const formData = new FormData(event.currentTarget);

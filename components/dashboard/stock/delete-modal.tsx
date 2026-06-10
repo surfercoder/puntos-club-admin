@@ -43,9 +43,8 @@ export default function DeleteModal({ stockId, stockDescription }: DeleteModalPr
       }
     } catch {
       toast.error(t('genericError'));
-    } finally {
-      setIsDeleting(false);
     }
+    setIsDeleting(false);
   };
 
   return (

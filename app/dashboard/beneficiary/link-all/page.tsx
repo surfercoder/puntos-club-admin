@@ -34,9 +34,8 @@ export default function LinkAllBeneficiariesPage() {
         success: false,
         message: 'An unexpected error occurred',
       });
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   return (

@@ -1,6 +1,6 @@
 "use client";
 
-import type { FC, MutableRefObject } from "react";
+import type { FC } from "react";
 import "@/components/landing/styles/contact-form.css";
 
 import type { ContactFormValues } from "@/schemas/contact.schema";
@@ -14,8 +14,7 @@ interface InputTextAreaProps {
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
-  circleRefs: MutableRefObject<(HTMLDivElement | null)[]>;
-  index: number;
+  setCircleRef: (el: HTMLDivElement | null) => void;
 }
 
 export const InputTextArea: FC<InputTextAreaProps> = ({
@@ -25,17 +24,14 @@ export const InputTextArea: FC<InputTextAreaProps> = ({
   color,
   errors,
   onChange,
-  circleRefs,
-  index,
+  setCircleRef,
 }) => {
   return (
     <div className="flex flex-col col-span-1 md:col-span-2 gap-3">
       <p className="font-light pl-7">{label}</p>
       <div className="relative">
         <div
-          ref={(el) => {
-            circleRefs.current[index] = el;
-          }}
+          ref={setCircleRef}
           className="absolute left-4 top-5 size-6 rounded-full"
           style={{ backgroundColor: color }}
         />

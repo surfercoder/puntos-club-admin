@@ -101,23 +101,26 @@ export function LoginForm({
 
     dispatch({ type: "SET_IS_LOADING", payload: true });
 
-    try {
-      const loginResult = await signInAdminPortal(email, password);
+    const loginResult = await signInAdminPortal(email, password).then(
+      (r) => ({ ok: true as const, result: r }),
+      (err: unknown) => ({
+        ok: false as const,
+        error: err instanceof Error ? err.message : tCommon("error"),
+      }),
+    );
 
-      if (!loginResult.success) {
-        throw new Error(loginResult.error || t("noPermission"));
-      }
-
+    if (!loginResult.ok) {
+      dispatch({ type: "SET_ERROR", payload: loginResult.error });
+    } else if (loginResult.result.success) {
       push("/dashboard");
       refresh();
-    } catch (err: unknown) {
+    } else {
       dispatch({
         type: "SET_ERROR",
-        payload: err instanceof Error ? err.message : tCommon("error"),
+        payload: loginResult.result.error || t("noPermission"),
       });
-    } finally {
-      dispatch({ type: "SET_IS_LOADING", payload: false });
     }
+    dispatch({ type: "SET_IS_LOADING", payload: false });
   };
 
   return (

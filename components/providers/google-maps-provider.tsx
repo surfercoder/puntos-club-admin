@@ -2,6 +2,20 @@
 
 import { createContext, use, useEffect, useReducer, useRef } from 'react';
 
+async function loadPlacesLibrary(apiKey: string): Promise<
+  | { ok: true; placesLibrary: google.maps.PlacesLibrary; sessionToken: google.maps.places.AutocompleteSessionToken }
+  | { ok: false }
+> {
+  try {
+    const { importLibrary, setOptions } = await import('@googlemaps/js-api-loader');
+    setOptions({ key: apiKey });
+    const lib = (await importLibrary('places')) as google.maps.PlacesLibrary;
+    return { ok: true, placesLibrary: lib, sessionToken: new lib.AutocompleteSessionToken() };
+  } catch {
+    return { ok: false };
+  }
+}
+
 interface GoogleMapsContextType {
   placesLibrary: google.maps.PlacesLibrary | null;
   sessionToken: google.maps.places.AutocompleteSessionToken | null;
@@ -70,25 +84,19 @@ export const GoogleMapsProvider: React.FC<GoogleMapsProviderProps> = ({ apiKey, 
     initialized.current = true;
 
     let cancelled = false;
-    import('@googlemaps/js-api-loader')
-      .then(({ importLibrary, setOptions }) => {
-        setOptions({ key: apiKey });
-        return importLibrary('places');
-      })
-      .then((lib) => {
-        if (cancelled) return;
-        const placesLib = lib as google.maps.PlacesLibrary;
+    loadPlacesLibrary(apiKey).then((result) => {
+      if (cancelled) return;
+      if (result.ok) {
         dispatch({
           type: 'loaded',
-          placesLibrary: placesLib,
-          sessionToken: new placesLib.AutocompleteSessionToken(),
+          placesLibrary: result.placesLibrary,
+          sessionToken: result.sessionToken,
         });
-      })
-      .catch((_err: Error) => {
-        if (cancelled) return;
+      } else {
         dispatch({ type: 'error', error: 'Failed to load Google Maps API' });
         initialized.current = false;
-      });
+      }
+    });
 
     return () => {
       cancelled = true;

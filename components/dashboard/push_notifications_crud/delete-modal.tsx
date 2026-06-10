@@ -43,9 +43,8 @@ export default function DeleteModal({ notificationId, notificationTitle }: Delet
       }
     } catch {
       toast.error(t('genericError'));
-    } finally {
-      setIsDeleting(false);
     }
+    setIsDeleting(false);
   };
 
   return (

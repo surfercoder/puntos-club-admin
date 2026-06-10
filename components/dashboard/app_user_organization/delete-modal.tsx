@@ -43,9 +43,8 @@ export default function DeleteModal({ appUserOrganizationId, appUserOrganization
       }
     } catch {
       toast.error(t('genericError'));
-    } finally {
-      setIsDeleting(false);
     }
+    setIsDeleting(false);
   };
 
   return (

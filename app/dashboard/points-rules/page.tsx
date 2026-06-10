@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useReducer, useCallback } from "react";
+import { useEffect, useReducer } from "react";
 import { useTranslations } from "next-intl";
 import {
   getAllPointsRules,
@@ -24,6 +24,7 @@ import {
 import { Plus, Pencil, Calculator, RefreshCw } from "lucide-react";
 import Link from "next/link";
 import DeleteModal from "@/components/dashboard/points-rules/delete-modal";
+import { createClient } from "@/lib/supabase/client";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -386,7 +387,7 @@ export default function PointsRulesPage() {
   const t = useTranslations("PointsRules");
   const [state, dispatch] = useReducer(reducer, initialState);
 
-  const loadBranches = useCallback(async () => {
+  const loadBranches = async () => {
     const activeOrgId =
       typeof document !== "undefined"
         ? document.cookie
@@ -402,7 +403,6 @@ export default function PointsRulesPage() {
       return;
     }
 
-    const { createClient } = await import("@/lib/supabase/client");
     const supabase = createClient();
     const { data } = await supabase
       .from("branch")
@@ -412,16 +412,16 @@ export default function PointsRulesPage() {
       .order("name");
 
     dispatch({ type: "SET_BRANCHES", payload: (data /* c8 ignore next */ ?? []) as Branch[] });
-  }, []);
+  };
 
-  const loadRules = useCallback(async () => {
+  const loadRules = async () => {
     dispatch({ type: "SET_LOADING", payload: true });
     const result = await getAllPointsRules();
     if (result.success && result.data) {
       dispatch({ type: "SET_RULES", payload: result.data });
     }
     dispatch({ type: "SET_LOADING", payload: false });
-  }, []);
+  };
 
   useEffect(() => {
     loadRules();
@@ -437,17 +437,14 @@ export default function PointsRulesPage() {
     return () => {
       window.removeEventListener("orgChanged", handleOrgChange);
     };
-  }, [loadRules, loadBranches]);
+  }, []);
 
-  const handleToggleStatus = useCallback(
-    async (id: number, currentStatus: boolean) => {
-      const result = await togglePointsRuleStatus(id, !currentStatus);
-      if (result.success) {
-        loadRules();
-      }
-    },
-    [loadRules]
-  );
+  const handleToggleStatus = async (id: number, currentStatus: boolean) => {
+    const result = await togglePointsRuleStatus(id, !currentStatus);
+    if (result.success) {
+      loadRules();
+    }
+  };
 
   return (
     <div className="space-y-6">

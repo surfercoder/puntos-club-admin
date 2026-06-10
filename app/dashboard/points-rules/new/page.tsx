@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { createPointsRule } from "@/actions/dashboard/points-rules/actions";
@@ -389,7 +389,13 @@ export default function NewPointsRulePage() {
   const tCommon = useTranslations("Common");
   const { push } = useRouter();
   const [loading, setLoading] = useState(false);
-  const [branches, setBranches] = useState<Array<{ id: string; name: string }>>([]);
+  const [branches, dispatch] = useReducer(
+    (
+      _: Array<{ id: string; name: string }>,
+      action: { type: 'SET'; payload: Array<{ id: string; name: string }> }
+    ) => action.payload,
+    []
+  );
   const [formData, setFormData] = useState<FormData>({
     name: "",
     description: "",
@@ -411,54 +417,53 @@ export default function NewPointsRulePage() {
     days_of_week: [],
   });
 
-  const loadBranches = useCallback(async (resetBranch = false) => {
-    const activeOrgId =
-      typeof document !== "undefined"
-        ? document.cookie
-            .split(";")
-            .map((c) => c.trim())
-            .find((c) => c.startsWith("active_org_id="))
-            ?.split("=")[1]
-        : /* c8 ignore next */ undefined;
-
-    const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
-    if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
-      setBranches([]);
-      return;
-    }
-
-    const supabase = createClient();
-    const { data } = await supabase
-      .from("branch")
-      .select("id, name")
-      .eq("organization_id", activeOrgIdNumber)
-      .eq("active", true)
-      .order("name");
-
-    const newBranches = (data ?? []) as Array<{ id: string; name: string }>;
-
-    if (resetBranch) {
-      // Single batch update: set branches and reset branch_id together
-      // by using a callback that captures newBranches in closure
-      setBranches(newBranches);
-      setFormData((prev) => ({ ...prev, branch_id: "" }));
-    } else {
-      setBranches(newBranches);
-    }
-  }, []);
-
   useEffect(() => {
-    loadBranches();
+    let cancelled = false;
+    const fetchBranches = async () => {
+      const activeOrgId =
+        typeof document !== "undefined"
+          ? document.cookie
+              .split(";")
+              .map((c) => c.trim())
+              .find((c) => c.startsWith("active_org_id="))
+              ?.split("=")[1]
+          : /* c8 ignore next */ undefined;
+
+      const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
+      if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
+        return [] as Array<{ id: string; name: string }>;
+      }
+
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("branch")
+        .select("id, name")
+        .eq("organization_id", activeOrgIdNumber)
+        .eq("active", true)
+        .order("name");
+
+      return (data ?? []) as Array<{ id: string; name: string }>;
+    };
+
+    fetchBranches().then((b) => {
+      if (!cancelled) dispatch({ type: 'SET', payload: b });
+    });
 
     const handleOrgChange = () => {
-      loadBranches(true);
+      fetchBranches().then((b) => {
+        /* c8 ignore next */
+        if (cancelled) return;
+        dispatch({ type: 'SET', payload: b });
+        setFormData((prev) => ({ ...prev, branch_id: "" }));
+      });
     };
 
     window.addEventListener("orgChanged", handleOrgChange);
     return () => {
+      cancelled = true;
       window.removeEventListener("orgChanged", handleOrgChange);
     };
-  }, [loadBranches]);
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

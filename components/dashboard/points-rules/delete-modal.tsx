@@ -42,9 +42,8 @@ export default function DeleteModal({ ruleId, ruleName, onDeleted }: DeleteModal
       }
     } catch {
       toast.error(t('genericError'));
-    } finally {
-      setIsDeleting(false);
     }
+    setIsDeleting(false);
   };
 
   return (

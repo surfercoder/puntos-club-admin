@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import type { FC, MutableRefObject } from "react";
+import type { FC } from "react";
 import { useTheme } from "next-themes";
 import "@/components/landing/styles/contact-form.css";
 
@@ -14,8 +13,7 @@ interface PhoneNumberFieldProps {
   onChange: (
     e: React.ChangeEvent<HTMLInputElement>
   ) => void;
-  circleRefs: MutableRefObject<(HTMLDivElement | null)[]>;
-  index: number;
+  setCircleRef: (el: HTMLDivElement | null) => void;
 }
 
 export const PhoneNumberField: FC<PhoneNumberFieldProps> = ({
@@ -23,30 +21,22 @@ export const PhoneNumberField: FC<PhoneNumberFieldProps> = ({
   value,
   errors,
   onChange,
-  circleRefs,
-  index,
+  setCircleRef,
 }) => {
   const { resolvedTheme: theme } = useTheme();
-  const [inputKey, setInputKey] = useState(0);
-
-  useEffect(() => {
-    setInputKey((prevKey) => /* c8 ignore next */ (prevKey === 0 ? 1 : 0));
-  }, [theme]);
 
   return (
     <div className="flex flex-col gap-2">
       <p className="font-light pl-7">{label}</p>
       <div className="relative">
         <div
-          ref={(el) => {
-            circleRefs.current[index] = el;
-          }}
+          ref={setCircleRef}
           className="absolute left-4 top-1/2 transform -translate-y-1/2 size-6 rounded-full z-10"
           style={{ backgroundColor: "#FF4573" }}
         />
         <input
           aria-label={label}
-          key={inputKey}
+          key={theme}
           type="tel"
           name="phoneNumber"
           value={value}

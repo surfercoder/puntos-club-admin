@@ -51,9 +51,8 @@ export default function DeleteModal({ branchId, branchName }: DeleteModalProps) 
       }
     } catch {
       toast.error(t('genericError'));
-    } finally {
-      setIsDeleting(false);
     }
+    setIsDeleting(false);
   };
 
   return (

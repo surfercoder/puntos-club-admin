@@ -179,7 +179,11 @@ export function LandingApp() {
             }}
           ></div>
           <div ref={contactFormRef} className="w-full -translate-x-full">
-            <ContactForm circleRefs={circleRefs} />
+            <ContactForm
+              setCircleRef={(index, el) => {
+                circleRefs.current[index] = el;
+              }}
+            />
           </div>
           <Footer />
         </div>

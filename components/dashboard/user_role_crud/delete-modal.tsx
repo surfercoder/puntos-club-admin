@@ -43,9 +43,8 @@ export default function DeleteModal({ roleId, roleName }: DeleteModalProps) {
       }
     } catch {
       toast.error(t('genericError'));
-    } finally {
-      setIsDeleting(false);
     }
+    setIsDeleting(false);
   };
 
   return (

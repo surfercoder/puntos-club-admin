@@ -93,17 +93,21 @@ export function ForgotPasswordForm({
     const supabase = createClient();
     dispatch({ type: "SET_LOADING", payload: true });
 
-    try {
-      const { error: resetError } = await supabase.auth.resetPasswordForEmail(email, {
+    const errorMessage = await supabase.auth
+      .resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/update-password`,
-      });
-      if (resetError) { throw resetError; }
+      })
+      .then(
+        (r) => (r.error ? r.error.message : null),
+        () => tCommon("error"),
+      );
+
+    if (errorMessage) {
+      dispatch({ type: "SET_ERROR", payload: errorMessage });
+    } else {
       dispatch({ type: "SET_SUCCESS", payload: true });
-    } catch (err: unknown) {
-      dispatch({ type: "SET_ERROR", payload: err instanceof Error ? err.message : tCommon("error") });
-    } finally {
-      dispatch({ type: "SET_LOADING", payload: false });
     }
+    dispatch({ type: "SET_LOADING", payload: false });
   };
 
   return (

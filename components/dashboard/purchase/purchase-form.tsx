@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { useActionState, useState, useEffect, useReducer, useCallback, useRef } from 'react';
+import { useActionState, useState, useEffect, useReducer, useRef } from 'react';
 
 import { purchaseFormAction } from '@/actions/dashboard/purchase/purchase-form-actions';
 import { Button } from '@/components/ui/button';
@@ -134,7 +134,7 @@ export default function PurchaseForm({ purchase }: PurchaseFormProps) {
   }, []);
 
   // Live points calculation using the same RPC as the server
-  const calculatePoints = useCallback(async (amount: number, branchId: string) => {
+  const calculatePoints = async (amount: number, branchId: string) => {
     if (amount <= 0) {
       setPointsPreview(0);
       return;
@@ -149,7 +149,7 @@ export default function PurchaseForm({ purchase }: PurchaseFormProps) {
       p_category_id: null,
     });
     setPointsPreview(data || 0);
-  }, []);
+  };
 
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const amount = parseFloat(e.target.value);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from 'react';
+import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { X, Upload, Image as ImageIcon } from 'lucide-react';
@@ -23,8 +23,7 @@ export default function ProductImageUpload({
   onImagesChange,
 }: ProductImageUploadProps) {
   const t = useTranslations('Dashboard.product.imageUpload');
-  const initialRef = useRef(initialImages);
-  const [images, setImages] = useState<string[]>(initialRef.current);
+  const [images, setImages] = useState<string[]>(initialImages);
   const [uploading, setUploading] = useState(false);
   const supabase = createClient();
 
@@ -52,38 +51,36 @@ export default function ProductImageUpload({
     setUploading(true);
     const uploadedUrls: string[] = [];
 
-    try {
-      const results = await Promise.all(filesArray.map(async (file) => {
-        const fileExt = file.name.split('.').pop();
-        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-        const filePath = `${fileName}`;
+    const results = await Promise.all(filesArray.map(async (file) => {
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+      const filePath = `${fileName}`;
 
-        const { error: uploadError } = await supabase.storage
-          .from('product-images')
-          .upload(filePath, file, {
-            cacheControl: '3600',
-            upsert: false,
-          });
+      const { error: uploadError } = await supabase.storage
+        .from('product-images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false,
+        });
 
-        if (uploadError) {
-          throw uploadError;
-        }
+      if (uploadError) {
+        return null;
+      }
 
-        const { data: { publicUrl } } = supabase.storage
-          .from('product-images')
-          .getPublicUrl(filePath);
+      const { data: { publicUrl } } = supabase.storage
+        .from('product-images')
+        .getPublicUrl(filePath);
 
-        return publicUrl;
-      }));
-      uploadedUrls.push(...results);
+      return publicUrl;
+    }));
 
-      const newImages = [...images, ...uploadedUrls];
-      setImages(newImages);
-      onImagesChange(newImages);
-      toast.success(t('uploadSuccess', { count: uploadedUrls.length }));
-    } catch (_error) {
+    const failed = results.some((r) => r === null);
+    for (const r of results) {
+      if (r) uploadedUrls.push(r);
+    }
+
+    if (failed) {
       toast.error(t('uploadError'));
-
       // Clean up any successfully uploaded images on error
       await Promise.all(uploadedUrls.map(async (url) => {
         const fileName = url.split('/').pop();
@@ -91,9 +88,13 @@ export default function ProductImageUpload({
           await supabase.storage.from('product-images').remove([fileName]);
         }
       }));
-    } finally {
-      setUploading(false);
+    } else {
+      const newImages = [...images, ...uploadedUrls];
+      setImages(newImages);
+      onImagesChange(newImages);
+      toast.success(t('uploadSuccess', { count: uploadedUrls.length }));
     }
+    setUploading(false);
   };
 
   const removeImage = async (imageUrl: string, index: number) => {

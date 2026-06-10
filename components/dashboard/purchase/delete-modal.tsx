@@ -43,9 +43,8 @@ export default function DeleteModal({ purchaseId, purchaseNumber }: DeleteModalP
       }
     } catch {
       toast.error(t('genericError'));
-    } finally {
-      setIsDeleting(false);
     }
+    setIsDeleting(false);
   };
 
   return (

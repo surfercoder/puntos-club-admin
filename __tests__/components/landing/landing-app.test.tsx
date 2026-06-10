@@ -67,12 +67,12 @@ jest.mock("@gsap/react", () => ({
 /* ── Mock all child screen components ── */
 jest.mock("@/components/landing/screens/contact-form", () => ({
   __esModule: true,
-  default: ({ circleRefs }: { circleRefs: React.MutableRefObject<(HTMLDivElement | null)[]> }) => {
+  default: ({ setCircleRef }: { setCircleRef: (index: number, el: HTMLDivElement | null) => void }) => {
     return (
       <div data-testid="contact-form" ref={(el) => {
-        // Populate circleRefs so the forEach loop body in onComplete is covered
-        if (el && circleRefs.current.length === 0) {
-          circleRefs.current = [el];
+        // Report a ref up so the forEach loop body in onComplete is covered
+        if (el) {
+          setCircleRef(0, el);
         }
       }} />
     );

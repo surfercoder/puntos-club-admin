@@ -83,15 +83,17 @@ export function UpdatePasswordForm({
     const supabase = createClient();
     dispatch({ type: 'SET_LOADING', payload: true });
 
-    try {
-      const { error: updateError } = await supabase.auth.updateUser({ password });
-      if (updateError) { throw updateError; }
+    const errorMessage = await supabase.auth.updateUser({ password }).then(
+      (r) => (r.error ? r.error.message : null),
+      () => tCommon("error"),
+    );
+
+    if (errorMessage) {
+      dispatch({ type: 'SET_ERROR', payload: errorMessage });
+    } else {
       push("/dashboard");
-    } catch (err: unknown) {
-      dispatch({ type: 'SET_ERROR', payload: err instanceof Error ? err.message : tCommon("error") });
-    } finally {
-      dispatch({ type: 'SET_LOADING', payload: false });
     }
+    dispatch({ type: 'SET_LOADING', payload: false });
   };
 
   return (

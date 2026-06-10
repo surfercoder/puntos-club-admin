@@ -148,29 +148,26 @@ export function Step3Plan({ onNext, onBack, initialPlan = 'trial' }: Step3Props)
     }
 
     setLoading(true);
-    try {
-      const res = await fetch('/api/mercadopago/create-subscription', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ planId: selected }),
-      });
+    const res = await fetch('/api/mercadopago/create-subscription', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ planId: selected }),
+    });
 
-      const data = await res.json() as { initPoint?: string; preapprovalId?: string; error?: string };
+    const data = await res.json() as { initPoint?: string; preapprovalId?: string; error?: string };
 
-      if (!res.ok || !data.initPoint) {
-        throw new Error(data.error ?? t('paymentInitError'));
-      }
-
-      if (data.preapprovalId) {
-        localStorage.setItem('mp_preapproval_id', data.preapprovalId);
-      }
-      localStorage.setItem('onboarding_plan', selected);
-
-      window.location.href = data.initPoint;
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t('paymentError'));
+    if (!res.ok || !data.initPoint) {
+      toast.error(data.error ?? t('paymentInitError'));
       setLoading(false);
+      return;
     }
+
+    if (data.preapprovalId) {
+      localStorage.setItem('mp_preapproval_id', data.preapprovalId);
+    }
+    localStorage.setItem('onboarding_plan', selected);
+
+    window.location.href = data.initPoint;
   };
 
   return (

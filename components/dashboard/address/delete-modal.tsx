@@ -33,9 +33,8 @@ export default function DeleteModal({ id }: { id: number }) {
       refresh();
     } catch {
       toast.error(t('genericError'));
-    } finally {
-      setLoading(false);
     }
+    setLoading(false);
   };
 
   return (

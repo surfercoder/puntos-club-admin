@@ -41,6 +41,23 @@ type DashboardShellOrg = {
 
 type DashboardShellPortalMode = "admin" | "org";
 
+const KNOWN_SEGMENTS = [
+  "address", "app_user", "app_user_organization",
+  "beneficiary", "beneficiary_organization", "branch", "category",
+  "notifications", "organization", "organization_notification_limits",
+  "points-rules", "product", "profile", "purchase", "push_notifications",
+  "push_tokens", "redemption", "stock", "user-role", "users", "qr",
+  "settings", "organization-settings",
+] as const;
+
+type KnownSegment = typeof KNOWN_SEGMENTS[number];
+
+const isKnownSegment = (s: string): s is KnownSegment =>
+  (KNOWN_SEGMENTS as readonly string[]).includes(s);
+
+const isUuidLike = (value: string) =>
+  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+
 export function DashboardShell({
   children,
   user,
@@ -72,59 +89,38 @@ export function DashboardShell({
     }
   });
 
-  const breadcrumbItems = React.useMemo(() => {
-    const knownSegments = [
-      "address", "app_user", "app_user_organization",
-      "beneficiary", "beneficiary_organization", "branch", "category",
-      "notifications", "organization", "organization_notification_limits",
-      "points-rules", "product", "profile", "purchase", "push_notifications",
-      "push_tokens", "redemption", "stock", "user-role", "users", "qr",
-      "settings", "organization-settings",
-    ] as const;
+  const rawSegments = (pathname ?? "")
+    .split("?")[0]
+    .split("#")[0]
+    .split("/")
+    .filter(Boolean);
 
-    type KnownSegment = typeof knownSegments[number];
+  const dashboardIndex = rawSegments.indexOf("dashboard");
+  const segments = dashboardIndex >= 0 ? rawSegments.slice(dashboardIndex + 1) : rawSegments;
 
-    const isKnownSegment = (s: string): s is KnownSegment =>
-      (knownSegments as readonly string[]).includes(s);
+  const breadcrumbItems: { label: string; href?: string }[] = [
+    { label: tBreadcrumb("panel"), href: "/dashboard" },
+  ];
 
-    const isUuidLike = (value: string) =>
-      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value);
+  let hrefAcc = "/dashboard";
+  for (const seg of segments) {
+    hrefAcc += `/${seg}`;
 
-    const rawSegments = (pathname ?? "")
-      .split("?")[0]
-      .split("#")[0]
-      .split("/")
-      .filter(Boolean);
+    let label: string;
+    if (seg === "new") label = tBreadcrumb("new");
+    else if (seg === "create") label = tBreadcrumb("create");
+    else if (seg === "edit") label = tBreadcrumb("edit");
+    else if (isUuidLike(seg) || /^\d+$/.test(seg)) label = tBreadcrumb("details");
+    else if (isKnownSegment(seg)) label = tBreadcrumb(seg);
+    else label = seg;
 
-    const dashboardIndex = rawSegments.indexOf("dashboard");
-    const segments = dashboardIndex >= 0 ? rawSegments.slice(dashboardIndex + 1) : rawSegments;
+    breadcrumbItems.push({ label, href: hrefAcc });
+  }
 
-    const items: { label: string; href?: string }[] = [
-      { label: tBreadcrumb("panel"), href: "/dashboard" },
-    ];
+  /* c8 ignore next */
+  if (breadcrumbItems.length > 0) breadcrumbItems[breadcrumbItems.length - 1] = { label: breadcrumbItems[breadcrumbItems.length - 1].label };
 
-    let hrefAcc = "/dashboard";
-    for (const seg of segments) {
-      hrefAcc += `/${seg}`;
-
-      let label: string;
-      if (seg === "new") label = tBreadcrumb("new");
-      else if (seg === "create") label = tBreadcrumb("create");
-      else if (seg === "edit") label = tBreadcrumb("edit");
-      else if (isUuidLike(seg) || /^\d+$/.test(seg)) label = tBreadcrumb("details");
-      else if (isKnownSegment(seg)) label = tBreadcrumb(seg);
-      else label = seg;
-
-      items.push({ label, href: hrefAcc });
-    }
-
-    /* c8 ignore next */
-    if (items.length > 0) items[items.length - 1] = { label: items[items.length - 1].label };
-
-    return items;
-  }, [pathname, tBreadcrumb]);
-
-  const onChangeOrg = React.useCallback((orgId: string) => {
+  const onChangeOrg = (orgId: string) => {
     if (portalMode === "admin") return;
     setActiveOrgId(orgId);
     try {
@@ -146,13 +142,13 @@ export function DashboardShell({
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('orgChanged', { detail: { orgId } }));
     }
-  }, [portalMode]);
+  };
 
-  const onLogout = React.useCallback(async () => {
+  const onLogout = async () => {
     const supabase = createClient();
     await supabase.auth.signOut();
     push("/auth/login");
-  }, [push]);
+  };
 
   return (
     <PlanUsageProvider initialSummary={initialPlanUsage}>
