@@ -169,7 +169,8 @@
       "Bash(echo \"---EXIT: $?\")",
       "Bash(echo \"exit: $?\")",
       "Read(//private/tmp/**)",
-      "Bash(git rm *)"
+      "Bash(git rm *)",
+      "Bash(echo \"EXIT_CODE: $?\")"
     ],
     "deny": []
   },
