@@ -829,11 +829,22 @@
         "product": "Product",
         "pointsUsed": "Points",
         "date": "Date",
+        "status": "Status",
         "actions": "Actions"
+      },
+      "status": {
+        "pending": "Pending",
+        "delivered": "Delivered",
+        "cancelled": "Cancelled"
       },
       "createTitle": "Create Redemption",
       "editTitle": "Edit Redemption",
       "fetchError": "Error fetching redemption",
+      "deliverButton": "Mark delivered",
+      "cancelButton": "Cancel redemption",
+      "deliverSuccess": "Redemption delivered",
+      "cancelSuccess": "Redemption cancelled",
+      "actionError": "Could not process the redemption",
       "deleteModal": {
         "title": "Delete Redemption",
         "confirm": "Are you sure you want to delete redemption <strong>{name}</strong>? This action cannot be undone.",

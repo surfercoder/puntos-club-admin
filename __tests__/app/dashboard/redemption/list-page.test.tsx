@@ -18,6 +18,12 @@ jest.mock('@/lib/auth/get-current-user', () => ({ getCurrentUser: jest.fn(() => 
 jest.mock('@/lib/auth/get-active-org-id', () => ({ getActiveOrgIdFilter: jest.fn(() => Promise.resolve(null)) }));
 jest.mock('@/lib/auth/roles', () => ({ isAdmin: jest.fn(() => true) }));
 jest.mock('@/components/dashboard/redemption/delete-modal', () => function Mock() { return <div />; });
+jest.mock('@/components/dashboard/redemption/row-actions', () => ({
+  PendingRedemptionActions: ({ redemptionId }: { redemptionId: string }) => <div data-testid="pending-actions">{redemptionId}</div>,
+}));
+jest.mock('@/components/dashboard/redemption/status-badge', () => ({
+  RedemptionStatusBadge: ({ status }: { status: string | null | undefined }) => <span>{status ?? 'none'}</span>,
+}));
 jest.mock('@/components/ui/button', () => ({ Button: ({ children }: { children: React.ReactNode }) => <button>{children}</button> }));
 jest.mock('@/components/ui/table', () => ({
   Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>,
@@ -94,6 +100,15 @@ describe('RedemptionListPage', () => {
   it('renders redemption with beneficiary only last_name', async () => {
     resolveData = {
       data: [{ id: '5', beneficiary_id: 'b5', points_used: 15,  redemption_date: '2024-01-01T00:00:00Z', beneficiary: { first_name: null, last_name: 'OnlyLast', email: null }, product: { name: 'P3', organization_id: 1 } }],
+      error: null,
+    };
+    const result = await RedemptionListPage();
+    expect(result).toBeTruthy();
+  });
+
+  it('renders PendingRedemptionActions for pending rows', async () => {
+    resolveData = {
+      data: [{ id: '9', beneficiary_id: 'b9', points_used: 25, status: 'pending', redemption_date: '2024-01-01T00:00:00Z', beneficiary: { first_name: 'X' }, product: { name: 'P9', organization_id: 1 } }],
       error: null,
     };
     const result = await RedemptionListPage();

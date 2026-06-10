@@ -1,5 +1,7 @@
 import { z } from 'zod';
 
+export const RedemptionStatusSchema = z.enum(['pending', 'delivered', 'cancelled']);
+
 export const RedemptionSchema = z.object({
   id: z.string().optional(),
   beneficiary_id: z.string().min(1, 'Beneficiary is required'),
@@ -10,4 +12,5 @@ export const RedemptionSchema = z.object({
     return parseInt(val) || 0;
   }),
   redemption_date: z.string().optional(),
+  status: RedemptionStatusSchema.optional(),
 });

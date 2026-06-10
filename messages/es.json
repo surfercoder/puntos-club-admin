@@ -829,11 +829,22 @@
         "product": "Producto",
         "pointsUsed": "Puntos",
         "date": "Fecha",
+        "status": "Estado",
         "actions": "Acciones"
+      },
+      "status": {
+        "pending": "Pendiente",
+        "delivered": "Entregado",
+        "cancelled": "Cancelado"
       },
       "createTitle": "Crear Canje",
       "editTitle": "Editar Canje",
       "fetchError": "Error al obtener el canje",
+      "deliverButton": "Marcar entregado",
+      "cancelButton": "Cancelar canje",
+      "deliverSuccess": "Canje entregado",
+      "cancelSuccess": "Canje cancelado",
+      "actionError": "No se pudo procesar el canje",
       "deleteModal": {
         "title": "Eliminar Canje",
         "confirm": "¿Estás seguro de que deseas eliminar el canje <strong>{name}</strong>? Esta acción no se puede deshacer.",

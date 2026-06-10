@@ -52,4 +52,24 @@ describe('redemptionFormAction', () => {
     const result = await redemptionFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
   });
+
+  describe('createRedemption error mapping', () => {
+    const cases: Array<[string, string]> = [
+      ['PENDING_REDEMPTION_EXISTS', 'El beneficiario ya tiene un canje pendiente. Debe completarlo o cancelarlo antes de pedir otro.'],
+      ['INSUFFICIENT_POINTS', 'Puntos insuficientes.'],
+      ['OUT_OF_STOCK', 'El producto no tiene stock disponible.'],
+      ['MEMBERSHIP_NOT_FOUND', 'El beneficiario no pertenece a esta organización.'],
+      ['MEMBERSHIP_INACTIVE', 'La membresía del beneficiario está inactiva.'],
+      ['PRODUCT_NOT_FOUND', 'Producto no encontrado en esta organización.'],
+      ['SOMETHING_UNKNOWN', 'Ocurrió un error al procesar el canje.'],
+    ];
+
+    it.each(cases)('maps rpc error %s to Spanish message', async (code, expected) => {
+      (createRedemption as jest.Mock).mockResolvedValueOnce({ data: null, error: { message: code } });
+      const fd = createFormData({ beneficiary_id: '1', product_id: 'prod-1', points_used: '100' });
+      const result = await redemptionFormAction(EMPTY_ACTION_STATE, fd);
+      expect(result.status).toBe('error');
+      expect(result.message).toBe(expected);
+    });
+  });
 });

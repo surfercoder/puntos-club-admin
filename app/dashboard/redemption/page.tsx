@@ -3,6 +3,8 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/redemption/delete-modal';
+import { PendingRedemptionActions } from '@/components/dashboard/redemption/row-actions';
+import { RedemptionStatusBadge } from '@/components/dashboard/redemption/status-badge';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -18,6 +20,7 @@ import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { formatDateTime } from '@/lib/utils';
+import type { RedemptionStatus } from '@/types/redemption';
 
 interface RedemptionWithRelations {
   id: string;
@@ -26,6 +29,7 @@ interface RedemptionWithRelations {
   organization_id?: number | null;
   points_used: number;
   redemption_date: string;
+  status: RedemptionStatus | null;
   beneficiary: {
     first_name?: string | null;
     last_name?: string | null;
@@ -44,7 +48,6 @@ export default async function RedemptionListPage() {
   ]);
   const userIsAdmin = isAdmin(currentUser);
 
-  // Use admin client to bypass RLS for admin users
   const supabase = userIsAdmin ? createAdminClient() : await createClient();
 
   const orgIdFilter = await getActiveOrgIdFilter(currentUser);
@@ -87,6 +90,7 @@ export default async function RedemptionListPage() {
               <TableHead>{t('tableHeaders.beneficiary')}</TableHead>
               <TableHead>{t('tableHeaders.product')}</TableHead>
               <TableHead>{t('tableHeaders.pointsUsed')}</TableHead>
+              <TableHead>{t('tableHeaders.status')}</TableHead>
               <TableHead>{t('tableHeaders.date')}</TableHead>
               <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
@@ -103,6 +107,9 @@ export default async function RedemptionListPage() {
                   <TableCell>{redemption.product?.name || 'N/A'}</TableCell>
                   <TableCell>{redemption.points_used}</TableCell>
                   <TableCell>
+                    <RedemptionStatusBadge status={redemption.status} />
+                  </TableCell>
+                  <TableCell>
                     <span suppressHydrationWarning>{formatDateTime(redemption.redemption_date, 'es-AR', {
                       year: 'numeric',
                       month: 'short',
@@ -114,11 +121,15 @@ export default async function RedemptionListPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Button asChild size="sm" variant="secondary">
-                        <Link href={`/dashboard/redemption/edit/${redemption.id}`}>
-                          <Pencil className="size-4" />
-                        </Link>
-                      </Button>
+                      {redemption.status === 'pending' ? (
+                        <PendingRedemptionActions redemptionId={redemption.id} />
+                      ) : (
+                        <Button asChild size="sm" variant="secondary">
+                          <Link href={`/dashboard/redemption/edit/${redemption.id}`}>
+                            <Pencil className="size-4" />
+                          </Link>
+                        </Button>
+                      )}
                       <DeleteModal
                         redemptionDescription={`${redemption.product?.name || 'Product'} - ${redemption.points_used} points`}
                         redemptionId={redemption.id}
@@ -129,7 +140,7 @@ export default async function RedemptionListPage() {
               ))
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={5}>{t('empty')}</TableCell>
+                <TableCell className="text-center py-4" colSpan={6}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>
