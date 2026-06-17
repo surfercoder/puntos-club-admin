@@ -1,6 +1,7 @@
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { Pencil, Package, ShoppingCart } from 'lucide-react';
+import { getTranslations, getLocale } from 'next-intl/server';
 
 import { getOrganization, getOrganizationProducts } from '@/actions/dashboard/organization/actions';
 import { Badge } from '@/components/ui/badge';
@@ -27,43 +28,48 @@ export default async function OrganizationDetailsPage({ params }: { params: Prom
     notFound();
   }
 
+  const [t, locale] = await Promise.all([
+    getTranslations('Dashboard.organization.detailPage'),
+    getLocale(),
+  ]);
+
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-semibold">{organization.name}</h1>
-          <p className="text-muted-foreground">Detalles de la organización y productos disponibles</p>
+          <p className="text-muted-foreground">{t('subtitle')}</p>
         </div>
         <Button asChild variant="secondary">
           <Link href={`/dashboard/organization/edit/${organization.id}`}>
             <Pencil className="size-4 mr-2" />
-            Editar Organización
+            {t('editButton')}
           </Link>
         </Button>
       </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>Información de la Organización</CardTitle>
+          <CardTitle>{t('infoSectionTitle')}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Nombre</p>
+              <p className="text-sm font-medium text-muted-foreground">{t('nameLabel')}</p>
               <p className="text-base">{organization.name}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Razón Social</p>
+              <p className="text-sm font-medium text-muted-foreground">{t('legalNameLabel')}</p>
               <p className="text-base">{organization.business_name || 'N/A'}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">CUIT/RUT</p>
+              <p className="text-sm font-medium text-muted-foreground">{t('taxIdLabel')}</p>
               <p className="text-base">{organization.tax_id || 'N/A'}</p>
             </div>
             <div>
-              <p className="text-sm font-medium text-muted-foreground">Fecha de Creación</p>
+              <p className="text-sm font-medium text-muted-foreground">{t('createdAtLabel')}</p>
               <p className="text-base" suppressHydrationWarning>
-                {new Date(organization.creation_date).toLocaleDateString('es-AR', { timeZone: 'UTC' })}
+                {new Date(organization.creation_date).toLocaleDateString(locale === 'es' ? 'es-AR' : 'en-US', { timeZone: 'UTC' })}
               </p>
             </div>
           </div>
@@ -76,16 +82,16 @@ export default async function OrganizationDetailsPage({ params }: { params: Prom
             <div>
               <CardTitle className="flex items-center gap-2">
                 <ShoppingCart className="size-5" />
-                Productos Disponibles para Canje
+                {t('productsTitle')}
               </CardTitle>
               <CardDescription>
-                Productos que los usuarios pueden canjear con sus puntos
+                {t('productsDescription')}
               </CardDescription>
             </div>
             <Button asChild size="sm">
               <Link href="/dashboard/product">
                 <Package className="size-4 mr-2" />
-                Administrar Productos
+                {t('manageProducts')}
               </Link>
             </Button>
           </div>
@@ -93,22 +99,22 @@ export default async function OrganizationDetailsPage({ params }: { params: Prom
         <CardContent>
           {productsError ? (
             <div className="text-center py-8 text-muted-foreground">
-              Error al cargar productos
+              {t('productsFetchError')}
             </div>
           ) : !products || products.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
-              Aún no hay productos disponibles para canje.
+              {t('noProducts')}
             </div>
           ) : (
             <div className="border rounded-lg">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Nombre del Producto</TableHead>
-                    <TableHead>Descripción</TableHead>
-                    <TableHead>Categoría</TableHead>
-                    <TableHead className="text-right">Puntos Requeridos</TableHead>
-                    <TableHead className="text-right">Stock Disponible</TableHead>
+                    <TableHead>{t('productNameHeader')}</TableHead>
+                    <TableHead>{t('descriptionHeader')}</TableHead>
+                    <TableHead>{t('categoryHeader')}</TableHead>
+                    <TableHead className="text-right">{t('pointsRequiredHeader')}</TableHead>
+                    <TableHead className="text-right">{t('availableStockHeader')}</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -131,12 +137,12 @@ export default async function OrganizationDetailsPage({ params }: { params: Prom
                         </TableCell>
                         <TableCell className="text-right">
                           <Badge variant="outline">
-                            {product.required_points} pts
+                            {product.required_points} {t('pointsUnit')}
                           </Badge>
                         </TableCell>
                         <TableCell className="text-right">
                           <Badge variant={totalStock > 0 ? 'default' : 'destructive'}>
-                            {totalStock > 0 ? `${totalStock} unidades` : 'Sin stock'}
+                            {totalStock > 0 ? t('unitsLabel', { count: totalStock }) : t('outOfStock')}
                           </Badge>
                         </TableCell>
                       </TableRow>

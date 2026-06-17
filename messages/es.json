@@ -66,6 +66,7 @@
     "noResults": "Sin resultados",
     "deleting": "Eliminando...",
     "imageUpload": {
+      "upload": "Subir imagen",
       "fileSizeError": "El tamaño del archivo debe ser menor a {maxSize}MB",
       "selectImageFile": "Por favor selecciona un archivo de imagen",
       "uploadFailed": "Error al subir",
@@ -84,7 +85,12 @@
       "hasDigit": "Un número",
       "hasSpecial": "Un carácter especial (!@#$%...)"
     },
-    "passwordWeak": "La contraseña no cumple todos los requisitos"
+    "passwordWeak": "La contraseña no cumple todos los requisitos",
+    "close": "Cerrar",
+    "more": "Más",
+    "toggleTheme": "Cambiar tema",
+    "toggleSidebar": "Alternar barra lateral",
+    "breadcrumb": "Migas de pan"
   },
   "NotFound": {
     "title": "404 - Página no encontrada",
@@ -324,6 +330,21 @@
       "organization": "Organización",
       "role": "Rol"
     },
+    "beneficiaryLinkAll": {
+      "title": "Vincular Beneficiarios No Vinculados",
+      "description": "Esta utilidad vinculará todos los beneficiarios que actualmente no están asociados con tu organización. Es útil para corregir beneficiarios creados antes de que se implementara la vinculación automática.",
+      "linkButton": "Vincular Todos los Beneficiarios No Vinculados",
+      "linking": "Vinculando...",
+      "backButton": "Volver a Beneficiarios",
+      "whatThisDoes": "Qué hace esta acción:",
+      "step1": "Encuentra todos los beneficiarios no vinculados a tu organización",
+      "step2": "Crea registros de beneficiary_organization para ellos",
+      "step3": "Establece sus puntos iniciales en 0",
+      "step4": "Los convierte en miembros activos de tu organización",
+      "linkFailed": "Error al vincular beneficiarios",
+      "linkSuccess": "Beneficiarios vinculados correctamente",
+      "unexpectedError": "Ocurrió un error inesperado"
+    },
     "organization": {
       "title": "Organizaciones",
       "description": "Administrar todas las organizaciones del sistema",
@@ -355,6 +376,28 @@
         "namePlaceholder": "Ingresa el nombre de la organización",
         "legalNamePlaceholder": "Ingresa la razón social (opcional)",
         "taxIdPlaceholder": "Ingresa el CUIT o RUT (opcional)"
+      },
+      "detailPage": {
+        "subtitle": "Detalles de la organización y productos disponibles",
+        "editButton": "Editar Organización",
+        "infoSectionTitle": "Información de la Organización",
+        "nameLabel": "Nombre",
+        "legalNameLabel": "Razón Social",
+        "taxIdLabel": "CUIT/RUT",
+        "createdAtLabel": "Fecha de Creación",
+        "productsTitle": "Productos Disponibles para Canje",
+        "productsDescription": "Productos que los usuarios pueden canjear con sus puntos",
+        "manageProducts": "Administrar Productos",
+        "productsFetchError": "Error al cargar productos",
+        "noProducts": "Aún no hay productos disponibles para canje.",
+        "productNameHeader": "Nombre del Producto",
+        "descriptionHeader": "Descripción",
+        "categoryHeader": "Categoría",
+        "pointsRequiredHeader": "Puntos Requeridos",
+        "availableStockHeader": "Stock Disponible",
+        "pointsUnit": "pts",
+        "unitsLabel": "{count} unidades",
+        "outOfStock": "Sin stock"
       }
     },
     "notifications": {
@@ -439,6 +482,22 @@
         "sentCount": "enviada(s)",
         "resend": "Reenviar Notificación",
         "updateError": "Error al actualizar la notificación"
+      },
+      "editForm": {
+        "titleLabel": "Título",
+        "titlePlaceholder": "Título de la notificación",
+        "bodyLabel": "Mensaje",
+        "bodyPlaceholder": "Mensaje de la notificación",
+        "statusLabel": "Estado",
+        "selectStatus": "Seleccionar estado",
+        "statusDraft": "Borrador",
+        "statusSending": "Enviando",
+        "statusSent": "Enviada",
+        "statusFailed": "Fallida",
+        "sentCountLabel": "Cantidad Enviada",
+        "failedCountLabel": "Cantidad Fallida",
+        "cancel": "Cancelar",
+        "update": "Actualizar"
       },
       "limits": {
         "dailyLimitReached": "Has alcanzado tu límite diario de notificaciones",
@@ -1046,6 +1105,10 @@
         "organizationLabel": "Organización",
         "selectOrganization": "Seleccionar una organización",
         "planType": "Tipo de Plan",
+        "planFree": "Free",
+        "planLight": "Light",
+        "planPro": "Pro",
+        "planPremium": "Premium",
         "defaultLimits": "Límites por defecto: {daily} diarias, {monthly} mensuales, {minHours}h entre notificaciones",
         "dailyLimit": "Límite Diario",
         "dailyLimitPlaceholder": "Ingresa el límite diario",
@@ -1112,6 +1175,28 @@
         "deleteError": "Error al eliminar la suscripción",
         "deleteSuccess": "Suscripción eliminada correctamente",
         "genericError": "Ocurrió un error al eliminar"
+      },
+      "form": {
+        "organizationLabel": "Organización",
+        "selectOrganization": "Seleccionar organización",
+        "mpPreapprovalIdLabel": "ID de Preaprobación MercadoPago",
+        "mpPlanIdLabel": "ID de Plan MercadoPago",
+        "planLabel": "Plan",
+        "selectPlan": "Seleccionar plan",
+        "advance": "Advance",
+        "pro": "Pro",
+        "statusLabel": "Estado",
+        "selectStatus": "Seleccionar estado",
+        "statusPending": "Pendiente",
+        "statusAuthorized": "Autorizada",
+        "statusPaused": "Pausada",
+        "statusCancelled": "Cancelada",
+        "payerEmailLabel": "Email del Pagador",
+        "amountLabel": "Monto",
+        "currencyLabel": "Moneda",
+        "cancel": "Cancelar",
+        "create": "Crear",
+        "update": "Actualizar"
       }
     },
     "planLimits": {
@@ -1133,6 +1218,26 @@
         "deleteError": "Error al eliminar el límite de plan",
         "deleteSuccess": "Límite de plan eliminado correctamente",
         "genericError": "Ocurrió un error al eliminar"
+      },
+      "form": {
+        "planLabel": "Plan",
+        "selectPlan": "Seleccionar plan",
+        "trial": "Trial",
+        "advance": "Advance",
+        "pro": "Pro",
+        "featureLabel": "Característica",
+        "selectFeature": "Seleccionar característica",
+        "beneficiaries": "Beneficiarios",
+        "pushNotificationsMonthly": "Notificaciones Push Mensuales",
+        "cashiers": "Cajeros",
+        "branches": "Sucursales",
+        "collaborators": "Colaboradores",
+        "redeemableProducts": "Productos Canjeables",
+        "limitValueLabel": "Valor Límite",
+        "warningThresholdLabel": "Umbral de Alerta (0-1)",
+        "cancel": "Cancelar",
+        "create": "Crear",
+        "update": "Actualizar"
       }
     },
     "pushTokensCrud": {
@@ -1158,6 +1263,22 @@
         "deleteError": "Error al eliminar el token push",
         "deleteSuccess": "Token push eliminado correctamente",
         "genericError": "Ocurrió un error al eliminar"
+      },
+      "form": {
+        "beneficiaryLabel": "Beneficiario",
+        "selectBeneficiary": "Seleccionar beneficiario",
+        "expoPushTokenLabel": "Token Push de Expo",
+        "deviceIdLabel": "ID del Dispositivo",
+        "deviceIdPlaceholder": "ID del dispositivo (opcional)",
+        "platformLabel": "Plataforma",
+        "selectPlatform": "Seleccionar plataforma",
+        "ios": "iOS",
+        "android": "Android",
+        "web": "Web",
+        "active": "Activo",
+        "cancel": "Cancelar",
+        "create": "Crear",
+        "update": "Actualizar"
       }
     },
     "orgPlanLimits": {
@@ -1180,6 +1301,28 @@
         "deleteError": "Error al eliminar el límite de plan por organización",
         "deleteSuccess": "Límite de plan por organización eliminado correctamente",
         "genericError": "Ocurrió un error al eliminar"
+      },
+      "form": {
+        "organizationLabel": "Organización",
+        "selectOrganization": "Seleccionar organización",
+        "planLabel": "Plan",
+        "selectPlan": "Seleccionar plan",
+        "trial": "Trial",
+        "advance": "Advance",
+        "pro": "Pro",
+        "featureLabel": "Característica",
+        "selectFeature": "Seleccionar característica",
+        "beneficiaries": "Beneficiarios",
+        "pushNotificationsMonthly": "Notificaciones Push Mensuales",
+        "cashiers": "Cajeros",
+        "branches": "Sucursales",
+        "collaborators": "Colaboradores",
+        "redeemableProducts": "Productos Canjeables",
+        "limitValueLabel": "Valor Límite",
+        "warningThresholdLabel": "Umbral de Alerta (0-1)",
+        "cancel": "Cancelar",
+        "create": "Crear",
+        "update": "Actualizar"
       }
     },
     "organizationDetail": {
@@ -1258,6 +1401,9 @@
       "emailVerifiedMessage": "Tu cuenta está activa y lista para continuar.",
       "needDifferentEmail": "¿Necesitas usar otro email?",
       "continueSetup": "Continuar con la configuración",
+      "firstNamePlaceholder": "Juan",
+      "lastNamePlaceholder": "García",
+      "emailPlaceholder": "juan@minegocio.com",
       "firstNameRequired": "El nombre es requerido",
       "lastNameRequired": "El apellido es requerido",
       "minPassword": "Mínimo 8 caracteres",
@@ -1351,7 +1497,9 @@
     },
     "step4": {
       "categoryName": "Nombre de la categoría",
+      "categoryNamePlaceholder": "Ej: Bebidas, Snacks, Electrodomésticos...",
       "rewardName": "Nombre del premio",
+      "rewardNamePlaceholder": "Ej: Café mediano, Remera, Cargador...",
       "rewardPlaceholder": "Premio {n}",
       "pointsRequired": "Puntos requeridos",
       "initialStock": "Stock inicial",
@@ -1538,6 +1686,17 @@
       "save": "Actualizar",
       "displayNameRequired": "El nombre a mostrar es requerido",
       "updateError": "No se pudo actualizar el rol"
+    },
+    "form": {
+      "roleNameLabel": "Nombre del rol (sistema)",
+      "selectRoleType": "Seleccionar tipo de rol",
+      "displayNameLabel": "Nombre a mostrar",
+      "displayNamePlaceholder": "Nombre amigable",
+      "descriptionLabel": "Descripción",
+      "descriptionPlaceholder": "Descripción del rol",
+      "cancel": "Cancelar",
+      "create": "Crear",
+      "update": "Actualizar"
     },
     "deleteModal": {
       "title": "Eliminar Rol de Usuario",

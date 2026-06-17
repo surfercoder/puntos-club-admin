@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useActionState, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 import { pushNotificationFormAction } from '@/actions/dashboard/push_notifications/push-notification-form-actions';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ interface PushNotificationEditFormProps {
 }
 
 export default function PushNotificationEditForm({ notification }: PushNotificationEditFormProps) {
+  const t = useTranslations('Dashboard.notifications.editForm');
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [actionState, formAction, pending] = useActionState(pushNotificationFormAction, EMPTY_ACTION_STATE);
 
@@ -41,49 +43,49 @@ export default function PushNotificationEditForm({ notification }: PushNotificat
       <input name="created_by" type="hidden" value={notification.created_by} />
 
       <div>
-        <Label htmlFor="title">Title</Label>
-        <Input defaultValue={notification.title} id="title" name="title" placeholder="Notification title" type="text" />
+        <Label htmlFor="title">{t('titleLabel')}</Label>
+        <Input defaultValue={notification.title} id="title" name="title" placeholder={t('titlePlaceholder')} type="text" />
         <FieldError actionState={validation ?? actionState} name="title" />
       </div>
 
       <div>
-        <Label htmlFor="body">Body</Label>
-        <Textarea defaultValue={notification.body} id="body" name="body" placeholder="Notification body" rows={4} />
+        <Label htmlFor="body">{t('bodyLabel')}</Label>
+        <Textarea defaultValue={notification.body} id="body" name="body" placeholder={t('bodyPlaceholder')} rows={4} />
         <FieldError actionState={validation ?? actionState} name="body" />
       </div>
 
       <div>
-        <Label htmlFor="status">Status</Label>
+        <Label htmlFor="status">{t('statusLabel')}</Label>
         <Select defaultValue={notification.status} name="status">
-          <SelectTrigger><SelectValue placeholder="Select status" /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder={t('selectStatus')} /></SelectTrigger>
           <SelectContent>
-            <SelectItem value="draft">Draft</SelectItem>
-            <SelectItem value="sending">Sending</SelectItem>
-            <SelectItem value="sent">Sent</SelectItem>
-            <SelectItem value="failed">Failed</SelectItem>
+            <SelectItem value="draft">{t('statusDraft')}</SelectItem>
+            <SelectItem value="sending">{t('statusSending')}</SelectItem>
+            <SelectItem value="sent">{t('statusSent')}</SelectItem>
+            <SelectItem value="failed">{t('statusFailed')}</SelectItem>
           </SelectContent>
         </Select>
         <FieldError actionState={validation ?? actionState} name="status" />
       </div>
 
       <div>
-        <Label htmlFor="sent_count">Sent Count</Label>
+        <Label htmlFor="sent_count">{t('sentCountLabel')}</Label>
         <Input defaultValue={notification.sent_count} id="sent_count" name="sent_count" type="number" min="0" />
         <FieldError actionState={validation ?? actionState} name="sent_count" />
       </div>
 
       <div>
-        <Label htmlFor="failed_count">Failed Count</Label>
+        <Label htmlFor="failed_count">{t('failedCountLabel')}</Label>
         <Input defaultValue={notification.failed_count} id="failed_count" name="failed_count" type="number" min="0" />
         <FieldError actionState={validation ?? actionState} name="failed_count" />
       </div>
 
       <div className="grid grid-cols-2 gap-2">
         <Button asChild type="button" variant="secondary">
-          <Link href="/dashboard/push_notifications">Cancel</Link>
+          <Link href="/dashboard/push_notifications">{t('cancel')}</Link>
         </Button>
         <Button disabled={pending} type="submit">
-          Update
+          {t('update')}
         </Button>
       </div>
     </form>

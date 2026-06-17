@@ -113,10 +113,10 @@ describe('OrganizationNotificationLimitForm', () => {
 
     const planSelect = screen.getByLabelText('form.planType');
     expect(planSelect).toBeInTheDocument();
-    expect(screen.getByText('Free')).toBeInTheDocument();
-    expect(screen.getByText('Light')).toBeInTheDocument();
-    expect(screen.getByText('Pro')).toBeInTheDocument();
-    expect(screen.getByText('Premium')).toBeInTheDocument();
+    expect(screen.getByText('form.planFree')).toBeInTheDocument();
+    expect(screen.getByText('form.planLight')).toBeInTheDocument();
+    expect(screen.getByText('form.planPro')).toBeInTheDocument();
+    expect(screen.getByText('form.planPremium')).toBeInTheDocument();
   });
 
   it('renders organization options', () => {

@@ -71,7 +71,7 @@ function ProductRowCard({ product, prodIndex, categoryId, canRemove, onRemove, o
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1 sm:col-span-2">
           <Label className="text-xs">{t('rewardName')}</Label>
-          <Input placeholder="Ej: Café mediano, Remera, Cargador..." value={product.name} onChange={(e) => onUpdate(categoryId, product.id, 'name', e.target.value)} className="h-8 text-sm" />
+          <Input placeholder={t('rewardNamePlaceholder')} value={product.name} onChange={(e) => onUpdate(categoryId, product.id, 'name', e.target.value)} className="h-8 text-sm" />
         </div>
         <div className="space-y-1">
           <Label className="text-xs">{t('pointsRequired')}</Label>
@@ -276,7 +276,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
                 </Label>
                 <Input
                   id={`cat-${category.id}`}
-                  placeholder="Ej: Bebidas, Snacks, Electrodomésticos..."
+                  placeholder={t('categoryNamePlaceholder')}
                   value={category.name}
                   onChange={(e) => updateCategory(category.id, e.target.value)}
                 />

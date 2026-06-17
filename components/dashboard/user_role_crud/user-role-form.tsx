@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { useActionState, useState } from 'react';
+import { useTranslations } from 'next-intl';
 
 import { userRoleFormAction } from '@/actions/dashboard/user-role/user-role-form-actions';
 import { Button } from '@/components/ui/button';
@@ -20,6 +21,7 @@ interface UserRoleFormProps {
 }
 
 export default function UserRoleForm({ userRole }: UserRoleFormProps) {
+  const t = useTranslations('UserRole.form');
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [actionState, formAction, pending] = useActionState(userRoleFormAction, EMPTY_ACTION_STATE);
 
@@ -39,9 +41,9 @@ export default function UserRoleForm({ userRole }: UserRoleFormProps) {
       {userRole?.id && <input name="id" type="hidden" value={userRole.id} />}
 
       <div>
-        <Label htmlFor="name">Role Name (system)</Label>
+        <Label htmlFor="name">{t('roleNameLabel')}</Label>
         <Select defaultValue={userRole?.name ?? ''} name="name" disabled={!!userRole}>
-          <SelectTrigger><SelectValue placeholder="Select role type" /></SelectTrigger>
+          <SelectTrigger><SelectValue placeholder={t('selectRoleType')} /></SelectTrigger>
           <SelectContent>
             <SelectItem value="final_user">final_user</SelectItem>
             <SelectItem value="cashier">cashier</SelectItem>
@@ -55,23 +57,23 @@ export default function UserRoleForm({ userRole }: UserRoleFormProps) {
       </div>
 
       <div>
-        <Label htmlFor="display_name">Display Name</Label>
-        <Input defaultValue={userRole?.display_name ?? ''} id="display_name" name="display_name" placeholder="User-friendly name" type="text" />
+        <Label htmlFor="display_name">{t('displayNameLabel')}</Label>
+        <Input defaultValue={userRole?.display_name ?? ''} id="display_name" name="display_name" placeholder={t('displayNamePlaceholder')} type="text" />
         <FieldError actionState={validation ?? actionState} name="display_name" />
       </div>
 
       <div>
-        <Label htmlFor="description">Description</Label>
-        <Textarea defaultValue={userRole?.description ?? ''} id="description" name="description" placeholder="Role description" rows={3} />
+        <Label htmlFor="description">{t('descriptionLabel')}</Label>
+        <Textarea defaultValue={userRole?.description ?? ''} id="description" name="description" placeholder={t('descriptionPlaceholder')} rows={3} />
         <FieldError actionState={validation ?? actionState} name="description" />
       </div>
 
       <div className="grid grid-cols-2 gap-2">
         <Button asChild type="button" variant="secondary">
-          <Link href="/dashboard/user-role">Cancel</Link>
+          <Link href="/dashboard/user-role">{t('cancel')}</Link>
         </Button>
         <Button disabled={pending} type="submit">
-          {userRole ? 'Update' : 'Create'}
+          {userRole ? t('update') : t('create')}
         </Button>
       </div>
     </form>

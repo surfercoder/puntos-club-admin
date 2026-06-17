@@ -229,7 +229,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
             <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
               id="firstName"
-              placeholder="Juan"
+              placeholder={t('firstNamePlaceholder')}
               className="pl-9"
               value={firstName}
               onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'firstName', value: e.target.value })}
@@ -246,7 +246,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
             <User className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
             <Input
               id="lastName"
-              placeholder="García"
+              placeholder={t('lastNamePlaceholder')}
               className="pl-9"
               value={lastName}
               onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'lastName', value: e.target.value })}
@@ -260,13 +260,13 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="email">Email</Label>
+        <Label htmlFor="email">{tCommon('email')}</Label>
         <div className="relative">
           <Mail className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
           <Input
             id="email"
             type="email"
-            placeholder="juan@minegocio.com"
+            placeholder={t('emailPlaceholder')}
             className="pl-9"
             value={email}
             onChange={(e) => dispatch({ type: 'SET_FIELD', field: 'email', value: e.target.value })}

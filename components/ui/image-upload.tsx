@@ -146,7 +146,7 @@ export function ImageUpload({
       ) : (
         <button
           type="button"
-          aria-label="Upload image"
+          aria-label={t('upload')}
           className="flex w-full max-w-xs cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 p-8 transition-colors hover:border-muted-foreground/50 hover:bg-muted"
           onClick={() => fileInputRef.current?.click()}
         >

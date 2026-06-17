@@ -64,7 +64,7 @@ describe('PushTokenForm', () => {
   it('renders correct submit button text in create mode', () => {
     render(<PushTokenForm />);
 
-    expect(screen.getByRole('button', { name: 'Create' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'create' })).toBeInTheDocument();
   });
 
   it('renders correct submit button text in edit mode', () => {
@@ -80,13 +80,13 @@ describe('PushTokenForm', () => {
 
     render(<PushTokenForm pushToken={pushToken as any} />);
 
-    expect(screen.getByRole('button', { name: 'Update' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'update' })).toBeInTheDocument();
   });
 
   it('renders cancel button linking to push_tokens list', () => {
     render(<PushTokenForm />);
 
-    const cancelLink = screen.getByText('Cancel');
+    const cancelLink = screen.getByText('cancel');
     expect(cancelLink.closest('a')).toHaveAttribute('href', '/dashboard/push_tokens');
   });
 
@@ -99,13 +99,13 @@ describe('PushTokenForm', () => {
 
     render(<PushTokenForm />);
 
-    expect(screen.getByRole('button', { name: 'Create' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'create' })).toBeDisabled();
   });
 
   it('runs handleSubmit and catches validation error on empty form', () => {
     render(<PushTokenForm />);
 
-    const form = screen.getByRole('button', { name: 'Create' }).closest('form')!;
+    const form = screen.getByRole('button', { name: 'create' }).closest('form')!;
     fireEvent.submit(form);
   });
 
@@ -122,7 +122,7 @@ describe('PushTokenForm', () => {
 
     render(<PushTokenForm pushToken={pushToken as any} />);
 
-    const form = screen.getByRole('button', { name: 'Update' }).closest('form')!;
+    const form = screen.getByRole('button', { name: 'update' }).closest('form')!;
     fireEvent.submit(form);
   });
 });

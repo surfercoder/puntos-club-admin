@@ -52,7 +52,7 @@ describe('PlanLimitForm', () => {
   it('renders correct submit button text in create mode', () => {
     render(<PlanLimitForm />);
 
-    expect(screen.getByRole('button', { name: 'Create' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'create' })).toBeInTheDocument();
   });
 
   it('renders correct submit button text in edit mode', () => {
@@ -67,13 +67,13 @@ describe('PlanLimitForm', () => {
 
     render(<PlanLimitForm planLimit={planLimit as any} />);
 
-    expect(screen.getByRole('button', { name: 'Update' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'update' })).toBeInTheDocument();
   });
 
   it('renders cancel button linking to plan_limits list', () => {
     render(<PlanLimitForm />);
 
-    const cancelLink = screen.getByText('Cancel');
+    const cancelLink = screen.getByText('cancel');
     expect(cancelLink.closest('a')).toHaveAttribute('href', '/dashboard/plan_limits');
   });
 
@@ -86,13 +86,13 @@ describe('PlanLimitForm', () => {
 
     render(<PlanLimitForm />);
 
-    expect(screen.getByRole('button', { name: 'Create' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'create' })).toBeDisabled();
   });
 
   it('runs handleSubmit and catches validation error on empty form', () => {
     render(<PlanLimitForm />);
 
-    const form = screen.getByRole('button', { name: 'Create' }).closest('form')!;
+    const form = screen.getByRole('button', { name: 'create' }).closest('form')!;
     fireEvent.submit(form);
   });
 
@@ -108,7 +108,7 @@ describe('PlanLimitForm', () => {
 
     render(<PlanLimitForm planLimit={planLimit as any} />);
 
-    const form = screen.getByRole('button', { name: 'Update' }).closest('form')!;
+    const form = screen.getByRole('button', { name: 'update' }).closest('form')!;
     fireEvent.submit(form);
   });
 });

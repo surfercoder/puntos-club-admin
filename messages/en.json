@@ -66,6 +66,7 @@
     "noResults": "No results",
     "deleting": "Deleting...",
     "imageUpload": {
+      "upload": "Upload image",
       "fileSizeError": "File size must be less than {maxSize}MB",
       "selectImageFile": "Please select an image file",
       "uploadFailed": "Upload failed",
@@ -84,7 +85,12 @@
       "hasDigit": "One number",
       "hasSpecial": "One special character (!@#$%...)"
     },
-    "passwordWeak": "Password doesn't meet all requirements"
+    "passwordWeak": "Password doesn't meet all requirements",
+    "close": "Close",
+    "more": "More",
+    "toggleTheme": "Toggle theme",
+    "toggleSidebar": "Toggle Sidebar",
+    "breadcrumb": "breadcrumb"
   },
   "NotFound": {
     "title": "404 - Page Not Found",
@@ -316,6 +322,21 @@
         }
       }
     },
+    "beneficiaryLinkAll": {
+      "title": "Link Unlinked Beneficiaries",
+      "description": "This utility will link all beneficiaries that are not currently associated with your organization. This is useful for fixing beneficiaries created before the automatic linking was implemented.",
+      "linkButton": "Link All Unlinked Beneficiaries",
+      "linking": "Linking...",
+      "backButton": "Back to Beneficiaries",
+      "whatThisDoes": "What this does:",
+      "step1": "Finds all beneficiaries not linked to your organization",
+      "step2": "Creates beneficiary_organization records for them",
+      "step3": "Sets their initial points to 0",
+      "step4": "Makes them active members of your organization",
+      "linkFailed": "Failed to link beneficiaries",
+      "linkSuccess": "Successfully linked beneficiaries",
+      "unexpectedError": "An unexpected error occurred"
+    },
     "profile": {
       "title": "Profile",
       "description": "Manage your personal information and preferences",
@@ -355,6 +376,28 @@
         "namePlaceholder": "Enter organization name",
         "legalNamePlaceholder": "Enter legal name (optional)",
         "taxIdPlaceholder": "Enter tax ID (optional)"
+      },
+      "detailPage": {
+        "subtitle": "Organization details and available products",
+        "editButton": "Edit Organization",
+        "infoSectionTitle": "Organization Information",
+        "nameLabel": "Name",
+        "legalNameLabel": "Legal Name",
+        "taxIdLabel": "Tax ID",
+        "createdAtLabel": "Creation Date",
+        "productsTitle": "Products Available for Redemption",
+        "productsDescription": "Products that users can redeem with their points",
+        "manageProducts": "Manage Products",
+        "productsFetchError": "Error loading products",
+        "noProducts": "No products available for redemption yet.",
+        "productNameHeader": "Product Name",
+        "descriptionHeader": "Description",
+        "categoryHeader": "Category",
+        "pointsRequiredHeader": "Points Required",
+        "availableStockHeader": "Available Stock",
+        "pointsUnit": "pts",
+        "unitsLabel": "{count} units",
+        "outOfStock": "Out of stock"
       }
     },
     "notifications": {
@@ -439,6 +482,22 @@
         "sentCount": "sent",
         "resend": "Resend Notification",
         "updateError": "Error updating notification"
+      },
+      "editForm": {
+        "titleLabel": "Title",
+        "titlePlaceholder": "Notification title",
+        "bodyLabel": "Body",
+        "bodyPlaceholder": "Notification body",
+        "statusLabel": "Status",
+        "selectStatus": "Select status",
+        "statusDraft": "Draft",
+        "statusSending": "Sending",
+        "statusSent": "Sent",
+        "statusFailed": "Failed",
+        "sentCountLabel": "Sent Count",
+        "failedCountLabel": "Failed Count",
+        "cancel": "Cancel",
+        "update": "Update"
       },
       "limits": {
         "dailyLimitReached": "You have reached your daily notification limit",
@@ -1046,6 +1105,10 @@
         "organizationLabel": "Organization",
         "selectOrganization": "Select an organization",
         "planType": "Plan Type",
+        "planFree": "Free",
+        "planLight": "Light",
+        "planPro": "Pro",
+        "planPremium": "Premium",
         "defaultLimits": "Default limits: {daily} daily, {monthly} monthly, {minHours}h between notifications",
         "dailyLimit": "Daily Limit",
         "dailyLimitPlaceholder": "Enter daily limit",
@@ -1112,6 +1175,28 @@
         "deleteError": "Error deleting subscription",
         "deleteSuccess": "Subscription deleted successfully",
         "genericError": "An unexpected error occurred"
+      },
+      "form": {
+        "organizationLabel": "Organization",
+        "selectOrganization": "Select organization",
+        "mpPreapprovalIdLabel": "MercadoPago Preapproval ID",
+        "mpPlanIdLabel": "MercadoPago Plan ID",
+        "planLabel": "Plan",
+        "selectPlan": "Select plan",
+        "advance": "Advance",
+        "pro": "Pro",
+        "statusLabel": "Status",
+        "selectStatus": "Select status",
+        "statusPending": "Pending",
+        "statusAuthorized": "Authorized",
+        "statusPaused": "Paused",
+        "statusCancelled": "Cancelled",
+        "payerEmailLabel": "Payer Email",
+        "amountLabel": "Amount",
+        "currencyLabel": "Currency",
+        "cancel": "Cancel",
+        "create": "Create",
+        "update": "Update"
       }
     },
     "planLimits": {
@@ -1133,6 +1218,26 @@
         "deleteError": "Error deleting plan limit",
         "deleteSuccess": "Plan limit deleted successfully",
         "genericError": "An unexpected error occurred"
+      },
+      "form": {
+        "planLabel": "Plan",
+        "selectPlan": "Select plan",
+        "trial": "Trial",
+        "advance": "Advance",
+        "pro": "Pro",
+        "featureLabel": "Feature",
+        "selectFeature": "Select feature",
+        "beneficiaries": "Beneficiaries",
+        "pushNotificationsMonthly": "Push Notifications Monthly",
+        "cashiers": "Cashiers",
+        "branches": "Branches",
+        "collaborators": "Collaborators",
+        "redeemableProducts": "Redeemable Products",
+        "limitValueLabel": "Limit Value",
+        "warningThresholdLabel": "Warning Threshold (0-1)",
+        "cancel": "Cancel",
+        "create": "Create",
+        "update": "Update"
       }
     },
     "pushTokensCrud": {
@@ -1158,6 +1263,22 @@
         "deleteError": "Error deleting push token",
         "deleteSuccess": "Push token deleted successfully",
         "genericError": "An unexpected error occurred"
+      },
+      "form": {
+        "beneficiaryLabel": "Beneficiary",
+        "selectBeneficiary": "Select beneficiary",
+        "expoPushTokenLabel": "Expo Push Token",
+        "deviceIdLabel": "Device ID",
+        "deviceIdPlaceholder": "Optional device ID",
+        "platformLabel": "Platform",
+        "selectPlatform": "Select platform",
+        "ios": "iOS",
+        "android": "Android",
+        "web": "Web",
+        "active": "Active",
+        "cancel": "Cancel",
+        "create": "Create",
+        "update": "Update"
       }
     },
     "orgPlanLimits": {
@@ -1180,6 +1301,28 @@
         "deleteError": "Error deleting organization plan limit",
         "deleteSuccess": "Organization plan limit deleted successfully",
         "genericError": "An unexpected error occurred"
+      },
+      "form": {
+        "organizationLabel": "Organization",
+        "selectOrganization": "Select organization",
+        "planLabel": "Plan",
+        "selectPlan": "Select plan",
+        "trial": "Trial",
+        "advance": "Advance",
+        "pro": "Pro",
+        "featureLabel": "Feature",
+        "selectFeature": "Select feature",
+        "beneficiaries": "Beneficiaries",
+        "pushNotificationsMonthly": "Push Notifications Monthly",
+        "cashiers": "Cashiers",
+        "branches": "Branches",
+        "collaborators": "Collaborators",
+        "redeemableProducts": "Redeemable Products",
+        "limitValueLabel": "Limit Value",
+        "warningThresholdLabel": "Warning Threshold (0-1)",
+        "cancel": "Cancel",
+        "create": "Create",
+        "update": "Update"
       }
     },
     "organizationDetail": {
@@ -1258,6 +1401,9 @@
       "emailVerifiedMessage": "Your account is active and ready to continue.",
       "needDifferentEmail": "Need to use a different email?",
       "continueSetup": "Continue with setup",
+      "firstNamePlaceholder": "John",
+      "lastNamePlaceholder": "Smith",
+      "emailPlaceholder": "john@mybusiness.com",
       "firstNameRequired": "First name is required",
       "lastNameRequired": "Last name is required",
       "minPassword": "Minimum 8 characters",
@@ -1351,7 +1497,9 @@
     },
     "step4": {
       "categoryName": "Category name",
+      "categoryNamePlaceholder": "e.g. Drinks, Snacks, Appliances...",
       "rewardName": "Reward name",
+      "rewardNamePlaceholder": "e.g. Medium coffee, T-shirt, Charger...",
       "rewardPlaceholder": "Reward {n}",
       "pointsRequired": "Points required",
       "initialStock": "Initial stock",
@@ -1538,6 +1686,17 @@
       "save": "Update",
       "displayNameRequired": "Display name is required",
       "updateError": "Could not update the role"
+    },
+    "form": {
+      "roleNameLabel": "Role Name (system)",
+      "selectRoleType": "Select role type",
+      "displayNameLabel": "Display Name",
+      "displayNamePlaceholder": "User-friendly name",
+      "descriptionLabel": "Description",
+      "descriptionPlaceholder": "Role description",
+      "cancel": "Cancel",
+      "create": "Create",
+      "update": "Update"
     },
     "deleteModal": {
       "title": "Delete User Role",

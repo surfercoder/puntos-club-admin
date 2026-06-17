@@ -122,10 +122,10 @@ export default function OrganizationNotificationLimitForm({
           aria-describedby="plan_type-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.plan_type}
         >
-          <option value="free">Free</option>
-          <option value="light">Light</option>
-          <option value="pro">Pro</option>
-          <option value="premium">Premium</option>
+          <option value="free">{t('form.planFree')}</option>
+          <option value="light">{t('form.planLight')}</option>
+          <option value="pro">{t('form.planPro')}</option>
+          <option value="premium">{t('form.planPremium')}</option>
         </select>
         <FieldError actionState={validation ?? actionState} name="plan_type" />
         {planLimits && (

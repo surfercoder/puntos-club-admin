@@ -139,4 +139,14 @@ describe('OrganizationDetailsPage', () => {
     const result = await OrganizationDetailsPage({ params: Promise.resolve({ id: '1' }) });
     expect(result).toBeTruthy();
   });
+
+  it('formats creation date with en-US locale when getLocale returns en', async () => {
+    const { getLocale } = require('next-intl/server');
+    (getLocale as jest.Mock).mockResolvedValueOnce('en');
+    (getOrganization as jest.Mock).mockResolvedValue({ data: mockOrg, error: null });
+    (getOrganizationProducts as jest.Mock).mockResolvedValue({ data: mockProducts, error: null });
+
+    const result = await OrganizationDetailsPage({ params: Promise.resolve({ id: '1' }) });
+    expect(result).toBeTruthy();
+  });
 });

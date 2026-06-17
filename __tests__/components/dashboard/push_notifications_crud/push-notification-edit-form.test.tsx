@@ -63,13 +63,13 @@ describe('PushNotificationEditForm', () => {
   it('renders correct submit button text (always Update)', () => {
     render(<PushNotificationEditForm notification={mockNotification as any} />);
 
-    expect(screen.getByRole('button', { name: 'Update' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'update' })).toBeInTheDocument();
   });
 
   it('renders cancel button linking to push_notifications list', () => {
     render(<PushNotificationEditForm notification={mockNotification as any} />);
 
-    const cancelLink = screen.getByText('Cancel');
+    const cancelLink = screen.getByText('cancel');
     expect(cancelLink.closest('a')).toHaveAttribute('href', '/dashboard/push_notifications');
   });
 
@@ -82,7 +82,7 @@ describe('PushNotificationEditForm', () => {
 
     render(<PushNotificationEditForm notification={mockNotification as any} />);
 
-    expect(screen.getByRole('button', { name: 'Update' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'update' })).toBeDisabled();
   });
 
   it('renders with initial data from notification prop', () => {
@@ -95,7 +95,7 @@ describe('PushNotificationEditForm', () => {
   it('runs handleSubmit in edit mode with pre-filled data', () => {
     render(<PushNotificationEditForm notification={mockNotification as any} />);
 
-    const form = screen.getByRole('button', { name: 'Update' }).closest('form')!;
+    const form = screen.getByRole('button', { name: 'update' }).closest('form')!;
     fireEvent.submit(form);
   });
 });

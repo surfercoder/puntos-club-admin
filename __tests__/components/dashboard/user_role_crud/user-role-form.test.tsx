@@ -52,7 +52,7 @@ describe('UserRoleForm', () => {
   it('renders correct submit button text in create mode', () => {
     render(<UserRoleForm />);
 
-    expect(screen.getByRole('button', { name: 'Create' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'create' })).toBeInTheDocument();
   });
 
   it('renders correct submit button text in edit mode', () => {
@@ -66,13 +66,13 @@ describe('UserRoleForm', () => {
 
     render(<UserRoleForm userRole={userRole as any} />);
 
-    expect(screen.getByRole('button', { name: 'Update' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'update' })).toBeInTheDocument();
   });
 
   it('renders cancel button linking to user-role list', () => {
     render(<UserRoleForm />);
 
-    const cancelLink = screen.getByText('Cancel');
+    const cancelLink = screen.getByText('cancel');
     expect(cancelLink.closest('a')).toHaveAttribute('href', '/dashboard/user-role');
   });
 
@@ -85,13 +85,13 @@ describe('UserRoleForm', () => {
 
     render(<UserRoleForm />);
 
-    expect(screen.getByRole('button', { name: 'Create' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'create' })).toBeDisabled();
   });
 
   it('runs handleSubmit and catches validation error on empty form', () => {
     render(<UserRoleForm />);
 
-    const form = screen.getByRole('button', { name: 'Create' }).closest('form')!;
+    const form = screen.getByRole('button', { name: 'create' }).closest('form')!;
     fireEvent.submit(form);
   });
 
@@ -106,7 +106,7 @@ describe('UserRoleForm', () => {
 
     render(<UserRoleForm userRole={userRole as any} />);
 
-    const form = screen.getByRole('button', { name: 'Update' }).closest('form')!;
+    const form = screen.getByRole('button', { name: 'update' }).closest('form')!;
     fireEvent.submit(form);
   });
 

@@ -31,12 +31,12 @@ describe('LinkAllBeneficiariesPage', () => {
 
   it('renders without crashing', () => {
     render(<LinkAllBeneficiariesPage />);
-    expect(screen.getByText('Link All Unlinked Beneficiaries')).toBeInTheDocument();
+    expect(screen.getByText('linkButton')).toBeInTheDocument();
   });
 
   it('renders the back button', () => {
     render(<LinkAllBeneficiariesPage />);
-    expect(screen.getByText('Back to Beneficiaries')).toBeInTheDocument();
+    expect(screen.getByText('backButton')).toBeInTheDocument();
   });
 
   it('handles successful linking', async () => {
@@ -46,10 +46,10 @@ describe('LinkAllBeneficiariesPage', () => {
     });
 
     render(<LinkAllBeneficiariesPage />);
-    fireEvent.click(screen.getByText('Link All Unlinked Beneficiaries'));
+    fireEvent.click(screen.getByText('linkButton'));
 
     // Should show loading state
-    expect(screen.getByText('Linking...')).toBeInTheDocument();
+    expect(screen.getByText('linking')).toBeInTheDocument();
 
     await waitFor(() => {
       expect(screen.getByText('Linked 5 beneficiaries')).toBeInTheDocument();
@@ -63,10 +63,10 @@ describe('LinkAllBeneficiariesPage', () => {
     });
 
     render(<LinkAllBeneficiariesPage />);
-    fireEvent.click(screen.getByText('Link All Unlinked Beneficiaries'));
+    fireEvent.click(screen.getByText('linkButton'));
 
     await waitFor(() => {
-      expect(screen.getByText('Successfully linked beneficiaries')).toBeInTheDocument();
+      expect(screen.getByText('linkSuccess')).toBeInTheDocument();
     });
   });
 
@@ -77,7 +77,7 @@ describe('LinkAllBeneficiariesPage', () => {
     });
 
     render(<LinkAllBeneficiariesPage />);
-    fireEvent.click(screen.getByText('Link All Unlinked Beneficiaries'));
+    fireEvent.click(screen.getByText('linkButton'));
 
     await waitFor(() => {
       expect(screen.getByText('Permission denied')).toBeInTheDocument();
@@ -91,10 +91,10 @@ describe('LinkAllBeneficiariesPage', () => {
     });
 
     render(<LinkAllBeneficiariesPage />);
-    fireEvent.click(screen.getByText('Link All Unlinked Beneficiaries'));
+    fireEvent.click(screen.getByText('linkButton'));
 
     await waitFor(() => {
-      expect(screen.getByText('Failed to link beneficiaries')).toBeInTheDocument();
+      expect(screen.getByText('linkFailed')).toBeInTheDocument();
     });
   });
 
@@ -102,10 +102,10 @@ describe('LinkAllBeneficiariesPage', () => {
     (linkAllUnlinkedBeneficiaries as jest.Mock).mockRejectedValue(new Error('Network error'));
 
     render(<LinkAllBeneficiariesPage />);
-    fireEvent.click(screen.getByText('Link All Unlinked Beneficiaries'));
+    fireEvent.click(screen.getByText('linkButton'));
 
     await waitFor(() => {
-      expect(screen.getByText('An unexpected error occurred')).toBeInTheDocument();
+      expect(screen.getByText('unexpectedError')).toBeInTheDocument();
     });
   });
 
@@ -115,7 +115,7 @@ describe('LinkAllBeneficiariesPage', () => {
     (useRouter as jest.Mock).mockReturnValue({ push: pushMock, replace: jest.fn(), prefetch: jest.fn(), back: jest.fn(), forward: jest.fn(), refresh: jest.fn() });
 
     render(<LinkAllBeneficiariesPage />);
-    fireEvent.click(screen.getByText('Back to Beneficiaries'));
+    fireEvent.click(screen.getByText('backButton'));
 
     expect(pushMock).toHaveBeenCalledWith('/dashboard/beneficiary');
   });
@@ -125,7 +125,7 @@ describe('LinkAllBeneficiariesPage', () => {
     (linkAllUnlinkedBeneficiaries as jest.Mock).mockImplementation(() => new Promise(r => { resolveLink = r; }));
 
     render(<LinkAllBeneficiariesPage />);
-    fireEvent.click(screen.getByText('Link All Unlinked Beneficiaries'));
+    fireEvent.click(screen.getByText('linkButton'));
 
     // Both buttons should be disabled while loading
     const buttons = screen.getAllByRole('button');

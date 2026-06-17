@@ -24,7 +24,7 @@ const mockUseTheme = useTheme as jest.MockedFunction<typeof useTheme>;
 describe('ThemeToggle', () => {
   it('renders toggle button with aria-label', () => {
     render(<ThemeToggle />);
-    expect(screen.getByRole('button', { name: /toggle theme/i })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /toggletheme/i })).toBeInTheDocument();
   });
 
   it('calls setTheme("dark") when current theme is light', () => {
@@ -39,7 +39,7 @@ describe('ThemeToggle', () => {
     });
 
     render(<ThemeToggle />);
-    fireEvent.click(screen.getByRole('button', { name: /toggle theme/i }));
+    fireEvent.click(screen.getByRole('button', { name: /toggletheme/i }));
     expect(mockSetTheme).toHaveBeenCalledWith('dark');
   });
 
@@ -55,7 +55,7 @@ describe('ThemeToggle', () => {
     });
 
     render(<ThemeToggle />);
-    fireEvent.click(screen.getByRole('button', { name: /toggle theme/i }));
+    fireEvent.click(screen.getByRole('button', { name: /toggletheme/i }));
     expect(mockSetTheme).toHaveBeenCalledWith('light');
   });
 });

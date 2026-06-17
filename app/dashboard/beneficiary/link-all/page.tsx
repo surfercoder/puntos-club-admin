@@ -2,11 +2,14 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useTranslations } from 'next-intl';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { linkAllUnlinkedBeneficiaries } from '@/actions/dashboard/beneficiary/link-to-organization';
 
 export default function LinkAllBeneficiariesPage() {
+  const t = useTranslations('Dashboard.beneficiaryLinkAll');
   const [loading, setLoading] = useState(false);
   const [result, setResult] = useState<{ success: boolean; message: string } | null>(null);
   const { push } = useRouter();
@@ -21,18 +24,18 @@ export default function LinkAllBeneficiariesPage() {
       if (error) {
         setResult({
           success: false,
-          message: error.message || 'Failed to link beneficiaries',
+          message: error.message || t('linkFailed'),
         });
       } else {
         setResult({
           success: true,
-          message: data?.message || 'Successfully linked beneficiaries',
+          message: data?.message || t('linkSuccess'),
         });
       }
     } catch {
       setResult({
         success: false,
-        message: 'An unexpected error occurred',
+        message: t('unexpectedError'),
       });
     }
     setLoading(false);
@@ -42,10 +45,9 @@ export default function LinkAllBeneficiariesPage() {
     <div className="max-w-2xl mx-auto p-6">
       <Card>
         <CardHeader>
-          <CardTitle>Link Unlinked Beneficiaries</CardTitle>
+          <CardTitle>{t('title')}</CardTitle>
           <CardDescription>
-            This utility will link all beneficiaries that are not currently associated with your organization.
-            This is useful for fixing beneficiaries created before the automatic linking was implemented.
+            {t('description')}
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -61,24 +63,24 @@ export default function LinkAllBeneficiariesPage() {
               disabled={loading}
               className="flex-1"
             >
-              {loading ? 'Linking...' : 'Link All Unlinked Beneficiaries'}
+              {loading ? t('linking') : t('linkButton')}
             </Button>
             <Button
               variant="secondary"
               onClick={() => push('/dashboard/beneficiary')}
               disabled={loading}
             >
-              Back to Beneficiaries
+              {t('backButton')}
             </Button>
           </div>
 
           <div className="text-sm text-muted-foreground">
-            <p className="font-semibold mb-2">What this does:</p>
+            <p className="font-semibold mb-2">{t('whatThisDoes')}</p>
             <ul className="list-disc list-inside space-y-1">
-              <li>Finds all beneficiaries not linked to your organization</li>
-              <li>Creates beneficiary_organization records for them</li>
-              <li>Sets their initial points to 0</li>
-              <li>Makes them active members of your organization</li>
+              <li>{t('step1')}</li>
+              <li>{t('step2')}</li>
+              <li>{t('step3')}</li>
+              <li>{t('step4')}</li>
             </ul>
           </div>
         </CardContent>
