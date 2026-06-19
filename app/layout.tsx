@@ -8,6 +8,7 @@ import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { Toaster } from "@/components/ui/sonner";
 import { GoogleMapsProvider } from "@/components/providers/google-maps-provider";
+import { StaleDeploymentReload } from "@/components/providers/stale-deployment-reload";
 import { env } from "@/lib/env";
 
 /* c8 ignore next 3 */
@@ -34,6 +35,7 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className="antialiased">
+        <StaleDeploymentReload />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider
             attribute="class"

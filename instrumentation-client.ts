@@ -14,6 +14,11 @@ Sentry.init({
 
   enableLogs: true,
 
+  // "Server Action … was not found on the server" is the expected result of a
+  // user holding an open tab across a new deployment. StaleDeploymentReload
+  // recovers from it automatically, so it is not an actionable error.
+  ignoreErrors: [/Server Action .* was not found on the server/],
+
   integrations: [Sentry.replayIntegration()],
 });
 
