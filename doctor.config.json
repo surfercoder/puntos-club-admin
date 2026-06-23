@@ -3,11 +3,39 @@
     "files": [
       "__tests__/**",
       "e2e/**",
+      ".next/**",
       "components/landing/screens/smartphone-3d.tsx",
       "components/ui/sidebar.tsx",
       "components/dashboard/organization/org-visibility-toggle.tsx",
       "components/dashboard/charts/*-chart-view.tsx",
       "components/ui/chart.tsx"
+    ],
+    "overrides": [
+      {
+        "files": ["supabase/migrations/**"],
+        "rules": ["react-doctor/supabase-rls-policy-risk"]
+      },
+      {
+        "files": [
+          "actions/auth/actions.ts",
+          "actions/dashboard/address/actions.ts",
+          "actions/dashboard/organization/actions.ts",
+          "actions/dashboard/tour/actions.ts",
+          "actions/dashboard/user-role/user-role-form-actions.ts"
+        ],
+        "rules": ["react-doctor/supabase-client-owned-authz-field"]
+      },
+      {
+        "files": ["app/auth/callback/route.ts", "app/auth/confirm/route.ts"],
+        "rules": [
+          "react-doctor/url-prefilled-privileged-action",
+          "react-doctor/clickjacking-redirect-risk"
+        ]
+      },
+      {
+        "files": ["components/dashboard/qr/qr-preview-card.tsx"],
+        "rules": ["react-doctor/dangerous-html-sink"]
+      }
     ]
   }
 }

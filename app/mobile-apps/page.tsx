@@ -10,12 +10,12 @@ const apps = [
   {
     titleKey: "puntosClubTitle" as const,
     descriptionKey: "puntosClubDescription" as const,
-    url: "https://drive.google.com/file/d/1nL1ypuKn2MtD4-erQLuFz_U_5ef3c3JD/view?usp=sharing",
+    url: "https://drive.google.com/file/d/1MjYbVMHRfsRyZHEAptdtsd6RGE8HNrgV/view?usp=drive_link",
   },
   {
     titleKey: "puntosClubCajaTitle" as const,
     descriptionKey: "puntosClubCajaDescription" as const,
-    url: "https://drive.google.com/file/d/115Iapcb8biuvOx2TFtm5aWCo4DeZwcwx/view?usp=sharing",
+    url: "https://drive.google.com/file/d/1y3iz90_1y_dP_J-kweAG_xXWsmairWe5/view?usp=drive_link",
   },
 ];
 
