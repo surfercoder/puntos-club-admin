@@ -15,7 +15,9 @@ export async function initiateRegistration(input: {
   password: string;
   redirectTo: string;
 }): Promise<{ success: boolean; error?: string }> {
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000';
+  const siteUrl = (
+    process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000'
+  ).replace(/\/+$/, '');
 
   const pending: PendingRegistration = {
     email: input.email,
