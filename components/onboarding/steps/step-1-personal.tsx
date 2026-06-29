@@ -1,7 +1,6 @@
 'use client';
 
 import { useReducer } from 'react';
-import Link from 'next/link';
 import { BadgeCheck, Eye, EyeOff, Loader2, Mail, ShieldCheck, User } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
@@ -73,13 +72,6 @@ function Step1CompletedView({
           </div>
         </div>
       </div>
-
-      <p className="text-xs text-muted-foreground text-center">
-        {t('needDifferentEmail')}{' '}
-        <Link href="/auth/login" className="underline hover:text-foreground">
-          {t('useDifferentEmail')}
-        </Link>
-      </p>
 
       <Button
         type="button"

@@ -1399,7 +1399,6 @@
     "step1": {
       "emailVerified": "Email verificado",
       "emailVerifiedMessage": "Tu cuenta está activa y lista para continuar.",
-      "needDifferentEmail": "¿Necesitas usar otro email?",
       "continueSetup": "Continuar con la configuración",
       "firstNamePlaceholder": "Juan",
       "lastNamePlaceholder": "García",
