@@ -170,7 +170,9 @@
       "Bash(echo \"exit: $?\")",
       "Read(//private/tmp/**)",
       "Bash(git rm *)",
-      "Bash(echo \"EXIT_CODE: $?\")"
+      "Bash(echo \"EXIT_CODE: $?\")",
+      "Bash(echo \"CHECKS_EXIT=$?\")",
+      "Bash(echo \"COV_EXIT=$?\")"
     ],
     "deny": []
   },
