@@ -1492,7 +1492,11 @@
       "selectedPlan": "Selected plan",
       "redirectingToMP": "Redirecting to Mercado Pago...",
       "paymentInitError": "Could not initiate payment",
-      "paymentError": "Error processing payment"
+      "paymentError": "Error processing payment",
+      "payerEmailLabel": "Email of the Mercado Pago account that will pay",
+      "payerEmailHelp": "It can be different from your registration email. It must match the Mercado Pago account you'll pay with (e.g. your treasury or billing account).",
+      "payerEmailPlaceholder": "billing@yourcompany.com",
+      "payerEmailInvalid": "Enter a valid payment email"
     },
     "step4": {
       "categoryName": "Category name",

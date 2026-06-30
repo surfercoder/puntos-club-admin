@@ -20,11 +20,22 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
     }
 
-    const body = await request.json() as { planId: string; backUrl?: string };
-    const { planId, backUrl: customBackUrl } = body;
+    const body = await request.json() as { planId: string; backUrl?: string; payerEmail?: string };
+    const { planId, backUrl: customBackUrl, payerEmail: requestedPayerEmailRaw } = body;
 
     if (!planId || !['advance', 'pro'].includes(planId)) {
       return NextResponse.json({ error: 'Plan inválido' }, { status: 400 });
+    }
+
+    // The payer's email can differ from the registration email: owners often
+    // register with a company address but pay with the treasury/billing account.
+    // MercadoPago requires the account that completes checkout to match this email.
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const requestedPayerEmail =
+      typeof requestedPayerEmailRaw === 'string' ? requestedPayerEmailRaw.trim().toLowerCase() : '';
+
+    if (requestedPayerEmail && !emailRegex.test(requestedPayerEmail)) {
+      return NextResponse.json({ error: 'El email de pago no es válido' }, { status: 400 });
     }
 
     const typedPlanId = planId as PlanId;
@@ -50,7 +61,8 @@ export async function POST(request: NextRequest) {
     const mp = getMercadoPagoClient();
     const preApproval = new PreApproval(mp);
 
-    const payerEmail = process.env.MP_TEST_PAYER_EMAIL || user.email;
+    // Priority: test override (sandbox) → email chosen by the owner → registration email.
+    const payerEmail = process.env.MP_TEST_PAYER_EMAIL || requestedPayerEmail || user.email;
 
     if (!payerEmail) {
       return NextResponse.json({ error: 'payer_email is required' }, { status: 400 });
@@ -89,7 +101,9 @@ export async function POST(request: NextRequest) {
           mp_plan_id: typedPlanId,
           plan: typedPlanId,
           status: 'pending',
-          payer_email: '',
+          // Seed with the chosen payer email; the webhook later overwrites it
+          // with MP's confirmed value (the account that actually paid).
+          payer_email: payerEmail,
           amount: config.amount,
           currency: config.currency,
         },

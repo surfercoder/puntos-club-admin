@@ -6,7 +6,10 @@ import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
 import { cn } from '@/lib/utils';
+import { createClient } from '@/lib/supabase/client';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import {
   Dialog,
   DialogContent,
@@ -22,6 +25,7 @@ import { verifySubscriptionAction } from '@/actions/dashboard/subscription/verif
 import { cancelSubscriptionAction } from '@/actions/dashboard/subscription/cancel-subscription';
 import type { PlanFeatureKey, PlanType } from '@/types/plan';
 
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface Plan {
   id: string;
@@ -425,12 +429,24 @@ export function PlanSelectorInner() {
   const [verifying, setVerifying] = useState(false);
   // react-doctor-disable-next-line react-doctor/rerender-state-only-in-handlers
   const [planLimits, setPlanLimits] = useState<Record<PlanType, Record<PlanFeatureKey, number>> | null>(null);
+  // react-doctor-disable-next-line react-doctor/rerender-state-only-in-handlers
+  const [payerEmail, setPayerEmail] = useState('');
   const verifiedRef = useRef(false);
 
   useEffect(() => {
     getAllPlanLimitsAction().then((data) => {
       if (data) setPlanLimits(data);
     });
+  }, []);
+
+  // Default the payer email to the logged-in user's email (it can be changed:
+  // owners often pay with a different Mercado Pago account, e.g. treasury).
+  useEffect(() => {
+    createClient()
+      .auth.getUser()
+      .then(({ data }) => {
+        if (data.user?.email) setPayerEmail(data.user.email);
+      });
   }, []);
 
   // Verify subscription status when returning from MercadoPago
@@ -515,12 +531,18 @@ export function PlanSelectorInner() {
     isChangingPlan && currentPlan === 'pro' && selected === 'advance';
 
   const startCheckoutForSelected = async () => {
+    const trimmedPayerEmail = payerEmail.trim();
+    if (!EMAIL_REGEX.test(trimmedPayerEmail)) {
+      throw new Error(t('payerEmailInvalid'));
+    }
+
     const res = await fetch('/api/mercadopago/create-subscription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         planId: selected,
         backUrl: '/dashboard/settings/plan',
+        payerEmail: trimmedPayerEmail,
       }),
     });
 
@@ -623,6 +645,24 @@ export function PlanSelectorInner() {
             />
           ))}
         </div>
+
+        {isChangingPlan && selectedPlan.isPaid && (isUpgrade || isSwitchPaidToPaid) && (
+          <div className="mt-3 space-y-1.5">
+            <Label htmlFor="payer-email" className="text-xs">{t('payerEmailLabel')}</Label>
+            <Input
+              id="payer-email"
+              type="email"
+              inputMode="email"
+              autoComplete="email"
+              value={payerEmail}
+              onChange={(e) => setPayerEmail(e.target.value)}
+              placeholder={t('payerEmailPlaceholder')}
+              disabled={loading}
+              className="text-sm"
+            />
+            <p className="text-[11px] text-muted-foreground">{t('payerEmailHelp')}</p>
+          </div>
+        )}
 
         {isChangingPlan && (
           <PlanChangeActions

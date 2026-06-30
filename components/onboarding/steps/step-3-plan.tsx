@@ -5,7 +5,11 @@ import { Check, Star, Zap, Rocket, Loader2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
+
+const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 interface Plan {
   id: string;
@@ -62,13 +66,15 @@ interface Step3Props {
   onNext: (plan: string) => void;
   onBack: () => void;
   initialPlan?: string;
+  userEmail?: string;
 }
 
-export function Step3Plan({ onNext, onBack, initialPlan = 'trial' }: Step3Props) {
+export function Step3Plan({ onNext, onBack, initialPlan = 'trial', userEmail = '' }: Step3Props) {
   const t = useTranslations('Onboarding.step3');
   const tCommon = useTranslations('Common');
   const [selected, setSelected] = useState<string>(() => initialPlan);
   const [loading, setLoading] = useState(false);
+  const [payerEmail, setPayerEmail] = useState<string>(() => userEmail);
 
   const f = t.raw('features') as Record<string, string>;
 
@@ -147,11 +153,17 @@ export function Step3Plan({ onNext, onBack, initialPlan = 'trial' }: Step3Props)
       return;
     }
 
+    const trimmedPayerEmail = payerEmail.trim();
+    if (!EMAIL_REGEX.test(trimmedPayerEmail)) {
+      toast.error(t('payerEmailInvalid'));
+      return;
+    }
+
     setLoading(true);
     const res = await fetch('/api/mercadopago/create-subscription', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ planId: selected }),
+      body: JSON.stringify({ planId: selected, payerEmail: trimmedPayerEmail }),
     });
 
     const data = await res.json() as { initPoint?: string; preapprovalId?: string; error?: string };
@@ -235,6 +247,23 @@ export function Step3Plan({ onNext, onBack, initialPlan = 'trial' }: Step3Props)
           );
         })}
       </div>
+
+      {selectedPlan.isPaid && (
+        <div className="mx-auto max-w-md space-y-1.5">
+          <Label htmlFor="payer-email">{t('payerEmailLabel')}</Label>
+          <Input
+            id="payer-email"
+            type="email"
+            inputMode="email"
+            autoComplete="email"
+            value={payerEmail}
+            onChange={(e) => setPayerEmail(e.target.value)}
+            placeholder={t('payerEmailPlaceholder')}
+            disabled={loading}
+          />
+          <p className="text-xs text-muted-foreground">{t('payerEmailHelp')}</p>
+        </div>
+      )}
 
       <p className="text-center text-xs text-muted-foreground">
         {t('allPlansInclude')} {t('changePlanAnytime')}

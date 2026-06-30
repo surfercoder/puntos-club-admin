@@ -118,6 +118,43 @@ describe('MercadoPago Create Subscription Route', () => {
     expect(calledBody.payer_email).toBe('test@test.com');
   });
 
+  it('uses the payerEmail from the request body when provided (different from registration email)', async () => {
+    const request = {
+      json: () => Promise.resolve({ planId: 'advance', payerEmail: 'Treasury@Company.com' }),
+      headers: { get: () => null },
+    } as any;
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+    const calledBody = mockCreate.mock.calls[0][0].body;
+    // normalized to lowercase + trimmed
+    expect(calledBody.payer_email).toBe('treasury@company.com');
+  });
+
+  it('returns 400 when payerEmail is provided but invalid', async () => {
+    const request = {
+      json: () => Promise.resolve({ planId: 'advance', payerEmail: 'not-an-email' }),
+      headers: { get: () => null },
+    } as any;
+    const response = await POST(request);
+    expect(response.status).toBe(400);
+    const data = await response.json();
+    expect(data.error).toBe('El email de pago no es válido');
+    expect(mockCreate).not.toHaveBeenCalled();
+  });
+
+  it('MP_TEST_PAYER_EMAIL takes precedence over body payerEmail (sandbox mode)', async () => {
+    process.env.MP_TEST_PAYER_EMAIL = 'test_payer@mp.com';
+    const request = {
+      json: () => Promise.resolve({ planId: 'advance', payerEmail: 'treasury@company.com' }),
+      headers: { get: () => null },
+    } as any;
+    const response = await POST(request);
+    expect(response.status).toBe(200);
+    const calledBody = mockCreate.mock.calls[0][0].body;
+    expect(calledBody.payer_email).toBe('test_payer@mp.com');
+    delete process.env.MP_TEST_PAYER_EMAIL;
+  });
+
   it('uses MP_TEST_PAYER_EMAIL when set (sandbox mode)', async () => {
     process.env.MP_TEST_PAYER_EMAIL = 'test_payer@mp.com';
     const request = {

@@ -15,6 +15,14 @@ jest.mock('@/actions/dashboard/subscription/cancel-subscription', () => ({
   cancelSubscriptionAction: jest.fn().mockResolvedValue({ success: true, preapprovalId: 'pa_123' }),
 }));
 
+jest.mock('@/lib/supabase/client', () => ({
+  createClient: jest.fn(() => ({
+    auth: {
+      getUser: jest.fn().mockResolvedValue({ data: { user: { email: 'owner@test.com' } } }),
+    },
+  })),
+}));
+
 jest.mock('@/actions/dashboard/usage/actions', () => ({
   getAllPlanLimitsAction: jest.fn().mockResolvedValue({
     trial: { beneficiaries: 10, push_notifications_monthly: 3, cashiers: 1, branches: 1, collaborators: 1, redeemable_products: 2 },
@@ -412,6 +420,33 @@ describe('PlanSelector', () => {
     await waitFor(() => {
       expect(toast.error).toHaveBeenCalledWith('paymentInitError');
     });
+  });
+
+  it('shows error toast when the payer email is invalid', async () => {
+    (usePlanUsage as jest.Mock).mockReturnValue({
+      summary: mockSummary,
+      isLoading: false,
+    });
+
+    await act(async () => { render(<PlanSelector />); });
+
+    // Select advance plan (upgrade from trial) to reveal the payer email input
+    fireEvent.click(screen.getByText('advancePlan'));
+
+    // Type an invalid email into the payer email field
+    fireEvent.change(screen.getByLabelText('payerEmailLabel'), {
+      target: { value: 'not-an-email' },
+    });
+
+    const upgradeButton = screen.getByText(/upgradeTo/);
+    await act(async () => {
+      fireEvent.click(upgradeButton);
+    });
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('payerEmailInvalid');
+    });
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 
   describe('cancel flow', () => {

@@ -1492,7 +1492,11 @@
       "selectedPlan": "Plan seleccionado",
       "redirectingToMP": "Redirigiendo a Mercado Pago...",
       "paymentInitError": "No se pudo iniciar el pago",
-      "paymentError": "Error al procesar el pago"
+      "paymentError": "Error al procesar el pago",
+      "payerEmailLabel": "Email de la cuenta de Mercado Pago que pagará",
+      "payerEmailHelp": "Puede ser distinto a tu email de registro. Debe coincidir con la cuenta de Mercado Pago con la que vas a pagar (por ejemplo, la de tesorería o pagos).",
+      "payerEmailPlaceholder": "pagos@tuempresa.com",
+      "payerEmailInvalid": "Ingresá un email de pago válido"
     },
     "step4": {
       "categoryName": "Nombre de la categoría",
