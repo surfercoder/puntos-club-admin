@@ -56,47 +56,57 @@ export async function cancelSubscriptionAction(): Promise<CancelResult> {
       return { error: 'Organización no encontrada' };
     }
 
-    // Find the most recent authorized (or pending) subscription for the org
-    const { data: subscription } = await admin
+    // Fetch ALL non-cancelled subscriptions for the org — not just the latest.
+    // A single org can hold several preapprovals in MercadoPago when the owner
+    // retried checkout (switched plans, or paid with a different account before
+    // succeeding). Cancelling only the most recent one leaves the others alive
+    // and still billing, which is exactly how a "cancelled" org kept being
+    // charged. We must cancel every live preapproval.
+    const { data: subscriptions } = await admin
       .from('subscription')
       .select('id, mp_preapproval_id, status')
       .eq('organization_id', appUser.organization_id)
-      .in('status', ['authorized', 'pending'])
-      .order('created_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
+      .neq('status', 'cancelled')
+      .order('created_at', { ascending: false });
 
-    if (!subscription?.mp_preapproval_id) {
+    const toCancel = (subscriptions ?? []).filter((s) => s.mp_preapproval_id);
+
+    if (toCancel.length === 0) {
       return { error: 'No hay suscripción activa para cancelar' };
     }
 
     const mp = getMercadoPagoClient();
     const preApproval = new PreApproval(mp);
 
-    try {
-      await preApproval.update({
-        id: subscription.mp_preapproval_id,
-        body: { status: 'cancelled' },
-      });
-    } catch (mpErr) {
-      if (!isMpResourceNotFoundError(mpErr)) throw mpErr;
-      console.warn(
-        '[cancel-subscription] MP preapproval not found; proceeding with local cleanup',
-        { preapprovalId: subscription.mp_preapproval_id },
-      );
-    }
+    // Cancel each preapproval in MP and persist that row as cancelled right
+    // after, so a mid-loop failure leaves a consistent partial state and a
+    // retry skips the ones already handled (they're no longer non-cancelled).
+    for (const sub of toCancel) {
+      try {
+        await preApproval.update({
+          id: sub.mp_preapproval_id,
+          body: { status: 'cancelled' },
+        });
+      } catch (mpErr) {
+        if (!isMpResourceNotFoundError(mpErr)) throw mpErr;
+        console.warn(
+          '[cancel-subscription] MP preapproval not found; proceeding with local cleanup',
+          { preapprovalId: sub.mp_preapproval_id },
+        );
+      }
 
-    await admin
-      .from('subscription')
-      .update({ status: 'cancelled', updated_at: new Date().toISOString() })
-      .eq('id', subscription.id);
+      await admin
+        .from('subscription')
+        .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+        .eq('id', sub.id);
+    }
 
     await admin
       .from('organization')
       .update({ plan: 'trial' })
       .eq('id', appUser.organization_id);
 
-    return { success: true, preapprovalId: subscription.mp_preapproval_id };
+    return { success: true, preapprovalId: toCancel[0].mp_preapproval_id };
   } catch (err) {
     console.error('[cancel-subscription]', err);
     return { error: 'Error cancelando suscripción' };
