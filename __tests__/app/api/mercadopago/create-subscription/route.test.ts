@@ -51,7 +51,6 @@ describe('MercadoPago Create Subscription Route', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     process.env = { ...originalEnv, NEXT_PUBLIC_SITE_URL: 'https://www.puntosclub.com.ar' };
-    delete process.env.MP_TEST_PAYER_EMAIL;
     mockGetUser.mockResolvedValue({ data: { user: { id: 'u1', email: 'test@test.com' } }, error: null });
     mockCreate.mockResolvedValue({ init_point: 'https://mp.com/checkout', id: 'pa_123' });
   });
@@ -107,7 +106,7 @@ describe('MercadoPago Create Subscription Route', () => {
     expect(data.preapprovalId).toBe('pa_123');
   });
 
-  it('uses authenticated user email as payer_email when MP_TEST_PAYER_EMAIL is not set', async () => {
+  it('falls back to the authenticated user email as payer_email when none is provided', async () => {
     const request = {
       json: () => Promise.resolve({ planId: 'advance' }),
       headers: { get: () => null },
@@ -142,33 +141,20 @@ describe('MercadoPago Create Subscription Route', () => {
     expect(mockCreate).not.toHaveBeenCalled();
   });
 
-  it('MP_TEST_PAYER_EMAIL takes precedence over body payerEmail (sandbox mode)', async () => {
-    process.env.MP_TEST_PAYER_EMAIL = 'test_payer@mp.com';
-    const request = {
-      json: () => Promise.resolve({ planId: 'advance', payerEmail: 'treasury@company.com' }),
+  it('lets each checkout use a different payer email (owner is never locked to one account)', async () => {
+    // Onboarding pays with one account…
+    await POST({
+      json: () => Promise.resolve({ planId: 'advance', payerEmail: 'onboarding@company.com' }),
       headers: { get: () => null },
-    } as any;
-    const response = await POST(request);
-    expect(response.status).toBe(200);
-    const calledBody = mockCreate.mock.calls[0][0].body;
-    expect(calledBody.payer_email).toBe('test_payer@mp.com');
-    delete process.env.MP_TEST_PAYER_EMAIL;
-  });
+    } as any);
+    expect(mockCreate.mock.calls[0][0].body.payer_email).toBe('onboarding@company.com');
 
-  it('uses MP_TEST_PAYER_EMAIL when set (sandbox mode)', async () => {
-    process.env.MP_TEST_PAYER_EMAIL = 'test_payer@mp.com';
-    const request = {
-      json: () => Promise.resolve({ planId: 'advance' }),
+    // …and a later upgrade can pay with a completely different one.
+    await POST({
+      json: () => Promise.resolve({ planId: 'pro', payerEmail: 'treasury@company.com' }),
       headers: { get: () => null },
-    } as any;
-    const response = await POST(request);
-    expect(response.status).toBe(200);
-    expect(mockCreate).toHaveBeenCalledWith(
-      expect.objectContaining({
-        body: expect.objectContaining({ payer_email: 'test_payer@mp.com' }),
-      }),
-    );
-    delete process.env.MP_TEST_PAYER_EMAIL;
+    } as any);
+    expect(mockCreate.mock.calls[1][0].body.payer_email).toBe('treasury@company.com');
   });
 
   it('creates subscription successfully for pro plan', async () => {
@@ -339,7 +325,7 @@ describe('MercadoPago Create Subscription Route', () => {
     );
   });
 
-  it('returns 400 when user has no email and MP_TEST_PAYER_EMAIL is not set', async () => {
+  it('returns 400 when no payer email is provided and the user has no email', async () => {
     mockGetUser.mockResolvedValueOnce({ data: { user: { id: 'u1', email: undefined } }, error: null });
 
     const request = {

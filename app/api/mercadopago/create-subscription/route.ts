@@ -61,8 +61,13 @@ export async function POST(request: NextRequest) {
     const mp = getMercadoPagoClient();
     const preApproval = new PreApproval(mp);
 
-    // Priority: test override (sandbox) → email chosen by the owner → registration email.
-    const payerEmail = process.env.MP_TEST_PAYER_EMAIL || requestedPayerEmail || user.email;
+    // The owner types, at each checkout, the Mercado Pago account they'll pay with —
+    // exactly like the onboarding step. It defaults to their registration email but can be
+    // any account, and it can differ between onboarding and each later upgrade (they are
+    // never locked to a single account). MercadoPago requires the account completing
+    // checkout to match this email, and it cannot be the collector's own account
+    // (you can't subscribe yourself).
+    const payerEmail = requestedPayerEmail || user.email;
 
     if (!payerEmail) {
       return NextResponse.json({ error: 'payer_email is required' }, { status: 400 });
