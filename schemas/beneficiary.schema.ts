@@ -4,7 +4,7 @@ export const BeneficiarySchema = z.object({
   id: z.string().optional(),
   first_name: z.string().nullable().optional(),
   last_name: z.string().nullable().optional(),
-  email: z.string().email().nullable().optional(),
+  email: z.email().nullable().optional(),
   phone: z.string().nullable().optional(),
   document_id: z.string().nullable().optional(),
   registration_date: z.string().optional(),

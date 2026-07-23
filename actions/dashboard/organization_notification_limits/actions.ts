@@ -3,8 +3,10 @@
 import { createAdminClient } from '@/lib/supabase/admin';
 import { OrganizationNotificationLimitSchema } from '@/schemas/organization_notification_limit.schema';
 import type { OrganizationNotificationLimit } from '@/types/organization_notification_limit';
+import { requireUser } from '@/lib/auth/require-user';
 
 export async function createOrganizationNotificationLimit(input: OrganizationNotificationLimit) {
+  await requireUser();
   const parsed = OrganizationNotificationLimitSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -23,6 +25,7 @@ export async function createOrganizationNotificationLimit(input: OrganizationNot
 }
 
 export async function updateOrganizationNotificationLimit(id: string, input: OrganizationNotificationLimit) {
+  await requireUser();
   const parsed = OrganizationNotificationLimitSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -41,6 +44,7 @@ export async function updateOrganizationNotificationLimit(id: string, input: Org
 }
 
 export async function deleteOrganizationNotificationLimit(id: string) {
+  await requireUser();
   const supabase = createAdminClient();
   const { error } = await supabase.from('organization_notification_limits').delete().eq('id', id);
 

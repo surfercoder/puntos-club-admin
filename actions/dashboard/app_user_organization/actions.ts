@@ -1,10 +1,12 @@
 "use server";
 
+import { requireUser } from '@/lib/auth/require-user';
 import { createClient } from '@/lib/supabase/server';
 import { AppUserOrganizationSchema } from '@/schemas/app_user_organization.schema';
 import type { AppUserOrganization } from '@/schemas/app_user_organization.schema';
 
 export async function createAppUserOrganization(input: AppUserOrganization) {
+  await requireUser();
   const parsed = AppUserOrganizationSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -33,6 +35,7 @@ export async function createAppUserOrganization(input: AppUserOrganization) {
 }
 
 export async function updateAppUserOrganization(id: string, input: AppUserOrganization) {
+  await requireUser();
   const parsed = AppUserOrganizationSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -62,6 +65,7 @@ export async function updateAppUserOrganization(id: string, input: AppUserOrgani
 }
 
 export async function deleteAppUserOrganization(id: string) {
+  await requireUser();
   const supabase = await createClient();
   const { error } = await supabase.from('app_user_organization').delete().eq('id', id);
 

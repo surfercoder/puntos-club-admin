@@ -3,8 +3,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { PushTokenSchema } from '@/schemas/push_token.schema';
 import type { PushToken } from '@/types/push_token';
+import { requireUser } from '@/lib/auth/require-user';
 
 export async function createPushToken(input: PushToken) {
+  await requireUser();
   const parsed = PushTokenSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -23,6 +25,7 @@ export async function createPushToken(input: PushToken) {
 }
 
 export async function updatePushToken(id: string, input: PushToken) {
+  await requireUser();
   const parsed = PushTokenSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -41,6 +44,7 @@ export async function updatePushToken(id: string, input: PushToken) {
 }
 
 export async function deletePushToken(id: string) {
+  await requireUser();
   const supabase = await createClient();
   const { error } = await supabase.from('push_tokens').delete().eq('id', id);
 

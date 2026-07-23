@@ -45,21 +45,18 @@ export async function GET(_request: NextRequest) {
     }
 
     if (!limits) {
-      const { data: newLimits } = await supabase
-        .from("organization_notification_limits")
-        .insert({
+      // No limits row yet — return computed defaults WITHOUT persisting.
+      // A GET must be side-effect-free (CSRF/prefetch safety); the row is
+      // lazily created on the first write path elsewhere.
+      return NextResponse.json({
+        success: true,
+        data: {
           organization_id: appUser.organization_id,
           plan_type: 'free',
           daily_limit: 1,
           monthly_limit: 5,
           min_hours_between_notifications: 24,
-        })
-        .select()
-        .single();
-
-      return NextResponse.json({
-        success: true,
-        data: newLimits,
+        },
       });
     }
 

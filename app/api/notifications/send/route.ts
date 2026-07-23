@@ -189,39 +189,56 @@ export async function POST(request: NextRequest) {
     }));
 
     const chunkSize = 100;
-    let sentCount = 0;
-    let failedCount = 0;
-
+    const chunks: { chunk: ExpoPushMessage[]; offset: number }[] = [];
     for (let i = 0; i < messages.length; i += chunkSize) {
-      const chunk = messages.slice(i, i + chunkSize);
+      chunks.push({ chunk: messages.slice(i, i + chunkSize), offset: i });
+    }
 
-      try {
-        const result = await sendPushNotifications(chunk);
+    // Send all chunks concurrently instead of serializing the awaits.
+    const chunkResults = await Promise.all(
+      chunks.map(async ({ chunk, offset }) => {
+        try {
+          const result = await sendPushNotifications(chunk);
 
-        if (result.data) {
-          for (let j = 0; j < result.data.length; j++) {
-            const ticketResult = result.data[j];
-            const tokenIndex = i + j;
-            const token = pushTokens[tokenIndex];
+          let sent = 0;
+          let failed = 0;
+          const deactivateIds: number[] = [];
 
-            if (ticketResult.status === 'ok') {
-              sentCount++;
-            } else {
-              failedCount++;
+          if (result.data) {
+            for (let j = 0; j < result.data.length; j++) {
+              const ticketResult = result.data[j];
+              const token = pushTokens[offset + j];
 
-              if (ticketResult.details?.error === 'DeviceNotRegistered') {
-                await dbClient
-                  .from("push_tokens")
-                  .update({ is_active: false })
-                  .eq("id", token.id);
+              if (ticketResult.status === 'ok') {
+                sent++;
+              } else {
+                failed++;
+
+                if (ticketResult.details?.error === 'DeviceNotRegistered') {
+                  deactivateIds.push(token.id);
+                }
               }
             }
           }
+
+          await Promise.all(
+            deactivateIds.map((id) =>
+              dbClient
+                .from("push_tokens")
+                .update({ is_active: false })
+                .eq("id", id)
+            )
+          );
+
+          return { sent, failed };
+        } catch (_error) {
+          return { sent: 0, failed: chunk.length };
         }
-      } catch (_error) {
-        failedCount += chunk.length;
-      }
-    }
+      })
+    );
+
+    const sentCount = chunkResults.reduce((acc, r) => acc + r.sent, 0);
+    const failedCount = chunkResults.reduce((acc, r) => acc + r.failed, 0);
 
     await dbClient
       .from("push_notifications")

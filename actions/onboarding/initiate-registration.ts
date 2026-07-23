@@ -1,5 +1,6 @@
 'use server';
 
+import { after } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import {
   createRegistrationToken,
@@ -41,8 +42,10 @@ export async function initiateRegistration(input: {
 
   // Dev fallback: no Resend API key → print link to server console
   if (!process.env.RESEND_API_KEY) {
-    console.warn('\n📧  [DEV] Verification URL (no RESEND_API_KEY set):\n');
-    console.warn(' ', verificationUrl, '\n');
+    after(() => {
+      console.warn('\n📧  [DEV] Verification URL (no RESEND_API_KEY set):\n');
+      console.warn(' ', verificationUrl, '\n');
+    });
     return { success: true };
   }
 

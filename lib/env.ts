@@ -5,11 +5,11 @@ const optionalString = (min = 1) =>
   z.preprocess((v) => (v === '' ? undefined : v), z.string().min(min).optional())
 
 const envSchema = z.object({
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
+  NEXT_PUBLIC_SUPABASE_URL: z.url(),
   NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY: z.string().min(1),
   NEXT_PUBLIC_SITE_URL: z.preprocess(
     (v) => (v === '' ? undefined : v),
-    z.string().url().optional(),
+    z.url().optional(),
   ),
   SUPABASE_SERVICE_ROLE_KEY: optionalString(),
   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY: z.string().min(1),

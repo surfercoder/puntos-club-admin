@@ -9,10 +9,8 @@ import { enforcePlanLimit } from '@/lib/plans/usage';
  * This is useful for beneficiaries created before the automatic linking was implemented
  */
 export async function linkBeneficiaryToOrganization(beneficiaryId: string) {
-  const supabase = await createClient();
-  
   // Get the current user to determine which organization to link to
-  const currentUser = await getCurrentUser();
+  const [supabase, currentUser] = await Promise.all([createClient(), getCurrentUser()]);
   
   if (!currentUser?.organization_id) {
     return { 
@@ -110,10 +108,8 @@ export async function linkBeneficiaryToOrganization(beneficiaryId: string) {
  * This is a bulk operation for fixing existing data
  */
 export async function linkAllUnlinkedBeneficiaries() {
-  const supabase = await createClient();
-  
   // Get the current user to determine which organization to link to
-  const currentUser = await getCurrentUser();
+  const [supabase, currentUser] = await Promise.all([createClient(), getCurrentUser()]);
   
   if (!currentUser?.organization_id) {
     return { 

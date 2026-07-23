@@ -217,6 +217,7 @@ function CashierSection({ state, dispatch, t, tCommon }: CashierSectionProps) {
                 />
                 <button
                   type="button"
+                  aria-label={state.showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                   onClick={() => dispatch({ type: 'TOGGLE', field: 'showPassword' })}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   tabIndex={-1}
@@ -244,6 +245,7 @@ function CashierSection({ state, dispatch, t, tCommon }: CashierSectionProps) {
                 />
                 <button
                   type="button"
+                  aria-label={state.showConfirmPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                   onClick={() => dispatch({ type: 'TOGGLE', field: 'showConfirmPassword' })}
                   className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   tabIndex={-1}

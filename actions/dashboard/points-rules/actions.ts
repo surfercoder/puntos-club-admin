@@ -5,6 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { getActiveOrgIdFilter } from "@/lib/auth/get-active-org-id";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
+import { requireUser } from "@/lib/auth/require-user";
 
 export interface PointsRuleInput {
   name: string;
@@ -121,7 +122,7 @@ export async function getPointsRuleById(id: number) {
  */
 export async function createPointsRule(input: PointsRuleInput) {
   try {
-    const supabase = await createClient();
+    await requireUser();
 
     const cookieStore = await cookies();
     const activeOrgId = cookieStore.get("active_org_id")?.value;
@@ -143,6 +144,8 @@ export async function createPointsRule(input: PointsRuleInput) {
         error: "No active organization selected",
       };
     }
+
+    const supabase = await createClient();
 
     // If branch_id is provided, validate it belongs to the organization
     if (input.branch_id) {
@@ -221,6 +224,8 @@ export async function createPointsRule(input: PointsRuleInput) {
  */
 export async function updatePointsRule(id: number, input: Partial<PointsRuleInput>) {
   try {
+    await requireUser();
+
     const supabase = await createClient();
 
     const cookieStore = await cookies();
@@ -315,6 +320,8 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
  */
 export async function togglePointsRuleStatus(id: number, is_active: boolean) {
   try {
+    await requireUser();
+
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -340,6 +347,8 @@ export async function togglePointsRuleStatus(id: number, is_active: boolean) {
  */
 export async function deletePointsRule(id: number) {
   try {
+    await requireUser();
+
     const supabase = await createClient();
 
     const { error } = await supabase

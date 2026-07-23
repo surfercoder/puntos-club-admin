@@ -5,8 +5,10 @@ import { OrganizationSchema, OrganizationVisibilitySchema } from '@/schemas/orga
 import type { Organization } from '@/types/organization';
 import { isAdmin } from '@/lib/auth/roles';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { requireUser } from '@/lib/auth/require-user';
 
 export async function createOrganization(input: Organization) {
+  await requireUser();
   const parsed = OrganizationSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -73,6 +75,7 @@ export async function createOrganization(input: Organization) {
 }
 
 export async function updateOrganization(id: string, input: Organization) {
+  await requireUser();
   const parsed = OrganizationSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -95,6 +98,7 @@ export async function updateOrganization(id: string, input: Organization) {
 }
 
 export async function deleteOrganization(id: string) {
+  await requireUser();
   const supabase = await createClient();
   const { error } = await supabase.from('organization').delete().eq('id', id);
 
@@ -127,6 +131,7 @@ export async function getOrganizationSettings(id: string) {
 }
 
 export async function updateOrganizationVisibility(id: string, isPublic: boolean) {
+  await requireUser();
   const parsed = OrganizationVisibilitySchema.safeParse({ is_public: isPublic });
 
   if (!parsed.success) {

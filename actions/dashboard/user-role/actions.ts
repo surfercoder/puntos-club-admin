@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from "@/lib/supabase/server";
+import { requireUser } from "@/lib/auth/require-user";
 import { revalidatePath } from "next/cache";
 
 /**
@@ -55,6 +56,7 @@ export async function updateUserRole(
   id: number,
   input: { display_name?: string; description?: string }
 ) {
+  await requireUser();
   try {
     const supabase = await createClient();
 
@@ -85,6 +87,7 @@ export async function updateUserRole(
  * Create a new user role
  */
 export async function createUserRole(input: { name: string; display_name: string; description?: string }) {
+  await requireUser();
   try {
     const supabase = await createClient();
 
@@ -109,6 +112,7 @@ export async function createUserRole(input: { name: string; display_name: string
  * Delete a user role
  */
 export async function deleteUserRole(id: string) {
+  await requireUser();
   try {
     const supabase = await createClient();
 

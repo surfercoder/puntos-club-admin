@@ -1,10 +1,12 @@
 "use server";
 
+import { requireUser } from '@/lib/auth/require-user';
 import { createClient } from '@/lib/supabase/server';
 import { BeneficiaryOrganizationSchema } from '@/schemas/beneficiary_organization.schema';
 import type { BeneficiaryOrganization } from '@/schemas/beneficiary_organization.schema';
 
 export async function createBeneficiaryOrganization(input: BeneficiaryOrganization) {
+  await requireUser();
   const parsed = BeneficiaryOrganizationSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -51,6 +53,7 @@ export async function createBeneficiaryOrganization(input: BeneficiaryOrganizati
 }
 
 export async function updateBeneficiaryOrganization(id: string, input: BeneficiaryOrganization) {
+  await requireUser();
   const parsed = BeneficiaryOrganizationSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -96,6 +99,7 @@ export async function updateBeneficiaryOrganization(id: string, input: Beneficia
 }
 
 export async function deleteBeneficiaryOrganization(id: string) {
+  await requireUser();
   const supabase = await createClient();
   const { error: supabaseError } = await supabase.from('beneficiary_organization').delete().eq('id', id);
 

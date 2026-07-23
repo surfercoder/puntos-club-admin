@@ -3,12 +3,15 @@
 import { cookies } from 'next/headers';
 
 import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { requireUser } from '@/lib/auth/require-user';
 import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import { AddressSchema } from '@/schemas/address.schema';
 import type { Address } from '@/types/address';
 
 export async function createAddress(input: Address) {
+  await requireUser();
+
   const parsed = AddressSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -45,6 +48,8 @@ export async function createAddress(input: Address) {
 }
 
 export async function updateAddress(id: number, input: Address) {
+  await requireUser();
+
   const parsed = AddressSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -56,8 +61,7 @@ export async function updateAddress(id: number, input: Address) {
     return { error: { fieldErrors } };
   }
 
-  const supabase = await createClient();
-  const currentUser = await getCurrentUser();
+  const [supabase, currentUser] = await Promise.all([createClient(), getCurrentUser()]);
   const userIsAdmin = isAdmin(currentUser);
 
   const cookieStore = await cookies();
@@ -103,8 +107,9 @@ export async function updateAddress(id: number, input: Address) {
 }
 
 export async function deleteAddress(id: number) {
-  const supabase = await createClient();
-  const currentUser = await getCurrentUser();
+  await requireUser();
+
+  const [supabase, currentUser] = await Promise.all([createClient(), getCurrentUser()]);
   const userIsAdmin = isAdmin(currentUser);
 
   const cookieStore = await cookies();

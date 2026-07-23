@@ -58,24 +58,27 @@ export function ImageUpload({
     formData.append('bucket', bucket);
     if (path) formData.append('path', path);
 
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      body: formData,
-    });
+    try {
+      const response = await fetch('/api/upload', {
+        method: 'POST',
+        body: formData,
+      });
 
-    if (response.ok) {
-      const { url, path: filePath } = await response.json();
-      setPreview(url);
-      uploadedPathRef.current = filePath;
-      onChange(url);
-      toast.success(t('uploadSuccess'));
-    } else {
-      const errorData = await response.json().catch(() => ({ error: t('uploadFailed') }));
-      toast.error(errorData.error || t('uploadFailed'));
-    }
-    setUploading(false);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+      if (response.ok) {
+        const { url, path: filePath } = await response.json();
+        setPreview(url);
+        uploadedPathRef.current = filePath;
+        onChange(url);
+        toast.success(t('uploadSuccess'));
+      } else {
+        const errorData = await response.json().catch(() => ({ error: t('uploadFailed') }));
+        toast.error(errorData.error || t('uploadFailed'));
+      }
+    } finally {
+      setUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
     }
   };
 

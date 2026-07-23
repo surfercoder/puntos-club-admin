@@ -48,8 +48,9 @@ export function HideButton({
       }
     } catch {
       toast.error(t('error'));
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

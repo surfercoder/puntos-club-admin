@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from '@/lib/supabase/server';
+import { requireUser } from '@/lib/auth/require-user';
 import { RedemptionSchema } from '@/schemas/redemption.schema';
 import type { Redemption } from '@/types/redemption';
 
@@ -114,6 +115,7 @@ export async function updateRedemption(id: string, input: Redemption) {
 }
 
 export async function deleteRedemption(id: string) {
+  await requireUser();
   const supabase = await createClient();
   // For pending rows route through cancel so the unique-pending index is freed
   // cleanly and the audit trail is preserved. For other statuses fall through

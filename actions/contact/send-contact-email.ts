@@ -1,5 +1,6 @@
 'use server';
 
+import { after } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import { ContactSchema } from '@/schemas/contact.schema';
 import type { ContactFormData } from '@/schemas/contact.schema';
@@ -28,10 +29,12 @@ export async function sendContactEmail(
   const fullName = `${firstName} ${lastName}`;
 
   if (!process.env.RESEND_API_KEY) {
-    console.warn(
-      '\n📧  [DEV] Contact form submission (no RESEND_API_KEY set):',
-      JSON.stringify({ firstName, lastName, email, phoneNumber, business, message }, null, 2),
-      '\n'
+    after(() =>
+      console.warn(
+        '\n📧  [DEV] Contact form submission (no RESEND_API_KEY set):',
+        JSON.stringify({ firstName, lastName, email, phoneNumber, business, message }, null, 2),
+        '\n'
+      ),
     );
     return { success: true };
   }

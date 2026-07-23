@@ -6,8 +6,10 @@ import { redirect } from 'next/navigation';
 import { cleanFormData, fromErrorToActionState, type ActionState } from '@/lib/error-handler';
 import { UserRoleSchema } from '@/schemas/user_role.schema';
 import { createClient } from '@/lib/supabase/server';
+import { requireUser } from '@/lib/auth/require-user';
 
 export async function userRoleFormAction(_prevState: ActionState, formData: FormData) {
+  await requireUser();
   const formDataObject = cleanFormData(formData);
   const parsed = UserRoleSchema.safeParse(formDataObject);
 

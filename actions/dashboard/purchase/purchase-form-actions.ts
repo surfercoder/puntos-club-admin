@@ -7,8 +7,10 @@ import { redirect } from 'next/navigation';
 import { cleanFormData, fromErrorToActionState, type ActionState } from '@/lib/error-handler';
 import { PurchaseSchema } from '@/schemas/purchase.schema';
 import { createClient } from '@/lib/supabase/server';
+import { requireUser } from '@/lib/auth/require-user';
 
 export async function purchaseFormAction(_prevState: ActionState, formData: FormData) {
+  await requireUser();
   const formDataObject = cleanFormData(formData);
   const parsed = PurchaseSchema.safeParse(formDataObject);
 

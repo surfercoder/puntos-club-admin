@@ -36,6 +36,7 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
     initialized.current = true;
 
     let tour: Tour | null = null;
+    let timer: ReturnType<typeof setTimeout> | undefined;
 
     const markCompleted = () => {
       completeTour(userId).catch(console.error);
@@ -174,24 +175,16 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
       localTour.addSteps(steps);
       tour = localTour;
 
-      /* c8 ignore next 5 */
-      const timer = setTimeout(() => {
+      /* c8 ignore next 3 */
+      timer = setTimeout(() => {
         localTour.start();
       }, 800);
-
-      return () => clearTimeout(timer);
     };
 
-    let cleanup: (() => void) | undefined;
-
-    initTour()
-      .then((fn) => {
-        cleanup = fn;
-      })
-      .catch(console.error);
+    initTour().catch(console.error);
 
     return () => {
-      cleanup?.();
+      clearTimeout(timer);
       safeCancelTour(tour);
     };
   }, [userRole, userId, tourCompleted, t]);

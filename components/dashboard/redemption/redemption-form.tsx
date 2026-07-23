@@ -144,6 +144,7 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
   // Load beneficiaries and products (only when orgId is available)
   useEffect(() => {
     if (!orgId) return;
+    let cancelled = false;
 
     async function loadData() {
       const supabase = createClient();
@@ -175,6 +176,7 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
         r.beneficiary ? [{ ...r.beneficiary, available_points: r.available_points ?? 0 }] : []
       );
 
+      if (cancelled) return;
       dispatch({
         type: 'SET_FORM_DATA',
         payload: {
@@ -184,6 +186,7 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
       });
     }
     loadData();
+    return () => { cancelled = true; };
   }, [orgId]);
 
   // Handlers

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { redirect } from 'next/navigation';
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState, useEffect, useRef } from 'react';
 import { toast } from "sonner";
 
 import { organizationFormAction } from '@/actions/dashboard/organization/organization-form-actions';
@@ -34,21 +34,20 @@ export default function OrganizationForm({ organization, onSuccess, onCancel, re
 
   // Utils
   const [actionState, formAction, pending] = useActionState(organizationFormAction, EMPTY_ACTION_STATE);
+  const successHandledRef = useRef(false);
 
   useEffect(() => {
-    if (actionState.status === 'success') {
+    if (actionState.status === 'success' && !successHandledRef.current) {
+      successHandledRef.current = true;
       toast.success(actionState.message);
+      onSuccess?.();
     } else if (actionState.status === 'error' && actionState.message) {
       toast.error(actionState.message);
     }
-  }, [actionState]);
+  }, [actionState, onSuccess]);
 
-  if (actionState.status === 'success') {
-    if (onSuccess) {
-      onSuccess();
-    } else {
-      redirect(redirectTo /* c8 ignore next */ ?? "/dashboard/organization");
-    }
+  if (actionState.status === 'success' && !onSuccess) {
+    redirect(redirectTo /* c8 ignore next */ ?? "/dashboard/organization");
   }
 
   // Handlers

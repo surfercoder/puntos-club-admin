@@ -137,6 +137,29 @@ describe('EditPointsRulePage', () => {
     expect(document.querySelector('.animate-spin') || screen.queryByText('form.editTitle') === null).toBeTruthy();
   });
 
+  it('ignores fetch result when unmounted before it resolves', async () => {
+    let resolveFetch: (value: unknown) => void = () => {};
+    mockGetPointsRuleById.mockImplementation(
+      () => new Promise((resolve) => {
+        resolveFetch = resolve;
+      }),
+    );
+
+    let unmount: () => void = () => {};
+    await act(async () => {
+      ({ unmount } = render(<EditPointsRulePage />));
+    });
+
+    // Unmount before the awaited fetch resolves, then resolve it.
+    await act(async () => {
+      unmount();
+      resolveFetch({ success: true, data: sampleRule });
+    });
+
+    // The cancelled guard prevents any post-unmount state update / warning.
+    expect(screen.queryByText('form.editTitle')).not.toBeInTheDocument();
+  });
+
   it('renders fetch error state', async () => {
     mockGetPointsRuleById.mockResolvedValue({ success: false, error: 'Not found' });
     await act(async () => {

@@ -51,50 +51,53 @@ export default function ProductImageUpload({
     setUploading(true);
     const uploadedUrls: string[] = [];
 
-    const results = await Promise.all(filesArray.map(async (file) => {
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
-      const filePath = `${fileName}`;
+    try {
+      const results = await Promise.all(filesArray.map(async (file) => {
+        const fileExt = file.name.split('.').pop();
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
+        const filePath = `${fileName}`;
 
-      const { error: uploadError } = await supabase.storage
-        .from('product-images')
-        .upload(filePath, file, {
-          cacheControl: '3600',
-          upsert: false,
-        });
+        const { error: uploadError } = await supabase.storage
+          .from('product-images')
+          .upload(filePath, file, {
+            cacheControl: '3600',
+            upsert: false,
+          });
 
-      if (uploadError) {
-        return null;
+        if (uploadError) {
+          return null;
+        }
+
+        const { data: { publicUrl } } = supabase.storage
+          .from('product-images')
+          .getPublicUrl(filePath);
+
+        return publicUrl;
+      }));
+
+      const failed = results.some((r) => r === null);
+      for (const r of results) {
+        if (r) uploadedUrls.push(r);
       }
 
-      const { data: { publicUrl } } = supabase.storage
-        .from('product-images')
-        .getPublicUrl(filePath);
-
-      return publicUrl;
-    }));
-
-    const failed = results.some((r) => r === null);
-    for (const r of results) {
-      if (r) uploadedUrls.push(r);
+      if (failed) {
+        toast.error(t('uploadError'));
+        // Clean up any successfully uploaded images on error
+        await Promise.all(uploadedUrls.map(async (url) => {
+          const fileName = url.split('/').pop();
+          if (fileName) {
+            await supabase.storage.from('product-images').remove([fileName]);
+          }
+        }));
+      } else {
+        const newImages = [...images, ...uploadedUrls];
+        setImages(newImages);
+        onImagesChange(newImages);
+        toast.success(t('uploadSuccess', { count: uploadedUrls.length }));
+      }
+    } finally {
+      setUploading(false);
     }
-
-    if (failed) {
-      toast.error(t('uploadError'));
-      // Clean up any successfully uploaded images on error
-      await Promise.all(uploadedUrls.map(async (url) => {
-        const fileName = url.split('/').pop();
-        if (fileName) {
-          await supabase.storage.from('product-images').remove([fileName]);
-        }
-      }));
-    } else {
-      const newImages = [...images, ...uploadedUrls];
-      setImages(newImages);
-      onImagesChange(newImages);
-      toast.success(t('uploadSuccess', { count: uploadedUrls.length }));
-    }
-    setUploading(false);
   };
 
   const removeImage = async (imageUrl: string, index: number) => {
@@ -137,6 +140,7 @@ export default function ProductImageUpload({
             />
             <button
               type="button"
+              aria-label={`Eliminar imagen ${index + 1}`}
               onClick={() => removeImage(imageUrl, index)}
               className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
             >

@@ -17,6 +17,8 @@ const dateOptions: Intl.DateTimeFormatOptions = {
   day: '2-digit',
   hour: '2-digit',
   minute: '2-digit',
+  // Explicit timeZone keeps server and client render identical (avoids hydration mismatch).
+  timeZone: 'America/Argentina/Buenos_Aires',
 };
 
 function useRestrictionReason(limits: OrganizationNotificationLimit) {

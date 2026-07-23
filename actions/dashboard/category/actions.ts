@@ -2,11 +2,13 @@
 
 import { cookies } from 'next/headers';
 
+import { requireUser } from '@/lib/auth/require-user';
 import { createClient } from '@/lib/supabase/server';
 import { CategorySchema } from '@/schemas/category.schema';
 import type { Category } from '@/types/category';
 
 export async function createCategory(input: Category) {
+  await requireUser();
   const parsed = CategorySchema.safeParse(input);
 
   if (!parsed.success) {
@@ -43,6 +45,7 @@ export async function createCategory(input: Category) {
 }
 
 export async function updateCategory(id: string, input: Category) {
+  await requireUser();
   const parsed = CategorySchema.safeParse(input);
 
   if (!parsed.success) {
@@ -79,6 +82,7 @@ export async function updateCategory(id: string, input: Category) {
 }
 
 export async function deleteCategory(id: string) {
+  await requireUser();
   const supabase = await createClient();
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;

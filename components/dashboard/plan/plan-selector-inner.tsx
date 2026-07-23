@@ -455,6 +455,7 @@ export function PlanSelectorInner() {
     if (!preapprovalId || verifiedRef.current) return;
     verifiedRef.current = true;
     setVerifying(true);
+    let cancelled = false;
 
     const verify = async () => {
       try {
@@ -469,12 +470,15 @@ export function PlanSelectorInner() {
       } catch {
         // Silent — webhook will handle it eventually
       }
-      setVerifying(false);
-      // Clean the URL without a client-side redirect
-      window.history.replaceState(null, '', '/dashboard/settings/plan');
+      if (!cancelled) {
+        setVerifying(false);
+        // Clean the URL without a client-side redirect
+        window.history.replaceState(null, '', '/dashboard/settings/plan');
+      }
     };
 
     verify();
+    return () => { cancelled = true; };
   }, [invalidate, tSettings]);
 
   // Sync selected with current plan when data loads
@@ -546,13 +550,18 @@ export function PlanSelectorInner() {
       }),
     });
 
+    if (!res.ok) {
+      const errorData = (await res.json()) as { error?: string };
+      throw new Error(errorData.error ?? t('paymentInitError'));
+    }
+
     const data = (await res.json()) as {
       initPoint?: string;
       preapprovalId?: string;
       error?: string;
     };
 
-    if (!res.ok || !data.initPoint) {
+    if (!data.initPoint) {
       throw new Error(data.error ?? t('paymentInitError'));
     }
 

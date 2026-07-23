@@ -37,8 +37,9 @@ export default function LinkAllBeneficiariesPage() {
         success: false,
         message: t('unexpectedError'),
       });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (

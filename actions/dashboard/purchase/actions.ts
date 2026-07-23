@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
+import { requireUser } from "@/lib/auth/require-user";
 import { isAdmin } from "@/lib/auth/roles";
 
 export interface PurchaseItem {
@@ -39,7 +40,7 @@ export async function createPurchase(
   input: CreatePurchaseInput
 ): Promise<PurchaseResponse> {
   try {
-    const supabase = await createClient();
+    await requireUser();
 
     // Validate input
     if (!input.beneficiary_id || !input.cashier_id || !input.branch_id) {
@@ -71,6 +72,8 @@ export async function createPurchase(
       (sum, item) => sum + item.quantity * item.unit_price,
       0
     );
+
+    const supabase = await createClient();
 
     // Get branch details to find organization_id
     const { data: branch, error: branchError } = await supabase
@@ -256,6 +259,8 @@ export async function getAllPurchases(filters?: {
  */
 export async function updatePurchase(id: string, input: Record<string, unknown>) {
   try {
+    await requireUser();
+
     const supabase = await createClient();
 
     const { data, error } = await supabase
@@ -281,6 +286,8 @@ export async function updatePurchase(id: string, input: Record<string, unknown>)
  */
 export async function deletePurchase(id: string) {
   try {
+    await requireUser();
+
     const supabase = await createClient();
 
     const { error } = await supabase

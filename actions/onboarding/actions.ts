@@ -311,8 +311,8 @@ export async function completeOnboarding(input: {
 
     // ── 9. Create catalog (optional) ──────────────────────────────────────────
     if (input.step4?.categories?.length) {
-      for (const cat of input.step4.categories) {
-        if (!cat.name.trim()) continue;
+      await Promise.all(input.step4.categories.map(async (cat) => {
+        if (!cat.name.trim()) return;
 
         const { data: categoryData, error: categoryError } = await adminClient
           .from('category')
@@ -325,10 +325,10 @@ export async function completeOnboarding(input: {
           .select()
           .single();
 
-        if (categoryError || !categoryData) continue;
+        if (categoryError || !categoryData) return;
 
-        for (const prod of cat.products) {
-          if (!prod.name.trim()) continue;
+        await Promise.all(cat.products.map(async (prod) => {
+          if (!prod.name.trim()) return;
 
           const { data: productData, error: productError } = await adminClient
             .from('product')
@@ -343,7 +343,7 @@ export async function completeOnboarding(input: {
             .select()
             .single();
 
-          if (productError || !productData) continue;
+          if (productError || !productData) return;
 
           await adminClient.from('stock').insert({
             product_id: Number(productData.id),
@@ -351,8 +351,8 @@ export async function completeOnboarding(input: {
             quantity: prod.quantity || 0,
             minimum_quantity: prod.minimum_quantity || 1,
           });
-        }
-      }
+        }));
+      }));
     }
 
     // ── 10. Create cashier user (optional) ───────────────────────────────────

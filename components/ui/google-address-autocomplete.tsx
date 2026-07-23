@@ -55,14 +55,20 @@ export function GoogleAddressAutocomplete({
       return;
     }
 
+    // Capture the node so the cleanup detaches listeners from the same element
+    // even if the ref changes before cleanup runs.
+    const inputEl = inputRef.current;
+
     const options: google.maps.places.AutocompleteOptions = {
       types: ['address'],
       fields: ['address_components', 'formatted_address', 'place_id', 'geometry'],
     };
 
-    const autocomplete = new google.maps.places.Autocomplete(inputRef.current, options);
+    const autocomplete = new google.maps.places.Autocomplete(inputEl, options);
 
     let lastProcessedPlaceId = '';
+    let enterTimeoutId: ReturnType<typeof setTimeout> | undefined;
+    let blurTimeoutId: ReturnType<typeof setTimeout> | undefined;
 
     const handlePlaceChanged = () => {
       const place = autocomplete.getPlace();
@@ -124,14 +130,15 @@ export function GoogleAddressAutocomplete({
       onPlaceSelectedRef.current(addressComponents);
     };
 
-    google.maps.event.addListener(autocomplete, 'place_changed', handlePlaceChanged);
+    const placeChangedListener = google.maps.event.addListener(autocomplete, 'place_changed', handlePlaceChanged);
 
     // Add keyboard listener to detect Enter key
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Enter') {
         e.preventDefault(); // Prevent form submission
         // Small delay to allow autocomplete to process
-        setTimeout(() => {
+        clearTimeout(enterTimeoutId);
+        enterTimeoutId = setTimeout(() => {
           const place = autocomplete.getPlace();
           if (place && place.address_components) {
             handlePlaceChanged();
@@ -152,7 +159,8 @@ export function GoogleAddressAutocomplete({
     // Add blur listener to detect when user clicks on a suggestion
     const handleBlur = () => {
       // Longer delay to allow autocomplete to process the click
-      setTimeout(() => {
+      clearTimeout(blurTimeoutId);
+      blurTimeoutId = setTimeout(() => {
         const place = autocomplete.getPlace();
         if (place && place.address_components) {
           handlePlaceChanged();
@@ -160,20 +168,18 @@ export function GoogleAddressAutocomplete({
       }, 300);
     };
 
-    inputRef.current.addEventListener('keydown', handleKeyDown);
-    inputRef.current.addEventListener('blur', handleBlur);
+    inputEl.addEventListener('keydown', handleKeyDown);
+    inputEl.addEventListener('blur', handleBlur);
     document.addEventListener('mousedown', handleDocumentMouseDown);
 
     autocompleteRef.current = autocomplete;
 
     return () => {
-      if (autocompleteRef.current) {
-        google.maps.event.clearInstanceListeners(autocompleteRef.current);
-      }
-      if (inputRef.current) {
-        inputRef.current.removeEventListener('keydown', handleKeyDown);
-        inputRef.current.removeEventListener('blur', handleBlur);
-      }
+      clearTimeout(enterTimeoutId);
+      clearTimeout(blurTimeoutId);
+      placeChangedListener.remove();
+      inputEl.removeEventListener('keydown', handleKeyDown);
+      inputEl.removeEventListener('blur', handleBlur);
       document.removeEventListener('mousedown', handleDocumentMouseDown);
     };
   }, [isLoaded]);

@@ -127,7 +127,7 @@ function QRSuccessView({
 
   const qrData = JSON.stringify({ type: 'organization', id: organizationId, name: orgName });
 
-  const handleDownload = () => {
+  const handleDownload = async () => {
     const svgEl = qrContainerRef.current?.querySelector('svg');
     if (!svgEl) return;
     const canvas = document.createElement('canvas');
@@ -138,27 +138,28 @@ function QRSuccessView({
     if (!ctx) return;
     const svgData = new XMLSerializer().serializeToString(svgEl);
     const img = new window.Image();
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
-    img.onload = () => {
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, size, size);
-      ctx.drawImage(img, 0, 0, size, size);
-      URL.revokeObjectURL(url);
-      canvas.toBlob((blob) => {
-        if (!blob) return;
-        const downloadUrl = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = downloadUrl;
-        a.download = `qr-${orgName.toLowerCase().replace(/\s+/g, '-')}.png`;
-        document.body.appendChild(a);
-        a.click();
-        document.body.removeChild(a);
-        URL.revokeObjectURL(downloadUrl);
-        toast.success(t('download'));
-      }, 'image/png');
-    };
-    img.src = url;
+    // Data URI needs no revoke; avoids an object URL kept alive across the decode await.
+    img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgData)}`;
+    try {
+      await img.decode();
+    } catch {
+      return;
+    }
+    ctx.fillStyle = '#ffffff';
+    ctx.fillRect(0, 0, size, size);
+    ctx.drawImage(img, 0, 0, size, size);
+    canvas.toBlob((blob) => {
+      if (!blob) return;
+      const downloadUrl = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = downloadUrl;
+      a.download = `qr-${orgName.toLowerCase().replace(/\s+/g, '-')}.png`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(downloadUrl);
+      toast.success(t('download'));
+    }, 'image/png');
   };
 
   const handleShare = async () => {
@@ -172,23 +173,19 @@ function QRSuccessView({
     if (!ctx) return;
     const svgData = new XMLSerializer().serializeToString(svgEl);
     const img = new window.Image();
-    const svgBlob = new Blob([svgData], { type: 'image/svg+xml;charset=utf-8' });
-    const url = URL.createObjectURL(svgBlob);
+    // Data URI needs no revoke; avoids an object URL kept alive across the decode await.
+    img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgData)}`;
 
-    const blob = await new Promise<Blob | null>((resolve) => {
-      img.onload = () => {
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, size, size);
-        ctx.drawImage(img, 0, 0, size, size);
-        URL.revokeObjectURL(url);
-        canvas.toBlob((b) => resolve(b), 'image/png');
-      };
-      img.onerror = () => {
-        URL.revokeObjectURL(url);
-        resolve(null);
-      };
-      img.src = url;
-    });
+    let blob: Blob | null = null;
+    try {
+      await img.decode();
+      ctx.fillStyle = '#ffffff';
+      ctx.fillRect(0, 0, size, size);
+      ctx.drawImage(img, 0, 0, size, size);
+      blob = await new Promise<Blob | null>((resolve) => canvas.toBlob((b) => resolve(b), 'image/png'));
+    } catch {
+      // Image decode failed; blob stays null and we bail out below.
+    }
 
     if (!blob) return;
 
@@ -327,6 +324,8 @@ export function Step5QR({
     if (state.status !== 'creating') return;
     hasRun.current = true;
 
+    let cancelled = false;
+
     (async () => {
       let nextState: State;
       try {
@@ -337,8 +336,14 @@ export function Step5QR({
       } catch {
         nextState = { status: 'error', message: 'Error de conexión. Por favor intenta de nuevo.' };
       }
-      setState(nextState);
+      if (!cancelled) {
+        setState(nextState);
+      }
     })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [state.status, step2Data, selectedPlan, mpPreapprovalId, step4Data]);
 
   useEffect(() => {

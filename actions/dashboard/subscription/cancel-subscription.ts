@@ -1,5 +1,6 @@
 'use server';
 
+import { after } from 'next/server';
 import { PreApproval } from 'mercadopago/dist/clients/preApproval';
 import { getMercadoPagoClient } from '@/lib/mercadopago/client';
 import { createClient } from '@/lib/supabase/server';
@@ -81,25 +82,29 @@ export async function cancelSubscriptionAction(): Promise<CancelResult> {
     // Cancel each preapproval in MP and persist that row as cancelled right
     // after, so a mid-loop failure leaves a consistent partial state and a
     // retry skips the ones already handled (they're no longer non-cancelled).
-    for (const sub of toCancel) {
-      try {
-        await preApproval.update({
-          id: sub.mp_preapproval_id,
-          body: { status: 'cancelled' },
-        });
-      } catch (mpErr) {
-        if (!isMpResourceNotFoundError(mpErr)) throw mpErr;
-        console.warn(
-          '[cancel-subscription] MP preapproval not found; proceeding with local cleanup',
-          { preapprovalId: sub.mp_preapproval_id },
-        );
-      }
+    await Promise.all(
+      toCancel.map(async (sub) => {
+        try {
+          await preApproval.update({
+            id: sub.mp_preapproval_id,
+            body: { status: 'cancelled' },
+          });
+        } catch (mpErr) {
+          if (!isMpResourceNotFoundError(mpErr)) throw mpErr;
+          after(() =>
+            console.warn(
+              '[cancel-subscription] MP preapproval not found; proceeding with local cleanup',
+              { preapprovalId: sub.mp_preapproval_id },
+            ),
+          );
+        }
 
-      await admin
-        .from('subscription')
-        .update({ status: 'cancelled', updated_at: new Date().toISOString() })
-        .eq('id', sub.id);
-    }
+        await admin
+          .from('subscription')
+          .update({ status: 'cancelled', updated_at: new Date().toISOString() })
+          .eq('id', sub.id);
+      }),
+    );
 
     await admin
       .from('organization')

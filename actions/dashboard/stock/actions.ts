@@ -1,10 +1,13 @@
 "use server";
 
+import { requireUser } from '@/lib/auth/require-user';
 import { createClient } from '@/lib/supabase/server';
 import { StockSchema } from '@/schemas/stock.schema';
 import type { Stock } from '@/types/stock';
 
 export async function createStock(input: Stock) {
+  await requireUser();
+
   const parsed = StockSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -23,6 +26,8 @@ export async function createStock(input: Stock) {
 }
 
 export async function updateStock(id: string, input: Stock) {
+  await requireUser();
+
   const parsed = StockSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -67,8 +72,10 @@ export async function updateStock(id: string, input: Stock) {
 }
 
 export async function deleteStock(id: string) {
+  await requireUser();
+
   const supabase = await createClient();
-  
+
   // First, verify the stock belongs to the user's organization
   const { data: stock, error: fetchError } = await supabase
     .from('stock')
@@ -100,10 +107,11 @@ export async function deleteStock(id: string) {
 }
 
 export async function getStocks() {
-  const supabase = await createClient();
-  
   // Get active organization from cookies
-  const { cookies } = await import('next/headers');
+  const [supabase, { cookies }] = await Promise.all([
+    createClient(),
+    import('next/headers'),
+  ]);
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
   const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;
@@ -129,10 +137,11 @@ export async function getStocks() {
 }
 
 export async function getStock(id: string) {
-  const supabase = await createClient();
-  
   // Get active organization from cookies
-  const { cookies } = await import('next/headers');
+  const [supabase, { cookies }] = await Promise.all([
+    createClient(),
+    import('next/headers'),
+  ]);
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
   const activeOrgIdNumber = activeOrgId ? Number(activeOrgId) : null;

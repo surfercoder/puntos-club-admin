@@ -531,8 +531,10 @@ export default function EditPointsRulePage() {
   const loadErrorPrefix = t("form.loadError");
 
   useEffect(() => {
+    let cancelled = false;
     async function fetchRule() {
       const result = await getPointsRuleById(parseInt(id));
+      if (cancelled) return;
       if (result.success && result.data) {
         const rule = result.data;
         const config = rule.config as Record<string, unknown>;
@@ -571,6 +573,9 @@ export default function EditPointsRulePage() {
       }
     }
     fetchRule();
+    return () => {
+      cancelled = true;
+    };
   }, [id, loadErrorPrefix]);
 
   useEffect(() => {

@@ -1,5 +1,6 @@
 'use server';
 
+import { after } from 'next/server';
 import * as Sentry from '@sentry/nextjs';
 import {
   brandedEmailLayout,
@@ -47,10 +48,12 @@ export async function sendFeedback(
   }
 
   if (!process.env.RESEND_API_KEY) {
-    console.warn(
-      '\n📧  [DEV] Feedback received (no RESEND_API_KEY set):',
-      JSON.stringify({ type, message, userEmail, userName, pageUrl }, null, 2),
-      '\n'
+    after(() =>
+      console.warn(
+        '\n📧  [DEV] Feedback received (no RESEND_API_KEY set):',
+        JSON.stringify({ type, message, userEmail, userName, pageUrl }, null, 2),
+        '\n'
+      ),
     );
     return { success: true };
   }

@@ -239,7 +239,7 @@ interface CaptchaVerificationProps {
 
 function CaptchaVerification({ status, error, onSuccess, onError, onExpire, recaptchaRef }: CaptchaVerificationProps) {
   return (
-    <div className="rounded-xl border bg-muted/30 p-4 space-y-3 transition-all">
+    <div className="rounded-xl border bg-muted/30 p-4 space-y-3 transition-colors">
       <div className="flex items-center gap-2">
         <ShieldCheck className="size-4 text-primary shrink-0" />
         <p className="text-sm font-medium text-foreground">

@@ -5,6 +5,7 @@ import { revalidatePath } from 'next/cache';
 
 import { createBeneficiary, updateBeneficiary } from '@/actions/dashboard/beneficiary/actions';
 import { cleanFormData, fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
+import { requireUser } from '@/lib/auth/require-user';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { enforcePlanLimit } from '@/lib/plans/usage';
 import { createClient } from '@/lib/supabase/server';
@@ -12,6 +13,7 @@ import { BeneficiarySchema } from '@/schemas/beneficiary.schema';
 import type { Beneficiary } from '@/types/beneficiary';
 
 export async function beneficiaryFormAction(_prevState: ActionState, formData: FormData) {
+  await requireUser();
   try {
     const formDataObject = cleanFormData(formData);
     const parsed = BeneficiarySchema.safeParse(formDataObject);

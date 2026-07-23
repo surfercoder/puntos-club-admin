@@ -44,8 +44,9 @@ export function PlanUsageBanner({ features, className }: PlanUsageBannerProps) {
 
   if (isLoading || !summary || dismissed) return null;
 
+  const featureSet = features ? new Set(features) : null;
   const warnings = summary.features.filter((f) => {
-    if (features && !features.includes(f.feature)) return false;
+    if (featureSet && !featureSet.has(f.feature)) return false;
     return f.should_warn || f.is_at_limit;
   });
 

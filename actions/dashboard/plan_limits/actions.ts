@@ -2,8 +2,10 @@
 
 import { createAdminClient } from '@/lib/supabase/admin';
 import { PlanLimitSchema } from '@/schemas/plan_limit.schema';
+import { requireUser } from '@/lib/auth/require-user';
 
 export async function createPlanLimit(input: Record<string, unknown>) {
+  await requireUser();
   const parsed = PlanLimitSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -25,6 +27,7 @@ export async function createPlanLimit(input: Record<string, unknown>) {
 }
 
 export async function updatePlanLimit(id: string, input: Record<string, unknown>) {
+  await requireUser();
   const parsed = PlanLimitSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -47,6 +50,7 @@ export async function updatePlanLimit(id: string, input: Record<string, unknown>
 }
 
 export async function deletePlanLimit(id: string) {
+  await requireUser();
   const supabase = createAdminClient();
   const { error } = await supabase
     .from('plan_limits')

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { redirect } from 'next/navigation';
-import { useActionState, useState, useEffect } from 'react';
+import { useActionState, useState, useEffect, useRef } from 'react';
 import { toast } from "sonner";
 
 import { organizationNotificationLimitFormAction } from '@/actions/dashboard/organization_notification_limits/organization_notification_limit-form-actions';
@@ -40,21 +40,20 @@ export default function OrganizationNotificationLimitForm({
   const [selectedOrganization, setSelectedOrganization] = useState<string>(organizationNotificationLimit?.organization_id ?? '');
   
   const [actionState, formAction, pending] = useActionState(organizationNotificationLimitFormAction, EMPTY_ACTION_STATE);
+  const successHandledRef = useRef(false);
 
   useEffect(() => {
-    if (actionState.status === 'success') {
+    if (actionState.status === 'success' && !successHandledRef.current) {
+      successHandledRef.current = true;
       toast.success(actionState.message);
+      onSuccess?.();
     } else if (actionState.status === 'error' && actionState.message) {
       toast.error(actionState.message);
     }
-  }, [actionState]);
+  }, [actionState, onSuccess]);
 
-  if (actionState.status === 'success') {
-    if (onSuccess) {
-      onSuccess();
-    } else if (redirectTo) {
-      redirect(redirectTo);
-    }
+  if (actionState.status === 'success' && !onSuccess && redirectTo) {
+    redirect(redirectTo);
   }
 
   const handlePlanChange = (value: string) => {

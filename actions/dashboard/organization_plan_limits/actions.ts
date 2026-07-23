@@ -3,8 +3,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { OrganizationPlanLimitSchema } from '@/schemas/organization_plan_limit.schema';
 import type { OrganizationPlanLimit } from '@/types/organization_plan_limit';
+import { requireUser } from '@/lib/auth/require-user';
 
 export async function createOrganizationPlanLimit(input: OrganizationPlanLimit) {
+  await requireUser();
   const parsed = OrganizationPlanLimitSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -26,6 +28,7 @@ export async function createOrganizationPlanLimit(input: OrganizationPlanLimit) 
 }
 
 export async function updateOrganizationPlanLimit(id: string, input: OrganizationPlanLimit) {
+  await requireUser();
   const parsed = OrganizationPlanLimitSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -48,6 +51,7 @@ export async function updateOrganizationPlanLimit(id: string, input: Organizatio
 }
 
 export async function deleteOrganizationPlanLimit(id: string) {
+  await requireUser();
   const supabase = await createClient();
   const { error } = await supabase
     .from('organization_plan_limits')

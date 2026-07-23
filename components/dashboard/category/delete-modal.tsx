@@ -43,8 +43,9 @@ export default function DeleteModal({ categoryId, categoryName }: DeleteModalPro
       }
     } catch {
       toast.error(t('genericError'));
+    } finally {
+      setIsDeleting(false);
     }
-    setIsDeleting(false);
   };
 
   return (

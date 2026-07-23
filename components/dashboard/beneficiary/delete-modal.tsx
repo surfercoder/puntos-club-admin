@@ -46,8 +46,9 @@ export default function DeleteModal({ beneficiaryId, beneficiaryName }: DeleteMo
       }
     } catch {
       toast.error(t('genericError'));
+    } finally {
+      setIsDeleting(false);
     }
-    setIsDeleting(false);
   };
 
   return (

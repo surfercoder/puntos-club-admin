@@ -15,6 +15,7 @@ afterAll(() => {
 describe('verifyCaptchaToken', () => {
   it('should return success when captcha is valid', async () => {
     mockFetch.mockResolvedValue({
+      ok: true,
       json: jest.fn().mockResolvedValue({ success: true }),
     });
     const result = await verifyCaptchaToken('valid-token');
@@ -30,9 +31,19 @@ describe('verifyCaptchaToken', () => {
 
   it('should return error when captcha is invalid', async () => {
     mockFetch.mockResolvedValue({
+      ok: true,
       json: jest.fn().mockResolvedValue({ success: false }),
     });
     const result = await verifyCaptchaToken('invalid-token');
+    expect(result).toEqual({ success: false, error: 'Verificación fallida. Intentá de nuevo.' });
+  });
+
+  it('should return error when the verify endpoint responds with a non-ok status', async () => {
+    mockFetch.mockResolvedValue({
+      ok: false,
+      json: jest.fn(),
+    });
+    const result = await verifyCaptchaToken('token');
     expect(result).toEqual({ success: false, error: 'Verificación fallida. Intentá de nuevo.' });
   });
 

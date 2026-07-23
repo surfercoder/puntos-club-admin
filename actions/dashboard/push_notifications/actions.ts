@@ -3,8 +3,10 @@
 import { createClient } from '@/lib/supabase/server';
 import { PushNotificationSchema } from '@/schemas/push_notification.schema';
 import type { PushNotification } from '@/types/push_notification';
+import { requireUser } from '@/lib/auth/require-user';
 
 export async function createPushNotification(input: PushNotification) {
+  await requireUser();
   const parsed = PushNotificationSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -23,6 +25,7 @@ export async function createPushNotification(input: PushNotification) {
 }
 
 export async function updatePushNotification(id: string, input: PushNotification) {
+  await requireUser();
   const parsed = PushNotificationSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -41,6 +44,7 @@ export async function updatePushNotification(id: string, input: PushNotification
 }
 
 export async function deletePushNotification(id: string) {
+  await requireUser();
   const supabase = await createClient();
   const { error } = await supabase.from('push_notifications').delete().eq('id', id);
 

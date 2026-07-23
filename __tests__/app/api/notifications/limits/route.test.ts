@@ -63,19 +63,25 @@ describe('Notification Limits API Route', () => {
     expect(data.data).toHaveProperty('plan_type', 'free');
   });
 
-  it('creates default limits when none exist', async () => {
+  it('returns default limits without persisting when none exist', async () => {
     mockSingle.mockReset();
     // app_user lookup
     mockSingle.mockResolvedValueOnce({ data: { organization_id: 1 }, error: null });
     // limits lookup - not found (PGRST116 = row not found)
     mockSingle.mockResolvedValueOnce({ data: null, error: { code: 'PGRST116', message: 'not found' } });
-    // insert default limits
-    mockInsertSingle.mockResolvedValueOnce({ data: { plan_type: 'free', daily_limit: 1, monthly_limit: 5 } });
 
     const request = {} as any;
     const response = await GET(request);
     const data = await response.json();
     expect(data.success).toBe(true);
+    expect(data.data).toMatchObject({
+      plan_type: 'free',
+      daily_limit: 1,
+      monthly_limit: 5,
+      min_hours_between_notifications: 24,
+    });
+    // GET must be side-effect-free: no insert on the no-row path.
+    expect(mockInsert).not.toHaveBeenCalled();
   });
 
   it('returns 500 on database error (non-PGRST116)', async () => {

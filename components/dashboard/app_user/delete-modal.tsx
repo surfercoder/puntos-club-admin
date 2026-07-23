@@ -46,8 +46,9 @@ export default function DeleteModal({ appUserId, appUserName }: DeleteModalProps
       }
     } catch {
       toast.error(t('genericError'));
+    } finally {
+      setIsDeleting(false);
     }
-    setIsDeleting(false);
   };
 
   return (

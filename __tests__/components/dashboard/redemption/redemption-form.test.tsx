@@ -1,4 +1,4 @@
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen, fireEvent, act } from '@testing-library/react';
 
 jest.mock('next-intl', () => ({
   useTranslations: jest.fn(() => {
@@ -688,5 +688,47 @@ describe('RedemptionForm', () => {
     expect(screen.getByText('Smith')).toBeInTheDocument();
 
     useReducerSpy.mockRestore();
+  });
+
+  // -- Cancellation guard: unmount before loadData resolves (line 179 true branch) --
+  it('does not dispatch form data when unmounted before load resolves', async () => {
+    Object.defineProperty(document, 'cookie', {
+      writable: true,
+      value: 'active_org_id=42',
+    });
+
+    let resolveData: (value: { data: never[] }) => void = () => {};
+    const dataPromise = new Promise<{ data: never[] }>((resolve) => {
+      resolveData = resolve;
+    });
+    const queryObj = {
+      select: jest.fn().mockReturnThis(),
+      eq: jest.fn().mockReturnThis(),
+      order: jest.fn().mockReturnThis(),
+      // Stay pending until we resolve dataPromise, so unmount happens mid-flight.
+      then: (onFulfilled: (v: { data: never[] }) => unknown, onRejected: (e: unknown) => unknown) =>
+        dataPromise.then(onFulfilled, onRejected),
+    };
+
+    const { createClient } = require('@/lib/supabase/client');
+    (createClient as jest.Mock).mockReturnValue({
+      from: jest.fn().mockReturnValue(queryObj),
+    });
+
+    const { unmount } = render(<RedemptionForm />);
+
+    // Unmount while loadData's Promise.all is still pending; the cleanup flips
+    // the cancellation flag so the post-await dispatch is skipped.
+    unmount();
+
+    await act(async () => {
+      resolveData({ data: [] });
+      await dataPromise;
+    });
+
+    Object.defineProperty(document, 'cookie', {
+      writable: true,
+      value: '',
+    });
   });
 });

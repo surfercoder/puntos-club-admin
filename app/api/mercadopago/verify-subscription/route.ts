@@ -7,6 +7,13 @@ import { getMercadoPagoClient, type PlanId } from '@/lib/mercadopago/client';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 
+const statusMap: Record<string, string> = {
+  authorized: 'authorized',
+  pending: 'pending',
+  paused: 'paused',
+  cancelled: 'cancelled',
+};
+
 /**
  * Verify a subscription status with MercadoPago after the user returns from checkout.
  * If the subscription is authorized, update the DB immediately (don't wait for webhook).
@@ -35,13 +42,6 @@ export async function POST(request: NextRequest) {
     };
 
     const mpStatus = subscription.status as string;
-
-    const statusMap: Record<string, string> = {
-      authorized: 'authorized',
-      pending: 'pending',
-      paused: 'paused',
-      cancelled: 'cancelled',
-    };
     const mappedStatus = statusMap[mpStatus] ?? 'pending';
 
     const admin = createAdminClient();

@@ -1,10 +1,12 @@
 "use server";
 
 import { createClient } from '@/lib/supabase/server';
+import { requireUser } from '@/lib/auth/require-user';
 import { SubscriptionSchema } from '@/schemas/subscription.schema';
 import type { Subscription } from '@/types/subscription';
 
 export async function createSubscription(input: Subscription) {
+  await requireUser();
   const parsed = SubscriptionSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -26,6 +28,7 @@ export async function createSubscription(input: Subscription) {
 }
 
 export async function updateSubscription(id: string, input: Subscription) {
+  await requireUser();
   const parsed = SubscriptionSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -48,6 +51,7 @@ export async function updateSubscription(id: string, input: Subscription) {
 }
 
 export async function deleteSubscription(id: string) {
+  await requireUser();
   const supabase = await createClient();
   const { error } = await supabase
     .from('subscription')

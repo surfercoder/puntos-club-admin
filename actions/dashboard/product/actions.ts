@@ -5,10 +5,13 @@ import { cookies } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
 import { getActiveOrgIdFilter } from '@/lib/auth/get-active-org-id';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { requireUser } from '@/lib/auth/require-user';
 import type { Product } from '@/types/product';
 import { enforcePlanLimit } from '@/lib/plans/usage';
 
 export async function createProduct(input: Product) {
+  await requireUser();
+
   const supabase = await createClient();
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
@@ -39,6 +42,8 @@ export async function createProduct(input: Product) {
 }
 
 export async function updateProduct(id: string, input: Product) {
+  await requireUser();
+
   const supabase = await createClient();
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
@@ -64,6 +69,8 @@ export async function updateProduct(id: string, input: Product) {
 }
 
 export async function deleteProduct(id: string) {
+  await requireUser();
+
   const supabase = await createClient();
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;
@@ -84,8 +91,7 @@ export async function deleteProduct(id: string) {
 }
 
 export async function getProducts() {
-  const supabase = await createClient();
-  const currentUser = await getCurrentUser();
+  const [supabase, currentUser] = await Promise.all([createClient(), getCurrentUser()]);
   const orgIdFilter = await getActiveOrgIdFilter(currentUser);
 
   let query = supabase.from('product').select('*').order('name');

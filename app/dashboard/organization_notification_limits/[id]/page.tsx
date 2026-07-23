@@ -4,14 +4,15 @@ import OrganizationNotificationLimitForm from '@/components/dashboard/organizati
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { createAdminClient } from '@/lib/supabase/admin';
 
-export default async function EditOrganizationNotificationLimitPage({ params }: { params: { id: string } }) {
+export default async function EditOrganizationNotificationLimitPage({ params }: { params: Promise<{ id: string }> }) {
   const supabase = createAdminClient();
-  
+  const { id } = await params;
+
   const [limitResult, organizationsResult] = await Promise.all([
     supabase
       .from('organization_notification_limits')
       .select('*')
-      .eq('id', params.id)
+      .eq('id', id)
       .single(),
     supabase
       .from('organization')

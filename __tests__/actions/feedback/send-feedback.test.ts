@@ -1,3 +1,7 @@
+jest.mock('next/server', () => ({
+  after: (fn: () => void) => fn(),
+}));
+
 const mockSend = jest.fn();
 jest.mock('@/lib/resend', () => ({
   resend: { emails: { send: (...args: unknown[]) => mockSend(...args) } },

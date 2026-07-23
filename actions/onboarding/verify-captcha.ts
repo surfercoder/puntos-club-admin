@@ -1,6 +1,6 @@
 'use server';
 
-const VERIFY_ENDPOINT = 'https://www.google.com/recaptcha/api/siteverify';
+import { fetchRecaptchaAssessment } from '@/lib/recaptcha';
 
 export async function verifyCaptchaToken(token: string): Promise<{ success: boolean; error?: string }> {
   const secretKey = process.env.RECAPTCHA_SECRET_KEY;
@@ -9,15 +9,9 @@ export async function verifyCaptchaToken(token: string): Promise<{ success: bool
   }
 
   try {
-    const res = await fetch(VERIFY_ENDPOINT, {
-      method: 'POST',
-      body: `secret=${encodeURIComponent(secretKey)}&response=${encodeURIComponent(token)}`,
-      headers: { 'content-type': 'application/x-www-form-urlencoded' },
-    });
+    const { success } = await fetchRecaptchaAssessment(secretKey, token);
 
-    const data = await res.json();
-
-    if (data.success) {
+    if (success) {
       return { success: true };
     }
 

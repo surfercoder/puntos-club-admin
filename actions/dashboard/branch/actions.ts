@@ -2,12 +2,14 @@
 
 import { cookies } from 'next/headers';
 
+import { requireUser } from '@/lib/auth/require-user';
 import { createClient } from '@/lib/supabase/server';
 import { BranchSchema } from '@/schemas/branch.schema';
 import type { Branch } from '@/types/branch';
 import { enforcePlanLimit } from '@/lib/plans/usage';
 
 export async function createBranch(input: Branch) {
+  await requireUser();
   const parsed = BranchSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -43,6 +45,7 @@ export async function createBranch(input: Branch) {
 }
 
 export async function updateBranch(id: string, input: Branch) {
+  await requireUser();
   const parsed = BranchSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -79,6 +82,7 @@ export async function updateBranch(id: string, input: Branch) {
 }
 
 export async function deleteBranch(id: string) {
+  await requireUser();
   const supabase = await createClient();
   const cookieStore = await cookies();
   const activeOrgId = cookieStore.get('active_org_id')?.value;

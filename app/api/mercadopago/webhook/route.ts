@@ -15,34 +15,57 @@ import { createAdminClient } from '@/lib/supabase/admin';
  *  - subscription_preapproval: status changes (authorized, paused, cancelled)
  *  - subscription_authorized_payment: payment was processed
  */
+
+// Map MP subscription status to our internal status.
+const statusMap: Record<string, string> = {
+  authorized: 'authorized',
+  pending: 'pending',
+  paused: 'paused',
+  cancelled: 'cancelled',
+};
+
+/**
+ * Authenticates the request as a genuine MercadoPago webhook by validating the
+ * HMAC-SHA256 signature in the `x-signature` header. When no webhook secret is
+ * configured (e.g. local/dev), verification is skipped and the request is
+ * treated as valid.
+ */
+function authenticateMercadoPagoWebhook(request: NextRequest): { valid: boolean } {
+  const xSignature = request.headers.get('x-signature');
+  const xRequestId = request.headers.get('x-request-id');
+  const webhookSecret = process.env.MP_WEBHOOK_SECRET;
+
+  if (webhookSecret && xSignature) {
+    // Parse ts and v1 from the x-signature header (format: "ts=<ts>,v1=<hash>")
+    const parts = Object.fromEntries(
+      xSignature.split(',').map((part) => {
+        const [key, ...rest] = part.trim().split('=');
+        return [key, rest.join('=')];
+      })
+    );
+    const ts = parts.ts;
+    const v1 = parts.v1;
+
+    // data.id is sent by MercadoPago as a query parameter
+    const dataId = request.nextUrl.searchParams.get('data.id') ?? request.nextUrl.searchParams.get('id') ?? /* c8 ignore next */ '';
+
+    // Build the manifest string and compute HMAC-SHA256
+    const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
+    const hmac = crypto.createHmac('sha256', webhookSecret).update(manifest).digest('hex');
+
+    if (hmac !== v1) {
+      return { valid: false };
+    }
+  }
+
+  return { valid: true };
+}
+
 export async function POST(request: NextRequest) {
   try {
-    // Verify the request comes from MP using the secret header
-    const xSignature = request.headers.get('x-signature');
-    const xRequestId = request.headers.get('x-request-id');
-    const webhookSecret = process.env.MP_WEBHOOK_SECRET;
-
-    if (webhookSecret && xSignature) {
-      // Parse ts and v1 from the x-signature header (format: "ts=<ts>,v1=<hash>")
-      const parts = Object.fromEntries(
-        xSignature.split(',').map((part) => {
-          const [key, ...rest] = part.trim().split('=');
-          return [key, rest.join('=')];
-        })
-      );
-      const ts = parts.ts;
-      const v1 = parts.v1;
-
-      // data.id is sent by MercadoPago as a query parameter
-      const dataId = request.nextUrl.searchParams.get('data.id') ?? request.nextUrl.searchParams.get('id') ?? /* c8 ignore next */ '';
-
-      // Build the manifest string and compute HMAC-SHA256
-      const manifest = `id:${dataId};request-id:${xRequestId};ts:${ts};`;
-      const hmac = crypto.createHmac('sha256', webhookSecret).update(manifest).digest('hex');
-
-      if (hmac !== v1) {
-        return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
-      }
+    // Verify the request comes from MP before doing any privileged work
+    if (!authenticateMercadoPagoWebhook(request).valid) {
+      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
     }
 
     const body = await request.json() as {
@@ -86,12 +109,6 @@ export async function POST(request: NextRequest) {
     const plan: PlanId = parsedPlan /* c8 ignore next */ ?? planFromMpPlanId ?? 'advance';
 
     // Map MP status to our status
-    const statusMap: Record<string, string> = {
-      authorized: 'authorized',
-      pending: 'pending',
-      paused: 'paused',
-      cancelled: 'cancelled',
-    };
     const mappedStatus = statusMap[mpStatus] ?? 'pending';
 
     const admin = createAdminClient();

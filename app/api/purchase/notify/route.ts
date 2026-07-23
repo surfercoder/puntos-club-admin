@@ -224,6 +224,7 @@ export async function POST(request: NextRequest) {
       try {
         const result = await sendPushNotifications(messages);
         if (result.data) {
+          const deactivateIds: number[] = [];
           for (let i = 0; i < result.data.length; i++) {
             const ticket = result.data[i];
             if (ticket.status === "ok") {
@@ -231,13 +232,18 @@ export async function POST(request: NextRequest) {
             } else {
               pushFailed++;
               if (ticket.details?.error === "DeviceNotRegistered") {
-                await adminClient
-                  .from("push_tokens")
-                  .update({ is_active: false })
-                  .eq("id", pushTokens[i].id);
+                deactivateIds.push(pushTokens[i].id);
               }
             }
           }
+          await Promise.all(
+            deactivateIds.map((id) =>
+              adminClient
+                .from("push_tokens")
+                .update({ is_active: false })
+                .eq("id", id)
+            )
+          );
         }
       } catch {
         pushFailed = pushTokens.length;

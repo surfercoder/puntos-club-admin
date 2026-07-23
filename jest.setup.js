@@ -82,6 +82,13 @@ jest.mock('@/lib/supabase/client', () => ({
   })),
 }));
 
+// Default-mock the server-action auth guard so authenticated flows are the
+// baseline for every suite. Suites that exercise the guard itself load the real
+// implementation via jest.requireActual.
+jest.mock('@/lib/auth/require-user', () => ({
+  requireUser: jest.fn(async () => ({ id: 1, role: { name: 'owner' } })),
+}));
+
 // Mock plan-usage-provider
 jest.mock('@/components/providers/plan-usage-provider', () => ({
   usePlanUsage: jest.fn(() => ({

@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers';
 
+import { requireUser } from '@/lib/auth/require-user';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { AppUserSchema, type AppUserInput } from '@/schemas/app_user.schema';
@@ -9,6 +10,8 @@ import { enforcePlanLimit } from '@/lib/plans/usage';
 import type { PlanFeatureKey } from '@/types/plan';
 
 export async function createAppUser(input: AppUserInput) {
+  await requireUser();
+
   const parsed = AppUserSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -98,6 +101,8 @@ export async function createAppUser(input: AppUserInput) {
 }
 
 export async function updateAppUser(id: string, input: AppUserInput) {
+  await requireUser();
+
   const parsed = AppUserSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -187,6 +192,8 @@ export async function updateAppUser(id: string, input: AppUserInput) {
 }
 
 export async function deleteAppUser(id: string) {
+  await requireUser();
+
   const supabase = await createClient();
 
   // Fetch the auth_user_id before deleting so we can remove the auth record
@@ -196,6 +203,10 @@ export async function deleteAppUser(id: string) {
     .eq('id', id)
     .single();
 
+  // Capture the auth id before the row is deleted; the delete below intentionally
+  // runs after this read (it destroys the row we just read).
+  const authUserId = appUser?.auth_user_id ?? null;
+
   const { error } = await supabase.from('app_user').delete().eq('id', id);
 
   if (error) {
@@ -203,9 +214,9 @@ export async function deleteAppUser(id: string) {
   }
 
   // Delete the associated Supabase Auth user to avoid dangling auth records
-  if (appUser?.auth_user_id) {
+  if (authUserId) {
     const adminClient = createAdminClient();
-    const { error: authError } = await adminClient.auth.admin.deleteUser(appUser.auth_user_id);
+    const { error: authError } = await adminClient.auth.admin.deleteUser(authUserId);
 
     if (authError) {
       return { error: { message: `User deleted but failed to remove auth record: ${authError.message}` } };

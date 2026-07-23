@@ -23,6 +23,9 @@ import { useTranslations } from "next-intl";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
+// Escape regex metacharacters so a translated word is matched literally.
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
 const OperationSteps = () => {
   const { resolvedTheme: theme } = useTheme();
   const isSmall = useMediaQuery("(max-width: 640px)");
@@ -158,7 +161,7 @@ const OperationSteps = () => {
                   >
                     {title
                       .split(
-                        new RegExp(`(${highlightedWord})`, "gi")
+                        new RegExp(`(${escapeRegExp(highlightedWord)})`, "gi")
                       )
                       .map((word, wIdx) => {
                         const wordKey = `${stepKey}-word-${wIdx}-${word}`;

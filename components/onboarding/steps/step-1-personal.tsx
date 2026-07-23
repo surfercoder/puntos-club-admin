@@ -284,6 +284,7 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
           />
           <button
             type="button"
+            aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             onClick={() => dispatch({ type: 'TOGGLE_SHOW_PASSWORD' })}
           >

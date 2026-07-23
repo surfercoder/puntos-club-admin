@@ -2,6 +2,19 @@ import { render, screen, fireEvent, act, waitFor } from '@testing-library/react'
 import { PlanSelector } from '@/components/dashboard/plan/plan-selector';
 import { usePlanUsage } from '@/components/providers/plan-usage-provider';
 
+// Stable next-intl mock: return the SAME translator instance across renders so
+// the mount-once subscription-verification effect (deps: [invalidate, tSettings])
+// does not spuriously re-run and cancel itself mid-flight.
+jest.mock('next-intl', () => {
+  const t = (key: string) => key;
+  (t as unknown as { rich: unknown }).rich = (key: string) => key;
+  (t as unknown as { raw: unknown }).raw = () => ({});
+  return {
+    useTranslations: () => t,
+    useLocale: () => 'es',
+  };
+});
+
 // Mock PlanUsageSummary to avoid deep dependency
 jest.mock('@/components/dashboard/plan/plan-usage-summary', () => ({
   PlanUsageSummary: () => <div data-testid="usage-summary">Usage Summary</div>,
@@ -249,6 +262,31 @@ describe('PlanSelector', () => {
     });
   });
 
+  it('shows fallback error toast when fetch fails without an error body', async () => {
+    (usePlanUsage as jest.Mock).mockReturnValue({
+      summary: mockSummary,
+      isLoading: false,
+    });
+
+    (global.fetch as jest.Mock).mockResolvedValue({
+      ok: false,
+      json: () => Promise.resolve({}),
+    });
+
+    await act(async () => { render(<PlanSelector />); });
+
+    fireEvent.click(screen.getByText('advancePlan'));
+
+    const upgradeButton = screen.getByText(/upgradeTo/);
+    await act(async () => {
+      fireEvent.click(upgradeButton);
+    });
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalledWith('paymentInitError');
+    });
+  });
+
   it('shows error toast when fetch throws an exception', async () => {
     (usePlanUsage as jest.Mock).mockReturnValue({
       summary: mockSummary,
@@ -393,6 +431,40 @@ describe('PlanSelector', () => {
     // Should not throw, error is silently caught
     expect(toast.success).not.toHaveBeenCalled();
     expect(toast.info).not.toHaveBeenCalled();
+
+    window.history.replaceState(null, '', '/');
+  });
+
+  it('skips the post-await state update when unmounted before verify resolves', async () => {
+    window.history.replaceState(null, '', '/dashboard/settings/plan?preapproval_id=test-cancel');
+    const { verifySubscriptionAction } = require('@/actions/dashboard/subscription/verify-subscription');
+
+    let resolveVerify: (value: { status: string }) => void = () => {};
+    (verifySubscriptionAction as jest.Mock).mockReturnValue(
+      new Promise<{ status: string }>((resolve) => {
+        resolveVerify = resolve;
+      })
+    );
+
+    (usePlanUsage as jest.Mock).mockReturnValue({
+      summary: mockSummary,
+      isLoading: false,
+      invalidate: jest.fn(),
+    });
+
+    let unmount: () => void = () => {};
+    await act(async () => {
+      ({ unmount } = render(<PlanSelector />));
+    });
+
+    await waitFor(() => expect(verifySubscriptionAction).toHaveBeenCalledWith('test-cancel'));
+
+    // Unmount while verification is still pending; the cleanup flips the flag so
+    // the post-await setState + history mutation are skipped.
+    act(() => { unmount(); });
+    await act(async () => {
+      resolveVerify({ status: 'authorized' });
+    });
 
     window.history.replaceState(null, '', '/');
   });

@@ -198,14 +198,14 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ title, body, ...(/* c8 ignore next */ isEditing ? { notificationId: notification.id } : {}) }),
       });
-      const moderateData = await moderateResponse.json();
-
       if (!moderateResponse.ok) {
-        toast.error(moderateData.error || t('moderationVerifyError'));
+        const moderateError = await moderateResponse.json();
+        toast.error(moderateError.error || t('moderationVerifyError'));
         dispatch({ type: 'MODERATION_ERROR' });
         return;
       }
 
+      const moderateData = await moderateResponse.json();
       dispatch({ type: 'MODERATION_COMPLETE', payload: moderateData.data });
       if (moderateData.data.isApproved) {
         toast.success(moderateData.cached ? t('moderationAlreadyApproved') : t('moderationApproved'));
@@ -235,10 +235,9 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title, body }),
         });
-        const updateData = await updateResponse.json();
-
         if (!updateResponse.ok) {
-          toast.error(updateData.error || t('updateError'));
+          const updateError = await updateResponse.json();
+          toast.error(updateError.error || t('updateError'));
           dispatch({ type: 'CREATE_ERROR' });
           return;
         }
@@ -250,14 +249,14 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ title, body, ...(organizationId ? { organizationId } : {}) }),
         });
-        const createData = await createResponse.json();
-
         if (!createResponse.ok) {
-          toast.error(createData.error || t('createError'));
+          const createError = await createResponse.json();
+          toast.error(createError.error || t('createError'));
           dispatch({ type: 'CREATE_ERROR' });
           return;
         }
 
+        const createData = await createResponse.json();
         notificationId = createData.data.id;
       }
       dispatch({ type: 'CREATED_NOW_SENDING' });
@@ -268,14 +267,14 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ notificationId }),
       });
-      const sendData = await sendResponse.json();
-
       if (!sendResponse.ok) {
-        toast.error(sendData.error || t('sendError'));
+        const sendError = await sendResponse.json();
+        toast.error(sendError.error || t('sendError'));
         dispatch({ type: 'SEND_ERROR' });
         return;
       }
 
+      const sendData = await sendResponse.json();
       toast.success(t('sendSuccess', { sent: sendData.sent, failed: sendData.failed }));
       setTimeout(() => { push(redirectPath); refresh(); }, 1500);
     } catch (_error) {

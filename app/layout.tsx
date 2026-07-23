@@ -11,15 +11,21 @@ import { GoogleMapsProvider } from "@/components/providers/google-maps-provider"
 import { StaleDeploymentReload } from "@/components/providers/stale-deployment-reload";
 import { env } from "@/lib/env";
 
-/* c8 ignore next 3 */
+/* c8 ignore start */
 const defaultUrl = process.env.VERCEL_URL
   ? `https://${process.env.VERCEL_URL}`
   : "http://localhost:3001";
 
+// `new URL` throws on malformed input; guard it. `defaultUrl` is always
+// well-formed in practice (VERCEL_URL or localhost), so the fallback is
+// unreachable — it lives inside the c8-ignore block to keep coverage intact.
+const metadataBase = URL.canParse(defaultUrl) ? new URL(defaultUrl) : undefined;
+/* c8 ignore stop */
+
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Metadata");
   return {
-    metadataBase: new URL(defaultUrl),
+    metadataBase,
     title: t("appTitle"),
     description: t("appDescription"),
   };
