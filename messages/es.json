@@ -681,7 +681,8 @@
         "passwordPlaceholder": "Ingresa la contraseña (opcional)",
         "roleLabel": "Rol",
         "selectRole": "Seleccionar un rol",
-        "roleLimitReached": "{role} (límite alcanzado)"
+        "roleLimitReached": "{role} (límite alcanzado)",
+        "cashierAppQr": "Escaneá para instalar PuntosClubCaja en el celular del cajero"
       },
       "roles": {
         "cashier": "Cajero",

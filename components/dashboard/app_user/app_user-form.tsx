@@ -1,6 +1,7 @@
 "use client";
 
 import { Eye, EyeOff } from 'lucide-react';
+import { QRCodeSVG } from 'qrcode.react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { redirect } from 'next/navigation';
@@ -16,6 +17,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { ActionState} from '@/lib/error-handler';
 import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import { USER_ROLES } from '@/lib/auth/roles';
+import { PUNTOS_CLUB_CAJA_APK_URL } from '@/lib/mobile-apps';
 import { createClient } from '@/lib/supabase/client';
 import { AppUserSchema } from '@/schemas/app_user.schema';
 import { PasswordStrengthChecklist } from '@/components/onboarding/password-strength-checklist';
@@ -41,6 +44,7 @@ export default function AppUserForm({ appUser, currentUserRole }: AppUserFormPro
   // State
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [roles, setRoles] = useReducer((_: UserRole[], next: UserRole[]) => next, [] as UserRole[]);
+  const [roleId, setRoleId] = useState(appUser?.role_id ? String(appUser.role_id) : '');
   const [showPassword, setShowPassword] = useState(false);
   const [passwordValue, setPasswordValue] = useState('');
 
@@ -67,6 +71,8 @@ export default function AppUserForm({ appUser, currentUserRole }: AppUserFormPro
   const visibleRoles = currentUserRole === 'collaborator'
     ? roles.filter((r) => r.name === 'cashier')
     : roles;
+
+  const isCashierSelected = roles.some((r) => String(r.id) === roleId && r.name === USER_ROLES.CASHIER);
 
   useEffect(() => {
     if (actionState.status === 'error' && actionState.message) {
@@ -109,33 +115,55 @@ export default function AppUserForm({ appUser, currentUserRole }: AppUserFormPro
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
       {appUser?.id && <input name="id" type="hidden" value={appUser.id} />}
 
-      <div>
-        <Label htmlFor="role_id">{t('form.roleLabel')}</Label>
-        <Select defaultValue={appUser?.role_id ? String(appUser.role_id) : ''} name="role_id">
-          <SelectTrigger>
-            <SelectValue placeholder={t('form.selectRole')} />
-          </SelectTrigger>
-          <SelectContent>
-            {visibleRoles.map((role) => {
-              const feature = roleToPlanFeature[role.name];
-              const atLimit = feature ? isAtLimit(feature) : false;
-              const roleId = String(role.id);
-              const isCurrentRole = String(appUser?.role_id) === roleId;
-              return (
-                <SelectItem
-                  key={roleId}
-                  value={roleId}
-                  disabled={atLimit && !isCurrentRole}
-                >
-                  {atLimit && !isCurrentRole
-                    ? t('form.roleLimitReached', { role: role.display_name })
-                    : role.display_name}
-                </SelectItem>
-              );
-            })}
-          </SelectContent>
-        </Select>
-        <FieldError actionState={validation ?? actionState} name="role_id" />
+      <div className="flex flex-wrap items-start gap-4">
+        <div className="flex-1">
+          <Label htmlFor="role_id">{t('form.roleLabel')}</Label>
+          <Select value={roleId} onValueChange={setRoleId} name="role_id">
+            <SelectTrigger
+              id="role_id"
+              aria-describedby="role_id-error"
+              aria-invalid={!!(validation ?? actionState).fieldErrors?.role_id}
+            >
+              <SelectValue placeholder={t('form.selectRole')} />
+            </SelectTrigger>
+            <SelectContent>
+              {visibleRoles.map((role) => {
+                const feature = roleToPlanFeature[role.name];
+                const atLimit = feature ? isAtLimit(feature) : false;
+                const optionId = String(role.id);
+                const isCurrentRole = String(appUser?.role_id) === optionId;
+                return (
+                  <SelectItem
+                    key={optionId}
+                    value={optionId}
+                    disabled={atLimit && !isCurrentRole}
+                  >
+                    {atLimit && !isCurrentRole
+                      ? t('form.roleLimitReached', { role: role.display_name })
+                      : role.display_name}
+                  </SelectItem>
+                );
+              })}
+            </SelectContent>
+          </Select>
+          <FieldError actionState={validation ?? actionState} name="role_id" />
+        </div>
+
+        {isCashierSelected && (
+          <a
+            href={PUNTOS_CLUB_CAJA_APK_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex shrink-0 flex-col items-center rounded-lg border p-2"
+          >
+            <div className="rounded-md border-2 border-primary bg-white p-1.5">
+              <QRCodeSVG value={PUNTOS_CLUB_CAJA_APK_URL} size={96} bgColor="#ffffff" fgColor="#31A1D6" level="M" />
+            </div>
+            <span className="mt-1 max-w-28 text-center text-[10px] leading-tight text-muted-foreground">
+              {t('form.cashierAppQr')}
+            </span>
+          </a>
+        )}
       </div>
 
       <div>

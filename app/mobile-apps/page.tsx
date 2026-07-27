@@ -5,17 +5,18 @@ import type { Metadata } from "next";
 
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { PUNTOS_CLUB_APK_URL, PUNTOS_CLUB_CAJA_APK_URL } from "@/lib/mobile-apps";
 
 const apps = [
   {
     titleKey: "puntosClubTitle" as const,
     descriptionKey: "puntosClubDescription" as const,
-    url: "https://drive.google.com/file/d/1MjYbVMHRfsRyZHEAptdtsd6RGE8HNrgV/view?usp=drive_link",
+    url: PUNTOS_CLUB_APK_URL,
   },
   {
     titleKey: "puntosClubCajaTitle" as const,
     descriptionKey: "puntosClubCajaDescription" as const,
-    url: "https://drive.google.com/file/d/1y3iz90_1y_dP_J-kweAG_xXWsmairWe5/view?usp=drive_link",
+    url: PUNTOS_CLUB_CAJA_APK_URL,
   },
 ];
 

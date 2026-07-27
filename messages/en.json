@@ -681,7 +681,8 @@
         "passwordPlaceholder": "Enter password (optional)",
         "roleLabel": "Role",
         "selectRole": "Select a role",
-        "roleLimitReached": "{role} (limit reached)"
+        "roleLimitReached": "{role} (limit reached)",
+        "cashierAppQr": "Scan to install PuntosClubCaja on the cashier's phone"
       },
       "roles": {
         "cashier": "Cashier",
