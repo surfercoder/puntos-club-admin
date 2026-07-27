@@ -10,6 +10,17 @@ const client = new Anthropic({
   apiKey: process.env.ANTHROPIC_API_KEY,
 });
 
+const MODERATION_SCHEMA = {
+  type: 'object',
+  properties: {
+    isApproved: { type: 'boolean' },
+    reasons: { type: 'array', items: { type: 'string' } },
+    severity: { type: 'string', enum: ['low', 'medium', 'high'] },
+  },
+  required: ['isApproved', 'reasons', 'severity'],
+  additionalProperties: false,
+} as const;
+
 export async function moderateNotificationContent(
   title: string,
   body: string
@@ -60,8 +71,10 @@ Si está rechazado, establece isApproved en false, proporciona razones específi
 Para errores de ortografía, usa severity "low" y en las razones indica el error y la corrección sugerida (ej: "Error ortográfico: 'prodcutos' debería ser 'productos'").`;
 
     const message = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+      model: process.env.ANTHROPIC_MODERATION_MODEL ?? 'claude-sonnet-5',
       max_tokens: 1024,
+      thinking: { type: 'disabled' }, // ponytail: classification needs no thinking; keeps output text-only
+      output_config: { format: { type: 'json_schema', schema: MODERATION_SCHEMA } },
       messages: [
         {
           role: 'user',
@@ -70,19 +83,18 @@ Para errores de ortografía, usa severity "low" y en las razones indica el error
       ],
     });
 
-    const responseText = message.content[0].type === 'text' 
-      ? message.content[0].text 
-      : '';
-
-    const jsonMatch = responseText.match(/\{[\s\S]*\}/);
-    if (!jsonMatch) {
-      throw new Error('Formato de respuesta inválido de la IA');
+    // Structured outputs guarantee the text block is JSON matching MODERATION_SCHEMA.
+    const responseText = message.content.find((b) => b.type === 'text')?.text;
+    if (!responseText) {
+      throw new Error('Respuesta vacía de la IA');
     }
 
-    const result: ModerationResult = JSON.parse(jsonMatch[0]);
+    const result: ModerationResult = JSON.parse(responseText);
 
     return result;
   } catch (_error: unknown) {
-    throw new Error('Error al moderar el contenido. Por favor intenta de nuevo.', { cause: _error });
+    console.error('[content-moderator] moderation failed:', _error);
+    const detail = _error instanceof Error ? _error.message : String(_error);
+    throw new Error(`Error al moderar el contenido: ${detail}`, { cause: _error });
   }
 }

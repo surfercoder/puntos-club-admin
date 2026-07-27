@@ -181,6 +181,11 @@ export function GoogleAddressAutocomplete({
       inputEl.removeEventListener('keydown', handleKeyDown);
       inputEl.removeEventListener('blur', handleBlur);
       document.removeEventListener('mousedown', handleDocumentMouseDown);
+      // Fully dispose Google's widget and clear the ref so a remount (e.g. React
+      // StrictMode's setup→cleanup→setup in dev) rebuilds it and re-attaches the
+      // place_changed listener instead of early-returning on a stale ref.
+      google.maps.event.clearInstanceListeners(autocomplete);
+      autocompleteRef.current = null;
     };
   }, [isLoaded]);
 

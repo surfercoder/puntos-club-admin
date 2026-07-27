@@ -172,7 +172,8 @@
       "Bash(git rm *)",
       "Bash(echo \"EXIT_CODE: $?\")",
       "Bash(echo \"CHECKS_EXIT=$?\")",
-      "Bash(echo \"COV_EXIT=$?\")"
+      "Bash(echo \"COV_EXIT=$?\")",
+      "Read(//Users/agustincassani/Documents/projects/surfercoder/puntos-club/puntos-club-admin/**)"
     ],
     "deny": []
   },

@@ -22,6 +22,8 @@ beforeAll(async () => {
 describe('moderateNotificationContent', () => {
   beforeEach(() => {
     mockCreate.mockReset();
+    // Keep the default-model assertion independent of the runner environment.
+    delete process.env.ANTHROPIC_MODERATION_MODEL;
   });
 
   it('returns approved result when AI approves the content', async () => {
@@ -43,7 +45,7 @@ describe('moderateNotificationContent', () => {
     });
     expect(mockCreate).toHaveBeenCalledWith(
       expect.objectContaining({
-        model: 'claude-sonnet-4-20250514',
+        model: 'claude-sonnet-5',
         max_tokens: 1024,
       })
     );
@@ -74,7 +76,7 @@ describe('moderateNotificationContent', () => {
     });
 
     await expect(moderateNotificationContent('T', 'B')).rejects.toThrow(
-      'Error al moderar el contenido. Por favor intenta de nuevo.'
+      'Error al moderar el contenido'
     );
   });
 
@@ -84,7 +86,7 @@ describe('moderateNotificationContent', () => {
     });
 
     await expect(moderateNotificationContent('T', 'B')).rejects.toThrow(
-      'Error al moderar el contenido. Por favor intenta de nuevo.'
+      'Error al moderar el contenido'
     );
   });
 
@@ -92,21 +94,33 @@ describe('moderateNotificationContent', () => {
     mockCreate.mockRejectedValue(new Error('API error'));
 
     await expect(moderateNotificationContent('T', 'B')).rejects.toThrow(
-      'Error al moderar el contenido. Por favor intenta de nuevo.'
+      'Error al moderar el contenido'
     );
   });
 
-  it('parses JSON embedded in surrounding text', async () => {
+  it('stringifies a non-Error rejection', async () => {
+    mockCreate.mockRejectedValue('plain string failure');
+
+    await expect(moderateNotificationContent('T', 'B')).rejects.toThrow(
+      'Error al moderar el contenido: plain string failure'
+    );
+  });
+
+  it('requests structured JSON output via output_config schema', async () => {
     mockCreate.mockResolvedValue({
       content: [
-        {
-          type: 'text',
-          text: 'Here is the result: {"isApproved": true, "reasons": [], "severity": "low"} end',
-        },
+        { type: 'text', text: '{"isApproved": true, "reasons": [], "severity": "low"}' },
       ],
     });
 
-    const result = await moderateNotificationContent('OK', 'Good content');
-    expect(result.isApproved).toBe(true);
+    await moderateNotificationContent('OK', 'Good content');
+
+    expect(mockCreate).toHaveBeenCalledWith(
+      expect.objectContaining({
+        output_config: expect.objectContaining({
+          format: expect.objectContaining({ type: 'json_schema' }),
+        }),
+      })
+    );
   });
 });
