@@ -682,7 +682,8 @@
         "roleLabel": "Rol",
         "selectRole": "Seleccionar un rol",
         "roleLimitReached": "{role} (límite alcanzado)",
-        "cashierAppQr": "Escaneá para instalar PuntosClubCaja en el celular del cajero"
+        "cashierAppQr": "Escaneá para instalar PuntosClubCaja en el celular del cajero",
+        "cashierAppInfo": "El cajero trabaja desde la app PuntosClubCaja en su celular. Pedile que la descargue e instale escaneando este QR e inicie sesión con el correo y la contraseña que definís acá. Desde la app va a poder cargar y canjear puntos de los clientes."
       },
       "roles": {
         "cashier": "Cajero",
@@ -1444,7 +1445,7 @@
       "branchPhonePlaceholder": "Ej: +54 11 1234-5678",
       "createCashier": "Crear primer cajero",
       "cashierOptional": "Opcional · Tu cajero podrá entrar a PuntosClubCaja de inmediato",
-      "cashierHint": "Se creará una cuenta para que el cajero pueda ingresar a la app PuntosClubCaja con estas credenciales. Podrás agregar más cajeros desde el panel de administración.",
+      "cashierHint": "Se creará una cuenta para el cajero. Tené en cuenta que el cajero trabaja desde la app PuntosClubCaja: tiene que descargarla e instalarla en su celular y luego iniciar sesión con estas credenciales para cargar y canjear puntos. En el panel de administración vas a encontrar el QR para descargar la app y podrás agregar más cajeros.",
       "cashierEmail": "Email del cajero",
       "cashierEmailPlaceholder": "cajero@tunegocio.com",
       "cashierFirstNamePlaceholder": "Ej: Juan",

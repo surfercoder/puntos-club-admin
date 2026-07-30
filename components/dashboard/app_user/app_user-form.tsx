@@ -1,6 +1,6 @@
 "use client";
 
-import { Eye, EyeOff } from 'lucide-react';
+import { Eye, EyeOff, Info } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -165,6 +165,13 @@ export default function AppUserForm({ appUser, currentUserRole }: AppUserFormPro
           </a>
         )}
       </div>
+
+      {isCashierSelected && (
+        <div className="flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+          <Info className="mt-0.5 size-4 shrink-0 text-primary" />
+          <span>{t('form.cashierAppInfo')}</span>
+        </div>
+      )}
 
       <div>
         <Label htmlFor="first_name">{t('form.firstNameLabel')}</Label>

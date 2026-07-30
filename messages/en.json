@@ -682,7 +682,8 @@
         "roleLabel": "Role",
         "selectRole": "Select a role",
         "roleLimitReached": "{role} (limit reached)",
-        "cashierAppQr": "Scan to install PuntosClubCaja on the cashier's phone"
+        "cashierAppQr": "Scan to install PuntosClubCaja on the cashier's phone",
+        "cashierAppInfo": "The cashier works from the PuntosClubCaja app on their phone. Ask them to download and install it by scanning this QR and sign in with the email and password you set here. From the app they'll be able to add and redeem customer points."
       },
       "roles": {
         "cashier": "Cashier",
@@ -1444,7 +1445,7 @@
       "branchPhonePlaceholder": "e.g. +1 555 123-4567",
       "createCashier": "Create first cashier",
       "cashierOptional": "Optional · Your cashier will be able to log in to PuntosClubCaja immediately",
-      "cashierHint": "An account will be created so the cashier can log in to the PuntosClubCaja app with these credentials. You can add more cashiers from the admin panel.",
+      "cashierHint": "An account will be created for the cashier. Keep in mind the cashier works from the PuntosClubCaja app: they need to download and install it on their phone and then sign in with these credentials to add and redeem points. In the admin panel you'll find the QR to download the app, and you can add more cashiers there.",
       "cashierEmail": "Cashier email",
       "cashierEmailPlaceholder": "cashier@yourbusiness.com",
       "cashierFirstNamePlaceholder": "e.g. John",
