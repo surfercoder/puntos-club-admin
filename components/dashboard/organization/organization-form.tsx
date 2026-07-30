@@ -12,6 +12,7 @@ import FieldError from '@/components/ui/field-error';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import type { ActionState} from '@/lib/error-handler';
 import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { OrganizationSchema } from '@/schemas/organization.schema';
@@ -113,6 +114,20 @@ export default function OrganizationForm({ organization, onSuccess, onCancel, re
           type="text"
         />
         <FieldError actionState={validation ?? actionState} name="tax_id" />
+      </div>
+
+      <div>
+        <Label htmlFor="public_info">{t('form.publicInfo')}</Label>
+        <Textarea
+          aria-describedby="public_info-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.public_info}
+          defaultValue={organization?.public_info ?? ''}
+          id="public_info"
+          name="public_info"
+          placeholder={t('form.publicInfoPlaceholder')}
+          rows={5}
+        />
+        <FieldError actionState={validation ?? actionState} name="public_info" />
       </div>
 
       <div>

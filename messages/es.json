@@ -375,7 +375,9 @@
         "nameLabel": "Nombre",
         "namePlaceholder": "Ingresa el nombre de la organización",
         "legalNamePlaceholder": "Ingresa la razón social (opcional)",
-        "taxIdPlaceholder": "Ingresa el CUIT o RUT (opcional)"
+        "taxIdPlaceholder": "Ingresa el CUIT o RUT (opcional)",
+        "publicInfo": "Información pública",
+        "publicInfoPlaceholder": "Texto que verán los clientes en la app: sucursales, teléfono, mail de contacto, instagram, etc."
       },
       "detailPage": {
         "subtitle": "Detalles de la organización y productos disponibles",

@@ -375,7 +375,9 @@
         "nameLabel": "Name",
         "namePlaceholder": "Enter organization name",
         "legalNamePlaceholder": "Enter legal name (optional)",
-        "taxIdPlaceholder": "Enter tax ID (optional)"
+        "taxIdPlaceholder": "Enter tax ID (optional)",
+        "publicInfo": "Public info",
+        "publicInfoPlaceholder": "Text customers see in the app: branches, phone, contact email, instagram, etc."
       },
       "detailPage": {
         "subtitle": "Organization details and available products",

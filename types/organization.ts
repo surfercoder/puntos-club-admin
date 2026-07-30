@@ -5,6 +5,7 @@ export type Organization = {
   name: string;
   business_name?: string | null;
   tax_id?: string | null;
+  public_info?: string | null;
   logo_url?: string | null;
   creation_date: string;
   plan: PlanType;
