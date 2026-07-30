@@ -16,6 +16,7 @@ jest.mock('@/lib/supabase/server', () => ({
 }));
 jest.mock('@/lib/auth/get-current-user', () => ({ getCurrentUser: jest.fn(() => Promise.resolve({ id: '1', organization: { id: '1', name: 'Test Org' } })) }));
 jest.mock('@/components/dashboard/qr/org-qr-display', () => ({ OrgQRDisplay: () => <div data-testid="qr-display" /> }));
+jest.mock('@/components/mobile-apps/app-download-qr-cards', () => ({ AppDownloadQRCards: () => <div data-testid="app-qr-display" /> }));
 
 describe('QRPage', () => {
   beforeEach(() => { jest.clearAllMocks(); });

@@ -7,6 +7,7 @@ import { getTranslations } from 'next-intl/server';
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { OrgQRDisplay } from '@/components/dashboard/qr/org-qr-display';
+import { AppDownloadQRCards } from '@/components/mobile-apps/app-download-qr-cards';
 
 export async function generateMetadata(): Promise<Metadata> {
   const tMeta = await getTranslations('Metadata');
@@ -71,16 +72,22 @@ export default async function QRPage() {
     <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
-        <p className="text-muted-foreground text-sm mt-1">
-          {t('description')} <strong>{org.name}</strong>
-        </p>
+        <p className="text-muted-foreground text-sm mt-1">{t('description')}</p>
       </div>
 
-      <OrgQRDisplay
-        organizationId={Number(org.id)}
-        organizationName={org.name}
-        logoUrl={org.logo_url}
-      />
+      <section className="space-y-3">
+        <h2 className="text-lg font-medium tracking-tight">{t('orgSectionTitle')}</h2>
+        <OrgQRDisplay
+          organizationId={Number(org.id)}
+          organizationName={org.name}
+          logoUrl={org.logo_url}
+        />
+      </section>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-medium tracking-tight">{t('downloadSectionTitle')}</h2>
+        <AppDownloadQRCards />
+      </section>
     </div>
   );
 }

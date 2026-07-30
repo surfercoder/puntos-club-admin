@@ -6,6 +6,8 @@ jest.mock('qrcode.react', () => ({ QRCodeSVG: (props: Record<string, unknown>) =
 jest.mock('lucide-react', () => ({
   Smartphone: () => <svg data-testid="smartphone-icon" />,
   Download: () => <svg data-testid="download-icon" />,
+  Printer: () => <svg data-testid="printer-icon" />,
+  Share2: () => <svg data-testid="share-icon" />,
 }));
 jest.mock('@/components/ui/button', () => ({
   Button: ({ children, ...props }: { children: React.ReactNode } & Record<string, unknown>) => <button {...props}>{children}</button>,

@@ -1,24 +1,8 @@
-import { QRCodeSVG } from "qrcode.react";
-import { Download, Smartphone } from "lucide-react";
+import { Smartphone } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import type { Metadata } from "next";
 
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PUNTOS_CLUB_APK_URL, PUNTOS_CLUB_CAJA_APK_URL } from "@/lib/mobile-apps";
-
-const apps = [
-  {
-    titleKey: "puntosClubTitle" as const,
-    descriptionKey: "puntosClubDescription" as const,
-    url: PUNTOS_CLUB_APK_URL,
-  },
-  {
-    titleKey: "puntosClubCajaTitle" as const,
-    descriptionKey: "puntosClubCajaDescription" as const,
-    url: PUNTOS_CLUB_CAJA_APK_URL,
-  },
-];
+import { AppDownloadQRCards } from "@/components/mobile-apps/app-download-qr-cards";
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Metadata");
@@ -43,35 +27,7 @@ export default async function MobileAppsPage() {
         <p className="mt-2 text-muted-foreground">{t("subtitle")}</p>
       </div>
 
-      <div className="grid gap-8 sm:grid-cols-2">
-        {apps.map((app) => (
-          <Card key={app.titleKey} className="flex flex-col items-center">
-            <CardHeader className="w-full pb-3 text-center">
-              <CardTitle className="text-xl">{t(app.titleKey)}</CardTitle>
-              <p className="text-sm text-muted-foreground">{t(app.descriptionKey)}</p>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center gap-4">
-              <div className="rounded-2xl border-4 border-primary bg-white p-6 shadow-md">
-                <QRCodeSVG
-                  value={app.url}
-                  size={200}
-                  bgColor="#ffffff"
-                  fgColor="#31A1D6"
-                  level="H"
-                  includeMargin={false}
-                />
-              </div>
-              <p className="text-xs text-muted-foreground">{t("scanToDownload")}</p>
-              <Button asChild className="w-full sm:hidden">
-                <a href={app.url} target="_blank" rel="noopener noreferrer">
-                  <Download className="mr-2 size-4" />
-                  {t("download")}
-                </a>
-              </Button>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+      <AppDownloadQRCards />
 
       <p className="mt-8 text-center text-sm text-muted-foreground">
         {t("androidOnly")}

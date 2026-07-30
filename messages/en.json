@@ -698,8 +698,10 @@
       }
     },
     "qr": {
-      "title": "QR Code",
-      "description": "Print or share this code so your customers can join your loyalty program.",
+      "title": "QR Codes",
+      "description": "Share your organization QR so customers can follow you, plus the QR codes to download the apps.",
+      "orgSectionTitle": "Your organization QR",
+      "downloadSectionTitle": "Download the apps",
       "noOrg": "No active organization found.",
       "createOrg": "Create organization",
       "orgNotFound": "Organization not found.",
@@ -1532,6 +1534,10 @@
       "reviewBack": "Go back and review",
       "tryAgain": "Try again",
       "businessReady": "Your business is ready!",
+      "orgQrTitle": "Your organization QR",
+      "orgQrDescription": "Share it so your customers follow you and earn points on every purchase.",
+      "downloadAppsTitle": "Download the apps",
+      "downloadAppsDescription": "Download the Puntos Club apps for Android by scanning these QR codes.",
       "download": "Download",
       "print": "Print",
       "share": "Share",

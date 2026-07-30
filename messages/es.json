@@ -698,8 +698,10 @@
       }
     },
     "qr": {
-      "title": "Código QR",
-      "description": "Imprime o comparte este código para que tus clientes se unan a tu programa de fidelización.",
+      "title": "Códigos QR",
+      "description": "Compartí el QR de tu organización para que tus clientes te sigan, y los QR para descargar las apps.",
+      "orgSectionTitle": "QR de tu organización",
+      "downloadSectionTitle": "Descargá las apps",
       "noOrg": "No se encontró ninguna organización activa.",
       "createOrg": "Crear organización",
       "orgNotFound": "Organización no encontrada.",
@@ -1532,6 +1534,10 @@
       "reviewBack": "Volver a revisar",
       "tryAgain": "Intentar de nuevo",
       "businessReady": "¡Tu negocio está listo!",
+      "orgQrTitle": "QR de tu organización",
+      "orgQrDescription": "Compartilo para que tus clientes te sigan y acumulen puntos en cada compra.",
+      "downloadAppsTitle": "Descargá las apps",
+      "downloadAppsDescription": "Descargá las apps de Puntos Club para Android escaneando estos códigos QR.",
       "download": "Descargar",
       "print": "Imprimir",
       "share": "Compartir",

@@ -1,22 +1,12 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { QRCodeSVG } from 'qrcode.react';
-import {
-  AlertCircle,
-  ArrowLeft,
-  Download,
-  ExternalLink,
-  Loader2,
-  PartyPopper,
-  Printer,
-  RefreshCw,
-  Share2,
-} from 'lucide-react';
-import { toast } from 'sonner';
+import { AlertCircle, ArrowLeft, Loader2, PartyPopper, RefreshCw } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { QRPreviewCard } from '@/components/dashboard/qr/qr-preview-card';
+import { AppDownloadQRCards } from '@/components/mobile-apps/app-download-qr-cards';
 import { completeOnboarding } from '@/actions/onboarding/actions';
 import type { OnboardingStep2Data, OnboardingStep4Data } from '@/actions/onboarding/actions';
 
@@ -123,113 +113,7 @@ function QRSuccessView({
   onFinish: () => void;
   t: ReturnType<typeof useTranslations>;
 }) {
-  const qrContainerRef = useRef<HTMLDivElement>(null);
-
   const qrData = JSON.stringify({ type: 'organization', id: organizationId, name: orgName });
-
-  const handleDownload = async () => {
-    const svgEl = qrContainerRef.current?.querySelector('svg');
-    if (!svgEl) return;
-    const canvas = document.createElement('canvas');
-    const size = 400;
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const svgData = new XMLSerializer().serializeToString(svgEl);
-    const img = new window.Image();
-    // Data URI needs no revoke; avoids an object URL kept alive across the decode await.
-    img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgData)}`;
-    try {
-      await img.decode();
-    } catch {
-      return;
-    }
-    ctx.fillStyle = '#ffffff';
-    ctx.fillRect(0, 0, size, size);
-    ctx.drawImage(img, 0, 0, size, size);
-    canvas.toBlob((blob) => {
-      if (!blob) return;
-      const downloadUrl = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = downloadUrl;
-      a.download = `qr-${orgName.toLowerCase().replace(/\s+/g, '-')}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      URL.revokeObjectURL(downloadUrl);
-      toast.success(t('download'));
-    }, 'image/png');
-  };
-
-  const handleShare = async () => {
-    const svgEl = qrContainerRef.current?.querySelector('svg');
-    if (!svgEl) return;
-    const canvas = document.createElement('canvas');
-    const size = 400;
-    canvas.width = size;
-    canvas.height = size;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-    const svgData = new XMLSerializer().serializeToString(svgEl);
-    const img = new window.Image();
-    // Data URI needs no revoke; avoids an object URL kept alive across the decode await.
-    img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgData)}`;
-
-    let blob: Blob | null = null;
-    try {
-      await img.decode();
-      ctx.fillStyle = '#ffffff';
-      ctx.fillRect(0, 0, size, size);
-      ctx.drawImage(img, 0, 0, size, size);
-      blob = await new Promise<Blob | null>((resolve) => canvas.toBlob((b) => resolve(b), 'image/png'));
-    } catch {
-      // Image decode failed; blob stays null and we bail out below.
-    }
-
-    if (!blob) return;
-
-    const file = new File(
-      [blob],
-      `qr-${orgName.toLowerCase().replace(/\s+/g, '-')}-puntosclub.png`,
-      { type: 'image/png' },
-    );
-
-    if (navigator.share && navigator.canShare?.({ files: [file] })) {
-      try {
-        await navigator.share({
-          title: `${orgName} - Puntos Club`,
-          text: t('shareText', { name: orgName }),
-          files: [file],
-        });
-      } catch {
-        // User cancelled
-      }
-    } else if (navigator.share) {
-      try {
-        await navigator.share({
-          title: `${orgName} - Puntos Club`,
-          text: t('shareText', { name: orgName }),
-        });
-      } catch {
-        // User cancelled
-      }
-    } else {
-      handleDownload();
-    }
-  };
-
-  const handlePrint = () => {
-    const svgEl = qrContainerRef.current?.querySelector('svg');
-    if (!svgEl) return;
-    const svgData = svgEl.outerHTML;
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) return;
-    printWindow.document.write(`<!DOCTYPE html><html><head><title>QR - ${orgName}</title><style>body{margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui,sans-serif;background:white}.container{text-align:center;padding:40px}.brand{font-size:14px;color:#FF4573;margin-bottom:16px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}.qr-wrapper{display:inline-block;padding:16px;border:3px solid #31A1D6;border-radius:12px}.org-name{font-size:24px;font-weight:bold;color:#1A1A2E;margin-top:20px}svg{display:block}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body><div class="container"><div class="brand">Puntos Club</div><div class="qr-wrapper">${svgData}</div><div class="org-name">${orgName}</div></div></body></html>`);
-    printWindow.document.close();
-    printWindow.focus();
-    setTimeout(() => printWindow.print(), 500);
-  };
 
   return (
     <div className="space-y-8">
@@ -240,53 +124,26 @@ function QRSuccessView({
         <h3 className="text-xl font-semibold text-foreground">{t('businessReady')}</h3>
       </div>
 
-      <div className="flex justify-center">
-        <div className="relative">
-          <div ref={qrContainerRef} className="rounded-2xl border-4 border-primary bg-white p-6 shadow-lg">
-            <QRCodeSVG value={qrData} size={240} bgColor="#ffffff" fgColor="#31A1D6" level="H" includeMargin={false} />
-          </div>
-          <div className="mt-3 text-center">
-            <p className="text-sm font-semibold text-foreground">{orgName}</p>
-            <p className="text-xs text-muted-foreground">ID: {organizationId}</p>
-          </div>
+      <section className="space-y-3">
+        <div className="text-center">
+          <h4 className="font-semibold text-foreground">{t('orgQrTitle')}</h4>
+          <p className="text-sm text-muted-foreground">{t('orgQrDescription')}</p>
         </div>
-      </div>
+        <div className="mx-auto w-full max-w-sm">
+          <QRPreviewCard qrData={qrData} organizationName={orgName} logoUrl={null} />
+        </div>
+      </section>
 
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-        <Button type="button" variant="outline" className="gap-2" onClick={handleDownload}>
-          <Download className="size-4" /> {t('download')}
-        </Button>
-        <Button type="button" variant="outline" className="gap-2" onClick={handlePrint}>
-          <Printer className="size-4" /> {t('print')}
-        </Button>
-        <Button type="button" variant="outline" className="gap-2 col-span-2 sm:col-span-1" onClick={handleShare}>
-          <Share2 className="size-4" /> {t('share')}
-        </Button>
-      </div>
+      <section className="space-y-3">
+        <div className="text-center">
+          <h4 className="font-semibold text-foreground">{t('downloadAppsTitle')}</h4>
+          <p className="text-sm text-muted-foreground">{t('downloadAppsDescription')}</p>
+        </div>
+        <AppDownloadQRCards />
+      </section>
 
-      <div className="rounded-lg border bg-muted/50 p-4 space-y-3">
-        <h4 className="font-semibold text-sm text-foreground">{t('howToUseQR')}</h4>
-        <ol className="space-y-2 text-sm text-muted-foreground">
-          {[
-            { key: 'step1', text: t('step1') },
-            { key: 'step2', text: t('step2') },
-            { key: 'step3', text: t('step3') },
-          ].map((step, idx) => (
-            <li key={step.key} className="flex gap-2">
-              <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/15 text-primary text-xs font-bold">
-                {idx + 1}
-              </span>
-              <span>{step.text}</span>
-            </li>
-          ))}
-        </ol>
-      </div>
-
-      <div className="flex flex-col gap-3 pt-2 sm:flex-row">
-        <Button type="button" variant="outline" className="gap-2 flex-1" onClick={() => window.open('/dashboard/qr', '_blank')}>
-          <ExternalLink className="size-4" /> {t('viewQRInPanel')}
-        </Button>
-        <Button type="button" className="flex-1" onClick={onFinish}>
+      <div className="flex justify-center pt-2">
+        <Button type="button" className="min-w-48" onClick={onFinish}>
           {t('goToDashboard')}
         </Button>
       </div>
