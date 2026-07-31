@@ -184,7 +184,7 @@ export async function POST(request: NextRequest) {
       data: {
         notificationId: notification.id,
         organizationId: notification.organization_id,
-        url: '/(tabs)',
+        url: `/organization/${notification.organization_id}`,
       },
     }));
 
