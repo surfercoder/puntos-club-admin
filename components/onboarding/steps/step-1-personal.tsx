@@ -12,6 +12,12 @@ import { Label } from '@/components/ui/label';
 import type { Step1CompletedData } from '@/components/onboarding/onboarding-wizard';
 import { PasswordStrengthChecklist } from '@/components/onboarding/password-strength-checklist';
 import { allRulesPass } from '@/components/onboarding/password-rules';
+import {
+  LS_FIRST_NAME,
+  LS_LAST_NAME,
+  LS_EMAIL,
+  clearOnboardingLocalStorage,
+} from '@/lib/onboarding-storage';
 
 interface Step1Props {
   onNext: (data?: Step1CompletedData) => void;
@@ -174,10 +180,18 @@ function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData)
       return;
     }
 
+    // Fresh registration for a different email → wipe any wizard state left
+    // over from a previous account so it can't leak into this one.
+    const trimmedEmail = email.trim();
+    const prevEmail = localStorage.getItem(LS_EMAIL);
+    if (prevEmail && prevEmail.toLowerCase() !== trimmedEmail.toLowerCase()) {
+      clearOnboardingLocalStorage();
+    }
+
     // Store in localStorage so the completed view can hydrate from it
-    localStorage.setItem('onboarding_first_name', firstName.trim());
-    localStorage.setItem('onboarding_last_name', lastName.trim());
-    localStorage.setItem('onboarding_email', email.trim());
+    localStorage.setItem(LS_FIRST_NAME, firstName.trim());
+    localStorage.setItem(LS_LAST_NAME, lastName.trim());
+    localStorage.setItem(LS_EMAIL, trimmedEmail);
 
     dispatch({ type: 'SET_EMAIL_SENT', value: true });
   };

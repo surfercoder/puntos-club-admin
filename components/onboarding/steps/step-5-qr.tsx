@@ -28,6 +28,22 @@ type State =
   | { status: 'error'; message: string }
   | { status: 'missing_data' };
 
+async function runCreation(
+  step2: OnboardingStep2Data,
+  plan: string | undefined,
+  mpPreapprovalId: string | null | undefined,
+  step4: OnboardingStep4Data | null | undefined,
+): Promise<State> {
+  try {
+    const result = await completeOnboarding({ step2, plan, mpPreapprovalId: mpPreapprovalId ?? undefined, step4 });
+    return result.success && result.data
+      ? { status: 'success', organizationId: result.data.organizationId, orgName: result.data.orgName }
+      : { status: 'error', message: result.error ?? 'Error desconocido.' };
+  } catch {
+    return { status: 'error', message: 'Error de conexión. Por favor intenta de nuevo.' };
+  }
+}
+
 // ─── Status screens ──────────────────────────────────────────────────────────
 
 function CreatingScreen({ t }: { t: ReturnType<typeof useTranslations> }) {
@@ -165,7 +181,12 @@ export function Step5QR({
   onCreationComplete,
 }: Step5Props) {
   const t = useTranslations('Onboarding.step6');
-  const hasRun = useRef(false);
+  // ponytail: the promise is created once and cached in this ref, so the
+  // non-idempotent completeOnboarding call fires exactly once even under
+  // StrictMode's dev remount. Each effect run subscribes with its own `active`
+  // flag, so the real result is always applied (no stuck spinner) while a
+  // genuine unmount safely skips the setState.
+  const creationRef = useRef<Promise<State> | null>(null);
   const prevStatusRef = useRef<State['status'] | null>(null);
 
   const [state, setState] = useState<State>(() => {
@@ -177,29 +198,18 @@ export function Step5QR({
   });
 
   useEffect(() => {
-    if (hasRun.current) return;
     if (state.status !== 'creating') return;
-    hasRun.current = true;
 
-    let cancelled = false;
-
-    (async () => {
-      let nextState: State;
-      try {
-        const result = await completeOnboarding({ step2: step2Data!, plan: selectedPlan, mpPreapprovalId: mpPreapprovalId ?? undefined, step4: step4Data });
-        nextState = result.success && result.data
-          ? { status: 'success', organizationId: result.data.organizationId, orgName: result.data.orgName }
-          : { status: 'error', message: result.error ?? 'Error desconocido.' };
-      } catch {
-        nextState = { status: 'error', message: 'Error de conexión. Por favor intenta de nuevo.' };
-      }
-      if (!cancelled) {
-        setState(nextState);
-      }
-    })();
+    let active = true;
+    const creation =
+      creationRef.current ??
+      (creationRef.current = runCreation(step2Data!, selectedPlan, mpPreapprovalId, step4Data));
+    creation.then((nextState) => {
+      if (active) setState(nextState);
+    });
 
     return () => {
-      cancelled = true;
+      active = false;
     };
   }, [state.status, step2Data, selectedPlan, mpPreapprovalId, step4Data]);
 
@@ -211,7 +221,7 @@ export function Step5QR({
   }, [state.status, onCreationComplete]);
 
   const handleRetry = () => {
-    hasRun.current = false;
+    creationRef.current = null;
     setState({ status: 'creating' });
   };
 

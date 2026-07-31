@@ -21,6 +21,16 @@ import { Step4Products } from './steps/step-4-products';
 import { Step5Consent } from './steps/step-5-consent';
 import { Step5QR } from './steps/step-5-qr';
 import type { OnboardingStep2Data, OnboardingStep4Data } from '@/actions/onboarding/actions';
+import {
+  LS_MAX_STEP,
+  LS_STEP2,
+  LS_STEP4,
+  LS_PLAN,
+  LS_MP_PREAPPROVAL_ID,
+  LS_CONSENT,
+  LS_EMAIL,
+  clearOnboardingLocalStorage,
+} from '@/lib/onboarding-storage';
 
 export interface Step1CompletedData {
   firstName: string;
@@ -37,27 +47,6 @@ interface OnboardingWizardProps {
   initialOrgName?: string;
 }
 
-const LS_MAX_STEP = 'onboarding_max_step';
-const LS_STEP2 = 'onboarding_step2';
-const LS_STEP4 = 'onboarding_step4';
-const LS_PLAN = 'onboarding_plan';
-const LS_MP_PREAPPROVAL_ID = 'mp_preapproval_id';
-const LS_CONSENT = 'onboarding_consent';
-
-function clearOnboardingLocalStorage() {
-  [
-    'onboarding_first_name',
-    'onboarding_last_name',
-    'onboarding_email',
-    'onboarding_org_name',
-    LS_PLAN,
-    LS_MP_PREAPPROVAL_ID,
-    LS_STEP2,
-    LS_STEP4,
-    LS_CONSENT,
-    LS_MAX_STEP,
-  ].forEach((key) => localStorage.removeItem(key));
-}
 
 function lsGet<T>(key: string): T | null {
   try {
@@ -107,6 +96,16 @@ function computeInitialWizardState({
   };
 
   if (typeof window === 'undefined') return base;
+
+  // If the authenticated user isn't the one this saved onboarding belongs to,
+  // it's stale from a previous account — wipe it so nothing leaks across users.
+  if (initialUserInfo?.email) {
+    const storedEmail = localStorage.getItem(LS_EMAIL);
+    if (storedEmail && storedEmail.toLowerCase() !== initialUserInfo.email.toLowerCase()) {
+      clearOnboardingLocalStorage();
+      return base;
+    }
+  }
 
   const storedMaxRaw = parseInt(localStorage.getItem(LS_MAX_STEP) ?? '0', 10);
   if (!initialOrganizationId && storedMaxRaw >= 6) {

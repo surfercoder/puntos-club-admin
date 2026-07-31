@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { PUNTOS_CLUB_APK_URL, PUNTOS_CLUB_CAJA_APK_URL } from '@/lib/mobile-apps';
 
 const apps = [
@@ -144,19 +145,21 @@ function AppQRCard({ app }: { app: (typeof apps)[number] }) {
         </div>
         <p className="text-xs text-muted-foreground">{t('scanToDownload')}</p>
 
-        <div className="grid w-full grid-cols-3 gap-2">
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleDownload}>
-            <Download className="size-3.5" />
-            <span className="hidden sm:inline">{tActions('download')}</span>
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={handlePrint}>
-            <Printer className="size-3.5" />
-            <span className="hidden sm:inline">{tActions('print')}</span>
-          </Button>
-          <Button variant="outline" size="sm" className="gap-1.5" onClick={handleShare}>
-            <Share2 className="size-3.5" />
-            <span className="hidden sm:inline">{tActions('share')}</span>
-          </Button>
+        <div className="flex w-full items-center justify-center gap-2">
+          {[
+            { icon: Download, label: tActions('download'), onClick: handleDownload },
+            { icon: Printer, label: tActions('print'), onClick: handlePrint },
+            { icon: Share2, label: tActions('share'), onClick: handleShare },
+          ].map(({ icon: Icon, label, onClick }) => (
+            <Tooltip key={label}>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="icon" onClick={onClick} aria-label={label}>
+                  <Icon className="size-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{label}</TooltipContent>
+            </Tooltip>
+          ))}
         </div>
 
         <Button asChild className="w-full sm:hidden">
@@ -174,10 +177,12 @@ function AppQRCard({ app }: { app: (typeof apps)[number] }) {
 // the dashboard QR page, and the last onboarding step.
 export function AppDownloadQRCards() {
   return (
-    <div className="grid gap-8 sm:grid-cols-2">
-      {apps.map((app) => (
-        <AppQRCard key={app.titleKey} app={app} />
-      ))}
-    </div>
+    <TooltipProvider>
+      <div className="grid gap-8 sm:grid-cols-2">
+        {apps.map((app) => (
+          <AppQRCard key={app.titleKey} app={app} />
+        ))}
+      </div>
+    </TooltipProvider>
   );
 }

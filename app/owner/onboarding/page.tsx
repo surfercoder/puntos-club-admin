@@ -33,6 +33,13 @@ export default async function OwnerOnboardingPage({ searchParams }: PageProps) {
     createClient(),
   ]);
 
+  // A user who already finished onboarding has nothing to configure here —
+  // send them to the dashboard instead of showing a stale "step 1 completed"
+  // card for their old account. (To register a new account, log out first.)
+  if (statusResult.success && statusResult.status === 'complete') {
+    redirect('/dashboard');
+  }
+
   // Derive step-1 completion from auth state — independent of URL param
   const step1Completed =
     statusResult.success && statusResult.status !== 'unauthenticated';
@@ -50,26 +57,13 @@ export default async function OwnerOnboardingPage({ searchParams }: PageProps) {
       }
     : null;
 
-  // Org info is only available server-side when the user already completed onboarding
-  let organizationId: number | null = null;
-  let initialOrgName = '';
-
-  if (statusResult.success && statusResult.status === 'complete' && statusResult.data) {
-    const data = statusResult.data as {
-      organizationId?: number | string;
-      org?: { name?: string };
-    };
-    organizationId = data.organizationId ? Number(data.organizationId) : null;
-    initialOrgName = data.org?.name ?? '';
-  }
-
   return (
     <OnboardingWizard
       initialStep={requestedStep}
       initialStep1Completed={step1Completed}
       initialUserInfo={initialUserInfo}
-      initialOrganizationId={organizationId}
-      initialOrgName={initialOrgName}
+      initialOrganizationId={null}
+      initialOrgName=""
     />
   );
 }

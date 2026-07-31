@@ -1,13 +1,23 @@
 import { GET } from '@/app/auth/complete-registration/route';
 
 const mockCreateUser = jest.fn();
+const mockListUsers = jest.fn();
+const mockUpdateUserById = jest.fn();
 const mockSignInWithPassword = jest.fn();
 
 jest.mock('@/lib/supabase/admin', () => ({
   createAdminClient: jest.fn(() => ({
-    auth: { admin: { createUser: mockCreateUser } },
+    auth: {
+      admin: {
+        createUser: mockCreateUser,
+        listUsers: mockListUsers,
+        updateUserById: mockUpdateUserById,
+      },
+    },
   })),
 }));
+
+jest.mock('@sentry/nextjs', () => ({ captureException: jest.fn() }));
 
 jest.mock('@/lib/supabase/server', () => ({
   createClient: jest.fn(() => Promise.resolve({
@@ -26,6 +36,11 @@ describe('Complete Registration Route', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCreateUser.mockResolvedValue({ error: null });
+    mockListUsers.mockResolvedValue({
+      data: { users: [{ id: 'existing-id', email: 'test@test.com' }] },
+      error: null,
+    });
+    mockUpdateUserById.mockResolvedValue({ error: null });
     mockSignInWithPassword.mockResolvedValue({ error: null });
   });
 
@@ -66,7 +81,7 @@ describe('Complete Registration Route', () => {
     });
   });
 
-  it('treats "already registered" as OK', async () => {
+  it('on "already registered", resets the password and signs in', async () => {
     mockCreateUser.mockResolvedValueOnce({
       error: { message: 'A user with this email address has already been registered' },
     });
@@ -75,6 +90,66 @@ describe('Complete Registration Route', () => {
     const response = await GET(request);
     expect(response.status).toBe(307);
     expect(response.headers.get('location')).toContain('/owner/onboarding');
+    expect(mockUpdateUserById).toHaveBeenCalledWith(
+      'existing-id',
+      expect.objectContaining({ password: 'pass123', email_confirm: true }),
+    );
+    expect(mockSignInWithPassword).toHaveBeenCalled();
+  });
+
+  it('errors when an existing user cannot be found to update', async () => {
+    mockCreateUser.mockResolvedValueOnce({
+      error: { message: 'A user with this email address has already been registered' },
+    });
+    mockListUsers.mockResolvedValueOnce({ data: { users: [] }, error: null });
+
+    const request = { url: 'http://localhost:3001/auth/complete-registration?token=valid' } as Request;
+    const response = await GET(request);
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toContain('/auth/error');
+  });
+
+  it('redirects to error when the existing user is not found across all pages', async () => {
+    mockCreateUser.mockResolvedValueOnce({
+      error: { message: 'A user with this email address has already been registered' },
+    });
+    // Every page is full (200) and never matches, so the lookup scans all
+    // pages and exits without finding the user.
+    mockListUsers.mockResolvedValue({
+      data: { users: Array.from({ length: 200 }, (_, i) => ({ id: `u${i}`, email: `other${i}@test.com` })) },
+      error: null,
+    });
+
+    const request = { url: 'http://localhost:3001/auth/complete-registration?token=valid' } as Request;
+    const response = await GET(request);
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toContain('/auth/error');
+    expect(mockListUsers).toHaveBeenCalledTimes(20);
+  });
+
+  it('redirects to error when listing users fails during lookup', async () => {
+    mockCreateUser.mockResolvedValueOnce({
+      error: { message: 'A user with this email address has already been registered' },
+    });
+    mockListUsers.mockResolvedValueOnce({ data: null, error: { message: 'list boom' } });
+
+    const request = { url: 'http://localhost:3001/auth/complete-registration?token=valid' } as Request;
+    const response = await GET(request);
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toContain('/auth/error');
+  });
+
+  it('redirects to error when updating the existing user fails', async () => {
+    mockCreateUser.mockResolvedValueOnce({
+      error: { message: 'A user with this email address has already been registered' },
+    });
+    mockUpdateUserById.mockResolvedValueOnce({ error: { message: 'update boom' } });
+
+    const request = { url: 'http://localhost:3001/auth/complete-registration?token=valid' } as Request;
+    const response = await GET(request);
+    expect(response.status).toBe(307);
+    expect(response.headers.get('location')).toContain('/auth/error');
+    expect(mockSignInWithPassword).not.toHaveBeenCalled();
   });
 
   it('redirects to error when createUser fails with other error', async () => {
