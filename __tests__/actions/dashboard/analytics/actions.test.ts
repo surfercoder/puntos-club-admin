@@ -64,10 +64,11 @@ beforeEach(() => {
 // Helper: build a date string in a given month offset from now
 // ---------------------------------------------------------------------------
 function dateInMonth(monthsAgo: number): string {
-  const d = new Date();
-  d.setMonth(d.getMonth() - monthsAgo);
-  d.setDate(15);
-  return d.toISOString();
+  // Build via the (year, month, day) constructor so subtracting a month never
+  // overflows when today's day-of-month exceeds the target month's length
+  // (e.g. Jul 31 - 1mo must land in June, not roll forward to July).
+  const now = new Date();
+  return new Date(now.getFullYear(), now.getMonth() - monthsAgo, 15).toISOString();
 }
 
 function _currentMonthKey(): string {

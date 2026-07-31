@@ -115,10 +115,8 @@ export async function getMonthlyPurchaseStats(
   if (!orgId) return [];
 
   const supabase = await createClient();
-  const since = new Date();
-  since.setMonth(since.getMonth() - months + 1);
-  since.setDate(1);
-  since.setHours(0, 0, 0, 0);
+  const now = new Date();
+  const since = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
 
   const { data, error } = await supabase
     .from("purchase")
@@ -157,10 +155,8 @@ export async function getMonthlyPointsStats(
   if (!orgId) return [];
 
   const supabase = await createClient();
-  const since = new Date();
-  since.setMonth(since.getMonth() - months + 1);
-  since.setDate(1);
-  since.setHours(0, 0, 0, 0);
+  const now = new Date();
+  const since = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
 
   const [purchasesRes, redemptionsRes] = await Promise.all([
     supabase
@@ -206,10 +202,8 @@ export async function getMonthlyMemberStats(
   if (!orgId) return [];
 
   const supabase = await createClient();
-  const since = new Date();
-  since.setMonth(since.getMonth() - months + 1);
-  since.setDate(1);
-  since.setHours(0, 0, 0, 0);
+  const now = new Date();
+  const since = new Date(now.getFullYear(), now.getMonth() - months + 1, 1);
 
   const { data, error } = await supabase
     .from("beneficiary_organization")
