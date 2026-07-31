@@ -47,6 +47,19 @@ describe('purchaseFormAction', () => {
     expect(redirect).toHaveBeenCalled();
   });
 
+  it('stamps the authenticated owner as cashier on create, ignoring client cashier_id', async () => {
+    const fd = createFormData({ beneficiary_id: 'ben-1', cashier_id: 'cash-1', total_amount: '100.50' });
+    await purchaseFormAction(EMPTY_ACTION_STATE, fd);
+    expect(mockSupabase.insert).toHaveBeenCalledWith([expect.objectContaining({ cashier_id: '1' })]);
+  });
+
+  it('does not reassign cashier on update', async () => {
+    const fd = createFormData({ id: '1', beneficiary_id: 'ben-1', total_amount: '100.50' });
+    await purchaseFormAction(EMPTY_ACTION_STATE, fd);
+    const updateArg = mockSupabase.update.mock.calls[0][0];
+    expect(updateArg).not.toHaveProperty('cashier_id');
+  });
+
   it('should update purchase and redirect', async () => {
     const fd = createFormData({ id: '1', beneficiary_id: 'ben-1', cashier_id: 'cash-1', total_amount: '100.50' });
     await purchaseFormAction(EMPTY_ACTION_STATE, fd);

@@ -51,14 +51,8 @@ export function OrgSwitcher({
   const { isMobile } = useSidebar()
   const { push, refresh } = useRouter()
   const t = useTranslations("Navigation")
-  const activeOrg = orgs.find((o) => o.id === activeOrgId) ?? orgs[0]
+  const activeOrg = orgs.find((o) => String(o.id) === String(activeOrgId)) ?? orgs[0]
   const [isAddOrgOpen, setIsAddOrgOpen] = React.useState(false)
-
-  React.useEffect(() => {
-    if (activeOrgId) return
-    if (!orgs[0]) return
-    onChangeOrg(orgs[0].id)
-  }, [activeOrgId, onChangeOrg, orgs])
 
   if (!activeOrg) return null
 

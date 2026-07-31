@@ -25,17 +25,13 @@ type NamedEntity = { id: string; name: string };
 
 interface FormDataState {
   beneficiaries: Person[];
-  cashiers: Person[];
   branches: NamedEntity[];
 }
 
 const initialFormData: FormDataState = {
   beneficiaries: [],
-  cashiers: [],
   branches: [],
 };
-
-const CASHIER_ROLE_NAME = 'cashier';
 
 function formDataReducer(state: FormDataState, action: Partial<FormDataState>): FormDataState {
   return { ...state, ...action };
@@ -64,7 +60,7 @@ export default function PurchaseForm({ purchase }: PurchaseFormProps) {
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [pointsPreview, setPointsPreview] = useState<number | null>(purchase?.points_earned ?? null);
   const selectedBranchIdRef = useRef<string>(purchase?.branch_id ? String(purchase.branch_id) : '');
-  const [{ beneficiaries, cashiers, branches }, dispatchFormData] = useReducer(
+  const [{ beneficiaries, branches }, dispatchFormData] = useReducer(
     formDataReducer,
     initialFormData,
   );
@@ -89,28 +85,13 @@ export default function PurchaseForm({ purchase }: PurchaseFormProps) {
           .order('first_name');
       }
 
-      // Look up cashier role ID dynamically
-      const { data: cashierRole } = await supabase
-        .from('user_role')
-        .select('id')
-        .eq('name', CASHIER_ROLE_NAME)
-        .single();
-
-      // Build cashiers query filtered by organization and cashier role
-      let cashiersQuery = supabase
-        .from('app_user')
-        .select('id, first_name, last_name')
-        .eq('role_id', cashierRole?.id ?? -1)
-        .order('first_name');
       let branchesQuery = supabase.from('branch').select('id, name').order('name');
       if (orgIdNumber) {
-        cashiersQuery = cashiersQuery.eq('organization_id', orgIdNumber);
         branchesQuery = branchesQuery.eq('organization_id', orgIdNumber);
       }
 
-      const [bRes, cRes, brRes] = await Promise.all([
+      const [bRes, brRes] = await Promise.all([
         beneficiariesPromise,
-        cashiersQuery,
         branchesQuery,
       ]);
 
@@ -126,7 +107,6 @@ export default function PurchaseForm({ purchase }: PurchaseFormProps) {
 
       dispatchFormData({
         beneficiaries: loadedBeneficiaries,
-        cashiers: cRes.data ?? [],
         branches: brRes.data ?? [],
       });
     }
@@ -197,19 +177,6 @@ export default function PurchaseForm({ purchase }: PurchaseFormProps) {
           </SelectContent>
         </Select>
         <FieldError actionState={validation ?? actionState} name="beneficiary_id" />
-      </div>
-
-      <div>
-        <Label htmlFor="cashier_id">{t('form.cashierLabel')}</Label>
-        <Select defaultValue={purchase?.cashier_id ? String(purchase.cashier_id) : ''} name="cashier_id">
-          <SelectTrigger><SelectValue placeholder={t('form.selectCashier')} /></SelectTrigger>
-          <SelectContent>
-            {cashiers.map((c) => (
-              <SelectItem key={c.id} value={String(c.id)}>{c.first_name} {c.last_name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <FieldError actionState={validation ?? actionState} name="cashier_id" />
       </div>
 
       <div>

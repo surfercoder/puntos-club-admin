@@ -3,7 +3,6 @@ import { PurchaseSchema } from '@/schemas/purchase.schema';
 describe('PurchaseSchema', () => {
   const validInput = {
     beneficiary_id: 'ben-1',
-    cashier_id: 'cashier-1',
     total_amount: 1500.50,
   };
 
@@ -13,7 +12,6 @@ describe('PurchaseSchema', () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.beneficiary_id).toBe('ben-1');
-        expect(result.data.cashier_id).toBe('cashier-1');
         expect(result.data.total_amount).toBe(1500.50);
       }
     });
@@ -44,15 +42,12 @@ describe('PurchaseSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should reject missing cashier_id', () => {
-      const { cashier_id: _cashier_id, ...rest } = validInput;
-      const result = PurchaseSchema.safeParse(rest);
-      expect(result.success).toBe(false);
-    });
-
-    it('should reject empty cashier_id', () => {
-      const result = PurchaseSchema.safeParse({ ...validInput, cashier_id: '' });
-      expect(result.success).toBe(false);
+    it('ignores a client-supplied cashier_id (owner is injected server-side)', () => {
+      const result = PurchaseSchema.safeParse({ ...validInput, cashier_id: 'spoofed' });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect((result.data as Record<string, unknown>).cashier_id).toBeUndefined();
+      }
     });
 
     it('should reject missing total_amount', () => {

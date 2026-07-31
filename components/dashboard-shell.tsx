@@ -120,7 +120,7 @@ export function DashboardShell({
   /* c8 ignore next */
   if (breadcrumbItems.length > 0) breadcrumbItems[breadcrumbItems.length - 1] = { label: breadcrumbItems[breadcrumbItems.length - 1].label };
 
-  const onChangeOrg = (orgId: string) => {
+  const onChangeOrg = React.useCallback((orgId: string) => {
     if (portalMode === "admin") return;
     setActiveOrgId(orgId);
     try {
@@ -142,7 +142,17 @@ export function DashboardShell({
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('orgChanged', { detail: { orgId } }));
     }
-  };
+  }, [portalMode]);
+
+  // Reconcile a stale/absent active org against the orgs the user belongs to:
+  // null on first load, or an id left over from a DB reseed / account switch.
+  // Persists here (state owner) so client forms reading the raw active_org_id
+  // cookie/localStorage scope to a real org instead of a phantom one.
+  React.useEffect(() => {
+    if (portalMode === "admin" || !orgs[0]) return;
+    if (orgs.some((o) => String(o.id) === String(activeOrgId))) return;
+    onChangeOrg(String(orgs[0].id));
+  }, [activeOrgId, orgs, onChangeOrg, portalMode]);
 
   const onLogout = async () => {
     const supabase = createClient();

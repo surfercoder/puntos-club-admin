@@ -10,7 +10,7 @@ import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth/require-user';
 
 export async function purchaseFormAction(_prevState: ActionState, formData: FormData) {
-  await requireUser();
+  const user = await requireUser();
   const formDataObject = cleanFormData(formData);
   const parsed = PurchaseSchema.safeParse(formDataObject);
 
@@ -41,6 +41,9 @@ export async function purchaseFormAction(_prevState: ActionState, formData: Form
     ...parsed.data,
     organization_id: orgIdNumber,
     points_earned: pointsEarned,
+    // Owner is always the virtual cashier. Only stamp it on create so edits
+    // don't reassign the cashier of an existing purchase.
+    ...(isUpdate ? {} : { cashier_id: String(user.id) }),
   };
 
   if (isUpdate) {

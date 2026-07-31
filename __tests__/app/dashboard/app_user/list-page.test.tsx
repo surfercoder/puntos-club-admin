@@ -102,6 +102,9 @@ describe('AppUserListPage', () => {
   it('filters by organization_id when non-admin with activeOrgId', async () => {
     const { isAdmin } = require('@/lib/auth/roles');
     (isAdmin as jest.Mock).mockReturnValueOnce(false);
+    // Cookie org (1) matches the user's primary org, so no membership lookup runs.
+    const { getCurrentUser } = require('@/lib/auth/get-current-user');
+    getCurrentUser.mockResolvedValueOnce({ id: 'current-user', organization_id: '1', role: { name: 'owner' } });
     const mockOrderInner = jest.fn().mockResolvedValue({ data: [], error: null });
     const mockEqInner = jest.fn(() => ({ order: mockOrderInner }));
     mockOrder.mockReturnValueOnce({ eq: mockEqInner });
@@ -143,6 +146,9 @@ describe('AppUserListPage', () => {
     const { isAdmin, isCollaborator } = require('@/lib/auth/roles');
     (isAdmin as jest.Mock).mockReturnValueOnce(false);
     (isCollaborator as jest.Mock).mockReturnValueOnce(true);
+    // Cookie org (1) matches the user's primary org, so no membership lookup runs.
+    const { getCurrentUser } = require('@/lib/auth/get-current-user');
+    getCurrentUser.mockResolvedValueOnce({ id: 'current-user', organization_id: '1', role: { name: 'collaborator' } });
 
     // The collaborator flow: query.eq('organization_id', ...) then query.eq('role_id', cashierRole.id)
     const mockOrderFinal = jest.fn().mockResolvedValue({ data: [], error: null });
@@ -164,6 +170,9 @@ describe('AppUserListPage', () => {
     const { isAdmin, isCollaborator } = require('@/lib/auth/roles');
     (isAdmin as jest.Mock).mockReturnValueOnce(false);
     (isCollaborator as jest.Mock).mockReturnValueOnce(true);
+    // Cookie org (1) matches the user's primary org, so no membership lookup runs.
+    const { getCurrentUser } = require('@/lib/auth/get-current-user');
+    getCurrentUser.mockResolvedValueOnce({ id: 'current-user', organization_id: '1', role: { name: 'collaborator' } });
 
     const mockOrderFinal = jest.fn().mockResolvedValue({ data: [], error: null });
     const mockEqInner = jest.fn(() => ({ order: mockOrderFinal, eq: mockEqInner }));

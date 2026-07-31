@@ -7,7 +7,6 @@ const mockSelectFrom = jest.fn(() => ({ eq: mockEq }));
 const mockFrom = jest.fn(() => ({ select: mockSelectFrom }));
 
 jest.mock('next-intl/server', () => ({ getTranslations: jest.fn(() => Promise.resolve((key: string) => key)) }));
-jest.mock('next/headers', () => ({ cookies: jest.fn(() => Promise.resolve({ get: jest.fn(() => ({ value: '1' })) })) }));
 jest.mock('@/lib/supabase/server', () => ({
   createClient: jest.fn(() => Promise.resolve({
     auth: { getUser: jest.fn(() => Promise.resolve({ data: { user: { id: 'u1' } } })) },
@@ -15,6 +14,7 @@ jest.mock('@/lib/supabase/server', () => ({
   })),
 }));
 jest.mock('@/lib/auth/get-current-user', () => ({ getCurrentUser: jest.fn(() => Promise.resolve({ id: '1', organization: { id: '1', name: 'Test Org' } })) }));
+jest.mock('@/lib/auth/get-active-org-id', () => ({ getActiveOrgIdFilter: jest.fn(() => Promise.resolve(1)) }));
 jest.mock('@/components/dashboard/qr/org-qr-display', () => ({ OrgQRDisplay: () => <div data-testid="qr-display" /> }));
 jest.mock('@/components/mobile-apps/app-download-qr-cards', () => ({ AppDownloadQRCards: () => <div data-testid="app-qr-display" /> }));
 
@@ -34,20 +34,16 @@ describe('QRPage', () => {
     expect(redirect).toHaveBeenCalledWith('/auth/login');
   });
 
-  it('renders no-org message when no organizationId and no currentUser org', async () => {
-    const { cookies } = require('next/headers');
-    cookies.mockResolvedValueOnce({ get: jest.fn(() => ({ value: '' })) });
-    const { getCurrentUser } = require('@/lib/auth/get-current-user');
-    getCurrentUser.mockResolvedValueOnce({ id: '1', organization: null });
+  it('renders no-org message when the resolver returns no org', async () => {
+    const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
+    getActiveOrgIdFilter.mockResolvedValueOnce(null);
     const result = await QRPage();
     expect(result).toBeTruthy();
   });
 
-  it('uses currentUser.organization.id as fallback when no cookie org', async () => {
-    const { cookies } = require('next/headers');
-    cookies.mockResolvedValueOnce({ get: jest.fn(() => ({ value: '' })) });
-    const { getCurrentUser } = require('@/lib/auth/get-current-user');
-    getCurrentUser.mockResolvedValueOnce({ id: '1', organization: { id: '5', name: 'Fallback Org' } });
+  it('uses the org id from getActiveOrgIdFilter', async () => {
+    const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
+    getActiveOrgIdFilter.mockResolvedValueOnce(5);
     mockEq.mockReturnValueOnce({ single: jest.fn().mockResolvedValue({ data: { id: 5, name: 'Fallback Org', logo_url: null } }) });
     const result = await QRPage();
     expect(result).toBeTruthy();

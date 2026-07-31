@@ -177,16 +177,16 @@ describe('OrgSwitcher', () => {
     expect(screen.getAllByText('Alpha Org').length).toBeGreaterThanOrEqual(1);
   });
 
-  it('auto-selects first org when no activeOrgId is provided', () => {
-    const onChangeOrg = jest.fn();
+  it('falls back to the first org for display when activeOrgId is stale', () => {
     render(
       <OrgSwitcher
         orgs={orgs}
-        activeOrgId={null}
-        onChangeOrg={onChangeOrg}
+        activeOrgId="stale-id"
+        onChangeOrg={jest.fn()}
       />
     );
-    expect(onChangeOrg).toHaveBeenCalledWith('org-1');
+    // Reconciliation lives in the parent; the switcher just displays orgs[0].
+    expect(screen.getAllByText('Alpha Org').length).toBeGreaterThanOrEqual(1);
   });
 
   it('opens add organization dialog when add button is clicked', () => {

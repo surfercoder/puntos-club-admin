@@ -22,6 +22,9 @@ describe('AddressListPage', () => {
   it('filters by organization for non-admin users', async () => {
     const { isAdmin } = require('@/lib/auth/roles');
     isAdmin.mockReturnValueOnce(false);
+    // Cookie org (1) matches the user's primary org, so no membership lookup runs.
+    const { getCurrentUser } = require('@/lib/auth/get-current-user');
+    getCurrentUser.mockResolvedValueOnce({ id: '1', organization_id: '1', role: { name: 'owner' } });
     mockOrder.mockReturnValueOnce({ eq: mockEq });
     mockEq.mockResolvedValueOnce({ data: [], error: null });
     const result = await AddressListPage();

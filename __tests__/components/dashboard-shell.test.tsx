@@ -432,10 +432,14 @@ describe('DashboardShell', () => {
   });
 
   it('dispatches orgChanged event when changing org (typeof window check line 143)', () => {
+    // Start with a valid stored org so the mount-time reconcile stays quiet, and
+    // include org-99 in the list so switching to it is a valid (non-reconciled)
+    // change — the only dispatch is then the click below.
+    (window.localStorage.getItem as jest.Mock).mockReturnValue('org-1');
     const dispatchSpy = jest.spyOn(window, 'dispatchEvent');
 
     render(
-      <DashboardShell {...defaultProps}>
+      <DashboardShell {...defaultProps} orgs={[{ id: 'org-1', name: 'Test Org' }, { id: 'org-99', name: 'Other Org' }]}>
         <div>Content</div>
       </DashboardShell>
     );
@@ -451,6 +455,46 @@ describe('DashboardShell', () => {
     expect(orgChangedEvents.length).toBe(1);
 
     dispatchSpy.mockRestore();
+  });
+
+  it('reconciles a stale stored org to the first available org on mount', () => {
+    (window.localStorage.getItem as jest.Mock).mockReturnValue('stale-org');
+
+    render(
+      <DashboardShell {...defaultProps}>
+        <div>Content</div>
+      </DashboardShell>
+    );
+
+    // Effect persists the fallback org since the stored id isn't in orgs.
+    expect(window.localStorage.setItem).toHaveBeenCalledWith('active_org_id', 'org-1');
+    expect(global.fetch).toHaveBeenCalledWith('/api/active-org', expect.objectContaining({
+      body: JSON.stringify({ orgId: 'org-1' }),
+    }));
+  });
+
+  it('does not reconcile when the stored org is already valid', () => {
+    (window.localStorage.getItem as jest.Mock).mockReturnValue('org-1');
+
+    render(
+      <DashboardShell {...defaultProps}>
+        <div>Content</div>
+      </DashboardShell>
+    );
+
+    expect(window.localStorage.setItem).not.toHaveBeenCalled();
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('does not reconcile when there are no orgs to select', () => {
+    render(
+      <DashboardShell {...defaultProps} orgs={[]}>
+        <div>Content</div>
+      </DashboardShell>
+    );
+
+    expect(window.localStorage.setItem).not.toHaveBeenCalled();
+    expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it('handles breadcrumbs with query params and hash', () => {

@@ -280,7 +280,6 @@ describe('PurchaseForm', () => {
     render(<PurchaseForm />);
     await waitFor(() => {
       expect(client._mockFrom).toHaveBeenCalledWith('beneficiary_organization');
-      expect(client._mockFrom).toHaveBeenCalledWith('app_user');
       expect(client._mockFrom).toHaveBeenCalledWith('branch');
     });
   });
@@ -474,42 +473,6 @@ describe('PurchaseForm', () => {
 
     // Don't set an amount, trigger branch change directly
     selectCallbacks['branch_id']('5');
-  });
-
-  it('falls back to -1 when cashierRole lookup returns null', async () => {
-    Object.defineProperty(document, 'cookie', { writable: true, value: 'active_org_id=42' });
-    const { createClient } = require('@/lib/supabase/client');
-
-    // Build a client where user_role single() returns null data (no cashier role found)
-    const mockFrom = jest.fn((table: string) => {
-      if (table === 'beneficiary_organization') {
-        const b = makeThenableBuilder([]);
-        let eqCount = 0;
-        b.eq = jest.fn(() => { eqCount++; return eqCount >= 2 ? makeThenableBuilder([]) : b; });
-        return b;
-      }
-      if (table === 'user_role') {
-        const b = makeThenableBuilder(null);
-        b.single = jest.fn(() => Promise.resolve({ data: null, error: null }));
-        return b;
-      }
-      if (table === 'app_user') {
-        const b = makeThenableBuilder([]);
-        return b;
-      }
-      if (table === 'branch') {
-        return makeThenableBuilder([]);
-      }
-      return makeThenableBuilder();
-    });
-    const client = { from: mockFrom, rpc: jest.fn(() => Promise.resolve({ data: 0, error: null })) };
-    (createClient as jest.Mock).mockImplementationOnce(() => client);
-
-    render(<PurchaseForm />);
-    await waitFor(() => {
-      // app_user query should have been called with role_id = -1 (the fallback)
-      expect(mockFrom).toHaveBeenCalledWith('app_user');
-    });
   });
 
   it('handleBranchChange handles missing amount input element', async () => {

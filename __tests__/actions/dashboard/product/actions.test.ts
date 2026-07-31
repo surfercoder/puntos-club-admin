@@ -141,6 +141,9 @@ describe('getProducts', () => {
 
   it('should filter by org for non-admin', async () => {
     (isAdmin as jest.Mock).mockReturnValue(false);
+    // Cookie org matches the user's primary org, so no membership lookup runs.
+    const { getCurrentUser } = require('@/lib/auth/get-current-user');
+    (getCurrentUser as jest.Mock).mockReturnValueOnce({ id: 1, organization_id: '123', role: { name: 'owner' } });
     mockSupabase.eq.mockReturnValue({ data: [{ id: '1' }], error: null });
     const result = await getProducts();
     expect(result.data).toEqual([{ id: '1' }]);

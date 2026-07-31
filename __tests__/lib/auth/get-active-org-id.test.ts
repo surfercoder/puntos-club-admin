@@ -6,6 +6,20 @@ jest.mock('next/headers', () => ({
   cookies: jest.fn(() => Promise.resolve({ get: cookieGet })),
 }));
 
+// belongsToOrg query: maybeSingle resolves to a row when the user is a member.
+const maybeSingle = jest.fn();
+jest.mock('@/lib/supabase/server', () => ({
+  createClient: jest.fn(() =>
+    Promise.resolve({
+      from: () => ({
+        select: () => ({
+          eq: () => ({ eq: () => ({ eq: () => ({ maybeSingle }) }) }),
+        }),
+      }),
+    })
+  ),
+}));
+
 const makeUser = (role: string | null, organization_id: string | null) =>
   ({
     id: 'u1',
@@ -19,6 +33,8 @@ const makeUser = (role: string | null, organization_id: string | null) =>
 describe('getActiveOrgIdFilter', () => {
   beforeEach(() => {
     cookieGet.mockReset();
+    maybeSingle.mockReset();
+    maybeSingle.mockResolvedValue({ data: null }); // not a member by default
   });
 
   it('returns null for admin regardless of cookie', async () => {
@@ -27,10 +43,25 @@ describe('getActiveOrgIdFilter', () => {
     expect(result).toBeNull();
   });
 
-  it('returns cookie value for non-admin when valid', async () => {
+  it('returns cookie value for non-admin when it matches their primary org (no membership query)', async () => {
+    cookieGet.mockReturnValue({ value: '1' });
+    const result = await getActiveOrgIdFilter(makeUser('owner', '1'));
+    expect(result).toBe(1);
+    expect(maybeSingle).not.toHaveBeenCalled();
+  });
+
+  it('honors a cookie for a different org when the user is an active member', async () => {
+    maybeSingle.mockResolvedValue({ data: { organization_id: 7 } });
     cookieGet.mockReturnValue({ value: '7' });
     const result = await getActiveOrgIdFilter(makeUser('owner', '1'));
     expect(result).toBe(7);
+  });
+
+  it('ignores a cookie for an org the user does not belong to and falls back (the phantom-org bug)', async () => {
+    maybeSingle.mockResolvedValue({ data: null });
+    cookieGet.mockReturnValue({ value: '3' }); // org 3 doesn't exist / not a member
+    const result = await getActiveOrgIdFilter(makeUser('owner', '1'));
+    expect(result).toBe(1);
   });
 
   it('falls back to currentUser.organization_id when cookie missing (the bug fix)', async () => {

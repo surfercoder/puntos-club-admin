@@ -3,7 +3,8 @@ import { z } from 'zod';
 export const PurchaseSchema = z.object({
   id: z.string().optional(),
   beneficiary_id: z.string().min(1, 'Beneficiary is required'),
-  cashier_id: z.string().min(1, 'Cashier is required'),
+  // cashier_id is not accepted from the client: the owner is always the virtual
+  // cashier, injected server-side. Keeps an owner from impersonating a cashier.
   branch_id: z.string().optional().nullable().transform(val => val === '' ? null : val),
   total_amount: z.union([z.number(), z.string()]).transform(val => {
     const num = typeof val === 'string' ? parseFloat(val) : val;

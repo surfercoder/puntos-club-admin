@@ -72,6 +72,9 @@ const validRule = {
 
 describe('getAllPointsRules', () => {
   it('should return rules filtered by org for non-admin', async () => {
+    // Cookie org matches the user's primary org, so no membership lookup runs.
+    const { getCurrentUser } = require('@/lib/auth/get-current-user');
+    (getCurrentUser as jest.Mock).mockReturnValueOnce({ id: 1, organization_id: '123', role: { name: 'owner' } });
     // order returns mockSupabase for chaining, eq is the terminal call
     mockSupabase.eq.mockReturnValueOnce({ data: [{ id: 1 }], error: null });
     const result = await getAllPointsRules();
@@ -86,6 +89,8 @@ describe('getAllPointsRules', () => {
   });
 
   it('should return error on failure', async () => {
+    const { getCurrentUser } = require('@/lib/auth/get-current-user');
+    (getCurrentUser as jest.Mock).mockReturnValueOnce({ id: 1, organization_id: '123', role: { name: 'owner' } });
     // For non-admin, eq is terminal; mock eq to return error
     mockSupabase.eq.mockReturnValueOnce({ data: null, error: { message: 'Error' } });
     const result = await getAllPointsRules();
