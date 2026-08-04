@@ -241,11 +241,11 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
         )}
       </div>
 
-      <div className="flex gap-2">
-        <Button asChild className="w-full" type="button" variant="secondary">
+      <div className="grid grid-cols-2 gap-2">
+        <Button asChild type="button" variant="secondary">
           <Link href="/dashboard/branch">{tCommon('cancel')}</Link>
         </Button>
-        <Button className="w-full" disabled={pending} type="submit">
+        <Button disabled={pending} type="submit">
           {branch ? t('update') : t('create')}
         </Button>
       </div>
