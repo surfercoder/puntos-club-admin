@@ -73,19 +73,8 @@ describe('ROLE_ENTITY_ACCESS', () => {
     expect(ROLE_ENTITY_ACCESS.owner.organization.edit).toBe(true);
   });
 
-  it('collaborator has read-only access to organization', () => {
-    expect(ROLE_ENTITY_ACCESS.collaborator.organization).toEqual({
-      view: true,
-      create: false,
-      edit: false,
-      delete: false,
-    });
-  });
-
-  it('collaborator cannot delete any entity', () => {
-    for (const entity of ALL_ENTITIES) {
-      expect(ROLE_ENTITY_ACCESS.collaborator[entity].delete).toBe(false);
-    }
+  it('collaborator has the same permissions as owner', () => {
+    expect(ROLE_ENTITY_ACCESS.collaborator).toEqual(ROLE_ENTITY_ACCESS.owner);
   });
 
   it('cashier has limited access', () => {
@@ -110,7 +99,7 @@ describe('canAccessEntity', () => {
     expect(canAccessEntity('owner', 'organization', 'create')).toBe(false);
     expect(canAccessEntity('owner', 'organization', 'edit')).toBe(true);
     expect(canAccessEntity('collaborator', 'beneficiary', 'create')).toBe(true);
-    expect(canAccessEntity('collaborator', 'beneficiary', 'delete')).toBe(false);
+    expect(canAccessEntity('collaborator', 'beneficiary', 'delete')).toBe(true);
     expect(canAccessEntity('cashier', 'redemption', 'create')).toBe(true);
     expect(canAccessEntity('cashier', 'redemption', 'delete')).toBe(false);
   });
@@ -143,14 +132,8 @@ describe('getAccessibleEntities', () => {
     expect(entities).toEqual(ALL_ENTITIES);
   });
 
-  it('collaborator can view most entities', () => {
-    const entities = getAccessibleEntities('collaborator');
-    expect(entities).toContain('beneficiary');
-    expect(entities).toContain('branch');
-    expect(entities).toContain('organization');
-    expect(entities).toContain('product');
-    expect(entities).toContain('app_user');
-    expect(entities).not.toContain('app_user_organization');
+  it('collaborator can view all entities, like an owner', () => {
+    expect(getAccessibleEntities('collaborator')).toEqual(ALL_ENTITIES);
   });
 
   it('cashier can view limited entities', () => {

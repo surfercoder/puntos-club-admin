@@ -10,7 +10,7 @@ jest.mock('next-intl/server', () => ({ getTranslations: jest.fn(() => Promise.re
 jest.mock('next/headers', () => ({ cookies: jest.fn(() => Promise.resolve({ get: jest.fn(() => ({ value: '1' })) })) }));
 jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => Promise.resolve({ from: mockFrom })) }));
 jest.mock('@/lib/auth/get-current-user', () => ({ getCurrentUser: jest.fn(() => Promise.resolve({ id: 'current-user', role: { name: 'admin' } })) }));
-jest.mock('@/lib/auth/roles', () => ({ isAdmin: jest.fn(() => true), isCollaborator: jest.fn(() => false) }));
+jest.mock('@/lib/auth/roles', () => ({ isAdmin: jest.fn(() => true) }));
 jest.mock('@/components/dashboard/app_user/delete-modal', () => function Mock() { return <div />; });
 jest.mock('@/components/dashboard/app_user/new-user-button', () => ({ NewUserButton: () => <button>New</button> }));
 jest.mock('@/components/dashboard/plan/plan-usage-badge', () => ({ PlanUsageBadge: () => <div /> }));
@@ -26,9 +26,8 @@ describe('AppUserListPage', () => {
     mockOrder.mockResolvedValue({ data: [], error: null });
     mockEq.mockReturnValue({ order: mockOrder, eq: mockEq, single: mockSingle });
     mockSingle.mockResolvedValue({ data: { id: 'cashier-role-id' }, error: null });
-    const { isAdmin, isCollaborator } = require('@/lib/auth/roles');
+    const { isAdmin } = require('@/lib/auth/roles');
     (isAdmin as jest.Mock).mockReturnValue(true);
-    (isCollaborator as jest.Mock).mockReturnValue(false);
   });
 
   it('exports a default async function', () => { expect(typeof AppUserListPage).toBe('function'); });
@@ -138,71 +137,6 @@ describe('AppUserListPage', () => {
       data: [{ id: '6', organization_id: '1', first_name: null, last_name: 'OnlyLast', email: null, organization: { name: 'Org1' }, role: null }],
       error: null,
     });
-    const result = await AppUserListPage();
-    expect(result).toBeTruthy();
-  });
-
-  it('filters cashier users when user is collaborator', async () => {
-    const { isAdmin, isCollaborator } = require('@/lib/auth/roles');
-    (isAdmin as jest.Mock).mockReturnValueOnce(false);
-    (isCollaborator as jest.Mock).mockReturnValueOnce(true);
-    // Cookie org (1) matches the user's primary org, so no membership lookup runs.
-    const { getCurrentUser } = require('@/lib/auth/get-current-user');
-    getCurrentUser.mockResolvedValueOnce({ id: 'current-user', organization_id: '1', role: { name: 'collaborator' } });
-
-    // The collaborator flow: query.eq('organization_id', ...) then query.eq('role_id', cashierRole.id)
-    const mockOrderFinal = jest.fn().mockResolvedValue({ data: [], error: null });
-    const mockEqRoleId = jest.fn(() => ({ order: mockOrderFinal, eq: mockEqRoleId }));
-    const mockEqOrgId = jest.fn(() => ({ order: mockOrderFinal, eq: mockEqRoleId }));
-    mockOrder.mockReturnValueOnce({ eq: mockEqOrgId });
-
-    // Mock the cashier role lookup (from('user_role').select('id').eq('name','cashier').single())
-    const mockRoleSingle = jest.fn().mockResolvedValue({ data: { id: 'cashier-role-id' }, error: null });
-    const mockRoleEq = jest.fn(() => ({ single: mockRoleSingle }));
-    const mockRoleSelect = jest.fn(() => ({ eq: mockRoleEq }));
-    mockFrom.mockReturnValueOnce({ select: mockSelect }).mockReturnValueOnce({ select: mockRoleSelect });
-
-    const result = await AppUserListPage();
-    expect(result).toBeTruthy();
-  });
-
-  it('handles collaborator when cashier role lookup returns null', async () => {
-    const { isAdmin, isCollaborator } = require('@/lib/auth/roles');
-    (isAdmin as jest.Mock).mockReturnValueOnce(false);
-    (isCollaborator as jest.Mock).mockReturnValueOnce(true);
-    // Cookie org (1) matches the user's primary org, so no membership lookup runs.
-    const { getCurrentUser } = require('@/lib/auth/get-current-user');
-    getCurrentUser.mockResolvedValueOnce({ id: 'current-user', organization_id: '1', role: { name: 'collaborator' } });
-
-    const mockOrderFinal = jest.fn().mockResolvedValue({ data: [], error: null });
-    const mockEqInner = jest.fn(() => ({ order: mockOrderFinal, eq: mockEqInner }));
-    mockOrder.mockReturnValueOnce({ eq: mockEqInner });
-
-    // Cashier role lookup returns null
-    const mockRoleSingle = jest.fn().mockResolvedValue({ data: null, error: null });
-    const mockRoleEq = jest.fn(() => ({ single: mockRoleSingle }));
-    const mockRoleSelect = jest.fn(() => ({ eq: mockRoleEq }));
-    mockFrom.mockReturnValueOnce({ select: mockSelect }).mockReturnValueOnce({ select: mockRoleSelect });
-
-    const result = await AppUserListPage();
-    expect(result).toBeTruthy();
-  });
-
-  it('hides collaborators PlanUsageBadge when user is collaborator', async () => {
-    const { isAdmin, isCollaborator } = require('@/lib/auth/roles');
-    (isAdmin as jest.Mock).mockReturnValue(true);
-    (isCollaborator as jest.Mock).mockReturnValueOnce(true);
-
-    // When isCollaborator is true, the code does cashier role lookup then query.eq('role_id', ...)
-    const mockOrderFinal = jest.fn().mockResolvedValue({ data: [], error: null });
-    const mockEqRoleId = jest.fn(() => ({ order: mockOrderFinal, eq: mockEqRoleId }));
-    mockOrder.mockReturnValueOnce({ eq: mockEqRoleId });
-
-    const mockRoleSingle = jest.fn().mockResolvedValue({ data: { id: 'cashier-role-id' }, error: null });
-    const mockRoleEq = jest.fn(() => ({ single: mockRoleSingle }));
-    const mockRoleSelect = jest.fn(() => ({ eq: mockRoleEq }));
-    mockFrom.mockReturnValueOnce({ select: mockSelect }).mockReturnValueOnce({ select: mockRoleSelect });
-
     const result = await AppUserListPage();
     expect(result).toBeTruthy();
   });

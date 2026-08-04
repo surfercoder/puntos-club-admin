@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     }
 
     const role = Array.isArray(appUser.role) ? appUser.role[0] : appUser.role;
-    if (!role || !['owner', 'admin'].includes(role.name)) {
+    if (!role || !['owner', 'collaborator', 'admin'].includes(role.name)) {
       return NextResponse.json(
         { success: false, error: 'Solo los propietarios y administradores pueden crear notificaciones' },
         { status: 403 }

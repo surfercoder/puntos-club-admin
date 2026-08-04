@@ -6,14 +6,14 @@ import { Settings } from "lucide-react"
 import { getOrganizationSettings } from "@/actions/dashboard/organization/actions"
 import { OrgVisibilityToggle } from "@/components/dashboard/organization/org-visibility-toggle"
 import { getCurrentUser } from "@/lib/auth/get-current-user"
-import { isOwner, isAdmin } from "@/lib/auth/roles"
+import { hasOwnerPermissions } from "@/lib/auth/roles"
 
 export default async function OrgSettingsPage() {
   const [t, currentUser] = await Promise.all([
     getTranslations("Dashboard.orgSettings"),
     getCurrentUser(),
   ])
-  if (!currentUser || (!isOwner(currentUser) && !isAdmin(currentUser))) {
+  if (!currentUser || !hasOwnerPermissions(currentUser)) {
     redirect("/dashboard")
   }
 

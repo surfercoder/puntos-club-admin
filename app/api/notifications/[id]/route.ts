@@ -37,7 +37,7 @@ export async function PATCH(
 
     const role = Array.isArray(appUser.role) ? appUser.role[0] : appUser.role;
 
-    if (!role || !['owner', 'admin'].includes(role.name)) {
+    if (!role || !['owner', 'collaborator', 'admin'].includes(role.name)) {
       return NextResponse.json(
         { success: false, error: "Only owners and admins can edit notifications" },
         { status: 403 }

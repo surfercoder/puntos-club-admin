@@ -8,7 +8,7 @@ jest.mock('@/lib/auth/get-current-user', () => ({
   getCurrentUser: jest.fn(() => Promise.resolve({ id: '1', role: { name: 'admin' } })),
 }));
 
-jest.mock('@/lib/auth/roles', () => ({ isOwner: jest.fn(() => false) }));
+jest.mock('@/lib/auth/roles', () => ({ hasOwnerPermissions: jest.fn(() => false) }));
 
 jest.mock('@/components/dashboard/branch/branch-form', () => {
   return function Mock() { return <div data-testid="branch-form" />; };
@@ -40,8 +40,8 @@ describe('CreateBranchPage', () => {
   });
 
   it('renders BranchFormWithAddress when owner', async () => {
-    const { isOwner } = require('@/lib/auth/roles');
-    isOwner.mockReturnValueOnce(true);
+    const { hasOwnerPermissions } = require('@/lib/auth/roles');
+    hasOwnerPermissions.mockReturnValueOnce(true);
     const result = await CreateBranchPage();
     expect(result).toBeTruthy();
   });

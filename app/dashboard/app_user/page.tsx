@@ -17,7 +17,6 @@ import {
 } from '@/components/ui/table';
 import { getActiveOrgIdFilter } from '@/lib/auth/get-active-org-id';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
-import { isCollaborator } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 
 interface AppUserWithOrganization {
@@ -40,7 +39,6 @@ export default async function AppUserListPage() {
     createClient(),
     getCurrentUser(),
   ]);
-  const userIsCollaborator = isCollaborator(currentUser);
   const orgIdFilter = await getActiveOrgIdFilter(currentUser);
 
   let query = supabase
@@ -54,18 +52,6 @@ export default async function AppUserListPage() {
 
   if (orgIdFilter) {
     query = query.eq('organization_id', orgIdFilter);
-  }
-
-  // Collaborators can only see and manage cashier users
-  if (userIsCollaborator) {
-    const { data: cashierRole } = await supabase
-      .from('user_role')
-      .select('id')
-      .eq('name', 'cashier')
-      .single();
-    if (cashierRole) {
-      query = query.eq('role_id', cashierRole.id);
-    }
   }
 
   const { data: rawData, error } = await query;
@@ -86,7 +72,7 @@ export default async function AppUserListPage() {
           <h1 className="text-2xl font-semibold flex items-center gap-2">
             {t('title')}
             <PlanUsageBadge feature="cashiers" showLabel />
-            {!userIsCollaborator && <PlanUsageBadge feature="collaborators" showLabel />}
+            <PlanUsageBadge feature="collaborators" showLabel />
           </h1>
           <p className="text-muted-foreground">{t('description')}</p>
         </div>

@@ -17,11 +17,20 @@ jest.mock('@/lib/auth/get-current-user', () => ({
   getCurrentUser: jest.fn(() => Promise.resolve(null)),
 }));
 
-jest.mock('@/lib/auth/roles', () => ({
-  isAdmin: jest.fn(() => false),
-  isOwner: jest.fn(() => false),
-  isCollaborator: jest.fn(() => false),
-}));
+jest.mock('@/lib/auth/roles', () => {
+  const isAdmin = jest.fn(() => false);
+  const isOwner = jest.fn(() => false);
+  const isCollaborator = jest.fn(() => false);
+  return {
+    isAdmin,
+    isOwner,
+    isCollaborator,
+    // Mirrors the real helper: collaborators have the same permissions as owners.
+    hasOwnerPermissions: jest.fn(
+      (u: unknown) => isOwner(u) || isCollaborator(u) || isAdmin(u),
+    ),
+  };
+});
 
 jest.mock('@/lib/plans/usage', () => ({
   getOrganizationUsageSummary: jest.fn(() => Promise.resolve(null)),

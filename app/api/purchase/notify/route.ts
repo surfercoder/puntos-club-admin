@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
     const role = Array.isArray(appUser.role) ? appUser.role[0] : appUser.role;
     if (
       !role ||
-      !["cashier", "owner", "admin"].includes(
+      !["cashier", "owner", "collaborator", "admin"].includes(
         (role as { name: string }).name
       )
     ) {

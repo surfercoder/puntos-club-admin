@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server'
 
 import { DashboardShell } from '@/components/dashboard-shell'
 import { getCurrentUser } from '@/lib/auth/get-current-user'
-import { isAdmin, isCollaborator, isOwner } from '@/lib/auth/roles'
+import { hasOwnerPermissions, isAdmin } from '@/lib/auth/roles'
 import { getOrganizationUsageSummary } from '@/lib/plans/usage'
 import { createClient } from '@/lib/supabase/server'
 
@@ -35,7 +35,7 @@ export default async function DashboardLayout({
 
   const currentUser = await getCurrentUser()
 
-  if (currentUser && (isOwner(currentUser) || isCollaborator(currentUser) || isAdmin(currentUser))) {
+  if (currentUser && hasOwnerPermissions(currentUser)) {
     // Temporary multi-tenant scaffold: show all orgs for switcher.
     // Later we’ll scope this list to only orgs the user has access to.
     let { data: membershipsData } = await supabase

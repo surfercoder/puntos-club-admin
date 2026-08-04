@@ -3,7 +3,7 @@ import { getTranslations } from "next-intl/server";
 
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
-import { isAdmin, isCollaborator, isOwner } from "@/lib/auth/roles";
+import { hasOwnerPermissions } from "@/lib/auth/roles";
 import { getUsageSummaryAction } from "@/actions/dashboard/usage/actions";
 import {
   getDashboardKpis,
@@ -33,8 +33,7 @@ export default async function DashboardPage() {
     getTranslations("Dashboard.analytics"),
     getCurrentUser(),
   ]);
-  const hasAnalyticsAccess =
-    currentUser && (isOwner(currentUser) || isCollaborator(currentUser) || isAdmin(currentUser));
+  const hasAnalyticsAccess = hasOwnerPermissions(currentUser);
 
   if (!hasAnalyticsAccess) {
     return (

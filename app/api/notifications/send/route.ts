@@ -61,7 +61,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!role || !['owner', 'admin'].includes(role.name)) {
+    if (!role || !['owner', 'collaborator', 'admin'].includes(role.name)) {
       return NextResponse.json(
         { success: false, error: "Only owners and admins can send notifications" },
         { status: 403 }

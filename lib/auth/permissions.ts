@@ -29,10 +29,30 @@ export type EntityPermissions = {
 };
 
 /**
+ * Owner-level access: full access to their organization's data.
+ * Collaborators share it — they are staff the owner creates and designates.
+ */
+const OWNER_ENTITY_ACCESS: Record<EntityName, EntityPermissions> = {
+  address: { view: true, create: true, edit: true, delete: true },
+  beneficiary: { view: true, create: true, edit: true, delete: true },
+  beneficiary_organization: { view: true, create: true, edit: true, delete: true },
+  branch: { view: true, create: true, edit: true, delete: true },
+  organization: { view: true, create: false, edit: true, delete: false }, // Can view/edit their org, not create/delete
+  category: { view: true, create: true, edit: true, delete: true },
+  product: { view: true, create: true, edit: true, delete: true },
+  app_user: { view: true, create: true, edit: true, delete: true },
+  app_user_organization: { view: true, create: true, edit: true, delete: true },
+  redemption: { view: true, create: true, edit: true, delete: true },
+  stock: { view: true, create: true, edit: true, delete: true },
+  users: { view: true, create: true, edit: true, delete: true },
+  'points-rules': { view: true, create: true, edit: true, delete: true },
+};
+
+/**
  * Define what each role can access
  * Admin: Full access to everything
  * Owner: Full access to their organization's data, cannot manage other organizations
- * Collaborator: Limited access, cannot manage collaborators or owner settings
+ * Collaborator: Same as owner
  * Cashier: Very limited access, mainly for processing transactions
  */
 export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityPermissions>> = {
@@ -52,38 +72,8 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     users: { view: true, create: true, edit: true, delete: true },
     'points-rules': { view: true, create: true, edit: true, delete: true },
   },
-  owner: {
-    // Owners have full access to their organization's data
-    address: { view: true, create: true, edit: true, delete: true },
-    beneficiary: { view: true, create: true, edit: true, delete: true },
-    beneficiary_organization: { view: true, create: true, edit: true, delete: true },
-    branch: { view: true, create: true, edit: true, delete: true },
-    organization: { view: true, create: false, edit: true, delete: false }, // Can view/edit their org, not create/delete
-    category: { view: true, create: true, edit: true, delete: true },
-    product: { view: true, create: true, edit: true, delete: true },
-    app_user: { view: true, create: true, edit: true, delete: true },
-    app_user_organization: { view: true, create: true, edit: true, delete: true },
-    redemption: { view: true, create: true, edit: true, delete: true },
-    stock: { view: true, create: true, edit: true, delete: true },
-    users: { view: true, create: true, edit: true, delete: true },
-    'points-rules': { view: true, create: true, edit: true, delete: true },
-  },
-  collaborator: {
-    // Collaborators have limited access, cannot manage users or settings
-    address: { view: true, create: true, edit: true, delete: false },
-    beneficiary: { view: true, create: true, edit: true, delete: false },
-    beneficiary_organization: { view: true, create: false, edit: false, delete: false },
-    branch: { view: true, create: false, edit: true, delete: false },
-    organization: { view: true, create: false, edit: false, delete: false }, // Read-only
-    category: { view: true, create: true, edit: true, delete: false },
-    product: { view: true, create: true, edit: true, delete: false },
-    app_user: { view: true, create: false, edit: false, delete: false }, // Read-only, cannot manage users
-    app_user_organization: { view: false, create: false, edit: false, delete: false },
-    redemption: { view: true, create: true, edit: true, delete: false },
-    stock: { view: true, create: true, edit: true, delete: false },
-    users: { view: true, create: false, edit: false, delete: false }, // Read-only
-    'points-rules': { view: true, create: false, edit: true, delete: false },
-  },
+  owner: OWNER_ENTITY_ACCESS,
+  collaborator: OWNER_ENTITY_ACCESS,
   cashier: {
     // Cashiers have very limited access, mainly for transactions
     address: { view: false, create: false, edit: false, delete: false },

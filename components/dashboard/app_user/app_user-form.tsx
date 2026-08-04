@@ -28,7 +28,6 @@ import type { UserRole } from '@/types/user_role';
 
 interface AppUserFormProps {
   appUser?: AppUser;
-  currentUserRole?: string;
 }
 
 const roleToPlanFeature: Record<string, 'cashiers' | 'collaborators'> = {
@@ -36,7 +35,7 @@ const roleToPlanFeature: Record<string, 'cashiers' | 'collaborators'> = {
   collaborator: 'collaborators',
 };
 
-export default function AppUserForm({ appUser, currentUserRole }: AppUserFormProps) {
+export default function AppUserForm({ appUser }: AppUserFormProps) {
   const t = useTranslations('Dashboard.appUser');
   const tCommon = useTranslations('Common');
   const { isAtLimit, invalidate } = usePlanUsage();
@@ -66,11 +65,6 @@ export default function AppUserForm({ appUser, currentUserRole }: AppUserFormPro
     }
     loadRoles();
   }, []);
-
-  // Collaborators can only create/manage cashiers
-  const visibleRoles = currentUserRole === 'collaborator'
-    ? roles.filter((r) => r.name === 'cashier')
-    : roles;
 
   const isCashierSelected = roles.some((r) => String(r.id) === roleId && r.name === USER_ROLES.CASHIER);
 
@@ -127,7 +121,7 @@ export default function AppUserForm({ appUser, currentUserRole }: AppUserFormPro
               <SelectValue placeholder={t('form.selectRole')} />
             </SelectTrigger>
             <SelectContent>
-              {visibleRoles.map((role) => {
+              {roles.map((role) => {
                 const feature = roleToPlanFeature[role.name];
                 const atLimit = feature ? isAtLimit(feature) : false;
                 const optionId = String(role.id);

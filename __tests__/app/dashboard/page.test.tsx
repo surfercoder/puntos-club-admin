@@ -25,9 +25,7 @@ jest.mock('@/lib/auth/get-current-user', () => ({
 }));
 
 jest.mock('@/lib/auth/roles', () => ({
-  isOwner: jest.fn(() => true),
-  isCollaborator: jest.fn(() => false),
-  isAdmin: jest.fn(() => false),
+  hasOwnerPermissions: jest.fn(() => true),
 }));
 
 jest.mock('@/actions/dashboard/usage/actions', () => ({
@@ -92,12 +90,10 @@ describe('DashboardPage', () => {
 
   it('renders "No tienes acceso" when user has no analytics access', async () => {
     const { getCurrentUser } = require('@/lib/auth/get-current-user');
-    const { isOwner: isOwnerFn, isCollaborator: isCollaboratorFn, isAdmin: isAdminFn } = require('@/lib/auth/roles');
+    const { hasOwnerPermissions: hasOwnerPermissionsFn } = require('@/lib/auth/roles');
 
     getCurrentUser.mockResolvedValueOnce({ id: 'u1', role: 'cashier' });
-    isOwnerFn.mockReturnValueOnce(false);
-    isCollaboratorFn.mockReturnValueOnce(false);
-    isAdminFn.mockReturnValueOnce(false);
+    hasOwnerPermissionsFn.mockReturnValueOnce(false);
 
     require('react');
     const result = await DashboardPage();

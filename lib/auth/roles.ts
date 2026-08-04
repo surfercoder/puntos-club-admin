@@ -26,20 +26,9 @@ export const ROLE_DESCRIPTIONS: Record<UserRoleType, string> = {
   final_user: 'Users of PuntosClub mobile app who make purchases and redeem points',
   cashier: 'Store employees using PuntosClubCaja app to process purchases and redemptions',
   owner: 'Store owners with full admin access to their stores',
-  collaborator: 'Helper users added by owners with limited admin permissions',
+  collaborator: 'Right-hand staff added by owners, with the same admin permissions',
   admin: 'System administrators with full access to all apps and entities',
 };
-
-/**
- * Actions that collaborators cannot perform
- */
-export const RESTRICTED_COLLABORATOR_ACTIONS = {
-  CREATE_COLLABORATOR: 'create_collaborator',
-  DELETE_COLLABORATOR: 'delete_collaborator',
-  MODIFY_OWNER_SETTINGS: 'modify_owner_settings',
-  DELETE_ORGANIZATION: 'delete_organization',
-  TRANSFER_OWNERSHIP: 'transfer_ownership',
-} as const;
 
 /**
  * Check if a user has a specific role
@@ -98,6 +87,16 @@ export function isOwnerOrAdmin(user: AppUser | null | undefined): boolean {
 }
 
 /**
+ * Collaborators are employees/right-hands that owners create and designate
+ * themselves, so they get the exact same permissions as an owner.
+ * ponytail: single gate for the whole admin portal — split it per-section only
+ * when collaborators actually need narrower permissions.
+ */
+export function hasOwnerPermissions(user: AppUser | null | undefined): boolean {
+  return isOwner(user) || isCollaborator(user) || isAdmin(user);
+}
+
+/**
  * Check if a user has staff permissions (cashier, owner, collaborator, or admin)
  */
 export function isStaff(user: AppUser | null | undefined): boolean {
@@ -108,31 +107,24 @@ export function isStaff(user: AppUser | null | undefined): boolean {
 /**
  * Check if a user can perform a specific action
  * Admins can do everything
- * Owners can do everything except system-level actions
- * Collaborators have restrictions defined in RESTRICTED_COLLABORATOR_ACTIONS
+ * Owners and collaborators can do everything except system-level actions
  */
 export function canPerformAction(
   user: AppUser | null | undefined,
   action: string
 ): boolean {
   if (!user) return false;
-  
+
   // Admins can do everything
   if (isAdmin(user)) return true;
-  
-  // Owners can do everything except restricted actions
-  if (isOwner(user)) {
+
+  // Owners (and collaborators) can do everything except restricted actions
+  if (isOwner(user) || isCollaborator(user)) {
     // Owners cannot perform system-level admin actions
     const systemActions = ['delete_all_organizations', 'manage_system_settings'];
     return !systemActions.includes(action);
   }
-  
-  // Collaborators have specific restrictions
-  if (isCollaborator(user)) {
-    const restrictedActions: string[] = Object.values(RESTRICTED_COLLABORATOR_ACTIONS);
-    return !restrictedActions.includes(action);
-  }
-  
+
   // Cashiers have limited permissions
   if (isCashier(user)) {
     const allowedActions = [
@@ -191,8 +183,8 @@ export function getUserRoleDescription(user: AppUser | Beneficiary | null | unde
 /**
  * Check if a user can manage another user
  * Admins can manage anyone
- * Owners can manage users in their organization (except other owners and admins)
- * Collaborators cannot manage other users
+ * Owners and collaborators can manage users in their organization
+ * (except other owners and admins)
  */
 export function canManageUser(
   currentUser: AppUser | null | undefined,
@@ -206,8 +198,8 @@ export function canManageUser(
   // Users cannot manage themselves through this function
   if (currentUser.id === targetUser.id) return false;
   
-  // Owners can manage users in their organization
-  if (isOwner(currentUser)) {
+  // Owners and collaborators can manage users in their organization
+  if (isOwner(currentUser) || isCollaborator(currentUser)) {
     // Must be in same organization
     if (!belongsToOrganization(targetUser, currentUser.organization_id)) {
       return false;
@@ -220,8 +212,8 @@ export function canManageUser(
     
     return true;
   }
-  
-  // Collaborators and cashiers cannot manage other users
+
+  // Cashiers cannot manage other users
   return false;
 }
 
@@ -242,8 +234,8 @@ export function getAssignableRoles(user: AppUser | null | undefined): UserRoleTy
     ];
   }
   
-  // Owners can assign cashier and collaborator roles
-  if (isOwner(user)) {
+  // Owners and collaborators can assign cashier and collaborator roles
+  if (isOwner(user) || isCollaborator(user)) {
     return [USER_ROLES.CASHIER, USER_ROLES.COLLABORATOR];
   }
   

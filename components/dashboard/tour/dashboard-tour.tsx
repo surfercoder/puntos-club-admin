@@ -29,7 +29,7 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
   const initialized = useRef(false);
 
   useEffect(() => {
-    if (userRole !== "owner") return;
+    if (userRole !== "owner" && userRole !== "collaborator") return;
     if (tourCompleted) return;
     if (initialized.current) return;
 

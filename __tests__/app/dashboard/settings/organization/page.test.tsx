@@ -11,8 +11,7 @@ jest.mock('@/lib/auth/get-current-user', () => ({
   getCurrentUser: jest.fn(() => Promise.resolve({ id: 1, organization_id: 5, role: { name: 'owner' } })),
 }));
 jest.mock('@/lib/auth/roles', () => ({
-  isOwner: jest.fn(() => true),
-  isAdmin: jest.fn(() => false),
+  hasOwnerPermissions: jest.fn(() => true),
 }));
 jest.mock('@/actions/dashboard/organization/actions', () => ({
   getOrganizationSettings: jest.fn(() => Promise.resolve({ data: { id: 5, name: 'Test Org', is_public: true }, error: null })),
@@ -26,7 +25,7 @@ jest.mock('lucide-react', () => ({
 
 import OrgSettingsPage from '@/app/dashboard/settings/organization/page';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
-import { isOwner, isAdmin } from '@/lib/auth/roles';
+import { hasOwnerPermissions } from '@/lib/auth/roles';
 import { getOrganizationSettings } from '@/actions/dashboard/organization/actions';
 import { cookies } from 'next/headers';
 
@@ -47,8 +46,7 @@ describe('OrgSettingsPage', () => {
   });
 
   it('redirects when user is not authorized (not owner/admin)', async () => {
-    (isOwner as jest.Mock).mockReturnValueOnce(false);
-    (isAdmin as jest.Mock).mockReturnValueOnce(false);
+    (hasOwnerPermissions as jest.Mock).mockReturnValueOnce(false);
     mockRedirect.mockImplementation(() => { throw new Error('NEXT_REDIRECT'); });
 
     await expect(OrgSettingsPage()).rejects.toThrow('NEXT_REDIRECT');

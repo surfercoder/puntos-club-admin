@@ -2,7 +2,6 @@ import {
   USER_ROLES,
   ROLE_DISPLAY_NAMES,
   ROLE_DESCRIPTIONS,
-  RESTRICTED_COLLABORATOR_ACTIONS,
   hasRole,
   isAdmin,
   isOwner,
@@ -10,6 +9,7 @@ import {
   isCashier,
   isFinalUser,
   isOwnerOrAdmin,
+  hasOwnerPermissions,
   isStaff,
   canPerformAction,
   belongsToOrganization,
@@ -66,12 +66,13 @@ describe('constants', () => {
     }
   });
 
-  it('RESTRICTED_COLLABORATOR_ACTIONS has expected actions', () => {
-    expect(RESTRICTED_COLLABORATOR_ACTIONS.CREATE_COLLABORATOR).toBe('create_collaborator');
-    expect(RESTRICTED_COLLABORATOR_ACTIONS.DELETE_COLLABORATOR).toBe('delete_collaborator');
-    expect(RESTRICTED_COLLABORATOR_ACTIONS.MODIFY_OWNER_SETTINGS).toBe('modify_owner_settings');
-    expect(RESTRICTED_COLLABORATOR_ACTIONS.DELETE_ORGANIZATION).toBe('delete_organization');
-    expect(RESTRICTED_COLLABORATOR_ACTIONS.TRANSFER_OWNERSHIP).toBe('transfer_ownership');
+  it('hasOwnerPermissions covers owner, collaborator and admin only', () => {
+    expect(hasOwnerPermissions(mockUser('owner'))).toBe(true);
+    expect(hasOwnerPermissions(mockUser('collaborator'))).toBe(true);
+    expect(hasOwnerPermissions(mockUser('admin'))).toBe(true);
+    expect(hasOwnerPermissions(mockUser('cashier'))).toBe(false);
+    expect(hasOwnerPermissions(mockUser('final_user'))).toBe(false);
+    expect(hasOwnerPermissions(null)).toBe(false);
   });
 });
 
@@ -213,19 +214,18 @@ describe('canPerformAction', () => {
     expect(canPerformAction(owner, 'manage_system_settings')).toBe(false);
   });
 
-  it('collaborator cannot perform restricted actions', () => {
+  it('collaborator can perform the same actions as an owner', () => {
     const collab = mockUser('collaborator');
-    expect(canPerformAction(collab, 'create_collaborator')).toBe(false);
-    expect(canPerformAction(collab, 'delete_collaborator')).toBe(false);
-    expect(canPerformAction(collab, 'modify_owner_settings')).toBe(false);
-    expect(canPerformAction(collab, 'delete_organization')).toBe(false);
-    expect(canPerformAction(collab, 'transfer_ownership')).toBe(false);
+    expect(canPerformAction(collab, 'create_collaborator')).toBe(true);
+    expect(canPerformAction(collab, 'delete_collaborator')).toBe(true);
+    expect(canPerformAction(collab, 'modify_owner_settings')).toBe(true);
+    expect(canPerformAction(collab, 'process_orders')).toBe(true);
   });
 
-  it('collaborator can perform non-restricted actions', () => {
+  it('collaborator cannot perform system-level actions', () => {
     const collab = mockUser('collaborator');
-    expect(canPerformAction(collab, 'process_orders')).toBe(true);
-    expect(canPerformAction(collab, 'some_other_action')).toBe(true);
+    expect(canPerformAction(collab, 'delete_all_organizations')).toBe(false);
+    expect(canPerformAction(collab, 'manage_system_settings')).toBe(false);
   });
 
   it('cashier can only perform allowed actions', () => {
@@ -401,10 +401,14 @@ describe('canManageUser', () => {
     expect(canManageUser(owner, cashier)).toBe(false);
   });
 
-  it('collaborator cannot manage anyone', () => {
+  it('collaborator can manage users in the same org, like an owner', () => {
     const collab = mockUser('collaborator', { id: 'collab-1', organization_id: 'org-1' });
     const cashier = mockUser('cashier', { id: 'cashier-1', organization_id: 'org-1' });
-    expect(canManageUser(collab, cashier)).toBe(false);
+    const otherOrgCashier = mockUser('cashier', { id: 'cashier-2', organization_id: 'org-2' });
+    const owner = mockUser('owner', { id: 'owner-1', organization_id: 'org-1' });
+    expect(canManageUser(collab, cashier)).toBe(true);
+    expect(canManageUser(collab, otherOrgCashier)).toBe(false);
+    expect(canManageUser(collab, owner)).toBe(false);
   });
 
   it('cashier cannot manage anyone', () => {
@@ -439,8 +443,8 @@ describe('getAssignableRoles', () => {
     expect(roles).toEqual(['cashier', 'collaborator']);
   });
 
-  it('collaborator gets empty array', () => {
-    expect(getAssignableRoles(mockUser('collaborator'))).toEqual([]);
+  it('collaborator can assign cashier and collaborator, like an owner', () => {
+    expect(getAssignableRoles(mockUser('collaborator'))).toEqual(['cashier', 'collaborator']);
   });
 
   it('cashier gets empty array', () => {

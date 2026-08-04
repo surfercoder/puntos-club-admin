@@ -5,11 +5,11 @@ import BranchFormWithAddress from '@/components/dashboard/branch/branch-form-wit
 import { PlanLimitGuard } from '@/components/dashboard/plan/plan-limit-guard';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
-import { isOwner } from '@/lib/auth/roles';
+import { hasOwnerPermissions } from '@/lib/auth/roles';
 
 export default async function CreateBranchPage() {
   const currentUser = await getCurrentUser();
-  const isOwnerUser = isOwner(currentUser);
+  const isOwnerUser = hasOwnerPermissions(currentUser);
   const t = await getTranslations('Dashboard.branch');
 
   return (
