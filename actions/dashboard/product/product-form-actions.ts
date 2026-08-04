@@ -39,6 +39,7 @@ export async function productFormAction(_prevState: ActionState, formData: FormD
 
     // Revalidate the product list page
     revalidatePath('/dashboard/product');
+    revalidatePath('/dashboard/stock');
 
     return toActionState(formDataObj.id ? 'Product updated successfully!' : 'Product created successfully!');
   } catch (error) {

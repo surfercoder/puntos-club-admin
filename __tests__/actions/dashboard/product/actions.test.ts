@@ -63,6 +63,12 @@ beforeEach(() => {
   (isAdmin as jest.Mock).mockReturnValue(true);
 });
 
+// Restores console spies even when an assertion throws mid-test, so a failure
+// here can never leak a mocked console into the tests that follow.
+afterEach(() => {
+  jest.restoreAllMocks();
+});
+
 const validProduct = {
   name: 'Product 1',
   category_id: '5',
@@ -97,6 +103,57 @@ describe('createProduct', () => {
     mockSupabase.single.mockReturnValue({ data: null, error: { message: 'DB error' } });
     const result = await createProduct(validProduct);
     expect(result.error).toEqual({ message: 'DB error' });
+  });
+
+  it('should seed an empty stock row for each branch of the organization', async () => {
+    mockSupabase.eq.mockReturnValue({ data: [{ id: 7 }, { id: 9 }] });
+
+    await createProduct(validProduct);
+
+    // Branches must be scoped to the active org, never queried globally.
+    expect(mockSupabase.from).toHaveBeenCalledWith('branch');
+    expect(mockSupabase.eq).toHaveBeenCalledWith('organization_id', 123);
+    expect(mockSupabase.from).toHaveBeenCalledWith('stock');
+    expect(mockSupabase.insert).toHaveBeenCalledWith([
+      { product_id: 1, branch_id: 7, quantity: 0, minimum_quantity: 0 },
+      { product_id: 1, branch_id: 9, quantity: 0, minimum_quantity: 0 },
+    ]);
+  });
+
+  it('should not insert stock when the organization has no branches', async () => {
+    mockSupabase.eq.mockReturnValue({ data: [] });
+
+    await createProduct(validProduct);
+
+    expect(mockSupabase.from).toHaveBeenCalledWith('branch');
+    expect(mockSupabase.from).not.toHaveBeenCalledWith('stock');
+  });
+
+  it('should log and skip seeding when the branch lookup fails', async () => {
+    mockSupabase.eq.mockReturnValue({ data: null, error: { message: 'branch boom' } });
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const result = await createProduct(validProduct);
+
+    expect(errorSpy).toHaveBeenCalledWith('[createProduct] branch lookup failed:', 'branch boom');
+    expect(mockSupabase.from).not.toHaveBeenCalledWith('stock');
+    // The product itself still succeeds — seeding is best-effort.
+    expect(result.data).toEqual({ id: '1', name: 'Test Product' });
+    expect(result.error).toBeNull();
+  });
+
+  it('should log when seeding stock fails without failing the product creation', async () => {
+    mockSupabase.eq.mockReturnValue({ data: [{ id: 7 }] });
+    mockSupabase.insert
+      .mockReturnValueOnce(mockSupabase)
+      .mockReturnValueOnce({ error: { message: 'stock boom' } });
+    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const result = await createProduct(validProduct);
+
+    expect(errorSpy).toHaveBeenCalledWith('[createProduct] stock seed failed:', 'stock boom');
+    expect(result.data).toEqual({ id: '1', name: 'Test Product' });
+    expect(result.error).toBeNull();
   });
 });
 

@@ -38,6 +38,37 @@ export async function createProduct(input: Product) {
     .select()
     .single();
 
+  // Seed an empty stock row per branch so the product shows up in the stock
+  // section right away, using the same defaults as the stock form (0 / 0).
+  // ponytail: best-effort — the product row is already committed, so a seeding
+  // failure is logged, never returned as an error the user would misread as
+  // "the product was not created". Missing rows stay fixable from /dashboard/stock.
+  if (data && !error) {
+    const { data: branches, error: branchesError } = await supabase
+      .from('branch')
+      .select('id')
+      .eq('organization_id', activeOrgIdNumber);
+
+    if (branchesError) {
+      console.error('[createProduct] branch lookup failed:', branchesError.message);
+    }
+
+    if (branches?.length) {
+      const { error: stockError } = await supabase.from('stock').insert(
+        branches.map((branch) => ({
+          product_id: Number(data.id),
+          branch_id: Number(branch.id),
+          quantity: 0,
+          minimum_quantity: 0,
+        }))
+      );
+
+      if (stockError) {
+        console.error('[createProduct] stock seed failed:', stockError.message);
+      }
+    }
+  }
+
   return { data, error };
 }
 
