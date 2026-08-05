@@ -57,6 +57,7 @@ export default async function ProductListPage() {
               <TableHead>{t('tableHeaders.name')}</TableHead>
               <TableHead>{t('tableHeaders.description')}</TableHead>
               <TableHead>{t('tableHeaders.requiredPoints')}</TableHead>
+              <TableHead>{t('tableHeaders.stock')}</TableHead>
 
               <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
@@ -94,6 +95,13 @@ export default async function ProductListPage() {
                   </TableCell>
                   <TableCell>{product.description || 'N/A'}</TableCell>
                   <TableCell>{product.required_points}</TableCell>
+                  <TableCell>
+                    {product.stock > 0 ? (
+                      product.stock
+                    ) : (
+                      <span className="text-muted-foreground">{t('outOfStock')}</span>
+                    )}
+                  </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">

@@ -26,7 +26,12 @@ const mockSupabase = {
   auth: { getUser: jest.fn(() => ({ data: { user: { id: 'auth-1' } }, error: null })) },
 };
 jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => mockSupabase) }));
+// getMutationOrgId falls back to the user's org, so keep it off the shared query mock.
+jest.mock('@/lib/auth/get-current-user', () => ({
+  getCurrentUser: jest.fn(async () => ({ id: 1, organization_id: 123 })),
+}));
 
+import { getCurrentUser } from '@/lib/auth/get-current-user';
 import {
   createCategory,
   updateCategory,
@@ -49,6 +54,7 @@ beforeEach(() => {
   mockSupabase.eq.mockReturnValue(mockSupabase);
   mockSupabase.order.mockReturnValue(mockSupabase);
   mockSupabase.single.mockReturnValue({ data: { id: '1', name: 'Test Category' }, error: null });
+  (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, organization_id: 123 });
 });
 
 describe('createCategory', () => {
@@ -67,14 +73,29 @@ describe('createCategory', () => {
     expect(result.error).toHaveProperty('fieldErrors');
   });
 
-  it('should return error when no active org', async () => {
+  it('should fall back to the users own org when the cookie is missing', async () => {
+    // The org-switcher cookie is only written client-side, so a fresh login has
+    // none — falling back keeps create/update/delete working.
     mockCookieStore.get.mockReturnValue(undefined);
     const result = await createCategory({ name: 'Test' });
-    expect(result).toEqual({ data: null, error: { message: 'Missing active organization' } });
+    expect(mockSupabase.insert).toHaveBeenCalledWith([
+      expect.objectContaining({ organization_id: 123 }),
+    ]);
+    expect(result.error).toBeNull();
   });
 
-  it('should return error when active_org_id is non-numeric', async () => {
+  it('should fall back when active_org_id is non-numeric', async () => {
     mockCookieStore.get.mockReturnValue({ value: 'abc' });
+    const result = await createCategory({ name: 'Test' });
+    expect(mockSupabase.insert).toHaveBeenCalledWith([
+      expect.objectContaining({ organization_id: 123 }),
+    ]);
+    expect(result.error).toBeNull();
+  });
+
+  it('should return error when neither the cookie nor the user has an org', async () => {
+    mockCookieStore.get.mockReturnValue(undefined);
+    (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, organization_id: null });
     const result = await createCategory({ name: 'Test' });
     expect(result).toEqual({ data: null, error: { message: 'Missing active organization' } });
   });
@@ -131,8 +152,9 @@ describe('updateCategory', () => {
     expect(result.error).toHaveProperty('fieldErrors');
   });
 
-  it('should return error when no active org', async () => {
+  it('should return error when neither the cookie nor the user has an org', async () => {
     mockCookieStore.get.mockReturnValue(undefined);
+    (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, organization_id: null });
     const result = await updateCategory('1', { name: 'Test' });
     expect(result).toEqual({ data: null, error: { message: 'Missing active organization' } });
   });
@@ -156,8 +178,9 @@ describe('deleteCategory', () => {
     expect(result.error).toBeNull();
   });
 
-  it('should return error when no active org', async () => {
+  it('should return error when neither the cookie nor the user has an org', async () => {
     mockCookieStore.get.mockReturnValue(undefined);
+    (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, organization_id: null });
     const result = await deleteCategory('1');
     expect(result).toEqual({ error: { message: 'Missing active organization' } });
   });

@@ -43,6 +43,7 @@ import {
   getProduct,
 } from '@/actions/dashboard/product/actions';
 import { enforcePlanLimit } from '@/lib/plans/usage';
+import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { isAdmin } from '@/lib/auth/roles';
 
 beforeEach(() => {
@@ -60,6 +61,7 @@ beforeEach(() => {
   mockSupabase.order.mockReturnValue(mockSupabase);
   mockSupabase.single.mockReturnValue({ data: { id: '1', name: 'Test Product' }, error: null });
   (enforcePlanLimit as jest.Mock).mockReturnValue(null);
+  (getCurrentUser as jest.Mock).mockReturnValue({ id: 1, organization_id: 123, role: { name: 'admin' } });
   (isAdmin as jest.Mock).mockReturnValue(true);
 });
 
@@ -73,6 +75,7 @@ const validProduct = {
   name: 'Product 1',
   category_id: '5',
   required_points: 100,
+  stock: 25,
   active: true,
 };
 
@@ -87,8 +90,18 @@ describe('createProduct', () => {
     expect(result.error).toBeNull();
   });
 
-  it('should return error when no active org', async () => {
+  it('should fall back to the users own org when the cookie is missing', async () => {
     mockCookieStore.get.mockReturnValue(undefined);
+    const result = await createProduct(validProduct);
+    expect(mockSupabase.insert).toHaveBeenCalledWith([
+      expect.objectContaining({ organization_id: 123 }),
+    ]);
+    expect(result.error).toBeNull();
+  });
+
+  it('should return error when neither the cookie nor the user has an org', async () => {
+    mockCookieStore.get.mockReturnValue(undefined);
+    (getCurrentUser as jest.Mock).mockReturnValue({ id: 1, organization_id: null });
     const result = await createProduct(validProduct);
     expect(result).toEqual({ data: null, error: { message: 'Missing active organization' } });
   });
@@ -105,140 +118,117 @@ describe('createProduct', () => {
     expect(result.error).toEqual({ message: 'DB error' });
   });
 
-  it('should seed an empty stock row for each branch of the organization', async () => {
-    mockSupabase.eq.mockReturnValue({ data: [{ id: 7 }, { id: 9 }] });
-
+  it('should persist the stock value it was given', async () => {
     await createProduct(validProduct);
-
-    // Branches must be scoped to the active org, never queried globally.
-    expect(mockSupabase.from).toHaveBeenCalledWith('branch');
-    expect(mockSupabase.eq).toHaveBeenCalledWith('organization_id', 123);
-    expect(mockSupabase.from).toHaveBeenCalledWith('stock');
     expect(mockSupabase.insert).toHaveBeenCalledWith([
-      { product_id: 1, branch_id: 7, quantity: 0, minimum_quantity: 0 },
-      { product_id: 1, branch_id: 9, quantity: 0, minimum_quantity: 0 },
+      expect.objectContaining({ stock: 25 }),
     ]);
-  });
-
-  it('should not insert stock when the organization has no branches', async () => {
-    mockSupabase.eq.mockReturnValue({ data: [] });
-
-    await createProduct(validProduct);
-
-    expect(mockSupabase.from).toHaveBeenCalledWith('branch');
-    expect(mockSupabase.from).not.toHaveBeenCalledWith('stock');
-  });
-
-  it('should log and skip seeding when the branch lookup fails', async () => {
-    mockSupabase.eq.mockReturnValue({ data: null, error: { message: 'branch boom' } });
-    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-    const result = await createProduct(validProduct);
-
-    expect(errorSpy).toHaveBeenCalledWith('[createProduct] branch lookup failed:', 'branch boom');
-    expect(mockSupabase.from).not.toHaveBeenCalledWith('stock');
-    // The product itself still succeeds — seeding is best-effort.
-    expect(result.data).toEqual({ id: '1', name: 'Test Product' });
-    expect(result.error).toBeNull();
-  });
-
-  it('should log when seeding stock fails without failing the product creation', async () => {
-    mockSupabase.eq.mockReturnValue({ data: [{ id: 7 }] });
-    mockSupabase.insert
-      .mockReturnValueOnce(mockSupabase)
-      .mockReturnValueOnce({ error: { message: 'stock boom' } });
-    const errorSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
-
-    const result = await createProduct(validProduct);
-
-    expect(errorSpy).toHaveBeenCalledWith('[createProduct] stock seed failed:', 'stock boom');
-    expect(result.data).toEqual({ id: '1', name: 'Test Product' });
-    expect(result.error).toBeNull();
   });
 });
 
 describe('updateProduct', () => {
-  it('should update a product successfully', async () => {
+  it('should update a product scoped to the active org', async () => {
     const result = await updateProduct('1', validProduct);
-    expect(mockSupabase.update).toHaveBeenCalled();
-    expect(result.data).toBeDefined();
+    expect(mockSupabase.from).toHaveBeenCalledWith('product');
+    expect(mockSupabase.update).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'Product 1', stock: 25, organization_id: 123 })
+    );
+    expect(mockSupabase.eq).toHaveBeenCalledWith('id', '1');
+    expect(mockSupabase.eq).toHaveBeenCalledWith('organization_id', 123);
+    expect(result.error).toBeNull();
   });
 
-  it('should return error when no active org', async () => {
+  // The reported bug: editing a product with no org-switcher cookie returned
+  // a plain object error, which surfaced as "An unknown error occurred".
+  it('should update using the users own org when the cookie is missing', async () => {
     mockCookieStore.get.mockReturnValue(undefined);
     const result = await updateProduct('1', validProduct);
+    expect(mockSupabase.update).toHaveBeenCalledWith(
+      expect.objectContaining({ stock: 25, organization_id: 123 })
+    );
+    expect(result.error).toBeNull();
+  });
+
+  it('should return error when neither the cookie nor the user has an org', async () => {
+    mockCookieStore.get.mockReturnValue(undefined);
+    (getCurrentUser as jest.Mock).mockReturnValue({ id: 1, organization_id: null });
+    const result = await updateProduct('1', validProduct);
     expect(result).toEqual({ data: null, error: { message: 'Missing active organization' } });
+  });
+
+  it('should return supabase error on failure', async () => {
+    mockSupabase.single.mockReturnValue({ data: null, error: { message: 'DB error' } });
+    const result = await updateProduct('1', validProduct);
+    expect(result.error).toEqual({ message: 'DB error' });
   });
 });
 
 describe('deleteProduct', () => {
-  it('should delete a product successfully', async () => {
-    mockSupabase.eq
-      .mockReturnValueOnce(mockSupabase)
-      .mockReturnValueOnce({ error: null });
+  it('should delete a product scoped to the active org', async () => {
+    mockSupabase.eq.mockReturnValueOnce(mockSupabase).mockReturnValueOnce({ error: null });
     const result = await deleteProduct('1');
     expect(mockSupabase.delete).toHaveBeenCalled();
+    expect(mockSupabase.eq).toHaveBeenCalledWith('id', '1');
+    expect(mockSupabase.eq).toHaveBeenCalledWith('organization_id', 123);
     expect(result.error).toBeNull();
   });
 
-  it('should return error when no active org', async () => {
+  it('should return error when neither the cookie nor the user has an org', async () => {
     mockCookieStore.get.mockReturnValue(undefined);
+    (getCurrentUser as jest.Mock).mockReturnValue({ id: 1, organization_id: null });
     const result = await deleteProduct('1');
     expect(result).toEqual({ error: { message: 'Missing active organization' } });
+  });
+
+  it('should return supabase error on failure', async () => {
+    mockSupabase.eq.mockReturnValueOnce(mockSupabase).mockReturnValueOnce({ error: { message: 'DB error' } });
+    const result = await deleteProduct('1');
+    expect(result.error).toEqual({ message: 'DB error' });
   });
 });
 
 describe('getProducts', () => {
-  it('should return all products for admin', async () => {
-    (isAdmin as jest.Mock).mockReturnValue(true);
+  it('should list products unscoped for admins', async () => {
     mockSupabase.order.mockReturnValue({ data: [{ id: '1' }], error: null });
     const result = await getProducts();
+    expect(mockSupabase.from).toHaveBeenCalledWith('product');
+    expect(mockSupabase.order).toHaveBeenCalledWith('name');
+    // Admins see every org, so no organization_id filter is applied.
+    expect(mockSupabase.eq).not.toHaveBeenCalledWith('organization_id', expect.anything());
     expect(result.data).toEqual([{ id: '1' }]);
   });
 
-  it('should filter by org for non-admin', async () => {
+  it('should scope the list to the org for non-admins', async () => {
     (isAdmin as jest.Mock).mockReturnValue(false);
-    // Cookie org matches the user's primary org, so no membership lookup runs.
-    const { getCurrentUser } = require('@/lib/auth/get-current-user');
-    (getCurrentUser as jest.Mock).mockReturnValueOnce({ id: 1, organization_id: '123', role: { name: 'owner' } });
-    mockSupabase.eq.mockReturnValue({ data: [{ id: '1' }], error: null });
-    const result = await getProducts();
-    expect(result.data).toEqual([{ id: '1' }]);
-  });
-
-  it('should not filter by org for non-admin when no org cookie', async () => {
-    (isAdmin as jest.Mock).mockReturnValue(false);
-    mockCookieStore.get.mockReturnValue(undefined);
-    mockSupabase.order.mockReturnValue({ data: [], error: null });
-    const result = await getProducts();
-    expect(result.data).toEqual([]);
+    // Cookie org == the user's own org, so the filter resolves without a
+    // membership lookup.
+    (getCurrentUser as jest.Mock).mockReturnValue({ id: 1, organization_id: 123 });
+    mockSupabase.order.mockReturnValue(mockSupabase);
+    mockSupabase.eq.mockReturnValue({ data: [], error: null });
+    await getProducts();
+    expect(mockSupabase.eq).toHaveBeenCalledWith('organization_id', 123);
   });
 });
 
 describe('getProduct', () => {
-  it('should return a product by id', async () => {
+  it('should fetch one product scoped to the active org', async () => {
     const result = await getProduct('1');
+    expect(mockSupabase.from).toHaveBeenCalledWith('product');
+    expect(mockSupabase.eq).toHaveBeenCalledWith('id', '1');
+    expect(mockSupabase.eq).toHaveBeenCalledWith('organization_id', 123);
     expect(result.data).toEqual({ id: '1', name: 'Test Product' });
   });
 
-  it('should return error on failure', async () => {
-    mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Not found' } });
-    const result = await getProduct('999');
-    expect(result.error).toEqual({ message: 'Not found' });
-  });
-
-  it('should not filter by org when no org cookie', async () => {
+  it('should fetch without an org filter when the cookie is missing', async () => {
     mockCookieStore.get.mockReturnValue(undefined);
-    const result = await getProduct('1');
-    expect(result.data).toBeDefined();
+    await getProduct('1');
+    expect(mockSupabase.eq).toHaveBeenCalledWith('id', '1');
+    expect(mockSupabase.eq).not.toHaveBeenCalledWith('organization_id', expect.anything());
   });
 
-  it('should filter by org when org cookie is present', async () => {
-    mockCookieStore.get.mockImplementation((name: string) => {
-      if (name === 'active_org_id') return { value: '123' };
-      return undefined;
-    });
+  it('should return supabase error on failure', async () => {
+    mockSupabase.single.mockReturnValue({ data: null, error: { message: 'DB error' } });
     const result = await getProduct('1');
-    expect(result.data).toBeDefined();
+    expect(result.error).toEqual({ message: 'DB error' });
   });
 });

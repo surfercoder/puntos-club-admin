@@ -39,7 +39,7 @@ const mockProducts = [
     description: 'Desc A',
     required_points: 50,
     category: { name: 'Cat 1' },
-    stock: [{ quantity: 10 }, { quantity: 5 }],
+    stock: 15,
   },
   {
     id: '2',
@@ -47,7 +47,7 @@ const mockProducts = [
     description: null,
     required_points: 100,
     category: null,
-    stock: [],
+    stock: 0,
   },
 ];
 

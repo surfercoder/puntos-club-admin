@@ -9,6 +9,10 @@ export const ProductSchema = z.object({
     if (typeof val === 'number') return val;
     return parseInt(val) || 0;
   }),
+  stock: z.union([z.number(), z.string()]).transform(val => {
+    const parsed = typeof val === 'number' ? val : parseInt(val) || 0;
+    return Math.max(0, parsed);
+  }),
 
   creation_date: z.string().optional(),
   image_urls: z.array(z.string()).max(3, 'Maximum 3 images allowed').optional(),

@@ -28,7 +28,15 @@ export async function productFormAction(_prevState: ActionState, formData: FormD
 
     let result;
     if (formDataObj.id) {
-      result = await updateProduct(String(formDataObj.id), parsed.data as Product);
+      // Redemptions decrement product.stock in the background, so writing back the
+      // absolute count the form rendered with would silently revert them (oversell).
+      // Only send stock when the admin actually edited the field.
+      // ponytail: last-write-wins if they did edit it — that's the intended "I counted
+      // the shelf" semantic. Add an optimistic .eq('stock', loaded) guard only if two
+      // admins ever restock the same product at once.
+      const { stock, ...withoutStock } = parsed.data as Product;
+      const stockUnchanged = String(formDataObj.stock_loaded ?? '') === String(stock);
+      result = await updateProduct(String(formDataObj.id), stockUnchanged ? withoutStock : parsed.data as Product);
     } else {
       result = await createProduct(parsed.data as Product);
     }
@@ -39,7 +47,6 @@ export async function productFormAction(_prevState: ActionState, formData: FormD
 
     // Revalidate the product list page
     revalidatePath('/dashboard/product');
-    revalidatePath('/dashboard/stock');
 
     return toActionState(formDataObj.id ? 'Product updated successfully!' : 'Product created successfully!');
   } catch (error) {

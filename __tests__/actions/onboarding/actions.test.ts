@@ -151,8 +151,7 @@ describe('completeOnboarding', () => {
       .mockReturnValueOnce({ data: { id: 2 }, error: null })
       .mockReturnValueOnce({ data: { id: 3 }, error: null })
       .mockReturnValueOnce({ data: { id: 4 }, error: null })
-      .mockReturnValueOnce({ data: { id: 5 }, error: null }) // category
-      .mockReturnValueOnce({ data: { id: 6 }, error: null }); // product
+      .mockReturnValueOnce({ data: { id: 5 }, error: null }); // category
     const result = await completeOnboarding({
       step2: step2Data,
       step4: {
@@ -381,26 +380,6 @@ describe('completeOnboarding', () => {
     expect(result.success).toBe(true); // continues despite category error
   });
 
-  it('should handle catalog with product insert error', async () => {
-    mockSupabase.maybeSingle
-      .mockReturnValueOnce({ data: null, error: null })
-      .mockReturnValueOnce({ data: { id: 1 }, error: null });
-    mockSupabase.single
-      .mockReturnValueOnce({ data: { id: 1, name: 'Org' }, error: null })
-      .mockReturnValueOnce({ data: { id: 2 }, error: null })
-      .mockReturnValueOnce({ data: { id: 3 }, error: null })
-      .mockReturnValueOnce({ data: { id: 4 }, error: null })
-      .mockReturnValueOnce({ data: { id: 5 }, error: null }) // category OK
-      .mockReturnValueOnce({ data: null, error: { message: 'Product insert failed' } }); // product fail
-    const result = await completeOnboarding({
-      step2: step2Data,
-      step4: {
-        categories: [{ name: 'Cat1', products: [{ name: 'Prod1', required_points: 100, quantity: 10 }] }],
-      },
-    });
-    expect(result.success).toBe(true); // continues despite product error
-  });
-
   it('should handle pro plan subscription', async () => {
     mockSupabase.maybeSingle
       .mockReturnValueOnce({ data: null, error: null })
@@ -587,8 +566,7 @@ describe('completeOnboarding', () => {
       .mockReturnValueOnce({ data: { id: 2 }, error: null })
       .mockReturnValueOnce({ data: { id: 3 }, error: null })
       .mockReturnValueOnce({ data: { id: 4 }, error: null })
-      .mockReturnValueOnce({ data: { id: 5 }, error: null }) // category
-      .mockReturnValueOnce({ data: { id: 6 }, error: null }); // product
+      .mockReturnValueOnce({ data: { id: 5 }, error: null }); // category
     const result = await completeOnboarding({
       step2: step2Data,
       step4: {
@@ -600,7 +578,6 @@ describe('completeOnboarding', () => {
             description: '',
             required_points: 0, // falsy, should default to 100
             quantity: 0,        // falsy, should default to 0
-            minimum_quantity: 0, // falsy, should default to 1
           }],
         }],
       },

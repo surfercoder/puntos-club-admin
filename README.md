@@ -45,9 +45,9 @@ Puntos Club is a SaaS platform where each retailer (an **organization**) runs th
 - Organization, branch (store location), product, and category catalogs
 - Beneficiary (customer) management — including customers shared across organizations
 - Purchase recording with automatic point calculation
-- Redemption workflow (customer redeems points → cashier confirms → stock decrements)
+- Redemption workflow (customer reserves points + stock → cashier confirms delivery)
 - Configurable **points rules** (earn/redeem ratios, multipliers)
-- Stock tracking with realtime updates
+- Per-product stock (`product.stock`) with realtime updates
 - **Push + email notification campaigns** with **AI content moderation** (Claude)
 - Subscription billing via **Mercado Pago** (trial / advance / pro tiers, with per-plan feature limits)
 - Analytics dashboards: revenue, member growth, points economy, branch performance, top products
@@ -146,8 +146,6 @@ erDiagram
     BENEFICIARY ||--o{ REDEMPTION : claims
     BENEFICIARY ||--o{ PUSH_TOKEN : registers
     BRANCH ||--o{ PURCHASE : "happens at"
-    BRANCH ||--o{ STOCK : "stocks"
-    PRODUCT ||--o{ STOCK : "tracked as"
     CATEGORY ||--o{ PRODUCT : groups
     APP_USER ||--o{ APP_USER_ORGANIZATION : "belongs to"
     APP_USER ||--|| USER_ROLE : "has"
@@ -182,7 +180,6 @@ erDiagram
 │   │   ├── category/
 │   │   ├── purchase/
 │   │   ├── redemption/
-│   │   ├── stock/
 │   │   ├── push_notifications/
 │   │   ├── points-rules/
 │   │   ├── subscription/

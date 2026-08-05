@@ -7,7 +7,7 @@ jest.mock('next-intl/server', () => ({
 
 jest.mock('@/actions/dashboard/product/actions', () => ({
   getProducts: jest.fn(() => Promise.resolve({
-    data: [{ id: '1', name: 'Test Product', description: 'Desc', required_points: 100, image_urls: [] }],
+    data: [{ id: '1', name: 'Test Product', description: 'Desc', required_points: 100, stock: 5, image_urls: [] }],
     error: null,
   })),
 }));
@@ -81,7 +81,7 @@ describe('ProductListPage', () => {
   it('renders product with no image_urls', async () => {
     const { getProducts } = require('@/actions/dashboard/product/actions');
     getProducts.mockResolvedValueOnce({
-      data: [{ id: '2', name: 'P2', description: 'Desc', required_points: 200, image_urls: null }],
+      data: [{ id: '2', name: 'P2', description: 'Desc', required_points: 200, stock: 0, image_urls: null }],
       error: null,
     });
     const result = await ProductListPage();

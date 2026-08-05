@@ -1,8 +1,7 @@
 "use server";
 
-import { cookies } from 'next/headers';
-
 import { getCurrentUser } from '@/lib/auth/get-current-user';
+import { getMutationOrgId } from '@/lib/auth/get-mutation-org-id';
 import { requireUser } from '@/lib/auth/require-user';
 import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
@@ -23,13 +22,9 @@ export async function createAddress(input: Address) {
     return { error: { fieldErrors } };
   }
 
-  const supabase = await createClient();
-  const cookieStore = await cookies();
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
-  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
+  const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
-  if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
+  if (!activeOrgIdNumber) {
     return { data: null, error: { message: 'Missing active organization' } };
   }
 
@@ -64,10 +59,7 @@ export async function updateAddress(id: number, input: Address) {
   const [supabase, currentUser] = await Promise.all([createClient(), getCurrentUser()]);
   const userIsAdmin = isAdmin(currentUser);
 
-  const cookieStore = await cookies();
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
-  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
+  const activeOrgIdNumber = await getMutationOrgId();
 
   // Non-admin users require an active organization
   if (!userIsAdmin && (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber))) {
@@ -112,10 +104,7 @@ export async function deleteAddress(id: number) {
   const [supabase, currentUser] = await Promise.all([createClient(), getCurrentUser()]);
   const userIsAdmin = isAdmin(currentUser);
 
-  const cookieStore = await cookies();
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
-  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
+  const activeOrgIdNumber = await getMutationOrgId();
 
   // Non-admin users require an active organization
   if (!userIsAdmin && (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber))) {

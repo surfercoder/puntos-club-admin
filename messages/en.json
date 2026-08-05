@@ -210,7 +210,6 @@
     "pushNotifications": "Push Notifications",
     "pushTokens": "Push Tokens",
     "redemptions": "Redemptions",
-    "stock": "Stock",
     "qrCode": "QR Code",
     "subscriptions": "Subscriptions",
     "planLimits": "Plan Limits",
@@ -252,7 +251,6 @@
     "push_notifications": "Push Notifications",
     "push_tokens": "Push Tokens",
     "redemption": "Redemptions",
-    "stock": "Stock",
     "subscription": "Subscriptions",
     "plan_limits": "Plan Limits",
     "organization_plan_limits": "Org Plan Limits",
@@ -905,6 +903,7 @@
         "name": "Name",
         "description": "Description",
         "requiredPoints": "Required Points",
+        "stock": "Stock",
         "actions": "Actions"
       },
       "empty": "No products found.",
@@ -917,6 +916,8 @@
         "descriptionPlaceholder": "Enter product description (optional)",
         "pointsLabel": "Required Points",
         "pointsPlaceholder": "Enter required points",
+        "stockLabel": "Stock",
+        "stockPlaceholder": "Units available for redemption",
         "imagesLabel": "Product Images (up to 3)"
       },
       "deleteModal": {
@@ -940,7 +941,8 @@
         "maxSize": "Max 5MB each",
         "noImages": "No images uploaded yet. You can add up to 3 images.",
         "imageCount": "{count} of 3 images uploaded"
-      }
+      },
+      "outOfStock": "Out of stock"
     },
     "redemption": {
       "title": "Redemptions",
@@ -1018,43 +1020,6 @@
         "organizationLabel": "Organization",
         "selectOrganization": "Select an organization",
         "activeLabel": "Active"
-      }
-    },
-    "stock": {
-      "title": "Stock",
-      "description": "Manage product stock levels",
-      "newButton": "+ New Stock Record",
-      "error": "Error loading stock records",
-      "empty": "No stock records found.",
-      "tableHeaders": {
-        "branch": "Branch",
-        "product": "Product",
-        "currentStock": "Current Stock",
-        "minimumStock": "Minimum Stock",
-        "status": "Status",
-        "actions": "Actions"
-      },
-      "statusInStock": "In Stock",
-      "statusLowStock": "Low Stock",
-      "statusOutOfStock": "Out of Stock",
-      "createTitle": "Create Stock Record",
-      "editTitle": "Edit Stock Record",
-      "deleteModal": {
-        "title": "Delete Stock Record",
-        "confirm": "Are you sure you want to delete the stock record for <strong>{name}</strong>? This action cannot be undone.",
-        "deleteError": "Error deleting stock record",
-        "deleteSuccess": "Stock record deleted successfully",
-        "genericError": "An error occurred while deleting"
-      },
-      "form": {
-        "branchLabel": "Branch",
-        "selectBranch": "Select a branch",
-        "productLabel": "Product",
-        "selectProduct": "Select a product",
-        "quantityLabel": "Current Quantity",
-        "quantityPlaceholder": "Enter current quantity",
-        "minimumQuantityLabel": "Minimum Quantity",
-        "minimumQuantityPlaceholder": "Enter minimum quantity threshold"
       }
     },
     "address": {
@@ -1688,12 +1653,11 @@
     },
     "dialog": {
       "title": "Edit Role",
-      "description": "Update the name and description of this role.",
+      "description": "Description",
       "note": "Note: The role type ({name}) cannot be changed.",
       "roleType": "Role Type",
       "displayName": "Display Name *",
       "displayNamePlaceholder": "Display name",
-      "description": "Description",
       "descriptionPlaceholder": "Role description",
       "saving": "Saving...",
       "save": "Update",
@@ -1744,7 +1708,7 @@
     "ctaTitle": "Ready to boost customer loyalty?",
     "ctaDescription": "Set up your loyalty program in just a few minutes. No credit card required to start.",
     "ctaButton": "Create my loyalty program",
-    "footerCopyright": "\u00a9 {year} Puntos Club. All rights reserved."
+    "footerCopyright": "© {year} Puntos Club. All rights reserved."
   },
   "Landing": {
     "loader": {
@@ -1867,7 +1831,7 @@
       "terms": "Terms and conditions",
       "legal": "Legal notice",
       "privacy": "Privacy and cookies policy",
-      "copyright": "\u00a92019-{year} Puntos Club"
+      "copyright": "©2019-{year} Puntos Club"
     }
   },
   "LanguageSwitcher": {

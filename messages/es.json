@@ -210,7 +210,6 @@
     "pushNotifications": "Notificaciones Push",
     "pushTokens": "Tokens Push",
     "redemptions": "Canjes",
-    "stock": "Stock",
     "qrCode": "Código QR",
     "subscriptions": "Suscripciones",
     "planLimits": "Límites de Plan",
@@ -252,7 +251,6 @@
     "push_notifications": "Notificaciones Push",
     "push_tokens": "Tokens Push",
     "redemption": "Canjes",
-    "stock": "Stock",
     "subscription": "Suscripciones",
     "plan_limits": "Límites de Plan",
     "organization_plan_limits": "Límites de Plan por Org",
@@ -905,6 +903,7 @@
         "name": "Nombre",
         "description": "Descripción",
         "requiredPoints": "Puntos Requeridos",
+        "stock": "Stock",
         "actions": "Acciones"
       },
       "empty": "No se encontraron productos.",
@@ -917,6 +916,8 @@
         "descriptionPlaceholder": "Ingresa una descripción del producto (opcional)",
         "pointsLabel": "Puntos Requeridos",
         "pointsPlaceholder": "Ingresa los puntos requeridos",
+        "stockLabel": "Stock",
+        "stockPlaceholder": "Unidades disponibles para canjear",
         "imagesLabel": "Imágenes del Producto (hasta 3)"
       },
       "deleteModal": {
@@ -940,7 +941,8 @@
         "maxSize": "Máx 5MB cada una",
         "noImages": "No se subieron imágenes aún. Podés agregar hasta 3 imágenes.",
         "imageCount": "{count} de 3 imágenes subidas"
-      }
+      },
+      "outOfStock": "Sin stock"
     },
     "redemption": {
       "title": "Canjes",
@@ -1018,43 +1020,6 @@
         "organizationLabel": "Organización",
         "selectOrganization": "Seleccionar una organización",
         "activeLabel": "Activo"
-      }
-    },
-    "stock": {
-      "title": "Stock",
-      "description": "Administrar niveles de stock de productos",
-      "newButton": "+ Nuevo Registro de Stock",
-      "error": "Error al obtener registros de stock",
-      "empty": "No se encontraron registros de stock.",
-      "tableHeaders": {
-        "branch": "Sucursal",
-        "product": "Producto",
-        "currentStock": "Stock Actual",
-        "minimumStock": "Stock Mínimo",
-        "status": "Estado",
-        "actions": "Acciones"
-      },
-      "statusInStock": "En Stock",
-      "statusLowStock": "Stock Bajo",
-      "statusOutOfStock": "Sin Stock",
-      "createTitle": "Crear Registro de Stock",
-      "editTitle": "Editar Registro de Stock",
-      "deleteModal": {
-        "title": "Eliminar Registro de Stock",
-        "confirm": "¿Estás seguro de que deseas eliminar el registro de stock de <strong>{name}</strong>? Esta acción no se puede deshacer.",
-        "deleteError": "Error al eliminar el registro de stock",
-        "deleteSuccess": "Registro de stock eliminado correctamente",
-        "genericError": "Ocurrió un error al eliminar"
-      },
-      "form": {
-        "branchLabel": "Sucursal",
-        "selectBranch": "Seleccionar una sucursal",
-        "productLabel": "Producto",
-        "selectProduct": "Seleccionar un producto",
-        "quantityLabel": "Cantidad Actual",
-        "quantityPlaceholder": "Ingresa la cantidad actual",
-        "minimumQuantityLabel": "Cantidad Mínima",
-        "minimumQuantityPlaceholder": "Ingresa el umbral mínimo de cantidad"
       }
     },
     "address": {
@@ -1688,12 +1653,11 @@
     },
     "dialog": {
       "title": "Editar Rol",
-      "description": "Actualiza el nombre y descripción de este rol.",
+      "description": "Descripción",
       "note": "Nota: El tipo de rol ({name}) no puede modificarse.",
       "roleType": "Tipo de Rol",
       "displayName": "Nombre a Mostrar *",
       "displayNamePlaceholder": "Nombre a mostrar",
-      "description": "Descripción",
       "descriptionPlaceholder": "Descripción del rol",
       "saving": "Guardando...",
       "save": "Actualizar",
@@ -1744,7 +1708,7 @@
     "ctaTitle": "¿Listo para potenciar la fidelización de tus clientes?",
     "ctaDescription": "Configurá tu programa de fidelización en solo unos minutos. No se requiere tarjeta de crédito para empezar.",
     "ctaButton": "Crear mi programa de fidelización",
-    "footerCopyright": "\u00a9 {year} Puntos Club. Todos los derechos reservados."
+    "footerCopyright": "© {year} Puntos Club. Todos los derechos reservados."
   },
   "Landing": {
     "loader": {
@@ -1867,7 +1831,7 @@
       "terms": "Términos y condiciones",
       "legal": "Aviso legal",
       "privacy": "Política de privacidad y cookies",
-      "copyright": "\u00a92019-{year} Puntos Club"
+      "copyright": "©2019-{year} Puntos Club"
     }
   },
   "LanguageSwitcher": {

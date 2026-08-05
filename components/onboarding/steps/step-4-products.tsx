@@ -30,7 +30,6 @@ function createProduct(): ProductRow {
     description: '',
     required_points: '' as unknown as number,
     quantity: '' as unknown as number,
-    minimum_quantity: 1,
   };
 }
 
@@ -104,7 +103,6 @@ function restoreCategories(data: OnboardingStep4Data): Category[] {
       description: p.description ?? '',
       required_points: p.required_points,
       quantity: p.quantity,
-      minimum_quantity: p.minimum_quantity ?? 1,
     })),
   }));
 }
@@ -149,7 +147,6 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
             description: p.description || undefined,
             required_points: Number(p.required_points) || 100,
             quantity: Number(p.quantity) || 0,
-            minimum_quantity: Number(p.minimum_quantity) || 1,
           }] : []),
         }];
       });
@@ -224,7 +221,6 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
           description: p.description || undefined,
           required_points: Number(p.required_points) || 100,
           quantity: Number(p.quantity) || 0,
-          minimum_quantity: Number(p.minimum_quantity) || 1,
         }] : []),
       }];
     });

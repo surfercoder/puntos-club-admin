@@ -131,7 +131,6 @@ export function canPerformAction(
       'process_orders',
       'manage_beneficiaries',
       'view_products',
-      'view_stock',
       'create_assignments',
       'process_redemptions',
     ];

@@ -23,7 +23,6 @@ SET LOCAL session_replication_role = 'replica';
 TRUNCATE TABLE
   public.redemption,
   public.purchase,
-  public.stock,
   public.product,
   public.category,
   public.points_rule,

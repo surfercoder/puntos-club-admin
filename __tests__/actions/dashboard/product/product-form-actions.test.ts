@@ -28,7 +28,7 @@ function createFormData(data: Record<string, string>): FormData {
 
 describe('productFormAction', () => {
   it('should create product successfully', async () => {
-    const fd = createFormData({ name: 'Product', category_id: '5', required_points: '100' });
+    const fd = createFormData({ name: 'Product', category_id: '5', required_points: '100', stock: '10' });
     const result = await productFormAction(EMPTY_ACTION_STATE, fd);
     expect(createProduct).toHaveBeenCalled();
     expect(revalidatePath).toHaveBeenCalledWith('/dashboard/product');
@@ -36,9 +36,21 @@ describe('productFormAction', () => {
   });
 
   it('should update product successfully', async () => {
-    const fd = createFormData({ id: '1', name: 'Product', category_id: '5', required_points: '100' });
+    const fd = createFormData({ id: '1', name: 'Product', category_id: '5', required_points: '100', stock: '10' });
     const result = await productFormAction(EMPTY_ACTION_STATE, fd);
-    expect(updateProduct).toHaveBeenCalledWith('1', expect.any(Object));
+    expect(updateProduct).toHaveBeenCalledWith('1', expect.objectContaining({ stock: 10 }));
+    expect(result.status).toBe('success');
+  });
+
+  it('omits stock from the update when the admin did not change it', async () => {
+    const fd = createFormData({
+      id: '1', name: 'Product', category_id: '5', required_points: '100',
+      stock: '10', stock_loaded: '10',
+    });
+    const result = await productFormAction(EMPTY_ACTION_STATE, fd);
+    // Keeping stock out of the payload is what stops a concurrent redemption
+    // from being reverted by a stale absolute write.
+    expect(updateProduct).toHaveBeenCalledWith('1', expect.not.objectContaining({ stock: expect.anything() }));
     expect(result.status).toBe('success');
   });
 
@@ -46,7 +58,7 @@ describe('productFormAction', () => {
     const fd = createFormData({
       name: 'Product',
       category_id: '5',
-      required_points: '100',
+      required_points: '100', stock: '10',
       image_urls: '["url1","url2"]',
     });
     const result = await productFormAction(EMPTY_ACTION_STATE, fd);
@@ -57,7 +69,7 @@ describe('productFormAction', () => {
     const fd = createFormData({
       name: 'Product',
       category_id: '5',
-      required_points: '100',
+      required_points: '100', stock: '10',
       image_urls: 'not-json',
     });
     const result = await productFormAction(EMPTY_ACTION_STATE, fd);
@@ -72,14 +84,14 @@ describe('productFormAction', () => {
 
   it('should handle API error result', async () => {
     (createProduct as jest.Mock).mockReturnValue({ error: new Error('API error') });
-    const fd = createFormData({ name: 'Product', category_id: '5', required_points: '100' });
+    const fd = createFormData({ name: 'Product', category_id: '5', required_points: '100', stock: '10' });
     const result = await productFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
   });
 
   it('should handle thrown error', async () => {
     (createProduct as jest.Mock).mockImplementation(() => { throw new Error('Throw'); });
-    const fd = createFormData({ name: 'Product', category_id: '5', required_points: '100' });
+    const fd = createFormData({ name: 'Product', category_id: '5', required_points: '100', stock: '10' });
     const result = await productFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
   });

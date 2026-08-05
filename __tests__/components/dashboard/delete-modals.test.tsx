@@ -17,7 +17,6 @@ jest.mock('@/components/ui/dialog', () => ({
 jest.mock('@/actions/dashboard/category/actions', () => ({ deleteCategory: jest.fn() }));
 jest.mock('@/actions/dashboard/product/actions', () => ({ deleteProduct: jest.fn() }));
 jest.mock('@/actions/dashboard/branch/actions', () => ({ deleteBranch: jest.fn() }));
-jest.mock('@/actions/dashboard/stock/actions', () => ({ deleteStock: jest.fn() }));
 jest.mock('@/actions/dashboard/beneficiary/actions', () => ({ deleteBeneficiary: jest.fn() }));
 jest.mock('@/actions/dashboard/redemption/actions', () => ({ deleteRedemption: jest.fn() }));
 jest.mock('@/actions/dashboard/address/actions', () => ({ deleteAddress: jest.fn() }));
@@ -31,7 +30,6 @@ jest.mock('@/actions/dashboard/points-rules/actions', () => ({ deletePointsRule:
 import { deleteCategory } from '@/actions/dashboard/category/actions';
 import { deleteProduct } from '@/actions/dashboard/product/actions';
 import { deleteBranch } from '@/actions/dashboard/branch/actions';
-import { deleteStock } from '@/actions/dashboard/stock/actions';
 import { deleteBeneficiary } from '@/actions/dashboard/beneficiary/actions';
 import { deleteRedemption } from '@/actions/dashboard/redemption/actions';
 import { deleteAddress } from '@/actions/dashboard/address/actions';
@@ -45,7 +43,6 @@ import { deletePointsRule } from '@/actions/dashboard/points-rules/actions';
 import CategoryDeleteModal from '@/components/dashboard/category/delete-modal';
 import ProductDeleteModal from '@/components/dashboard/product/delete-modal';
 import BranchDeleteModal from '@/components/dashboard/branch/delete-modal';
-import StockDeleteModal from '@/components/dashboard/stock/delete-modal';
 import BeneficiaryDeleteModal from '@/components/dashboard/beneficiary/delete-modal';
 import RedemptionDeleteModal from '@/components/dashboard/redemption/delete-modal';
 import AddressDeleteModal from '@/components/dashboard/address/delete-modal';
@@ -220,43 +217,6 @@ describe('BranchDeleteModal', () => {
 
   it('cancel button click', () => {
     render(<BranchDeleteModal branchId="1" branchName="B" />);
-    fireEvent.click(getCancelButton());
-  });
-});
-
-// ---- Stock ----
-describe('StockDeleteModal', () => {
-  const mock = deleteStock as jest.Mock;
-
-  it('renders', () => {
-    render(<StockDeleteModal stockId="1" stockDescription="S" />);
-    expectRendered();
-  });
-
-  it('success path', async () => {
-    mock.mockResolvedValue({ error: null });
-    render(<StockDeleteModal stockId="1" stockDescription="S" />);
-    fireEvent.click(getDeleteButton());
-    await waitFor(() => expect(toast.success).toHaveBeenCalled());
-    expect(mockRefresh).toHaveBeenCalled();
-  });
-
-  it('error path', async () => {
-    mock.mockResolvedValue({ error: { message: 'fail' } });
-    render(<StockDeleteModal stockId="1" stockDescription="S" />);
-    fireEvent.click(getDeleteButton());
-    await waitFor(() => expect(toast.error).toHaveBeenCalled());
-  });
-
-  it('exception path', async () => {
-    mock.mockRejectedValue(new Error('Net'));
-    render(<StockDeleteModal stockId="1" stockDescription="S" />);
-    fireEvent.click(getDeleteButton());
-    await waitFor(() => expect(toast.error).toHaveBeenCalled());
-  });
-
-  it('cancel button click', () => {
-    render(<StockDeleteModal stockId="1" stockDescription="S" />);
     fireEvent.click(getCancelButton());
   });
 });

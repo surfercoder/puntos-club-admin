@@ -17,7 +17,6 @@ export type EntityName =
   | 'app_user'
   | 'app_user_organization'
   | 'redemption'
-  | 'stock'
   | 'users'
   | 'points-rules';
 
@@ -43,7 +42,6 @@ const OWNER_ENTITY_ACCESS: Record<EntityName, EntityPermissions> = {
   app_user: { view: true, create: true, edit: true, delete: true },
   app_user_organization: { view: true, create: true, edit: true, delete: true },
   redemption: { view: true, create: true, edit: true, delete: true },
-  stock: { view: true, create: true, edit: true, delete: true },
   users: { view: true, create: true, edit: true, delete: true },
   'points-rules': { view: true, create: true, edit: true, delete: true },
 };
@@ -68,7 +66,6 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     app_user: { view: true, create: true, edit: true, delete: true },
     app_user_organization: { view: true, create: true, edit: true, delete: true },
     redemption: { view: true, create: true, edit: true, delete: true },
-    stock: { view: true, create: true, edit: true, delete: true },
     users: { view: true, create: true, edit: true, delete: true },
     'points-rules': { view: true, create: true, edit: true, delete: true },
   },
@@ -86,7 +83,6 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     app_user: { view: false, create: false, edit: false, delete: false },
     app_user_organization: { view: false, create: false, edit: false, delete: false },
     redemption: { view: true, create: true, edit: false, delete: false },
-    stock: { view: true, create: false, edit: false, delete: false }, // Read-only
     users: { view: false, create: false, edit: false, delete: false },
     'points-rules': { view: true, create: false, edit: false, delete: false }, // Read-only
   },
@@ -102,7 +98,6 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     app_user: { view: false, create: false, edit: false, delete: false },
     app_user_organization: { view: false, create: false, edit: false, delete: false },
     redemption: { view: false, create: false, edit: false, delete: false },
-    stock: { view: false, create: false, edit: false, delete: false },
     users: { view: false, create: false, edit: false, delete: false },
     'points-rules': { view: false, create: false, edit: false, delete: false },
   },

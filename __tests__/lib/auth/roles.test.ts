@@ -233,7 +233,6 @@ describe('canPerformAction', () => {
     expect(canPerformAction(cashier, 'process_orders')).toBe(true);
     expect(canPerformAction(cashier, 'manage_beneficiaries')).toBe(true);
     expect(canPerformAction(cashier, 'view_products')).toBe(true);
-    expect(canPerformAction(cashier, 'view_stock')).toBe(true);
     expect(canPerformAction(cashier, 'create_assignments')).toBe(true);
     expect(canPerformAction(cashier, 'process_redemptions')).toBe(true);
   });

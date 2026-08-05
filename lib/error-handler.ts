@@ -13,6 +13,10 @@ export const EMPTY_ACTION_STATE: ActionState = {
 };
 
 export const fromErrorToActionState = (error: unknown): ActionState => {
+  // Supabase returns PostgrestError as a plain object, not an Error, so without
+  // this every DB failure surfaced as "An unknown error occurred".
+  const plainMessage = (error as { message?: unknown } | null)?.message;
+
   if (error instanceof ZodError) {
     return {
       status: 'error',
@@ -23,6 +27,12 @@ export const fromErrorToActionState = (error: unknown): ActionState => {
     return {
       status: 'error',
       message: error.message,
+      fieldErrors: {},
+    };
+  } else if (typeof plainMessage === 'string' && plainMessage !== '') {
+    return {
+      status: 'error',
+      message: plainMessage,
       fieldErrors: {},
     };
   } else {

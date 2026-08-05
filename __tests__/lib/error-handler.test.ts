@@ -48,6 +48,38 @@ describe('fromErrorToActionState', () => {
     });
   });
 
+  it('surfaces the message of a Supabase PostgrestError (plain object, not an Error)', () => {
+    const result = fromErrorToActionState({
+      message: 'new row violates check constraint "product_stock_non_negative"',
+      code: '23514',
+      details: null,
+      hint: null,
+    });
+    expect(result).toEqual({
+      status: 'error',
+      message: 'new row violates check constraint "product_stock_non_negative"',
+      fieldErrors: {},
+    });
+  });
+
+  it('falls back to the generic message for an object with an empty message', () => {
+    const result = fromErrorToActionState({ message: '' });
+    expect(result).toEqual({
+      status: 'error',
+      message: 'An unknown error occurred',
+      fieldErrors: {},
+    });
+  });
+
+  it('falls back to the generic message for an object with a non-string message', () => {
+    const result = fromErrorToActionState({ message: 500 });
+    expect(result).toEqual({
+      status: 'error',
+      message: 'An unknown error occurred',
+      fieldErrors: {},
+    });
+  });
+
   it('handles unknown error (string)', () => {
     const result = fromErrorToActionState('random string');
     expect(result).toEqual({

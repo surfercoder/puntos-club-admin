@@ -46,7 +46,7 @@ const KNOWN_SEGMENTS = [
   "beneficiary", "beneficiary_organization", "branch", "category",
   "notifications", "organization", "organization_notification_limits",
   "points-rules", "product", "profile", "purchase", "push_notifications",
-  "push_tokens", "redemption", "stock", "user-role", "users", "qr",
+  "push_tokens", "redemption", "user-role", "users", "qr",
   "settings", "organization-settings",
 ] as const;
 

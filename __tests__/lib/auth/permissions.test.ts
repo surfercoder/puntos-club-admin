@@ -18,7 +18,6 @@ const ALL_ENTITIES: EntityName[] = [
   'app_user',
   'app_user_organization',
   'redemption',
-  'stock',
   'users',
   'points-rules',
 ];
@@ -141,7 +140,6 @@ describe('getAccessibleEntities', () => {
     expect(entities).toContain('beneficiary');
     expect(entities).toContain('redemption');
     expect(entities).toContain('product');
-    expect(entities).toContain('stock');
     expect(entities).not.toContain('address');
     expect(entities).not.toContain('organization');
     expect(entities).not.toContain('app_user');

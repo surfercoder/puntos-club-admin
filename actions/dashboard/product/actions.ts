@@ -4,6 +4,7 @@ import { cookies } from 'next/headers';
 
 import { createClient } from '@/lib/supabase/server';
 import { getActiveOrgIdFilter } from '@/lib/auth/get-active-org-id';
+import { getMutationOrgId } from '@/lib/auth/get-mutation-org-id';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { requireUser } from '@/lib/auth/require-user';
 import type { Product } from '@/types/product';
@@ -12,13 +13,9 @@ import { enforcePlanLimit } from '@/lib/plans/usage';
 export async function createProduct(input: Product) {
   await requireUser();
 
-  const supabase = await createClient();
-  const cookieStore = await cookies();
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
-  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
+  const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
-  if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
+  if (!activeOrgIdNumber) {
     return { data: null, error: { message: 'Missing active organization' } };
   }
 
@@ -38,50 +35,15 @@ export async function createProduct(input: Product) {
     .select()
     .single();
 
-  // Seed an empty stock row per branch so the product shows up in the stock
-  // section right away, using the same defaults as the stock form (0 / 0).
-  // ponytail: best-effort — the product row is already committed, so a seeding
-  // failure is logged, never returned as an error the user would misread as
-  // "the product was not created". Missing rows stay fixable from /dashboard/stock.
-  if (data && !error) {
-    const { data: branches, error: branchesError } = await supabase
-      .from('branch')
-      .select('id')
-      .eq('organization_id', activeOrgIdNumber);
-
-    if (branchesError) {
-      console.error('[createProduct] branch lookup failed:', branchesError.message);
-    }
-
-    if (branches?.length) {
-      const { error: stockError } = await supabase.from('stock').insert(
-        branches.map((branch) => ({
-          product_id: Number(data.id),
-          branch_id: Number(branch.id),
-          quantity: 0,
-          minimum_quantity: 0,
-        }))
-      );
-
-      if (stockError) {
-        console.error('[createProduct] stock seed failed:', stockError.message);
-      }
-    }
-  }
-
   return { data, error };
 }
 
-export async function updateProduct(id: string, input: Product) {
+export async function updateProduct(id: string, input: Partial<Product>) {
   await requireUser();
 
-  const supabase = await createClient();
-  const cookieStore = await cookies();
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
-  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
+  const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
-  if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
+  if (!activeOrgIdNumber) {
     return { data: null, error: { message: 'Missing active organization' } };
   }
 
@@ -102,13 +64,9 @@ export async function updateProduct(id: string, input: Product) {
 export async function deleteProduct(id: string) {
   await requireUser();
 
-  const supabase = await createClient();
-  const cookieStore = await cookies();
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
-  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
+  const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
-  if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
+  if (!activeOrgIdNumber) {
     return { error: { message: 'Missing active organization' } };
   }
 

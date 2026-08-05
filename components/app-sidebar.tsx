@@ -18,7 +18,6 @@ import {
   BellRing,
   KeyRound,
   Ticket,
-  Boxes,
   Shield,
   Users,
   HandHeart,
@@ -89,7 +88,6 @@ export function AppSidebar({
     const isOwnerOrCollaborator = userRole === "owner" || userRole === "collaborator"
 
     if (portalMode === "admin") {
-      const stockItem = { title: t("stock"), url: "/dashboard/stock", icon: Boxes }
       const adminEntities = [
         { title: t("addresses"), url: "/dashboard/address", icon: MapPin },
 
@@ -115,14 +113,10 @@ export function AppSidebar({
         .slice()
         .sort((a, b) => a.title.localeCompare(b.title))
 
-      const productsIdx = adminEntities.findIndex((e) => e.url === "/dashboard/product")
-      adminEntities.splice(productsIdx + 1, 0, stockItem)
-
       return adminEntities
     }
 
     if (isOwnerOrCollaborator) {
-      const ownerStockItem = { title: t("stock"), url: "/dashboard/stock", icon: Boxes }
       const ownerEntities = [
         { title: t("qrCode"), url: "/dashboard/qr", icon: QrCode },
 
@@ -138,9 +132,6 @@ export function AppSidebar({
       ]
         .slice()
         .sort((a, b) => a.title.localeCompare(b.title))
-
-      const ownerProductsIdx = ownerEntities.findIndex((e) => e.url === "/dashboard/product")
-      ownerEntities.splice(ownerProductsIdx + 1, 0, ownerStockItem)
 
       return ownerEntities
     }
@@ -186,7 +177,6 @@ export function AppSidebar({
           { title: t("addresses"), url: "/dashboard/address" },
           { title: t("categories"), url: "/dashboard/category" },
           { title: t("products"), url: "/dashboard/product" },
-          { title: t("stock"), url: "/dashboard/stock" },
           { title: t("appUsers"), url: "/dashboard/app_user" },
           { title: t("usersByOrg"), url: "/dashboard/app_user_organization" },
         ],

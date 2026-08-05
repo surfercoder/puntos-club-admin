@@ -179,13 +179,7 @@ export async function getOrganizationProducts(organizationId: string) {
     .from('product')
     .select(`
       *,
-      category:category_id(id, name),
-      stock:stock(
-        id,
-        branch_id,
-        quantity,
-        branch:branch(id, name)
-      )
+      category:category_id(id, name)
     `)
     .eq('organization_id', organizationId)
     .order('required_points', { ascending: true });

@@ -5,6 +5,7 @@ describe('ProductSchema', () => {
     category_id: 'cat-1',
     name: 'Mug',
     required_points: 100,
+    stock: 5,
   };
 
   describe('valid input', () => {
@@ -41,7 +42,12 @@ describe('ProductSchema', () => {
     });
 
     it('should reject missing required_points', () => {
-      const result = ProductSchema.safeParse({ category_id: 'cat-1', name: 'Mug' });
+      const result = ProductSchema.safeParse({ category_id: 'cat-1', name: 'Mug', stock: 0 });
+      expect(result.success).toBe(false);
+    });
+
+    it('should reject missing stock', () => {
+      const result = ProductSchema.safeParse({ category_id: 'cat-1', name: 'Mug', required_points: 100 });
       expect(result.success).toBe(false);
     });
 
@@ -70,6 +76,30 @@ describe('ProductSchema', () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.required_points).toBe(0);
+      }
+    });
+
+    it('should transform string stock to number', () => {
+      const result = ProductSchema.safeParse({ ...validProduct, stock: '250' });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.stock).toBe(250);
+      }
+    });
+
+    it('should transform non-numeric string stock to 0', () => {
+      const result = ProductSchema.safeParse({ ...validProduct, stock: 'abc' });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.stock).toBe(0);
+      }
+    });
+
+    it('should clamp negative stock to 0', () => {
+      const result = ProductSchema.safeParse({ ...validProduct, stock: -7 });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.stock).toBe(0);
       }
     });
 

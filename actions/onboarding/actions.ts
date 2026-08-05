@@ -43,7 +43,6 @@ export interface OnboardingProductInput {
   description?: string;
   required_points: number;
   quantity: number;
-  minimum_quantity?: number;
 }
 
 export interface OnboardingCategoryInput {
@@ -330,27 +329,17 @@ export async function completeOnboarding(input: {
         await Promise.all(cat.products.map(async (prod) => {
           if (!prod.name.trim()) return;
 
-          const { data: productData, error: productError } = await adminClient
+          await adminClient
             .from('product')
             .insert({
               name: prod.name.trim(),
               description: prod.description || null,
               required_points: prod.required_points || 100,
+              stock: prod.quantity || 0,
               category_id: Number(categoryData.id),
               organization_id: organizationId,
               creation_date: new Date().toISOString().split('T')[0],
-            })
-            .select()
-            .single();
-
-          if (productError || !productData) return;
-
-          await adminClient.from('stock').insert({
-            product_id: Number(productData.id),
-            branch_id: branchId,
-            quantity: prod.quantity || 0,
-            minimum_quantity: prod.minimum_quantity || 1,
-          });
+            });
         }));
       }));
     }

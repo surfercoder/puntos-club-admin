@@ -3,7 +3,7 @@ import { test, expect, type Page } from '@playwright/test';
 /**
  * E2E CRUD tests for the Owner Dashboard.
  *
- * Dependency order: Category → Product → Stock, Beneficiary, PointsRule
+ * Dependency order: Category → Product, Beneficiary, PointsRule
  * Cleanup in reverse order to leave DB pristine.
  */
 
@@ -84,7 +84,6 @@ const state = {
   productRows: 0,
 
   beneficiaryRows: 0,
-  stockRows: 0,
 };
 
 // ── CRUD tests (serial) ─────────────────────────────────────────────────────
@@ -164,6 +163,7 @@ test.describe.serial('Owner Dashboard CRUD Tests', () => {
     await page.locator('#name, input[name="name"]').first().fill('E2E Test Product');
     await page.locator('#description, textarea[name="description"]').first().fill('Created by e2e test');
     await page.locator('input[name="required_points"]').fill('50');
+    await page.locator('input[name="stock"]').fill('100');
 
     await submitBtn.click();
 
@@ -299,63 +299,6 @@ test.describe.serial('Owner Dashboard CRUD Tests', () => {
     await expect(page.getByText('E2E Rule Updated').first()).toBeVisible({ timeout: 10000 });
   });
 
-  // ━━━ 6. STOCK ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  test('Stock: list', async ({ page }) => {
-    await navigateTo(page, '/dashboard/stock');
-    await expect(page.getByRole('heading', { level: 1 })).toBeVisible();
-    state.stockRows = await getTableRowCount(page);
-  });
-
-  test('Stock: create', async ({ page }) => {
-    await navigateTo(page, '/dashboard/stock/create');
-
-    // Select branch (first available)
-    const branchSelect = page.locator('select[name="branch_id"]').first();
-    if (await branchSelect.isVisible().catch(() => false)) {
-      await branchSelect.selectOption({ index: 1 });
-    }
-
-    // Select product (first available)
-    const productSelect = page.locator('select[name="product_id"]').first();
-    if (await productSelect.isVisible().catch(() => false)) {
-      await productSelect.selectOption({ index: 1 });
-    }
-
-    await page.locator('input[name="quantity"]').fill('100');
-
-    const minQty = page.locator('input[name="minimum_quantity"]');
-    if (await minQty.isVisible().catch(() => false)) {
-      await minQty.fill('10');
-    }
-
-    await page.getByRole('button', { name: /^crear$/i }).click();
-
-    await page.waitForURL(/\/dashboard\/stock(?:\?|$)/, { timeout: 20000 });
-    await waitForPageLoad(page);
-  });
-
-  test('Stock: edit', async ({ page }) => {
-    await navigateTo(page, '/dashboard/stock');
-    const count = await getTableRowCount(page);
-    if (count <= state.stockRows) {
-      test.skip(true, 'Stock not created');
-      return;
-    }
-
-    const lastRow = page.locator('table tbody tr').last();
-    await lastRow.locator('td').last().locator('a').first().click();
-    await waitForPageLoad(page);
-
-    await page.locator('input[name="quantity"]').clear();
-    await page.locator('input[name="quantity"]').fill('200');
-
-    await page.getByRole('button', { name: /actualizar|update/i }).click();
-
-    await page.waitForURL(/\/dashboard\/stock(?:\?|$)/, { timeout: 20000 });
-    await waitForPageLoad(page);
-  });
-
   // ━━━ 7. BRANCH (edit only — plan limited) ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   test('Branch: shows plan limit', async ({ page }) => {
@@ -399,19 +342,6 @@ test.describe.serial('Owner Dashboard CRUD Tests', () => {
 
   // ━━━ CLEANUP ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  test('Cleanup: stock', async ({ page }) => {
-    await navigateTo(page, '/dashboard/stock');
-    const count = await getTableRowCount(page);
-    if (count > state.stockRows) {
-      const lastRow = page.locator('table tbody tr').last();
-      const deleteBtn = lastRow.locator('td').last().locator('button').last();
-      await deleteBtn.click();
-      const dialog = page.locator('[role="dialog"]');
-      await dialog.waitFor({ state: 'visible', timeout: 5000 });
-      await dialog.getByRole('button', { name: /eliminar|borrar|delete|confirm/i }).click();
-      await dialog.waitFor({ state: 'hidden', timeout: 15000 });
-    }
-  });
 
   test('Cleanup: points rule', async ({ page }) => {
     await navigateTo(page, '/dashboard/points-rules');
@@ -459,8 +389,5 @@ test.describe.serial('Owner Dashboard CRUD Tests', () => {
 
     await navigateTo(page, '/dashboard/beneficiary');
     expect(await getTableRowCount(page)).toBe(state.beneficiaryRows);
-
-    await navigateTo(page, '/dashboard/stock');
-    expect(await getTableRowCount(page)).toBe(state.stockRows);
   });
 });

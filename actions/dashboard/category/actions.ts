@@ -2,6 +2,7 @@
 
 import { cookies } from 'next/headers';
 
+import { getMutationOrgId } from '@/lib/auth/get-mutation-org-id';
 import { requireUser } from '@/lib/auth/require-user';
 import { createClient } from '@/lib/supabase/server';
 import { CategorySchema } from '@/schemas/category.schema';
@@ -20,11 +21,7 @@ export async function createCategory(input: Category) {
     return { error: { fieldErrors } };
   }
 
-  const supabase = await createClient();
-  const cookieStore = await cookies();
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
-  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
+  const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
   if (!activeOrgIdNumber) {
     return { data: null, error: { message: 'Missing active organization' } };
@@ -57,11 +54,7 @@ export async function updateCategory(id: string, input: Category) {
     return { error: { fieldErrors } };
   }
 
-  const supabase = await createClient();
-  const cookieStore = await cookies();
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
-  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
+  const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
   if (!activeOrgIdNumber) {
     return { data: null, error: { message: 'Missing active organization' } };
@@ -83,11 +76,7 @@ export async function updateCategory(id: string, input: Category) {
 
 export async function deleteCategory(id: string) {
   await requireUser();
-  const supabase = await createClient();
-  const cookieStore = await cookies();
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
-  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
+  const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
   if (!activeOrgIdNumber) {
     return { error: { message: 'Missing active organization' } };

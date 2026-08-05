@@ -165,6 +165,22 @@ export default function ProductForm({ product }: ProductFormProps) {
       </div>
 
       <div>
+        <Label htmlFor="stock">{t('stockLabel')}</Label>
+        <Input
+          aria-describedby="stock-error"
+          aria-invalid={!!(validation ?? actionState).fieldErrors?.stock}
+          defaultValue={product?.stock ?? 0}
+          id="stock"
+          min={0}
+          name="stock"
+          placeholder={t('stockPlaceholder')}
+          type="number"
+        />
+        <input defaultValue={product?.stock ?? 0} name="stock_loaded" type="hidden" />
+        <FieldError actionState={validation ?? actionState} name="stock" />
+      </div>
+
+      <div>
         <Label>{t('imagesLabel')}</Label>
         <ProductImageUpload
           productId={product?.id}

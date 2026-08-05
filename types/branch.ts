@@ -1,6 +1,5 @@
 import type { Address } from './address';
 import type { Organization } from './organization';
-import type { Stock } from './stock';
 
 export type Branch = {
   id: string;
@@ -14,5 +13,4 @@ export type Branch = {
 export type BranchWithRelations = Branch & {
   organization?: Organization;
   address?: Address;
-  stock?: Stock[];
 };

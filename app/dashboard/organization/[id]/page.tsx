@@ -119,10 +119,7 @@ export default async function OrganizationDetailsPage({ params }: { params: Prom
                 </TableHeader>
                 <TableBody>
                   {products.map((product: ProductWithRelations) => {
-                    const totalStock = product.stock?.reduce(
-                      (sum: number, s) => sum + (s.quantity /* c8 ignore next */ || 0),
-                      0
-                    ) || 0;
+                    const totalStock = product.stock || 0;
 
                     return (
                       <TableRow key={product.id}>

@@ -1,5 +1,4 @@
 import type { Redemption } from './redemption';
-import type { Stock } from './stock';
 import type { Category } from './category';
 
 export type Product = {
@@ -8,6 +7,7 @@ export type Product = {
   name: string;
   description?: string | null;
   required_points: number;
+  stock: number;
 
   creation_date: string;
   image_urls?: string[] | null;
@@ -15,6 +15,5 @@ export type Product = {
 
 export type ProductWithRelations = Product & {
   category?: Category;
-  stock?: Stock[];
   redemptions?: Redemption[];
 };
