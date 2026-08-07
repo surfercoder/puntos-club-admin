@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth/require-user';
+import { getMutationOrgId } from '@/lib/auth/get-mutation-org-id';
 import { RedemptionSchema } from '@/schemas/redemption.schema';
 import type { Redemption } from '@/types/redemption';
 
@@ -109,46 +110,51 @@ export async function updateRedemption(id: string, input: Redemption) {
     });
     return { error: { fieldErrors } };
   }
-  const supabase = await createClient();
-  const { data, error } = await supabase.from('redemption').select('*').eq('id', id).single();
-  return { data, error };
+  // Nothing to write, and the only caller discards the result, so don't read
+  // the row back either — that read was an unscoped cross-org leak.
+  return { data: null, error: null };
 }
 
 export async function deleteRedemption(id: string) {
   await requireUser();
-  const supabase = await createClient();
+  const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
+
+  if (!activeOrgIdNumber) {
+    return { error: { message: 'Missing active organization' } };
+  }
+
   // For pending rows route through cancel so the unique-pending index is freed
   // cleanly and the audit trail is preserved. For other statuses fall through
   // to a physical delete (legacy behavior).
-  const { data: row } = await supabase.from('redemption').select('status').eq('id', id).single();
-  if (row?.status === 'pending') {
+  // Org-scoped: RLS lets any owner read cross-org, so this filter is the boundary.
+  const { data: row, error: lookupError } = await supabase
+    .from('redemption')
+    .select('status')
+    .eq('id', id)
+    .eq('organization_id', activeOrgIdNumber)
+    .maybeSingle();
+
+  // maybeSingle so a transient DB error stays distinguishable from "no such row
+  // in this org" — .single() collapses both into REDEMPTION_NOT_FOUND.
+  if (lookupError) {
+    return { error: { message: lookupError.message } };
+  }
+  if (!row) {
+    return { error: { message: 'REDEMPTION_NOT_FOUND' } };
+  }
+
+  if (row.status === 'pending') {
     const { error } = await supabase.rpc('cancel_redemption', {
       p_redemption_id: Number(id),
       p_reason: 'Deleted from admin portal',
     });
     return { error: error ? { message: mapRpcError(error.message) } : null };
   }
-  const { error } = await supabase.from('redemption').delete().eq('id', id);
-  return { error };
-}
 
-export async function getRedemptions() {
-  const supabase = await createClient();
-  const { data, error } = await supabase
+  const { error } = await supabase
     .from('redemption')
-    .select(`
-      *,
-      beneficiary:beneficiary(first_name, last_name, email),
-      product:product(name, organization_id)
-    `)
-    .order('redemption_date', { ascending: false });
-
-  return { data, error };
-}
-
-export async function getRedemption(id: string) {
-  const supabase = await createClient();
-  const { data, error } = await supabase.from('redemption').select('*').eq('id', id).single();
-
-  return { data, error };
+    .delete()
+    .eq('id', id)
+    .eq('organization_id', activeOrgIdNumber);
+  return { error };
 }

@@ -65,7 +65,7 @@ export async function getDashboardKpis(): Promise<DashboardKpis | null> {
 
     supabase
       .from("purchase")
-      .select("total_amount, points_earned")
+      .select("total_amount")
       .eq("organization_id", orgId)
       .gte("purchase_date", startOfMonth),
 
@@ -78,15 +78,12 @@ export async function getDashboardKpis(): Promise<DashboardKpis | null> {
     supabase
       .from("redemption")
       .select("points_used")
+      .eq("organization_id", orgId)
       .gte("redemption_date", startOfMonth),
   ]);
 
   const revenue_this_month = (revenueRes.data ?? []).reduce(
     (sum, p) => sum + (p.total_amount ?? 0),
-    0
-  );
-  const _points_earned_this_month = (revenueRes.data ?? []).reduce(
-    (sum, p) => sum + (p.points_earned ?? 0),
     0
   );
   const points_in_circulation = (pointsCirculationRes.data ?? []).reduce(
@@ -140,7 +137,7 @@ export async function getMonthlyPurchaseStats(
     grouped[key].purchase_count += 1;
   }
 
-  return fillMissingMonths(grouped, months, (key, label) => ({
+  return fillMissingMonths(grouped, months, (label) => ({
     month: label,
     revenue: 0,
     points_earned: 0,
@@ -167,6 +164,7 @@ export async function getMonthlyPointsStats(
     supabase
       .from("redemption")
       .select("redemption_date, points_used")
+      .eq("organization_id", orgId)
       .gte("redemption_date", since.toISOString()),
   ]);
 
@@ -188,7 +186,7 @@ export async function getMonthlyPointsStats(
     grouped[key].points_redeemed += row.points_used ?? 0;
   }
 
-  return fillMissingMonths(grouped, months, (key, label) => ({
+  return fillMissingMonths(grouped, months, (label) => ({
     month: label,
     points_earned: 0,
     points_redeemed: 0,
@@ -224,7 +222,7 @@ export async function getMonthlyMemberStats(
     grouped[key].new_members += 1;
   }
 
-  const filled = fillMissingMonths(grouped, months, (key, label) => ({
+  const filled = fillMissingMonths(grouped, months, (label) => ({
     month: label,
     new_members: 0,
   }));
@@ -249,6 +247,7 @@ export async function getTopProducts(limit = 8): Promise<TopProductStat[]> {
       quantity,
       product:product(name, organization_id)
     `)
+    .eq("organization_id", orgId)
     .not("product_id", "is", null);
 
   if (error || !data) return [];
@@ -300,7 +299,7 @@ export async function getBranchPerformance(): Promise<BranchPerformanceStat[]> {
 function fillMissingMonths<T extends { month: string }>(
   grouped: Record<string, T>,
   months: number,
-  createEmpty: (key: string, label: string) => T
+  createEmpty: (label: string) => T
 ): T[] {
   const result: T[] = [];
   const now = new Date();
@@ -309,7 +308,7 @@ function fillMissingMonths<T extends { month: string }>(
     const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
     const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
     const label = d.toLocaleString("es-AR", { month: "short", year: "2-digit" });
-    result.push(grouped[key] ?? createEmpty(key, label));
+    result.push(grouped[key] ?? createEmpty(label));
   }
 
   return result;

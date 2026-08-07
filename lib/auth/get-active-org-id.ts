@@ -11,7 +11,7 @@ import { isAdmin } from './roles';
  * so an unvalidated cookie would let them read a foreign org's data — this is
  * the gate that keeps the active-org cookie from crossing that boundary.
  */
-async function belongsToOrg(
+export async function belongsToOrg(
   appUserId: string,
   orgId: number,
 ): Promise<boolean> {

@@ -1,22 +1,31 @@
 jest.mock('next/cache', () => ({ revalidatePath: jest.fn() }));
 jest.mock('next/navigation', () => ({ redirect: jest.fn() }));
-jest.mock('next/headers', () => ({
-  cookies: jest.fn(() => ({
-    get: jest.fn(() => ({ value: '123' })),
-    set: jest.fn(),
-  })),
-}));
+
+const mockCookieStore = {
+  get: jest.fn((name: string) => (name === 'active_org_id' ? { value: '123' } : undefined)),
+  set: jest.fn(),
+};
+jest.mock('next/headers', () => ({ cookies: jest.fn(() => mockCookieStore) }));
 
 type RpcResult = { data: unknown; error: { message: string } | null };
 
 const rpcImpl = jest.fn<RpcResult, [string, Record<string, unknown>]>();
 
+// `.delete()` gets its own chain so the org filter added to the delete path
+// does not have to share `eq` call-ordering with the status lookup.
+// Awaiting a non-thenable yields the object itself, so `error` is the result.
+const deleteChain: any = {
+  eq: jest.fn(() => deleteChain),
+  error: null,
+};
+
 const fromChain: any = {
   select: jest.fn(() => fromChain),
-  delete: jest.fn(() => fromChain),
+  delete: jest.fn(() => deleteChain),
   eq: jest.fn(() => fromChain),
   order: jest.fn(() => fromChain),
   single: jest.fn(),
+  maybeSingle: jest.fn(),
 };
 
 const mockSupabase = {
@@ -26,25 +35,36 @@ const mockSupabase = {
 };
 
 jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => mockSupabase) }));
+// requireUser and getMutationOrgId both resolve the current user; keep them off
+// the shared query mock so they don't consume its `single()` sequencing.
+jest.mock('@/lib/auth/get-current-user', () => ({
+  getCurrentUser: jest.fn(async () => ({ id: 1, organization_id: 123 })),
+}));
 
+import { getCurrentUser } from '@/lib/auth/get-current-user';
 import {
   createRedemption,
   updateRedemption,
   deleteRedemption,
   deliverRedemption,
   cancelRedemption,
-  getRedemptions,
-  getRedemption,
 } from '@/actions/dashboard/redemption/actions';
 
 beforeEach(() => {
   jest.clearAllMocks();
+  mockCookieStore.get.mockImplementation((name: string) =>
+    name === 'active_org_id' ? { value: '123' } : undefined
+  );
   fromChain.select.mockReturnValue(fromChain);
-  fromChain.delete.mockReturnValue(fromChain);
+  fromChain.delete.mockReturnValue(deleteChain);
   fromChain.eq.mockReturnValue(fromChain);
   fromChain.order.mockReturnValue(fromChain);
   fromChain.single.mockReturnValue({ data: { id: '1' }, error: null });
+  fromChain.maybeSingle.mockReturnValue({ data: { status: 'delivered' }, error: null });
+  deleteChain.eq.mockReturnValue(deleteChain);
+  deleteChain.error = null;
   mockSupabase.from.mockReturnValue(fromChain);
+  (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, organization_id: 123 });
   rpcImpl.mockReset();
 });
 
@@ -171,12 +191,10 @@ describe('cancelRedemption', () => {
 });
 
 describe('updateRedemption', () => {
-  it('reads redemption row on success', async () => {
-    fromChain.single.mockReturnValueOnce({ data: { id: '1' }, error: null });
+  it('is a validated no-op that touches no rows', async () => {
     const result = await updateRedemption('1', validRedemption as any);
-    expect(mockSupabase.from).toHaveBeenCalledWith('redemption');
-    expect(result.data).toEqual({ id: '1' });
-    expect(result.error).toBeNull();
+    expect(result).toEqual({ data: null, error: null });
+    expect(mockSupabase.from).not.toHaveBeenCalled();
   });
 
   it('returns field errors on invalid input', async () => {
@@ -201,7 +219,7 @@ describe('updateRedemption - empty path validation', () => {
 
 describe('deleteRedemption', () => {
   it('cancels via rpc when row is pending', async () => {
-    fromChain.single.mockReturnValueOnce({ data: { status: 'pending' }, error: null });
+    fromChain.maybeSingle.mockReturnValueOnce({ data: { status: 'pending' }, error: null });
     rpcImpl.mockImplementationOnce(() => ({ data: null, error: null }));
     const result = await deleteRedemption('1');
     expect(rpcImpl).toHaveBeenCalledWith('cancel_redemption', expect.objectContaining({ p_redemption_id: 1 }));
@@ -209,58 +227,52 @@ describe('deleteRedemption', () => {
   });
 
   it('maps rpc error when cancel fails', async () => {
-    fromChain.single.mockReturnValueOnce({ data: { status: 'pending' }, error: null });
+    fromChain.maybeSingle.mockReturnValueOnce({ data: { status: 'pending' }, error: null });
     rpcImpl.mockImplementationOnce(() => ({ data: null, error: { message: 'REDEMPTION_NOT_PENDING' } }));
     const result = await deleteRedemption('1');
     expect(result.error).toEqual({ message: 'REDEMPTION_NOT_PENDING' });
   });
 
   it('physically deletes when row is not pending', async () => {
-    fromChain.single.mockReturnValueOnce({ data: { status: 'delivered' }, error: null });
-    fromChain.eq.mockReturnValueOnce(fromChain).mockReturnValueOnce({ error: null });
+    fromChain.maybeSingle.mockReturnValueOnce({ data: { status: 'delivered' }, error: null });
     const result = await deleteRedemption('1');
     expect(fromChain.delete).toHaveBeenCalled();
     expect(result.error).toBeNull();
   });
 
   it('returns delete error when physical delete fails', async () => {
-    fromChain.single.mockReturnValueOnce({ data: { status: 'delivered' }, error: null });
-    fromChain.eq.mockReturnValueOnce(fromChain).mockReturnValueOnce({ error: { message: 'Error' } });
+    fromChain.maybeSingle.mockReturnValueOnce({ data: { status: 'delivered' }, error: null });
+    deleteChain.error = { message: 'Error' };
     const result = await deleteRedemption('1');
     expect(result.error).toEqual({ message: 'Error' });
   });
 
-  it('physically deletes when no row is found', async () => {
-    fromChain.single.mockReturnValueOnce({ data: null, error: null });
-    fromChain.eq.mockReturnValueOnce(fromChain).mockReturnValueOnce({ error: null });
+  it('surfaces a lookup failure instead of reporting it as not found', async () => {
+    fromChain.maybeSingle.mockReturnValueOnce({ data: null, error: { message: 'connection reset' } });
     const result = await deleteRedemption('1');
-    expect(result.error).toBeNull();
-  });
-});
-
-describe('getRedemptions', () => {
-  it('returns rows', async () => {
-    fromChain.order.mockReturnValueOnce({ data: [{ id: '1' }], error: null });
-    const result = await getRedemptions();
-    expect(result.data).toEqual([{ id: '1' }]);
+    expect(fromChain.delete).not.toHaveBeenCalled();
+    expect(result.error).toEqual({ message: 'connection reset' });
   });
 
-  it('returns error on failure', async () => {
-    fromChain.order.mockReturnValueOnce({ data: null, error: { message: 'Error' } });
-    const result = await getRedemptions();
-    expect(result.error).toEqual({ message: 'Error' });
-  });
-});
-
-describe('getRedemption', () => {
-  it('returns row by id', async () => {
-    const result = await getRedemption('1');
-    expect(result.data).toEqual({ id: '1' });
+  it('does not delete when the row is not in the active org', async () => {
+    fromChain.maybeSingle.mockReturnValueOnce({ data: null, error: null });
+    const result = await deleteRedemption('1');
+    expect(fromChain.delete).not.toHaveBeenCalled();
+    expect(result.error).toEqual({ message: 'REDEMPTION_NOT_FOUND' });
   });
 
-  it('returns error on failure', async () => {
-    fromChain.single.mockReturnValueOnce({ data: null, error: { message: 'Not found' } });
-    const result = await getRedemption('999');
-    expect(result.error).toEqual({ message: 'Not found' });
+  it('scopes both the lookup and the delete to the active org', async () => {
+    fromChain.maybeSingle.mockReturnValueOnce({ data: { status: 'delivered' }, error: null });
+    await deleteRedemption('1');
+    expect(fromChain.eq).toHaveBeenCalledWith('organization_id', 123);
+    expect(deleteChain.eq).toHaveBeenCalledWith('organization_id', 123);
+  });
+
+  it('returns an error when there is no active organization', async () => {
+    mockCookieStore.get.mockReturnValue(undefined);
+    (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, organization_id: null });
+    const result = await deleteRedemption('1');
+    expect(result.error).toEqual({ message: 'Missing active organization' });
+    expect(fromChain.delete).not.toHaveBeenCalled();
   });
 });

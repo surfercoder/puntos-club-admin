@@ -12,15 +12,25 @@ jest.mock('next/headers', () => ({
   cookies: jest.fn(() => mockCookieStore),
 }));
 
+// `.delete()` gets its own chain so its `eq` calls keep their own ordering,
+// independent of the membership lookup getMutationOrgId now performs.
+// Awaiting a non-thenable yields the object itself, so `error` is the result.
+const deleteChain: any = {
+  eq: jest.fn(() => deleteChain),
+  error: null,
+};
+
 const mockSupabase = {
   from: jest.fn(() => mockSupabase),
   select: jest.fn(() => mockSupabase),
   insert: jest.fn(() => mockSupabase),
   update: jest.fn(() => mockSupabase),
-  delete: jest.fn(() => mockSupabase),
+  delete: jest.fn(() => deleteChain),
   eq: jest.fn(() => mockSupabase),
   order: jest.fn(() => mockSupabase),
   single: jest.fn(() => ({ data: { id: 1, street: 'Main St' }, error: null })),
+  // getMutationOrgId validates the active_org_id cookie against membership.
+  maybeSingle: jest.fn(() => ({ data: { organization_id: 123 }, error: null })),
   rpc: jest.fn(() => ({ data: null, error: null })),
   auth: { getUser: jest.fn(() => ({ data: { user: { id: 'auth-1' } }, error: null })) },
 };
@@ -45,10 +55,13 @@ beforeEach(() => {
   mockSupabase.select.mockReturnValue(mockSupabase);
   mockSupabase.insert.mockReturnValue(mockSupabase);
   mockSupabase.update.mockReturnValue(mockSupabase);
-  mockSupabase.delete.mockReturnValue(mockSupabase);
+  mockSupabase.delete.mockReturnValue(deleteChain);
   mockSupabase.eq.mockReturnValue(mockSupabase);
+  deleteChain.eq.mockReturnValue(deleteChain);
+  deleteChain.error = null;
   mockSupabase.order.mockReturnValue(mockSupabase);
   mockSupabase.single.mockReturnValue({ data: { id: 1, street: 'Main St' }, error: null });
+  mockSupabase.maybeSingle.mockReturnValue({ data: { organization_id: 123 }, error: null });
   (isAdmin as jest.Mock).mockReturnValue(false);
 });
 
@@ -150,11 +163,9 @@ describe('updateAddress', () => {
 
 describe('deleteAddress', () => {
   it('should delete address for non-admin successfully', async () => {
-    mockSupabase.eq
-      .mockReturnValueOnce(mockSupabase)
-      .mockReturnValueOnce({ error: null });
     const result = await deleteAddress(1);
     expect(mockSupabase.delete).toHaveBeenCalled();
+    expect(deleteChain.eq).toHaveBeenCalledWith('organization_id', 123);
     expect(result.error).toBeNull();
   });
 
@@ -166,15 +177,13 @@ describe('deleteAddress', () => {
 
   it('should allow admin to delete without org filter', async () => {
     (isAdmin as jest.Mock).mockReturnValue(true);
-    mockSupabase.eq.mockReturnValue({ error: null });
     const result = await deleteAddress(1);
+    expect(deleteChain.eq).not.toHaveBeenCalledWith('organization_id', expect.anything());
     expect(result.error).toBeNull();
   });
 
   it('should return error on failure', async () => {
-    mockSupabase.eq
-      .mockReturnValueOnce(mockSupabase)
-      .mockReturnValueOnce({ error: { message: 'Error' } });
+    deleteChain.error = { message: 'Error' };
     const result = await deleteAddress(1);
     expect(result.error).toEqual({ message: 'Error' });
   });

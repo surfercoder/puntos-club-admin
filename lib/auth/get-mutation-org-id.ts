@@ -1,5 +1,6 @@
 import { cookies } from 'next/headers';
 
+import { belongsToOrg } from './get-active-org-id';
 import { getCurrentUser } from './get-current-user';
 
 /**
@@ -15,20 +16,25 @@ import { getCurrentUser } from './get-current-user';
  * them a cross-org *read*; a write needs one concrete org, so admins resolve
  * the same way as everyone else here.
  *
- * ponytail: no membership validation on the cookie — RLS plus the
- * `.eq('organization_id', …)` on each mutation already stop a forged cookie
- * from touching another org's rows. Validate here only if a write ever lands
- * somewhere those two don't cover.
+ * The cookie is honored only for an org the user actually belongs to. Most
+ * tables' RLS is org-blind (`has_admin_portal_access()` checks the role, not
+ * the org), so the `.eq('organization_id', …)` each mutation applies is the
+ * whole tenant boundary — an unvalidated cookie would let any owner aim a
+ * scoped write at another org's rows.
  */
 export async function getMutationOrgId(): Promise<number | null> {
   const [cookieStore, currentUser] = await Promise.all([cookies(), getCurrentUser()]);
 
+  const fromUser = currentUser?.organization_id ? Number(currentUser.organization_id) : NaN;
+  const fromUserValid = Number.isFinite(fromUser) && fromUser > 0;
+
   const raw = cookieStore.get('active_org_id')?.value;
   const fromCookie = raw ? parseInt(raw, 10) : NaN;
-  if (Number.isFinite(fromCookie) && fromCookie > 0) {
-    return fromCookie;
+  if (Number.isFinite(fromCookie) && fromCookie > 0 && currentUser) {
+    if (fromCookie === fromUser || (await belongsToOrg(currentUser.id, fromCookie))) {
+      return fromCookie;
+    }
   }
 
-  const fromUser = currentUser?.organization_id ? Number(currentUser.organization_id) : NaN;
-  return Number.isFinite(fromUser) && fromUser > 0 ? fromUser : null;
+  return fromUserValid ? fromUser : null;
 }

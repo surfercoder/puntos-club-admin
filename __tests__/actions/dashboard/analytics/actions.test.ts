@@ -71,10 +71,32 @@ function dateInMonth(monthsAgo: number): string {
   return new Date(now.getFullYear(), now.getMonth() - monthsAgo, 15).toISOString();
 }
 
-function _currentMonthKey(): string {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-}
+// ===========================================================================
+// Tenant isolation: every redemption query must be scoped to the caller's org
+// ===========================================================================
+describe('redemption queries are scoped to the org', () => {
+  it.each([
+    ['getDashboardKpis', getDashboardKpis],
+    ['getMonthlyPointsStats', getMonthlyPointsStats],
+    ['getTopProducts', getTopProducts],
+  ])('%s filters redemption by organization_id', async (_name, fn) => {
+    let table = '';
+    let scoped = false;
+    mockSupabase.from.mockImplementation((name: string) => {
+      table = name;
+      return mockSupabase;
+    });
+    mockSupabase.eq.mockImplementation((column: string, value: unknown) => {
+      scoped ||= table === 'redemption' && column === 'organization_id' && value === 10;
+      return mockSupabase;
+    });
+    mockSupabase.gte.mockReturnValue({ data: [], error: null });
+    mockSupabase.not.mockReturnValue({ data: [], error: null });
+
+    await fn();
+    expect(scoped).toBe(true);
+  });
+});
 
 // ===========================================================================
 // getDashboardKpis
@@ -121,9 +143,11 @@ describe('getDashboardKpis', () => {
     };
     const redemptionsChain = {
       select: jest.fn().mockReturnThis(),
-      gte: jest.fn().mockReturnValue({
-        data: [{ points_used: 15 }, { points_used: 25 }],
-        error: null,
+      eq: jest.fn().mockReturnValue({
+        gte: jest.fn().mockReturnValue({
+          data: [{ points_used: 15 }, { points_used: 25 }],
+          error: null,
+        }),
       }),
     };
 
@@ -169,9 +193,11 @@ describe('getDashboardKpis', () => {
     };
     const redemptionsChain = {
       select: jest.fn().mockReturnThis(),
-      gte: jest.fn().mockReturnValue({
-        data: [{ points_used: null }, { points_used: 10 }],
-        error: null,
+      eq: jest.fn().mockReturnValue({
+        gte: jest.fn().mockReturnValue({
+          data: [{ points_used: null }, { points_used: 10 }],
+          error: null,
+        }),
       }),
     };
 
@@ -198,16 +224,11 @@ describe('getDashboardKpis', () => {
       select: jest.fn().mockReturnThis(),
       eq: jest.fn().mockReturnValue({ gte: jest.fn().mockReturnValue(emptyTerminal) }),
     };
-    const chainWithGte = {
-      select: jest.fn().mockReturnThis(),
-      gte: jest.fn().mockReturnValue(emptyTerminal),
-    };
-
     mockSupabase.from
       .mockReturnValueOnce(chainWithEqEq)    // members
       .mockReturnValueOnce(chainWithEqGte)   // revenue
       .mockReturnValueOnce(chainWithEqEq)    // circulation
-      .mockReturnValueOnce(chainWithGte);    // redemptions
+      .mockReturnValueOnce(chainWithEqGte);  // redemptions
 
     const result = await getDashboardKpis();
     expect(result).not.toBeNull();
