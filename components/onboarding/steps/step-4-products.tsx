@@ -69,16 +69,16 @@ function ProductRowCard({ product, prodIndex, categoryId, canRemove, onRemove, o
       </div>
       <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
         <div className="space-y-1 sm:col-span-2">
-          <Label className="text-xs">{t('rewardName')}</Label>
-          <Input placeholder={t('rewardNamePlaceholder')} value={product.name} onChange={(e) => onUpdate(categoryId, product.id, 'name', e.target.value)} className="h-8 text-sm" />
+          <Label className="text-xs" htmlFor={`reward-name-${product.id}`}>{t('rewardName')}</Label>
+          <Input id={`reward-name-${product.id}`} placeholder={t('rewardNamePlaceholder')} value={product.name} onChange={(e) => onUpdate(categoryId, product.id, 'name', e.target.value)} className="h-8 text-sm" />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs">{t('pointsRequired')}</Label>
-          <Input type="number" min={1} placeholder="100" value={product.required_points} onChange={(e) => onUpdate(categoryId, product.id, 'required_points', e.target.value === '' ? '' : parseInt(e.target.value))} className="h-8 text-sm" />
+          <Label className="text-xs" htmlFor={`reward-points-${product.id}`}>{t('pointsRequired')}</Label>
+          <Input id={`reward-points-${product.id}`} type="number" min={1} placeholder="100" value={product.required_points} onChange={(e) => onUpdate(categoryId, product.id, 'required_points', e.target.value === '' ? '' : parseInt(e.target.value))} className="h-8 text-sm" />
         </div>
         <div className="space-y-1">
-          <Label className="text-xs">{t('initialStock')}</Label>
-          <Input type="number" min={0} placeholder="10" value={product.quantity} onChange={(e) => onUpdate(categoryId, product.id, 'quantity', e.target.value === '' ? '' : parseInt(e.target.value))} className="h-8 text-sm" />
+          <Label className="text-xs" htmlFor={`reward-stock-${product.id}`}>{t('initialStock')}</Label>
+          <Input id={`reward-stock-${product.id}`} type="number" min={0} placeholder="10" value={product.quantity} onChange={(e) => onUpdate(categoryId, product.id, 'quantity', e.target.value === '' ? '' : parseInt(e.target.value))} className="h-8 text-sm" />
         </div>
       </div>
     </div>
@@ -165,8 +165,9 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
     setCategories((prev) => [...prev, createCategory()]);
   };
 
+  // The delete buttons only render while more than one item exists, so these
+  // never have to defend the "keep at least one" rule themselves.
   const removeCategory = (categoryId: string) => {
-    if (categories.length === 1) return;
     setCategories((prev) => prev.filter((cat) => cat.id !== categoryId));
   };
 
@@ -184,7 +185,6 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
     setCategories((prev) =>
       prev.map((cat) => {
         if (cat.id !== categoryId) return cat;
-        if (cat.products.length === 1) return cat;
         return { ...cat, products: cat.products.filter((p) => p.id !== productId) };
       })
     );
@@ -282,6 +282,7 @@ export function Step4Products({ onNext, onBack, initialData, onAutoSave, selecte
                   type="button"
                   variant="ghost"
                   size="icon"
+                  aria-label={`${tCommon('delete')} ${t('categoryName')} ${catIndex + 1}`}
                   className="text-destructive hover:text-destructive shrink-0"
                   onClick={() => removeCategory(category.id)}
                 >

@@ -10,8 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import { verifyCaptchaToken } from '@/actions/onboarding/verify-captcha';
-
-const LS_CONSENT = 'onboarding_consent';
+import { LS_CONSENT } from '@/lib/onboarding-storage';
 
 // --- State & Reducer ---
 
@@ -64,8 +63,6 @@ function consentReducer(state: ConsentState, action: ConsentAction): ConsentStat
       return { ...state, isVerifying: false, captchaToken: null, captchaStatus: 'idle', captchaError: action.error };
     case 'RESTORE_FROM_STORAGE':
       return { ...state, consentChecked: true, hasScrolledToBottom: true };
-    default:
-      return state;
   }
 }
 
@@ -330,6 +327,9 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
   };
 
   const handleContinue = async () => {
+    // Unreachable: the button is disabled unless canContinue, which already requires
+    // a non-null token. The guard stays because it is what narrows the type below.
+    /* v8 ignore next */
     if (!state.captchaToken) return;
     dispatch({ type: 'VERIFY_START' });
     try {

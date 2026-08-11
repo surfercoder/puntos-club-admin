@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { OnboardingWizard } from '@/components/onboarding/onboarding-wizard';
 import { getOnboardingStatus } from '@/actions/onboarding/actions';
 import { createClient } from '@/lib/supabase/server';
-import type { Step1CompletedData } from '@/components/onboarding/onboarding-wizard';
+import type { Step1CompletedData } from '@/components/onboarding/wizard-state';
 
 export const metadata: Metadata = {
   title: 'Onboarding',

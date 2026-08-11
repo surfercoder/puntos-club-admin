@@ -1,4 +1,4 @@
-import { render, screen, waitFor } from '@testing-library/react';
+import { act, render, screen, waitFor } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
 import { GoogleMapsProvider, useGoogleMaps } from '@/components/providers/google-maps-provider';
 
@@ -86,6 +86,49 @@ describe('GoogleMapsProvider', () => {
     }).toThrow('useGoogleMaps must be used within GoogleMapsProvider');
 
     consoleSpy.mockRestore();
+  });
+
+  it('loads the library once even when the api key prop changes identity', async () => {
+    mockImportLibrary.mockResolvedValue({
+      AutocompleteSessionToken: jest.fn().mockImplementation(() => ({})),
+    });
+
+    const { rerender } = render(
+      <GoogleMapsProvider apiKey="test-api-key">
+        <TestConsumer />
+      </GoogleMapsProvider>
+    );
+    await waitFor(() => expect(screen.getByTestId('loaded')).toHaveTextContent('true'));
+
+    // a second key re-runs the effect, but the ref guard blocks a second load
+    rerender(
+      <GoogleMapsProvider apiKey="another-key">
+        <TestConsumer />
+      </GoogleMapsProvider>
+    );
+    await waitFor(() => expect(mockImportLibrary).toHaveBeenCalledTimes(1));
+  });
+
+  it('drops a load that resolves after unmount instead of updating state', async () => {
+    let resolveLibrary: (lib: unknown) => void = () => {};
+    mockImportLibrary.mockReturnValue(new Promise((resolve) => { resolveLibrary = resolve; }));
+    const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+
+    const { unmount } = render(
+      <GoogleMapsProvider apiKey="test-api-key">
+        <TestConsumer />
+      </GoogleMapsProvider>
+    );
+
+    unmount();
+    // flush the .then() continuation so the guard actually runs before asserting
+    await act(async () => {
+      resolveLibrary({ AutocompleteSessionToken: jest.fn().mockImplementation(() => ({})) });
+    });
+
+    expect(mockImportLibrary).toHaveBeenCalled();
+    // no "state update on an unmounted component" warning means the guard held
+    expect(consoleSpy).not.toHaveBeenCalled();
   });
 
   it('renders children', () => {

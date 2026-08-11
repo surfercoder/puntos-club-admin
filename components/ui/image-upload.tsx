@@ -82,9 +82,8 @@ export function ImageUpload({
     }
   };
 
+  // Only reachable from the remove button, which renders only when a preview exists.
   const handleRemove = async () => {
-    if (!preview) return;
-
     try {
       if (uploadedPathRef.current) {
         await fetch('/api/upload', {

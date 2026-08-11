@@ -51,8 +51,6 @@ function mapsReducer(state: MapsState, action: MapsAction): MapsState {
       };
     case 'error':
       return { ...state, error: action.error };
-    default:
-      return state;
   }
 }
 

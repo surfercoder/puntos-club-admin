@@ -1,114 +1,176 @@
-import type * as ReactNS from 'react';
-import { render, screen } from '@testing-library/react';
-
-jest.mock('next-intl', () => ({
-  useTranslations: jest.fn(() => {
-    const t = (key: string) => key;
-    t.rich = (key: string) => key;
-    t.raw = () => ({});
-    return t;
-  }),
-  useLocale: jest.fn(() => 'es'),
+jest.mock('next/image', () => ({
+  __esModule: true,
+  default: ({ alt, src }: { alt: string; src: string }) => (
+    <img alt={alt} src={src} />
+  ),
 }));
 
-jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn(), info: jest.fn() } }));
-
-jest.mock('@/lib/supabase/client', () => ({
-  createClient: jest.fn(() => ({
-    storage: {
-      from: jest.fn(() => ({
-        upload: jest.fn(),
-        getPublicUrl: jest.fn(() => ({ data: { publicUrl: 'http://example.com/image.jpg' } })),
-        remove: jest.fn(),
-      })),
-    },
-  })),
-}));
-
-jest.mock('next/image', () => {
-  const React = jest.requireActual('react') as typeof ReactNS;
-  return function MockImage({ alt, ...props }: { alt: string; [key: string]: unknown }) {
-    return React.createElement('img', { alt, ...props });
-  };
-});
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { toast } from 'sonner';
 
 import ProductImageUpload from '@/components/dashboard/product/product-image-upload';
+import { createClient } from '@/lib/supabase/client';
+
+const upload = jest.fn();
+const getPublicUrl = jest.fn();
+const remove = jest.fn();
+
+const imageFile = (name = 'a.png', type = 'image/png', size = 1024) => {
+  const file = new File(['x'], name, { type });
+  Object.defineProperty(file, 'size', { value: size });
+  return file;
+};
+
+const selectFiles = (files: File[]) => {
+  const input = document.querySelector('input[type="file"]') as HTMLInputElement;
+  fireEvent.change(input, { target: { files } });
+};
+
+const renderUpload = (initialImages?: string[]) => {
+  const onImagesChange = jest.fn();
+  render(<ProductImageUpload initialImages={initialImages} onImagesChange={onImagesChange} />);
+  return { onImagesChange };
+};
 
 describe('ProductImageUpload', () => {
-  const mockOnImagesChange = jest.fn();
-
   beforeEach(() => {
-    jest.clearAllMocks();
+    upload.mockResolvedValue({ error: null });
+    getPublicUrl.mockImplementation((path: string) => ({ data: { publicUrl: `https://cdn/${path}` } }));
+    remove.mockResolvedValue({ error: null });
+    (createClient as jest.Mock).mockReturnValue({
+      storage: { from: jest.fn(() => ({ upload, getPublicUrl, remove })) },
+    });
   });
 
-  it('renders with no images message when empty', () => {
-    render(<ProductImageUpload onImagesChange={mockOnImagesChange} />);
-
+  it('invites an upload while there are no images', () => {
+    renderUpload();
     expect(screen.getByText('noImages')).toBeInTheDocument();
-  });
-
-  it('renders upload button when no images', () => {
-    render(<ProductImageUpload onImagesChange={mockOnImagesChange} />);
-
     expect(screen.getByText('uploadButton')).toBeInTheDocument();
+    expect(screen.queryByText('imageCount')).not.toBeInTheDocument();
   });
 
-  it('renders format and size hints', () => {
-    render(<ProductImageUpload onImagesChange={mockOnImagesChange} />);
+  it('renders the initial images with a remove button each', () => {
+    renderUpload(['https://cdn/a.png', 'https://cdn/b.png']);
 
-    expect(screen.getByText('formats')).toBeInTheDocument();
-    expect(screen.getByText('maxSize')).toBeInTheDocument();
-  });
-
-  it('renders with initial images', () => {
-    const initialImages = ['http://example.com/img1.jpg', 'http://example.com/img2.jpg'];
-
-    render(
-      <ProductImageUpload
-        initialImages={initialImages}
-        onImagesChange={mockOnImagesChange}
-      />
-    );
-
-    const images = screen.getAllByRole('img');
-    expect(images).toHaveLength(2);
-  });
-
-  it('renders image count when images exist', () => {
-    const initialImages = ['http://example.com/img1.jpg'];
-
-    render(
-      <ProductImageUpload
-        initialImages={initialImages}
-        onImagesChange={mockOnImagesChange}
-      />
-    );
-
+    expect(screen.getAllByRole('img')).toHaveLength(2);
     expect(screen.getByText('imageCount')).toBeInTheDocument();
+    expect(screen.queryByText('noImages')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Eliminar imagen 1' })).toBeInTheDocument();
   });
 
-  it('hides upload area when 3 images exist', () => {
-    const initialImages = [
-      'http://example.com/img1.jpg',
-      'http://example.com/img2.jpg',
-      'http://example.com/img3.jpg',
-    ];
-
-    render(
-      <ProductImageUpload
-        initialImages={initialImages}
-        onImagesChange={mockOnImagesChange}
-      />
-    );
-
-    expect(screen.queryByText('uploadButton')).not.toBeInTheDocument();
+  it('hides the dropzone once three images are present', () => {
+    renderUpload(['https://cdn/a.png', 'https://cdn/b.png', 'https://cdn/c.png']);
+    expect(document.querySelector('input[type="file"]')).not.toBeInTheDocument();
   });
 
-  it('renders file input for image upload', () => {
-    render(<ProductImageUpload onImagesChange={mockOnImagesChange} />);
+  it('uploads the selected files and reports the new list', async () => {
+    const { onImagesChange } = renderUpload();
 
-    const fileInput = document.querySelector('input[type="file"]');
-    expect(fileInput).toBeInTheDocument();
-    expect(fileInput).toHaveAttribute('accept', 'image/jpeg,image/jpg,image/png,image/webp,image/gif');
+    selectFiles([imageFile('a.png'), imageFile('b.png')]);
+
+    await waitFor(() => expect(onImagesChange).toHaveBeenCalled());
+    expect(upload).toHaveBeenCalledTimes(2);
+    expect(onImagesChange.mock.calls[0][0]).toHaveLength(2);
+    expect(toast.success).toHaveBeenCalledWith('uploadSuccess');
+  });
+
+  it('appends to the images already present', async () => {
+    const { onImagesChange } = renderUpload(['https://cdn/existing.png']);
+
+    selectFiles([imageFile('a.png')]);
+
+    await waitFor(() => expect(onImagesChange).toHaveBeenCalled());
+    expect(onImagesChange.mock.calls[0][0][0]).toBe('https://cdn/existing.png');
+    expect(onImagesChange.mock.calls[0][0]).toHaveLength(2);
+  });
+
+  it('refuses a batch that would exceed the three image limit', async () => {
+    const { onImagesChange } = renderUpload(['https://cdn/a.png', 'https://cdn/b.png']);
+
+    selectFiles([imageFile('c.png'), imageFile('d.png')]);
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('uploadLimitError'));
+    expect(upload).not.toHaveBeenCalled();
+    expect(onImagesChange).not.toHaveBeenCalled();
+  });
+
+  it('rejects an unsupported format before uploading anything', async () => {
+    renderUpload();
+
+    selectFiles([imageFile('notes.pdf', 'application/pdf')]);
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('formatError'));
+    expect(upload).not.toHaveBeenCalled();
+  });
+
+  it('rejects a file over 5MB before uploading anything', async () => {
+    renderUpload();
+
+    selectFiles([imageFile('big.png', 'image/png', 6 * 1024 * 1024)]);
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('sizeError'));
+    expect(upload).not.toHaveBeenCalled();
+  });
+
+  it('rolls back the images that did upload when one of the batch fails', async () => {
+    upload.mockResolvedValueOnce({ error: null }).mockResolvedValueOnce({ error: new Error('boom') });
+    const { onImagesChange } = renderUpload();
+
+    selectFiles([imageFile('a.png'), imageFile('b.png')]);
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('uploadError'));
+    expect(remove).toHaveBeenCalledTimes(1);
+    expect(onImagesChange).not.toHaveBeenCalled();
+  });
+
+  it('reports a wholly failed batch without trying to clean up', async () => {
+    upload.mockResolvedValue({ error: new Error('boom') });
+    renderUpload();
+
+    selectFiles([imageFile('a.png')]);
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('uploadError'));
+    expect(remove).not.toHaveBeenCalled();
+  });
+
+  it('ignores a change event with no files', () => {
+    renderUpload();
+
+    selectFiles([]);
+
+    expect(upload).not.toHaveBeenCalled();
+    expect(toast.error).not.toHaveBeenCalled();
+  });
+
+  it('removes an image from storage and from the list', async () => {
+    const { onImagesChange } = renderUpload(['https://cdn/a.png', 'https://cdn/b.png']);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Eliminar imagen 1' }));
+
+    await waitFor(() => expect(onImagesChange).toHaveBeenCalledWith(['https://cdn/b.png']));
+    expect(remove).toHaveBeenCalledWith(['a.png']);
+    expect(toast.success).toHaveBeenCalledWith('removeSuccess');
+  });
+
+  it('reports a failed removal', async () => {
+    remove.mockRejectedValue(new Error('network down'));
+    const { onImagesChange } = renderUpload(['https://cdn/a.png']);
+
+    fireEvent.click(screen.getByRole('button', { name: 'Eliminar imagen 1' }));
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('removeError'));
+    expect(onImagesChange).not.toHaveBeenCalled();
+  });
+
+  it('shows the uploading state while the batch is in flight', async () => {
+    let finishUpload: (result: { error: null }) => void = () => {};
+    upload.mockReturnValue(new Promise((resolve) => { finishUpload = resolve; }));
+    renderUpload();
+
+    selectFiles([imageFile('a.png')]);
+
+    expect(await screen.findByText('uploading')).toBeInTheDocument();
+    finishUpload({ error: null });
+    await waitFor(() => expect(screen.queryByText('uploading')).not.toBeInTheDocument());
   });
 });

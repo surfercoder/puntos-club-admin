@@ -147,15 +147,6 @@ export function GoogleAddressAutocomplete({
       }
     };
 
-    // Detect mousedown on autocomplete dropdown items
-    const handleDocumentMouseDown = (e: MouseEvent) => {
-      const target = e.target as HTMLElement;
-      // Check if clicking on a pac-item (Google's autocomplete suggestion class)
-      if (target.closest('.pac-item') || target.closest('.pac-container')) {
-        // User is selecting from dropdown
-      }
-    };
-
     // Add blur listener to detect when user clicks on a suggestion
     const handleBlur = () => {
       // Longer delay to allow autocomplete to process the click
@@ -170,7 +161,6 @@ export function GoogleAddressAutocomplete({
 
     inputEl.addEventListener('keydown', handleKeyDown);
     inputEl.addEventListener('blur', handleBlur);
-    document.addEventListener('mousedown', handleDocumentMouseDown);
 
     autocompleteRef.current = autocomplete;
 
@@ -180,7 +170,6 @@ export function GoogleAddressAutocomplete({
       placeChangedListener.remove();
       inputEl.removeEventListener('keydown', handleKeyDown);
       inputEl.removeEventListener('blur', handleBlur);
-      document.removeEventListener('mousedown', handleDocumentMouseDown);
       // Fully dispose Google's widget and clear the ref so a remount (e.g. React
       // StrictMode's setup→cleanup→setup in dev) rebuilds it and re-attaches the
       // place_changed listener instead of early-returning on a stale ref.

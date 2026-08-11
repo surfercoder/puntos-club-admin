@@ -9,7 +9,7 @@ import { initiateRegistration } from '@/actions/onboarding/initiate-registration
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { Step1CompletedData } from '@/components/onboarding/onboarding-wizard';
+import type { Step1CompletedData } from '@/components/onboarding/wizard-state';
 import { PasswordStrengthChecklist } from '@/components/onboarding/password-strength-checklist';
 import { allRulesPass } from '@/components/onboarding/password-rules';
 import {
@@ -133,12 +133,12 @@ function step1FormReducer(state: Step1FormState, action: Step1FormAction): Step1
       return { ...state, emailSent: action.value };
     case 'SET_ERRORS':
       return { ...state, errors: action.value };
-    default:
-      return state;
   }
 }
 
-function Step1FormView({ onNext: _onNext }: { onNext: (data: Step1CompletedData) => void }) {
+// Registration ends on the "check your email" screen, so this view never
+// advances the wizard itself — step 1 resumes from the verification link.
+function Step1FormView() {
   const t = useTranslations('Onboarding.step1');
   const tCommon = useTranslations('Common');
   const [state, dispatch] = useReducer(step1FormReducer, step1FormInitialState);
@@ -339,5 +339,5 @@ export function Step1Personal({ onNext, completedData }: Step1Props) {
     );
   }
 
-  return <Step1FormView onNext={(data) => onNext(data)} />;
+  return <Step1FormView />;
 }
