@@ -8,6 +8,7 @@ import { toast } from "sonner";
 
 import { redemptionFormAction } from '@/actions/dashboard/redemption/redemption-form-actions';
 import { Button } from '@/components/ui/button';
+import { Combobox } from '@/components/ui/combobox';
 import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -235,24 +236,18 @@ export default function RedemptionForm({ redemption }: RedemptionFormProps) {
 
       <div>
         <Label htmlFor="beneficiary_id">{t('form.beneficiaryLabel')}</Label>
-        <Select
+        <Combobox
           defaultValue={redemption?.beneficiary_id ? String(redemption.beneficiary_id) : ''}
           name="beneficiary_id"
+          options={beneficiaries.map((beneficiary) => ({
+            value: String(beneficiary.id),
+            label: beneficiary.first_name || beneficiary.last_name
+              ? `${beneficiary.first_name || ''} ${beneficiary.last_name || ''}`.trim()
+              : beneficiary.email || t('form.noName'),
+          }))}
+          placeholder={t('form.selectBeneficiary')}
           onValueChange={(value) => dispatch({ type: 'SET_SELECTED_BENEFICIARY', payload: value })}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder={t('form.selectBeneficiary')} />
-          </SelectTrigger>
-          <SelectContent>
-            {beneficiaries.map((beneficiary) => (
-              <SelectItem key={beneficiary.id} value={String(beneficiary.id)}>
-                {beneficiary.first_name || beneficiary.last_name
-                  ? `${beneficiary.first_name || ''} ${beneficiary.last_name || ''}`.trim()
-                  : beneficiary.email || t('form.noName')}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        />
         {selectedBeneficiary && (
           <p className="text-sm text-muted-foreground mt-1">
             {t('form.availablePoints')}: {selectedBeneficiary.available_points}

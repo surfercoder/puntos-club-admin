@@ -6,6 +6,7 @@ import { useActionState, useState, useEffect, useReducer, useRef } from 'react';
 
 import { purchaseFormAction } from '@/actions/dashboard/purchase/purchase-form-actions';
 import { Button } from '@/components/ui/button';
+import { Combobox } from '@/components/ui/combobox';
 import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -168,14 +169,12 @@ export default function PurchaseForm({ purchase }: PurchaseFormProps) {
 
       <div>
         <Label htmlFor="beneficiary_id">{t('form.beneficiaryLabel')}</Label>
-        <Select defaultValue={purchase?.beneficiary_id ? String(purchase.beneficiary_id) : ''} name="beneficiary_id">
-          <SelectTrigger><SelectValue placeholder={t('form.selectBeneficiary')} /></SelectTrigger>
-          <SelectContent>
-            {beneficiaries.map((b) => (
-              <SelectItem key={b.id} value={String(b.id)}>{b.first_name} {b.last_name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <Combobox
+          defaultValue={purchase?.beneficiary_id ? String(purchase.beneficiary_id) : ''}
+          name="beneficiary_id"
+          options={beneficiaries.map(b => ({ value: String(b.id), label: `${b.first_name} ${b.last_name}` }))}
+          placeholder={t('form.selectBeneficiary')}
+        />
         <FieldError actionState={validation ?? actionState} name="beneficiary_id" />
       </div>
 

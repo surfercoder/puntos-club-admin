@@ -64,6 +64,7 @@
     "saveChanges": "Guardar Cambios",
     "emailPlaceholder": "m@ejemplo.com",
     "noResults": "Sin resultados",
+    "search": "Buscar...",
     "deleting": "Eliminando...",
     "imageUpload": {
       "upload": "Subir imagen",

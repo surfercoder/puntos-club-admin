@@ -63,6 +63,30 @@ jest.mock('@/components/ui/select', () => {
   };
 });
 
+// Mock Combobox: render every option so tests can assert labels without opening the popover
+jest.mock('@/components/ui/combobox', () => ({
+  Combobox: ({ name, options, defaultValue, placeholder, onValueChange }: {
+    name: string;
+    options: { value: string; label: string }[];
+    defaultValue?: string;
+    placeholder: string;
+    onValueChange?: (value: string) => void;
+  }) => {
+    if (onValueChange) {
+      selectCallbacks[name] = onValueChange;
+    }
+    return (
+      <div data-testid={`combobox-${name}`}>
+        <input type="hidden" name={name} defaultValue={defaultValue} />
+        <span>{placeholder}</span>
+        {options.map((o) => (
+          <div key={o.value} data-value={o.value}>{o.label}</div>
+        ))}
+      </div>
+    );
+  },
+}));
+
 import RedemptionForm from '@/components/dashboard/redemption/redemption-form';
 
 const React = require('react');
