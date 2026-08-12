@@ -418,6 +418,20 @@ describe('DashboardShell', () => {
     expect(links.some(l => l.getAttribute('href') === '/dashboard/product')).toBe(true);
   });
 
+  it('does not link non-routable segments', () => {
+    const { usePathname } = require('next/navigation');
+    (usePathname as jest.Mock).mockReturnValue('/dashboard/settings/organization');
+
+    render(
+      <DashboardShell {...defaultProps}>
+        <div>Content</div>
+      </DashboardShell>
+    );
+
+    const links = screen.getAllByRole('link');
+    expect(links.some(l => l.getAttribute('href') === '/dashboard/settings')).toBe(false);
+  });
+
   it('generates breadcrumbs for all known segments', () => {
     const { usePathname } = require('next/navigation');
     (usePathname as jest.Mock).mockReturnValue('/dashboard/address');

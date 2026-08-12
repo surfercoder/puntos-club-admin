@@ -52,6 +52,9 @@ const KNOWN_SEGMENTS = [
 
 type KnownSegment = typeof KNOWN_SEGMENTS[number];
 
+// Segmentos que solo agrupan rutas y no tienen page.tsx propio: enlazarlos da 404.
+const NON_ROUTABLE_SEGMENTS = new Set(["settings", "edit", "view"]);
+
 const isKnownSegment = (s: string): s is KnownSegment =>
   (KNOWN_SEGMENTS as readonly string[]).includes(s);
 
@@ -98,8 +101,9 @@ export function DashboardShell({
   const dashboardIndex = rawSegments.indexOf("dashboard");
   const segments = dashboardIndex >= 0 ? rawSegments.slice(dashboardIndex + 1) : rawSegments;
 
-  const breadcrumbItems: { label: string; href?: string }[] = [
-    { label: tBreadcrumb("panel"), href: "/dashboard" },
+  // `path` identifica al item (key estable); `href` sólo existe si el segmento es navegable.
+  const breadcrumbItems: { label: string; path: string; href?: string }[] = [
+    { label: tBreadcrumb("panel"), path: "/dashboard", href: "/dashboard" },
   ];
 
   let hrefAcc = "/dashboard";
@@ -114,11 +118,12 @@ export function DashboardShell({
     else if (isKnownSegment(seg)) label = tBreadcrumb(seg);
     else label = seg;
 
-    breadcrumbItems.push({ label, href: hrefAcc });
+    breadcrumbItems.push({
+      label,
+      path: hrefAcc,
+      href: NON_ROUTABLE_SEGMENTS.has(seg) ? undefined : hrefAcc,
+    });
   }
-
-  /* c8 ignore next */
-  if (breadcrumbItems.length > 0) breadcrumbItems[breadcrumbItems.length - 1] = { label: breadcrumbItems[breadcrumbItems.length - 1].label };
 
   const onChangeOrg = React.useCallback((orgId: string) => {
     if (portalMode === "admin") return;
@@ -187,12 +192,14 @@ export function DashboardShell({
                     const isLast = idx === breadcrumbItems.length - 1;
 
                     return (
-                      <React.Fragment key={item.href ?? `last-${item.label}`}>
+                      <React.Fragment key={item.path}>
                         <BreadcrumbItem className={idx === 0 ? "hidden md:block" : undefined}>
-                          {isLast || !item.href ? (
+                          {isLast ? (
                             <BreadcrumbPage>{item.label}</BreadcrumbPage>
-                          ) : (
+                          ) : item.href ? (
                             <BreadcrumbLink href={item.href}>{item.label}</BreadcrumbLink>
+                          ) : (
+                            <span>{item.label}</span>
                           )}
                         </BreadcrumbItem>
                         {!isLast ? <BreadcrumbSeparator className="hidden md:block" /> : null}
