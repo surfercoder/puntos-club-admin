@@ -1,4 +1,3 @@
-import { Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
@@ -41,16 +40,28 @@ interface RedemptionWithRelations {
   } | null;
 }
 
-export default async function RedemptionListPage() {
-  const [t, currentUser] = await Promise.all([
+const STATUSES: RedemptionStatus[] = ['pending', 'delivered', 'cancelled'];
+const FIELD_CLASS = 'border-input h-9 rounded-md border bg-transparent px-3 text-sm shadow-xs';
+
+interface PageProps {
+  searchParams: Promise<{ status?: string; from?: string; to?: string }>;
+}
+
+export default async function RedemptionListPage({ searchParams }: PageProps) {
+  const [t, currentUser, params] = await Promise.all([
     getTranslations('Dashboard.redemption'),
     getCurrentUser(),
+    searchParams,
   ]);
   const userIsAdmin = isAdmin(currentUser);
 
   const supabase = userIsAdmin ? createAdminClient() : await createClient();
 
   const orgIdFilter = await getActiveOrgIdFilter(currentUser);
+
+  const status = STATUSES.find((s) => s === params.status) ?? '';
+  const from = params.from?.match(/^\d{4}-\d{2}-\d{2}$/)?.[0] ?? '';
+  const to = params.to?.match(/^\d{4}-\d{2}-\d{2}$/)?.[0] ?? '';
 
   let query = supabase
     .from('redemption')
@@ -64,6 +75,17 @@ export default async function RedemptionListPage() {
   if (orgIdFilter) {
     query = query.eq('organization_id', orgIdFilter);
   }
+  if (status) {
+    query = query.eq('status', status);
+  }
+  // ponytail: date bounds are interpreted in the DB timezone; add an explicit
+  // tz offset here if org-local day boundaries ever matter.
+  if (from) {
+    query = query.gte('redemption_date', from);
+  }
+  if (to) {
+    query = query.lte('redemption_date', `${to}T23:59:59.999`);
+  }
 
   const { data, error } = await query;
 
@@ -73,15 +95,50 @@ export default async function RedemptionListPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">{t('title')}</h1>
-          <p className="text-muted-foreground">{t('description')}</p>
-        </div>
-        <Button asChild>
-          <Link href="/dashboard/redemption/create">{t('newButton')}</Link>
-        </Button>
+      <div>
+        <h1 className="text-2xl font-semibold">{t('title')}</h1>
+        <p className="text-muted-foreground">{t('description')}</p>
       </div>
+
+      <form className="flex flex-wrap items-end gap-3" method="GET">
+        <label className="flex flex-col gap-1 text-sm">
+          {t('filters.status')}
+          <select
+            className={FIELD_CLASS}
+            defaultValue={status}
+            name="status"
+          >
+            <option value="">{t('filters.allStatuses')}</option>
+            {STATUSES.map((s) => (
+              <option key={s} value={s}>{t(`status.${s}`)}</option>
+            ))}
+          </select>
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          {t('filters.from')}
+          <input
+            className={FIELD_CLASS}
+            defaultValue={from}
+            name="from"
+            type="date"
+          />
+        </label>
+        <label className="flex flex-col gap-1 text-sm">
+          {t('filters.to')}
+          <input
+            className={FIELD_CLASS}
+            defaultValue={to}
+            name="to"
+            type="date"
+          />
+        </label>
+        <Button type="submit">{t('filters.apply')}</Button>
+        {(status || from || to) && (
+          <Button asChild type="button" variant="ghost">
+            <Link href="/dashboard/redemption">{t('filters.clear')}</Link>
+          </Button>
+        )}
+      </form>
 
       <div className="border rounded-lg">
         <Table>
@@ -121,14 +178,8 @@ export default async function RedemptionListPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      {redemption.status === 'pending' ? (
+                      {redemption.status === 'pending' && (
                         <PendingRedemptionActions redemptionId={redemption.id} />
-                      ) : (
-                        <Button asChild size="sm" variant="secondary">
-                          <Link href={`/dashboard/redemption/edit/${redemption.id}`}>
-                            <Pencil className="size-4" />
-                          </Link>
-                        </Button>
                       )}
                       <DeleteModal
                         redemptionDescription={`${redemption.product?.name || 'Product'} - ${redemption.points_used} points`}

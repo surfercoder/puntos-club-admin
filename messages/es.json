@@ -948,9 +948,16 @@
     "redemption": {
       "title": "Canjes",
       "description": "Administrar canjes del sistema",
-      "newButton": "+ Nuevo Canje",
       "error": "Error al obtener canjes",
       "empty": "No se encontraron canjes.",
+      "filters": {
+        "status": "Estado",
+        "allStatuses": "Todos los estados",
+        "from": "Desde",
+        "to": "Hasta",
+        "apply": "Aplicar",
+        "clear": "Limpiar"
+      },
       "tableHeaders": {
         "beneficiary": "Beneficiario",
         "product": "Producto",
@@ -964,9 +971,6 @@
         "delivered": "Entregado",
         "cancelled": "Cancelado"
       },
-      "createTitle": "Crear Canje",
-      "editTitle": "Editar Canje",
-      "fetchError": "Error al obtener el canje",
       "deliverButton": "Marcar entregado",
       "cancelButton": "Cancelar canje",
       "deliverSuccess": "Canje entregado",
@@ -978,18 +982,6 @@
         "deleteError": "Error al eliminar el canje",
         "deleteSuccess": "Canje eliminado correctamente",
         "genericError": "Ocurrió un error al eliminar"
-      },
-      "form": {
-        "beneficiaryLabel": "Beneficiario",
-        "selectBeneficiary": "Seleccionar un beneficiario",
-        "noName": "Beneficiario sin nombre",
-        "productLabel": "Producto",
-        "selectProduct": "Seleccionar un producto",
-        "points": "Puntos",
-        "pointsUsedPlaceholder": "Ingresa los puntos",
-        "availablePoints": "Puntos disponibles",
-        "insufficientPoints": "El beneficiario no tiene suficientes puntos. Disponibles: {available}, requeridos: {required}",
-        "insufficientPointsField": "Puntos insuficientes"
       }
     },
     "appUserOrganization": {

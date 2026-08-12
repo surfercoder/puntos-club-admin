@@ -9,7 +9,9 @@ const mockOrder = jest.fn(() => queryBuilder);
 const mockEq = jest.fn(() => queryBuilder);
 const mockSelect = jest.fn(() => queryBuilder);
 const mockFrom = jest.fn(() => queryBuilder);
-Object.assign(queryBuilder, { select: mockSelect, order: mockOrder, eq: mockEq, from: mockFrom });
+const mockGte = jest.fn(() => queryBuilder);
+const mockLte = jest.fn(() => queryBuilder);
+Object.assign(queryBuilder, { select: mockSelect, order: mockOrder, eq: mockEq, from: mockFrom, gte: mockGte, lte: mockLte });
 
 jest.mock('next/headers', () => ({ cookies: jest.fn(() => Promise.resolve({ get: jest.fn(() => ({ value: '1' })) })) }));
 jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => Promise.resolve({ from: mockFrom })) }));
@@ -43,7 +45,7 @@ describe('RedemptionListPage', () => {
   it('exports a default async function', () => { expect(typeof RedemptionListPage).toBe('function'); });
 
   it('renders without crashing', async () => {
-    const result = await RedemptionListPage();
+    const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 
@@ -59,7 +61,7 @@ describe('RedemptionListPage', () => {
       ],
       error: null,
     };
-    const result = await RedemptionListPage();
+    const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
     expect(mockEq).toHaveBeenCalledWith('organization_id', 1);
   });
@@ -69,13 +71,13 @@ describe('RedemptionListPage', () => {
       data: [{ id: '1', beneficiary_id: 'b1', points_used: 50,  redemption_date: '2024-01-01T00:00:00Z', beneficiary: { first_name: 'A' }, product: { name: 'P1', organization_id: 1 } }],
       error: null,
     };
-    const result = await RedemptionListPage();
+    const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 
   it('renders error message when query fails', async () => {
     resolveData = { data: null, error: { message: 'DB error' } };
-    const result = await RedemptionListPage();
+    const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 
@@ -84,7 +86,7 @@ describe('RedemptionListPage', () => {
       data: [{ id: '3', beneficiary_id: 'b3', points_used: 10,  redemption_date: '2024-01-01T00:00:00Z', beneficiary: { first_name: null, last_name: null, email: null }, product: null }],
       error: null,
     };
-    const result = await RedemptionListPage();
+    const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 
@@ -93,7 +95,7 @@ describe('RedemptionListPage', () => {
       data: [{ id: '4', beneficiary_id: 'b4', points_used: 20,  redemption_date: '2024-01-01T00:00:00Z', beneficiary: { first_name: null, last_name: null, email: 'email@test.com' }, product: { name: 'P2', organization_id: 1 } }],
       error: null,
     };
-    const result = await RedemptionListPage();
+    const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 
@@ -102,7 +104,7 @@ describe('RedemptionListPage', () => {
       data: [{ id: '5', beneficiary_id: 'b5', points_used: 15,  redemption_date: '2024-01-01T00:00:00Z', beneficiary: { first_name: null, last_name: 'OnlyLast', email: null }, product: { name: 'P3', organization_id: 1 } }],
       error: null,
     };
-    const result = await RedemptionListPage();
+    const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 
@@ -111,14 +113,34 @@ describe('RedemptionListPage', () => {
       data: [{ id: '9', beneficiary_id: 'b9', points_used: 25, status: 'pending', redemption_date: '2024-01-01T00:00:00Z', beneficiary: { first_name: 'X' }, product: { name: 'P9', organization_id: 1 } }],
       error: null,
     };
-    const result = await RedemptionListPage();
+    const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
+  });
+
+  it('applies status and date filters from searchParams', async () => {
+    const result = await RedemptionListPage({
+      searchParams: Promise.resolve({ status: 'pending', from: '2024-01-01', to: '2024-01-31' }),
+    });
+    expect(result).toBeTruthy();
+    expect(mockEq).toHaveBeenCalledWith('status', 'pending');
+    expect(mockGte).toHaveBeenCalledWith('redemption_date', '2024-01-01');
+    expect(mockLte).toHaveBeenCalledWith('redemption_date', '2024-01-31T23:59:59.999');
+  });
+
+  it('ignores invalid status and malformed dates', async () => {
+    const result = await RedemptionListPage({
+      searchParams: Promise.resolve({ status: 'bogus', from: '01/01/2024', to: 'nope' }),
+    });
+    expect(result).toBeTruthy();
+    expect(mockEq).not.toHaveBeenCalledWith('status', expect.anything());
+    expect(mockGte).not.toHaveBeenCalled();
+    expect(mockLte).not.toHaveBeenCalled();
   });
 
   it('handles no active_org_id cookie (null branch)', async () => {
     const { cookies } = require('next/headers');
     (cookies as jest.Mock).mockResolvedValueOnce({ get: jest.fn(() => undefined) });
-    const result = await RedemptionListPage();
+    const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 });

@@ -948,9 +948,16 @@
     "redemption": {
       "title": "Redemptions",
       "description": "Manage system redemptions",
-      "newButton": "+ New Redemption",
       "error": "Error loading redemptions",
       "empty": "No redemptions found.",
+      "filters": {
+        "status": "Status",
+        "allStatuses": "All statuses",
+        "from": "From",
+        "to": "To",
+        "apply": "Apply",
+        "clear": "Clear"
+      },
       "tableHeaders": {
         "beneficiary": "Beneficiary",
         "product": "Product",
@@ -964,9 +971,6 @@
         "delivered": "Delivered",
         "cancelled": "Cancelled"
       },
-      "createTitle": "Create Redemption",
-      "editTitle": "Edit Redemption",
-      "fetchError": "Error fetching redemption",
       "deliverButton": "Mark delivered",
       "cancelButton": "Cancel redemption",
       "deliverSuccess": "Redemption delivered",
@@ -978,18 +982,6 @@
         "deleteError": "Error deleting redemption",
         "deleteSuccess": "Redemption deleted successfully",
         "genericError": "An error occurred while deleting"
-      },
-      "form": {
-        "beneficiaryLabel": "Beneficiary",
-        "selectBeneficiary": "Select a beneficiary",
-        "noName": "Unnamed beneficiary",
-        "productLabel": "Product",
-        "selectProduct": "Select a product",
-        "points": "Points",
-        "pointsUsedPlaceholder": "Enter points",
-        "availablePoints": "Available points",
-        "insufficientPoints": "The beneficiary does not have enough points. Available: {available}, required: {required}",
-        "insufficientPointsField": "Insufficient points"
       }
     },
     "appUserOrganization": {

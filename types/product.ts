@@ -1,4 +1,3 @@
-import type { Redemption } from './redemption';
 import type { Category } from './category';
 
 export type Product = {
@@ -15,5 +14,4 @@ export type Product = {
 
 export type ProductWithRelations = Product & {
   category?: Category;
-  redemptions?: Redemption[];
 };

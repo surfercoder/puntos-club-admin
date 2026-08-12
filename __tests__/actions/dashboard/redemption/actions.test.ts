@@ -43,8 +43,6 @@ jest.mock('@/lib/auth/get-current-user', () => ({
 
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import {
-  createRedemption,
-  updateRedemption,
   deleteRedemption,
   deliverRedemption,
   cancelRedemption,
@@ -66,91 +64,6 @@ beforeEach(() => {
   mockSupabase.from.mockReturnValue(fromChain);
   (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, organization_id: 123 });
   rpcImpl.mockReset();
-});
-
-const validRedemption = {
-  beneficiary_id: '1',
-  product_id: '2',
-  points_used: 100,
-  organization_id: '10',
-};
-
-describe('createRedemption', () => {
-  it('returns field errors on schema failure', async () => {
-    const result = await createRedemption({ beneficiary_id: '', product_id: '', points_used: 0 } as any);
-    expect(result.error).toHaveProperty('fieldErrors');
-  });
-
-  it('returns INVALID_INPUT when ids cannot be parsed to numbers', async () => {
-    const result = await createRedemption({
-      beneficiary_id: 'not-a-number',
-      product_id: '2',
-      points_used: 100,
-      organization_id: '10',
-    } as any);
-    expect(result.error).toEqual({ message: 'INVALID_INPUT' });
-  });
-
-  it('maps known request_redemption rpc error', async () => {
-    rpcImpl.mockImplementationOnce(() => ({ data: null, error: { message: 'INSUFFICIENT_POINTS detail' } }));
-    const result = await createRedemption(validRedemption as any);
-    expect(rpcImpl).toHaveBeenCalledWith('request_redemption', expect.objectContaining({
-      p_beneficiary_id: 1,
-      p_product_id: 2,
-      p_organization_id: 10,
-    }));
-    expect(result.error).toEqual({ message: 'INSUFFICIENT_POINTS' });
-  });
-
-  it('returns unmapped rpc error message verbatim', async () => {
-    rpcImpl.mockImplementationOnce(() => ({ data: null, error: { message: 'random-db-failure' } }));
-    const result = await createRedemption(validRedemption as any);
-    expect(result.error).toEqual({ message: 'random-db-failure' });
-  });
-
-  it('returns UNKNOWN_ERROR when rpc error message is null/undefined', async () => {
-    rpcImpl.mockImplementationOnce(() => ({ data: null, error: { message: undefined as any } }));
-    const result = await createRedemption(validRedemption as any);
-    expect(result.error).toEqual({ message: 'UNKNOWN_ERROR' });
-  });
-
-  it('returns UNKNOWN_ERROR when request_redemption returns no id', async () => {
-    rpcImpl.mockImplementationOnce(() => ({ data: null, error: null }));
-    const result = await createRedemption(validRedemption as any);
-    expect(result.error).toEqual({ message: 'UNKNOWN_ERROR' });
-  });
-
-  it('maps known deliver_redemption rpc error', async () => {
-    rpcImpl
-      .mockImplementationOnce(() => ({ data: { id: 99 }, error: null }))
-      .mockImplementationOnce(() => ({ data: null, error: { message: 'OUT_OF_STOCK now' } }));
-    const result = await createRedemption(validRedemption as any);
-    expect(rpcImpl).toHaveBeenNthCalledWith(2, 'deliver_redemption', { p_redemption_id: 99 });
-    expect(result.error).toEqual({ message: 'OUT_OF_STOCK' });
-  });
-
-  it('returns delivered redemption on full success', async () => {
-    rpcImpl
-      .mockImplementationOnce(() => ({ data: { id: 99 }, error: null }))
-      .mockImplementationOnce(() => ({ data: { id: 99, status: 'delivered' }, error: null }));
-    const result = await createRedemption(validRedemption as any);
-    expect(result.data).toEqual({ id: 99, status: 'delivered' });
-    expect(result.error).toBeNull();
-  });
-});
-
-describe('createRedemption - empty path validation', () => {
-  it('skips validation errors with empty path[0]', async () => {
-    const schema = require('@/schemas/redemption.schema').RedemptionSchema;
-    const orig = schema.safeParse;
-    schema.safeParse = jest.fn(() => ({
-      success: false,
-      error: { issues: [{ path: [], message: 'Root' }] },
-    }));
-    const result = await createRedemption({ beneficiary_id: '', product_id: '', points_used: 0 } as any);
-    expect((result.error as { fieldErrors: Record<string, string> }).fieldErrors).toEqual({});
-    schema.safeParse = orig;
-  });
 });
 
 describe('deliverRedemption', () => {
@@ -187,33 +100,6 @@ describe('cancelRedemption', () => {
     rpcImpl.mockImplementationOnce(() => ({ data: null, error: { message: 'REDEMPTION_NOT_PENDING' } }));
     const result = await cancelRedemption('1');
     expect(result.error).toEqual({ message: 'REDEMPTION_NOT_PENDING' });
-  });
-});
-
-describe('updateRedemption', () => {
-  it('is a validated no-op that touches no rows', async () => {
-    const result = await updateRedemption('1', validRedemption as any);
-    expect(result).toEqual({ data: null, error: null });
-    expect(mockSupabase.from).not.toHaveBeenCalled();
-  });
-
-  it('returns field errors on invalid input', async () => {
-    const result = await updateRedemption('1', { beneficiary_id: '', product_id: '', points_used: 0 } as any);
-    expect(result.error).toHaveProperty('fieldErrors');
-  });
-});
-
-describe('updateRedemption - empty path validation', () => {
-  it('skips validation errors with empty path[0]', async () => {
-    const schema = require('@/schemas/redemption.schema').RedemptionSchema;
-    const orig = schema.safeParse;
-    schema.safeParse = jest.fn(() => ({
-      success: false,
-      error: { issues: [{ path: [], message: 'Root' }] },
-    }));
-    const result = await updateRedemption('1', { beneficiary_id: '', product_id: '', points_used: 0 } as any);
-    expect((result.error as { fieldErrors: Record<string, string> }).fieldErrors).toEqual({});
-    schema.safeParse = orig;
   });
 });
 
