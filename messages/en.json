@@ -930,7 +930,7 @@
       },
       "imageUpload": {
         "uploadLimitError": "You can only upload {count} more image(s)",
-        "formatError": "{name} format not supported. Please use JPEG, PNG, WebP, or GIF",
+        "formatError": "{name} format not supported. Please use JPEG, PNG or WebP",
         "sizeError": "{name} exceeds 5MB limit",
         "uploadSuccess": "{count} image(s) uploaded successfully",
         "uploadError": "Failed to upload images",
@@ -938,8 +938,8 @@
         "removeError": "Failed to remove image",
         "uploading": "Uploading...",
         "uploadButton": "Upload Images",
-        "formats": "JPEG, PNG, WebP, GIF",
-        "maxSize": "Max 5MB each",
+        "formats": "JPEG, PNG, WebP · Max 5MB",
+        "autoResize": "Resized automatically to 1200×675 px (16:9). Upload that ratio to avoid letterboxing.",
         "noImages": "No images uploaded yet. You can add up to 3 images.",
         "imageCount": "{count} of 3 images uploaded"
       },

@@ -930,7 +930,7 @@
       },
       "imageUpload": {
         "uploadLimitError": "Solo podés subir {count} imagen/es más",
-        "formatError": "{name} formato no soportado. Usá JPEG, PNG, WebP o GIF",
+        "formatError": "{name} formato no soportado. Usá JPEG, PNG o WebP",
         "sizeError": "{name} excede el límite de 5MB",
         "uploadSuccess": "{count} imagen/es subida/s correctamente",
         "uploadError": "Error al subir imágenes",
@@ -938,8 +938,8 @@
         "removeError": "Error al eliminar imagen",
         "uploading": "Subiendo...",
         "uploadButton": "Subir Imágenes",
-        "formats": "JPEG, PNG, WebP, GIF",
-        "maxSize": "Máx 5MB cada una",
+        "formats": "JPEG, PNG, WebP · Máx 5MB",
+        "autoResize": "Se ajustan solas a 1200×675 px (16:9). Usá ese formato para que no queden bordes.",
         "noImages": "No se subieron imágenes aún. Podés agregar hasta 3 imágenes.",
         "imageCount": "{count} de 3 imágenes subidas"
       },

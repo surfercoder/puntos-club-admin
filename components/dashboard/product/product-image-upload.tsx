@@ -5,11 +5,14 @@ import { useTranslations } from 'next-intl';
 import Image from 'next/image';
 import { X, Upload, Image as ImageIcon } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
+import { normalizeProductImage } from '@/lib/utils/normalize-product-image';
 import { toast } from 'sonner';
 
 const EMPTY_IMAGES: string[] = [];
 
-const SUPPORTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp', 'image/gif']);
+// Sin GIF: la normalizacion a WebP se queda con el primer frame, asi que
+// aceptarlo seria prometer una animacion que la app nunca va a mostrar.
+const SUPPORTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']);
 
 interface ProductImageUploadProps {
   productId?: string;
@@ -52,7 +55,8 @@ export default function ProductImageUpload({
     const uploadedUrls: string[] = [];
 
     try {
-      const results = await Promise.all(filesArray.map(async (file) => {
+      const results = await Promise.all(filesArray.map(async (original) => {
+        const file = await normalizeProductImage(original);
         const fileExt = file.name.split('.').pop();
         const fileName = `${Date.now()}-${Math.random().toString(36).substring(2)}.${fileExt}`;
         const filePath = `${fileName}`;
@@ -130,12 +134,12 @@ export default function ProductImageUpload({
     <div className="space-y-4">
       <div className="grid grid-cols-3 gap-4">
         {images.map((imageUrl, index) => (
-          <div key={imageUrl} className="relative aspect-square rounded-lg border overflow-hidden group">
+          <div key={imageUrl} className="relative aspect-video rounded-lg border overflow-hidden group bg-muted">
             <Image
               src={imageUrl}
               alt={`Product image ${index + 1}`}
               fill
-              className="object-cover"
+              className="object-contain"
               sizes="(max-width: 768px) 33vw, 200px"
             />
             <button
@@ -150,10 +154,10 @@ export default function ProductImageUpload({
         ))}
 
         {images.length < 3 && (
-          <label className="relative aspect-square rounded-lg border-2 border-dashed border-border hover:border-muted-foreground cursor-pointer flex flex-col items-center justify-center transition-colors">
+          <label className="relative aspect-video rounded-lg border-2 border-dashed border-border hover:border-muted-foreground cursor-pointer flex flex-col items-center justify-center transition-colors">
             <input
               type="file"
-              accept="image/jpeg,image/jpg,image/png,image/webp,image/gif"
+              accept="image/jpeg,image/jpg,image/png,image/webp"
               multiple
               onChange={handleFileSelect}
               disabled={uploading}
@@ -169,7 +173,7 @@ export default function ProductImageUpload({
                 <Upload className="size-8 text-muted-foreground" />
                 <span className="text-sm text-muted-foreground">{t('uploadButton')}</span>
                 <span className="text-xs text-muted-foreground/70">{t('formats')}</span>
-                <span className="text-xs text-muted-foreground/70">{t('maxSize')}</span>
+                <span className="text-xs text-muted-foreground/70 text-center px-2">{t('autoResize')}</span>
               </div>
             )}
           </label>
