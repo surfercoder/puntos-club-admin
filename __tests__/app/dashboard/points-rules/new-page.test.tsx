@@ -439,13 +439,18 @@ describe('NewPointsRulePage', () => {
       fireEvent.change(nameInput, { target: { value: 'Item Rule' } });
     });
 
+    const perItemInput = screen.getByLabelText('form.pointsPerItem');
+    await act(async () => {
+      fireEvent.change(perItemInput, { target: { value: '7' } });
+    });
+
     const form = document.querySelector('form')!;
     await act(async () => {
       fireEvent.submit(form);
     });
     await waitFor(() => {
       expect(mockCreatePointsRule).toHaveBeenCalledWith(expect.objectContaining({
-        config: { points_per_item: 2 },
+        config: { points_per_item: 7 },
       }));
     });
   });
@@ -467,6 +472,28 @@ describe('NewPointsRulePage', () => {
     });
     await waitFor(() => {
       expect(alertMock).toHaveBeenCalledWith('Error: Validation failed');
+    });
+    expect(mockPush).not.toHaveBeenCalled();
+    alertMock.mockRestore();
+  });
+
+  it('shows the duplicate priority message instead of a raw error', async () => {
+    mockCreatePointsRule.mockResolvedValue({ success: false, error: 'DUPLICATE_PRIORITY' });
+    const alertMock = jest.spyOn(window, 'alert').mockImplementation(() => {});
+    await act(async () => {
+      render(<NewPointsRulePage />);
+    });
+    const nameInput = screen.getByLabelText('form.ruleName');
+    await act(async () => {
+      fireEvent.change(nameInput, { target: { value: 'Clashing Rule' } });
+    });
+
+    const form = document.querySelector('form')!;
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+    await waitFor(() => {
+      expect(alertMock).toHaveBeenCalledWith('form.duplicatePriority');
     });
     expect(mockPush).not.toHaveBeenCalled();
     alertMock.mockRestore();

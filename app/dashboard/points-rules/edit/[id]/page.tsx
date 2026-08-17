@@ -665,6 +665,8 @@ export default function EditPointsRulePage() {
 
     if (result.success) {
       push("/dashboard/points-rules");
+    } else if (result.error === "DUPLICATE_PRIORITY") {
+      alert(t("form.duplicatePriority", { priority: formData.priority }));
     } else {
       alert(`Error: ${result.error}`);
     }

@@ -221,6 +221,26 @@ function PointsCalculationSection({
           <p className="text-sm text-muted-foreground mt-1">{t("form.percentageHint")}</p>
         </div>
       )}
+
+      {formData.rule_type === "fixed_per_item" && (
+        <div>
+          <Label htmlFor="points_per_item">{t("form.pointsPerItem")}</Label>
+          <Input
+            id="points_per_item"
+            type="number"
+            step="0.1"
+            value={formData.points_per_dollar}
+            onChange={(e) =>
+              setFormData((prev) => ({ ...prev, points_per_dollar: e.target.value }))
+            }
+            placeholder="10"
+            required
+          />
+          <p className="text-sm text-muted-foreground mt-1">
+            {t("form.pointsPerItemHint")}
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -511,6 +531,8 @@ export default function NewPointsRulePage() {
 
     if (result.success) {
       push("/dashboard/points-rules");
+    } else if (result.error === "DUPLICATE_PRIORITY") {
+      alert(t("form.duplicatePriority", { priority: formData.priority }));
     } else {
       alert(`Error: ${result.error}`);
     }

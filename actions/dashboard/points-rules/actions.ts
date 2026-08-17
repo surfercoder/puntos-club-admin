@@ -118,6 +118,15 @@ export async function getPointsRuleById(id: number) {
 }
 
 /**
+ * Two rules with the same priority make resolution ambiguous
+ * (calculate_points_for_amount orders by priority desc, id desc), so a unique
+ * index owns the rule. Translate its conflict into something the form can show.
+ */
+function isPriorityConflict(error: { code?: string; message?: string }) {
+  return error.code === "23505" && !!error.message?.includes("points_rule_organization_priority_key");
+}
+
+/**
  * Create a new points rule
  */
 export async function createPointsRule(input: PointsRuleInput) {
@@ -209,7 +218,10 @@ export async function createPointsRule(input: PointsRuleInput) {
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return {
+        success: false,
+        error: isPriorityConflict(error) ? "DUPLICATE_PRIORITY" : error.message,
+      };
     }
 
     revalidatePath("/dashboard/points-rules");
@@ -305,7 +317,10 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return {
+        success: false,
+        error: isPriorityConflict(error) ? "DUPLICATE_PRIORITY" : error.message,
+      };
     }
 
     revalidatePath("/dashboard/points-rules");

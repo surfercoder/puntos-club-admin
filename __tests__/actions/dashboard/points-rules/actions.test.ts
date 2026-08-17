@@ -220,6 +220,36 @@ describe('createPointsRule', () => {
     expect(result).toEqual({ success: false, error: 'Insert error' });
   });
 
+  it('should map the priority unique index conflict to DUPLICATE_PRIORITY', async () => {
+    mockSupabase.single.mockReturnValue({
+      data: null,
+      error: {
+        code: '23505',
+        message: 'duplicate key value violates unique constraint "points_rule_organization_priority_key"',
+      },
+    });
+    const result = await createPointsRule({ ...validRule, priority: 1 });
+    expect(result).toEqual({ success: false, error: 'DUPLICATE_PRIORITY' });
+  });
+
+  it('should pass through a unique violation on another constraint', async () => {
+    mockSupabase.single.mockReturnValue({
+      data: null,
+      error: {
+        code: '23505',
+        message: 'duplicate key value violates unique constraint "points_rule_one_default_per_org"',
+      },
+    });
+    const result = await createPointsRule({ ...validRule, is_default: true });
+    expect(result.error).toContain('points_rule_one_default_per_org');
+  });
+
+  it('should pass through a non-unique-violation error untouched', async () => {
+    mockSupabase.single.mockReturnValue({ data: null, error: { code: '23503', message: 'FK violation' } });
+    const result = await createPointsRule(validRule);
+    expect(result).toEqual({ success: false, error: 'FK violation' });
+  });
+
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await createPointsRule(validRule);
@@ -228,6 +258,18 @@ describe('createPointsRule', () => {
 });
 
 describe('updatePointsRule', () => {
+  it('should map the priority unique index conflict to DUPLICATE_PRIORITY', async () => {
+    mockSupabase.single.mockReturnValue({
+      data: null,
+      error: {
+        code: '23505',
+        message: 'duplicate key value violates unique constraint "points_rule_organization_priority_key"',
+      },
+    });
+    const result = await updatePointsRule(1, { priority: 2 });
+    expect(result).toEqual({ success: false, error: 'DUPLICATE_PRIORITY' });
+  });
+
   it('should update rule successfully', async () => {
     const result = await updatePointsRule(1, { name: 'Updated' });
     expect(result.success).toBe(true);

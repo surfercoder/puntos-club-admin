@@ -1585,6 +1585,7 @@
       "selectBranch": "Select a branch",
       "priority": "Priority *",
       "priorityHint": "Higher priority rules are applied first when multiple rules match. Use 0 for default rules and higher numbers for special promotions.",
+      "duplicatePriority": "Another rule already uses priority {priority}. Each rule needs a distinct priority: the highest one wins.",
       "ruleType": "Rule Type *",
       "ruleTypeFixed": "Fixed Points per Purchase",
       "ruleTypePercentage": "Percentage of Amount",

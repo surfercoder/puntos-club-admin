@@ -555,6 +555,25 @@ describe('EditPointsRulePage', () => {
     alertMock.mockRestore();
   });
 
+  it('shows the duplicate priority message instead of a raw error', async () => {
+    mockUpdatePointsRule.mockResolvedValue({ success: false, error: 'DUPLICATE_PRIORITY' });
+    const alertMock = jest.spyOn(window, 'alert').mockImplementation(() => {});
+    await act(async () => {
+      render(<EditPointsRulePage />);
+    });
+    await waitFor(() => {
+      expect(screen.getByText('form.editTitle')).toBeInTheDocument();
+    });
+    const form = document.querySelector('form')!;
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+    await waitFor(() => {
+      expect(alertMock).toHaveBeenCalledWith('form.duplicatePriority');
+    });
+    alertMock.mockRestore();
+  });
+
   it('handles form submit with is_default true (clears schedule)', async () => {
     const defaultRule = {
       ...sampleRule,

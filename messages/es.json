@@ -1585,6 +1585,7 @@
       "selectBranch": "Seleccionar una sucursal",
       "priority": "Prioridad *",
       "priorityHint": "Las reglas de mayor prioridad se aplican primero cuando coinciden varias reglas. Usa 0 para reglas por defecto y números más altos para promociones especiales.",
+      "duplicatePriority": "Ya existe otra regla con prioridad {priority}. Cada regla debe tener una prioridad distinta: la de mayor prioridad es la que se aplica.",
       "ruleType": "Tipo de Regla *",
       "ruleTypeFixed": "Puntos Fijos por Compra",
       "ruleTypePercentage": "Porcentaje del Monto",
