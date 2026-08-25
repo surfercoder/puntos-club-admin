@@ -4,7 +4,11 @@ import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
+import Link from "next/link";
+import { Bell } from "lucide-react";
+
 import { AppSidebar } from "@/components/app-sidebar";
+import { DashboardFooter } from "@/components/dashboard-footer";
 import { DashboardTour } from "@/components/dashboard/tour/dashboard-tour";
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { LanguageSwitcher } from "@/components/language-switcher";
@@ -43,10 +47,10 @@ type DashboardShellPortalMode = "admin" | "org";
 
 const KNOWN_SEGMENTS = [
   "address", "app_user", "app_user_organization",
-  "beneficiary", "beneficiary_organization", "branch", "category",
+  "beneficiary", "beneficiary_organization", "branch",
   "notifications", "organization", "organization_notification_limits",
-  "points-rules", "product", "profile", "purchase", "push_notifications",
-  "push_tokens", "redemption", "user-role", "users", "qr",
+  "points-rules", "product", "profile", "purchase", "push_notifications", "mother",
+  "push_tokens", "redemption", "user-role", "users", "qr", "cashiers", "collaborators",
   "settings", "organization-settings",
 ] as const;
 
@@ -105,6 +109,10 @@ export function DashboardShell({
   const breadcrumbItems: { label: string; path: string; href?: string }[] = [
     { label: tBreadcrumb("panel"), path: "/dashboard", href: "/dashboard" },
   ];
+
+  if (segments.length === 0) {
+    breadcrumbItems.push({ label: tBreadcrumb("dashboard"), path: "/dashboard#home" });
+  }
 
   let hrefAcc = "/dashboard";
   for (const seg of segments) {
@@ -210,12 +218,22 @@ export function DashboardShell({
               </Breadcrumb>
               <div className="ml-auto flex items-center gap-1">
                 <FeedbackDialog userEmail={user.email} userName={user.name} />
+                <Link
+                  href="/dashboard/notifications"
+                  aria-label={tBreadcrumb("notifications")}
+                  className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
+                >
+                  <Bell className="size-[18px]" />
+                </Link>
                 <LanguageSwitcher />
                 <ThemeToggle />
               </div>
             </div>
           </header>
-          <div className="flex flex-1 flex-col px-4 pt-4">{children}</div>
+          <div className="flex flex-1 flex-col px-4 pt-4">
+            {children}
+            <DashboardFooter />
+          </div>
         </SidebarInset>
       </SidebarProvider>
     </PlanUsageProvider>

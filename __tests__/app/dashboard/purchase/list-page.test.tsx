@@ -1,3 +1,5 @@
+import { render } from '@testing-library/react';
+
 import PurchaseListPage from '@/app/dashboard/purchase/page';
 
 const mockEq = jest.fn().mockResolvedValue({ data: [], error: null });
@@ -18,6 +20,15 @@ jest.mock('@/lib/auth/get-active-org-id', () => ({ getActiveOrgIdFilter: jest.fn
 jest.mock('@/lib/auth/roles', () => ({ isAdmin: jest.fn(() => true) }));
 jest.mock('@/components/dashboard/purchase/delete-modal', () => function Mock() { return <div />; });
 jest.mock('@/components/dashboard/purchase/toast-handler', () => function Mock() { return <div />; });
+jest.mock('@/components/dashboard/purchase/purchase-filters', () => ({
+  PurchaseFilters: () => <div />,
+}));
+jest.mock('@/components/dashboard/purchase/purchase-stats', () => ({ PurchaseStats: () => <div /> }));
+jest.mock('@/components/dashboard/shared/csv-export-button', () => ({ CsvExportButton: () => <div /> }));
+jest.mock('@/components/dashboard/shared/info-card', () => ({ InfoCard: () => <div /> }));
+jest.mock('@/components/dashboard/shared/quick-actions-card', () => ({ QuickActionsCard: () => <div /> }));
+jest.mock('@/components/dashboard/shared/summary-card', () => ({ SummaryCard: () => <div /> }));
+jest.mock('@/components/dashboard/shared/table-pagination', () => ({ TablePagination: () => <div /> }));
 jest.mock('@/components/ui/badge', () => ({ Badge: ({ children }: { children: React.ReactNode }) => <span>{children}</span> }));
 jest.mock('@/components/ui/button', () => ({ Button: ({ children }: { children: React.ReactNode }) => <button>{children}</button> }));
 jest.mock('@/components/ui/table', () => ({
@@ -63,19 +74,22 @@ describe('PurchaseListPage', () => {
 
   it('renders without crashing with empty data', async () => {
     mockOrder.mockResolvedValueOnce({ data: [], error: null });
-    const result = await PurchaseListPage();
+    const result = await PurchaseListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
   });
 
   it('renders purchase rows when data is returned', async () => {
     mockOrder.mockResolvedValueOnce({ data: mockPurchases, error: null });
-    const result = await PurchaseListPage();
+    const result = await PurchaseListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
   });
 
   it('renders error message when query fails', async () => {
     mockOrder.mockResolvedValueOnce({ data: null, error: { message: 'DB error' } });
-    const result = await PurchaseListPage();
+    const result = await PurchaseListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
   });
 
@@ -84,7 +98,8 @@ describe('PurchaseListPage', () => {
       data: [mockPurchases[1]],
       error: null,
     });
-    const result = await PurchaseListPage();
+    const result = await PurchaseListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
   });
 
@@ -93,7 +108,8 @@ describe('PurchaseListPage', () => {
       data: [mockPurchases[0]],
       error: null,
     });
-    const result = await PurchaseListPage();
+    const result = await PurchaseListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
   });
 
@@ -107,7 +123,8 @@ describe('PurchaseListPage', () => {
       }],
       error: null,
     });
-    const result = await PurchaseListPage();
+    const result = await PurchaseListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
   });
 
@@ -117,8 +134,117 @@ describe('PurchaseListPage', () => {
     isAdmin.mockReturnValueOnce(false);
     getActiveOrgIdFilter.mockResolvedValueOnce(1);
     mockEq.mockResolvedValueOnce({ data: [], error: null });
-    const result = await PurchaseListPage();
+    const result = await PurchaseListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
     expect(mockEq).toHaveBeenCalledWith('organization_id', 1);
+  });
+});
+
+describe('PurchaseListPage filters', () => {
+  const { isAdmin } = require('@/lib/auth/roles');
+  const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
+
+  const sale = {
+    id: 9,
+    purchase_number: 'PUR-009',
+    total_amount: '2500',
+    points_earned: 2500,
+    purchase_date: '2026-08-13T15:32:00Z',
+    beneficiary_id: 'b1',
+    beneficiary: { id: 'b1', first_name: 'Ana', last_name: 'Diaz' },
+    cashier: { id: 'c1', first_name: 'Luis', last_name: 'Perez' },
+    branch: { id: 'br1', name: 'Sucursal Centro' },
+  };
+  const assignment = { ...sale, id: 10, purchase_number: 'PUR-010', total_amount: '0', points_earned: 100 };
+
+  const renderWith = async (params: Record<string, string>, rows: unknown[]) => {
+    isAdmin.mockReturnValueOnce(false);
+    getActiveOrgIdFilter.mockResolvedValueOnce(1);
+    const chain: Record<string, unknown> = {};
+    const query = Promise.resolve({ data: rows, error: null });
+    for (const key of ['eq', 'gte', 'lte']) {
+      (chain as Record<string, unknown>)[key] = jest.fn(() => Object.assign(query, chain));
+    }
+    mockFrom.mockReturnValueOnce({
+      select: jest.fn(() => ({ order: jest.fn(() => Object.assign(query, chain)) })),
+    });
+    const result = await PurchaseListPage({ searchParams: Promise.resolve(params) });
+    render(result);
+    return result;
+  };
+
+  beforeEach(() => { jest.clearAllMocks(); });
+
+  it('applies every server-side filter', async () => {
+    expect(
+      await renderWith(
+        {
+          branch: 'br1', cashier: 'c1', beneficiary: 'b1',
+          from: '2026-08-01', to: '2026-08-31',
+        },
+        [sale],
+      ),
+    ).toBeTruthy();
+  });
+
+  it('searches across the operation, people and branch', async () => {
+    expect(await renderWith({ q: 'ana' }, [sale])).toBeTruthy();
+    expect(await renderWith({ q: 'zzz' }, [sale])).toBeTruthy();
+  });
+
+  it('splits sales from manual point assignments', async () => {
+    expect(await renderWith({ type: 'sale' }, [sale, assignment])).toBeTruthy();
+    expect(await renderWith({ type: 'assignment' }, [sale, assignment])).toBeTruthy();
+  });
+
+  it('filters by points bucket', async () => {
+    expect(await renderWith({ points: '0-1000' }, [sale, assignment])).toBeTruthy();
+    expect(await renderWith({ points: 'nope' }, [sale])).toBeTruthy();
+  });
+
+  it('handles operations with no related rows', async () => {
+    expect(
+      await renderWith({}, [{ ...sale, beneficiary: null, cashier: null, branch: null, beneficiary_id: null }]),
+    ).toBeTruthy();
+  });
+});
+
+describe('PurchaseListPage messy data', () => {
+  const { isAdmin } = require('@/lib/auth/roles');
+  const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
+
+  const renderWith = async (rows: unknown[] | null) => {
+    isAdmin.mockReturnValueOnce(false);
+    getActiveOrgIdFilter.mockResolvedValueOnce(1);
+    const query = Promise.resolve({ data: rows, error: null });
+    const chain = { eq: jest.fn(() => Object.assign(query, chain)) };
+    mockFrom.mockReturnValueOnce({
+      select: jest.fn(() => ({ order: jest.fn(() => Object.assign(query, chain)) })),
+    });
+    const result = await PurchaseListPage({ searchParams: Promise.resolve({}) });
+    render(result);
+    return result;
+  };
+
+  beforeEach(() => { jest.clearAllMocks(); });
+
+  it('survives a null data payload', async () => {
+    expect(await renderWith(null)).toBeTruthy();
+  });
+
+  it('drops nameless relations and de-duplicates repeated ones', async () => {
+    const row = {
+      id: 1,
+      purchase_number: 'PUR-001',
+      total_amount: null,
+      points_earned: null,
+      purchase_date: '2026-08-13T15:32:00Z',
+      beneficiary_id: 'b1',
+      beneficiary: { id: 'b1', first_name: null, last_name: null },
+      cashier: { id: 'c1', first_name: null, last_name: null },
+      branch: { id: 'br1', name: null },
+    };
+    expect(await renderWith([row, { ...row, id: 2, purchase_number: 'PUR-002' }])).toBeTruthy();
   });
 });

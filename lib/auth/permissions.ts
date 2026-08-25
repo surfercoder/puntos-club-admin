@@ -11,9 +11,7 @@ export type EntityName =
   | 'beneficiary_organization'
   | 'branch'
   | 'organization'
-  | 'category'
   | 'product'
-
   | 'app_user'
   | 'app_user_organization'
   | 'redemption'
@@ -37,7 +35,6 @@ const OWNER_ENTITY_ACCESS: Record<EntityName, EntityPermissions> = {
   beneficiary_organization: { view: true, create: true, edit: true, delete: true },
   branch: { view: true, create: true, edit: true, delete: true },
   organization: { view: true, create: false, edit: true, delete: false }, // Can view/edit their org, not create/delete
-  category: { view: true, create: true, edit: true, delete: true },
   product: { view: true, create: true, edit: true, delete: true },
   app_user: { view: true, create: true, edit: true, delete: true },
   app_user_organization: { view: true, create: true, edit: true, delete: true },
@@ -61,7 +58,6 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     beneficiary_organization: { view: true, create: true, edit: true, delete: true },
     branch: { view: true, create: true, edit: true, delete: true },
     organization: { view: true, create: true, edit: true, delete: true },
-    category: { view: true, create: true, edit: true, delete: true },
     product: { view: true, create: true, edit: true, delete: true },
     app_user: { view: true, create: true, edit: true, delete: true },
     app_user_organization: { view: true, create: true, edit: true, delete: true },
@@ -78,7 +74,6 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     beneficiary_organization: { view: true, create: false, edit: false, delete: false },
     branch: { view: true, create: false, edit: false, delete: false }, // Read-only
     organization: { view: false, create: false, edit: false, delete: false },
-    category: { view: true, create: false, edit: false, delete: false }, // Read-only
     product: { view: true, create: false, edit: false, delete: false }, // Read-only
     app_user: { view: false, create: false, edit: false, delete: false },
     app_user_organization: { view: false, create: false, edit: false, delete: false },
@@ -93,7 +88,6 @@ export const ROLE_ENTITY_ACCESS: Record<UserRoleType, Record<EntityName, EntityP
     beneficiary_organization: { view: false, create: false, edit: false, delete: false },
     branch: { view: false, create: false, edit: false, delete: false },
     organization: { view: false, create: false, edit: false, delete: false },
-    category: { view: false, create: false, edit: false, delete: false },
     product: { view: false, create: false, edit: false, delete: false },
     app_user: { view: false, create: false, edit: false, delete: false },
     app_user_organization: { view: false, create: false, edit: false, delete: false },

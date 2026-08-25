@@ -36,6 +36,8 @@ jest.mock('@/lib/auth/roles', () => ({
 }));
 
 import {
+  createCategory,
+  deleteCategory,
   createProduct,
   updateProduct,
   deleteProduct,
@@ -230,5 +232,63 @@ describe('getProduct', () => {
     mockSupabase.single.mockReturnValue({ data: null, error: { message: 'DB error' } });
     const result = await getProduct('1');
     expect(result.error).toEqual({ message: 'DB error' });
+  });
+});
+
+// El ABM de categorías se borró, pero createCategory/deleteCategory siguen
+// vivos detrás del alta de producto: se testean acá, no desde el form.
+describe('createCategory', () => {
+  it('creates the category scoped to the active org', async () => {
+    mockSupabase.single.mockReturnValue({ data: { id: '9', name: 'Bebidas' }, error: null });
+    const result = await createCategory({ name: 'Bebidas', active: true });
+    expect(mockSupabase.from).toHaveBeenCalledWith('category');
+    expect(mockSupabase.insert).toHaveBeenCalledWith([
+      expect.objectContaining({ name: 'Bebidas', organization_id: 123 }),
+    ]);
+    expect(result).toEqual({ data: { id: '9', name: 'Bebidas' }, error: null, created: true });
+  });
+
+  it('returns field errors on invalid input', async () => {
+    const result = await createCategory({ name: '' });
+    expect(result).toEqual({ data: null, error: { fieldErrors: { name: 'Name is required' } } });
+    expect(mockSupabase.insert).not.toHaveBeenCalled();
+  });
+
+  it('returns an error when there is no active organization', async () => {
+    mockCookieStore.get.mockReturnValue(undefined);
+    (getCurrentUser as jest.Mock).mockReturnValue({ id: 1 });
+    const result = await createCategory({ name: 'Bebidas' });
+    expect(result).toEqual({ data: null, error: { message: 'Missing active organization' } });
+  });
+
+  it('reuses an existing category matching by name, ignoring case and spaces', async () => {
+    mockSupabase.eq.mockReturnValueOnce({ data: [{ id: '7', name: '  bebidas ' }], error: null });
+    const result = await createCategory({ name: 'Bebidas' });
+    expect(result).toEqual({ data: { id: '7', name: '  bebidas ' }, error: null, created: false });
+    expect(mockSupabase.insert).not.toHaveBeenCalled();
+  });
+
+  it('reports created:false when the insert fails', async () => {
+    mockSupabase.single.mockReturnValue({ data: null, error: { message: 'DB error' } });
+    const result = await createCategory({ name: 'Bebidas' });
+    expect(result).toEqual({ data: null, error: { message: 'DB error' }, created: false });
+  });
+});
+
+describe('deleteCategory', () => {
+  it('deletes the category scoped to the active org', async () => {
+    mockSupabase.eq.mockReturnValueOnce(mockSupabase).mockReturnValueOnce({ error: null });
+    const result = await deleteCategory('9');
+    expect(mockSupabase.from).toHaveBeenCalledWith('category');
+    expect(mockSupabase.eq).toHaveBeenCalledWith('id', '9');
+    expect(result).toEqual({ error: null });
+  });
+
+  it('returns an error when there is no active organization', async () => {
+    mockCookieStore.get.mockReturnValue(undefined);
+    (getCurrentUser as jest.Mock).mockReturnValue({ id: 1 });
+    const result = await deleteCategory('9');
+    expect(result).toEqual({ error: { message: 'Missing active organization' } });
+    expect(mockSupabase.delete).not.toHaveBeenCalled();
   });
 });

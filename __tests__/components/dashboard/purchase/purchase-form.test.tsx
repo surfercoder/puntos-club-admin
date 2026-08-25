@@ -123,6 +123,7 @@ function makeThenableBuilder(resolveData: unknown = []) {
   b.eq = jest.fn(() => b);
   b.neq = jest.fn(() => b);
   b.order = jest.fn(() => b);
+  b.limit = jest.fn(() => b);
   b.single = jest.fn(() => Promise.resolve({ data: resolveData, error: null }));
   return b;
 }
@@ -183,331 +184,319 @@ describe('PurchaseForm', () => {
       jest.fn(),
       false,
     ]);
-    // Reset cookie safely
     try {
       Object.defineProperty(document, 'cookie', { writable: true, value: '', configurable: true });
     } catch {
-      // Restore from prototype if it was overridden with a non-configurable getter
       const proto = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie');
       if (proto) Object.defineProperty(document, 'cookie', proto);
     }
   });
 
-  it('renders correct submit button text in create mode', () => {
+  const setClient = (client: unknown) => {
+    const { createClient } = require('@/lib/supabase/client');
+    (createClient as jest.Mock).mockReturnValue(client);
+  };
+
+  it('starts in assignment mode and posts it as the operation mode', async () => {
+    setClient(makeOrgAwareClient());
+    const { container } = render(<PurchaseForm />);
+    await waitFor(() => expect(container.querySelector('input[name="mode"]')).toHaveValue('assignment'));
+    expect(screen.getByRole('button', { name: 'submitAssignment' })).toBeInTheDocument();
+    expect(container.querySelector('input[name="points_earned"]')).toBeInTheDocument();
+    expect(container.querySelector('input[name="total_amount"]')).not.toBeInTheDocument();
+  });
+
+  it('switches to sale mode and swaps the amount field in', async () => {
+    setClient(makeOrgAwareClient());
+    const { container } = render(<PurchaseForm />);
+    fireEvent.click(screen.getAllByRole('radio')[1]);
+
+    await waitFor(() => expect(container.querySelector('input[name="mode"]')).toHaveValue('sale'));
+    expect(screen.getByRole('button', { name: 'submitSale' })).toBeInTheDocument();
+    expect(container.querySelector('input[name="total_amount"]')).toBeInTheDocument();
+    expect(container.querySelector('input[name="points_earned"]')).not.toBeInTheDocument();
+  });
+
+  it('loads beneficiaries and branches scoped to the active organization', async () => {
+    Object.defineProperty(document, 'cookie', { writable: true, value: 'active_org_id=7', configurable: true });
+    const client = makeOrgAwareClient({
+      beneficiaryData: [{ beneficiary: { id: '1', first_name: 'Ana', last_name: 'Diaz' } }],
+      branchData: [{ id: '3', name: 'Sucursal Centro' }],
+    });
+    setClient(client);
+
     render(<PurchaseForm />);
-
-    expect(screen.getByRole('button', { name: 'create' })).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('Ana Diaz')).toBeInTheDocument());
+    expect(client._mockFrom).toHaveBeenCalledWith('beneficiary_organization');
+    expect(screen.getByText('Sucursal Centro')).toBeInTheDocument();
   });
 
-  it('renders correct submit button text in edit mode', () => {
-    const purchase = {
-      id: '1',
-      beneficiary_id: 'ben-1',
-      cashier_id: 'cash-1',
-      branch_id: 'br-1',
-      organization_id: 'org-1',
-      total_amount: 100.50,
-      points_earned: 10,
-      notes: 'Test notes',
-      created_at: '2024-01-01',
-    };
+  it('falls back to every beneficiary when no organization is active', async () => {
+    const client = makeOrgAwareClient({
+      beneficiaryData: [{ id: '1', first_name: 'Ana', last_name: 'Diaz' }],
+    });
+    setClient(client);
 
-    render(<PurchaseForm purchase={purchase as any} />);
-
-    expect(screen.getByRole('button', { name: 'update' })).toBeInTheDocument();
-  });
-
-  it('renders cancel button linking to purchase list', () => {
     render(<PurchaseForm />);
-
-    const cancelLink = screen.getByText('cancel');
-    expect(cancelLink.closest('a')).toHaveAttribute('href', '/dashboard/purchase');
+    await waitFor(() => expect(client._mockFrom).toHaveBeenCalledWith('beneficiary'));
   });
 
-  it('disables submit button when pending', () => {
+  it('shows the beneficiary balance and the resulting total once one is picked', async () => {
+    Object.defineProperty(document, 'cookie', { writable: true, value: 'active_org_id=7', configurable: true });
+    setClient(makeOrgAwareClient({
+      beneficiaryData: [{ available_points: 9500 }],
+      branchData: [],
+    }));
+
+    const { container } = render(<PurchaseForm />);
+    await waitFor(() => expect(selectCallbacks['beneficiary_id']).toBeDefined());
+
+    await waitFor(() => {
+      selectCallbacks['beneficiary_id']('1');
+    });
+
+    const pointsInput = container.querySelector('input[name="points_earned"]') as HTMLInputElement;
+    fireEvent.change(pointsInput, { target: { value: '500' } });
+    expect(screen.getByText('500 pts')).toBeInTheDocument();
+  });
+
+  it('recalculates the points preview from the rule engine in sale mode', async () => {
+    const client = makeOrgAwareClient({ rpcData: 100 });
+    setClient(client);
+
+    const { container } = render(<PurchaseForm />);
+    fireEvent.click(screen.getAllByRole('radio')[1]);
+
+    const amountInput = container.querySelector('input[name="total_amount"]') as HTMLInputElement;
+    fireEvent.change(amountInput, { target: { value: '1000' } });
+
+    await waitFor(() => expect(client._mockRpc).toHaveBeenCalledWith(
+      'calculate_points_for_amount',
+      expect.objectContaining({ p_amount: 1000 }),
+    ));
+    await waitFor(() => expect(screen.getByText('100 pts')).toBeInTheDocument());
+  });
+
+  it('zeroes the preview for a non-positive amount and clears it for junk input', async () => {
+    const client = makeOrgAwareClient({ rpcData: 100 });
+    setClient(client);
+
+    const { container } = render(<PurchaseForm />);
+    fireEvent.click(screen.getAllByRole('radio')[1]);
+    const amountInput = container.querySelector('input[name="total_amount"]') as HTMLInputElement;
+
+    // Primero un importe válido, así el 0 tiene un preview previo que borrar.
+    fireEvent.change(amountInput, { target: { value: '1000' } });
+    await waitFor(() => expect(screen.getByText('100 pts')).toBeInTheDocument());
+
+    fireEvent.change(amountInput, { target: { value: '0' } });
+    await waitFor(() => expect(screen.getByText('0 pts')).toBeInTheDocument());
+    expect(client._mockRpc).toHaveBeenCalledTimes(1);
+
+    fireEvent.change(amountInput, { target: { value: '' } });
+    await waitFor(() => expect(screen.getByText('0 pts')).toBeInTheDocument());
+  });
+
+  it('waits for the typing to settle and ignores the answer to a stale amount', async () => {
+    const client = makeOrgAwareClient();
+    let releaseStale: () => void = () => {};
+    let calls = 0;
+    client._mockRpc.mockImplementation(() => {
+      calls += 1;
+      if (calls === 1) {
+        return new Promise<{ data: unknown; error: null }>((resolve) => {
+          releaseStale = () => resolve({ data: 999, error: null });
+        });
+      }
+      return Promise.resolve({ data: 7, error: null });
+    });
+    setClient(client);
+
+    const { container } = render(<PurchaseForm />);
+    fireEvent.click(screen.getAllByRole('radio')[1]);
+    const amountInput = container.querySelector('input[name="total_amount"]') as HTMLInputElement;
+
+    // Tres teclas seguidas: sólo la última llega al motor de puntos.
+    fireEvent.change(amountInput, { target: { value: '1' } });
+    fireEvent.change(amountInput, { target: { value: '10' } });
+    fireEvent.change(amountInput, { target: { value: '100' } });
+    await waitFor(() => expect(client._mockRpc).toHaveBeenCalledTimes(1));
+    expect(client._mockRpc).toHaveBeenCalledWith(
+      'calculate_points_for_amount',
+      expect.objectContaining({ p_amount: 100 }),
+    );
+
+    // El importe cambia con esa consulta en vuelo: su respuesta ya no vale.
+    fireEvent.change(amountInput, { target: { value: '2000' } });
+    releaseStale();
+
+    await waitFor(() => expect(screen.getByText('7 pts')).toBeInTheDocument());
+    expect(screen.queryByText('999 pts')).not.toBeInTheDocument();
+  });
+
+  it('recalculates when the branch changes', async () => {
+    const client = makeOrgAwareClient({ rpcData: 42, branchData: [{ id: '3', name: 'Centro' }] });
+    setClient(client);
+
+    const { container } = render(<PurchaseForm />);
+    fireEvent.click(screen.getAllByRole('radio')[1]);
+    const amountInput = container.querySelector('input[name="total_amount"]') as HTMLInputElement;
+    fireEvent.change(amountInput, { target: { value: '500' } });
+
+    await waitFor(() => expect(selectCallbacks['branch_id']).toBeDefined());
+    await waitFor(() => { selectCallbacks['branch_id']('3'); });
+
+    await waitFor(() => expect(client._mockRpc).toHaveBeenCalledWith(
+      'calculate_points_for_amount',
+      expect.objectContaining({ p_branch_id: 3 }),
+    ));
+  });
+
+  it('stores the reason together with the observation in the notes field', async () => {
+    setClient(makeOrgAwareClient());
+    const { container } = render(<PurchaseForm />);
+
+    await waitFor(() => expect(selectCallbacks['reason']).toBeDefined());
+    await waitFor(() => { selectCallbacks['reason']('welcome'); });
+    fireEvent.change(screen.getByPlaceholderText('notesPlaceholder'), {
+      target: { value: 'Cliente nuevo' },
+    });
+
+    await waitFor(() =>
+      expect(container.querySelector('input[name="notes"]')).toHaveValue(
+        'reasons.welcome — Cliente nuevo',
+      ),
+    );
+  });
+
+  it('blocks the submit and surfaces validation errors on an empty form', async () => {
+    setClient(makeOrgAwareClient());
+    const { container } = render(<PurchaseForm />);
+    const form = container.querySelector('form') as HTMLFormElement;
+    fireEvent.submit(form);
+
+    await waitFor(() => expect(screen.getByText('Beneficiary is required')).toBeInTheDocument());
+    expect(screen.getByText('Points are required')).toBeInTheDocument();
+  });
+
+  it('opens in sale mode when editing an operation that has an amount', async () => {
+    setClient(makeOrgAwareClient());
+    const { container } = render(
+      <PurchaseForm
+        purchase={{
+          id: '9',
+          purchase_number: 'PUR-009',
+          beneficiary_id: '1',
+          cashier_id: '2',
+          branch_id: '3',
+          total_amount: 1500,
+          points_earned: 150,
+          purchase_date: '2026-08-13T15:32:00Z',
+          created_at: '2026-08-13T15:32:00Z',
+          updated_at: '2026-08-13T15:32:00Z',
+        }}
+      />,
+    );
+    await waitFor(() => expect(container.querySelector('input[name="mode"]')).toHaveValue('sale'));
+    expect(container.querySelector('input[name="id"]')).toHaveValue('9');
+    expect(screen.getByRole('button', { name: 'submitSale' })).toBeInTheDocument();
+  });
+
+  it('lists the beneficiary recent activity once one is selected', async () => {
+    Object.defineProperty(document, 'cookie', { writable: true, value: 'active_org_id=7', configurable: true });
+    const client = makeOrgAwareClient();
+    client._mockFrom.mockImplementation((table: string) => {
+      if (table === 'purchase') {
+        return makeThenableBuilder([
+          { id: '1', purchase_date: '2026-08-08T15:42:00Z', total_amount: 0, points_earned: 5000 },
+          { id: '2', purchase_date: '2026-08-07T10:00:00Z', total_amount: 2500, points_earned: 250 },
+        ]);
+      }
+      if (table === 'beneficiary_organization') {
+        return makeThenableBuilder([{ available_points: 9500 }]);
+      }
+      return makeThenableBuilder([]);
+    });
+    setClient(client);
+
+    render(<PurchaseForm />);
+    await waitFor(() => expect(selectCallbacks['beneficiary_id']).toBeDefined());
+    await waitFor(() => { selectCallbacks['beneficiary_id']('1'); });
+
+    expect(await screen.findByText('activityAssignment')).toBeInTheDocument();
+    expect(screen.getByText('activitySale')).toBeInTheDocument();
+  });
+
+  it('clears the balance and the activity when the beneficiary is deselected', async () => {
+    setClient(makeOrgAwareClient());
+    render(<PurchaseForm />);
+    await waitFor(() => expect(selectCallbacks['beneficiary_id']).toBeDefined());
+
+    await waitFor(() => { selectCallbacks['beneficiary_id']('1'); });
+    await waitFor(() => { selectCallbacks['beneficiary_id'](''); });
+
+    expect(screen.queryByText('activityTitle')).not.toBeInTheDocument();
+  });
+
+  it('ignores a cookie jar that cannot be read', async () => {
+    Object.defineProperty(document, 'cookie', {
+      configurable: true,
+      get() { throw new Error('blocked'); },
+    });
+    setClient(makeOrgAwareClient());
+    const { container } = render(<PurchaseForm />);
+    await waitFor(() => expect(container.querySelector('form')).toBeInTheDocument());
+  });
+
+  it('shows the beneficiary name in the summary once one is picked', async () => {
+    setClient(makeOrgAwareClient({
+      beneficiaryData: [{ id: '1', first_name: 'Ana', last_name: 'Diaz' }],
+    }));
+    render(<PurchaseForm />);
+    await waitFor(() => expect(selectCallbacks['beneficiary_id']).toBeDefined());
+    await waitFor(() => { selectCallbacks['beneficiary_id']('1'); });
+    await waitFor(() => expect(screen.getAllByText('Ana Diaz').length).toBeGreaterThan(1));
+  });
+
+  it('copes with queries that come back empty', async () => {
+    Object.defineProperty(document, 'cookie', { writable: true, value: 'active_org_id=7', configurable: true });
+    const client = makeOrgAwareClient({ rpcData: null });
+    client._mockFrom.mockImplementation(() => {
+      const b = makeThenableBuilder(null);
+      b.eq = jest.fn(() => makeThenableBuilder(null));
+      return b;
+    });
+    setClient(client);
+
+    const { container } = render(<PurchaseForm />);
+    await waitFor(() => expect(selectCallbacks['beneficiary_id']).toBeDefined());
+    await waitFor(() => { selectCallbacks['beneficiary_id']('1'); });
+
+    fireEvent.click(screen.getAllByRole('radio')[1]);
+    const amountInput = container.querySelector('input[name="total_amount"]') as HTMLInputElement;
+    fireEvent.change(amountInput, { target: { value: '1000' } });
+
+    await waitFor(() => expect(client._mockRpc).toHaveBeenCalled());
+    // Sin datos: cero puntos por la venta y cero de saldo resultante.
+    await waitFor(() => expect(screen.getAllByText('0 pts')).toHaveLength(2));
+  });
+
+  it('stops loading the beneficiary when the form unmounts first', async () => {
+    setClient(makeOrgAwareClient());
+    const { unmount } = render(<PurchaseForm />);
+    await waitFor(() => expect(selectCallbacks['beneficiary_id']).toBeDefined());
+    await waitFor(() => { selectCallbacks['beneficiary_id']('1'); });
+    unmount();
+  });
+
+  it('disables the submit button while the action is pending', () => {
     (React.useActionState as jest.Mock).mockReturnValue([
       { status: '', message: '', fieldErrors: {} },
       jest.fn(),
       true,
     ]);
-
+    setClient(makeOrgAwareClient());
     render(<PurchaseForm />);
-
-    expect(screen.getByRole('button', { name: 'create' })).toBeDisabled();
-  });
-
-  it('runs handleSubmit and catches validation error on empty form', () => {
-    render(<PurchaseForm />);
-
-    const form = screen.getByRole('button', { name: 'create' }).closest('form')!;
-    fireEvent.submit(form);
-  });
-
-  it('loads dropdown data via useEffect and dispatches into reducer', async () => {
-    const { createClient } = require('@/lib/supabase/client');
-    render(<PurchaseForm />);
-    await waitFor(() => {
-      expect(createClient).toHaveBeenCalled();
-    });
-  });
-
-  it('falls back to empty arrays when supabase responses have null data', async () => {
-    const { createClient } = require('@/lib/supabase/client');
-    (createClient as jest.Mock).mockImplementationOnce(() => ({
-      from: jest.fn(() => {
-        const b: Record<string, unknown> = {};
-        b.select = jest.fn(() => b);
-        b.eq = jest.fn(() => b);
-        b.neq = jest.fn(() => b);
-        b.order = jest.fn(() => Promise.resolve({ data: null, error: null }));
-        b.single = jest.fn(() => Promise.resolve({ data: { id: 4 }, error: null }));
-        return b;
-      }),
-      rpc: jest.fn(() => Promise.resolve({ data: 0, error: null })),
-    }));
-    render(<PurchaseForm />);
-    await waitFor(() => {
-      expect(createClient).toHaveBeenCalled();
-    });
-  });
-
-  it('runs handleSubmit in edit mode with pre-filled data', () => {
-    const purchase = {
-      id: '1',
-      beneficiary_id: 'ben-1',
-      cashier_id: 'cash-1',
-      branch_id: 'br-1',
-      organization_id: 'org-1',
-      total_amount: 100.50,
-      points_earned: 10,
-      notes: 'Test notes',
-      created_at: '2024-01-01',
-    };
-
-    render(<PurchaseForm purchase={purchase as any} />);
-
-    const form = screen.getByRole('button', { name: 'update' }).closest('form')!;
-    fireEvent.submit(form);
-  });
-
-  it('getOrgIdFromCookies returns parsed org id when cookie exists', async () => {
-    Object.defineProperty(document, 'cookie', { writable: true, value: 'active_org_id=42; other=stuff' });
-    const { createClient } = require('@/lib/supabase/client');
-    const client = makeOrgAwareClient({
-      beneficiaryData: [{ beneficiary: { id: '1', first_name: 'A', last_name: 'B' } }],
-      cashierData: [{ id: '2', first_name: 'C', last_name: 'D' }],
-      branchData: [{ id: '3', name: 'Branch' }],
-    });
-    (createClient as jest.Mock).mockImplementationOnce(() => client);
-    render(<PurchaseForm />);
-    await waitFor(() => {
-      expect(client._mockFrom).toHaveBeenCalledWith('beneficiary_organization');
-      expect(client._mockFrom).toHaveBeenCalledWith('branch');
-    });
-  });
-
-  it('getOrgIdFromCookies returns null when cookie is missing', async () => {
-    Object.defineProperty(document, 'cookie', { writable: true, value: '' });
-    const { createClient } = require('@/lib/supabase/client');
-    const client = makeOrgAwareClient({
-      beneficiaryData: [{ id: '1', first_name: 'A', last_name: 'B' }],
-    });
-    (createClient as jest.Mock).mockImplementationOnce(() => client);
-    render(<PurchaseForm />);
-    await waitFor(() => {
-      expect(client._mockFrom).toHaveBeenCalledWith('beneficiary');
-    });
-  });
-
-  it('getOrgIdFromCookies returns null when cookie value is NaN', async () => {
-    Object.defineProperty(document, 'cookie', { writable: true, value: 'active_org_id=notanumber' });
-    const { createClient } = require('@/lib/supabase/client');
-    const client = makeOrgAwareClient({
-      beneficiaryData: [{ id: '1', first_name: 'A', last_name: 'B' }],
-    });
-    (createClient as jest.Mock).mockImplementationOnce(() => client);
-    render(<PurchaseForm />);
-    await waitFor(() => {
-      expect(client._mockFrom).toHaveBeenCalledWith('beneficiary');
-    });
-  });
-
-  it('getOrgIdFromCookies catches errors and returns null', async () => {
-    const originalDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie');
-    Object.defineProperty(document, 'cookie', {
-      get: () => { throw new Error('cookie access denied'); },
-      configurable: true,
-    });
-    const { createClient } = require('@/lib/supabase/client');
-    const client = makeOrgAwareClient({
-      beneficiaryData: [{ id: '1', first_name: 'A', last_name: 'B' }],
-    });
-    (createClient as jest.Mock).mockImplementationOnce(() => client);
-    render(<PurchaseForm />);
-    await waitFor(() => {
-      expect(client._mockFrom).toHaveBeenCalledWith('beneficiary');
-    });
-    if (originalDescriptor) {
-      Object.defineProperty(document, 'cookie', originalDescriptor);
-    }
-  });
-
-  it('handles nested beneficiary data with org filter including null entries', async () => {
-    Object.defineProperty(document, 'cookie', { writable: true, value: 'active_org_id=42' });
-    const { createClient } = require('@/lib/supabase/client');
-    const client = makeOrgAwareClient({
-      beneficiaryData: [
-        { beneficiary: { id: '1', first_name: 'John', last_name: 'Doe' } },
-        { beneficiary: null },
-      ],
-      branchData: [{ id: '5', name: 'Branch1' }],
-    });
-    (createClient as jest.Mock).mockImplementationOnce(() => client);
-    render(<PurchaseForm />);
-    await waitFor(() => {
-      expect(screen.getByText('John Doe')).toBeInTheDocument();
-    });
-  });
-
-  it('calls calculatePoints when amount changes with valid number', async () => {
-    Object.defineProperty(document, 'cookie', { writable: true, value: 'active_org_id=42' });
-    const { createClient } = require('@/lib/supabase/client');
-    const client = makeOrgAwareClient({ rpcData: 25 });
-    (createClient as jest.Mock).mockImplementation(() => client);
-    render(<PurchaseForm />);
-    const amountInput = screen.getByPlaceholderText('0.00');
-    fireEvent.change(amountInput, { target: { value: '150' } });
-    await waitFor(() => {
-      expect(client._mockRpc).toHaveBeenCalledWith('calculate_points_for_amount', expect.objectContaining({
-        p_amount: 150,
-      }));
-    });
-  });
-
-  it('sets pointsPreview to null when amount is NaN', async () => {
-    // Render with a purchase that has points_earned so pointsPreview starts non-null
-    Object.defineProperty(document, 'cookie', { writable: true, value: 'active_org_id=42' });
-    const { createClient } = require('@/lib/supabase/client');
-    const client = makeOrgAwareClient({ rpcData: 10 });
-    (createClient as jest.Mock).mockImplementation(() => client);
-    const purchase = {
-      id: '1',
-      beneficiary_id: 'ben-1',
-      cashier_id: 'cash-1',
-      branch_id: 'br-1',
-      organization_id: 'org-1',
-      total_amount: 100,
-      points_earned: 10,
-      notes: '',
-      created_at: '2024-01-01',
-    };
-    render(<PurchaseForm purchase={purchase as any} />);
-    // Points preview should be visible initially since purchase.points_earned is 10
-    expect(screen.getByText('form.pointsEarnedLabel', { exact: false })).toBeInTheDocument();
-    // Now set invalid value to trigger the else branch (setPointsPreview(null))
-    const amountInput = screen.getByPlaceholderText('0.00');
-    fireEvent.change(amountInput, { target: { value: '' } });
-    await waitFor(() => {
-      expect(screen.queryByText('form.pointsEarnedLabel', { exact: false })).not.toBeInTheDocument();
-    });
-  });
-
-  it('sets pointsPreview to 0 when amount is 0 or negative', async () => {
-    Object.defineProperty(document, 'cookie', { writable: true, value: 'active_org_id=42' });
-    const { createClient } = require('@/lib/supabase/client');
-    const client = makeOrgAwareClient({ rpcData: 25 });
-    (createClient as jest.Mock).mockImplementation(() => client);
-    render(<PurchaseForm />);
-    const amountInput = screen.getByPlaceholderText('0.00');
-    fireEvent.change(amountInput, { target: { value: '0' } });
-    await waitFor(() => {
-      expect(screen.getByText('0')).toBeInTheDocument();
-    });
-  });
-
-  it('calls calculatePoints when rpc returns null data', async () => {
-    Object.defineProperty(document, 'cookie', { writable: true, value: 'active_org_id=42' });
-    const { createClient } = require('@/lib/supabase/client');
-    const client = makeOrgAwareClient({ rpcData: null });
-    (createClient as jest.Mock).mockImplementation(() => client);
-    render(<PurchaseForm />);
-    const amountInput = screen.getByPlaceholderText('0.00');
-    fireEvent.change(amountInput, { target: { value: '100' } });
-    await waitFor(() => {
-      expect(client._mockRpc).toHaveBeenCalledWith('calculate_points_for_amount', expect.anything());
-    });
-  });
-
-  it('handleBranchChange recalculates points when amount is valid', async () => {
-    Object.defineProperty(document, 'cookie', { writable: true, value: 'active_org_id=42' });
-    const { createClient } = require('@/lib/supabase/client');
-    const client = makeOrgAwareClient({
-      branchData: [{ id: '5', name: 'Branch A' }],
-      rpcData: 30,
-    });
-    (createClient as jest.Mock).mockImplementation(() => client);
-    render(<PurchaseForm />);
-
-    // Set a valid amount first
-    const amountInput = screen.getByPlaceholderText('0.00');
-    fireEvent.change(amountInput, { target: { value: '200' } });
-
-    // Trigger handleBranchChange via the stored callback
-    selectCallbacks['branch_id']('5');
-
-    await waitFor(() => {
-      expect(client._mockRpc).toHaveBeenCalledWith('calculate_points_for_amount', expect.objectContaining({
-        p_branch_id: 5,
-      }));
-    });
-  });
-
-  it('handleBranchChange does not calculate when amount is zero', async () => {
-    Object.defineProperty(document, 'cookie', { writable: true, value: 'active_org_id=42' });
-    const { createClient } = require('@/lib/supabase/client');
-    const client = makeOrgAwareClient({
-      branchData: [{ id: '5', name: 'Branch C' }],
-      rpcData: 30,
-    });
-    (createClient as jest.Mock).mockImplementation(() => client);
-    render(<PurchaseForm />);
-
-    // Set amount to 0
-    const amountInput = screen.getByPlaceholderText('0.00');
-    fireEvent.change(amountInput, { target: { value: '0' } });
-
-    // Trigger branch change - should NOT call calculatePoints since amount is 0 (not > 0)
-    const rpcCallsBefore = client._mockRpc.mock.calls.length;
-    selectCallbacks['branch_id']('5');
-    // rpc should not have been called again after the branch change
-    expect(client._mockRpc.mock.calls.length).toBe(rpcCallsBefore);
-  });
-
-  it('handleBranchChange does not calculate when amount is empty', async () => {
-    Object.defineProperty(document, 'cookie', { writable: true, value: 'active_org_id=42' });
-    const { createClient } = require('@/lib/supabase/client');
-    const client = makeOrgAwareClient({
-      branchData: [{ id: '5', name: 'Branch B' }],
-      rpcData: 30,
-    });
-    (createClient as jest.Mock).mockImplementation(() => client);
-    render(<PurchaseForm />);
-
-    // Don't set an amount, trigger branch change directly
-    selectCallbacks['branch_id']('5');
-  });
-
-  it('handleBranchChange handles missing amount input element', async () => {
-    Object.defineProperty(document, 'cookie', { writable: true, value: 'active_org_id=42' });
-    const { createClient } = require('@/lib/supabase/client');
-    const client = makeOrgAwareClient({ rpcData: 30 });
-    (createClient as jest.Mock).mockImplementation(() => client);
-    render(<PurchaseForm />);
-
-    // Remove the amount input from DOM to test the ?? '' fallback
-    const amountInput = document.querySelector('input[name="total_amount"]');
-    amountInput?.remove();
-
-    selectCallbacks['branch_id']('5');
+    expect(screen.getByRole('button', { name: 'submitAssignment' })).toBeDisabled();
   });
 });

@@ -1,3 +1,4 @@
+import { ShieldAlert } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -65,14 +66,15 @@ export default async function QRPage() {
   }
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4 sm:p-6">
+    <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">{t('title')}</h1>
-        <p className="text-muted-foreground text-sm mt-1">{t('description')}</p>
+        <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
+        <p className="mt-1 text-sm text-muted-foreground">{t('description')}</p>
       </div>
 
       <section className="space-y-3">
         <h2 className="text-lg font-medium tracking-tight">{t('orgSectionTitle')}</h2>
+        {/* OrgQRDisplay ya trae la guía de uso y los consejos: no los repetimos acá. */}
         <OrgQRDisplay
           organizationId={Number(org.id)}
           organizationName={org.name}
@@ -84,6 +86,14 @@ export default async function QRPage() {
         <h2 className="text-lg font-medium tracking-tight">{t('downloadSectionTitle')}</h2>
         <AppDownloadQRCards />
       </section>
+
+      <p className="flex items-start gap-3 rounded-xl border bg-brand-violet/5 p-5 text-sm">
+        <ShieldAlert className="mt-0.5 size-4 shrink-0 text-brand-violet" />
+        <span>
+          <span className="block font-semibold">{t('important.title')}</span>
+          <span className="block text-xs text-muted-foreground">{t('important.body')}</span>
+        </span>
+      </p>
     </div>
   );
 }

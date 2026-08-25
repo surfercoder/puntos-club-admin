@@ -132,6 +132,8 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
   });
   const { title, body, isCreating, isSending, showEmojiPicker, showTitleEmojiPicker, isModerating, moderationResult, timeRemaining } = state;
   const t = useTranslations('Dashboard.notifications.form');
+  const tSections = useTranslations('Dashboard.notifications');
+  const tRecipients = useTranslations('Dashboard.notifications.recipients');
   const tCommon = useTranslations('Common');
 
   const NotificationSchema = z.object({
@@ -288,10 +290,11 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
   const canSendNotification = isFormValid && canSend && moderationResult?.isApproved && !isProcessing && !isModerating;
 
   return (
-    <div className="max-w-2xl space-y-6">
+    <div className="space-y-6">
       {limits && <NotificationLimitsPanel limits={limits} canSend={canSend} timeRemaining={timeRemaining} />}
 
-      <div className="space-y-4 border rounded-lg p-6">
+      <div className="space-y-4 rounded-xl border bg-card p-5 shadow-sm">
+        <h2 className="text-base font-semibold">{tSections('contentSection')}</h2>
         <NotificationFormFields
           title={title}
           body={body}
@@ -328,6 +331,23 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
 
         {moderationResult && <ModerationResultPanel result={moderationResult} />}
 
+        <div className="border-t pt-4">
+          <h2 className="text-base font-semibold">{tSections('recipientsSection')}</h2>
+          <label className="mt-3 block text-sm font-medium" htmlFor="notification-audience">
+            {tRecipients('label')} <span className="text-destructive">*</span>
+          </label>
+          <select
+            className="border-input mt-1.5 h-9 w-full rounded-md border bg-transparent px-3 text-sm shadow-xs"
+            disabled
+            id="notification-audience"
+          >
+            <option>{tRecipients('all')}</option>
+          </select>
+          <p className="mt-2 rounded-lg bg-brand-blue/5 p-3 text-xs text-muted-foreground">
+            {tRecipients('note')}
+          </p>
+        </div>
+
         <div className="flex items-center justify-between pt-4 border-t gap-3">
           <Button type="button" variant="outline" onClick={() => push(redirectPath)} disabled={isProcessing || isModerating}>
             {tCommon('cancel')}
@@ -354,8 +374,8 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
         </div>
       </div>
 
-      <div className="bg-muted/30 border rounded-lg p-4">
-        <h3 className="font-semibold text-sm mb-2">{t('importantNotes')}</h3>
+      <div className="rounded-xl border bg-muted/30 p-4">
+        <h3 className="mb-2 text-sm font-semibold">{t('importantNotes')}</h3>
         <ul className="text-sm space-y-1 text-muted-foreground list-disc list-inside">
           <li>{t('notesList1')}</li>
           <li>{t('notesList2')}</li>

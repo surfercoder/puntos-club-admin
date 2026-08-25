@@ -1,10 +1,11 @@
 import { render, screen } from '@testing-library/react';
+import { usePathname } from 'next/navigation';
 import { NavMain } from '@/components/nav-main';
 import { Store, Users } from 'lucide-react';
 
 jest.mock('@/components/ui/collapsible', () => ({
-  Collapsible: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => (
-    <div data-testid="collapsible" {...props}>{children}</div>
+  Collapsible: ({ children, defaultOpen, asChild: _asChild, ...props }: React.PropsWithChildren<Record<string, unknown>>) => (
+    <div data-testid="collapsible" data-open={String(defaultOpen)} {...props}>{children}</div>
   ),
   CollapsibleContent: ({ children }: React.PropsWithChildren) => <div>{children}</div>,
   CollapsibleTrigger: ({ children, ...props }: React.PropsWithChildren<Record<string, unknown>>) => (
@@ -27,7 +28,11 @@ jest.mock('@/components/ui/sidebar', () => ({
   SidebarMenuSubItem: ({ children }: React.PropsWithChildren) => <li>{children}</li>,
 }));
 
+const mockUsePathname = usePathname as jest.Mock;
+
 describe('NavMain', () => {
+  afterEach(() => { mockUsePathname.mockReturnValue('/'); });
+
   it('renders flat items without sub-items as links', () => {
     const items = [
       { title: 'Branches', url: '/dashboard/branch', icon: Store },
@@ -69,5 +74,40 @@ describe('NavMain', () => {
   it('renders empty menu when no items', () => {
     const { container } = render(<NavMain items={[]} />);
     expect(container.querySelector('ul')).toBeInTheDocument();
+  });
+
+  it('opens the group that matches the route when the pathname changes', () => {
+    const items = [
+      {
+        title: 'Settings',
+        url: '/dashboard/settings',
+        icon: Store,
+        items: [{ title: 'Branches', url: '/dashboard/branch' }],
+      },
+    ];
+
+    mockUsePathname.mockReturnValue('/dashboard/otra-cosa');
+    const { rerender } = render(<NavMain items={items} />);
+    expect(screen.getByTestId('collapsible')).toHaveAttribute('data-open', 'false');
+
+    // Al navegar a una pagina del grupo cerrado, el grupo tiene que abrirse.
+    mockUsePathname.mockReturnValue('/dashboard/branch');
+    rerender(<NavMain items={items} />);
+    expect(screen.getByTestId('collapsible')).toHaveAttribute('data-open', 'true');
+  });
+
+  it('keeps a group open when the item is flagged as active', () => {
+    const items = [
+      {
+        title: 'Settings',
+        url: '/dashboard/settings',
+        icon: Store,
+        isActive: true,
+        items: [{ title: 'Branches', url: '/dashboard/branch' }],
+      },
+    ];
+
+    render(<NavMain items={items} />);
+    expect(screen.getByTestId('collapsible')).toHaveAttribute('data-open', 'true');
   });
 });

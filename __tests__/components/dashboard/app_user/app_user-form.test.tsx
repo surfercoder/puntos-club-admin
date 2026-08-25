@@ -389,4 +389,59 @@ describe('AppUserForm', () => {
     });
   });
 
+
+  it('hides the role selector and posts the locked role', async () => {
+    const { container } = render(<AppUserForm lockedRoleName="cashier" />);
+
+    await waitFor(() =>
+      expect(container.querySelector('input[name="role_id"]')).toBeInTheDocument(),
+    );
+    expect(screen.queryByText('form.roleLabel')).not.toBeInTheDocument();
+  });
+
+  it('offers the branch selector once a cashier role is locked in', async () => {
+    mockRoleData = [{ id: '2', name: 'cashier', display_name: 'Cajero' }];
+    render(
+      <AppUserForm
+        branches={[{ id: '3', name: 'Sucursal Centro' }]}
+        lockedRoleName="cashier"
+      />,
+    );
+
+    expect(await screen.findByText('form.branchLabel')).toBeInTheDocument();
+  });
+
+  it('preselects the branch of the cashier being edited', async () => {
+    mockRoleData = [{ id: '2', name: 'cashier', display_name: 'Cajero' }];
+    const { container } = render(
+      <AppUserForm
+        appUser={{ id: '9', role_id: '2', branch_id: 3 } as never}
+        branches={[{ id: '3', name: 'Sucursal Centro' }]}
+        lockedRoleName="cashier"
+      />,
+    );
+    expect(await screen.findByText('form.branchLabel')).toBeInTheDocument();
+    // Lo que importa no es que se vea la etiqueta sino que el control salga con
+    // la sucursal ya elegida: si no, el submit la desasignaría.
+    expect(container.querySelector('select[name="branch_id"]')).toHaveValue('3');
+  });
+
+  it('keeps the role selector when no role is locked', async () => {
+    render(<AppUserForm />);
+    expect(await screen.findByText('form.roleLabel')).toBeInTheDocument();
+  });
+
+  it('descarta los roles si el formulario se desmonta antes de la respuesta', async () => {
+    mockRoleData = [{ id: 'role-1', name: 'cashier', display_name: 'Cashier' }];
+    setupSupabaseMock();
+
+    const { unmount } = render(<AppUserForm lockedRoleName="cashier" />);
+    unmount();
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(screen.queryByText('Cashier')).not.toBeInTheDocument();
+  });
 });

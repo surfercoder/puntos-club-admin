@@ -1,4 +1,15 @@
-import { cn, formatDateTime, formatDateOnly } from '@/lib/utils';
+import {
+  POINT_RANGES,
+  cn,
+  isNavItemActive,
+  parseDashboardRange,
+  parsePage,
+  parsePerPage,
+  previewPoints,
+  formatDateTime,
+  formatDateOnly,
+  toCsv,
+} from '@/lib/utils';
 
 describe('cn', () => {
   it('merges simple class strings', () => {
@@ -97,5 +108,114 @@ describe('formatDateOnly', () => {
   it('formats date with explicit locale and options', () => {
     const out = formatDateOnly('2026-05-06T12:34:56Z', 'es-AR', { timeZone: 'UTC' });
     expect(out).toMatch(/2026/);
+  });
+});
+
+describe('isNavItemActive', () => {
+  it('returns false without a pathname', () => {
+    expect(isNavItemActive(null, '/dashboard/beneficiary')).toBe(false);
+  });
+
+  it('matches /dashboard only exactly', () => {
+    expect(isNavItemActive('/dashboard', '/dashboard')).toBe(true);
+    expect(isNavItemActive('/dashboard/beneficiary', '/dashboard')).toBe(false);
+  });
+
+  it('matches an entity route and its children', () => {
+    expect(isNavItemActive('/dashboard/beneficiary', '/dashboard/beneficiary')).toBe(true);
+    expect(isNavItemActive('/dashboard/beneficiary/create', '/dashboard/beneficiary')).toBe(true);
+  });
+
+  it('does not match a sibling route with the same prefix', () => {
+    expect(isNavItemActive('/dashboard/beneficiary_organization', '/dashboard/beneficiary')).toBe(false);
+  });
+});
+
+describe('parseDashboardRange', () => {
+  it('accepts the supported ranges', () => {
+    expect(parseDashboardRange('3')).toBe(3);
+    expect(parseDashboardRange('12')).toBe(12);
+  });
+
+  it('falls back to 6 months for missing or unsupported values', () => {
+    expect(parseDashboardRange(undefined)).toBe(6);
+    expect(parseDashboardRange('99')).toBe(6);
+    expect(parseDashboardRange('abc')).toBe(6);
+  });
+});
+
+describe('parsePerPage', () => {
+  it('accepts the offered page sizes', () => {
+    expect(parsePerPage('25')).toBe(25);
+    expect(parsePerPage('100')).toBe(100);
+  });
+
+  it('falls back to 10 for anything else', () => {
+    expect(parsePerPage(undefined)).toBe(10);
+    expect(parsePerPage('7')).toBe(10);
+  });
+});
+
+describe('parsePage', () => {
+  it('clamps to the available pages', () => {
+    expect(parsePage('2', 5)).toBe(2);
+    expect(parsePage('9', 5)).toBe(5);
+  });
+
+  it('falls back to the first page for junk or out-of-range input', () => {
+    expect(parsePage(undefined, 5)).toBe(1);
+    expect(parsePage('0', 5)).toBe(1);
+    expect(parsePage('1.5', 5)).toBe(1);
+  });
+
+  it('treats an empty result set as a single page', () => {
+    expect(parsePage('3', 0)).toBe(1);
+  });
+});
+
+describe('previewPoints', () => {
+  it('takes a percentage of the purchase', () => {
+    expect(previewPoints('percentage', 5, 1000)).toBe(50);
+  });
+
+  it('scales fixed points per $100 spent', () => {
+    expect(previewPoints('fixed_amount', 2, 250)).toBe(5);
+  });
+
+  it('returns zero for a missing or negative value', () => {
+    expect(previewPoints('percentage', 0, 1000)).toBe(0);
+    expect(previewPoints('percentage', -1, 1000)).toBe(0);
+    expect(previewPoints('percentage', Number.NaN, 1000)).toBe(0);
+  });
+});
+
+describe('toCsv', () => {
+  it('quotes every field and doubles inner quotes', () => {
+    expect(toCsv(['a', 'b'], [['x', 'say "hi"'], [1, null]])).toBe(
+      '"a","b"\r\n"x","say ""hi"""\r\n"1",""',
+    );
+  });
+});
+
+describe('toCsv · inyección de fórmulas', () => {
+  it.each(['=1+1', '+1', '-1', '@SUM(A1)', '\tcmd', '\rcmd'])(
+    'neutraliza %j anteponiendo una comilla simple',
+    (payload) => {
+      expect(toCsv(['a'], [[payload]])).toBe(`"a"\r\n"'${payload}"`);
+    },
+  );
+
+  it('deja pasar un valor normal sin tocarlo', () => {
+    expect(toCsv(['a'], [['Ana Pérez']])).toBe('"a"\r\n"Ana Pérez"');
+  });
+});
+
+describe('POINT_RANGES', () => {
+  it('covers every balance without gaps', () => {
+    expect(POINT_RANGES[0].min).toBe(0);
+    expect(POINT_RANGES.at(-1)!.max).toBe(Number.POSITIVE_INFINITY);
+    POINT_RANGES.forEach((range, i) => {
+      if (i > 0) expect(range.min).toBe(POINT_RANGES[i - 1].max);
+    });
   });
 });

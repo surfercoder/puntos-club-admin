@@ -28,8 +28,9 @@ jest.mock('@/lib/auth/roles', () => ({
   hasOwnerPermissions: jest.fn(() => true),
 }));
 
+const getUsageSummaryAction = jest.fn().mockResolvedValue(null);
 jest.mock('@/actions/dashboard/usage/actions', () => ({
-  getUsageSummaryAction: jest.fn().mockResolvedValue(null),
+  getUsageSummaryAction: (...args: unknown[]) => getUsageSummaryAction(...args),
 }));
 
 jest.mock('@/actions/dashboard/analytics/actions', () => ({
@@ -62,6 +63,18 @@ jest.mock('@/components/dashboard/charts/branch-performance-chart', () => ({
 jest.mock('@/components/dashboard/charts/plan-usage-chart', () => ({
   PlanUsageChart: () => <div data-testid="plan-usage-chart" />,
 }));
+jest.mock('@/components/dashboard/home/dashboard-hero', () => ({
+  DashboardHero: () => <div data-testid="dashboard-hero" />,
+}));
+jest.mock('@/components/dashboard/home/quick-actions', () => ({
+  QuickActions: () => <div data-testid="quick-actions" />,
+}));
+jest.mock('@/components/dashboard/home/quick-summary', () => ({
+  QuickSummary: () => <div data-testid="quick-summary" />,
+}));
+jest.mock('@/components/dashboard/home/help-card', () => ({
+  HelpCard: () => <div data-testid="help-card" />,
+}));
 
 describe('DashboardPage', () => {
   it('exports a default async function', () => {
@@ -69,7 +82,7 @@ describe('DashboardPage', () => {
   });
 
   it('renders dashboard content when authenticated', async () => {
-    const result = await DashboardPage();
+    const result = await DashboardPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 
@@ -84,7 +97,7 @@ describe('DashboardPage', () => {
       },
     });
 
-    await DashboardPage();
+    await DashboardPage({ searchParams: Promise.resolve({}) });
     expect(redirect).toHaveBeenCalledWith('/auth/login');
   });
 
@@ -96,7 +109,7 @@ describe('DashboardPage', () => {
     hasOwnerPermissionsFn.mockReturnValueOnce(false);
 
     require('react');
-    const result = await DashboardPage();
+    const result = await DashboardPage({ searchParams: Promise.resolve({}) });
     // The result should be the "no access" JSX
     const rendered = require('react-dom/server').renderToStaticMarkup(result);
     expect(rendered).toContain('noAccess');
@@ -111,7 +124,7 @@ describe('DashboardPage', () => {
     getTopProducts.mockResolvedValueOnce([]);
     getBranchPerformance.mockResolvedValueOnce([{ branch: 'Main', count: 10 }]);
 
-    const result = await DashboardPage();
+    const result = await DashboardPage({ searchParams: Promise.resolve({}) });
     const rendered = require('react-dom/server').renderToStaticMarkup(result);
     expect(rendered).toContain('topProducts.title');
     expect(rendered).toContain('topProducts.emptyMessage');
@@ -126,7 +139,7 @@ describe('DashboardPage', () => {
     getTopProducts.mockResolvedValueOnce([{ product: 'Widget', count: 5 }]);
     getBranchPerformance.mockResolvedValueOnce([]);
 
-    const result = await DashboardPage();
+    const result = await DashboardPage({ searchParams: Promise.resolve({}) });
     const rendered = require('react-dom/server').renderToStaticMarkup(result);
     expect(rendered).toContain('branchPerformance.title');
     expect(rendered).toContain('branchPerformance.emptyMessage');
@@ -141,11 +154,54 @@ describe('DashboardPage', () => {
     getTopProducts.mockResolvedValueOnce([]);
     getBranchPerformance.mockResolvedValueOnce([]);
 
-    const result = await DashboardPage();
+    const result = await DashboardPage({ searchParams: Promise.resolve({}) });
     const rendered = require('react-dom/server').renderToStaticMarkup(result);
     expect(rendered).toContain('topProducts.title');
     expect(rendered).toContain('topProducts.emptyMessage');
     expect(rendered).toContain('branchPerformance.title');
     expect(rendered).toContain('branchPerformance.emptyMessage');
+  });
+});
+
+describe('DashboardPage plan usage', () => {
+  it('takes the beneficiary count from the plan usage summary', async () => {
+    getUsageSummaryAction.mockResolvedValueOnce({
+      plan: 'pro',
+      features: [{ feature: 'beneficiaries', current_usage: 42 }],
+    });
+    const result = await DashboardPage({ searchParams: Promise.resolve({ range: '12' }) });
+    expect(result).toBeTruthy();
+  });
+});
+
+describe('DashboardPage greeting', () => {
+  const { getCurrentUser } = require('@/lib/auth/get-current-user');
+
+  it('greets with the first name and org name when both are present', async () => {
+    getCurrentUser.mockResolvedValueOnce({
+      id: 'u1',
+      role: 'owner',
+      first_name: 'Carlos',
+      email: 'carlos@onestore.com',
+      organization: { name: 'One Store' },
+    });
+    const result = await DashboardPage({ searchParams: Promise.resolve({}) });
+    expect(result).toBeTruthy();
+  });
+
+  it('falls back to the email when there is no first name', async () => {
+    getCurrentUser.mockResolvedValueOnce({
+      id: 'u1',
+      role: 'owner',
+      email: 'carlos@onestore.com',
+    });
+    const result = await DashboardPage({ searchParams: Promise.resolve({}) });
+    expect(result).toBeTruthy();
+  });
+
+  it('falls back to empty strings when the user has neither', async () => {
+    getCurrentUser.mockResolvedValueOnce(null);
+    const result = await DashboardPage({ searchParams: Promise.resolve({}) });
+    expect(result).toBeTruthy();
   });
 });

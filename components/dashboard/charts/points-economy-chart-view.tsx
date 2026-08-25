@@ -27,9 +27,10 @@ import type { MonthlyPointsStat } from "@/actions/dashboard/analytics/actions";
 
 type Props = {
   data: MonthlyPointsStat[];
+  months: number;
 };
 
-export function PointsEconomyChart({ data }: Props) {
+export function PointsEconomyChart({ data, months }: Props) {
   const t = useTranslations("Dashboard.analytics.pointsEconomy");
   const chartConfig = {
     points_earned: {
@@ -47,7 +48,7 @@ export function PointsEconomyChart({ data }: Props) {
       <CardHeader>
         <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          {t("description")}
+          {t("description", { months })}
         </CardDescription>
       </CardHeader>
       <CardContent>

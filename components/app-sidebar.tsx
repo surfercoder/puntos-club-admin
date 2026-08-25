@@ -2,6 +2,7 @@
 
 import * as React from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import {
   MapPin,
   Smartphone,
@@ -9,7 +10,6 @@ import {
   HeartHandshake,
   Building,
   Store,
-  LayoutGrid,
   Building2,
   BellMinus,
   Trophy,
@@ -21,7 +21,6 @@ import {
   Shield,
   Users,
   HandHeart,
-  Tags,
   Bell,
   Star,
   Receipt,
@@ -55,6 +54,7 @@ import {
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
+import { isNavItemActive } from "@/lib/utils"
 
 export type DashboardSidebarUser = {
   name: string
@@ -83,6 +83,7 @@ export function AppSidebar({
   portalMode: DashboardSidebarPortalMode
 }) {
   const t = useTranslations("Sidebar")
+  const pathname = usePathname()
 
   const navMain = (() => {
     const isOwnerOrCollaborator = userRole === "owner" || userRole === "collaborator"
@@ -96,7 +97,6 @@ export function AppSidebar({
         { title: t("beneficiaries"), url: "/dashboard/beneficiary", icon: HeartHandshake },
         { title: t("beneficiaryOrgs"), url: "/dashboard/beneficiary_organization", icon: Building },
         { title: t("branches"), url: "/dashboard/branch", icon: Store },
-        { title: t("categories"), url: "/dashboard/category", icon: LayoutGrid },
         { title: t("notificationLimits"), url: "/dashboard/organization_notification_limits", icon: BellMinus },
         { title: t("orgPlanLimits"), url: "/dashboard/organization_plan_limits", icon: SlidersHorizontal },
         { title: t("organizations"), url: "/dashboard/organization", icon: Building2 },
@@ -121,8 +121,9 @@ export function AppSidebar({
         { title: t("qrCode"), url: "/dashboard/qr", icon: QrCode },
 
         { title: t("beneficiaries"), url: "/dashboard/beneficiary", icon: HandHeart },
+        { title: t("cashiers"), url: "/dashboard/cashiers", icon: Smartphone },
+        { title: t("collaborators"), url: "/dashboard/collaborators", icon: UserCog },
         { title: t("branches"), url: "/dashboard/branch", icon: Store },
-        { title: t("categories"), url: "/dashboard/category", icon: Tags },
         { title: t("notifications"), url: "/dashboard/notifications", icon: Bell },
         { title: t("pointsRules"), url: "/dashboard/points-rules", icon: Star },
         { title: t("products"), url: "/dashboard/product", icon: Package },
@@ -175,7 +176,6 @@ export function AppSidebar({
         items: [
           { title: t("branches"), url: "/dashboard/branch" },
           { title: t("addresses"), url: "/dashboard/address" },
-          { title: t("categories"), url: "/dashboard/category" },
           { title: t("products"), url: "/dashboard/product" },
           { title: t("appUsers"), url: "/dashboard/app_user" },
           { title: t("usersByOrg"), url: "/dashboard/app_user_organization" },
@@ -217,7 +217,11 @@ export function AppSidebar({
         <SidebarGroup>
           <SidebarMenu>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild tooltip={t("home")}>
+              <SidebarMenuButton
+                asChild
+                tooltip={t("home")}
+                isActive={isNavItemActive(pathname, "/dashboard")}
+              >
                 <Link href="/dashboard">
                   <Home />
                   <span>{t("home")}</span>

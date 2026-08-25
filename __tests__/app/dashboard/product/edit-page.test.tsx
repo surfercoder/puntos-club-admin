@@ -1,3 +1,4 @@
+import { render, screen } from '@testing-library/react';
 import { notFound } from 'next/navigation';
 import EditProductPage from '@/app/dashboard/product/edit/[id]/page';
 
@@ -39,6 +40,13 @@ describe('EditProductPage', () => {
   it('renders without crashing', async () => {
     const result = await EditProductPage({ params: Promise.resolve({ id: '1' }) });
     expect(result).toBeTruthy();
+  });
+
+  it('uses the edit-specific description copy, not the create one', async () => {
+    const result = await EditProductPage({ params: Promise.resolve({ id: '1' }) });
+    render(result);
+    expect(screen.getByText('editDescription')).toBeInTheDocument();
+    expect(screen.queryByText('createDescription')).not.toBeInTheDocument();
   });
 
   it('renders error when fetch fails', async () => {

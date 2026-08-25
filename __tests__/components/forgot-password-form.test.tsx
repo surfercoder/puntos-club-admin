@@ -53,7 +53,6 @@ describe('ForgotPasswordForm', () => {
 
     await waitFor(() => {
       expect(screen.getByText('successTitle')).toBeInTheDocument();
-      expect(screen.getByText('successDescription')).toBeInTheDocument();
       expect(screen.getByText('successMessage')).toBeInTheDocument();
     });
   });

@@ -158,11 +158,11 @@ describe('LoginForm', () => {
     expect(passwordInput).toHaveAttribute('type', 'password');
 
     // Click to show password
-    fireEvent.click(screen.getByRole('button', { name: 'Show password' }));
+    fireEvent.click(screen.getByRole('button', { name: 'showPassword' }));
     expect(passwordInput).toHaveAttribute('type', 'text');
 
     // Click to hide password
-    fireEvent.click(screen.getByRole('button', { name: 'Hide password' }));
+    fireEvent.click(screen.getByRole('button', { name: 'hidePassword' }));
     expect(passwordInput).toHaveAttribute('type', 'password');
   });
 

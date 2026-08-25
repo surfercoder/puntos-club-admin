@@ -12,6 +12,7 @@ import {
   User,
 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { ClubiSidebar } from '@/components/onboarding/clubi-sidebar';
 import { cn } from '@/lib/utils';
 
 import { Step1Personal } from './steps/step-1-personal';
@@ -242,13 +243,17 @@ export function OnboardingWizard({
 
   const currentStepInfo = steps[currentStep - 1];
 
+  // Términos ocupa todo el ancho: es el único paso sin acompañamiento de Clubi.
+  const showClubi = currentStep !== 5;
+
   return (
-    <div className={`mx-auto px-4 py-8 sm:px-6 ${currentStep === 3 ? 'max-w-5xl' : 'max-w-2xl'}`}>
+    <div className={`mx-auto px-4 py-8 sm:px-6 ${currentStep === 3 ? 'max-w-6xl' : showClubi ? 'max-w-5xl' : 'max-w-3xl'}`}>
       <div className="mb-8">
         <StepNav steps={steps} currentStep={currentStep} canNavigateToStep={canNavigateToStep} onGoToStep={goToStep} />
       </div>
 
-      <div className="rounded-2xl border bg-card shadow-sm">
+      <div className={showClubi ? 'grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_320px]' : ''}>
+      <div className="min-w-0 rounded-2xl border bg-card shadow-sm">
         <div className="border-b px-6 py-5">
           <div className="flex items-center gap-3">
             <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10">
@@ -273,6 +278,9 @@ export function OnboardingWizard({
         </div>
 
         <div className="p-6">{stepContent()}</div>
+      </div>
+
+      {showClubi && <ClubiSidebar step={currentStep} />}
       </div>
 
       <div className="mt-4 flex justify-center">

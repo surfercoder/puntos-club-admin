@@ -115,7 +115,7 @@ describe('ProductForm', () => {
   it('renders correct submit button text in create mode', () => {
     render(<ProductForm />);
 
-    expect(screen.getByRole('button', { name: 'create' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'submitCreate' })).toBeInTheDocument();
   });
 
   it('renders correct submit button text in edit mode', () => {
@@ -132,7 +132,7 @@ describe('ProductForm', () => {
 
     render(<ProductForm product={product} />);
 
-    expect(screen.getByRole('button', { name: 'update' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'submitEdit' })).toBeInTheDocument();
   });
 
   it('renders with initial data in edit mode', () => {
@@ -157,7 +157,7 @@ describe('ProductForm', () => {
   it('renders without initial data in create mode', () => {
     render(<ProductForm />);
 
-    const nameInput = screen.getByRole('textbox', { name: 'nameLabel' });
+    const nameInput = screen.getByRole('textbox', { name: /nameLabel/ });
     expect(nameInput).toHaveValue('');
   });
 
@@ -208,13 +208,13 @@ describe('ProductForm', () => {
 
     render(<ProductForm />);
 
-    expect(screen.getByRole('button', { name: 'create' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'submitCreate' })).toBeDisabled();
   });
 
   it('validates form on submit and prevents default for invalid data', async () => {
     render(<ProductForm />);
 
-    const form = screen.getByRole('textbox', { name: 'nameLabel' }).closest('form')!;
+    const form = screen.getByRole('textbox', { name: /nameLabel/ }).closest('form')!;
 
     await act(async () => {
       fireEvent.submit(form);
@@ -343,5 +343,22 @@ describe('ProductForm', () => {
 
     // Should render without crashing, categories should be empty
     expect(screen.getByText('categoryLabel')).toBeInTheDocument();
+  });
+
+  it('feeds every typed field into the live preview', async () => {
+    render(<ProductForm />);
+
+    fireEvent.change(screen.getByLabelText(/nameLabel/), { target: { value: 'Botella' } });
+    fireEvent.change(screen.getByLabelText(/descriptionLabel/), {
+      target: { value: 'Mantiene el frío' },
+    });
+    fireEvent.change(screen.getByLabelText(/pointsLabel/), { target: { value: '15000' } });
+    fireEvent.change(screen.getByLabelText(/stockLabel/), { target: { value: '12' } });
+    fireEvent.change(screen.getByLabelText(/newCategoryLabel/), { target: { value: 'Bebidas' } });
+
+    expect(await screen.findByText('Botella')).toBeInTheDocument();
+    expect(screen.getAllByText('Mantiene el frío').length).toBeGreaterThan(1);
+    expect(screen.getByText('15.000 pts')).toBeInTheDocument();
+    expect(screen.getByText('Bebidas')).toBeInTheDocument();
   });
 });

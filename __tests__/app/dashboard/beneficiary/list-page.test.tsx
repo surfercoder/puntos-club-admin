@@ -1,3 +1,5 @@
+import { render, screen } from '@testing-library/react';
+
 import BeneficiaryListPage from '@/app/dashboard/beneficiary/page';
 
 const mockSelect = jest.fn().mockResolvedValue({ data: [], error: null });
@@ -15,6 +17,13 @@ jest.mock('@/lib/auth/roles', () => ({ isAdmin: jest.fn(() => true) }));
 jest.mock('@/components/dashboard/beneficiary/delete-modal', () => function Mock() { return <div />; });
 jest.mock('@/components/dashboard/plan/plan-limit-create-button', () => ({ PlanLimitCreateButton: () => <div /> }));
 jest.mock('@/components/dashboard/plan/plan-usage-banner', () => ({ PlanUsageBanner: () => <div /> }));
+jest.mock('@/components/dashboard/plan/plan-usage-badge', () => ({ PlanUsageBadge: () => <div /> }));
+jest.mock('@/components/dashboard/beneficiary/hide-button', () => ({ HideButton: () => <div /> }));
+jest.mock('@/components/dashboard/beneficiary/beneficiary-filters', () => ({ BeneficiaryFilters: () => <div /> }));
+jest.mock('@/components/dashboard/beneficiary/beneficiary-stats', () => ({ BeneficiaryStats: () => <div /> }));
+jest.mock('@/components/dashboard/beneficiary/beneficiary-heatmap', () => ({ BeneficiaryHeatmap: () => <div /> }));
+jest.mock('@/components/dashboard/shared/csv-export-button', () => ({ CsvExportButton: () => <div /> }));
+jest.mock('@/components/dashboard/shared/table-pagination', () => ({ TablePagination: () => <div /> }));
 jest.mock('@/components/ui/button', () => ({ Button: ({ children }: { children: React.ReactNode }) => <button>{children}</button> }));
 jest.mock('@/components/ui/table', () => ({
   Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>,
@@ -33,7 +42,8 @@ describe('BeneficiaryListPage', () => {
     const { isAdmin } = require('@/lib/auth/roles');
     isAdmin.mockReturnValueOnce(true);
     mockSelect.mockResolvedValueOnce({ data: [], error: null });
-    const result = await BeneficiaryListPage();
+    const result = await BeneficiaryListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
   });
 
@@ -52,7 +62,8 @@ describe('BeneficiaryListPage', () => {
     });
     const mockSelectOrg = jest.fn(() => ({ eq: mockEqOrg }));
     mockFrom.mockReturnValueOnce({ select: mockSelectOrg });
-    const result = await BeneficiaryListPage();
+    const result = await BeneficiaryListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
     expect(mockEqOrg).toHaveBeenCalledWith('organization_id', 1);
   });
@@ -70,7 +81,8 @@ describe('BeneficiaryListPage', () => {
     });
     const mockSelectOrg = jest.fn(() => ({ eq: mockEqOrg }));
     mockFrom.mockReturnValueOnce({ select: mockSelectOrg });
-    const result = await BeneficiaryListPage();
+    const result = await BeneficiaryListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
   });
 
@@ -82,7 +94,8 @@ describe('BeneficiaryListPage', () => {
     const mockEqOrg = jest.fn().mockResolvedValue({ data: null, error: { message: 'fail' } });
     const mockSelectOrg = jest.fn(() => ({ eq: mockEqOrg }));
     mockFrom.mockReturnValueOnce({ select: mockSelectOrg });
-    const result = await BeneficiaryListPage();
+    const result = await BeneficiaryListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
   });
 
@@ -93,7 +106,8 @@ describe('BeneficiaryListPage', () => {
       data: [{ id: '1', first_name: 'Ben', last_name: 'Doe', email: 'ben@test.com', phone: '123', document_id: 'D1', registration_date: '2024-01-01' }],
       error: null,
     });
-    const result = await BeneficiaryListPage();
+    const result = await BeneficiaryListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
   });
 
@@ -104,7 +118,8 @@ describe('BeneficiaryListPage', () => {
       data: [{ id: '2', first_name: null, last_name: null, email: null, phone: null, document_id: null, registration_date: '2024-01-01' }],
       error: null,
     });
-    const result = await BeneficiaryListPage();
+    const result = await BeneficiaryListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
   });
 
@@ -115,7 +130,8 @@ describe('BeneficiaryListPage', () => {
       data: [{ id: '3', first_name: 'Solo', last_name: null, email: 'solo@test.com', phone: null, document_id: null, registration_date: '2024-01-01' }],
       error: null,
     });
-    const result = await BeneficiaryListPage();
+    const result = await BeneficiaryListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
   });
 
@@ -123,7 +139,8 @@ describe('BeneficiaryListPage', () => {
     const { isAdmin } = require('@/lib/auth/roles');
     isAdmin.mockReturnValueOnce(true);
     mockSelect.mockResolvedValueOnce({ data: null, error: { message: 'fail' } });
-    const result = await BeneficiaryListPage();
+    const result = await BeneficiaryListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
   });
 
@@ -133,7 +150,8 @@ describe('BeneficiaryListPage', () => {
     const { isAdmin } = require('@/lib/auth/roles');
     isAdmin.mockReturnValueOnce(true);
     mockSelect.mockResolvedValueOnce({ data: [], error: null });
-    const result = await BeneficiaryListPage();
+    const result = await BeneficiaryListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
   });
 
@@ -144,7 +162,8 @@ describe('BeneficiaryListPage', () => {
       data: [{ id: '4', first_name: null, last_name: 'OnlyLast', email: 'only@test.com', phone: '456', document_id: null, registration_date: '2024-01-01' }],
       error: null,
     });
-    const result = await BeneficiaryListPage();
+    const result = await BeneficiaryListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
   });
 
@@ -159,7 +178,8 @@ describe('BeneficiaryListPage', () => {
     });
     const mockSelectOrg = jest.fn(() => ({ eq: mockEqOrg }));
     mockFrom.mockReturnValueOnce({ select: mockSelectOrg });
-    const result = await BeneficiaryListPage();
+    const result = await BeneficiaryListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
   });
 
@@ -174,7 +194,165 @@ describe('BeneficiaryListPage', () => {
     });
     const mockSelectOrg = jest.fn(() => ({ eq: mockEqOrg }));
     mockFrom.mockReturnValueOnce({ select: mockSelectOrg });
-    const result = await BeneficiaryListPage();
+    const result = await BeneficiaryListPage({ searchParams: Promise.resolve({}) });
+    render(result);
     expect(result).toBeTruthy();
+  });
+});
+
+describe('BeneficiaryListPage filters', () => {
+  const { isAdmin } = require('@/lib/auth/roles');
+  const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
+
+  const member = (over: Record<string, unknown> = {}) => ({
+    is_hidden: false,
+    is_active: true,
+    available_points: 100,
+    beneficiary: {
+      id: '1',
+      first_name: 'Ana',
+      last_name: 'Diaz',
+      email: 'ana@test.com',
+      phone: '111',
+      document_id: 'D1',
+      registration_date: '2026-08-10',
+      address: { latitude: -32.88, longitude: -68.84 },
+    },
+    ...over,
+  });
+
+  const renderWith = async (
+    params: Record<string, string>,
+    rows: Record<string, unknown>[],
+  ) => {
+    isAdmin.mockReturnValueOnce(false);
+    getActiveOrgIdFilter.mockResolvedValueOnce(1);
+    const eq = jest.fn().mockResolvedValue({ data: rows, error: null });
+    mockFrom.mockReturnValueOnce({ select: jest.fn(() => ({ eq })) });
+    const result = await BeneficiaryListPage({ searchParams: Promise.resolve(params) });
+    render(result);
+    return result;
+  };
+
+  beforeEach(() => { jest.clearAllMocks(); });
+
+  it('matches the search against name, email, document and phone', async () => {
+    expect(await renderWith({ q: 'ana' }, [member()])).toBeTruthy();
+    expect(await renderWith({ q: 'zzz' }, [member()])).toBeTruthy();
+  });
+
+  it('filters by activity status', async () => {
+    expect(await renderWith({ status: 'active' }, [member({ is_active: false })])).toBeTruthy();
+    expect(await renderWith({ status: 'inactive' }, [member()])).toBeTruthy();
+  });
+
+  it('filters by points balance', async () => {
+    expect(await renderWith({ points: 'with' }, [member({ available_points: 0 })])).toBeTruthy();
+    expect(await renderWith({ points: 'without' }, [member()])).toBeTruthy();
+  });
+
+  it('filters by registration date and paginates', async () => {
+    expect(
+      await renderWith({ from: '2026-09-01', page: '2', perPage: '25' }, [member()]),
+    ).toBeTruthy();
+  });
+
+  it('drops beneficiaries without coordinates from the map', async () => {
+    const noAddress = member();
+    (noAddress.beneficiary as Record<string, unknown>).address = null;
+    expect(await renderWith({}, [noAddress])).toBeTruthy();
+  });
+
+  it('renders an inactive member without a name', async () => {
+    const anon = member({ is_active: false });
+    Object.assign(anon.beneficiary as Record<string, unknown>, {
+      first_name: null,
+      last_name: null,
+    });
+    expect(await renderWith({}, [anon])).toBeTruthy();
+  });
+});
+
+describe('BeneficiaryListPage admin map data', () => {
+  const { isAdmin } = require('@/lib/auth/roles');
+  const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
+
+  beforeEach(() => { jest.clearAllMocks(); });
+
+  it('keeps the coordinates of beneficiaries that have an address', async () => {
+    isAdmin.mockReturnValueOnce(true);
+    getActiveOrgIdFilter.mockResolvedValueOnce(null);
+    mockSelect.mockResolvedValueOnce({
+      data: [
+        {
+          id: '1',
+          first_name: 'Ana',
+          last_name: 'Diaz',
+          registration_date: '2026-08-10',
+          address: { latitude: -32.88, longitude: -68.84 },
+        },
+      ],
+      error: null,
+    });
+    const result = await BeneficiaryListPage({ searchParams: Promise.resolve({}) });
+    render(result);
+    expect(result).toBeTruthy();
+  });
+});
+
+describe('BeneficiaryListPage PII', () => {
+  const { isAdmin } = require('@/lib/auth/roles');
+  const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
+
+  const BENEFICIARY = {
+    id: '1',
+    first_name: 'Ben',
+    last_name: 'Doe',
+    email: 'ben@test.com',
+    phone: '2615464612',
+    document_id: '31011953',
+    registration_date: '2026-08-10',
+  };
+
+  beforeEach(() => { jest.clearAllMocks(); });
+
+  it('hides email, phone and document from owners', async () => {
+    isAdmin.mockReturnValue(false);
+    getActiveOrgIdFilter.mockResolvedValueOnce(1);
+    mockFrom.mockReturnValueOnce({
+      select: jest.fn(() => ({
+        eq: jest.fn().mockResolvedValue({
+          data: [{ is_active: true, available_points: 0, beneficiary: BENEFICIARY }],
+          error: null,
+        }),
+      })),
+    });
+    render(await BeneficiaryListPage({ searchParams: Promise.resolve({}) }));
+    expect(screen.getByText('Ben Doe')).toBeInTheDocument();
+    expect(screen.queryByText('ben@test.com')).not.toBeInTheDocument();
+    expect(screen.queryByText('2615464612')).not.toBeInTheDocument();
+    expect(screen.queryByText('31011953')).not.toBeInTheDocument();
+  });
+
+  it('lets admins search by email, phone or document', async () => {
+    isAdmin.mockReturnValue(true);
+    getActiveOrgIdFilter.mockResolvedValue(null);
+    mockSelect.mockResolvedValueOnce({ data: [BENEFICIARY], error: null });
+    render(await BeneficiaryListPage({ searchParams: Promise.resolve({ q: '31011953' }) }));
+    expect(screen.getByText('Ben Doe')).toBeInTheDocument();
+
+    mockSelect.mockResolvedValueOnce({ data: [BENEFICIARY], error: null });
+    render(await BeneficiaryListPage({ searchParams: Promise.resolve({ q: 'zzz' }) }));
+    expect(screen.getAllByText('empty')).toHaveLength(1);
+  });
+
+  it('keeps them for admins', async () => {
+    isAdmin.mockReturnValue(true);
+    getActiveOrgIdFilter.mockResolvedValueOnce(null);
+    mockSelect.mockResolvedValueOnce({ data: [BENEFICIARY], error: null });
+    render(await BeneficiaryListPage({ searchParams: Promise.resolve({}) }));
+    expect(screen.getByText('ben@test.com')).toBeInTheDocument();
+    expect(screen.getByText('2615464612')).toBeInTheDocument();
+    expect(screen.getByText('31011953')).toBeInTheDocument();
   });
 });

@@ -1,16 +1,22 @@
 import { cookies } from "next/headers"
+import Link from "next/link"
 import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
-import { Settings } from "lucide-react"
+import { Eye } from "lucide-react"
 
-import { getOrganizationSettings } from "@/actions/dashboard/organization/actions"
-import { OrgVisibilityToggle } from "@/components/dashboard/organization/org-visibility-toggle"
+import { getOrganizationAddress, getOrganizationSettings } from "@/actions/dashboard/organization/actions"
+import { GiftIllustration } from "@/components/dashboard/home/gift-illustration"
+import {
+  ClubProfileForm,
+  type ClubProfileFormAddress,
+} from "@/components/dashboard/organization/club-profile-form"
 import { getCurrentUser } from "@/lib/auth/get-current-user"
 import { hasOwnerPermissions } from "@/lib/auth/roles"
+import type { Organization } from "@/types/organization"
 
 export default async function OrgSettingsPage() {
   const [t, currentUser] = await Promise.all([
-    getTranslations("Dashboard.orgSettings"),
+    getTranslations("Dashboard.clubProfile"),
     getCurrentUser(),
   ])
   if (!currentUser || !hasOwnerPermissions(currentUser)) {
@@ -26,34 +32,38 @@ export default async function OrgSettingsPage() {
     redirect("/dashboard")
   }
 
-  const { data: org, error } = await getOrganizationSettings(activeOrgId)
+  const [{ data: org, error }, { data: address }] = await Promise.all([
+    getOrganizationSettings(activeOrgId),
+    getOrganizationAddress(activeOrgId),
+  ])
 
   if (error || !org) {
     redirect("/dashboard")
   }
 
   return (
-    <div className="space-y-6 max-w-2xl">
-      <div className="flex items-center gap-3">
-        <div className="flex size-10 items-center justify-center rounded-lg bg-muted">
-          <Settings className="size-5 text-muted-foreground" />
-        </div>
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-start justify-between gap-4">
         <div>
-          <h1 className="text-lg font-semibold">{org.name}</h1>
+          <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">{t("description")}</p>
+        </div>
+        <div className="flex items-center gap-4">
+          <GiftIllustration className="hidden h-20 w-28 shrink-0 lg:block" />
+          <Link
+            className="inline-flex h-10 items-center gap-2 rounded-lg border bg-card px-4 text-sm font-medium transition-colors hover:bg-accent"
+            href="/dashboard/qr"
+          >
+            <Eye className="size-4" />
+            {t("preview")}
+          </Link>
         </div>
       </div>
 
-      <div className="space-y-3">
-        <div>
-          <h2 className="text-sm font-semibold">{t("visibilityTitle")}</h2>
-          <p className="text-sm text-muted-foreground">{t("visibilityDescription")}</p>
-        </div>
-        <OrgVisibilityToggle
-          orgId={activeOrgId}
-          initialIsPublic={/* c8 ignore next */ org.is_public ?? true}
-        />
-      </div>
+      <ClubProfileForm
+        address={address as ClubProfileFormAddress | null}
+        organization={org as unknown as Organization}
+      />
     </div>
   )
 }

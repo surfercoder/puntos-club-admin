@@ -15,7 +15,20 @@ jest.mock('@/lib/utils', () => ({
 
 // jest.setup.js's next/server mock has no NextResponse.next(); this suite needs it.
 jest.mock('next/server', () => {
-  const make = (kind: string) => ({ kind, cookies: { set: jest.fn() } });
+  // El cookie jar del mock guarda de verdad, así que se puede verificar que un
+  // redirect arrastre las cookies que refrescó supabase.auth.getUser().
+  const make = (kind: string) => {
+    const jar: { name: string; value: string }[] = [];
+    return {
+      kind,
+      cookies: {
+        set: jest.fn((name: string, value: string, options?: Record<string, unknown>) => {
+          jar.push({ name, value, ...(options ?? {}) });
+        }),
+        getAll: jest.fn(() => jar),
+      },
+    };
+  };
   return {
     NextResponse: {
       next: jest.fn(() => make('next')),
@@ -68,6 +81,39 @@ describe('lib/supabase/middleware updateSession', () => {
     mockUser(null);
     const result = await updateSession(buildRequest('/dashboard/purchase'));
     expect(result).toEqual(expect.objectContaining({ kind: 'redirect:/auth/login' }));
+  });
+
+  // Una sesión válida no tiene nada que hacer en el login: se la manda al
+  // dashboard (para entrar con otra cuenta hay que desloguearse primero).
+  it('redirects an authenticated user away from the login page', async () => {
+    const result = await updateSession(buildRequest('/auth/login'));
+    expect(result).toEqual(expect.objectContaining({ kind: 'redirect:/dashboard' }));
+  });
+
+  // Si getUser() refrescó la sesión, esas cookies viven en la respuesta base:
+  // un redirect que no las copie deja al usuario deslogueado.
+  it('carries refreshed session cookies onto the redirect', async () => {
+    const request = buildRequest('/auth/login');
+    (createServerClient as jest.Mock).mockImplementation((_url, _key, opts) => ({
+      auth: {
+        getUser: jest.fn(async () => {
+          opts.cookies.setAll([{ name: 'sb', value: 'fresh', options: { path: '/' } }]);
+          return { data: { user: { id: 'user-1' } } };
+        }),
+      },
+    }));
+
+    const result = (await updateSession(request)) as unknown as {
+      cookies: { set: jest.Mock };
+    };
+    expect(result.cookies.set).toHaveBeenCalledWith('sb', 'fresh', { path: '/' });
+  });
+
+  it('leaves an anonymous visitor on the login page', async () => {
+    mockUser(null);
+    const result = await updateSession(buildRequest('/auth/login'));
+    expect(result).toEqual(expect.objectContaining({ kind: 'next' }));
+    expect(NextResponse.redirect).not.toHaveBeenCalled();
   });
 
   it('lets an authenticated user through', async () => {

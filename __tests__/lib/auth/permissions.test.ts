@@ -12,7 +12,6 @@ const ALL_ENTITIES: EntityName[] = [
   'beneficiary_organization',
   'branch',
   'organization',
-  'category',
   'product',
 
   'app_user',

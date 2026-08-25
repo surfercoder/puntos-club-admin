@@ -64,6 +64,25 @@ export interface OnboardingStep4Data {
   categories: OnboardingCategoryInput[];
 }
 
+// ─── Nombre de organizacion disponible ───────────────────────────────────────
+
+/**
+ * ¿Ya hay un club con ese nombre? La normalizacion (minusculas + trim) vive en
+ * el indice unico organization_name_unique y en el RPC, no aca.
+ * 'unknown' cuando no se pudo consultar: el indice unico sigue siendo la red.
+ */
+export async function checkOrgNameAvailable(
+  name: string
+): Promise<'available' | 'taken' | 'unknown'> {
+  if (!name.trim()) return 'unknown';
+
+  const supabase = await createClient();
+  const { data, error } = await supabase.rpc('org_name_taken', { p_name: name });
+
+  if (error) return 'unknown';
+  return data ? 'taken' : 'available';
+}
+
 // ─── Atomic onboarding action ─────────────────────────────────────────────────
 
 /**
@@ -144,6 +163,13 @@ export async function completeOnboarding(input: {
       .single();
 
     if (orgError || !orgData) {
+      if (orgError?.code === '23505') {
+        return {
+          success: false,
+          error:
+            'Ya existe una empresa con ese nombre. Probá con otro, por ejemplo agregando la ciudad o el barrio.',
+        };
+      }
       return { success: false, error: orgError?.message || 'Error al crear la organización.' };
     }
 

@@ -27,18 +27,32 @@ export async function purchaseFormAction(_prevState: ActionState, formData: Form
   const supabase = await createClient();
   const isUpdate = !!formDataObject.id;
 
-  // Calculate points using the database function (same as mobile)
-  const branchId = parsed.data.branch_id ? parseInt(parsed.data.branch_id, 10) : null;
-  const { data: pointsData } = await supabase.rpc('calculate_points_for_amount', {
-    p_amount: parsed.data.total_amount,
-    p_organization_id: orgIdNumber,
-    p_branch_id: branchId,
-    p_category_id: null,
-  });
-  const pointsEarned = pointsData || 0;
+  const { mode, total_amount, points_earned, ...rest } = parsed.data;
+  const branchId = rest.branch_id ? parseInt(rest.branch_id, 10) : null;
+
+  let amount = 0;
+  let pointsEarned: number;
+
+  if (mode === 'assignment') {
+    // Asignación manual: el owner otorga los puntos y no hay importe de venta.
+    /* c8 ignore next -- el schema ya exige el campo en este modo */
+    pointsEarned = points_earned ?? 0;
+  } else {
+    // Venta: los puntos los calcula el mismo RPC que usa la app de cajeros.
+    /* c8 ignore next -- el schema ya exige el campo en este modo */
+    amount = total_amount ?? 0;
+    const { data: pointsData } = await supabase.rpc('calculate_points_for_amount', {
+      p_amount: amount,
+      p_organization_id: orgIdNumber,
+      p_branch_id: branchId,
+      p_category_id: null,
+    });
+    pointsEarned = pointsData || 0;
+  }
 
   const dataToSave = {
-    ...parsed.data,
+    ...rest,
+    total_amount: amount,
     organization_id: orgIdNumber,
     points_earned: pointsEarned,
     // Owner is always the virtual cashier. Only stamp it on create so edits

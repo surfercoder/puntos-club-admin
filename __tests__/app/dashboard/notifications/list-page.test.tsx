@@ -1,17 +1,42 @@
 import NotificationsPage from '@/app/dashboard/notifications/page';
 
 const mockOrder = jest.fn();
+const mockEq = jest.fn();
+const mockGte = jest.fn();
+const mockLte = jest.fn();
 
 jest.mock('next-intl/server', () => ({ getTranslations: jest.fn(() => Promise.resolve((key: string) => key)) }));
 jest.mock('@/lib/supabase/server', () => ({
   createClient: jest.fn(() => Promise.resolve({
     from: jest.fn(() => ({
       select: jest.fn(() => ({
-        order: mockOrder,
+        order: (...args: unknown[]) => {
+          const result = mockOrder(...args) as Record<string, unknown>;
+          // La página encadena filtros opcionales sobre el mismo builder.
+          const chain = {
+            ...result,
+            then: (resolve: (v: unknown) => unknown) => Promise.resolve(result).then(resolve),
+            eq: (...eqArgs: unknown[]) => { mockEq(...eqArgs); return chain; },
+            gte: (...gteArgs: unknown[]) => { mockGte(...gteArgs); return chain; },
+            lte: (...lteArgs: unknown[]) => { mockLte(...lteArgs); return chain; },
+          };
+          return chain;
+        },
       })),
     })),
   })),
 }));
+jest.mock('@/actions/dashboard/usage/actions', () => ({
+  getUsageSummaryAction: jest.fn(() => Promise.resolve(null)),
+}));
+jest.mock('@/components/dashboard/plan/plan-usage-badge', () => ({ PlanUsageBadge: () => <div /> }));
+jest.mock('@/components/dashboard/notifications/notification-stats', () => ({ NotificationStats: () => <div /> }));
+jest.mock('@/components/dashboard/notifications/notification-detail-row', () => ({ NotificationDetailRow: () => <div data-testid="detail-row" /> }));
+jest.mock('@/components/dashboard/notifications/notification-filters', () => ({
+  NotificationFilters: () => <div />,
+}));
+jest.mock('@/components/dashboard/shared/table-pagination', () => ({ TablePagination: () => <div /> }));
+jest.mock('@/components/dashboard/notifications/delete-modal', () => function Mock() { return <div />; });
 jest.mock('@/components/dashboard/plan/plan-limit-create-button', () => ({ PlanLimitCreateButton: () => <div /> }));
 jest.mock('@/components/dashboard/plan/plan-usage-banner', () => ({ PlanUsageBanner: () => <div /> }));
 jest.mock('@/components/ui/badge', () => ({ Badge: ({ children }: { children: React.ReactNode }) => <span>{children}</span> }));
@@ -79,41 +104,41 @@ describe('NotificationsPage', () => {
   });
 
   it('renders without crashing (empty)', async () => {
-    const result = await NotificationsPage();
+    const result = await NotificationsPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 
   it('throws when fetch fails', async () => {
     mockOrder.mockResolvedValue({ data: null, error: { message: 'DB error' } });
 
-    await expect(NotificationsPage()).rejects.toThrow('Failed to fetch notifications');
+    await expect(NotificationsPage({ searchParams: Promise.resolve({}) })).rejects.toThrow('Failed to fetch notifications');
   });
 
   it('renders notifications list', async () => {
     mockOrder.mockResolvedValue({ data: mockNotifications, error: null });
 
-    const result = await NotificationsPage();
+    const result = await NotificationsPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 
   it('renders empty state with action link', async () => {
     mockOrder.mockResolvedValue({ data: [], error: null });
 
-    const result = await NotificationsPage();
+    const result = await NotificationsPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 
   it('renders null notifications as empty', async () => {
     mockOrder.mockResolvedValue({ data: null, error: null });
 
-    const result = await NotificationsPage();
+    const result = await NotificationsPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 
   it('handles getStatusVariant for all statuses', async () => {
     mockOrder.mockResolvedValue({ data: mockNotifications, error: null });
 
-    const result = await NotificationsPage();
+    const result = await NotificationsPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 
@@ -132,7 +157,7 @@ describe('NotificationsPage', () => {
       error: null,
     });
 
-    const result = await NotificationsPage();
+    const result = await NotificationsPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 
@@ -142,7 +167,7 @@ describe('NotificationsPage', () => {
       error: null,
     });
 
-    const result = await NotificationsPage();
+    const result = await NotificationsPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 
@@ -152,7 +177,7 @@ describe('NotificationsPage', () => {
       error: null,
     });
 
-    const result = await NotificationsPage();
+    const result = await NotificationsPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 
@@ -162,7 +187,7 @@ describe('NotificationsPage', () => {
       error: null,
     });
 
-    const result = await NotificationsPage();
+    const result = await NotificationsPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 
@@ -181,7 +206,80 @@ describe('NotificationsPage', () => {
       error: null,
     });
 
-    const result = await NotificationsPage();
+    const result = await NotificationsPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
   });
 });
+
+describe('NotificationsPage filters and detail', () => {
+  const rows = [
+    {
+      id: 3,
+      title: 'Inviernos especiales',
+      body: 'Triplicá tus puntos',
+      status: 'sent',
+      sent_count: 10,
+      failed_count: 2,
+      created_at: '2026-07-31T18:15:00Z',
+      creator: { first_name: 'Agustin', last_name: 'Cassani', email: 'a@test.com' },
+    },
+  ];
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    mockOrder.mockReturnValue({ data: rows, error: null });
+  });
+
+  it('pushes every filter down to the query', async () => {
+    await NotificationsPage({
+      searchParams: Promise.resolve({ status: 'sent', from: '2026-07-01', to: '2026-07-31' }),
+    });
+    expect(mockEq).toHaveBeenCalledWith('status', 'sent');
+    expect(mockGte).toHaveBeenCalledWith('created_at', '2026-07-01');
+    expect(mockLte).toHaveBeenCalledWith('created_at', '2026-07-31T23:59:59.999');
+  });
+
+  it('searches across the title and the message', async () => {
+    expect(await NotificationsPage({ searchParams: Promise.resolve({ q: 'invierno' }) })).toBeTruthy();
+    expect(await NotificationsPage({ searchParams: Promise.resolve({ q: 'zzz' }) })).toBeTruthy();
+  });
+
+  it('expands the row named in the query string', async () => {
+    const result = await NotificationsPage({ searchParams: Promise.resolve({ open: '3' }) });
+    const rendered = require('react-dom/server').renderToStaticMarkup(result);
+    expect(rendered).toContain('detail-row');
+  });
+
+  it('keeps the current filters and page in the expand link', async () => {
+    const result = await NotificationsPage({
+      searchParams: Promise.resolve({ q: 'invierno', page: '1', perPage: '25', open: '3' }),
+    });
+    const rendered = require('react-dom/server').renderToStaticMarkup(result);
+    expect(rendered).toContain('q=invierno');
+    expect(rendered).toContain('perPage=25');
+  });
+
+  it('reports the remaining notifications from the plan usage', async () => {
+    const { getUsageSummaryAction } = require('@/actions/dashboard/usage/actions');
+    getUsageSummaryAction.mockResolvedValueOnce({
+      plan: 'pro',
+      features: [{ feature: 'push_notifications_monthly', current_usage: 1, limit_value: 50 }],
+    });
+    expect(await NotificationsPage({ searchParams: Promise.resolve({}) })).toBeTruthy();
+  });
+
+  it('treats a missing send count as zero, expanded row included', async () => {
+    mockOrder.mockReturnValue({
+      data: [{ ...rows[0], sent_count: null, failed_count: null, creator: null }],
+      error: null,
+    });
+    expect(await NotificationsPage({ searchParams: Promise.resolve({}) })).toBeTruthy();
+
+    mockOrder.mockReturnValue({
+      data: [{ ...rows[0], sent_count: null, failed_count: null, creator: null }],
+      error: null,
+    });
+    expect(await NotificationsPage({ searchParams: Promise.resolve({ open: '3' }) })).toBeTruthy();
+  });
+});
+

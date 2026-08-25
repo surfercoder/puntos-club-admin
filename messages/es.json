@@ -91,7 +91,18 @@
     "more": "Más",
     "toggleTheme": "Cambiar tema",
     "toggleSidebar": "Alternar barra lateral",
-    "breadcrumb": "Migas de pan"
+    "breadcrumb": "Migas de pan",
+    "pagination": {
+      "rowsPerPage": "Filas por página",
+      "pageOf": "Página {page} de {totalPages}",
+      "first": "Primera página",
+      "previous": "Página anterior",
+      "next": "Página siguiente",
+      "last": "Última página",
+      "showing": "Mostrando {shown} de {total}"
+    },
+    "export": "Exportar",
+    "copy": "Copiar"
   },
   "NotFound": {
     "title": "404 - Página no encontrada",
@@ -108,10 +119,12 @@
       "title": "Iniciar sesión",
       "description": "Ingresa tu correo electrónico para acceder a tu cuenta",
       "forgotPassword": "¿Olvidaste tu contraseña?",
-      "noAccount": "¿No tienes una cuenta?",
-      "signUpLink": "Registrarse",
+      "noAccount": "¿Aún no tenés cuenta?",
+      "signUpLink": "Unirse ahora",
       "submitting": "Iniciando sesión...",
       "noPermission": "No tienes permisos para acceder al portal de administración.",
+      "showPassword": "Mostrar contraseña",
+      "hidePassword": "Ocultar contraseña",
       "pageTitle": "Iniciar sesión - Puntos Club Admin",
       "pageDescription": "Inicia sesión en tu cuenta"
     },
@@ -135,17 +148,17 @@
       "pageTitle": "Registro exitoso - Puntos Club Admin"
     },
     "forgotPassword": {
-      "title": "Restablecer contraseña",
-      "description": "Ingresa tu correo y te enviaremos un enlace para restablecer tu contraseña",
+      "title": "¿Olvidaste tu contraseña?",
+      "description": "No te preocupes, sucede. Ingresá tu correo y te enviaremos un enlace para restablecerla.",
       "successTitle": "Revisa tu correo",
-      "successDescription": "Instrucciones de restablecimiento enviadas",
       "successMessage": "Si te registraste con correo y contraseña, recibirás un correo para restablecer tu contraseña.",
-      "submitButton": "Enviar correo de restablecimiento",
+      "submitButton": "Enviar enlace de recuperación",
       "submitting": "Enviando...",
-      "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+      "alreadyHaveAccount": "¿Recordaste tu contraseña?",
       "loginLink": "Iniciar sesión",
       "pageTitle": "Restablecer contraseña - Puntos Club Admin",
-      "pageDescription": "Restablece la contraseña de tu cuenta"
+      "pageDescription": "Restablece la contraseña de tu cuenta",
+      "backToLogin": "Volver al inicio de sesión"
     },
     "updatePassword": {
       "title": "Restablecer contraseña",
@@ -202,7 +215,6 @@
     "beneficiaries": "Beneficiarios",
     "beneficiaryOrgs": "Organizaciones de Beneficiarios",
     "branches": "Sucursales",
-    "categories": "Categorías",
     "notificationLimits": "Límites de Notificaciones",
     "organizations": "Organizaciones",
     "pointsRules": "Reglas de Puntos",
@@ -227,10 +239,13 @@
     "settings": "Configuración",
     "designEngineering": "Ingeniería de diseño",
     "salesMarketing": "Ventas y marketing",
-    "travel": "Viajes"
+    "travel": "Viajes",
+    "cashiers": "Cajeros",
+    "collaborators": "Colaboradores"
   },
   "Breadcrumb": {
     "panel": "Panel",
+    "dashboard": "Dashboard",
     "new": "Nuevo",
     "create": "Crear",
     "edit": "Editar",
@@ -241,7 +256,6 @@
     "beneficiary": "Beneficiarios",
     "beneficiary_organization": "Organizaciones de Beneficiarios",
     "branch": "Sucursales",
-    "category": "Categorías",
     "notifications": "Notificaciones",
     "organization": "Organizaciones",
     "organization_notification_limits": "Límites de Notificaciones",
@@ -259,7 +273,10 @@
     "users": "Usuarios",
     "qr": "Código QR",
     "settings": "Configuración",
-    "organization-settings": "Configuración de Organización"
+    "organization-settings": "Configuración de Organización",
+    "mother": "Regla madre",
+    "cashiers": "Cajeros",
+    "collaborators": "Colaboradores"
   },
   "Dashboard": {
     "analytics": {
@@ -280,13 +297,13 @@
       },
       "purchasesOverTime": {
         "title": "Ventas en el tiempo",
-        "description": "Ingresos y cantidad de operaciones de los últimos 6 meses",
+        "description": "Ingresos y cantidad de operaciones de los últimos {months} meses",
         "revenueLabel": "Ingresos ($)",
         "countLabel": "Operaciones"
       },
       "pointsEconomy": {
         "title": "Economía de puntos",
-        "description": "Puntos otorgados vs canjeados en los últimos 6 meses",
+        "description": "Puntos otorgados vs canjeados en los últimos {months} meses",
         "earnedLabel": "Puntos otorgados",
         "redeemedLabel": "Puntos canjeados"
       },
@@ -319,6 +336,47 @@
           "collaborators": "Colaboradores",
           "redeemable_products": "Productos"
         }
+      }
+    },
+    "home": {
+      "greeting": "¡Hola, {name}!",
+      "subtitle": "Este es el resumen de la actividad de {organization} en PuntosClub.",
+      "rangeLabel": "Período",
+      "rangeOption": "Últimos {months} meses",
+      "quickActions": {
+        "title": "Accesos rápidos",
+        "assignPoints": {
+          "title": "Asignar puntos",
+          "description": "Otorgá puntos a tus beneficiarios"
+        },
+        "createBenefit": {
+          "title": "Crear beneficio",
+          "description": "Agregá nuevos productos o premios"
+        },
+        "downloadQr": {
+          "title": "Descargar QR",
+          "description": "Compartí tu club con más personas"
+        },
+        "viewRedemptions": {
+          "title": "Ver canjes",
+          "description": "Revisá los últimos canjes realizados"
+        }
+      },
+      "quickSummary": {
+        "title": "Resumen rápido",
+        "availablePoints": "Saldo de puntos disponible",
+        "pointsGranted": "Puntos otorgados ({months} meses)",
+        "pointsRedeemed": "Puntos canjeados ({months} meses)",
+        "totalBeneficiaries": "Beneficiarios totales",
+        "activeBeneficiaries": "Beneficiarios activos"
+      },
+      "help": {
+        "title": "¿Necesitás ayuda?",
+        "description": "Nuestro asistente está listo para ayudarte con tu programa.",
+        "cta": "Abrir asistente"
+      },
+      "footer": {
+        "copyright": "© {year} PuntosClub. Todos los derechos reservados."
       }
     },
     "profile": {
@@ -403,14 +461,15 @@
     },
     "notifications": {
       "title": "Notificaciones Push",
-      "description": "Envía notificaciones a tus beneficiarios",
+      "description": "Enviá notificaciones a tus beneficiarios y revisá su rendimiento.",
       "newButton": "Nueva Notificación",
       "tableHeaders": {
         "title": "Título",
         "message": "Mensaje",
         "status": "Estado",
         "sent": "Enviadas",
-        "failed": "Fallidas"
+        "failed": "Fallidas",
+        "delivered": "Entregadas"
       },
       "empty": "Aún no se enviaron notificaciones",
       "emptyAction": "Enviar la primera notificación",
@@ -529,7 +588,102 @@
         "approvedMessage": "Tu contenido de notificación ha sido revisado y aprobado. Ahora puedes enviarlo a tus beneficiarios.",
         "reviewReasons": "Por favor revisa tu contenido por las siguientes razones:",
         "reminder": "Recuerda: Las notificaciones solo deben contener información sobre productos, ofertas, promociones y campañas."
-      }
+      },
+      "viewStats": "Ver estadísticas",
+      "showing": "Mostrando {shown} de {total} notificaciones",
+      "expand": "Ver detalle",
+      "collapse": "Ocultar detalle",
+      "status": {
+        "draft": "Borrador",
+        "sending": "Enviando",
+        "sent": "Enviada",
+        "failed": "Fallida"
+      },
+      "stats": {
+        "sent": "Enviadas",
+        "sentSubtitle": "Total histórico",
+        "delivered": "Entregadas",
+        "failed": "Fallidas",
+        "ofSent": "{percent}% de enviadas",
+        "deliveryRate": "Tasa de entrega",
+        "deliveryRateSubtitle": "Sobre el total enviado",
+        "excellent": "Excelente",
+        "remaining": "Disponibles este mes",
+        "remainingSubtitle": "De {limit} de tu plan",
+        "remainingNoLimit": "Sin límite de plan"
+      },
+      "filters": {
+        "search": "Buscar",
+        "searchPlaceholder": "Buscar por título o mensaje...",
+        "status": "Estado",
+        "all": "Todos",
+        "from": "Fecha desde",
+        "to": "Fecha hasta",
+        "apply": "Aplicar filtros",
+        "clear": "Limpiar"
+      },
+      "detail": {
+        "type": "Tipo de notificación",
+        "typeGlobal": "Global",
+        "segment": "Segmento",
+        "segmentAll": "Todos los beneficiarios activos",
+        "platform": "Plataforma",
+        "platformBoth": "Android, iOS",
+        "action": "Enlace / Acción",
+        "actionOpenApp": "Abrir app (pantalla principal)",
+        "performance": "Rendimiento detallado",
+        "steps": {
+          "sent": "Enviadas",
+          "delivered": "Entregadas",
+          "failed": "Fallidas"
+        },
+        "deliveryRate": "Tasa de entrega",
+        "openRatePending": "Todavía no registramos aperturas: hace falta instrumentar la app para medirlas."
+      },
+      "guidance": {
+        "aiTitle": "Revisión con IA",
+        "aiSubtitle": "Antes de enviarse, tu notificación será analizada automáticamente.",
+        "aiChecks": {
+          "safe": {
+            "title": "Contenido seguro",
+            "description": "Sin lenguaje ofensivo, discriminatorio o sexual."
+          },
+          "aligned": {
+            "title": "Alineado al propósito",
+            "description": "Relación con beneficios, puntos o promociones."
+          },
+          "clear": {
+            "title": "Claridad y calidad",
+            "description": "Mensajes claros, útiles y bien estructurados."
+          }
+        },
+        "aiNote": "Si el contenido no cumple con nuestras políticas, te sugerimos mejoras antes de poder enviarlo.",
+        "tipsTitle": "Consejos para mejores resultados",
+        "tips": {
+          "short": "Usá títulos llamativos y cortos",
+          "urgency": "Generá urgencia o destacá beneficios",
+          "personalize": "Personalizá el mensaje cuando sea posible",
+          "caps": "Evitá el uso excesivo de mayúsculas",
+          "preview": "Revisá la vista previa antes de enviar"
+        },
+        "policiesTitle": "Políticas de contenido",
+        "policiesSubtitle": "No se permite:",
+        "policies": {
+          "offensive": "Lenguaje ofensivo o discriminatorio",
+          "sexual": "Contenido de índole sexual",
+          "spam": "Spam o publicidad externa",
+          "misleading": "Promesas engañosas o falsas",
+          "unrelated": "Contenido no relacionado al programa",
+          "personal": "Datos personales o sensibles"
+        }
+      },
+      "recipients": {
+        "label": "Enviar a",
+        "all": "Todos los beneficiarios activos",
+        "note": "La notificación se enviará a todos los beneficiarios que tengan instalada la app PuntosClub y las notificaciones habilitadas."
+      },
+      "contentSection": "1. Contenido de la notificación",
+      "recipientsSection": "2. Destinatarios"
     },
     "users": {
       "title": "Usuarios",
@@ -623,38 +777,6 @@
         "genericError": "Ocurrió un error al eliminar"
       }
     },
-    "category": {
-      "title": "Categorías",
-      "description": "Administrar categorías de productos del sistema",
-      "newButton": "+ Nueva Categoría",
-      "error": "Error al obtener categorías",
-      "empty": "No se encontraron categorías.",
-      "tableHeaders": {
-        "name": "Nombre",
-        "description": "Descripción",
-        "status": "Estado",
-        "actions": "Acciones"
-      },
-      "createTitle": "Crear Categoría",
-      "editTitle": "Editar Categoría",
-      "fetchError": "Error al obtener la categoría",
-      "form": {
-        "parentCategory": "Categoría Padre",
-        "noParent": "Sin categoría padre",
-        "nameLabel": "Nombre",
-        "namePlaceholder": "Ingresa el nombre de la categoría",
-        "descriptionLabel": "Descripción",
-        "descriptionPlaceholder": "Ingresa una descripción de la categoría (opcional)",
-        "activeLabel": "Activo"
-      },
-      "deleteModal": {
-        "title": "Eliminar Categoría",
-        "confirm": "¿Estás seguro de que deseas eliminar {name}? Esta acción no se puede deshacer.",
-        "deleteError": "Error al eliminar la categoría",
-        "deleteSuccess": "Categoría eliminada correctamente",
-        "genericError": "Ocurrió un error al eliminar"
-      }
-    },
     "appUser": {
       "title": "Usuarios",
       "description": "Administrar usuarios de la aplicación",
@@ -684,7 +806,10 @@
         "selectRole": "Seleccionar un rol",
         "roleLimitReached": "{role} (límite alcanzado)",
         "cashierAppQr": "Escaneá para instalar PuntosClubCaja en el celular del cajero",
-        "cashierAppInfo": "El cajero trabaja desde la app PuntosClubCaja en su celular. Pedile que la descargue e instale escaneando este QR e inicie sesión con el correo y la contraseña que definís acá. Desde la app va a poder cargar y canjear puntos de los clientes."
+        "cashierAppInfo": "El cajero trabaja desde la app PuntosClubCaja en su celular. Pedile que la descargue e instale escaneando este QR e inicie sesión con el correo y la contraseña que definís acá. Desde la app va a poder cargar y canjear puntos de los clientes.",
+        "branchLabel": "Sucursal",
+        "selectBranch": "Seleccionar sucursal",
+        "branchHint": "El cajero solo podrá asignar puntos en esta sucursal."
       },
       "roles": {
         "cashier": "Cajero",
@@ -726,6 +851,10 @@
         "printFooter": "puntosclub.app · Programa de fidelización",
         "printError": "No se pudo abrir la ventana de impresión. Verifica que no estén bloqueados los pop-ups.",
         "shareText": "Unite a {name} en Puntos Club y acumula puntos en cada compra."
+      },
+      "important": {
+        "title": "Importante",
+        "body": "Los códigos QR son únicos para tu organización. Si necesitás regenerarlos, contactá a nuestro equipo de soporte."
       }
     },
     "plan": {
@@ -743,8 +872,8 @@
       "upgradeSuffix": "para aumentar estos límites."
     },
     "planSettings": {
-      "title": "Plan y Suscripción",
-      "description": "Administra tu plan actual y compara las opciones disponibles",
+      "title": "Elegí el plan ideal para tu club de puntos",
+      "description": "Planes simples, claros y flexibles para acompañar el crecimiento de tu negocio.",
       "currentPlan": "Plan actual",
       "availablePlans": "Planes disponibles",
       "upgradeTo": "Mejorar a {plan}",
@@ -762,11 +891,48 @@
       "confirmCancel": "Sí, cancelar",
       "confirmSwitch": "Sí, cambiar",
       "cancelSuccess": "Suscripción cancelada. Tu plan ahora es trial.",
-      "cancelError": "No pudimos cancelar tu suscripción. Probá nuevamente."
+      "cancelError": "No pudimos cancelar tu suscripción. Probá nuevamente.",
+      "clubi": {
+        "greeting": "¡Hola! Soy Clubi 🎁",
+        "body": "Estoy acá para ayudarte a elegir el plan que mejor se adapte a tu negocio. Cualquier duda, estamos para vos."
+      },
+      "trust": {
+        "payments": {
+          "title": "Pagos 100% seguros",
+          "description": "Procesamos tus pagos con Mercado Pago, la plataforma líder en Latinoamérica."
+        },
+        "data": {
+          "title": "Tus datos protegidos",
+          "description": "La seguridad de tu información y la de tus usuarios es nuestra máxima prioridad."
+        },
+        "noHiddenFees": {
+          "title": "Sin cargos ocultos",
+          "description": "Precios claros, sin sorpresas. Cancelás o cambiás de plan cuando quieras."
+        },
+        "support": {
+          "title": "Soporte real",
+          "description": "Te acompañamos en cada paso con soporte humano y atención personalizada."
+        }
+      },
+      "mercadoPago": {
+        "title": "Pagos procesados por Mercado Pago",
+        "body": "Tu pago es 100% seguro. Utilizamos Mercado Pago, la plataforma líder en pagos online en Latinoamérica."
+      },
+      "guarantee": {
+        "title": "Garantía Clubi",
+        "body": "Si no estás conforme con el servicio, te devolvemos tu dinero dentro de los primeros 7 días."
+      },
+      "help": {
+        "title": "¿Tenés dudas?",
+        "body": "Hablá con nuestro equipo y te ayudamos a elegir el plan ideal para tu negocio.",
+        "cta": "Contactar soporte"
+      },
+      "footerNote": "Podés cambiar de plan o cancelar tu suscripción en cualquier momento. Los cambios se aplican al próximo ciclo de facturación.",
+      "taxNote": "Todos los precios incluyen impuestos."
     },
     "branch": {
       "title": "Sucursales",
-      "description": "Administrar todas las sucursales del sistema",
+      "description": "Administrar todas las sucursales y los cajeros asignados",
       "newButton": "+ Nueva Sucursal",
       "error": "Error al obtener sucursales",
       "createTitle": "Crear Sucursal",
@@ -778,7 +944,9 @@
         "phone": "Teléfono",
         "address": "Dirección",
         "status": "Estado",
-        "actions": "Acciones"
+        "actions": "Acciones",
+        "cashier": "Cajero asignado",
+        "cashierStatus": "Estado de cajero"
       },
       "empty": "No se encontraron sucursales.",
       "deleteModal": {
@@ -813,7 +981,41 @@
         "zipCode": "Código Postal",
         "zipCodePlaceholder": "Código postal",
         "create": "Crear",
-        "update": "Actualizar"
+        "update": "Actualizar",
+        "useMyLocation": "Usar mi ubicación",
+        "locating": "Buscando tu ubicación...",
+        "locationError": "No pudimos obtener tu ubicación",
+        "cashierLabel": "Cajero asignado",
+        "cashierPlaceholder": "Seleccionar cajero",
+        "cashierHint": "El cajero podrá operar en esta sucursal desde la App Cajeros.",
+        "cashierWarning": "Asigná un cajero para que esta sucursal pueda operar."
+      },
+      "showing": "Mostrando {shown} de {total} sucursales",
+      "noCashier": "Sin cajero asignado",
+      "assignCashier": "Asignar cajero",
+      "withoutCashier": "Sin cajero",
+      "cashierNotice": {
+        "title": "Cada sucursal debe tener un cajero asignado.",
+        "description": "El cajero será quien podrá asignar puntos en esa sucursal desde la App Cajeros.",
+        "activeBranches": "Sucursales activas",
+        "withoutCashier": "Sin cajero asignado"
+      },
+      "filters": {
+        "search": "Buscar",
+        "searchPlaceholder": "Buscar sucursal...",
+        "status": "Estado",
+        "statusActive": "Activas",
+        "statusInactive": "Inactivas",
+        "cashierStatus": "Estado de cajero",
+        "cashierAssigned": "Con cajero",
+        "cashierUnassigned": "Sin cajero",
+        "all": "Todos",
+        "apply": "Aplicar",
+        "refresh": "Actualizar"
+      },
+      "newBranch": {
+        "title": "Nueva Sucursal",
+        "description": "Completá los datos de la sucursal y asigná un cajero."
       }
     },
     "user": {
@@ -860,7 +1062,8 @@
         "document": "Documento",
         "availablePoints": "Puntos Disponibles",
         "registrationDate": "Fecha de Registro",
-        "actions": "Acciones"
+        "actions": "Acciones",
+        "pointsStatus": "Estado de puntos"
       },
       "empty": "No se encontraron beneficiarios.",
       "form": {
@@ -890,6 +1093,52 @@
         "hideSuccess": "Organización ocultada para este beneficiario",
         "unhideSuccess": "Organización visible para este beneficiario",
         "error": "Ocurrió un error al actualizar la visibilidad"
+      },
+      "viewOnMap": "Ver en mapa",
+      "showing": "Mostrando {shown} de {total} beneficiarios",
+      "pointsStatus": {
+        "with": "Con puntos",
+        "without": "Sin puntos"
+      },
+      "stats": {
+        "total": "Beneficiarios totales",
+        "totalSubtitle": "De {limit} permitidos",
+        "totalNoLimit": "Sin límite de plan",
+        "active": "Beneficiarios activos",
+        "percentOfTotal": "{percent}% del total",
+        "withPoints": "Con puntos disponibles",
+        "averagePoints": "Promedio de puntos",
+        "averagePointsSubtitle": "Entre todos los beneficiarios",
+        "newThisMonth": "Nuevos este mes",
+        "growth": "{growth}% vs mes anterior"
+      },
+      "filters": {
+        "search": "Buscar",
+        "searchPlaceholder": "Nombre, email, documento...",
+        "searchPlaceholderName": "Nombre o apellido...",
+        "status": "Estado",
+        "statusActive": "Activos",
+        "statusInactive": "Inactivos",
+        "points": "Puntos disponibles",
+        "pointsWith": "Con puntos",
+        "pointsWithout": "Sin puntos",
+        "registrationDate": "Fecha de registro",
+        "all": "Todos",
+        "apply": "Aplicar filtros",
+        "clear": "Limpiar"
+      },
+      "map": {
+        "title": "Beneficiarios por zona",
+        "tooltip": "Las zonas se calculan con la dirección registrada de cada beneficiario.",
+        "subtitle": "Distribución geográfica (mapa de calor)",
+        "rangeLabel": "Período del mapa",
+        "rangeOption": "Últimos {months} meses",
+        "legendLow": "Menos beneficiarios",
+        "legendHigh": "Más beneficiarios",
+        "privacyNote": "Vista aproximada por seguridad. No se muestran ubicaciones exactas.",
+        "loading": "Cargando el mapa...",
+        "empty": "Todavía no hay beneficiarios con dirección registrada en este período.",
+        "error": "No pudimos cargar el mapa."
       }
     },
     "product": {
@@ -910,16 +1159,25 @@
       "empty": "No se encontraron productos.",
       "form": {
         "categoryLabel": "Categoría",
-        "categoryPlaceholder": "Seleccionar una categoría",
-        "nameLabel": "Nombre",
-        "namePlaceholder": "Ingresa el nombre del producto",
-        "descriptionLabel": "Descripción",
-        "descriptionPlaceholder": "Ingresa una descripción del producto (opcional)",
-        "pointsLabel": "Puntos Requeridos",
-        "pointsPlaceholder": "Ingresa los puntos requeridos",
-        "stockLabel": "Stock",
-        "stockPlaceholder": "Unidades disponibles para canjear",
-        "imagesLabel": "Imágenes del Producto (hasta 3)"
+        "categoryPlaceholder": "Seleccionar categoría existente",
+        "nameLabel": "Nombre del producto",
+        "namePlaceholder": "Ingresá el nombre del producto",
+        "descriptionLabel": "Descripción (opcional)",
+        "descriptionPlaceholder": "Ingresá una descripción del producto",
+        "pointsLabel": "Puntos requeridos",
+        "pointsPlaceholder": "0",
+        "stockLabel": "Stock disponible",
+        "stockPlaceholder": "0",
+        "imagesLabel": "Imágenes del producto (hasta 3)",
+        "sectionTitle": "1. Información del producto",
+        "orCreateCategory": "o crear una nueva a la derecha",
+        "newCategoryLabel": "Categoría nueva (opcional)",
+        "newCategoryPlaceholder": "Nombre de la nueva categoría",
+        "descriptionMax": "Máx. {max} caracteres",
+        "pointsHelp": "Cantidad de puntos que necesita el beneficiario para canjearlo.",
+        "stockHelp": "Cantidad de unidades disponibles para canjear.",
+        "submitCreate": "Crear producto",
+        "submitEdit": "Guardar cambios"
       },
       "deleteModal": {
         "title": "Eliminar Producto",
@@ -941,30 +1199,52 @@
         "formats": "JPEG, PNG, WebP · Máx 5MB",
         "autoResize": "Se ajustan solas a 1200×675 px (16:9). Usá ese formato para que no queden bordes.",
         "noImages": "No se subieron imágenes aún. Podés agregar hasta 3 imágenes.",
-        "imageCount": "{count} de 3 imágenes subidas"
+        "imageCount": "{count} de 3 imágenes subidas",
+        "mainImage": "Principal",
+        "addImage": "Agregar imagen"
       },
-      "outOfStock": "Sin stock"
+      "outOfStock": "Sin stock",
+      "preview": {
+        "title": "Vista previa del producto",
+        "placeholderName": "Nombre del producto",
+        "placeholderDescription": "La descripción del producto aparecerá acá.",
+        "points": "Puntos requeridos",
+        "stock": "Stock disponible",
+        "units": "{count} unidades",
+        "infoTitle": "Información",
+        "infoBody": "Una vez creado, el producto estará disponible para que los beneficiarios lo vean y puedan canjearlo según las reglas del programa."
+      },
+      "createDescription": "Completá la información del premio y su categoría.",
+      "editDescription": "Actualizá la información del premio y su categoría."
     },
     "redemption": {
       "title": "Canjes",
-      "description": "Administrar canjes del sistema",
+      "description": "Administrar canjes realizados por los beneficiarios",
       "error": "Error al obtener canjes",
       "empty": "No se encontraron canjes.",
       "filters": {
+        "search": "Buscar",
+        "searchPlaceholder": "Buscar por beneficiario, producto, código...",
         "status": "Estado",
         "allStatuses": "Todos los estados",
-        "from": "Desde",
-        "to": "Hasta",
-        "apply": "Aplicar",
+        "from": "Fecha desde",
+        "to": "Fecha hasta",
+        "beneficiary": "Beneficiario",
+        "allBeneficiaries": "Todos los beneficiarios",
+        "product": "Producto",
+        "allProducts": "Todos los productos",
+        "apply": "Aplicar filtros",
         "clear": "Limpiar"
       },
       "tableHeaders": {
         "beneficiary": "Beneficiario",
         "product": "Producto",
-        "pointsUsed": "Puntos",
-        "date": "Fecha",
+        "pointsUsed": "Puntos utilizados",
+        "date": "Fecha y hora",
         "status": "Estado",
-        "actions": "Acciones"
+        "actions": "Acciones",
+        "code": "ID Canje",
+        "deliveredBy": "Entregado por"
       },
       "status": {
         "pending": "Pendiente",
@@ -982,6 +1262,44 @@
         "deleteError": "Error al eliminar el canje",
         "deleteSuccess": "Canje eliminado correctamente",
         "genericError": "Ocurrió un error al eliminar"
+      },
+      "reportButton": "Reporte de canjes",
+      "showing": "Mostrando {shown} de {total} canjes",
+      "summaryTitle": "Resumen del período",
+      "donutTotal": "Total de canjes",
+      "stats": {
+        "inPeriod": "En el período seleccionado",
+        "total": "Canjes totales",
+        "pointsUsed": "Puntos utilizados",
+        "pending": "Canjes pendientes",
+        "pendingSubtitle": "Esperando entrega",
+        "delivered": "Canjes entregados",
+        "deliveredSubtitle": "Completados",
+        "cancelled": "Canjes cancelados",
+        "cancelledSubtitle": "Cancelados por la organización"
+      },
+      "quickActions": {
+        "title": "Acciones rápidas",
+        "deliver": {
+          "title": "Marcar como entregado",
+          "description": "Confirmar entrega de un canje"
+        },
+        "cancel": {
+          "title": "Cancelar canje",
+          "description": "Cancelar un canje pendiente"
+        },
+        "products": {
+          "title": "Ver productos",
+          "description": "Revisar el catálogo y su stock"
+        },
+        "export": {
+          "title": "Exportar canjes",
+          "description": "Descargar la lista de canjes"
+        }
+      },
+      "info": {
+        "title": "Información",
+        "body": "Desde acá podés ver todos los canjes realizados por los beneficiarios, su estado actual y gestionar las entregas."
       }
     },
     "appUserOrganization": {
@@ -1084,7 +1402,7 @@
     },
     "purchase": {
       "title": "Cajero Virtual",
-      "description": "Administrar operaciones del cajero virtual",
+      "description": "Historial de operaciones y asignaciones de puntos",
       "createTitle": "Crear Operación",
       "editTitle": "Editar Operación",
       "newButton": "+ Nueva Operación",
@@ -1098,25 +1416,158 @@
         "branch": "Sucursal",
         "amount": "Monto",
         "points": "Puntos",
-        "actions": "Acciones"
+        "actions": "Acciones",
+        "type": "Tipo"
       },
       "deleteModal": {
         "title": "Eliminar Operación",
         "confirm": "¿Estás seguro de que deseas eliminar la operación <strong>{name}</strong>? Esta acción no se puede deshacer.",
         "deleteError": "Error al eliminar la operación",
+        "trigger": "Eliminar la operación {name}",
         "deleteSuccess": "Operación eliminada correctamente",
         "genericError": "Ocurrió un error al eliminar"
       },
       "form": {
+        "step1": "1. ¿Qué deseas registrar?",
+        "modes": {
+          "assignment": {
+            "title": "Asignar puntos",
+            "description": "Otorga puntos de forma manual"
+          },
+          "sale": {
+            "title": "Registrar venta",
+            "description": "Ingresa el importe de la venta realizada"
+          }
+        },
+        "assignmentHint": "Los puntos que cargues se acreditan de forma directa al beneficiario.",
+        "saleHint": "Los puntos se calcularán automáticamente según la regla activa del programa.",
         "beneficiaryLabel": "Beneficiario",
-        "selectBeneficiary": "Seleccionar beneficiario",
-        "cashierLabel": "Cajero",
-        "selectCashier": "Seleccionar cajero",
-        "branchLabel": "Sucursal",
-        "selectBranch": "Seleccionar sucursal (opcional)",
-        "totalAmountLabel": "Monto Total",
+        "selectBeneficiary": "Buscar por nombre, email, documento o teléfono...",
+        "viewProfile": "Ver perfil",
+        "branchLabel": "Sucursal (opcional)",
+        "selectBranch": "Seleccionar sucursal",
+        "totalAmountLabel": "Monto de la venta",
+        "totalAmountHelp": "Ingresa el importe de la venta realizada.",
+        "pointsToAssignLabel": "Monto de puntos a asignar",
+        "pointsToAssignHelp": "Ingresa la cantidad de puntos que deseas asignar.",
+        "availablePointsLabel": "Puntos disponibles",
+        "reasonLabel": "Motivo (opcional)",
+        "selectReason": "Seleccionar motivo",
+        "reasonHelp": "Selecciona el motivo de la asignación de puntos.",
+        "reasons": {
+          "welcome": "Bienvenida",
+          "campaign": "Campaña",
+          "compensation": "Compensación",
+          "referral": "Referido",
+          "other": "Otro"
+        },
+        "notesLabel": "Observaciones (opcional)",
+        "notesPlaceholder": "Escribe una observación o comentario...",
+        "notesHelp": "Información adicional sobre esta operación.",
+        "summaryTitle": "Resumen de la operación",
+        "summaryBeneficiary": "Beneficiario",
+        "summaryPoints": "Puntos a asignar",
+        "summaryTotal": "Total después de la operación",
+        "submitAssignment": "Asignar puntos",
+        "submitSale": "Registrar venta",
+        "activityTitle": "Actividad reciente del beneficiario",
+        "activityDate": "Fecha",
+        "activityType": "Tipo",
+        "activityDescription": "Descripción",
+        "activityPoints": "Puntos",
+        "activitySale": "Venta registrada por {amount}",
+        "activityAssignment": "Asignación de puntos desde Cajero Virtual",
         "pointsEarnedLabel": "Puntos Ganados"
-      }
+      },
+      "viewStats": "Ver estadísticas",
+      "showing": "Mostrando {shown} de {total} operaciones",
+      "types": {
+        "sale": "Venta",
+        "assignment": "Asignación"
+      },
+      "stats": {
+        "inPeriod": "En el período seleccionado",
+        "operations": "Operaciones totales",
+        "totalAmount": "Monto total",
+        "pointsAssigned": "Puntos asignados",
+        "beneficiariesReached": "Beneficiarios alcanzados",
+        "averagePoints": "Promedio por operación"
+      },
+      "filters": {
+        "search": "Buscar",
+        "searchPlaceholder": "Operación, beneficiario, cajero, sucursal...",
+        "from": "Fecha desde",
+        "to": "Fecha hasta",
+        "branch": "Sucursal",
+        "cashier": "Cajero",
+        "beneficiary": "Beneficiario",
+        "type": "Tipo de operación",
+        "points": "Rango de puntos",
+        "all": "Todos",
+        "allFemale": "Todas",
+        "apply": "Aplicar filtros",
+        "clear": "Limpiar",
+        "pointRanges": {
+          "0-1000": "Hasta 1.000 pts",
+          "1000-5000": "1.000 a 5.000 pts",
+          "5000-10000": "5.000 a 10.000 pts",
+          "10000+": "Más de 10.000 pts"
+        }
+      },
+      "summary": {
+        "title": "Resumen del período",
+        "operations": "Operaciones",
+        "totalAmount": "Monto total",
+        "pointsAssigned": "Puntos asignados",
+        "averagePoints": "Promedio por operación",
+        "beneficiariesReached": "Beneficiarios alcanzados",
+        "activeCashiers": "Cajeros activos"
+      },
+      "quickActions": {
+        "title": "Acciones rápidas",
+        "assign": {
+          "title": "Asignar puntos",
+          "description": "Otorgá puntos a un beneficiario"
+        },
+        "reports": {
+          "title": "Ver reportes",
+          "description": "Reportes y métricas detalladas"
+        },
+        "history": {
+          "title": "Historial por beneficiario",
+          "description": "Ver todas las operaciones"
+        }
+      },
+      "info": {
+        "title": "Información",
+        "realtime": "Las operaciones se reflejan en tiempo real.",
+        "delay": "Los puntos pueden tardar unos minutos en estar disponibles para el beneficiario."
+      },
+      "rulePanel": {
+        "title": "2. Reglas activas del programa",
+        "subtitle": "Regla que se aplicará para esta operación",
+        "activeRule": "Regla activa",
+        "motherRule": "Regla madre",
+        "campaign": "Campaña actual",
+        "validity": "Vigencia: {range}",
+        "perEach": "Por cada",
+        "perItem": "Cada ítem",
+        "ofPurchase": "de compra",
+        "grants": "Otorga",
+        "toBeneficiary": "al beneficiario",
+        "noRule": "Todavía no hay una regla de puntos activa para tu club.",
+        "allRules": "Ver todas las reglas",
+        "howTitle": "¿Cómo se calculan los puntos?",
+        "howSale": "Si registrás una venta, los puntos se calculan automáticamente según la regla activa.",
+        "howAssignment": "Si asignás puntos manualmente, se acreditan de forma directa al beneficiario.",
+        "previewTitle": "Vista previa del cálculo",
+        "previewSubtitle": "Así se calcularán los puntos con la regla activa",
+        "previewIf": "Si el importe de la venta es:",
+        "previewResult": "El beneficiario recibiría:",
+        "previewAuto": "Cálculo automático",
+        "previewNote": "Este es solo un ejemplo. El cálculo se aplicará al guardar la operación."
+      },
+      "createDescription": "Asigna puntos a un beneficiario desde el panel de administración."
     },
     "subscription": {
       "title": "Suscripciones",
@@ -1337,6 +1788,173 @@
       "step2": "Crea registros de beneficiary_organization para ellos",
       "step3": "Establece sus puntos iniciales en 0",
       "step4": "Los convierte en miembros activos de tu organización"
+    },
+    "staff": {
+      "filters": {
+        "search": "Buscar",
+        "searchPlaceholder": "Buscar por nombre o email...",
+        "status": "Estado",
+        "statusActive": "Activos",
+        "statusInactive": "Inactivos",
+        "branch": "Sucursal",
+        "branchNone": "Sin sucursal",
+        "all": "Todos",
+        "allFemale": "Todas",
+        "apply": "Aplicar filtros",
+        "clear": "Limpiar"
+      },
+      "cashiers": {
+        "title": "Cajeros",
+        "description": "Gestioná los cajeros que pueden asignar puntos desde la App Cajeros.",
+        "appGuide": "Guía de la App Cajeros",
+        "showing": "Mostrando {shown} de {total} cajeros",
+        "empty": "Todavía no creaste ningún cajero.",
+        "noBranch": "Sin sucursal",
+        "never": "Sin operaciones",
+        "headers": {
+          "cashier": "Cajero",
+          "branch": "Sucursal",
+          "status": "Estado",
+          "operations": "Operaciones (mes)",
+          "lastOperation": "Última operación"
+        },
+        "stats": {
+          "total": "Cajeros totales",
+          "ofLimit": "De {limit} disponibles",
+          "noLimit": "Sin límite de plan",
+          "active": "Activos",
+          "activeSubtitle": "Cajeros habilitados",
+          "inactive": "Inactivos",
+          "inactiveSubtitle": "Cajeros deshabilitados",
+          "extra": "Con sucursal",
+          "extraSubtitle": "Pueden operar en la App Cajeros"
+        },
+        "newCashier": {
+          "title": "Nuevo Cajero",
+          "description": "Creá un cajero y asignalo a una sucursal."
+        },
+        "whatsNext": {
+          "title": "¿Qué sigue?",
+          "body": "El cajero recibirá un email con sus credenciales y podrá descargar la App Cajeros para comenzar a asignar puntos.",
+          "download": "Descargar la App Cajeros"
+        }
+      },
+      "collaborators": {
+        "title": "Colaboradores",
+        "description": "Gestioná los colaboradores que pueden acceder al panel de administración.",
+        "showing": "Mostrando {shown} de {total} colaboradores",
+        "empty": "Todavía no creaste ningún colaborador.",
+        "roleName": "Colaborador",
+        "headers": {
+          "collaborator": "Colaborador",
+          "role": "Rol",
+          "status": "Estado",
+          "since": "Desde"
+        },
+        "stats": {
+          "total": "Colaboradores totales",
+          "ofLimit": "De {limit} disponibles",
+          "noLimit": "Sin límite de plan",
+          "active": "Activos",
+          "activeSubtitle": "Colaboradores habilitados",
+          "inactive": "Inactivos",
+          "inactiveSubtitle": "Colaboradores deshabilitados",
+          "extra": "Sucursales",
+          "extraSubtitle": "Alcance del panel"
+        },
+        "newCollaborator": {
+          "title": "Nuevo Colaborador",
+          "description": "Completá los datos y le damos acceso al panel."
+        },
+        "permissions": {
+          "title": "Permisos del rol",
+          "subtitle": "Hoy un colaborador puede:",
+          "items": {
+            "beneficiaries": "Ver y administrar beneficiarios",
+            "cashiers": "Crear y administrar cajeros",
+            "redemptions": "Gestionar canjes y entregas",
+            "products": "Administrar el catálogo de premios",
+            "pointsRules": "Editar reglas de puntos y campañas",
+            "branches": "Administrar sucursales",
+            "notifications": "Enviar notificaciones push"
+          },
+          "note": "Los permisos por colaborador todavía no son configurables: el rol otorga los mismos accesos que el owner."
+        }
+      }
+    },
+    "clubProfile": {
+      "title": "Perfil del Club",
+      "description": "Administrá la información y configuración de tu organización en PuntosClub.",
+      "preview": "Vista previa del club",
+      "saved": "Perfil del club actualizado",
+      "visibility": {
+        "title": "Visibilidad del club",
+        "description": "Controlá si tu organización es visible para los usuarios que exploran la app PuntosClub.",
+        "public": "Público",
+        "publicDescription": "Tu club es visible para todos los usuarios que exploran la app.",
+        "private": "Privado",
+        "privateDescription": "Tu club solo puede ser accedido mediante invitación o código QR.",
+        "qrNote": "El acceso por código QR siempre está disponible, independientemente de la visibilidad que elijas."
+      },
+      "general": {
+        "title": "Información General",
+        "name": "Nombre de la organización",
+        "description": "Descripción (opcional)",
+        "email": "Email de contacto",
+        "phone": "Teléfono de contacto (opcional)",
+        "website": "Sitio web (opcional)",
+        "industry": "Rubro / Industria (opcional)",
+        "industryPlaceholder": "Seleccionar rubro",
+        "logo": "Logo de la organización",
+        "logoHint": "Recomendado: PNG o JPG. Máx. 2MB. Tamaño sugerido 512x512px.",
+        "businessName": "Razón social (opcional)",
+        "taxId": "CUIT / Identificación fiscal (opcional)"
+      },
+      "industries": {
+        "retail": "Retail",
+        "gastronomy": "Gastronomía",
+        "services": "Servicios",
+        "health": "Salud",
+        "beauty": "Belleza y bienestar",
+        "other": "Otro"
+      },
+      "pointLabels": {
+        "puntos": "Puntos",
+        "estrellas": "Estrellas",
+        "monedas": "Monedas"
+      },
+      "settings": {
+        "title": "Configuraciones del club",
+        "description": "Personalizá el comportamiento y las preferencias de tu club.",
+        "allowNewMembers": "Permitir que nuevos usuarios se unan al club",
+        "allowNewMembersHint": "Los usuarios podrán unirse y comenzar a acumular puntos.",
+        "requiresApproval": "Requiere aprobación para nuevos beneficiarios",
+        "requiresApprovalHint": "Los nuevos usuarios deberán ser aprobados por un administrador.",
+        "invitationCode": "Código de invitación al club",
+        "invitationCodeHint": "Compartí este código para que las personas se unan directamente a tu club.",
+        "welcomeMessage": "Mensaje de bienvenida (opcional)",
+        "welcomeMessageHint": "Este mensaje se mostrará cuando un usuario se una al club por primera vez.",
+        "createdAt": "Fecha de creación del club",
+        "pointsLabel": "Moneda de puntos",
+        "pointsLabelHint": "Define cómo se mostrarán los puntos en tu club.",
+        "emailNotifications": "Notificaciones por email",
+        "emailNotificationsHint": "Recibí notificaciones importantes sobre la actividad del club.",
+        "showInExplore": "Mostrar club en la sección \"Explorar\"",
+        "showInExploreHint": "Tu club aparecerá en la sección de organizaciones destacadas.",
+        "timezone": "Zona horaria",
+        "timezoneHint": "Configura la zona horaria para tu club."
+      },
+      "address": {
+        "title": "Dirección",
+        "description": "La dirección principal de tu organización, la que ves en tus sucursales.",
+        "search": "Buscar dirección",
+        "searchPlaceholder": "Escribí la dirección y elegí una sugerencia",
+        "street": "Calle",
+        "number": "Número",
+        "city": "Ciudad",
+        "state": "Provincia",
+        "zip_code": "Código postal"
+      }
     }
   },
   "Onboarding": {
@@ -1392,6 +2010,8 @@
     "step2": {
       "businessName": "Nombre del negocio",
       "businessNamePlaceholder": "Ej: Café Central",
+      "nameChecking": "Verificando disponibilidad…",
+      "nameAvailable": "Nombre disponible",
       "legalName": "Razón social",
       "legalNamePlaceholder": "Ej: Café Central S.A.",
       "taxId": "CUIT / RUT / NIF",
@@ -1417,6 +2037,7 @@
       "confirmPasswordPlaceholder": "Repite la contraseña",
       "validation": {
         "businessNameRequired": "El nombre del negocio es requerido",
+        "businessNameTaken": "Ya existe una empresa con ese nombre. Probá con otro, por ejemplo agregando la ciudad o el barrio.",
         "branchNameRequired": "El nombre de la sucursal es requerido",
         "branchAddressRequired": "La dirección de la sucursal es requerida",
         "cashierEmailRequired": "El email del cajero es requerido",
@@ -1508,12 +2129,30 @@
       "shareText": "Unite a {name} en Puntos Club y acumula puntos en cada compra.",
       "viewQRInPanel": "Ver QR en el panel",
       "goToDashboard": "Ir al panel de control"
+    },
+    "clubi": {
+      "greeting": "¡Hola! Soy Clubi 🎁",
+      "tipTitle": "Tip Clubi",
+      "safeTitle": "Tus datos están seguros",
+      "safeBody": "En Puntos Club cuidamos tu información con tecnología de nivel bancario.",
+      "messages": {
+        "step1": "Te voy a acompañar en cada paso para que configures tu club de puntos de la mejor manera. Empecemos con tu información personal.",
+        "step2": "Contanos sobre tu negocio para que podamos ayudarte a crear experiencias increíbles para tus clientes.",
+        "step3": "Elegí el plan que mejor se adapte al tamaño y objetivos de tu organización. Siempre podrás cambiarlo más adelante.",
+        "step4": "Los premios son el corazón de tu programa de fidelización. Ofrecé productos y experiencias que tus clientes realmente amen.",
+        "step6": "¡Tu negocio está listo! Compartí tu QR para que tus clientes te sigan y acumulen puntos en cada compra."
+      },
+      "tips": {
+        "step2": "Usá tu logo y datos reales. Así tu club se verá más profesional y generás confianza desde el inicio.",
+        "step3": "Si estás empezando, el Plan Trial es ideal para probar todas las funcionalidades sin costo durante 3 meses.",
+        "step4": "Podés editar o agregar nuevos premios en cualquier momento desde el panel."
+      }
     }
   },
   "PointsRules": {
-    "title": "Reglas de Puntos y Ofertas Especiales",
-    "description": "Administrar cómo los clientes acumulan puntos en sus compras",
-    "createButton": "Crear Regla",
+    "title": "Reglas de Puntos y Campañas",
+    "description": "Definí cómo tus clientes acumulan puntos en cada compra.",
+    "createButton": "+ Nueva campaña",
     "backToList": "Volver a las Reglas",
     "calculator": {
       "title": "Calculadora de Puntos",
@@ -1589,7 +2228,6 @@
       "ruleType": "Tipo de Regla *",
       "ruleTypeFixed": "Puntos Fijos por Compra",
       "ruleTypePercentage": "Porcentaje del Monto",
-      "ruleTypePerItem": "Puntos Fijos por Ítem",
       "pointsPerPurchase": "Puntos por Compra *",
       "pointsPerPurchaseHint": "Ejemplo: 2 significa que los clientes ganan 2 puntos por cada $1 gastado",
       "percentage": "Porcentaje *",
@@ -1617,13 +2255,160 @@
       "displayNameHint": "Nombre amigable mostrado en la app móvil. Por defecto usa el nombre de la regla.",
       "icon": "Ícono",
       "color": "Color",
-      "pointsPerItem": "Puntos por Ítem *",
-      "pointsPerItemHint": "Ejemplo: 10 significa que los clientes ganan 10 puntos por cada ítem comprado",
       "loadError": "Error al cargar la regla",
       "creating": "Creando...",
       "createRule": "Crear Regla",
       "saving": "Guardando...",
       "saveRule": "Guardar Cambios"
+    },
+    "mother": {
+      "title": "1. Regla madre (siempre activa)",
+      "description": "Es la regla principal que define cómo los clientes ganan puntos en sus compras. Siempre está activa y se aplica cuando no hay campañas especiales vigentes.",
+      "note": "Esta regla es la base de tu programa de puntos.",
+      "editButton": "Editar regla madre",
+      "currentType": "Tipo de cálculo actual",
+      "noRule": "Sin regla madre todavía",
+      "allBranches": "En todas las sucursales",
+      "singleBranch": "Solo en {branch}",
+      "ruleTypes": {
+        "fixed_amount": "Puntos fijos por compra",
+        "percentage": "Puntos por % de compra",
+        "fixed_per_item": "Puntos fijos por ítem",
+        "tiered": "Escalonado por tramos"
+      },
+      "summary": {
+        "fixedAmount": "{points, plural, one {# punto} other {# puntos}} por cada {amount} gastado",
+        "percentage": "{percentage}% de cada compra se convierte en puntos",
+        "perItem": "{points, plural, one {# punto} other {# puntos}} por cada ítem comprado"
+      }
+    },
+    "campaigns": {
+      "title": "2. Campañas especiales",
+      "description": "Son promociones temporales que pueden otorgar más puntos o condiciones especiales. Se aplican automáticamente cuando se cumplen las condiciones.",
+      "tabs": {
+        "active": "Activas ({count})",
+        "scheduled": "Programadas ({count})",
+        "finished": "Finalizadas ({count})"
+      },
+      "status": {
+        "active": "Activa",
+        "scheduled": "Programada",
+        "finished": "Finalizada"
+      },
+      "headers": {
+        "campaign": "Campaña",
+        "benefit": "Beneficio",
+        "appliesTo": "Aplica en",
+        "validity": "Vigencia",
+        "status": "Estado",
+        "actions": "Acciones"
+      },
+      "benefit": {
+        "points": "{points} pts",
+        "percentage": "{percentage}%",
+        "custom": "Condiciones especiales",
+        "overMother": "Reemplaza a la regla madre mientras esté vigente"
+      },
+      "validity": {
+        "always": "Sin fecha de fin",
+        "from": "Desde {date}",
+        "until": "Hasta {date}"
+      },
+      "schedule": {
+        "allDay": "Todo el día"
+      },
+      "empty": {
+        "active": "No hay campañas activas en este momento.",
+        "scheduled": "No hay campañas programadas.",
+        "finished": "Todavía no finalizó ninguna campaña."
+      }
+    },
+    "rowActions": {
+      "open": "Abrir acciones",
+      "edit": "Editar campaña",
+      "pause": "Pausar campaña",
+      "resume": "Reactivar campaña",
+      "paused": "Campaña pausada",
+      "resumed": "Campaña reactivada",
+      "toggleError": "No pudimos cambiar el estado de la campaña"
+    },
+    "howItWorks": {
+      "title": "¿Cómo funcionan las campañas?",
+      "subtitle": "Cuando un cliente realiza una compra:",
+      "first": "Primero se verifica si hay campañas activas que apliquen.",
+      "second": "Si hay una campaña activa, sus beneficios reemplazan a la regla madre.",
+      "third": "Si no hay campañas activas, se aplica la regla madre."
+    },
+    "tip": {
+      "title": "Consejo",
+      "body": "Creá campañas para fechas especiales, temporadas o para incentivar días y horarios específicos."
+    },
+    "help": {
+      "title": "¿Necesitás ayuda para crear una campaña?",
+      "body": "Crear campañas es fácil y te ayudará a motivar más compras en tu negocio.",
+      "cta": "Ver guía rápida"
+    },
+    "motherForm": {
+      "back": "Volver a Reglas de Puntos",
+      "title": "Editar Regla Madre",
+      "description": "Define cómo los clientes acumulan puntos en sus compras. Esta es la regla principal y siempre está activa.",
+      "statusActive": "Regla activa",
+      "statusInactive": "Regla desactivada",
+      "lastUpdate": "Última actualización: {date}",
+      "noOrganization": "Elegí una organización para editar su regla madre.",
+      "noRule": "Tu club todavía no tiene una regla madre. Creá una campaña y marcala como regla principal.",
+      "typeTitle": "1. Tipo de cálculo",
+      "typeSubtitle": "Elegí cómo se acumulan los puntos en cada compra.",
+      "types": {
+        "percentage": {
+          "title": "Puntos por % de compra",
+          "description": "Los puntos se calculan en base al porcentaje del monto de la compra."
+        },
+        "fixed_amount": {
+          "title": "Puntos fijos por monto de compra",
+          "description": "Los puntos se otorgan en base a un monto fijo gastado."
+        }
+      },
+      "configTitle": "2. Configuración de puntos",
+      "configSubtitle": "Define el porcentaje o la cantidad de puntos según el tipo de cálculo seleccionado.",
+      "valueLabel": {
+        "percentage": "Porcentaje de la compra",
+        "fixed_amount": "Puntos por cada $100"
+      },
+      "valueHelp": {
+        "percentage": "Ejemplo: 5% de cada compra se convierte en puntos.",
+        "fixed_amount": "Ejemplo: 10 puntos por cada $100 de compra."
+      },
+      "summary": {
+        "percentage": "Por cada {amount} de compra, el cliente ganará {points, plural, one {# punto} other {# puntos}}.",
+        "fixed_amount": "Por cada {amount} de compra, el cliente ganará {points, plural, one {# punto} other {# puntos}}."
+      },
+      "appliesEverywhere": "Esta regla se aplica en todas las sucursales y todos los días.",
+      "appliesToBranch": "Esta regla se aplica solo en la sucursal elegida.",
+      "allBranchesLabel": "Aplicar en todas las sucursales",
+      "allBranchesHelp": "La regla se aplicará automáticamente en todas las sucursales activas.",
+      "branchLabel": "Sucursal",
+      "branchPlaceholder": "Seleccionar sucursal",
+      "previewTitle": "3. Vista previa del cálculo",
+      "previewSubtitle": "Simulá cómo se acumulan los puntos con esta regla.",
+      "previewPoints": "{points, plural, one {# punto} other {# puntos}}",
+      "howTitle": "¿Cómo funciona la Regla Madre?",
+      "how": {
+        "base": "Es la base de tu programa de puntos.",
+        "always": "Siempre está activa y se aplica cuando no hay campañas especiales vigentes.",
+        "campaigns": "Las campañas pueden reemplazar temporalmente esta regla.",
+        "everywhere": "Se aplica a todas las compras, todos los días."
+      },
+      "examplesTitle": "Ejemplos de cálculo",
+      "examplesAmount": "Monto de compra",
+      "examplesPoints": "Puntos que obtiene",
+      "examplesNote": "Los puntos se redondean según la configuración del motor de puntos.",
+      "deactivate": "Desactivar regla",
+      "deactivated": "Regla madre desactivada",
+      "saved": "Regla madre actualizada",
+      "saveError": "No pudimos guardar la regla madre",
+      "invalidValue": "Ingresá un valor numérico válido para la regla madre",
+      "branchRequired": "Elegí la sucursal donde se aplica la regla"
     }
   },
   "UserRole": {

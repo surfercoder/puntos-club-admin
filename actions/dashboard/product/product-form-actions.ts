@@ -2,7 +2,7 @@
 
 import { revalidatePath } from 'next/cache';
 
-import { createProduct, updateProduct } from '@/actions/dashboard/product/actions';
+import { createCategory, createProduct, deleteCategory, updateProduct } from '@/actions/dashboard/product/actions';
 import { cleanFormData, fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
 import { ProductSchema } from '@/schemas/product.schema';
 import type { Product } from '@/types/product';
@@ -20,10 +20,31 @@ export async function productFormAction(_prevState: ActionState, formData: FormD
       }
     }
     
+    // "Crear nueva categoría" del formulario: se da de alta recién después de validar
+    // el producto, para no dejar categorías huérfanas si el alta del producto falla.
+    const newCategory = String(formDataObj.new_category ?? '').trim();
+    delete formDataObj.new_category;
+    if (newCategory) {
+      formDataObj.category_id = 'pending';
+    }
+
     const parsed = ProductSchema.safeParse(formDataObj);
 
     if (!parsed.success) {
       return fromErrorToActionState(parsed.error);
+    }
+
+    let createdCategoryId: string | null = null;
+    if (newCategory) {
+      const created = await createCategory({ name: newCategory, active: true });
+      if (created.error || !created.data) {
+        return fromErrorToActionState(created.error);
+      }
+      // Sólo la borramos después si la dimos de alta nosotros, no si se reusó una existente.
+      if (created.created) {
+        createdCategoryId = String((created.data as { id: string | number }).id);
+      }
+      parsed.data.category_id = String((created.data as { id: string | number }).id);
     }
 
     let result;
@@ -42,6 +63,11 @@ export async function productFormAction(_prevState: ActionState, formData: FormD
     }
 
     if (result.error) {
+      // El producto no entró (límite de plan, RLS, etc.): la categoría recién creada
+      // quedaría suelta en el selector.
+      if (createdCategoryId) {
+        await deleteCategory(createdCategoryId);
+      }
       return fromErrorToActionState(result.error);
     }
 

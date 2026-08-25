@@ -21,7 +21,7 @@ const EMOJI_OPTIONS = ["⭐", "🌙", "🎉", "💎", "🔥", "🍽️", "☀️
 type FormData = {
   name: string;
   description: string;
-  rule_type: "fixed_amount" | "percentage" | "fixed_per_item" | "tiered";
+  rule_type: "fixed_amount" | "percentage" | "tiered";
   points_per_dollar: string;
   percentage: string;
   is_active: boolean;
@@ -172,7 +172,7 @@ function PointsCalculationSection({
         <Select
           value={formData.rule_type}
           onValueChange={(
-            value: "fixed_amount" | "percentage" | "fixed_per_item" | "tiered"
+            value: "fixed_amount" | "percentage" | "tiered"
           ) => setFormData((prev) => ({ ...prev, rule_type: value }))}
         >
           <SelectTrigger>
@@ -181,7 +181,6 @@ function PointsCalculationSection({
           <SelectContent>
             <SelectItem value="fixed_amount">{t("form.ruleTypeFixed")}</SelectItem>
             <SelectItem value="percentage">{t("form.ruleTypePercentage")}</SelectItem>
-            <SelectItem value="fixed_per_item">{t("form.ruleTypePerItem")}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -219,26 +218,6 @@ function PointsCalculationSection({
             required
           />
           <p className="text-sm text-muted-foreground mt-1">{t("form.percentageHint")}</p>
-        </div>
-      )}
-
-      {formData.rule_type === "fixed_per_item" && (
-        <div>
-          <Label htmlFor="points_per_item">{t("form.pointsPerItem")}</Label>
-          <Input
-            id="points_per_item"
-            type="number"
-            step="0.1"
-            value={formData.points_per_dollar}
-            onChange={(e) =>
-              setFormData((prev) => ({ ...prev, points_per_dollar: e.target.value }))
-            }
-            placeholder="10"
-            required
-          />
-          <p className="text-sm text-muted-foreground mt-1">
-            {t("form.pointsPerItemHint")}
-          </p>
         </div>
       )}
     </div>
@@ -496,9 +475,6 @@ export default function NewPointsRulePage() {
         break;
       case "percentage":
         config = { percentage: parseFloat(formData.percentage) };
-        break;
-      case "fixed_per_item":
-        config = { points_per_item: parseFloat(formData.points_per_dollar) };
         break;
     }
 

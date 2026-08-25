@@ -26,6 +26,18 @@ jest.mock('@/components/dashboard/redemption/row-actions', () => ({
 jest.mock('@/components/dashboard/redemption/status-badge', () => ({
   RedemptionStatusBadge: ({ status }: { status: string | null | undefined }) => <span>{status ?? 'none'}</span>,
 }));
+jest.mock('@/components/dashboard/redemption/redemption-donut', () => ({ RedemptionDonut: () => <div /> }));
+jest.mock('@/components/dashboard/redemption/redemption-stats', () => ({ RedemptionStats: () => <div /> }));
+jest.mock('@/components/dashboard/redemption/redemption-filters', () => ({
+  RedemptionFilters: () => <div />,
+}));
+jest.mock('@/components/dashboard/shared/copyable-code', () => ({
+  CopyableCode: ({ value }: { value: string }) => <span>{value}</span>,
+}));
+jest.mock('@/components/dashboard/shared/csv-export-button', () => ({ CsvExportButton: () => <div /> }));
+jest.mock('@/components/dashboard/shared/info-card', () => ({ InfoCard: () => <div /> }));
+jest.mock('@/components/dashboard/shared/quick-actions-card', () => ({ QuickActionsCard: () => <div /> }));
+jest.mock('@/components/dashboard/shared/table-pagination', () => ({ TablePagination: () => <div /> }));
 jest.mock('@/components/ui/button', () => ({ Button: ({ children }: { children: React.ReactNode }) => <button>{children}</button> }));
 jest.mock('@/components/ui/table', () => ({
   Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>,
@@ -142,5 +154,73 @@ describe('RedemptionListPage', () => {
     (cookies as jest.Mock).mockResolvedValueOnce({ get: jest.fn(() => undefined) });
     const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
+  });
+});
+
+describe('RedemptionListPage extra filters', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    resolveData = { data: [], error: null };
+  });
+
+  it('filters by beneficiary and product', async () => {
+    await RedemptionListPage({
+      searchParams: Promise.resolve({ beneficiary: '1', product: '2' }),
+    });
+    expect(mockEq).toHaveBeenCalledWith('beneficiary_id', '1');
+    expect(mockEq).toHaveBeenCalledWith('product_id', '2');
+  });
+
+  it('searches across code, beneficiary and product', async () => {
+    resolveData = {
+      data: [
+        {
+          id: 128,
+          points_used: 10000,
+          redemption_date: '2026-08-14T22:30:00Z',
+          status: 'pending',
+          beneficiary: { id: 1, first_name: 'Carlos', last_name: 'Schmidt' },
+          product: { id: 2, name: 'Descuento $10.000' },
+          deliveredBy: null,
+        },
+      ],
+      error: null,
+    };
+    const hit = await RedemptionListPage({ searchParams: Promise.resolve({ q: 'carlos' }) });
+    expect(hit).toBeTruthy();
+    const miss = await RedemptionListPage({ searchParams: Promise.resolve({ q: 'zzz' }) });
+    expect(miss).toBeTruthy();
+  });
+
+  it('survives a null data payload', async () => {
+    resolveData = { data: null, error: null };
+    expect(await RedemptionListPage({ searchParams: Promise.resolve({}) })).toBeTruthy();
+  });
+
+  it('skips relations that have no id and falls back to the email as a name', async () => {
+    resolveData = {
+      data: [
+        {
+          id: 129,
+          points_used: null,
+          redemption_date: '2026-08-14T22:30:00Z',
+          status: 'delivered',
+          beneficiary: { first_name: null, last_name: null, email: 'ana@test.com' },
+          product: { name: 'Sin id' },
+          deliveredBy: { first_name: 'Maria', last_name: 'Gonzalez' },
+        },
+        {
+          id: 130,
+          points_used: 100,
+          redemption_date: '2026-08-14T22:30:00Z',
+          status: 'cancelled',
+          beneficiary: { id: 4, first_name: null, last_name: null, email: null },
+          product: { id: 5, name: 'Con id' },
+          deliveredBy: null,
+        },
+      ],
+      error: null,
+    };
+    expect(await RedemptionListPage({ searchParams: Promise.resolve({}) })).toBeTruthy();
   });
 });

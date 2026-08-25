@@ -58,9 +58,16 @@ describe('ProductImageUpload', () => {
     expect(screen.getByRole('button', { name: 'Eliminar imagen 1' })).toBeInTheDocument();
   });
 
-  it('hides the dropzone once three images are present', () => {
+  it('disables the dropzone once three images are present', () => {
     renderUpload(['https://cdn/a.png', 'https://cdn/b.png', 'https://cdn/c.png']);
-    expect(document.querySelector('input[type="file"]')).not.toBeInTheDocument();
+    expect(document.querySelector('input[type="file"]')).toBeDisabled();
+    expect(screen.queryByText('addImage')).not.toBeInTheDocument();
+  });
+
+  it('marks the first image as the main one and pads the rest with empty slots', () => {
+    renderUpload(['https://cdn/a.png']);
+    expect(screen.getByText('mainImage')).toBeInTheDocument();
+    expect(screen.getAllByText('addImage')).toHaveLength(2);
   });
 
   it('uploads the selected files and reports the new list', async () => {

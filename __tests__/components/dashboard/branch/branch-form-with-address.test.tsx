@@ -159,7 +159,7 @@ describe('BranchFormWithAddress', () => {
 
     fireEvent.submit(document.querySelector('form') as HTMLFormElement);
 
-    expect(document.querySelector('.text-destructive')).not.toBeInTheDocument();
+    expect(document.querySelector('p.text-destructive.text-sm')).not.toBeInTheDocument();
   });
 
   it('clears a previous round of errors when the form is resubmitted valid', () => {
@@ -233,6 +233,141 @@ describe('BranchFormWithAddress', () => {
     await waitFor(() => {
       expect(screen.getByLabelText('street')).toHaveAttribute('aria-invalid', 'true');
       expect(screen.getByLabelText('statusLabel')).toHaveAttribute('aria-invalid', 'true');
+    });
+  });
+
+  it('clears the warning once a cashier is picked', () => {
+    render(
+      <BranchFormWithAddress cashiers={[{ id: '5', name: 'María Juárez', branchId: null }]} />,
+    );
+    expect(screen.getByText('cashierWarning')).toBeInTheDocument();
+
+    fireEvent.change(screen.getByLabelText(/cashierLabel/), { target: { value: '5' } });
+    expect(screen.queryByText('cashierWarning')).not.toBeInTheDocument();
+  });
+
+  describe('use my location', () => {
+    const geocode = jest.fn();
+
+    beforeEach(() => {
+      jest.mocked(toast.error).mockClear();
+      geocode.mockReset();
+      (globalThis as never as { google: unknown }).google = {};
+      jest.doMock('@googlemaps/js-api-loader', () => ({
+        importLibrary: jest.fn(() =>
+          Promise.resolve({ Geocoder: class { geocode = geocode; } }),
+        ),
+      }));
+    });
+
+    const withGeolocation = (impl: (ok: PositionCallback, fail: PositionErrorCallback) => void) => {
+      Object.defineProperty(navigator, 'geolocation', {
+        configurable: true,
+        value: { getCurrentPosition: impl },
+      });
+    };
+
+    it('fills the address from the browser position', async () => {
+      geocode.mockResolvedValue({
+        results: [
+          {
+            place_id: 'abc',
+            address_components: [
+              { types: ['route'], long_name: 'Av. Corrientes' },
+              { types: ['street_number'], long_name: '1234' },
+              { types: ['locality'], long_name: 'CABA' },
+              { types: ['administrative_area_level_1'], long_name: 'CABA' },
+              { types: ['postal_code'], long_name: '1043' },
+              { types: ['country'], long_name: 'Argentina' },
+            ],
+          },
+        ],
+      });
+      withGeolocation((ok) =>
+        ok({ coords: { latitude: -34.6, longitude: -58.4 } } as GeolocationPosition),
+      );
+
+      render(<BranchFormWithAddress />);
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'useMyLocation' }));
+      });
+
+      await waitFor(() =>
+        expect((document.querySelector('#street') as HTMLInputElement).value).toBe('Av. Corrientes'),
+      );
+    });
+
+    it('falls back to the coarser locality when there is no city', async () => {
+      geocode.mockResolvedValue({
+        results: [
+          {
+            place_id: 'abc',
+            address_components: [
+              { types: ['administrative_area_level_2'], long_name: 'Guaymallén' },
+            ],
+          },
+        ],
+      });
+      withGeolocation((ok) =>
+        ok({ coords: { latitude: -32.8, longitude: -68.8 } } as GeolocationPosition),
+      );
+
+      render(<BranchFormWithAddress />);
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'useMyLocation' }));
+      });
+
+      await waitFor(() =>
+        expect((document.querySelector('#city') as HTMLInputElement).value).toBe('Guaymallén'),
+      );
+    });
+
+    it('says nothing changed when the geocoder finds no place', async () => {
+      geocode.mockResolvedValue({ results: [] });
+      withGeolocation((ok) =>
+        ok({ coords: { latitude: 0, longitude: 0 } } as GeolocationPosition),
+      );
+
+      render(<BranchFormWithAddress />);
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'useMyLocation' }));
+      });
+
+      await waitFor(() => expect(toast.error).toHaveBeenCalledWith('locationError'));
+      expect((document.querySelector('#street') as HTMLInputElement).value).toBe('');
+    });
+
+    it('reports a geocoding failure', async () => {
+      geocode.mockRejectedValue(new Error('offline'));
+      withGeolocation((ok) =>
+        ok({ coords: { latitude: 0, longitude: 0 } } as GeolocationPosition),
+      );
+
+      render(<BranchFormWithAddress />);
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'useMyLocation' }));
+      });
+
+      await waitFor(() => expect(toast.error).toHaveBeenCalledWith('locationError'));
+    });
+
+    it('reports a denied permission', async () => {
+      withGeolocation((_ok, fail) => fail({ code: 1 } as GeolocationPositionError));
+
+      render(<BranchFormWithAddress />);
+      await act(async () => {
+        fireEvent.click(screen.getByRole('button', { name: 'useMyLocation' }));
+      });
+
+      await waitFor(() => expect(toast.error).toHaveBeenCalledWith('locationError'));
+    });
+
+    it('warns when the browser has no geolocation', async () => {
+      Object.defineProperty(navigator, 'geolocation', { configurable: true, value: undefined });
+      render(<BranchFormWithAddress />);
+      fireEvent.click(screen.getByRole('button', { name: 'useMyLocation' }));
+      expect(toast.error).toHaveBeenCalledWith('locationError');
+      expect(screen.getByRole('button', { name: 'useMyLocation' })).not.toBeDisabled();
     });
   });
 });

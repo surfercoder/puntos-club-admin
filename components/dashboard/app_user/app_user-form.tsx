@@ -26,8 +26,16 @@ import { allRulesPass } from '@/components/onboarding/password-rules';
 import type { AppUser } from '@/types/app_user';
 import type { UserRole } from '@/types/user_role';
 
+export type BranchOption = { id: string; name: string };
+
 interface AppUserFormProps {
-  appUser?: AppUser;
+  appUser?: AppUser & { branch_id?: number | string | null };
+  /** Fija el rol desde la pantalla (Cajeros / Colaboradores) y oculta el selector. */
+  lockedRoleName?: 'cashier' | 'collaborator';
+  branches?: BranchOption[];
+  /** Sucursal preseleccionada al crear (ej: "Asignar cajero" desde Sucursales). */
+  defaultBranchId?: string;
+  redirectTo?: string;
 }
 
 const roleToPlanFeature: Record<string, 'cashiers' | 'collaborators'> = {
@@ -35,7 +43,13 @@ const roleToPlanFeature: Record<string, 'cashiers' | 'collaborators'> = {
   collaborator: 'collaborators',
 };
 
-export default function AppUserForm({ appUser }: AppUserFormProps) {
+export default function AppUserForm({
+  appUser,
+  lockedRoleName,
+  branches = [],
+  defaultBranchId = '',
+  redirectTo = '/dashboard/app_user',
+}: AppUserFormProps) {
   const t = useTranslations('Dashboard.appUser');
   const tCommon = useTranslations('Common');
   const { isAtLimit, invalidate } = usePlanUsage();
@@ -44,6 +58,9 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [roles, setRoles] = useReducer((_: UserRole[], next: UserRole[]) => next, [] as UserRole[]);
   const [roleId, setRoleId] = useState(appUser?.role_id ? String(appUser.role_id) : '');
+  const [branchId, setBranchId] = useState(
+    appUser?.branch_id ? String(appUser.branch_id) : defaultBranchId,
+  );
   const [showPassword, setShowPassword] = useState(false);
   const [passwordValue, setPasswordValue] = useState('');
 
@@ -52,6 +69,9 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
 
   // Load roles
   useEffect(() => {
+    // Si el formulario se desmonta (o cambia el rol fijado) antes de que
+    // responda Supabase, descartamos el resultado en vez de tocar el estado.
+    let cancelled = false;
     const supabase = createClient();
     async function loadRoles() {
       const { data } = await supabase
@@ -59,12 +79,18 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
         .select('*')
         .in('name', ['cashier', 'collaborator'])
         .order('name');
-      if (data) {
-        setRoles(data as UserRole[]);
-      }
+      if (cancelled || !data) return;
+      setRoles(data as UserRole[]);
+      // Cuando la pantalla ya define el rol (Cajeros / Colaboradores) no lo
+      // pedimos de nuevo: lo fijamos apenas conocemos su id.
+      const locked = lockedRoleName
+        ? (data as UserRole[]).find((role) => role.name === lockedRoleName)
+        : undefined;
+      if (locked) setRoleId(String(locked.id));
     }
     loadRoles();
-  }, []);
+    return () => { cancelled = true; };
+  }, [lockedRoleName]);
 
   const isCashierSelected = roles.some((r) => String(r.id) === roleId && r.name === USER_ROLES.CASHIER);
 
@@ -79,7 +105,7 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
   }, [actionState, invalidate]);
 
   if (actionState.status === 'success') {
-    redirect("/dashboard/app_user");
+    redirect(redirectTo);
   }
 
   // Handlers
@@ -110,6 +136,9 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
       {appUser?.id && <input name="id" type="hidden" value={appUser.id} />}
 
       <div className="flex flex-wrap items-start gap-4">
+        {lockedRoleName ? (
+          <input name="role_id" type="hidden" value={roleId} />
+        ) : (
         <div className="flex-1">
           <Label htmlFor="role_id">{t('form.roleLabel')}</Label>
           <Select value={roleId} onValueChange={setRoleId} name="role_id">
@@ -142,8 +171,9 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
           </Select>
           <FieldError actionState={validation ?? actionState} name="role_id" />
         </div>
+        )}
 
-        {isCashierSelected && (
+        {isCashierSelected && !lockedRoleName && (
           <a
             href={PUNTOS_CLUB_CAJA_APK_URL}
             target="_blank"
@@ -164,6 +194,23 @@ export default function AppUserForm({ appUser }: AppUserFormProps) {
         <div className="flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
           <Info className="mt-0.5 size-4 shrink-0 text-primary" />
           <span>{t('form.cashierAppInfo')}</span>
+        </div>
+      )}
+
+      {isCashierSelected && branches.length > 0 && (
+        <div>
+          <Label htmlFor="branch_id">{t('form.branchLabel')}</Label>
+          <Select name="branch_id" onValueChange={setBranchId} value={branchId}>
+            <SelectTrigger className="w-full" id="branch_id">
+              <SelectValue placeholder={t('form.selectBranch')} />
+            </SelectTrigger>
+            <SelectContent>
+              {branches.map((branch) => (
+                <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="mt-1.5 text-xs text-muted-foreground">{t('form.branchHint')}</p>
         </div>
       )}
 

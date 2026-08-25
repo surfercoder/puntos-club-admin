@@ -18,6 +18,10 @@ function safeCancelTour(tour: Tour | null) {
   }
 }
 
+// La tarjeta "¿Necesitás ayuda?" del dashboard dispara este evento para
+// relanzar la guía aunque el usuario ya la haya completado.
+export const START_TOUR_EVENT = "puntosclub:start-tour";
+
 interface DashboardTourProps {
   userRole: string | null;
   userId: string;
@@ -30,13 +34,14 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
 
   useEffect(() => {
     if (userRole !== "owner" && userRole !== "collaborator") return;
-    if (tourCompleted) return;
     if (initialized.current) return;
 
     initialized.current = true;
 
     let tour: Tour | null = null;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    const restart = () => tour?.start();
+    window.addEventListener(START_TOUR_EVENT, restart);
 
     const markCompleted = () => {
       completeTour(userId).catch(console.error);
@@ -175,15 +180,18 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
       localTour.addSteps(steps);
       tour = localTour;
 
-      /* c8 ignore next 3 */
-      timer = setTimeout(() => {
-        localTour.start();
-      }, 800);
+      /* c8 ignore next 5 */
+      if (!tourCompleted) {
+        timer = setTimeout(() => {
+          localTour.start();
+        }, 800);
+      }
     };
 
     initTour().catch(console.error);
 
     return () => {
+      window.removeEventListener(START_TOUR_EVENT, restart);
       clearTimeout(timer);
       safeCancelTour(tour);
     };

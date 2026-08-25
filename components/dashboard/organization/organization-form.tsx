@@ -134,7 +134,7 @@ export default function OrganizationForm({ organization, onSuccess, onCancel, re
         <Label htmlFor="logo_url">{t('form.logoLabel')}</Label>
         <ImageUpload
           aspectRatio="auto"
-          bucket="organization-logos"
+          bucket="logos"
           disabled={pending}
           maxHeight={150}
           maxSizeMB={5}

@@ -59,7 +59,6 @@ jest.mock('@/components/ui/select', () => ({
       <select data-testid="mock-select" value={value} onChange={(e) => onValueChange?.(e.target.value)}>
         <option value="fixed_amount">fixed_amount</option>
         <option value="percentage">percentage</option>
-        <option value="fixed_per_item">fixed_per_item</option>
       </select>
     </div>
   ),
@@ -288,28 +287,6 @@ describe('EditPointsRulePage', () => {
     });
   });
 
-  it('handles rule type change to fixed_per_item and edits the input', async () => {
-    await act(async () => {
-      render(<EditPointsRulePage />);
-    });
-    await waitFor(() => {
-      expect(screen.getByText('form.editTitle')).toBeInTheDocument();
-    });
-    const selects = screen.getAllByTestId('mock-select');
-    await act(async () => {
-      fireEvent.change(selects[0], { target: { value: 'fixed_per_item' } });
-    });
-    await waitFor(() => {
-      expect(screen.getByText('form.pointsPerItem')).toBeInTheDocument();
-    });
-    // Edit the points_per_item input (covers line 330)
-    const input = screen.getByLabelText('form.pointsPerItem');
-    await act(async () => {
-      fireEvent.change(input, { target: { value: '8' } });
-    });
-    expect(input).toHaveValue(8);
-  });
-
   it('handles points_per_dollar change', async () => {
     await act(async () => {
       render(<EditPointsRulePage />);
@@ -507,31 +484,6 @@ describe('EditPointsRulePage', () => {
     await waitFor(() => {
       expect(mockUpdatePointsRule).toHaveBeenCalledWith(1, expect.objectContaining({
         config: { percentage: 15 },
-      }));
-    });
-  });
-
-  it('handles form submit success with fixed_per_item type', async () => {
-    const perItemRule = {
-      ...sampleRule,
-      rule_type: 'fixed_per_item',
-      config: { points_per_item: 7 },
-    };
-    mockGetPointsRuleById.mockResolvedValue({ success: true, data: perItemRule });
-    mockUpdatePointsRule.mockResolvedValue({ success: true });
-    await act(async () => {
-      render(<EditPointsRulePage />);
-    });
-    await waitFor(() => {
-      expect(screen.getByText('form.editTitle')).toBeInTheDocument();
-    });
-    const form = document.querySelector('form')!;
-    await act(async () => {
-      fireEvent.submit(form);
-    });
-    await waitFor(() => {
-      expect(mockUpdatePointsRule).toHaveBeenCalledWith(1, expect.objectContaining({
-        config: { points_per_item: 7 },
       }));
     });
   });

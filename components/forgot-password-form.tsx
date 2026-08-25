@@ -4,18 +4,18 @@ import Link from "next/link";
 import { useReducer } from "react";
 import { useTranslations } from "next-intl";
 
+import { ArrowLeft } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { createClient } from "@/lib/supabase/client";
-import { cn } from "@/lib/utils";
+import {
+  AUTH_CARD_CLASS,
+  AUTH_SUBMIT_CLASS,
+  INPUT_CLASS,
+  cn,
+} from "@/lib/utils";
 import { ForgotPasswordSchema } from "@/schemas/auth.schema";
 
 type ForgotPasswordState = {
@@ -111,63 +111,61 @@ export function ForgotPasswordForm({
   };
 
   return (
-    <div className={cn("flex flex-col gap-6", className)} {...props}>
-      {success ? (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">{t("successTitle")}</CardTitle>
-            <CardDescription>{t("successDescription")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <p className="text-sm text-muted-foreground">
-              {t("successMessage")}
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle className="text-2xl">{t("title")}</CardTitle>
-            <CardDescription>{t("description")}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <form onSubmit={handleForgotPassword} noValidate>
-              <div className="flex flex-col gap-6">
-                <div className="grid gap-2">
-                  <Label htmlFor="email">{tCommon("email")}</Label>
-                  <Input
-                    id="email"
-                    onChange={(e) => dispatch({ type: "SET_EMAIL", payload: e.target.value })}
-                    placeholder={tCommon("emailPlaceholder")}
-                    type="email"
-                    value={email}
-                    aria-invalid={!!fieldErrors.email}
-                    aria-describedby="email-error"
-                  />
-                  {fieldErrors.email && (
-                    <p id="email-error" className="text-destructive text-sm">
-                      {fieldErrors.email}
-                    </p>
-                  )}
-                </div>
-                {error && <p className="text-sm text-destructive">{error}</p>}
-                <Button className="w-full" disabled={isLoading} type="submit">
-                  {isLoading ? t("submitting") : t("submitButton")}
-                </Button>
-              </div>
-              <div className="mt-4 text-center text-sm">
-                {t("alreadyHaveAccount")}{" "}
-                <Link
-                  className="underline underline-offset-4"
-                  href="/auth/login"
-                >
-                  {t("loginLink")}
-                </Link>
-              </div>
-            </form>
-          </CardContent>
-        </Card>
+    <div className={cn(AUTH_CARD_CLASS, "sm:px-16", className)} {...props}>
+      <Link
+        href="/auth/login"
+        className="inline-flex items-center gap-3 text-base font-medium text-muted-foreground underline-offset-4 hover:text-foreground hover:underline sm:text-[1.0625rem]"
+      >
+        <ArrowLeft className="size-5 shrink-0" aria-hidden />
+        {t("backToLogin")}
+      </Link>
+      <h1 className="mt-8 text-[1.875rem] leading-[1.15] font-bold tracking-[-0.02em] sm:text-[2.1875rem]">
+        {success ? t("successTitle") : t("title")}
+      </h1>
+      <p className="mt-4 max-w-[26.25rem] text-lg leading-8 text-muted-foreground sm:text-[1.1875rem] sm:leading-9">
+        {success ? t("successMessage") : t("description")}
+      </p>
+      {!success && (
+        <form onSubmit={handleForgotPassword} noValidate className="mt-9">
+          <div className="grid gap-[0.875rem]">
+            <Label htmlFor="email" className="text-lg font-semibold sm:text-[1.1875rem]">
+              {tCommon("email")}
+            </Label>
+            <Input
+              id="email"
+              onChange={(e) => dispatch({ type: "SET_EMAIL", payload: e.target.value })}
+              placeholder={tCommon("emailPlaceholder")}
+              type="email"
+              value={email}
+              aria-invalid={!!fieldErrors.email}
+              aria-describedby="email-error"
+              className={INPUT_CLASS}
+            />
+            {fieldErrors.email && (
+              <p id="email-error" className="text-destructive text-sm">
+                {fieldErrors.email}
+              </p>
+            )}
+          </div>
+          {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
+          <Button
+            className={cn("mt-8", AUTH_SUBMIT_CLASS)}
+            disabled={isLoading}
+            type="submit"
+          >
+            {isLoading ? t("submitting") : t("submitButton")}
+          </Button>
+        </form>
       )}
+      <p className="mt-9 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-lg font-medium sm:text-[1.1875rem]">
+        {t("alreadyHaveAccount")}
+        <Link
+          href="/auth/login"
+          className="font-bold text-brand-pink underline-offset-4 hover:underline"
+        >
+          {t("loginLink")}
+        </Link>
+      </p>
     </div>
   );
 }

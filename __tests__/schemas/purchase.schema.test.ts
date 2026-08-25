@@ -74,12 +74,27 @@ describe('PurchaseSchema', () => {
       }
     });
 
-    it('should reject negative total_amount', () => {
-      expect(() => PurchaseSchema.parse({ ...validInput, total_amount: -10 })).toThrow();
+    // Con safeParse y no con parse: el server action usa safeParse, y un throw
+    // crudo adentro del transform se le escapa en vez de volver como fieldError.
+    it.each([-10, 'abc', '-10'])('should reject total_amount %j via safeParse', (amount) => {
+      const result = PurchaseSchema.safeParse({ ...validInput, total_amount: amount });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].path).toEqual(['total_amount']);
+        expect(result.error.issues[0].message).toBe('Amount must be a non-negative number');
+      }
     });
 
-    it('should reject non-numeric string total_amount', () => {
-      expect(() => PurchaseSchema.parse({ ...validInput, total_amount: 'abc' })).toThrow();
+    it('should reject a negative points_earned via safeParse', () => {
+      const result = PurchaseSchema.safeParse({
+        ...validInput,
+        mode: 'assignment',
+        points_earned: -1,
+      });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].message).toBe('Points must be a non-negative number');
+      }
     });
 
     it('should transform empty branch_id to null', () => {
@@ -103,6 +118,58 @@ describe('PurchaseSchema', () => {
       expect(result.success).toBe(true);
       if (result.success) {
         expect(result.data.branch_id).toBeNull();
+      }
+    });
+  });
+
+  describe('notes', () => {
+    it.each([
+      ['', null],
+      [null, null],
+      ['Compra con descuento', 'Compra con descuento'],
+    ])('normaliza %j a %j', (input, expected) => {
+      const result = PurchaseSchema.safeParse({ ...validInput, notes: input });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.notes).toBe(expected);
+      }
+    });
+  });
+
+  // El modo decide qué campo numérico es obligatorio: una venta cobra importe,
+  // una asignación otorga puntos a mano.
+  describe('campos obligatorios según el modo', () => {
+    it('exige el importe en una venta', () => {
+      const { total_amount: _omitido, ...sinImporte } = validInput;
+      const result = PurchaseSchema.safeParse({ ...sinImporte, mode: 'sale' });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].path).toEqual(['total_amount']);
+        expect(result.error.issues[0].message).toBe('Amount is required');
+      }
+    });
+
+    it('exige los puntos en una asignación', () => {
+      const { total_amount: _omitido, ...sinImporte } = validInput;
+      const result = PurchaseSchema.safeParse({ ...sinImporte, mode: 'assignment' });
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0].path).toEqual(['points_earned']);
+        expect(result.error.issues[0].message).toBe('Points are required');
+      }
+    });
+
+    it('acepta una asignación con puntos y sin importe', () => {
+      const { total_amount: _omitido, ...sinImporte } = validInput;
+      const result = PurchaseSchema.safeParse({
+        ...sinImporte,
+        mode: 'assignment',
+        points_earned: 250,
+      });
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.points_earned).toBe(250);
+        expect(result.data.total_amount).toBeUndefined();
       }
     });
   });

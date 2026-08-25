@@ -2,6 +2,8 @@ import { z } from 'zod';
 
 export const ProductSchema = z.object({
   id: z.string().optional(),
+  // Vacío es válido sólo si el formulario mandó `new_category`; la acción crea
+  // la categoría y completa este campo antes de guardar el producto.
   category_id: z.string().min(1, 'Category is required'),
   name: z.string().min(1, 'Name is required'),
   description: z.string().optional().or(z.literal('')).transform(val => val === '' ? null : val),

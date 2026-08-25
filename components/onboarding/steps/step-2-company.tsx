@@ -1,7 +1,7 @@
 'use client';
 
-import { useReducer } from 'react';
-import { Building2, ChevronDown, ChevronUp, Eye, EyeOff, Info, Phone, Store, UserCog } from 'lucide-react';
+import { useEffect, useReducer, useState } from 'react';
+import { Building2, Check, ChevronDown, ChevronUp, Eye, EyeOff, Info, Loader2, Phone, Store, UserCog } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { Label } from '@/components/ui/label';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { GoogleAddressAutocomplete } from '@/components/ui/google-address-autocomplete';
 import type { GoogleAddressComponents } from '@/components/ui/google-address-autocomplete';
-import type { OnboardingStep2Data } from '@/actions/onboarding/actions';
+import { checkOrgNameAvailable, type OnboardingStep2Data } from '@/actions/onboarding/actions';
 import { PasswordStrengthChecklist } from '@/components/onboarding/password-strength-checklist';
 import { allRulesPass } from '@/components/onboarding/password-rules';
 
@@ -280,6 +280,28 @@ export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
   const t = useTranslations('Onboarding.step2');
   const tCommon = useTranslations('Common');
   const [state, dispatch] = useReducer(reducer, initialData, buildInitialState);
+  const [nameStatus, setNameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
+
+  // Dos clubes con el mismo nombre confunden al beneficiario, asi que se avisa
+  // mientras se escribe en vez de fallar recien al crear la organizacion.
+  const orgName = state.orgName.trim();
+  useEffect(() => {
+    if (!orgName || orgName === initialData?.org.name) {
+      setNameStatus('idle');
+      return;
+    }
+    setNameStatus('checking');
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      const result = await checkOrgNameAvailable(orgName);
+      if (cancelled) return;
+      setNameStatus(result === 'unknown' ? 'idle' : result);
+    }, 500);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [orgName, initialData?.org.name]);
 
   const setText = (field: keyof Step2State) => (e: React.ChangeEvent<HTMLInputElement>) =>
     dispatch({ type: 'SET_FIELD', field, value: e.target.value });
@@ -291,6 +313,7 @@ export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
   const validate = () => {
     const errs: Record<string, string> = {};
     if (!state.orgName.trim()) errs.orgName = t('validation.businessNameRequired');
+    else if (nameStatus === 'taken') errs.orgName = t('validation.businessNameTaken');
     if (!state.branchName.trim()) errs.branchName = t('validation.branchNameRequired');
     if (!state.address) errs.address = t('validation.branchAddressRequired');
     if (cashierHasData) {
@@ -366,6 +389,19 @@ export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
           />
         </div>
         {state.errors.orgName && <p className="text-xs text-destructive">{state.errors.orgName}</p>}
+        {nameStatus === 'checking' && (
+          <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+            <Loader2 className="size-3 animate-spin" /> {t('nameChecking')}
+          </p>
+        )}
+        {nameStatus === 'available' && (
+          <p className="flex items-center gap-1.5 text-xs text-brand-green">
+            <Check className="size-3" /> {t('nameAvailable')}
+          </p>
+        )}
+        {nameStatus === 'taken' && !state.errors.orgName && (
+          <p className="text-xs text-destructive">{t('validation.businessNameTaken')}</p>
+        )}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -443,7 +479,7 @@ export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
         <Button type="button" variant="outline" onClick={onBack} className="flex-1">
           {tCommon('back')}
         </Button>
-        <Button type="submit" className="flex-1">
+        <Button type="submit" className="flex-1" disabled={nameStatus === 'taken'}>
           {tCommon('continue')}
         </Button>
       </div>

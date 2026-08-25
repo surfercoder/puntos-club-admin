@@ -82,6 +82,14 @@ describe('LanguageSwitcher', () => {
     expect(select).toHaveAttribute('data-value', 'en');
   });
 
+  // useLocale() puede devolver un locale que no está en LOCALE_CODE: se muestra
+  // el código crudo en vez de romper.
+  it('falls back to the raw locale when it has no display code', () => {
+    (useLocale as jest.Mock).mockReturnValue('pt');
+    render(<LanguageSwitcher />);
+    expect(screen.getByTestId('select-value')).toHaveTextContent('pt');
+  });
+
   it('has an accessible label from translations', () => {
     render(<LanguageSwitcher />);
     const trigger = screen.getByTestId('select-trigger');

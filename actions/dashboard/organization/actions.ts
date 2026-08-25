@@ -1,9 +1,11 @@
 "use server";
 
+import { revalidatePath } from 'next/cache';
+
 import { createClient } from '@/lib/supabase/server';
-import { OrganizationSchema, OrganizationVisibilitySchema } from '@/schemas/organization.schema';
+import { ClubProfileSchema, OrganizationSchema, OrganizationVisibilitySchema } from '@/schemas/organization.schema';
 import type { Organization } from '@/types/organization';
-import { isAdmin } from '@/lib/auth/roles';
+import { hasOwnerPermissions, isAdmin } from '@/lib/auth/roles';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { requireUser } from '@/lib/auth/require-user';
 
@@ -123,9 +125,25 @@ export async function getOrganizationSettings(id: string) {
   const supabase = await createClient();
   const { data, error } = await supabase
     .from('organization')
-    .select('id, name, is_public')
+    .select(
+      'id, name, business_name, tax_id, logo_url, is_public, timezone, description, contact_email, contact_phone, website, industry, invitation_code, welcome_message, points_label, allow_new_members, requires_approval, email_notifications, show_in_explore',
+    )
     .eq('id', id)
     .single();
+
+  return { data, error };
+}
+
+/** Dirección principal de la organización (la primera que creó el onboarding). */
+export async function getOrganizationAddress(organizationId: string) {
+  const supabase = await createClient();
+  const { data, error } = await supabase
+    .from('address')
+    .select('id, street, number, city, state, zip_code, country, place_id, latitude, longitude')
+    .eq('organization_id', organizationId)
+    .order('id')
+    .limit(1)
+    .maybeSingle();
 
   return { data, error };
 }
@@ -185,4 +203,100 @@ export async function getOrganizationProducts(organizationId: string) {
     .order('required_points', { ascending: true });
 
   return { data, error };
+}
+
+/** Campos del "Perfil del Club" que el owner puede editar desde el panel. */
+export type ClubProfileAddress = {
+  street: string;
+  number: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  country: string | null;
+  place_id: string | null;
+  latitude: number | null;
+  longitude: number | null;
+};
+
+export type ClubProfileInput = {
+  name: string;
+  business_name: string | null;
+  tax_id: string | null;
+  description: string | null;
+  contact_email: string | null;
+  contact_phone: string | null;
+  website: string | null;
+  industry: string | null;
+  logo_url: string | null;
+  is_public: boolean;
+  show_in_explore: boolean;
+  allow_new_members: boolean;
+  requires_approval: boolean;
+  email_notifications: boolean;
+  invitation_code: string | null;
+  welcome_message: string | null;
+  points_label: string;
+  timezone: string | null;
+  /** Dirección principal; se crea si la organización todavía no tiene una. */
+  address?: ClubProfileAddress;
+};
+
+export async function updateClubProfile(id: string, input: ClubProfileInput) {
+  await requireUser();
+
+  const currentUser = await getCurrentUser();
+  if (!currentUser || !hasOwnerPermissions(currentUser)) {
+    return { error: 'Not authorized' };
+  }
+
+  // El owner sólo puede tocar su propia organización.
+  if (String(currentUser.organization_id) !== String(id)) {
+    return { error: 'Not authorized' };
+  }
+
+  // El tipo no existe en runtime: se valida para no escribir campos que el
+  // formulario no ofrece (plan, trial_started_at, ...).
+  const parsed = ClubProfileSchema.safeParse(input);
+  if (!parsed.success) {
+    return { error: 'Invalid club profile' };
+  }
+  const { address, ...orgFields } = parsed.data;
+
+  const supabase = await createClient();
+  const { error } = await supabase
+    .from('organization')
+    .update({
+      ...orgFields,
+      invitation_code: orgFields.invitation_code?.trim() || null,
+    })
+    .eq('id', id);
+
+  if (error) {
+    // organization_name_unique: el nombre es la identidad visible del club.
+    if (error.code === '23505') {
+      return { error: 'Ya existe una empresa con ese nombre. Probá con otro.' };
+    }
+    return { error: error.message };
+  }
+
+  if (address) {
+    const { data: existing } = await supabase
+      .from('address')
+      .select('id')
+      .eq('organization_id', id)
+      .order('id')
+      .limit(1)
+      .maybeSingle();
+
+    const { error: addressError } = existing
+      ? await supabase.from('address').update(address).eq('id', existing.id)
+      : await supabase.from('address').insert({ ...address, organization_id: Number(id) });
+
+    if (addressError) {
+      return { error: addressError.message };
+    }
+  }
+
+  revalidatePath('/dashboard/settings/organization');
+  return { error: null };
 }

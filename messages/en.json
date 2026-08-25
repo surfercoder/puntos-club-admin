@@ -91,7 +91,18 @@
     "more": "More",
     "toggleTheme": "Toggle theme",
     "toggleSidebar": "Toggle Sidebar",
-    "breadcrumb": "breadcrumb"
+    "breadcrumb": "breadcrumb",
+    "pagination": {
+      "rowsPerPage": "Rows per page",
+      "pageOf": "Page {page} of {totalPages}",
+      "first": "First page",
+      "previous": "Previous page",
+      "next": "Next page",
+      "last": "Last page",
+      "showing": "Showing {shown} of {total}"
+    },
+    "export": "Export",
+    "copy": "Copy"
   },
   "NotFound": {
     "title": "404 - Page Not Found",
@@ -108,10 +119,12 @@
       "title": "Sign in",
       "description": "Enter your email address to access your account",
       "forgotPassword": "Forgot your password?",
-      "noAccount": "Don't have an account?",
-      "signUpLink": "Sign up",
+      "noAccount": "Don't have an account yet?",
+      "signUpLink": "Join now",
       "submitting": "Signing in...",
       "noPermission": "You do not have permission to access the administration portal.",
+      "showPassword": "Show password",
+      "hidePassword": "Hide password",
       "pageTitle": "Sign in - Puntos Club Admin",
       "pageDescription": "Sign in to your account"
     },
@@ -135,17 +148,17 @@
       "pageTitle": "Registration successful - Puntos Club Admin"
     },
     "forgotPassword": {
-      "title": "Reset password",
-      "description": "Enter your email and we will send you a link to reset your password",
+      "title": "Forgot your password?",
+      "description": "Don't worry, it happens. Enter your email and we'll send you a link to reset it.",
       "successTitle": "Check your email",
-      "successDescription": "Password reset instructions sent",
       "successMessage": "If you signed up with email and password, you will receive an email to reset your password.",
-      "submitButton": "Send reset email",
+      "submitButton": "Send recovery link",
       "submitting": "Sending...",
-      "alreadyHaveAccount": "Already have an account?",
+      "alreadyHaveAccount": "Remembered your password?",
       "loginLink": "Sign in",
       "pageTitle": "Reset password - Puntos Club Admin",
-      "pageDescription": "Reset your account password"
+      "pageDescription": "Reset your account password",
+      "backToLogin": "Back to sign in"
     },
     "updatePassword": {
       "title": "Reset password",
@@ -202,7 +215,6 @@
     "beneficiaries": "Beneficiaries",
     "beneficiaryOrgs": "Beneficiary Organizations",
     "branches": "Branches",
-    "categories": "Categories",
     "notificationLimits": "Notification Limits",
     "organizations": "Organizations",
     "pointsRules": "Points Rules",
@@ -227,10 +239,13 @@
     "settings": "Settings",
     "designEngineering": "Design Engineering",
     "salesMarketing": "Sales & Marketing",
-    "travel": "Travel"
+    "travel": "Travel",
+    "cashiers": "Cashiers",
+    "collaborators": "Collaborators"
   },
   "Breadcrumb": {
     "panel": "Dashboard",
+    "dashboard": "Dashboard",
     "new": "New",
     "create": "Create",
     "edit": "Edit",
@@ -241,7 +256,6 @@
     "beneficiary": "Beneficiaries",
     "beneficiary_organization": "Beneficiary Organizations",
     "branch": "Branches",
-    "category": "Categories",
     "notifications": "Notifications",
     "organization": "Organizations",
     "organization_notification_limits": "Notification Limits",
@@ -259,7 +273,10 @@
     "users": "Users",
     "qr": "QR Code",
     "settings": "Settings",
-    "organization-settings": "Organization Settings"
+    "organization-settings": "Organization Settings",
+    "mother": "Base rule",
+    "cashiers": "Cashiers",
+    "collaborators": "Collaborators"
   },
   "Dashboard": {
     "analytics": {
@@ -280,13 +297,13 @@
       },
       "purchasesOverTime": {
         "title": "Sales over time",
-        "description": "Revenue and number of operations over the last 6 months",
+        "description": "Revenue and number of operations over the last {months} months",
         "revenueLabel": "Revenue ($)",
         "countLabel": "Operations"
       },
       "pointsEconomy": {
         "title": "Points economy",
-        "description": "Points earned vs redeemed over the last 6 months",
+        "description": "Points granted vs redeemed over the last {months} months",
         "earnedLabel": "Points earned",
         "redeemedLabel": "Points redeemed"
       },
@@ -310,7 +327,7 @@
       },
       "planUsage": {
         "title": "Plan usage",
-        "descriptionPrefix": "Utilization of your plan limits",
+        "descriptionPrefix": "How much of your plan limits you are using",
         "features": {
           "beneficiaries": "Members",
           "push_notifications_monthly": "Notifications",
@@ -319,6 +336,47 @@
           "collaborators": "Collaborators",
           "redeemable_products": "Products"
         }
+      }
+    },
+    "home": {
+      "greeting": "Hi, {name}!",
+      "subtitle": "Here is how {organization} is doing on PuntosClub.",
+      "rangeLabel": "Period",
+      "rangeOption": "Last {months} months",
+      "quickActions": {
+        "title": "Quick actions",
+        "assignPoints": {
+          "title": "Assign points",
+          "description": "Give points to your beneficiaries"
+        },
+        "createBenefit": {
+          "title": "Create a reward",
+          "description": "Add new products or rewards"
+        },
+        "downloadQr": {
+          "title": "Download QR",
+          "description": "Share your club with more people"
+        },
+        "viewRedemptions": {
+          "title": "View redemptions",
+          "description": "Check the latest redemptions"
+        }
+      },
+      "quickSummary": {
+        "title": "Quick summary",
+        "availablePoints": "Available points balance",
+        "pointsGranted": "Points granted ({months} months)",
+        "pointsRedeemed": "Points redeemed ({months} months)",
+        "totalBeneficiaries": "Total beneficiaries",
+        "activeBeneficiaries": "Active beneficiaries"
+      },
+      "help": {
+        "title": "Need a hand?",
+        "description": "Our assistant is ready to walk you through your program.",
+        "cta": "Open assistant"
+      },
+      "footer": {
+        "copyright": "© {year} PuntosClub. All rights reserved."
       }
     },
     "beneficiaryLinkAll": {
@@ -403,14 +461,15 @@
     },
     "notifications": {
       "title": "Push Notifications",
-      "description": "Send notifications to your beneficiaries",
+      "description": "Send notifications to your beneficiaries and review how they perform.",
       "newButton": "New Notification",
       "tableHeaders": {
         "title": "Title",
         "message": "Message",
         "status": "Status",
         "sent": "Sent",
-        "failed": "Failed"
+        "failed": "Failed",
+        "delivered": "Delivered"
       },
       "empty": "No notifications have been sent yet",
       "emptyAction": "Send the first notification",
@@ -529,7 +588,102 @@
         "approvedMessage": "Your notification content has been reviewed and approved. You can now send it to your beneficiaries.",
         "reviewReasons": "Please review your content for the following reasons:",
         "reminder": "Remember: Notifications should only contain information about products, offers, promotions and campaigns."
-      }
+      },
+      "viewStats": "View stats",
+      "showing": "Showing {shown} of {total} notifications",
+      "expand": "View details",
+      "collapse": "Hide details",
+      "status": {
+        "draft": "Draft",
+        "sending": "Sending",
+        "sent": "Sent",
+        "failed": "Failed"
+      },
+      "stats": {
+        "sent": "Sent",
+        "sentSubtitle": "All time",
+        "delivered": "Delivered",
+        "failed": "Failed",
+        "ofSent": "{percent}% of sent",
+        "deliveryRate": "Delivery rate",
+        "deliveryRateSubtitle": "Over everything sent",
+        "excellent": "Excellent",
+        "remaining": "Left this month",
+        "remainingSubtitle": "Of {limit} in your plan",
+        "remainingNoLimit": "No plan limit"
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Search by title or message...",
+        "status": "Status",
+        "all": "All",
+        "from": "Date from",
+        "to": "Date to",
+        "apply": "Apply filters",
+        "clear": "Clear"
+      },
+      "detail": {
+        "type": "Notification type",
+        "typeGlobal": "Global",
+        "segment": "Segment",
+        "segmentAll": "Every active beneficiary",
+        "platform": "Platform",
+        "platformBoth": "Android, iOS",
+        "action": "Link / Action",
+        "actionOpenApp": "Open the app (home screen)",
+        "performance": "Detailed performance",
+        "steps": {
+          "sent": "Sent",
+          "delivered": "Delivered",
+          "failed": "Failed"
+        },
+        "deliveryRate": "Delivery rate",
+        "openRatePending": "Opens are not tracked yet: the app needs instrumenting to measure them."
+      },
+      "guidance": {
+        "aiTitle": "AI review",
+        "aiSubtitle": "Before it goes out, your notification is analysed automatically.",
+        "aiChecks": {
+          "safe": {
+            "title": "Safe content",
+            "description": "No offensive, discriminatory or sexual language."
+          },
+          "aligned": {
+            "title": "On purpose",
+            "description": "Related to rewards, points or promotions."
+          },
+          "clear": {
+            "title": "Clear and useful",
+            "description": "Clear, useful, well-structured messages."
+          }
+        },
+        "aiNote": "If the content breaks our policies, we suggest improvements before you can send it.",
+        "tipsTitle": "Tips for better results",
+        "tips": {
+          "short": "Use short, eye-catching titles",
+          "urgency": "Create urgency or highlight the reward",
+          "personalize": "Personalise the message when you can",
+          "caps": "Avoid shouting in all caps",
+          "preview": "Check the preview before sending"
+        },
+        "policiesTitle": "Content policies",
+        "policiesSubtitle": "Not allowed:",
+        "policies": {
+          "offensive": "Offensive or discriminatory language",
+          "sexual": "Sexual content",
+          "spam": "Spam or third-party advertising",
+          "misleading": "Misleading or false promises",
+          "unrelated": "Content unrelated to the program",
+          "personal": "Personal or sensitive data"
+        }
+      },
+      "recipients": {
+        "label": "Send to",
+        "all": "Every active beneficiary",
+        "note": "The notification reaches every beneficiary with the PuntosClub app installed and notifications enabled."
+      },
+      "contentSection": "1. Notification content",
+      "recipientsSection": "2. Recipients"
     },
     "users": {
       "title": "Users",
@@ -623,38 +777,6 @@
         "genericError": "An error occurred while deleting"
       }
     },
-    "category": {
-      "title": "Categories",
-      "description": "Manage product categories",
-      "newButton": "+ New Category",
-      "error": "Error loading categories",
-      "empty": "No categories found.",
-      "tableHeaders": {
-        "name": "Name",
-        "description": "Description",
-        "status": "Status",
-        "actions": "Actions"
-      },
-      "createTitle": "Create Category",
-      "editTitle": "Edit Category",
-      "fetchError": "Error fetching category",
-      "form": {
-        "parentCategory": "Parent Category",
-        "noParent": "No parent category",
-        "nameLabel": "Name",
-        "namePlaceholder": "Enter category name",
-        "descriptionLabel": "Description",
-        "descriptionPlaceholder": "Enter category description (optional)",
-        "activeLabel": "Active"
-      },
-      "deleteModal": {
-        "title": "Delete Category",
-        "confirm": "Are you sure you want to delete {name}? This action cannot be undone.",
-        "deleteError": "Error deleting category",
-        "deleteSuccess": "Category deleted successfully",
-        "genericError": "An error occurred while deleting"
-      }
-    },
     "appUser": {
       "title": "Users",
       "description": "Manage app users",
@@ -684,7 +806,10 @@
         "selectRole": "Select a role",
         "roleLimitReached": "{role} (limit reached)",
         "cashierAppQr": "Scan to install PuntosClubCaja on the cashier's phone",
-        "cashierAppInfo": "The cashier works from the PuntosClubCaja app on their phone. Ask them to download and install it by scanning this QR and sign in with the email and password you set here. From the app they'll be able to add and redeem customer points."
+        "cashierAppInfo": "The cashier works from the PuntosClubCaja app on their phone. Ask them to download and install it by scanning this QR and sign in with the email and password you set here. From the app they'll be able to add and redeem customer points.",
+        "branchLabel": "Branch",
+        "selectBranch": "Select a branch",
+        "branchHint": "The cashier can only hand out points at this branch."
       },
       "roles": {
         "cashier": "Cashier",
@@ -726,6 +851,10 @@
         "printFooter": "puntosclub.app · Loyalty program",
         "printError": "Could not open print window. Please check that pop-ups are not blocked.",
         "shareText": "Join {name} on Puntos Club and earn points on every purchase."
+      },
+      "important": {
+        "title": "Good to know",
+        "body": "QR codes are unique to your organization. If you need them regenerated, contact our support team."
       }
     },
     "plan": {
@@ -743,8 +872,8 @@
       "upgradeSuffix": "to increase these limits."
     },
     "planSettings": {
-      "title": "Plan & Subscription",
-      "description": "Manage your current plan and compare available options",
+      "title": "Pick the right plan for your points club",
+      "description": "Simple, clear and flexible plans that grow with your business.",
       "currentPlan": "Current plan",
       "availablePlans": "Available plans",
       "upgradeTo": "Upgrade to {plan}",
@@ -762,11 +891,48 @@
       "confirmCancel": "Yes, cancel",
       "confirmSwitch": "Yes, switch",
       "cancelSuccess": "Subscription cancelled. Your plan is now trial.",
-      "cancelError": "Could not cancel your subscription. Please try again."
+      "cancelError": "Could not cancel your subscription. Please try again.",
+      "clubi": {
+        "greeting": "Hi! I'm Clubi 🎁",
+        "body": "I'm here to help you pick the plan that fits your business best. Any questions, we're around."
+      },
+      "trust": {
+        "payments": {
+          "title": "100% secure payments",
+          "description": "We process payments with Mercado Pago, the leading platform in Latin America."
+        },
+        "data": {
+          "title": "Your data protected",
+          "description": "Keeping your information and your users' safe is our top priority."
+        },
+        "noHiddenFees": {
+          "title": "No hidden fees",
+          "description": "Clear pricing, no surprises. Cancel or switch plans whenever you want."
+        },
+        "support": {
+          "title": "Real support",
+          "description": "We walk with you at every step, with human, personal support."
+        }
+      },
+      "mercadoPago": {
+        "title": "Payments processed by Mercado Pago",
+        "body": "Your payment is 100% secure. We use Mercado Pago, the leading online payments platform in Latin America."
+      },
+      "guarantee": {
+        "title": "Clubi guarantee",
+        "body": "If the service is not for you, we refund your money within the first 7 days."
+      },
+      "help": {
+        "title": "Still deciding?",
+        "body": "Talk to our team and we help you pick the right plan for your business.",
+        "cta": "Contact support"
+      },
+      "footerNote": "You can switch plans or cancel any time. Changes apply on the next billing cycle.",
+      "taxNote": "All prices include taxes."
     },
     "branch": {
       "title": "Branches",
-      "description": "Manage all branches in the system",
+      "description": "Manage every branch and the cashiers assigned to them",
       "newButton": "+ New Branch",
       "error": "Error fetching branches",
       "createTitle": "Create Branch",
@@ -778,7 +944,9 @@
         "phone": "Phone",
         "address": "Address",
         "status": "Status",
-        "actions": "Actions"
+        "actions": "Actions",
+        "cashier": "Assigned cashier",
+        "cashierStatus": "Cashier status"
       },
       "empty": "No branches found.",
       "deleteModal": {
@@ -813,7 +981,41 @@
         "zipCode": "Zip Code",
         "zipCodePlaceholder": "Postal code",
         "create": "Create",
-        "update": "Update"
+        "update": "Update",
+        "useMyLocation": "Use my location",
+        "locating": "Finding your location...",
+        "locationError": "We could not get your location",
+        "cashierLabel": "Assigned cashier",
+        "cashierPlaceholder": "Select a cashier",
+        "cashierHint": "The cashier will be able to operate this branch from the Cashiers app.",
+        "cashierWarning": "Assign a cashier so this branch can operate."
+      },
+      "showing": "Showing {shown} of {total} branches",
+      "noCashier": "No cashier assigned",
+      "assignCashier": "Assign a cashier",
+      "withoutCashier": "No cashier",
+      "cashierNotice": {
+        "title": "Every branch needs a cashier assigned.",
+        "description": "The cashier is who can hand out points at that branch from the Cashiers app.",
+        "activeBranches": "Active branches",
+        "withoutCashier": "Without a cashier"
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Search a branch...",
+        "status": "Status",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "cashierStatus": "Cashier status",
+        "cashierAssigned": "With cashier",
+        "cashierUnassigned": "Without cashier",
+        "all": "All",
+        "apply": "Apply",
+        "refresh": "Refresh"
+      },
+      "newBranch": {
+        "title": "New branch",
+        "description": "Fill in the branch details and assign a cashier."
       }
     },
     "user": {
@@ -860,7 +1062,8 @@
         "document": "Document",
         "availablePoints": "Available Points",
         "registrationDate": "Registration Date",
-        "actions": "Actions"
+        "actions": "Actions",
+        "pointsStatus": "Points status"
       },
       "empty": "No beneficiaries found.",
       "form": {
@@ -890,6 +1093,52 @@
         "hideSuccess": "Organization hidden from this beneficiary",
         "unhideSuccess": "Organization is now visible to this beneficiary",
         "error": "An error occurred while updating visibility"
+      },
+      "viewOnMap": "View on map",
+      "showing": "Showing {shown} of {total} beneficiaries",
+      "pointsStatus": {
+        "with": "Has points",
+        "without": "No points"
+      },
+      "stats": {
+        "total": "Total beneficiaries",
+        "totalSubtitle": "Of {limit} allowed",
+        "totalNoLimit": "No plan limit",
+        "active": "Active beneficiaries",
+        "percentOfTotal": "{percent}% of total",
+        "withPoints": "With available points",
+        "averagePoints": "Average points",
+        "averagePointsSubtitle": "Across all beneficiaries",
+        "newThisMonth": "New this month",
+        "growth": "{growth}% vs last month"
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Name, email, document...",
+        "searchPlaceholderName": "Name or last name...",
+        "status": "Status",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "points": "Available points",
+        "pointsWith": "Has points",
+        "pointsWithout": "No points",
+        "registrationDate": "Registration date",
+        "all": "All",
+        "apply": "Apply filters",
+        "clear": "Clear"
+      },
+      "map": {
+        "title": "Beneficiaries by area",
+        "tooltip": "Areas are derived from each beneficiary's registered address.",
+        "subtitle": "Geographic distribution (heat map)",
+        "rangeLabel": "Map period",
+        "rangeOption": "Last {months} months",
+        "legendLow": "Fewer beneficiaries",
+        "legendHigh": "More beneficiaries",
+        "privacyNote": "Approximate view for safety. Exact locations are never shown.",
+        "loading": "Loading the map...",
+        "empty": "No beneficiaries with a registered address in this period yet.",
+        "error": "We could not load the map."
       }
     },
     "product": {
@@ -910,16 +1159,25 @@
       "empty": "No products found.",
       "form": {
         "categoryLabel": "Category",
-        "categoryPlaceholder": "Select a category",
-        "nameLabel": "Name",
-        "namePlaceholder": "Enter product name",
-        "descriptionLabel": "Description",
-        "descriptionPlaceholder": "Enter product description (optional)",
-        "pointsLabel": "Required Points",
-        "pointsPlaceholder": "Enter required points",
-        "stockLabel": "Stock",
-        "stockPlaceholder": "Units available for redemption",
-        "imagesLabel": "Product Images (up to 3)"
+        "categoryPlaceholder": "Pick an existing category",
+        "nameLabel": "Product name",
+        "namePlaceholder": "Enter the product name",
+        "descriptionLabel": "Description (optional)",
+        "descriptionPlaceholder": "Enter a product description",
+        "pointsLabel": "Points required",
+        "pointsPlaceholder": "0",
+        "stockLabel": "Available stock",
+        "stockPlaceholder": "0",
+        "imagesLabel": "Product images (up to 3)",
+        "sectionTitle": "1. Product information",
+        "orCreateCategory": "or create a new one on the right",
+        "newCategoryLabel": "New category (optional)",
+        "newCategoryPlaceholder": "Name of the new category",
+        "descriptionMax": "Max. {max} characters",
+        "pointsHelp": "How many points a beneficiary needs to redeem it.",
+        "stockHelp": "How many units are available to redeem.",
+        "submitCreate": "Create product",
+        "submitEdit": "Save changes"
       },
       "deleteModal": {
         "title": "Delete Product",
@@ -941,30 +1199,52 @@
         "formats": "JPEG, PNG, WebP · Max 5MB",
         "autoResize": "Resized automatically to 1200×675 px (16:9). Upload that ratio to avoid letterboxing.",
         "noImages": "No images uploaded yet. You can add up to 3 images.",
-        "imageCount": "{count} of 3 images uploaded"
+        "imageCount": "{count} of 3 images uploaded",
+        "mainImage": "Main",
+        "addImage": "Add image"
       },
-      "outOfStock": "Out of stock"
+      "outOfStock": "Out of stock",
+      "preview": {
+        "title": "Product preview",
+        "placeholderName": "Product name",
+        "placeholderDescription": "The product description will show up here.",
+        "points": "Points required",
+        "stock": "Available stock",
+        "units": "{count} units",
+        "infoTitle": "Good to know",
+        "infoBody": "Once created, the product shows up for your beneficiaries and can be redeemed under the program rules."
+      },
+      "createDescription": "Fill in the reward details and its category.",
+      "editDescription": "Update the reward details and its category."
     },
     "redemption": {
       "title": "Redemptions",
-      "description": "Manage system redemptions",
+      "description": "Manage redemptions made by your beneficiaries",
       "error": "Error loading redemptions",
       "empty": "No redemptions found.",
       "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Search by beneficiary, product, code...",
         "status": "Status",
         "allStatuses": "All statuses",
-        "from": "From",
-        "to": "To",
-        "apply": "Apply",
+        "from": "Date from",
+        "to": "Date to",
+        "beneficiary": "Beneficiary",
+        "allBeneficiaries": "All beneficiaries",
+        "product": "Product",
+        "allProducts": "All products",
+        "apply": "Apply filters",
         "clear": "Clear"
       },
       "tableHeaders": {
         "beneficiary": "Beneficiary",
         "product": "Product",
-        "pointsUsed": "Points",
-        "date": "Date",
+        "pointsUsed": "Points used",
+        "date": "Date & time",
         "status": "Status",
-        "actions": "Actions"
+        "actions": "Actions",
+        "code": "Redemption ID",
+        "deliveredBy": "Delivered by"
       },
       "status": {
         "pending": "Pending",
@@ -982,6 +1262,44 @@
         "deleteError": "Error deleting redemption",
         "deleteSuccess": "Redemption deleted successfully",
         "genericError": "An error occurred while deleting"
+      },
+      "reportButton": "Redemption report",
+      "showing": "Showing {shown} of {total} redemptions",
+      "summaryTitle": "Period summary",
+      "donutTotal": "Total redemptions",
+      "stats": {
+        "inPeriod": "In the selected period",
+        "total": "Total redemptions",
+        "pointsUsed": "Points used",
+        "pending": "Pending redemptions",
+        "pendingSubtitle": "Waiting for delivery",
+        "delivered": "Delivered redemptions",
+        "deliveredSubtitle": "Completed",
+        "cancelled": "Cancelled redemptions",
+        "cancelledSubtitle": "Cancelled by the organization"
+      },
+      "quickActions": {
+        "title": "Quick actions",
+        "deliver": {
+          "title": "Mark as delivered",
+          "description": "Confirm a redemption delivery"
+        },
+        "cancel": {
+          "title": "Cancel redemption",
+          "description": "Cancel a pending redemption"
+        },
+        "products": {
+          "title": "View products",
+          "description": "Check the catalogue and its stock"
+        },
+        "export": {
+          "title": "Export redemptions",
+          "description": "Download the redemption list"
+        }
+      },
+      "info": {
+        "title": "Good to know",
+        "body": "From here you can see every redemption your beneficiaries made, its current status, and manage deliveries."
       }
     },
     "appUserOrganization": {
@@ -1084,7 +1402,7 @@
     },
     "purchase": {
       "title": "Virtual Cashier",
-      "description": "Manage virtual cashier operations",
+      "description": "Operations and points assignment history",
       "createTitle": "Create Operation",
       "editTitle": "Edit Operation",
       "newButton": "+ New Operation",
@@ -1098,25 +1416,158 @@
         "branch": "Branch",
         "amount": "Amount",
         "points": "Points",
-        "actions": "Actions"
+        "actions": "Actions",
+        "type": "Type"
       },
       "deleteModal": {
         "title": "Delete Operation",
         "confirm": "Are you sure you want to delete operation <strong>{name}</strong>? This action cannot be undone.",
         "deleteError": "Error deleting operation",
+        "trigger": "Delete operation {name}",
         "deleteSuccess": "Operation deleted successfully",
         "genericError": "An unexpected error occurred"
       },
       "form": {
+        "step1": "1. What do you want to record?",
+        "modes": {
+          "assignment": {
+            "title": "Assign points",
+            "description": "Grant points manually"
+          },
+          "sale": {
+            "title": "Record a sale",
+            "description": "Enter the amount of the sale"
+          }
+        },
+        "assignmentHint": "The points you enter are credited straight to the beneficiary.",
+        "saleHint": "Points are calculated automatically from the program's active rule.",
         "beneficiaryLabel": "Beneficiary",
-        "selectBeneficiary": "Select beneficiary",
-        "cashierLabel": "Cashier",
-        "selectCashier": "Select cashier",
-        "branchLabel": "Branch",
-        "selectBranch": "Select branch (optional)",
-        "totalAmountLabel": "Total Amount",
-        "pointsEarnedLabel": "Points Earned"
-      }
+        "selectBeneficiary": "Search by name, email, document or phone...",
+        "viewProfile": "View profile",
+        "branchLabel": "Branch (optional)",
+        "selectBranch": "Select a branch",
+        "totalAmountLabel": "Sale amount",
+        "totalAmountHelp": "Enter the amount of the sale.",
+        "pointsToAssignLabel": "Points to assign",
+        "pointsToAssignHelp": "Enter how many points you want to assign.",
+        "availablePointsLabel": "Available points",
+        "reasonLabel": "Reason (optional)",
+        "selectReason": "Select a reason",
+        "reasonHelp": "Pick why you are assigning these points.",
+        "reasons": {
+          "welcome": "Welcome",
+          "campaign": "Campaign",
+          "compensation": "Compensation",
+          "referral": "Referral",
+          "other": "Other"
+        },
+        "notesLabel": "Notes (optional)",
+        "notesPlaceholder": "Write a note or comment...",
+        "notesHelp": "Extra information about this operation.",
+        "summaryTitle": "Operation summary",
+        "summaryBeneficiary": "Beneficiary",
+        "summaryPoints": "Points to assign",
+        "summaryTotal": "Balance after the operation",
+        "submitAssignment": "Assign points",
+        "submitSale": "Record sale",
+        "activityTitle": "Recent beneficiary activity",
+        "activityDate": "Date",
+        "activityType": "Type",
+        "activityDescription": "Description",
+        "activityPoints": "Points",
+        "activitySale": "Sale recorded for {amount}",
+        "activityAssignment": "Points assigned from the Virtual Cashier",
+        "pointsEarnedLabel": "Points earned"
+      },
+      "viewStats": "View stats",
+      "showing": "Showing {shown} of {total} operations",
+      "types": {
+        "sale": "Sale",
+        "assignment": "Assignment"
+      },
+      "stats": {
+        "inPeriod": "In the selected period",
+        "operations": "Total operations",
+        "totalAmount": "Total amount",
+        "pointsAssigned": "Points assigned",
+        "beneficiariesReached": "Beneficiaries reached",
+        "averagePoints": "Average per operation"
+      },
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Operation, beneficiary, cashier, branch...",
+        "from": "Date from",
+        "to": "Date to",
+        "branch": "Branch",
+        "cashier": "Cashier",
+        "beneficiary": "Beneficiary",
+        "type": "Operation type",
+        "points": "Points range",
+        "all": "All",
+        "allFemale": "All",
+        "apply": "Apply filters",
+        "clear": "Clear",
+        "pointRanges": {
+          "0-1000": "Up to 1,000 pts",
+          "1000-5000": "1,000 to 5,000 pts",
+          "5000-10000": "5,000 to 10,000 pts",
+          "10000+": "Over 10,000 pts"
+        }
+      },
+      "summary": {
+        "title": "Period summary",
+        "operations": "Operations",
+        "totalAmount": "Total amount",
+        "pointsAssigned": "Points assigned",
+        "averagePoints": "Average per operation",
+        "beneficiariesReached": "Beneficiaries reached",
+        "activeCashiers": "Active cashiers"
+      },
+      "quickActions": {
+        "title": "Quick actions",
+        "assign": {
+          "title": "Assign points",
+          "description": "Give points to a beneficiary"
+        },
+        "reports": {
+          "title": "View reports",
+          "description": "Detailed reports and metrics"
+        },
+        "history": {
+          "title": "History by beneficiary",
+          "description": "See every operation"
+        }
+      },
+      "info": {
+        "title": "Good to know",
+        "realtime": "Operations show up in real time.",
+        "delay": "Points can take a few minutes to become available to the beneficiary."
+      },
+      "rulePanel": {
+        "title": "2. Active program rules",
+        "subtitle": "The rule that will apply to this operation",
+        "activeRule": "Active rule",
+        "motherRule": "Base rule",
+        "campaign": "Current campaign",
+        "validity": "Valid: {range}",
+        "perEach": "For every",
+        "perItem": "Each item",
+        "ofPurchase": "of purchase",
+        "grants": "Grants",
+        "toBeneficiary": "to the beneficiary",
+        "noRule": "Your club has no active points rule yet.",
+        "allRules": "View all rules",
+        "howTitle": "How are points calculated?",
+        "howSale": "When you record a sale, points come from the active rule automatically.",
+        "howAssignment": "When you assign points manually, they are credited directly.",
+        "previewTitle": "Calculation preview",
+        "previewSubtitle": "How points are calculated with the active rule",
+        "previewIf": "If the sale amount is:",
+        "previewResult": "The beneficiary would get:",
+        "previewAuto": "Automatic calculation",
+        "previewNote": "This is only an example. The calculation runs when you save the operation."
+      },
+      "createDescription": "Assign points to a beneficiary from the admin panel."
     },
     "subscription": {
       "title": "Subscriptions",
@@ -1337,6 +1788,173 @@
       "step2": "Creates beneficiary_organization records for them",
       "step3": "Sets their initial points to 0",
       "step4": "Makes them active members of your organization"
+    },
+    "staff": {
+      "filters": {
+        "search": "Search",
+        "searchPlaceholder": "Search by name or email...",
+        "status": "Status",
+        "statusActive": "Active",
+        "statusInactive": "Inactive",
+        "branch": "Branch",
+        "branchNone": "No branch",
+        "all": "All",
+        "allFemale": "All",
+        "apply": "Apply filters",
+        "clear": "Clear"
+      },
+      "cashiers": {
+        "title": "Cashiers",
+        "description": "Manage the cashiers who can hand out points from the Cashiers app.",
+        "appGuide": "Cashiers app guide",
+        "showing": "Showing {shown} of {total} cashiers",
+        "empty": "You have not created any cashier yet.",
+        "noBranch": "No branch",
+        "never": "No operations",
+        "headers": {
+          "cashier": "Cashier",
+          "branch": "Branch",
+          "status": "Status",
+          "operations": "Operations (month)",
+          "lastOperation": "Last operation"
+        },
+        "stats": {
+          "total": "Total cashiers",
+          "ofLimit": "Of {limit} available",
+          "noLimit": "No plan limit",
+          "active": "Active",
+          "activeSubtitle": "Enabled cashiers",
+          "inactive": "Inactive",
+          "inactiveSubtitle": "Disabled cashiers",
+          "extra": "With a branch",
+          "extraSubtitle": "Can operate in the Cashiers app"
+        },
+        "newCashier": {
+          "title": "New cashier",
+          "description": "Create a cashier and assign them to a branch."
+        },
+        "whatsNext": {
+          "title": "What happens next?",
+          "body": "The cashier gets an email with their credentials and can download the Cashiers app to start handing out points.",
+          "download": "Download the Cashiers app"
+        }
+      },
+      "collaborators": {
+        "title": "Collaborators",
+        "description": "Manage who can access the admin panel.",
+        "showing": "Showing {shown} of {total} collaborators",
+        "empty": "You have not created any collaborator yet.",
+        "roleName": "Collaborator",
+        "headers": {
+          "collaborator": "Collaborator",
+          "role": "Role",
+          "status": "Status",
+          "since": "Since"
+        },
+        "stats": {
+          "total": "Total collaborators",
+          "ofLimit": "Of {limit} available",
+          "noLimit": "No plan limit",
+          "active": "Active",
+          "activeSubtitle": "Enabled collaborators",
+          "inactive": "Inactive",
+          "inactiveSubtitle": "Disabled collaborators",
+          "extra": "Branches",
+          "extraSubtitle": "Panel scope"
+        },
+        "newCollaborator": {
+          "title": "New collaborator",
+          "description": "Fill in their details and we grant panel access."
+        },
+        "permissions": {
+          "title": "Role permissions",
+          "subtitle": "Today a collaborator can:",
+          "items": {
+            "beneficiaries": "View and manage beneficiaries",
+            "cashiers": "Create and manage cashiers",
+            "redemptions": "Handle redemptions and deliveries",
+            "products": "Manage the reward catalogue",
+            "pointsRules": "Edit points rules and campaigns",
+            "branches": "Manage branches",
+            "notifications": "Send push notifications"
+          },
+          "note": "Per-collaborator permissions are not configurable yet: the role grants the same access as the owner."
+        }
+      }
+    },
+    "clubProfile": {
+      "title": "Club profile",
+      "description": "Manage your organization's information and settings on PuntosClub.",
+      "preview": "Preview the club",
+      "saved": "Club profile updated",
+      "visibility": {
+        "title": "Club visibility",
+        "description": "Control whether your organization shows up for people browsing the PuntosClub app.",
+        "public": "Public",
+        "publicDescription": "Your club is visible to everyone browsing the app.",
+        "private": "Private",
+        "privateDescription": "Your club can only be reached by invitation or QR code.",
+        "qrNote": "QR access always works, whatever visibility you choose."
+      },
+      "general": {
+        "title": "General information",
+        "name": "Organization name",
+        "description": "Description (optional)",
+        "email": "Contact email",
+        "phone": "Contact phone (optional)",
+        "website": "Website (optional)",
+        "industry": "Industry (optional)",
+        "industryPlaceholder": "Select an industry",
+        "logo": "Organization logo",
+        "logoHint": "Recommended: PNG or JPG. Max 2MB. Suggested size 512x512px.",
+        "businessName": "Legal name (optional)",
+        "taxId": "Tax ID (optional)"
+      },
+      "industries": {
+        "retail": "Retail",
+        "gastronomy": "Food & drink",
+        "services": "Services",
+        "health": "Health",
+        "beauty": "Beauty & wellness",
+        "other": "Other"
+      },
+      "pointLabels": {
+        "puntos": "Points",
+        "estrellas": "Stars",
+        "monedas": "Coins"
+      },
+      "settings": {
+        "title": "Club settings",
+        "description": "Tune how your club behaves and what your members see.",
+        "allowNewMembers": "Let new users join the club",
+        "allowNewMembersHint": "Users can join and start earning points.",
+        "requiresApproval": "New beneficiaries need approval",
+        "requiresApprovalHint": "New users must be approved by an administrator.",
+        "invitationCode": "Club invitation code",
+        "invitationCodeHint": "Share this code so people can join your club directly.",
+        "welcomeMessage": "Welcome message (optional)",
+        "welcomeMessageHint": "Shown the first time a user joins the club.",
+        "createdAt": "Club creation date",
+        "pointsLabel": "Points currency",
+        "pointsLabelHint": "How points are named across your club.",
+        "emailNotifications": "Email notifications",
+        "emailNotificationsHint": "Get important updates about your club's activity.",
+        "showInExplore": "Show the club in \"Explore\"",
+        "showInExploreHint": "Your club appears among the featured organizations.",
+        "timezone": "Time zone",
+        "timezoneHint": "Set the time zone for your club."
+      },
+      "address": {
+        "title": "Address",
+        "description": "Your organization's main address, the one shown on your branches.",
+        "search": "Search address",
+        "searchPlaceholder": "Type the address and pick a suggestion",
+        "street": "Street",
+        "number": "Number",
+        "city": "City",
+        "state": "State",
+        "zip_code": "Zip code"
+      }
     }
   },
   "Onboarding": {
@@ -1392,6 +2010,8 @@
     "step2": {
       "businessName": "Business name",
       "businessNamePlaceholder": "e.g. Central Café",
+      "nameChecking": "Checking availability…",
+      "nameAvailable": "Name available",
       "legalName": "Legal name",
       "legalNamePlaceholder": "e.g. Central Café Inc.",
       "taxId": "Tax ID",
@@ -1417,6 +2037,7 @@
       "confirmPasswordPlaceholder": "Repeat the password",
       "validation": {
         "businessNameRequired": "Business name is required",
+        "businessNameTaken": "A business with that name already exists. Try another one, for example adding the city or neighborhood.",
         "branchNameRequired": "Branch name is required",
         "branchAddressRequired": "Branch address is required",
         "cashierEmailRequired": "Cashier email is required",
@@ -1508,12 +2129,30 @@
       "shareText": "Join {name} on Puntos Club and earn points on every purchase.",
       "viewQRInPanel": "View QR in dashboard",
       "goToDashboard": "Go to dashboard"
+    },
+    "clubi": {
+      "greeting": "Hi! I'm Clubi 🎁",
+      "tipTitle": "Clubi tip",
+      "safeTitle": "Your data is safe",
+      "safeBody": "At Puntos Club we protect your information with bank-grade technology.",
+      "messages": {
+        "step1": "I'll walk you through every step so your points club is set up right. Let's start with your details.",
+        "step2": "Tell us about your business so we can help you build experiences your customers love.",
+        "step3": "Pick the plan that fits your organization's size and goals. You can always change it later.",
+        "step4": "Rewards are the heart of your loyalty program. Offer products and experiences people truly want.",
+        "step6": "Your business is ready! Share your QR so customers follow you and earn points on every purchase."
+      },
+      "tips": {
+        "step2": "Use your real logo and details. Your club looks more professional and earns trust from day one.",
+        "step3": "Just starting out? The Trial plan lets you try everything free for 3 months.",
+        "step4": "You can edit or add new rewards any time from the panel."
+      }
     }
   },
   "PointsRules": {
-    "title": "Points Rules & Special Offers",
-    "description": "Manage how customers earn points on their purchases",
-    "createButton": "Create Rule",
+    "title": "Points Rules and Campaigns",
+    "description": "Define how your customers earn points on every purchase.",
+    "createButton": "+ New campaign",
     "backToList": "Back to Rules",
     "calculator": {
       "title": "Points Calculator",
@@ -1589,7 +2228,6 @@
       "ruleType": "Rule Type *",
       "ruleTypeFixed": "Fixed Points per Purchase",
       "ruleTypePercentage": "Percentage of Amount",
-      "ruleTypePerItem": "Fixed Points per Item",
       "pointsPerPurchase": "Points per Purchase *",
       "pointsPerPurchaseHint": "Example: 2 means customers earn 2 points for every $1 spent",
       "percentage": "Percentage *",
@@ -1617,13 +2255,160 @@
       "displayNameHint": "Friendly name shown in the mobile app. Defaults to the rule name.",
       "icon": "Icon",
       "color": "Color",
-      "pointsPerItem": "Points per Item *",
-      "pointsPerItemHint": "Example: 10 means customers earn 10 points for each item purchased",
       "loadError": "Error loading rule",
       "creating": "Creating...",
       "createRule": "Create Rule",
       "saving": "Saving...",
       "saveRule": "Save Changes"
+    },
+    "mother": {
+      "title": "1. Base rule (always on)",
+      "description": "The main rule that defines how customers earn points. It is always active and applies whenever no special campaign is running.",
+      "note": "This rule is the foundation of your points program.",
+      "editButton": "Edit base rule",
+      "currentType": "Current calculation",
+      "noRule": "No base rule yet",
+      "allBranches": "In every branch",
+      "singleBranch": "Only in {branch}",
+      "ruleTypes": {
+        "fixed_amount": "Fixed points per purchase",
+        "percentage": "Points as a % of the purchase",
+        "fixed_per_item": "Fixed points per item",
+        "tiered": "Tiered by brackets"
+      },
+      "summary": {
+        "fixedAmount": "{points, plural, one {# point} other {# points}} for every {amount} spent",
+        "percentage": "{percentage}% of every purchase turns into points",
+        "perItem": "{points, plural, one {# point} other {# points}} for each item bought"
+      }
+    },
+    "campaigns": {
+      "title": "2. Special campaigns",
+      "description": "Temporary promotions that can grant extra points or special conditions. They apply automatically when their conditions are met.",
+      "tabs": {
+        "active": "Active ({count})",
+        "scheduled": "Scheduled ({count})",
+        "finished": "Finished ({count})"
+      },
+      "status": {
+        "active": "Active",
+        "scheduled": "Scheduled",
+        "finished": "Finished"
+      },
+      "headers": {
+        "campaign": "Campaign",
+        "benefit": "Benefit",
+        "appliesTo": "Applies in",
+        "validity": "Valid",
+        "status": "Status",
+        "actions": "Actions"
+      },
+      "benefit": {
+        "points": "{points} pts",
+        "percentage": "{percentage}%",
+        "custom": "Special conditions",
+        "overMother": "Replaces the base rule while it runs"
+      },
+      "validity": {
+        "always": "No end date",
+        "from": "From {date}",
+        "until": "Until {date}"
+      },
+      "schedule": {
+        "allDay": "All day"
+      },
+      "empty": {
+        "active": "No campaigns are running right now.",
+        "scheduled": "No campaigns are scheduled.",
+        "finished": "No campaign has finished yet."
+      }
+    },
+    "rowActions": {
+      "open": "Open actions",
+      "edit": "Edit campaign",
+      "pause": "Pause campaign",
+      "resume": "Resume campaign",
+      "paused": "Campaign paused",
+      "resumed": "Campaign resumed",
+      "toggleError": "We could not change the campaign status"
+    },
+    "howItWorks": {
+      "title": "How do campaigns work?",
+      "subtitle": "When a customer makes a purchase:",
+      "first": "We first check whether any active campaign applies.",
+      "second": "If a campaign is running, its benefits replace the base rule.",
+      "third": "If no campaign is running, the base rule applies."
+    },
+    "tip": {
+      "title": "Tip",
+      "body": "Create campaigns for special dates, seasons, or to push specific days and time slots."
+    },
+    "help": {
+      "title": "Need a hand creating a campaign?",
+      "body": "Campaigns are quick to set up and help drive more purchases.",
+      "cta": "Read the quick guide"
+    },
+    "motherForm": {
+      "back": "Back to Points Rules",
+      "title": "Edit the base rule",
+      "description": "Define how customers earn points on their purchases. This is the main rule and it is always on.",
+      "statusActive": "Rule active",
+      "statusInactive": "Rule disabled",
+      "lastUpdate": "Last updated: {date}",
+      "noOrganization": "Pick an organization to edit its base rule.",
+      "noRule": "Your club has no base rule yet. Create a campaign and mark it as the main rule.",
+      "typeTitle": "1. Calculation type",
+      "typeSubtitle": "Choose how points add up on each purchase.",
+      "types": {
+        "percentage": {
+          "title": "Points as a % of the purchase",
+          "description": "Points come from a percentage of the purchase amount."
+        },
+        "fixed_amount": {
+          "title": "Fixed points per amount spent",
+          "description": "Points are granted per fixed amount spent."
+        }
+      },
+      "configTitle": "2. Points configuration",
+      "configSubtitle": "Set the percentage or the number of points for the selected calculation.",
+      "valueLabel": {
+        "percentage": "Percentage of the purchase",
+        "fixed_amount": "Points per $100"
+      },
+      "valueHelp": {
+        "percentage": "Example: 5% of every purchase turns into points.",
+        "fixed_amount": "Example: 10 points for every $100 spent."
+      },
+      "summary": {
+        "percentage": "For every {amount} spent, the customer earns {points, plural, one {# point} other {# points}}.",
+        "fixed_amount": "For every {amount} spent, the customer earns {points, plural, one {# point} other {# points}}."
+      },
+      "appliesEverywhere": "This rule applies in every branch, every day.",
+      "appliesToBranch": "This rule only applies in the chosen branch.",
+      "allBranchesLabel": "Apply in every branch",
+      "allBranchesHelp": "The rule applies automatically across every active branch.",
+      "branchLabel": "Branch",
+      "branchPlaceholder": "Select a branch",
+      "previewTitle": "3. Calculation preview",
+      "previewSubtitle": "Simulate how points add up with this rule.",
+      "previewPoints": "{points, plural, one {# point} other {# points}}",
+      "howTitle": "How does the base rule work?",
+      "how": {
+        "base": "It is the foundation of your points program.",
+        "always": "It is always on and applies whenever no campaign is running.",
+        "campaigns": "Campaigns can temporarily replace this rule.",
+        "everywhere": "It applies to every purchase, every day."
+      },
+      "examplesTitle": "Calculation examples",
+      "examplesAmount": "Purchase amount",
+      "examplesPoints": "Points earned",
+      "examplesNote": "Points are rounded according to the points engine settings.",
+      "deactivate": "Disable rule",
+      "deactivated": "Base rule disabled",
+      "saved": "Base rule updated",
+      "saveError": "We could not save the base rule",
+      "invalidValue": "Enter a valid number for the base rule",
+      "branchRequired": "Pick the branch where the rule applies"
     }
   },
   "UserRole": {

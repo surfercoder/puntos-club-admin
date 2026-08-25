@@ -66,14 +66,13 @@ export function PlanUsageChart({ data }: Props) {
   return (
     <Card>
       <CardHeader>
-        <CardTitle>{t("title")}</CardTitle>
-        <CardDescription>
-          {t("descriptionPrefix")}{" "}
-          <span className="capitalize font-medium">{data.plan}</span>
-        </CardDescription>
+        <CardTitle className="text-base">
+          {t("title")} <span className="capitalize">{data.plan}</span>
+        </CardTitle>
+        <CardDescription>{t("descriptionPrefix")}</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
           {chartData.map((item) => (
             <div key={item.feature} className="flex flex-col items-center gap-1">
               <ChartContainer

@@ -1,7 +1,6 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import type { DashboardKpis } from "@/actions/dashboard/analytics/actions";
 import { Users, ShoppingCart, Star, TrendingUp, Gift, Coins } from "lucide-react";
 
@@ -24,25 +23,28 @@ function formatNumber(value: number) {
 type KpiCardProps = {
   title: string;
   value: string;
-  subtitle: string;
+  subtitle: React.ReactNode;
   icon: React.ComponentType<{ className?: string }>;
-  iconClassName?: string;
+  /** Clases de fondo + color para el cuadro del ícono. */
+  tint: string;
 };
 
-export function KpiCard({ title, value, subtitle, icon: Icon, iconClassName }: KpiCardProps) {
+export function KpiCard({ title, value, subtitle, icon: Icon, tint }: KpiCardProps) {
   return (
-    <Card>
-      <CardHeader className="flex flex-row items-center justify-between gap-0 pb-2">
-        <CardTitle className="text-sm font-medium text-muted-foreground">
+    <div className="flex flex-col gap-3 rounded-xl border bg-card p-4 shadow-sm">
+      <div className="flex items-center gap-2.5">
+        <span className={`grid size-9 shrink-0 place-items-center rounded-xl ${tint}`}>
+          <Icon className="size-4" />
+        </span>
+        <span className="min-w-0 text-[12.5px] font-medium leading-tight text-muted-foreground">
           {title}
-        </CardTitle>
-        <Icon className={`size-4 ${iconClassName ?? "text-muted-foreground"}`} />
-      </CardHeader>
-      <CardContent>
-        <div className="text-2xl font-bold">{value}</div>
-        <p className="text-xs text-muted-foreground mt-1">{subtitle}</p>
-      </CardContent>
-    </Card>
+        </span>
+      </div>
+      <div>
+        <p className="text-3xl font-bold tracking-tight">{value}</p>
+        <div className="mt-1.5 text-xs text-muted-foreground">{subtitle}</div>
+      </div>
+    </div>
   );
 }
 
@@ -53,48 +55,48 @@ type KpiCardsProps = {
 export function KpiCards({ data }: KpiCardsProps) {
   const t = useTranslations("Dashboard.analytics.kpi");
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
+    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
       <KpiCard
         title={t("activeMembers")}
         value={formatNumber(data.total_active_members)}
         subtitle={t("activeMembersSubtitle")}
         icon={Users}
-        iconClassName="text-chart-2"
+        tint="bg-brand-blue/10 text-brand-blue"
       />
       <KpiCard
         title={t("monthlyRevenue")}
         value={formatCurrency(data.revenue_this_month)}
         subtitle={t("monthlyRevenueSubtitle")}
         icon={TrendingUp}
-        iconClassName="text-chart-4"
+        tint="bg-brand-green/10 text-brand-green"
       />
       <KpiCard
         title={t("monthlyPurchases")}
         value={formatNumber(data.purchases_this_month)}
         subtitle={t("monthlyPurchasesSubtitle")}
         icon={ShoppingCart}
-        iconClassName="text-chart-3"
+        tint="bg-brand-orange/10 text-brand-orange"
       />
       <KpiCard
         title={t("pointsInCirculation")}
         value={formatNumber(data.points_in_circulation)}
         subtitle={t("pointsInCirculationSubtitle")}
         icon={Coins}
-        iconClassName="text-chart-1"
+        tint="bg-brand-pink/10 text-brand-pink"
       />
       <KpiCard
         title={t("monthlyRedemptions")}
         value={formatNumber(data.redemptions_this_month)}
         subtitle={t("monthlyRedemptionsSubtitle")}
         icon={Gift}
-        iconClassName="text-chart-5"
+        tint="bg-brand-violet/10 text-brand-violet"
       />
       <KpiCard
         title={t("pointsRedeemed")}
         value={formatNumber(data.points_redeemed_this_month)}
         subtitle={t("pointsRedeemedSubtitle")}
         icon={Star}
-        iconClassName="text-chart-1"
+        tint="bg-brand-pink/10 text-brand-pink"
       />
     </div>
   );

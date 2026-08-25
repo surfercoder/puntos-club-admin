@@ -27,9 +27,10 @@ import type { MonthlyPurchaseStat } from "@/actions/dashboard/analytics/actions"
 
 type Props = {
   data: MonthlyPurchaseStat[];
+  months: number;
 };
 
-export function PurchasesOverTimeChart({ data }: Props) {
+export function PurchasesOverTimeChart({ data, months }: Props) {
   const t = useTranslations("Dashboard.analytics.purchasesOverTime");
   const chartConfig = {
     revenue: {
@@ -47,7 +48,7 @@ export function PurchasesOverTimeChart({ data }: Props) {
       <CardHeader>
         <CardTitle>{t("title")}</CardTitle>
         <CardDescription>
-          {t("description")}
+          {t("description", { months })}
         </CardDescription>
       </CardHeader>
       <CardContent>

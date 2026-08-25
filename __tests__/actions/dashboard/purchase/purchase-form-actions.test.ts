@@ -126,3 +126,30 @@ describe('purchaseFormAction', () => {
     expect(mockSupabase.insert).toHaveBeenCalledWith([expect.objectContaining({ points_earned: 0 })]);
   });
 });
+
+describe('purchaseFormAction assignment mode', () => {
+  it('credits the points the owner typed and records no sale amount', async () => {
+    await purchaseFormAction(
+      EMPTY_ACTION_STATE,
+      createFormData({ mode: 'assignment', beneficiary_id: 'ben-1', points_earned: '500' }),
+    );
+
+    expect(mockSupabase.rpc).not.toHaveBeenCalled();
+    expect(mockSupabase.insert).toHaveBeenCalledWith([
+      expect.objectContaining({ points_earned: 500, total_amount: 0 }),
+    ]);
+    expect(redirect).toHaveBeenCalled();
+  });
+
+  it('defaults to zero points when the field is somehow absent', async () => {
+    await purchaseFormAction(
+      EMPTY_ACTION_STATE,
+      createFormData({ mode: 'assignment', beneficiary_id: 'ben-1', points_earned: '0' }),
+    );
+    expect(mockSupabase.insert).toHaveBeenCalledWith([
+      expect.objectContaining({ points_earned: 0 }),
+    ]);
+    expect(revalidatePath).toHaveBeenCalledWith('/dashboard/purchase');
+  });
+});
+

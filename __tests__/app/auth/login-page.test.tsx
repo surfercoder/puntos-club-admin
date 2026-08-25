@@ -6,8 +6,8 @@ jest.mock('@/components/login-form', () => ({ LoginForm: () => <div data-testid=
 describe('Login Page', () => {
   it('exports a default function', () => { expect(typeof Page).toBe('function'); });
 
-  it('renders the LoginForm component', () => {
-    const { getByTestId } = render(<Page />);
+  it('renders the LoginForm component', async () => {
+    const { getByTestId } = render(await Page());
     expect(getByTestId('login-form')).toBeInTheDocument();
   });
 

@@ -164,3 +164,59 @@ export function messageBox(label: string, content: string): string {
 export function typeBadge(label: string, color: string = BRAND.blue): string {
   return `<span style="display:inline-block;background:${color}1A;color:${color};font-family:'Poppins',Arial,sans-serif;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;letter-spacing:0.3px">${label}</span>`;
 }
+
+/**
+ * Cuadrícula de beneficios del email de bienvenida. Va en tabla porque es lo
+ * único que respetan de forma consistente Outlook y Gmail.
+ */
+export function benefitGrid(
+  items: { emoji: string; title: string; description: string; color: string }[],
+): string {
+  const cell = ({ emoji, title, description, color }: (typeof items)[number]) => `
+    <td width="50%" valign="top" style="padding:14px 12px">
+      <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+        <tr>
+          <td align="center" style="padding-bottom:10px">
+            <div style="width:44px;height:44px;line-height:44px;border-radius:50%;background:${color}1A;font-size:20px;text-align:center">${emoji}</div>
+          </td>
+        </tr>
+        <tr>
+          <td align="center" style="font-family:'Poppins',Arial,sans-serif;font-size:14px;font-weight:600;color:${BRAND.dark};padding-bottom:6px">${title}</td>
+        </tr>
+        <tr>
+          <td align="center" style="font-family:'Lexend',Arial,sans-serif;font-size:12px;color:${BRAND.muted};line-height:1.6">${description}</td>
+        </tr>
+      </table>
+    </td>`;
+
+  const rows: string[] = [];
+  for (let index = 0; index < items.length; index += 2) {
+    rows.push(`<tr>${items.slice(index, index + 2).map(cell).join('')}</tr>`);
+  }
+
+  return `
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:28px 0 8px;border-top:1px solid ${BRAND.border};border-bottom:1px solid ${BRAND.border}">
+      ${rows.join('')}
+    </table>`;
+}
+
+/** Aviso destacado, como el bloque de seguridad del email de bienvenida. */
+export function noticeBox(
+  emoji: string,
+  title: string,
+  description: string,
+  color: string = BRAND.blue,
+): string {
+  return `
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:${color}0D;border-radius:10px;margin:20px 0">
+      <tr>
+        <td width="56" align="center" valign="top" style="padding:16px 0 16px 16px">
+          <div style="width:40px;height:40px;line-height:40px;border-radius:50%;background:${color}1A;font-size:18px;text-align:center">${emoji}</div>
+        </td>
+        <td style="padding:16px">
+          <p style="margin:0 0 4px;font-family:'Poppins',Arial,sans-serif;font-size:14px;font-weight:600;color:${color}">${title}</p>
+          <p style="margin:0;font-family:'Lexend',Arial,sans-serif;font-size:12px;color:${BRAND.muted};line-height:1.6">${description}</p>
+        </td>
+      </tr>
+    </table>`;
+}

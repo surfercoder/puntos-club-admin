@@ -50,7 +50,12 @@ export default function DeleteModal({ purchaseId, purchaseNumber }: DeleteModalP
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="destructive">
+        <Button
+          aria-label={t('trigger', { name: purchaseNumber })}
+          size="icon-sm"
+          variant="outline"
+          className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
+        >
           <Trash2 className="size-4" />
         </Button>
       </DialogTrigger>

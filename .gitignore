@@ -48,3 +48,5 @@ test-results/
 
 # claude commands
 .claude/
+# helper local de screenshots (no versionar)
+shot.local.mjs

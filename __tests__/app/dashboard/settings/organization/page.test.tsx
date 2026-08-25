@@ -15,12 +15,23 @@ jest.mock('@/lib/auth/roles', () => ({
 }));
 jest.mock('@/actions/dashboard/organization/actions', () => ({
   getOrganizationSettings: jest.fn(() => Promise.resolve({ data: { id: 5, name: 'Test Org', is_public: true }, error: null })),
+  getOrganizationAddress: jest.fn(() => Promise.resolve({ data: { id: 7, street: 'Belgrano' }, error: null })),
 }));
-jest.mock('@/components/dashboard/organization/org-visibility-toggle', () => ({
-  OrgVisibilityToggle: (props: any) => <div data-testid="org-visibility-toggle" data-org-id={props.orgId} />,
+jest.mock('@/components/dashboard/organization/club-profile-form', () => ({
+  ClubProfileForm: (props: any) => (
+    <div
+      data-testid="club-profile-form"
+      data-org-id={props.organization.id}
+      data-street={props.address?.street}
+    />
+  ),
 }));
-jest.mock('lucide-react', () => ({
-  Settings: () => <div data-testid="settings-icon" />,
+jest.mock('@/components/dashboard/home/gift-illustration', () => ({
+  GiftIllustration: () => <div data-testid="gift" />,
+}));
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: ({ children, href }: any) => <a href={href}>{children}</a>,
 }));
 
 import OrgSettingsPage from '@/app/dashboard/settings/organization/page';
@@ -36,13 +47,13 @@ describe('OrgSettingsPage', () => {
     mockRedirect.mockImplementation(() => {});
   });
 
-  it('renders settings page with org name', async () => {
+  it('renders the club profile form for the active organization', async () => {
     const page = await OrgSettingsPage();
-    const { getByText, getByTestId } = render(page);
+    const { getByTestId } = render(page);
 
-    expect(getByText('Test Org')).toBeTruthy();
-    expect(getByTestId('settings-icon')).toBeTruthy();
-    expect(getByTestId('org-visibility-toggle')).toBeTruthy();
+    expect(getByTestId('club-profile-form')).toHaveAttribute('data-org-id', '5');
+    expect(getByTestId('club-profile-form')).toHaveAttribute('data-street', 'Belgrano');
+    expect(getByTestId('gift')).toBeTruthy();
   });
 
   it('redirects when user is not authorized (not owner/admin)', async () => {

@@ -2,7 +2,6 @@ import { notFound } from 'next/navigation';
 import { getTranslations } from 'next-intl/server';
 
 import ProductForm from '@/components/dashboard/product/product-form';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
@@ -20,15 +19,12 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
   if (!data) { notFound(); }
 
   return (
-    <div className="w-full max-w-3xl mx-auto">
-    <Card>
-      <CardHeader>
-        <CardTitle>{t('editTitle')}</CardTitle>
-      </CardHeader>
-      <CardContent>
-        <ProductForm product={data} />
-      </CardContent>
-    </Card>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold tracking-tight">{t('editTitle')}</h1>
+        <p className="text-sm text-muted-foreground">{t('editDescription')}</p>
+      </div>
+      <ProductForm product={data} />
     </div>
   );
 }

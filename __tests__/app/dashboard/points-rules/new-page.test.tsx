@@ -51,7 +51,6 @@ jest.mock('@/components/ui/select', () => ({
         <option value="">--</option>
         <option value="fixed_amount">fixed_amount</option>
         <option value="percentage">percentage</option>
-        <option value="fixed_per_item">fixed_per_item</option>
         <option value="10">Branch X</option>
       </select>
     </div>
@@ -420,37 +419,6 @@ describe('NewPointsRulePage', () => {
     await waitFor(() => {
       expect(mockCreatePointsRule).toHaveBeenCalledWith(expect.objectContaining({
         config: { percentage: 10 },
-      }));
-    });
-  });
-
-  it('handles form submit with fixed_per_item type', async () => {
-    mockCreatePointsRule.mockResolvedValue({ success: true });
-    await act(async () => {
-      render(<NewPointsRulePage />);
-    });
-    const selects = screen.getAllByTestId('mock-select');
-    await act(async () => {
-      fireEvent.change(selects[1], { target: { value: 'fixed_per_item' } });
-    });
-
-    const nameInput = screen.getByLabelText('form.ruleName');
-    await act(async () => {
-      fireEvent.change(nameInput, { target: { value: 'Item Rule' } });
-    });
-
-    const perItemInput = screen.getByLabelText('form.pointsPerItem');
-    await act(async () => {
-      fireEvent.change(perItemInput, { target: { value: '7' } });
-    });
-
-    const form = document.querySelector('form')!;
-    await act(async () => {
-      fireEvent.submit(form);
-    });
-    await waitFor(() => {
-      expect(mockCreatePointsRule).toHaveBeenCalledWith(expect.objectContaining({
-        config: { points_per_item: 7 },
       }));
     });
   });

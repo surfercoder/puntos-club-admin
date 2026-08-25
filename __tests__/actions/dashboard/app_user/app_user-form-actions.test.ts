@@ -1,3 +1,9 @@
+const assignCashierToBranch = jest.fn(() => Promise.resolve({ error: null }));
+const checkBranchInActiveOrg = jest.fn(() => Promise.resolve({ error: null }));
+jest.mock('@/actions/dashboard/branch/assign-cashier', () => ({
+  assignCashierToBranch: (...args: unknown[]) => assignCashierToBranch(...args),
+  checkBranchInActiveOrg: (...args: unknown[]) => checkBranchInActiveOrg(...args),
+}));
 jest.mock('next/cache', () => ({ revalidatePath: jest.fn() }));
 jest.mock('next/navigation', () => ({ redirect: jest.fn() }));
 jest.mock('next/headers', () => ({
@@ -77,3 +83,104 @@ describe('appUserFormAction', () => {
     expect(result.message).toBe('An unexpected error occurred');
   });
 });
+
+describe('appUserFormAction branch assignment', () => {
+  function formDataOf(data: Record<string, string>): FormData {
+    const fd = new FormData();
+    for (const [k, v] of Object.entries(data)) fd.append(k, v);
+    return fd;
+  }
+
+  const validFields = {
+    role_id: '2',
+    first_name: 'María',
+    last_name: 'Juárez',
+    email: 'maria@appcajeros.com',
+    password: 'Sup3rSecret!',
+  };
+
+  beforeEach(() => {
+    assignCashierToBranch.mockResolvedValue({ error: null });
+    checkBranchInActiveOrg.mockResolvedValue({ error: null });
+    (createAppUser as jest.Mock).mockReturnValue({ data: { id: '1' }, error: null });
+  });
+
+  it('assigns the branch of a newly created cashier', async () => {
+    await appUserFormAction(EMPTY_ACTION_STATE, formDataOf({ ...validFields, branch_id: '3' }));
+    expect(assignCashierToBranch).toHaveBeenCalledWith(expect.any(String), '3');
+  });
+
+  it('assigns the branch when editing an existing cashier', async () => {
+    await appUserFormAction(
+      EMPTY_ACTION_STATE,
+      formDataOf({ ...validFields, id: '9', branch_id: '3' }),
+    );
+    expect(assignCashierToBranch).toHaveBeenCalledWith('9', '3');
+  });
+
+  it('surfaces a failed assignment', async () => {
+    assignCashierToBranch.mockResolvedValueOnce({ error: { message: 'BRANCH_NOT_FOUND' } });
+    const result = await appUserFormAction(
+      EMPTY_ACTION_STATE,
+      formDataOf({ ...validFields, branch_id: '3' }),
+    );
+    expect(result).toEqual({
+      status: 'error',
+      message: 'BRANCH_NOT_FOUND',
+      fieldErrors: {},
+    });
+  });
+
+  // Una sucursal de otra organización tiene que frenar ANTES del alta: si no,
+  // quedan el app_user y su usuario de Auth creados y el email ya tomado.
+  it('rejects a branch outside the organization without creating the user', async () => {
+    checkBranchInActiveOrg.mockResolvedValueOnce({ error: { message: 'BRANCH_NOT_FOUND' } });
+    const result = await appUserFormAction(
+      EMPTY_ACTION_STATE,
+      formDataOf({ ...validFields, branch_id: '99' }),
+    );
+    expect(result).toEqual({
+      status: 'error',
+      message: 'BRANCH_NOT_FOUND',
+      fieldErrors: {},
+    });
+    expect(createAppUser).not.toHaveBeenCalled();
+    expect(assignCashierToBranch).not.toHaveBeenCalled();
+  });
+
+  it('does nothing when the created user has no id', async () => {
+    (createAppUser as jest.Mock).mockReturnValueOnce({ data: null, error: null });
+    await appUserFormAction(EMPTY_ACTION_STATE, formDataOf({ ...validFields, branch_id: '3' }));
+    expect(assignCashierToBranch).not.toHaveBeenCalled();
+  });
+
+  it('does nothing when the form does not include the branch field', async () => {
+    await appUserFormAction(EMPTY_ACTION_STATE, formDataOf(validFields));
+    expect(assignCashierToBranch).not.toHaveBeenCalled();
+  });
+
+  // El owner vacía el selector para liberar la sucursal: el campo viaja vacío y
+  // hay que desasignar, no ignorar.
+  it('unassigns the branch when the field arrives empty', async () => {
+    await appUserFormAction(
+      EMPTY_ACTION_STATE,
+      formDataOf({ ...validFields, id: '9', branch_id: '' }),
+    );
+    expect(checkBranchInActiveOrg).not.toHaveBeenCalled();
+    expect(assignCashierToBranch).toHaveBeenCalledWith('9', null);
+  });
+
+  it('surfaces a failed unassignment', async () => {
+    assignCashierToBranch.mockResolvedValueOnce({ error: { message: 'UPDATE_FAILED' } });
+    const result = await appUserFormAction(
+      EMPTY_ACTION_STATE,
+      formDataOf({ ...validFields, id: '9', branch_id: '' }),
+    );
+    expect(result).toEqual({
+      status: 'error',
+      message: 'UPDATE_FAILED',
+      fieldErrors: {},
+    });
+  });
+});
+

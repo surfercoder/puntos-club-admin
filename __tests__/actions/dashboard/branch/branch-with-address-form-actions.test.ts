@@ -1,4 +1,8 @@
 jest.mock('next/cache', () => ({ revalidatePath: jest.fn() }));
+const assignCashierToBranch = jest.fn(() => Promise.resolve({ error: null }));
+jest.mock('@/actions/dashboard/branch/assign-cashier', () => ({
+  assignCashierToBranch: (...args: unknown[]) => assignCashierToBranch(...args),
+}));
 jest.mock('next/navigation', () => ({ redirect: jest.fn() }));
 jest.mock('next/headers', () => ({
   cookies: jest.fn(() => ({ get: jest.fn(() => ({ value: '123' })), set: jest.fn() })),
@@ -60,6 +64,23 @@ describe('branchWithAddressFormAction', () => {
     expect(result.message).toContain('updated');
   });
 
+  // Una edición que falla en la base no puede reportar "guardado con éxito".
+  it('should surface an update failure instead of reporting success', async () => {
+    (updateBranch as jest.Mock).mockReturnValueOnce({ data: null, error: { message: 'DB down' } });
+    const fd = createFormData({ ...validFields, id: '1' });
+    const result = await branchWithAddressFormAction(EMPTY_ACTION_STATE, fd);
+    expect(result.status).toBe('error');
+    expect(result.message).toBe('DB down');
+  });
+
+  it('should fall back to a generic message when the update error has none', async () => {
+    (updateBranch as jest.Mock).mockReturnValueOnce({ data: null, error: { message: '' } });
+    const fd = createFormData({ ...validFields, id: '1' });
+    const result = await branchWithAddressFormAction(EMPTY_ACTION_STATE, fd);
+    expect(result.status).toBe('error');
+    expect(result.message).toBe('Failed to update branch');
+  });
+
   it('should return validation error for invalid address', async () => {
     const fd = createFormData({ street: '', number: '', city: '', state: '', zip_code: '', name: 'Branch' });
     const result = await branchWithAddressFormAction(EMPTY_ACTION_STATE, fd);
@@ -118,3 +139,54 @@ describe('branchWithAddressFormAction', () => {
     expect(result.status).toBe('success');
   });
 });
+
+describe('branchWithAddressFormAction cashier assignment', () => {
+  function formDataOf(data: Record<string, string>): FormData {
+    const fd = new FormData();
+    for (const [k, v] of Object.entries(data)) fd.append(k, v);
+    return fd;
+  }
+
+  const validFields = {
+    name: 'Sucursal Centro',
+    active: 'true',
+    street: 'Av. Corrientes',
+    number: '1234',
+    city: 'CABA',
+    state: 'CABA',
+    zip_code: '1043',
+  };
+
+  it('assigns the chosen cashier to the new branch', async () => {
+    assignCashierToBranch.mockResolvedValueOnce({ error: null });
+    await branchWithAddressFormAction(
+      EMPTY_ACTION_STATE,
+      formDataOf({ ...validFields, cashier_id: '5' }),
+    );
+    expect(assignCashierToBranch).toHaveBeenCalledWith('5', expect.any(String));
+  });
+
+  it('reports a failed assignment', async () => {
+    assignCashierToBranch.mockResolvedValueOnce({ error: { message: 'BRANCH_NOT_FOUND' } });
+    const result = await branchWithAddressFormAction(
+      EMPTY_ACTION_STATE,
+      formDataOf({ ...validFields, cashier_id: '5' }),
+    );
+    expect(result.status).toBe('error');
+  });
+
+  it('skips the assignment when the created branch has no id', async () => {
+    (createBranch as jest.Mock).mockResolvedValueOnce({ data: null, error: null });
+    await branchWithAddressFormAction(
+      EMPTY_ACTION_STATE,
+      formDataOf({ ...validFields, cashier_id: '5' }),
+    );
+    expect(assignCashierToBranch).not.toHaveBeenCalled();
+  });
+
+  it('leaves the cashier untouched when none was chosen', async () => {
+    await branchWithAddressFormAction(EMPTY_ACTION_STATE, formDataOf(validFields));
+    expect(assignCashierToBranch).not.toHaveBeenCalled();
+  });
+});
+

@@ -42,6 +42,11 @@ describe('DeleteModal', () => {
     expect(screen.getByTestId('dialog-description')).toBeInTheDocument();
   });
 
+  it('names the icon-only trigger for screen readers', () => {
+    render(<DeleteModal purchaseId="pur-1" purchaseNumber="PUR-001" />);
+    expect(screen.getByRole('button', { name: 'trigger' })).toBeInTheDocument();
+  });
+
   it('renders cancel and delete buttons', () => {
     render(<DeleteModal purchaseId="pur-1" purchaseNumber="PUR-001" />);
     const buttons = screen.getAllByRole('button');

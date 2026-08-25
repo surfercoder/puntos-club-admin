@@ -14,7 +14,6 @@ jest.mock('@/components/ui/dialog', () => ({
 }));
 
 // Mock all delete actions
-jest.mock('@/actions/dashboard/category/actions', () => ({ deleteCategory: jest.fn() }));
 jest.mock('@/actions/dashboard/product/actions', () => ({ deleteProduct: jest.fn() }));
 jest.mock('@/actions/dashboard/branch/actions', () => ({ deleteBranch: jest.fn() }));
 jest.mock('@/actions/dashboard/beneficiary/actions', () => ({ deleteBeneficiary: jest.fn() }));
@@ -27,7 +26,6 @@ jest.mock('@/actions/dashboard/app_user_organization/actions', () => ({ deleteAp
 jest.mock('@/actions/dashboard/beneficiary_organization/actions', () => ({ deleteBeneficiaryOrganization: jest.fn() }));
 jest.mock('@/actions/dashboard/points-rules/actions', () => ({ deletePointsRule: jest.fn() }));
 
-import { deleteCategory } from '@/actions/dashboard/category/actions';
 import { deleteProduct } from '@/actions/dashboard/product/actions';
 import { deleteBranch } from '@/actions/dashboard/branch/actions';
 import { deleteBeneficiary } from '@/actions/dashboard/beneficiary/actions';
@@ -40,7 +38,6 @@ import { deleteAppUserOrganization } from '@/actions/dashboard/app_user_organiza
 import { deleteBeneficiaryOrganization } from '@/actions/dashboard/beneficiary_organization/actions';
 import { deletePointsRule } from '@/actions/dashboard/points-rules/actions';
 
-import CategoryDeleteModal from '@/components/dashboard/category/delete-modal';
 import ProductDeleteModal from '@/components/dashboard/product/delete-modal';
 import BranchDeleteModal from '@/components/dashboard/branch/delete-modal';
 import BeneficiaryDeleteModal from '@/components/dashboard/beneficiary/delete-modal';
@@ -85,44 +82,6 @@ function getCancelButton() {
   const matches = buttons.filter((b) => b.textContent === 'cancel' || b.textContent === 'Cancelar');
   return matches[matches.length - 1];
 }
-
-// ---- Category ----
-describe('CategoryDeleteModal', () => {
-  const mock = deleteCategory as jest.Mock;
-
-  it('renders', () => {
-    render(<CategoryDeleteModal categoryId="1" categoryName="Cat" />);
-    expectRendered();
-  });
-
-  it('success path', async () => {
-    mock.mockResolvedValue({ error: null });
-    render(<CategoryDeleteModal categoryId="1" categoryName="Cat" />);
-    fireEvent.click(getDeleteButton());
-    await waitFor(() => expect(mock).toHaveBeenCalledWith('1'));
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('deleteSuccess'));
-    expect(mockRefresh).toHaveBeenCalled();
-  });
-
-  it('error path', async () => {
-    mock.mockResolvedValue({ error: { message: 'fail' } });
-    render(<CategoryDeleteModal categoryId="1" categoryName="Cat" />);
-    fireEvent.click(getDeleteButton());
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('deleteError'));
-  });
-
-  it('exception path', async () => {
-    mock.mockRejectedValue(new Error('Network'));
-    render(<CategoryDeleteModal categoryId="1" categoryName="Cat" />);
-    fireEvent.click(getDeleteButton());
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('genericError'));
-  });
-
-  it('cancel button click', () => {
-    render(<CategoryDeleteModal categoryId="1" categoryName="Cat" />);
-    fireEvent.click(getCancelButton());
-  });
-});
 
 // ---- Product ----
 describe('ProductDeleteModal', () => {

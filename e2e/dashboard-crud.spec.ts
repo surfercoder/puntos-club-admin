@@ -3,7 +3,7 @@ import { test, expect, type Page } from '@playwright/test';
 /**
  * E2E CRUD tests for the Owner Dashboard.
  *
- * Dependency order: Category → Product, Beneficiary, PointsRule
+ * Dependency order: Product, Beneficiary, PointsRule
  * Cleanup in reverse order to leave DB pristine.
  */
 
@@ -15,37 +15,6 @@ async function waitForPageLoad(page: Page) {
   // Wait for client-side hydration and network to settle
   await page.waitForLoadState('networkidle').catch(() => {});
   await page.waitForTimeout(500);
-}
-
-/**
- * Fill an input field reliably, retrying if React hydration clears the value.
- * This handles the case where SSR hydration replaces DOM elements after fill.
- */
-async function fillReliably(page: Page, selector: string, value: string, maxRetries = 5) {
-  const locator = page.locator(selector);
-  for (let i = 0; i < maxRetries; i++) {
-    await locator.click();
-    await locator.fill(value);
-    await page.waitForTimeout(300);
-    const current = await locator.inputValue();
-    if (current === value) return;
-    // Value was cleared by hydration, wait and retry
-    await page.waitForTimeout(1000);
-  }
-  // Final attempt - use evaluate to set value directly
-  await page.evaluate(({ sel, val }) => {
-    const el = document.querySelector(sel) as HTMLInputElement;
-    if (el) {
-      const nativeInputValueSetter = Object.getOwnPropertyDescriptor(
-        window.HTMLInputElement.prototype, 'value'
-      )?.set || Object.getOwnPropertyDescriptor(
-        window.HTMLTextAreaElement.prototype, 'value'
-      )?.set;
-      nativeInputValueSetter?.call(el, val);
-      el.dispatchEvent(new Event('input', { bubbles: true }));
-      el.dispatchEvent(new Event('change', { bubbles: true }));
-    }
-  }, { sel: selector, val: value });
 }
 
 async function navigateTo(page: Page, url: string) {
@@ -80,7 +49,6 @@ async function deleteRowByText(page: Page, text: string): Promise<boolean> {
 // ── state ───────────────────────────────────────────────────────────────────
 
 const state = {
-  categoryRows: 0,
   productRows: 0,
 
   beneficiaryRows: 0,
@@ -90,50 +58,7 @@ const state = {
 
 test.describe.serial('Owner Dashboard CRUD Tests', () => {
 
-  // ━━━ 1. CATEGORY ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  test('Category: list', async ({ page }) => {
-    await navigateTo(page, '/dashboard/category');
-    await expect(page.getByRole('heading', { name: 'Categorías', level: 1 })).toBeVisible();
-    state.categoryRows = await getTableRowCount(page);
-  });
-
-  test('Category: create', async ({ page }) => {
-    await navigateTo(page, '/dashboard/category/create');
-    await expect(page.getByText('Crear Categoría')).toBeVisible();
-
-    await fillReliably(page, '#name', 'E2E Test Category');
-    await expect(page.locator('#name')).toHaveValue('E2E Test Category');
-
-    await fillReliably(page, '#description', 'Created by e2e test');
-
-    await page.getByRole('button', { name: /^crear$/i }).click();
-
-    // The category form does a server-side redirect to /dashboard/category?success=...
-    // Wait specifically for the list page URL with query params
-    await page.waitForURL(/\/dashboard\/category\?/, { timeout: 30000 });
-    await waitForPageLoad(page);
-    await expect(page.getByText('E2E Test Category')).toBeVisible({ timeout: 10000 });
-  });
-
-  test('Category: edit', async ({ page }) => {
-    await navigateTo(page, '/dashboard/category');
-
-    const row = page.locator('table tbody tr', { hasText: 'E2E Test Category' });
-    await row.locator('td').last().locator('a').first().click();
-    await waitForPageLoad(page);
-
-    await fillReliably(page, '#name', 'E2E Category Updated');
-    await expect(page.locator('#name')).toHaveValue('E2E Category Updated');
-
-    await page.getByRole('button', { name: /actualizar|update/i }).click();
-
-    await page.waitForURL(/\/dashboard\/category\?/, { timeout: 30000 });
-    await waitForPageLoad(page);
-    await expect(page.getByText('E2E Category Updated')).toBeVisible({ timeout: 10000 });
-  });
-
-  // ━━━ 2. PRODUCT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // ━━━ 1. PRODUCT ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   test('Product: list', async ({ page }) => {
     await navigateTo(page, '/dashboard/product');
@@ -156,9 +81,17 @@ test.describe.serial('Owner Dashboard CRUD Tests', () => {
     const submitBtn = page.getByRole('button', { name: /^crear$/i });
     await expect(submitBtn).toBeEnabled({ timeout: 15000 });
 
-    // The product form uses a native <select> for category
+    // El ABM de categorías ya no existe: se elige una del select o se crea desde el
+    // propio formulario de producto.
     const categorySelect = page.locator('select[name="category_id"]');
-    await categorySelect.selectOption({ label: 'E2E Category Updated' });
+    const options = await categorySelect.locator('option').evaluateAll(
+      (els) => els.map((el) => (el as HTMLOptionElement).value).filter(Boolean)
+    );
+    if (options.length) {
+      await categorySelect.selectOption(options[0]);
+    } else {
+      await page.locator('input[name="new_category"]').fill('E2E Test Category');
+    }
 
     await page.locator('#name, input[name="name"]').first().fill('E2E Test Product');
     await page.locator('#description, textarea[name="description"]').first().fill('Created by e2e test');
@@ -372,18 +305,9 @@ test.describe.serial('Owner Dashboard CRUD Tests', () => {
     if (!d) await deleteRowByText(page, 'E2E Test Product');
   });
 
-  test('Cleanup: category', async ({ page }) => {
-    await navigateTo(page, '/dashboard/category');
-    const d = await deleteRowByText(page, 'E2E Category Updated');
-    if (!d) await deleteRowByText(page, 'E2E Test Category');
-  });
-
   // ━━━ VERIFICATION ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   test('Verify: counts restored', async ({ page }) => {
-    await navigateTo(page, '/dashboard/category');
-    expect(await getTableRowCount(page)).toBe(state.categoryRows);
-
     await navigateTo(page, '/dashboard/product');
     expect(await getTableRowCount(page)).toBe(state.productRows);
 

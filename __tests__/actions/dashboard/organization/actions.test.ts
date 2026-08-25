@@ -12,6 +12,8 @@ const mockSupabase = {
   delete: jest.fn(() => mockSupabase),
   eq: jest.fn(() => mockSupabase),
   order: jest.fn(() => mockSupabase),
+  limit: jest.fn(() => mockSupabase),
+  maybeSingle: jest.fn(() => ({ data: null, error: null })),
   single: jest.fn(() => ({ data: { id: '1', name: 'Test Org' }, error: null })),
   rpc: jest.fn(() => ({ data: null, error: null })),
   auth: {
@@ -27,6 +29,7 @@ jest.mock('@/lib/auth/get-current-user', () => ({
 }));
 jest.mock('@/lib/auth/roles', () => ({
   isAdmin: jest.fn(() => false),
+  hasOwnerPermissions: jest.fn(() => true),
 }));
 
 import {
@@ -37,9 +40,11 @@ import {
   getOrganization,
   getOrganizationProducts,
   getOrganizationSettings,
+  getOrganizationAddress,
   updateOrganizationVisibility,
+  updateClubProfile,
 } from '@/actions/dashboard/organization/actions';
-import { isAdmin } from '@/lib/auth/roles';
+import { hasOwnerPermissions, isAdmin } from '@/lib/auth/roles';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 
 beforeEach(() => {
@@ -51,6 +56,8 @@ beforeEach(() => {
   mockSupabase.delete.mockReturnValue(mockSupabase);
   mockSupabase.eq.mockReturnValue(mockSupabase);
   mockSupabase.order.mockReturnValue(mockSupabase);
+  mockSupabase.limit.mockReturnValue(mockSupabase);
+  mockSupabase.maybeSingle.mockReturnValue({ data: null, error: null });
   mockSupabase.single.mockReturnValue({ data: { id: '1', name: 'Test Org' }, error: null });
   (isAdmin as jest.Mock).mockReturnValue(false);
 });
@@ -240,6 +247,16 @@ describe('getOrganizationSettings', () => {
   });
 });
 
+describe('getOrganizationAddress', () => {
+  it('returns the first address of the organization', async () => {
+    mockSupabase.maybeSingle.mockReturnValue({ data: { id: 7, street: 'Belgrano' }, error: null });
+    expect(await getOrganizationAddress('1')).toEqual({
+      data: { id: 7, street: 'Belgrano' },
+      error: null,
+    });
+  });
+});
+
 describe('updateOrganizationVisibility', () => {
   it('should update visibility for admin user', async () => {
     (isAdmin as jest.Mock).mockReturnValue(true);
@@ -287,3 +304,140 @@ describe('updateOrganizationVisibility', () => {
     expect(result).toEqual({ error: 'Invalid input' });
   });
 });
+
+describe('updateClubProfile', () => {
+  const profile = {
+    name: 'One Store',
+    business_name: null,
+    tax_id: null,
+    description: null,
+    contact_email: null,
+    contact_phone: null,
+    website: null,
+    industry: null,
+    logo_url: null,
+    is_public: true,
+    show_in_explore: true,
+    allow_new_members: true,
+    requires_approval: false,
+    email_notifications: true,
+    invitation_code: '  ONESTORE  ',
+    welcome_message: null,
+    points_label: 'puntos',
+    timezone: 'America/Argentina/Buenos_Aires',
+  };
+
+  beforeEach(() => {
+    (hasOwnerPermissions as jest.Mock).mockReturnValue(true);
+    (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, organization_id: 5 });
+    mockSupabase.eq.mockReturnValue({ error: null });
+  });
+
+  it('trims the invitation code and saves the profile', async () => {
+    const result = await updateClubProfile('5', profile);
+    expect(result).toEqual({ error: null });
+    expect(mockSupabase.update).toHaveBeenCalledWith(
+      expect.objectContaining({ invitation_code: 'ONESTORE' }),
+    );
+  });
+
+  it('stores a null code when it is blank', async () => {
+    await updateClubProfile('5', { ...profile, invitation_code: '   ' });
+    expect(mockSupabase.update).toHaveBeenCalledWith(
+      expect.objectContaining({ invitation_code: null }),
+    );
+  });
+
+  // El tipo no existe en runtime: un payload con campos de más no puede
+  // escribir columnas que el formulario no ofrece (plan, trial_started_at, ...).
+  it('ignores fields outside the club-profile allowlist', async () => {
+    await updateClubProfile('5', {
+      ...profile,
+      plan: 'pro',
+      trial_started_at: '2020-01-01',
+    } as unknown as Parameters<typeof updateClubProfile>[1]);
+
+    const written = (mockSupabase.update as jest.Mock).mock.calls.at(-1)?.[0];
+    expect(written).not.toHaveProperty('plan');
+    expect(written).not.toHaveProperty('trial_started_at');
+    expect(written).toHaveProperty('name', 'One Store');
+  });
+
+  it('rejects a payload that does not match the club profile', async () => {
+    const result = await updateClubProfile(
+      '5',
+      { name: '' } as unknown as Parameters<typeof updateClubProfile>[1],
+    );
+    expect(result).toEqual({ error: 'Invalid club profile' });
+    expect(mockSupabase.update).not.toHaveBeenCalled();
+  });
+
+  it('refuses a user without owner permissions', async () => {
+    (hasOwnerPermissions as jest.Mock).mockReturnValueOnce(false);
+    expect(await updateClubProfile('5', profile)).toEqual({ error: 'Not authorized' });
+  });
+
+  it('refuses an unauthenticated user', async () => {
+    (getCurrentUser as jest.Mock).mockResolvedValueOnce(null);
+    expect(await updateClubProfile('5', profile)).toEqual({ error: 'Not authorized' });
+  });
+
+  it('refuses editing another organization', async () => {
+    expect(await updateClubProfile('9', profile)).toEqual({ error: 'Not authorized' });
+  });
+
+  it('surfaces a database error', async () => {
+    mockSupabase.eq.mockReturnValueOnce({ error: { message: 'boom' } });
+    expect(await updateClubProfile('5', profile)).toEqual({ error: 'boom' });
+  });
+
+  // organization_name_unique: el 23505 se traduce a un mensaje para el usuario.
+  it('translates the unique-name violation', async () => {
+    mockSupabase.eq.mockReturnValueOnce({ error: { code: '23505', message: 'duplicate key' } });
+    expect(await updateClubProfile('5', profile)).toEqual({
+      error: 'Ya existe una empresa con ese nombre. Probá con otro.',
+    });
+  });
+
+  const address = {
+    street: 'Belgrano',
+    number: '10',
+    city: 'Mendoza',
+    state: 'Mendoza',
+    zip_code: '5500',
+    country: null,
+    place_id: null,
+    latitude: null,
+    longitude: null,
+  };
+
+  it('updates the address the organization already has', async () => {
+    mockSupabase.eq
+      .mockReturnValueOnce({ error: null })
+      .mockReturnValueOnce(mockSupabase)
+      .mockReturnValueOnce({ error: null });
+    mockSupabase.maybeSingle.mockReturnValue({ data: { id: 7 }, error: null });
+
+    expect(await updateClubProfile('5', { ...profile, address })).toEqual({ error: null });
+    expect(mockSupabase.from).toHaveBeenCalledWith('address');
+    expect(mockSupabase.update).toHaveBeenLastCalledWith(address);
+  });
+
+  it('creates the address when the organization has none', async () => {
+    mockSupabase.eq.mockReturnValueOnce({ error: null }).mockReturnValue(mockSupabase);
+    mockSupabase.insert.mockReturnValueOnce({ error: null });
+
+    expect(await updateClubProfile('5', { ...profile, address })).toEqual({ error: null });
+    expect(mockSupabase.insert).toHaveBeenCalledWith({ ...address, organization_id: 5 });
+  });
+
+  it('surfaces an address error', async () => {
+    mockSupabase.eq.mockReturnValueOnce({ error: null }).mockReturnValue(mockSupabase);
+    mockSupabase.insert.mockReturnValueOnce({ error: { message: 'address boom' } });
+
+    expect(await updateClubProfile('5', { ...profile, address })).toEqual({
+      error: 'address boom',
+    });
+  });
+});
+

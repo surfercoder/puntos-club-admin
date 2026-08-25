@@ -1,3 +1,5 @@
+import Image from "next/image";
+import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
@@ -11,11 +13,30 @@ export async function generateMetadata(): Promise<Metadata> {
   };
 }
 
-export default function Page() {
+export default async function Page() {
+  const t = await getTranslations("Auth.login");
+
   return (
-    <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
-      <div className="w-full max-w-sm">
+    <div className="flex flex-1 items-center justify-center px-6 py-12">
+      <div className="relative w-full max-w-[35.375rem]">
+        <Image
+          src="/images/login-mascot.png"
+          alt=""
+          width={254}
+          height={628}
+          priority
+          className="pointer-events-none absolute -top-10 right-full hidden max-w-none select-none xl:block"
+        />
         <LoginForm />
+        <p className="mt-[2.375rem] flex flex-wrap items-center justify-center gap-x-11 gap-y-2 text-lg font-medium sm:text-[1.1875rem]">
+          {t("noAccount")}
+          <Link
+            href="/owner/onboarding"
+            className="font-bold text-brand-pink underline-offset-4 hover:underline"
+          >
+            {t("signUpLink")}
+          </Link>
+        </p>
       </div>
     </div>
   );

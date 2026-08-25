@@ -32,6 +32,11 @@ jest.mock('@/components/ui/google-address-autocomplete', () => ({
     />
   ),
 }));
+// El chequeo de nombre pega al servidor; aca se controla la respuesta.
+const mockCheckOrgName = jest.fn(() => Promise.resolve('available'));
+jest.mock('@/actions/onboarding/actions', () => ({
+  checkOrgNameAvailable: (name: string) => mockCheckOrgName(name),
+}));
 jest.mock('@/components/ui/image-upload', () => ({
   ImageUpload: ({ value, onChange }: { value: string | null; onChange: (u: string | null) => void }) => (
     <div>
@@ -41,7 +46,7 @@ jest.mock('@/components/ui/image-upload', () => ({
   ),
 }));
 
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 import { Step2Company } from '@/components/onboarding/steps/step-2-company';
 
@@ -339,5 +344,67 @@ describe('Step2Company', () => {
 
     expect(screen.queryByText('validation.businessNameRequired')).not.toBeInTheDocument();
     expect(onNext).toHaveBeenCalled();
+  });
+});
+
+describe('Step2Company · nombre de empresa', () => {
+  beforeEach(() => mockCheckOrgName.mockClear());
+
+  it('avisa que el nombre esta disponible', async () => {
+    renderStep();
+    fireEvent.change(screen.getByLabelText(/businessName/), { target: { value: 'Churrico Centro' } });
+
+    expect(await screen.findByText('nameChecking')).toBeInTheDocument();
+    expect(await screen.findByText('nameAvailable')).toBeInTheDocument();
+    expect(mockCheckOrgName).toHaveBeenCalledWith('Churrico Centro');
+  });
+
+  it('bloquea el paso cuando el nombre ya esta tomado', async () => {
+    mockCheckOrgName.mockResolvedValue('taken');
+    const { onNext } = renderStep();
+    fillRequired();
+
+    expect(await screen.findByText('validation.businessNameTaken')).toBeInTheDocument();
+    submit();
+    expect(onNext).not.toHaveBeenCalled();
+    mockCheckOrgName.mockResolvedValue('available');
+  });
+
+  // 'unknown' = no se pudo consultar: no se avisa nada y el indice unico de la
+  // base sigue siendo la red de contencion.
+  it('no muestra nada cuando el chequeo no pudo resolverse', async () => {
+    mockCheckOrgName.mockResolvedValueOnce('unknown');
+    renderStep();
+    fireEvent.change(screen.getByLabelText(/businessName/), { target: { value: 'Churrico Centro' } });
+
+    await waitFor(() => expect(screen.queryByText('nameChecking')).not.toBeInTheDocument());
+    expect(screen.queryByText('nameAvailable')).not.toBeInTheDocument();
+    expect(screen.queryByText('validation.businessNameTaken')).not.toBeInTheDocument();
+  });
+
+  // Si el owner sigue tecleando, la respuesta del nombre anterior llega tarde:
+  // el efecto ya se limpio y no tiene que pisar el estado actual.
+  it('descarta la respuesta de un nombre que ya cambio', async () => {
+    let resolveStale: (value: string) => void = () => {};
+    mockCheckOrgName.mockImplementationOnce(
+      () => new Promise<string>((resolve) => { resolveStale = resolve; }),
+    );
+
+    renderStep();
+    const input = screen.getByLabelText(/businessName/);
+    fireEvent.change(input, { target: { value: 'Churrico Uno' } });
+    await waitFor(() => expect(mockCheckOrgName).toHaveBeenCalledWith('Churrico Uno'));
+
+    fireEvent.change(input, { target: { value: 'Churrico Dos' } });
+    resolveStale('taken');
+
+    expect(await screen.findByText('nameAvailable')).toBeInTheDocument();
+    expect(screen.queryByText('validation.businessNameTaken')).not.toBeInTheDocument();
+  });
+
+  it('no consulta por el nombre que ya venia guardado', async () => {
+    renderStep({ initialData: savedData });
+
+    await waitFor(() => expect(mockCheckOrgName).not.toHaveBeenCalled());
   });
 });

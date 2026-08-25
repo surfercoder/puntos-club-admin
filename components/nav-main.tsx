@@ -1,6 +1,8 @@
 "use client"
 
 import { ChevronRight, type LucideIcon } from "lucide-react"
+import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { useTranslations } from "next-intl"
 
 import {
@@ -18,6 +20,7 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
+import { isNavItemActive } from "@/lib/utils"
 
 export function NavMain({
   items,
@@ -34,35 +37,44 @@ export function NavMain({
   }[]
 }) {
   const t = useTranslations("Navigation")
+  const pathname = usePathname()
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>{t("entities")}</SidebarGroupLabel>
+      <SidebarGroupLabel className="text-[11px] font-semibold uppercase tracking-wider text-brand-violet/70">
+        {t("entities")}
+      </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => {
           if (!item.items?.length) {
+            const active = isNavItemActive(pathname, item.url)
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton asChild tooltip={item.title}>
-                  <a href={item.url}>
+                <SidebarMenuButton asChild tooltip={item.title} isActive={active}>
+                  <Link href={item.url}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
-                  </a>
+                  </Link>
                 </SidebarMenuButton>
               </SidebarMenuItem>
             )
           }
 
+          const groupActive = item.items.some((sub) => isNavItemActive(pathname, sub.url))
+          const shouldOpen = item.isActive || groupActive
+
           return (
             <Collapsible
-              key={item.title}
+              // `defaultOpen` solo se aplica al montar, asi que incluimos el estado
+              // esperado en la key: al navegar a un grupo cerrado, el remount lo abre.
+              key={`${item.title}-${shouldOpen}`}
               asChild
-              defaultOpen={item.isActive}
+              defaultOpen={shouldOpen}
               className="group/collapsible"
             >
               <SidebarMenuItem>
                 <CollapsibleTrigger asChild>
-                  <SidebarMenuButton tooltip={item.title}>
+                  <SidebarMenuButton tooltip={item.title} isActive={groupActive}>
                     {item.icon && <item.icon />}
                     <span>{item.title}</span>
                     <ChevronRight className="ml-auto transition-transform duration-200 group-data-[state=open]/collapsible:rotate-90" />
@@ -72,10 +84,13 @@ export function NavMain({
                   <SidebarMenuSub>
                     {item.items.map((subItem) => (
                       <SidebarMenuSubItem key={subItem.title}>
-                        <SidebarMenuSubButton asChild>
-                          <a href={subItem.url}>
+                        <SidebarMenuSubButton
+                          asChild
+                          isActive={isNavItemActive(pathname, subItem.url)}
+                        >
+                          <Link href={subItem.url}>
                             <span>{subItem.title}</span>
-                          </a>
+                          </Link>
                         </SidebarMenuSubButton>
                       </SidebarMenuSubItem>
                     ))}

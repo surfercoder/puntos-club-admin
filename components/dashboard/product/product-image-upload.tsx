@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { useTranslations } from 'next-intl';
 import Image from 'next/image';
-import { X, Upload, Image as ImageIcon } from 'lucide-react';
+import { Image as ImageIcon, Plus, Upload, X } from 'lucide-react';
 import { createClient } from '@/lib/supabase/client';
 import { normalizeProductImage } from '@/lib/utils/normalize-product-image';
 import { toast } from 'sonner';
@@ -130,64 +130,80 @@ export default function ProductImageUpload({
     event.target.value = '';
   };
 
+  const emptySlots = Math.max(0, 3 - images.length);
+
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-3 gap-4">
+    <div className="space-y-3">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <label className="relative flex aspect-video cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed p-3 text-center transition-colors hover:border-muted-foreground">
+          <input
+            type="file"
+            accept="image/jpeg,image/jpg,image/png,image/webp"
+            multiple
+            onChange={handleFileSelect}
+            disabled={uploading || images.length >= 3}
+            className="hidden"
+          />
+          {uploading ? (
+            <>
+              <div className="size-7 animate-spin rounded-full border-b-2 border-foreground" />
+              <span className="text-sm text-muted-foreground">{t('uploading')}</span>
+            </>
+          ) : (
+            <>
+              <Upload className="size-7 text-muted-foreground" />
+              <span className="text-sm font-medium">{t('uploadButton')}</span>
+              <span className="text-[11px] text-muted-foreground">{t('formats')}</span>
+              <span className="text-[11px] text-muted-foreground">{t('autoResize')}</span>
+            </>
+          )}
+        </label>
+
         {images.map((imageUrl, index) => (
-          <div key={imageUrl} className="relative aspect-video rounded-lg border overflow-hidden group bg-muted">
+          <div
+            key={imageUrl}
+            className="relative aspect-video overflow-hidden rounded-xl border bg-muted"
+          >
             <Image
               src={imageUrl}
               alt={`Product image ${index + 1}`}
               fill
-              className="object-contain"
-              sizes="(max-width: 768px) 33vw, 200px"
+              className="object-cover"
+              sizes="(max-width: 768px) 50vw, 200px"
             />
+            {index === 0 && (
+              <span className="absolute left-2 top-2 rounded-md bg-brand-violet/90 px-2 py-0.5 text-[11px] font-medium text-white">
+                {t('mainImage')}
+              </span>
+            )}
             <button
               type="button"
               aria-label={`Eliminar imagen ${index + 1}`}
               onClick={() => removeImage(imageUrl, index)}
-              className="absolute top-2 right-2 p-1 bg-destructive text-destructive-foreground rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+              className="absolute right-2 top-2 cursor-pointer rounded-full bg-destructive p-1 text-destructive-foreground transition-opacity hover:opacity-90"
             >
-              <X className="size-4" />
+              <X className="size-3.5" />
             </button>
           </div>
         ))}
 
-        {images.length < 3 && (
-          <label className="relative aspect-video rounded-lg border-2 border-dashed border-border hover:border-muted-foreground cursor-pointer flex flex-col items-center justify-center transition-colors">
-            <input
-              type="file"
-              accept="image/jpeg,image/jpg,image/png,image/webp"
-              multiple
-              onChange={handleFileSelect}
-              disabled={uploading}
-              className="hidden"
-            />
-            {uploading ? (
-              <div className="flex flex-col items-center gap-2">
-                <div className="animate-spin rounded-full size-8 border-b-2 border-foreground" />
-                <span className="text-sm text-muted-foreground">{t('uploading')}</span>
-              </div>
-            ) : (
-              <div className="flex flex-col items-center gap-2">
-                <Upload className="size-8 text-muted-foreground" />
-                <span className="text-sm text-muted-foreground">{t('uploadButton')}</span>
-                <span className="text-xs text-muted-foreground/70">{t('formats')}</span>
-                <span className="text-xs text-muted-foreground/70 text-center px-2">{t('autoResize')}</span>
-              </div>
-            )}
-          </label>
-        )}
+        {Array.from({ length: emptySlots }, (_, index) => (
+          <span
+            key={`slot-${index}`}
+            className="flex aspect-video flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed text-muted-foreground"
+          >
+            <Plus className="size-6" />
+            <span className="text-sm">{t('addImage')}</span>
+          </span>
+        ))}
       </div>
 
-      {images.length === 0 && (
-        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+      {images.length === 0 ? (
+        <p className="flex items-center gap-2 text-sm text-muted-foreground">
           <ImageIcon className="size-4" />
-          <span>{t('noImages')}</span>
-        </div>
-      )}
-
-      {images.length > 0 && (
+          {t('noImages')}
+        </p>
+      ) : (
         <p className="text-sm text-muted-foreground">
           {t('imageCount', { count: images.length })}
         </p>

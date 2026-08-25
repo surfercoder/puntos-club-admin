@@ -2,6 +2,7 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
+import { NotificationGuidance } from '@/components/dashboard/notifications/notification-guidance';
 import NotificationForm from '@/components/dashboard/notifications/notification-form';
 import { PlanLimitGuard } from '@/components/dashboard/plan/plan-limit-guard';
 import { Button } from '@/components/ui/button';
@@ -48,12 +49,17 @@ export default async function CreateNotificationPage() {
             </Link>
           </Button>
           <div>
-            <h1 className="text-2xl font-semibold">{t('createPage.title')}</h1>
-            <p className="text-muted-foreground">{t('createPage.description')}</p>
+            <h1 className="text-3xl font-bold tracking-tight">{t('createPage.title')}</h1>
+            <p className="text-sm text-muted-foreground">{t('createPage.description')}</p>
           </div>
         </div>
 
-        <NotificationForm limits={limits} canSend={canSend} />
+        <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+          <div className="min-w-0">
+            <NotificationForm limits={limits} canSend={canSend} />
+          </div>
+          <NotificationGuidance />
+        </div>
       </div>
     </PlanLimitGuard>
   );

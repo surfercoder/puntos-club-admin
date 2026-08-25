@@ -31,7 +31,7 @@ const mockSupabase = {
 jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => mockSupabase) }));
 jest.mock('@/lib/supabase/admin', () => ({ createAdminClient: jest.fn(() => mockSupabase) }));
 
-import { completeOnboarding, getOnboardingStatus } from '@/actions/onboarding/actions';
+import { checkOrgNameAvailable, completeOnboarding, getOnboardingStatus } from '@/actions/onboarding/actions';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -716,5 +716,35 @@ describe('getOnboardingStatus', () => {
     const result = await getOnboardingStatus();
     expect(result.status).toBe('error');
     expect(result.error).toBe('Unknown error');
+  });
+});
+
+describe('checkOrgNameAvailable', () => {
+  it('reporta nombre tomado', async () => {
+    mockSupabase.rpc.mockReturnValueOnce({ data: true, error: null });
+    expect(await checkOrgNameAvailable('  Churrico ')).toBe('taken');
+    expect(mockSupabase.rpc).toHaveBeenCalledWith('org_name_taken', { p_name: '  Churrico ' });
+  });
+
+  it('reporta nombre disponible', async () => {
+    mockSupabase.rpc.mockReturnValueOnce({ data: false, error: null });
+    expect(await checkOrgNameAvailable('Churrico Centro')).toBe('available');
+  });
+
+  it('no consulta con el nombre vacio', async () => {
+    expect(await checkOrgNameAvailable('   ')).toBe('unknown');
+    expect(mockSupabase.rpc).not.toHaveBeenCalled();
+  });
+
+  it('no bloquea al owner si la consulta falla', async () => {
+    mockSupabase.rpc.mockReturnValueOnce({ data: null, error: { message: 'boom' } });
+    expect(await checkOrgNameAvailable('Churrico')).toBe('unknown');
+  });
+
+  it('traduce el duplicado del indice unico a un mensaje entendible', async () => {
+    mockSupabase.single.mockReturnValueOnce({ data: null, error: { code: '23505', message: 'duplicate key' } });
+    const result = await completeOnboarding({ step2: step2Data });
+    expect(result.success).toBe(false);
+    expect(result.error).toContain('Ya existe una empresa con ese nombre');
   });
 });

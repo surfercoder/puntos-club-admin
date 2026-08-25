@@ -34,11 +34,11 @@ export function PlanLimitCreateButton({
       : features.every((f) => isAtLimit(f)));
 
   if (isDisabled) {
-    return <Button disabled>{createLabel}</Button>;
+    return <Button className="h-10" disabled size="lg">{createLabel}</Button>;
   }
 
   return (
-    <Button asChild>
+    <Button asChild className="brand-cta h-10" size="lg">
       <Link href={createHref}>{createLabel}</Link>
     </Button>
   );

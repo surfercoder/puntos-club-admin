@@ -46,15 +46,8 @@ const sampleData: DashboardKpis = {
 
 describe('KpiCards', () => {
   it('renders all 6 KPI cards', () => {
-    render(<KpiCards data={sampleData} />);
-    const cards = screen.getAllByTestId('card');
-    expect(cards).toHaveLength(6);
-  });
-
-  it('renders all 6 card titles', () => {
-    render(<KpiCards data={sampleData} />);
-    const titles = screen.getAllByTestId('card-title');
-    expect(titles).toHaveLength(6);
+    const { container } = render(<KpiCards data={sampleData} />);
+    expect(container.querySelectorAll('.rounded-xl.border')).toHaveLength(6);
   });
 
   it('displays the correct KPI titles', () => {
@@ -94,9 +87,8 @@ describe('KpiCards', () => {
       redemptions_this_month: 0,
       points_redeemed_this_month: 0,
     };
-    render(<KpiCards data={zeroData} />);
-    const cards = screen.getAllByTestId('card');
-    expect(cards).toHaveLength(6);
+    const { container } = render(<KpiCards data={zeroData} />);
+    expect(container.querySelectorAll('.rounded-xl.border')).toHaveLength(6);
   });
 
   it('renders icons for each KPI card', () => {
@@ -109,19 +101,20 @@ describe('KpiCards', () => {
     expect(screen.getByTestId('icon-star')).toBeInTheDocument();
   });
 
-  it('falls back to text-muted-foreground when iconClassName is not provided', () => {
+  it('applies the tint classes to the icon box', () => {
     const TestIcon = ({ className }: { className?: string }) => (
       <span data-testid="test-icon" className={className} />
     );
-    render(
+    const { container } = render(
       <KpiCard
         title="Test KPI"
         value="42"
         subtitle="Test subtitle"
         icon={TestIcon}
+        tint="bg-brand-blue/10 text-brand-blue"
       />
     );
-    const icon = screen.getByTestId('test-icon');
-    expect(icon.className).toContain('text-muted-foreground');
+    expect(container.querySelector('.bg-brand-blue\\/10')).not.toBeNull();
+    expect(screen.getByTestId('test-icon')).toBeInTheDocument();
   });
 });

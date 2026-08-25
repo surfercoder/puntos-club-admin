@@ -6,7 +6,7 @@ import {
   createRegistrationToken,
   type PendingRegistration,
 } from '@/lib/registration-token';
-import { brandedEmailLayout, ctaButton } from '@/lib/email-template';
+import { benefitGrid, brandedEmailLayout, ctaButton, noticeBox } from '@/lib/email-template';
 import { resend, EMAIL_FROM } from '@/lib/resend';
 
 export async function initiateRegistration(input: {
@@ -50,15 +50,52 @@ export async function initiateRegistration(input: {
   }
 
   const body = `
-    <h2 style="font-family:'Poppins',Arial,sans-serif;font-size:22px;font-weight:700;color:#1A1A2E;margin:0 0 12px">
-      ¡Hola, ${input.firstName}!
+    <h2 style="font-family:'Poppins',Arial,sans-serif;font-size:24px;font-weight:700;color:#1A1A2E;margin:0 0 4px">
+      ¡Hola, ${input.firstName}! 👋
     </h2>
+    <h2 style="font-family:'Poppins',Arial,sans-serif;font-size:24px;font-weight:700;color:#1A1A2E;margin:0 0 16px">
+      ¡Bienvenido a <span style="color:#FF4573">Puntos Club</span>!
+    </h2>
+    <p style="font-family:'Lexend',Arial,sans-serif;font-size:15px;color:#374151;margin:0 0 12px;line-height:1.7">
+      Estás a un paso de transformar la forma en que <strong style="color:#1A1A2E">premiás la lealtad</strong>
+      y creás <strong style="color:#1A1A2E">relaciones que duran</strong>.
+    </p>
     <p style="font-family:'Lexend',Arial,sans-serif;font-size:15px;color:#374151;margin:0 0 8px;line-height:1.7">
-      Gracias por registrarte en <strong style="color:#1A1A2E">Puntos Club</strong>.
-      Un último paso: confirmá tu dirección de email para activar tu cuenta y
-      comenzar a gestionar tus programas de fidelización.
+      Solo necesitamos que <strong style="color:#1A1A2E">confirmes tu dirección de email</strong>
+      para activar tu cuenta y comenzar a disfrutar de todos los beneficios.
     </p>
     ${ctaButton(verificationUrl, 'Confirmar mi email')}
+    ${benefitGrid([
+      {
+        emoji: '🎁',
+        title: 'Premiá lealtad',
+        description: 'Motivá a tus clientes con recompensas que realmente valoran.',
+        color: '#FF4573',
+      },
+      {
+        emoji: '🤝',
+        title: 'Fortalecé vínculos',
+        description: 'Creá experiencias que generan conexión y fidelidad.',
+        color: '#31A1D6',
+      },
+      {
+        emoji: '📈',
+        title: 'Hacé crecer tu negocio',
+        description: 'Más engagement, más visitas, más resultados.',
+        color: '#FD7E14',
+      },
+      {
+        emoji: '🛡️',
+        title: 'Con la seguridad que necesitás',
+        description: 'Tus datos y los de tus clientes siempre protegidos.',
+        color: '#4BB562',
+      },
+    ])}
+    ${noticeBox(
+      '🔒',
+      'Tu seguridad es nuestra prioridad',
+      'Usamos encriptación de nivel bancario para proteger tu información y la de tus clientes.',
+    )}
     <p style="font-family:'Lexend',Arial,sans-serif;font-size:13px;color:#6B7280;margin:0;line-height:1.6">
       Este enlace expira en <strong>1&nbsp;hora</strong>. Si no creaste esta
       cuenta, podés ignorar este mensaje sin problema.
@@ -67,7 +104,7 @@ export async function initiateRegistration(input: {
 
   const footer = `
     <p style="margin:0 0 4px;font-size:13px;color:#6B7280;font-family:'Lexend',Arial,sans-serif">
-      Si el botón no funciona, copiá y pegá este enlace en tu navegador:
+      🔗 Si el botón no funciona, copiá y pegá este enlace en tu navegador:
     </p>
     <p style="margin:0 0 16px;font-size:11px;word-break:break-all">
       <a href="${verificationUrl}" style="color:#31A1D6">${verificationUrl}</a>

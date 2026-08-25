@@ -6,6 +6,7 @@ import { useTransition } from "react";
 
 import { setLocale } from "@/actions/i18n/set-locale";
 import { locales, type Locale } from "@/i18n/locales";
+import { cn } from "@/lib/utils";
 import {
   Select,
   SelectContent,
@@ -14,12 +15,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-const LOCALE_META: Record<Locale, { flag: string; label: string }> = {
-  es: { flag: "🇦🇷", label: "Español" },
-  en: { flag: "🇺🇸", label: "English" },
+const LOCALE_CODE: Record<Locale, string> = {
+  es: "AR ES",
+  en: "US EN",
 };
 
-export function LanguageSwitcher() {
+export function LanguageSwitcher({ className }: { className?: string }) {
   const t = useTranslations("LanguageSwitcher");
   const locale = useLocale() as Locale;
   const { refresh } = useRouter();
@@ -36,23 +37,22 @@ export function LanguageSwitcher() {
     <Select value={locale} onValueChange={handleChange} disabled={isPending}>
       <SelectTrigger
         size="sm"
-        className="h-8 w-auto gap-1.5 border-none bg-transparent shadow-none focus-visible:ring-0 px-2 hover:bg-accent hover:text-accent-foreground"
+        className={cn(
+          "h-8 w-auto gap-1.5 border-none bg-transparent px-2 shadow-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-0 dark:bg-transparent dark:hover:bg-accent",
+          className,
+        )}
         aria-label={t("label")}
       >
         <SelectValue>
-          <span className="flex items-center gap-1.5">
-            <span className="text-base leading-none">{LOCALE_META[locale]?.flag}</span>
-            <span className="text-xs font-medium uppercase tracking-wide">{locale}</span>
+          <span className="text-xs font-medium tracking-wide uppercase">
+            {LOCALE_CODE[locale] ?? locale}
           </span>
         </SelectValue>
       </SelectTrigger>
       <SelectContent align="end" className="min-w-[130px]">
         {locales.map((l) => (
           <SelectItem key={l} value={l} className="cursor-pointer">
-            <span className="flex items-center gap-2">
-              <span className="text-base leading-none">{LOCALE_META[l]?.flag}</span>
-              <span>{t(l)}</span>
-            </span>
+            {t(l)}
           </SelectItem>
         ))}
       </SelectContent>

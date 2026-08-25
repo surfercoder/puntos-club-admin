@@ -1,108 +1,176 @@
 import BranchListPage from '@/app/dashboard/branch/page';
 
-const mockEq = jest.fn().mockResolvedValue({ data: [], error: null });
-const mockSelect = jest.fn().mockResolvedValue({ data: [], error: null });
-const mockFrom = jest.fn(() => ({ select: mockSelect }));
+let branchRows: unknown[] | null = [];
+let cashierRows: unknown[] | null = [];
+let branchError: unknown = null;
 
-jest.mock('next-intl/server', () => ({
-  getTranslations: jest.fn(() => Promise.resolve((key: string) => key)),
+const branchEq = jest.fn();
+const cashierEq = jest.fn();
+
+const makeBranchBuilder = () => {
+  const builder: Record<string, unknown> = {};
+  const settled = () => Promise.resolve({ data: branchRows, error: branchError });
+  Object.assign(builder, {
+    select: () => builder,
+    order: () => Object.assign(settled(), builder),
+    eq: (...args: unknown[]) => {
+      branchEq(...args);
+      return Object.assign(settled(), builder);
+    },
+    then: (resolve: (v: unknown) => unknown) => settled().then(resolve),
+  });
+  return builder;
+};
+
+const makeCashierBuilder = () => {
+  const builder: Record<string, unknown> = {};
+  const settled = () => Promise.resolve({ data: cashierRows, error: null });
+  Object.assign(builder, {
+    select: () => builder,
+    eq: (...args: unknown[]) => {
+      cashierEq(...args);
+      return Object.assign(settled(), builder);
+    },
+    then: (resolve: (v: unknown) => unknown) => settled().then(resolve),
+  });
+  return builder;
+};
+
+jest.mock('@/lib/supabase/server', () => ({
+  createClient: jest.fn(() => Promise.resolve({
+    from: (table: string) => (table === 'branch' ? makeBranchBuilder() : makeCashierBuilder()),
+  })),
 }));
-
 jest.mock('next/headers', () => ({
   cookies: jest.fn(() => Promise.resolve({ get: jest.fn(() => ({ value: '1' })) })),
 }));
-
-jest.mock('@/lib/supabase/server', () => ({
-  createClient: jest.fn(() => Promise.resolve({ from: mockFrom })),
-}));
-
 jest.mock('@/lib/auth/get-current-user', () => ({
-  getCurrentUser: jest.fn(() => Promise.resolve({ id: '1', role: { name: 'admin' } })),
+  getCurrentUser: jest.fn(() => Promise.resolve({ id: '1' })),
 }));
+const getActiveOrgIdFilter = jest.fn(() => Promise.resolve(1 as number | null));
+jest.mock('@/lib/auth/get-active-org-id', () => ({
+  getActiveOrgIdFilter: (...args: unknown[]) => getActiveOrgIdFilter(...args),
+}));
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: ({ children, href }: any) => <a href={href}>{children}</a>,
+}));
+jest.mock('@/components/dashboard/branch/delete-modal', () => function Mock() { return <div />; });
+jest.mock('@/components/dashboard/branch/branch-filters', () => ({ BranchFilters: () => <div /> }));
+jest.mock('@/components/dashboard/branch/branch-form-with-address', () => ({
+  __esModule: true,
+  default: ({ cashiers }: { cashiers: unknown[] }) => (
+    <div data-testid="branch-form">{JSON.stringify(cashiers)}</div>
+  ),
+}));
+jest.mock('@/components/dashboard/plan/plan-usage-badge', () => ({ PlanUsageBadge: () => <div /> }));
+jest.mock('@/components/dashboard/plan/plan-usage-banner', () => ({ PlanUsageBanner: () => <div /> }));
+jest.mock('@/components/dashboard/shared/table-pagination', () => ({ TablePagination: () => <div /> }));
 
-jest.mock('@/lib/auth/roles', () => ({ isAdmin: jest.fn(() => true) }));
-
-jest.mock('@/components/dashboard/branch/delete-modal', () => {
-  return function Mock() { return <div />; };
+const branch = (over: Record<string, unknown> = {}) => ({
+  id: 1,
+  name: 'Sucursal Centro',
+  phone: '+54 9 11 1234',
+  active: true,
+  address: { street: 'Av. Corrientes', number: '1234', city: 'CABA' },
+  ...over,
 });
 
-jest.mock('@/components/dashboard/plan/plan-limit-create-button', () => ({
-  PlanLimitCreateButton: () => <div />,
-}));
+const cashier = (over: Record<string, unknown> = {}) => ({
+  id: 5,
+  first_name: 'María',
+  last_name: 'Juárez',
+  email: 'maria@appcajeros.com',
+  active: true,
+  branch_id: 1,
+  role: { name: 'cashier' },
+  ...over,
+});
 
-jest.mock('@/components/dashboard/plan/plan-usage-banner', () => ({
-  PlanUsageBanner: () => <div />,
-}));
-
-jest.mock('@/components/ui/button', () => ({
-  Button: ({ children }: { children: React.ReactNode }) => <button>{children}</button>,
-}));
-
-jest.mock('@/components/ui/table', () => ({
-  Table: ({ children }: { children: React.ReactNode }) => <table>{children}</table>,
-  TableHeader: ({ children }: { children: React.ReactNode }) => <thead>{children}</thead>,
-  TableRow: ({ children }: { children: React.ReactNode }) => <tr>{children}</tr>,
-  TableHead: ({ children }: { children: React.ReactNode }) => <th>{children}</th>,
-  TableBody: ({ children }: { children: React.ReactNode }) => <tbody>{children}</tbody>,
-  TableCell: ({ children }: { children: React.ReactNode }) => <td>{children}</td>,
-}));
+const render = async (params: Record<string, string> = {}) =>
+  require('react-dom/server').renderToStaticMarkup(
+    await BranchListPage({ searchParams: Promise.resolve(params) }),
+  ) as string;
 
 describe('BranchListPage', () => {
-  beforeEach(() => { jest.clearAllMocks(); });
-
-  it('exports a default async function', () => {
-    expect(typeof BranchListPage).toBe('function');
+  beforeEach(() => {
+    jest.clearAllMocks();
+    branchRows = [branch()];
+    cashierRows = [cashier()];
+    branchError = null;
+    getActiveOrgIdFilter.mockResolvedValue(1);
   });
 
-  it('renders without crashing', async () => {
-    mockSelect.mockResolvedValueOnce({ data: [], error: null });
-    const result = await BranchListPage();
-    expect(result).toBeTruthy();
+  it('shows the cashier assigned to each branch', async () => {
+    const html = await render();
+    expect(html).toContain('María Juárez');
+    expect(html).toContain('maria@appcajeros.com');
+    expect(html).toContain('Av. Corrientes 1234, CABA');
   });
 
-  it('filters by organization for non-admin users', async () => {
-    const { isAdmin } = require('@/lib/auth/roles');
-    isAdmin.mockReturnValueOnce(false);
-    // Cookie org (1) matches the user's primary org, so no membership lookup runs.
-    const { getCurrentUser } = require('@/lib/auth/get-current-user');
-    getCurrentUser.mockResolvedValueOnce({ id: '1', organization_id: '1', role: { name: 'owner' } });
-    // non-admin path: select returns object with eq
-    mockSelect.mockReturnValueOnce({ eq: mockEq });
-    mockEq.mockResolvedValueOnce({ data: [], error: null });
-    const result = await BranchListPage();
-    expect(result).toBeTruthy();
-    expect(mockEq).toHaveBeenCalled();
+  it('flags a branch with no cashier', async () => {
+    cashierRows = [];
+    const html = await render();
+    expect(html).toContain('noCashier');
+    expect(html).toContain('assignCashier');
   });
 
-  it('renders branch rows when data is returned', async () => {
-    mockSelect.mockResolvedValueOnce({
-      data: [{ id: '1', name: 'Branch 1', phone: '123', active: true, organization: { name: 'Org1' }, address: { street: 'St', city: 'City' } }],
-      error: null,
-    });
-    const result = await BranchListPage();
-    expect(result).toBeTruthy();
+  it('scopes both queries to the active organization', async () => {
+    await render();
+    expect(branchEq).toHaveBeenCalledWith('organization_id', 1);
+    expect(cashierEq).toHaveBeenCalledWith('organization_id', 1);
   });
 
-  it('renders error message when query fails', async () => {
-    mockSelect.mockResolvedValueOnce({ data: null, error: { message: 'DB error' } });
-    const result = await BranchListPage();
-    expect(result).toBeTruthy();
+  it('skips the org filter when no organization is active', async () => {
+    getActiveOrgIdFilter.mockResolvedValue(null);
+    await render();
+    expect(branchEq).not.toHaveBeenCalledWith('organization_id', expect.anything());
   });
 
-  it('renders branch with missing optional fields', async () => {
-    mockSelect.mockResolvedValueOnce({
-      data: [{ id: '2', name: 'Branch 2', phone: null, active: false, organization: null, address: null }],
-      error: null,
-    });
-    const result = await BranchListPage();
-    expect(result).toBeTruthy();
+  it('renders the error state when the branch query fails', async () => {
+    branchError = { message: 'boom' };
+    expect(await render()).toContain('error');
   });
 
-  it('handles no active_org_id cookie (null branch)', async () => {
-    const { cookies } = require('next/headers');
-    (cookies as jest.Mock).mockResolvedValueOnce({ get: jest.fn(() => undefined) });
-    mockSelect.mockResolvedValueOnce({ data: [], error: null });
-    const result = await BranchListPage();
-    expect(result).toBeTruthy();
+  it('handles a branch with no address or phone', async () => {
+    branchRows = [branch({ address: null, phone: null, active: false })];
+    const html = await render();
+    expect(html).toContain('N/A');
+    expect(html).toContain('inactive');
+  });
+
+  it('filters by name, status and cashier assignment', async () => {
+    branchRows = [branch(), branch({ id: 2, name: 'Sucursal Norte', active: false })];
+    expect(await render({ q: 'centro' })).toContain('Sucursal Centro');
+    expect(await render({ status: 'active' })).toContain('Sucursal Centro');
+    expect(await render({ status: 'inactive' })).toContain('Sucursal Norte');
+    expect(await render({ cashier: 'assigned' })).toContain('Sucursal Centro');
+    expect(await render({ cashier: 'unassigned' })).toContain('Sucursal Norte');
+  });
+
+  it('shows the empty state when nothing matches', async () => {
+    expect(await render({ q: 'zzz' })).toContain('empty');
+  });
+
+  it('ignores rows whose role join came back empty', async () => {
+    cashierRows = [cashier({ role: null })];
+    expect(await render()).toContain('noCashier');
+  });
+
+  it('lists unassigned cashiers as options for the new-branch form', async () => {
+    cashierRows = [cashier({ branch_id: null, first_name: null, last_name: null })];
+    const html = await render();
+    expect(html).toContain('maria@appcajeros.com');
+  });
+
+  it('falls back to a placeholder avatar for a nameless cashier', async () => {
+    cashierRows = [cashier({ first_name: null, last_name: null, email: null })];
+    expect(await render()).toContain('?');
+  });
+
+  it('survives null payloads', async () => {
+    branchRows = null;
+    cashierRows = null;
+    expect(await render()).toContain('empty');
   });
 });

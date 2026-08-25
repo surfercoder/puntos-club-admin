@@ -1,5 +1,5 @@
 import { render, act } from '@testing-library/react';
-import { DashboardTour } from '@/components/dashboard/tour/dashboard-tour';
+import { DashboardTour, START_TOUR_EVENT } from '@/components/dashboard/tour/dashboard-tour';
 
 const mockCompleteTour = jest.fn().mockResolvedValue(undefined);
 jest.mock('@/actions/dashboard/tour/actions', () => ({
@@ -48,11 +48,38 @@ describe('DashboardTour', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('does not initialize tour when tourCompleted is true', () => {
+  it('does not auto-start the tour when tourCompleted is true', () => {
     const { container } = render(
       <DashboardTour userRole="owner" userId="user-1" tourCompleted={true} />
     );
     expect(container.firstChild).toBeNull();
+    act(() => {
+      jest.advanceTimersByTime(800);
+    });
+    expect(mockTour.start).not.toHaveBeenCalled();
+  });
+
+  it('restarts an already completed tour when the help card asks for it', async () => {
+    await act(async () => {
+      render(
+        <DashboardTour userRole="owner" userId="user-1" tourCompleted={true} />
+      );
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    // Con el tour ya completado no arranca solo...
+    act(() => {
+      jest.advanceTimersByTime(800);
+    });
+    expect(mockTour.start).not.toHaveBeenCalled();
+
+    // ...pero sí cuando la tarjeta de ayuda dispara el evento.
+    act(() => {
+      window.dispatchEvent(new CustomEvent(START_TOUR_EVENT));
+    });
+    expect(mockTour.start).toHaveBeenCalled();
   });
 
   it('renders without crashing with null userRole', () => {

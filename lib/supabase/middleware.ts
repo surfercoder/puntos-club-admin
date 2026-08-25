@@ -47,6 +47,24 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
+  // `getUser()` puede haber refrescado la sesión: esas cookies viven en
+  // supabaseResponse, así que un redirect que no las copie desloguea al usuario.
+  const redirectTo = (pathname: string) => {
+    const url = request.nextUrl.clone();
+    url.pathname = pathname;
+    const response = NextResponse.redirect(url);
+    supabaseResponse.cookies
+      .getAll()
+      .forEach(({ name, value, ...options }) => response.cookies.set(name, value, options));
+    return response;
+  };
+
+  // A valid session has nothing to do on the login page — same rule the
+  // onboarding page applies. (To use another account, log out first.)
+  if (user && request.nextUrl.pathname.startsWith("/auth/login")) {
+    return redirectTo("/dashboard");
+  }
+
   // Allow API routes to be accessed without authentication (for mobile apps)
   if (request.nextUrl.pathname.startsWith("/api/")) {
     return supabaseResponse;
@@ -61,9 +79,7 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/mobile-apps")
   ) {
     // no user, potentially respond by redirecting the user to the login page
-    const url = request.nextUrl.clone();
-    url.pathname = "/auth/login";
-    return NextResponse.redirect(url);
+    return redirectTo("/auth/login");
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.
