@@ -8,62 +8,65 @@ jest.mock('next/link', () => ({
   default: ({ children, href }: any) => <a href={href}>{children}</a>,
 }));
 
-const rule = {
+const mother = {
   id: 1,
+  name: 'Regla madre',
+  isDefault: true,
+  validFrom: null,
+  validUntil: null,
+  points: 1000,
+};
+
+const campaign = {
+  id: 2,
   name: 'Campaña Invierno 2026',
-  ruleType: 'fixed_amount',
   isDefault: false,
   validFrom: '2026-08-01',
   validUntil: '2026-08-31',
-  perAmount: 100,
-  points: 10,
-  sampleAmount: 1000,
-  samplePoints: 100,
+  points: 100,
 };
 
+const rules = { rules: [mother, campaign], sampleAmount: 1000, samplePoints: 1100 };
+
 describe('ActiveRuleCard', () => {
-  it('shows the campaign, its validity and the points it grants', async () => {
-    render(await ActiveRuleCard({ rule }));
-    expect(screen.getByText('Campaña Invierno 2026')).toBeInTheDocument();
+  it('lists every rule that applies and breaks down the total', async () => {
+    render(await ActiveRuleCard({ rules }));
+    // Cada regla se nombra dos veces: en la lista de arriba y en el desglose.
+    expect(screen.getAllByText('Regla madre')).toHaveLength(2);
+    expect(screen.getAllByText('Campaña Invierno 2026')).toHaveLength(2);
+    expect(screen.getByText('motherRule')).toBeInTheDocument();
     expect(screen.getByText('campaign')).toBeInTheDocument();
-    expect(screen.getByText('validity')).toBeInTheDocument();
-    expect(screen.getByText('10 pts')).toBeInTheDocument();
-    expect(screen.getByText('100 pts')).toBeInTheDocument();
+    // El total es la suma, y cada aporte se muestra por separado.
+    expect(screen.getByText('1.100 pts')).toBeInTheDocument();
+    expect(screen.getByText('+1.000 pts')).toBeInTheDocument();
+    expect(screen.getByText('+100 pts')).toBeInTheDocument();
+    // Solo la campaña tiene fechas: la madre no muestra línea de vigencia.
+    expect(screen.getAllByText('validity')).toHaveLength(1);
   });
 
-  it('labels the base rule and an open-ended validity', async () => {
+  it('keeps the validity line for an open-ended campaign', async () => {
     render(
       await ActiveRuleCard({
-        rule: { ...rule, isDefault: true, validUntil: null },
+        rules: { ...rules, rules: [{ ...campaign, validUntil: null }] },
       }),
     );
-    expect(screen.getByText('motherRule')).toBeInTheDocument();
     expect(screen.getByText('validity')).toBeInTheDocument();
-  });
-
-  it('says "each item" when the rule has no reference amount', async () => {
-    render(await ActiveRuleCard({ rule: { ...rule, perAmount: null } }));
-    expect(screen.getByText('perItem')).toBeInTheDocument();
-  });
-
-  it('hides the conversion block when the rule has no simple point value', async () => {
-    render(await ActiveRuleCard({ rule: { ...rule, points: null } }));
-    expect(screen.queryByText('grants')).not.toBeInTheDocument();
-  });
-
-  it('drops the validity line when the rule has no dates', async () => {
-    render(await ActiveRuleCard({ rule: { ...rule, validFrom: null, validUntil: null } }));
-    expect(screen.queryByText('validity')).not.toBeInTheDocument();
   });
 
   it('invites the owner to create a rule when there is none', async () => {
-    render(await ActiveRuleCard({ rule: null }));
+    render(await ActiveRuleCard({ rules: null }));
+    expect(screen.getByText('noRule')).toBeInTheDocument();
+    expect(screen.queryByText('previewTitle')).not.toBeInTheDocument();
+  });
+
+  it('shows no preview when the org has rules but none apply', async () => {
+    render(await ActiveRuleCard({ rules: { ...rules, rules: [] } }));
     expect(screen.getByText('noRule')).toBeInTheDocument();
     expect(screen.queryByText('previewTitle')).not.toBeInTheDocument();
   });
 
   it('always links to the full rule list', async () => {
-    render(await ActiveRuleCard({ rule: null }));
+    render(await ActiveRuleCard({ rules: null }));
     expect(screen.getByRole('link', { name: 'allRules' })).toHaveAttribute(
       'href',
       '/dashboard/points-rules',

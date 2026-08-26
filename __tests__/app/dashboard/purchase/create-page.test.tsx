@@ -1,17 +1,18 @@
+import { render } from '@testing-library/react';
+
 import CreatePurchasePage from '@/app/dashboard/purchase/create/page';
 
-const rpc = jest.fn(() => Promise.resolve({ data: 100, error: null }));
-let ruleRows: unknown[] = [];
+// El panel se arma con el desglose de explain_points_for_amount (una fila por
+// regla que aplica) y un segundo select que trae la vigencia de cada una.
+let breakdownRows: unknown[] | null = [];
+let periodRows: unknown[] | null = [];
 
-const limit = jest.fn(() => Promise.resolve({ data: ruleRows, error: null }));
-const or = jest.fn(() => builder);
+const rpc = jest.fn(() => Promise.resolve({ data: breakdownRows, error: null }));
+const inFilter = jest.fn(() => Promise.resolve({ data: periodRows, error: null }));
 const builder: Record<string, unknown> = {};
 Object.assign(builder, {
   select: jest.fn(() => builder),
-  eq: jest.fn(() => builder),
-  or,
-  order: jest.fn(() => builder),
-  limit,
+  in: inFilter,
 });
 
 jest.mock('@/lib/supabase/server', () => ({
@@ -27,103 +28,93 @@ jest.mock('@/lib/auth/get-active-org-id', () => ({
 jest.mock('@/components/dashboard/purchase/purchase-form', () => {
   return function MockPurchaseForm() { return <div data-testid="purchase-form" />; };
 });
+let received: unknown;
 jest.mock('@/components/dashboard/purchase/active-rule-card', () => ({
-  ActiveRuleCard: ({ rule }: { rule: unknown }) => (
-    <div data-testid="active-rule">{JSON.stringify(rule)}</div>
-  ),
+  ActiveRuleCard: ({ rules }: { rules: unknown }) => {
+    received = rules;
+    return <div data-testid="active-rule">{JSON.stringify(rules)}</div>;
+  },
 }));
 
-const rule = (over: Record<string, unknown> = {}) => ({
-  id: 1,
-  name: 'Campaña Invierno 2026',
+const row = (over: Record<string, unknown> = {}) => ({
+  rule_id: 1,
+  name: 'Regla madre',
   rule_type: 'fixed_amount',
-  is_default: false,
-  config: { points_per_dollar: 10 },
-  valid_from: '2026-08-01',
-  valid_until: '2026-08-31',
+  is_default: true,
+  points: 1000,
   ...over,
 });
 
 describe('CreatePurchasePage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    ruleRows = [];
+    breakdownRows = [];
+    periodRows = [];
+    received = undefined;
     getActiveOrgIdFilter.mockResolvedValue(1);
   });
 
-  it('describes a fixed-amount rule as points per $100', async () => {
-    ruleRows = [rule()];
-    const result = await CreatePurchasePage();
-    expect(result).toBeTruthy();
+  it('suma los aportes de todas las reglas y les pega su vigencia', async () => {
+    breakdownRows = [
+      row(),
+      row({ rule_id: 2, name: 'Especial Invierno', is_default: false, points: 100 }),
+    ];
+    periodRows = [
+      { id: 2, valid_from: '2026-06-21', valid_until: '2026-09-21' },
+    ];
+
+    render(await CreatePurchasePage());
     expect(rpc).toHaveBeenCalledWith(
-      'calculate_points_for_amount',
-      expect.objectContaining({ p_amount: 1000 }),
+      'explain_points_for_amount',
+      expect.objectContaining({ p_amount: 1000, p_organization_id: 1 }),
     );
+    expect(received).toEqual({
+      sampleAmount: 1000,
+      samplePoints: 1100,
+      rules: [
+        { id: 1, name: 'Regla madre', isDefault: true, points: 1000, validFrom: null, validUntil: null },
+        {
+          id: 2,
+          name: 'Especial Invierno',
+          isDefault: false,
+          points: 100,
+          validFrom: '2026-06-21',
+          validUntil: '2026-09-21',
+        },
+      ],
+    });
   });
 
-  it('describes a percentage rule', async () => {
-    ruleRows = [rule({ rule_type: 'percentage', config: { percentage: 5 } })];
-    expect(await CreatePurchasePage()).toBeTruthy();
+  it('no pide vigencias cuando no aplica ninguna regla', async () => {
+    breakdownRows = [];
+    render(await CreatePurchasePage());
+    expect(inFilter).not.toHaveBeenCalled();
+    expect(received).toBeNull();
   });
 
-  it('describes a per-item rule with no reference amount', async () => {
-    ruleRows = [rule({ rule_type: 'fixed_per_item', config: { points_per_item: 500 } })];
-    expect(await CreatePurchasePage()).toBeTruthy();
+  it('sobrevive a un desglose nulo', async () => {
+    breakdownRows = null;
+    render(await CreatePurchasePage());
+    expect(received).toBeNull();
   });
 
-  it('leaves a tiered rule without a simple description', async () => {
-    ruleRows = [rule({ rule_type: 'tiered', config: {}, is_default: true, valid_until: null })];
-    expect(await CreatePurchasePage()).toBeTruthy();
+  it('sobrevive a un select de vigencias nulo y a puntos nulos', async () => {
+    breakdownRows = [row({ is_default: null, points: null })];
+    periodRows = null;
+    render(await CreatePurchasePage());
+    expect(received).toEqual({
+      sampleAmount: 1000,
+      samplePoints: 0,
+      rules: [
+        { id: 1, name: 'Regla madre', isDefault: false, points: 0, validFrom: null, validUntil: null },
+      ],
+    });
   });
 
-  it('handles a rule with an unreadable config and no dates', async () => {
-    ruleRows = [rule({ config: null, valid_from: null, valid_until: null })];
-    expect(await CreatePurchasePage()).toBeTruthy();
-  });
-
-  it('handles a percentage rule with a missing percentage', async () => {
-    ruleRows = [rule({ rule_type: 'percentage', config: {} })];
-    expect(await CreatePurchasePage()).toBeTruthy();
-  });
-
-  it('survives a null rule payload', async () => {
-    limit.mockResolvedValueOnce({ data: null, error: null } as never);
-    expect(await CreatePurchasePage()).toBeTruthy();
-  });
-
-  it('defaults is_default to false when the column is null', async () => {
-    ruleRows = [rule({ is_default: null })];
-    expect(await CreatePurchasePage()).toBeTruthy();
-  });
-
-  it('only asks for rules that are in force right now', async () => {
-    ruleRows = [rule()];
-    expect(await CreatePurchasePage()).toBeTruthy();
-
-    const filters = or.mock.calls.map(([filter]) => filter as string);
-    expect(filters).toHaveLength(4);
-    const today = new Date().toISOString().slice(0, 10);
-    expect(filters[0]).toBe(`start_date.is.null,start_date.lte.${today}`);
-    expect(filters[1]).toBe(`end_date.is.null,end_date.gte.${today}`);
-    expect(filters[2]).toMatch(/^valid_from\.is\.null,valid_from\.lte\./);
-    expect(filters[3]).toMatch(/^valid_until\.is\.null,valid_until\.gte\./);
-  });
-
-  it('renders without a rule when the club has none', async () => {
-    ruleRows = [];
-    expect(await CreatePurchasePage()).toBeTruthy();
-    expect(rpc).not.toHaveBeenCalled();
-  });
-
-  it('skips the lookup entirely when no organization is active', async () => {
+  it('ni consulta cuando no hay organización activa', async () => {
     getActiveOrgIdFilter.mockResolvedValue(null);
-    expect(await CreatePurchasePage()).toBeTruthy();
-    expect(limit).not.toHaveBeenCalled();
-  });
-
-  it('falls back to zero sample points when the rpc returns nothing', async () => {
-    ruleRows = [rule()];
-    rpc.mockResolvedValueOnce({ data: null, error: null } as never);
-    expect(await CreatePurchasePage()).toBeTruthy();
+    render(await CreatePurchasePage());
+    expect(rpc).not.toHaveBeenCalled();
+    expect(received).toBeNull();
   });
 });

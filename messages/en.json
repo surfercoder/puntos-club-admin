@@ -1545,23 +1545,17 @@
       },
       "rulePanel": {
         "title": "2. Active program rules",
-        "subtitle": "The rule that will apply to this operation",
-        "activeRule": "Active rule",
+        "subtitle": "All of these rules add up on this operation",
         "motherRule": "Base rule",
         "campaign": "Current campaign",
         "validity": "Valid: {range}",
-        "perEach": "For every",
-        "perItem": "Each item",
-        "ofPurchase": "of purchase",
-        "grants": "Grants",
-        "toBeneficiary": "to the beneficiary",
-        "noRule": "Your club has no active points rule yet.",
+        "noRule": "Your club has no active points rules yet.",
         "allRules": "View all rules",
         "howTitle": "How are points calculated?",
-        "howSale": "When you record a sale, points come from the active rule automatically.",
+        "howSale": "When you record a sale, points are added up from every active rule automatically.",
         "howAssignment": "When you assign points manually, they are credited directly.",
         "previewTitle": "Calculation preview",
-        "previewSubtitle": "How points are calculated with the active rule",
+        "previewSubtitle": "How points add up with the active rules",
         "previewIf": "If the sale amount is:",
         "previewResult": "The beneficiary would get:",
         "previewAuto": "Automatic calculation",
@@ -2335,9 +2329,9 @@
     "howItWorks": {
       "title": "How do campaigns work?",
       "subtitle": "When a customer makes a purchase:",
-      "first": "We first check whether any active campaign applies.",
-      "second": "If a campaign is running, its benefits replace the base rule.",
-      "third": "If no campaign is running, the base rule applies."
+      "first": "The base rule always applies.",
+      "second": "Every active campaign that applies to the purchase is added on top.",
+      "third": "The customer gets the sum of all of them: the base rule plus each campaign."
     },
     "tip": {
       "title": "Tip",
@@ -2395,8 +2389,8 @@
       "howTitle": "How does the base rule work?",
       "how": {
         "base": "It is the foundation of your points program.",
-        "always": "It is always on and applies whenever no campaign is running.",
-        "campaigns": "Campaigns can temporarily replace this rule.",
+        "always": "It is always on and adds up on every purchase.",
+        "campaigns": "Points from active campaigns are added to the points from this rule.",
         "everywhere": "It applies to every purchase, every day."
       },
       "examplesTitle": "Calculation examples",

@@ -1545,23 +1545,17 @@
       },
       "rulePanel": {
         "title": "2. Reglas activas del programa",
-        "subtitle": "Regla que se aplicará para esta operación",
-        "activeRule": "Regla activa",
+        "subtitle": "Todas estas reglas se suman en esta operación",
         "motherRule": "Regla madre",
         "campaign": "Campaña actual",
         "validity": "Vigencia: {range}",
-        "perEach": "Por cada",
-        "perItem": "Cada ítem",
-        "ofPurchase": "de compra",
-        "grants": "Otorga",
-        "toBeneficiary": "al beneficiario",
-        "noRule": "Todavía no hay una regla de puntos activa para tu club.",
+        "noRule": "Todavía no hay reglas de puntos activas para tu club.",
         "allRules": "Ver todas las reglas",
         "howTitle": "¿Cómo se calculan los puntos?",
-        "howSale": "Si registrás una venta, los puntos se calculan automáticamente según la regla activa.",
+        "howSale": "Si registrás una venta, los puntos se calculan automáticamente sumando todas las reglas activas.",
         "howAssignment": "Si asignás puntos manualmente, se acreditan de forma directa al beneficiario.",
         "previewTitle": "Vista previa del cálculo",
-        "previewSubtitle": "Así se calcularán los puntos con la regla activa",
+        "previewSubtitle": "Así se suman los puntos con las reglas activas",
         "previewIf": "Si el importe de la venta es:",
         "previewResult": "El beneficiario recibiría:",
         "previewAuto": "Cálculo automático",
@@ -2263,7 +2257,7 @@
     },
     "mother": {
       "title": "1. Regla madre (siempre activa)",
-      "description": "Es la regla principal que define cómo los clientes ganan puntos en sus compras. Siempre está activa y se aplica cuando no hay campañas especiales vigentes.",
+      "description": "Es la regla principal que define cómo los clientes ganan puntos en sus compras. Siempre está activa y suma en todas las compras.",
       "note": "Esta regla es la base de tu programa de puntos.",
       "editButton": "Editar regla madre",
       "currentType": "Tipo de cálculo actual",
@@ -2335,9 +2329,9 @@
     "howItWorks": {
       "title": "¿Cómo funcionan las campañas?",
       "subtitle": "Cuando un cliente realiza una compra:",
-      "first": "Primero se verifica si hay campañas activas que apliquen.",
-      "second": "Si hay una campaña activa, sus beneficios reemplazan a la regla madre.",
-      "third": "Si no hay campañas activas, se aplica la regla madre."
+      "first": "Siempre se aplica la regla madre.",
+      "second": "Además se suman todas las campañas activas que apliquen a esa compra.",
+      "third": "El cliente recibe la suma de todos los puntos: la regla madre más cada campaña."
     },
     "tip": {
       "title": "Consejo",
@@ -2395,8 +2389,8 @@
       "howTitle": "¿Cómo funciona la Regla Madre?",
       "how": {
         "base": "Es la base de tu programa de puntos.",
-        "always": "Siempre está activa y se aplica cuando no hay campañas especiales vigentes.",
-        "campaigns": "Las campañas pueden reemplazar temporalmente esta regla.",
+        "always": "Siempre está activa y suma en todas las compras.",
+        "campaigns": "Los puntos de las campañas activas se suman a los de esta regla.",
         "everywhere": "Se aplica a todas las compras, todos los días."
       },
       "examplesTitle": "Ejemplos de cálculo",
