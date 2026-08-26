@@ -1,4 +1,5 @@
 import { BookOpen, Smartphone, Store } from 'lucide-react';
+import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import AppUserForm from '@/components/dashboard/app_user/app_user-form';
@@ -101,6 +102,7 @@ export default async function CashiersPage({ searchParams }: PageProps) {
                   <TableHead>{t('headers.status')}</TableHead>
                   <TableHead className="text-right">{t('headers.operations')}</TableHead>
                   <TableHead>{t('headers.lastOperation')}</TableHead>
+                  <TableHead className="text-right">{tCommon('actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -129,7 +131,15 @@ export default async function CashiersPage({ searchParams }: PageProps) {
                               {member.branchName}
                             </span>
                           ) : (
-                            <span className="text-destructive">{t('noBranch')}</span>
+                            <span className="text-destructive">
+                              <span className="block">{t('noBranch')}</span>
+                              <Link
+                                className="text-xs underline"
+                                href={`/dashboard/app_user/edit/${member.id}`}
+                              >
+                                {t('assignBranch')}
+                              </Link>
+                            </span>
                           )}
                         </TableCell>
                         <TableCell>
@@ -157,12 +167,20 @@ export default async function CashiersPage({ searchParams }: PageProps) {
                             <span className="text-muted-foreground">{t('never')}</span>
                           )}
                         </TableCell>
+                        <TableCell className="text-right">
+                          <Link
+                            className="text-xs underline"
+                            href={`/dashboard/app_user/edit/${member.id}`}
+                          >
+                            {tCommon('edit')}
+                          </Link>
+                        </TableCell>
                       </TableRow>
                     );
                   })
                 ) : (
                   <TableRow>
-                    <TableCell className="py-8 text-center" colSpan={5}>{t('empty')}</TableCell>
+                    <TableCell className="py-8 text-center" colSpan={6}>{t('empty')}</TableCell>
                   </TableRow>
                 )}
               </TableBody>

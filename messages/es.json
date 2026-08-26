@@ -1831,7 +1831,8 @@
           "title": "¿Qué sigue?",
           "body": "El cajero recibirá un email con sus credenciales y podrá descargar la App Cajeros para comenzar a asignar puntos.",
           "download": "Descargar la App Cajeros"
-        }
+        },
+        "assignBranch": "Asignar sucursal"
       },
       "collaborators": {
         "title": "Colaboradores",

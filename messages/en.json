@@ -1831,7 +1831,8 @@
           "title": "What happens next?",
           "body": "The cashier gets an email with their credentials and can download the Cashiers app to start handing out points.",
           "download": "Download the Cashiers app"
-        }
+        },
+        "assignBranch": "Assign a branch"
       },
       "collaborators": {
         "title": "Collaborators",
