@@ -157,6 +157,19 @@ export async function POST(request: NextRequest) {
       .single();
 
     if (purchaseError || !purchase) {
+      // El trigger check_purchase_membership frena las ventas a socios dados
+      // de baja; sin este caso el cajero sólo veía "Failed to create purchase".
+      if (purchaseError?.message?.includes("MEMBERSHIP_INACTIVE")) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "This beneficiary is no longer a member of the organization. Add them again before loading points.",
+            code: "MEMBERSHIP_INACTIVE",
+          },
+          { status: 409 }
+        );
+      }
       return NextResponse.json(
         { success: false, error: "Failed to create purchase" },
         { status: 500 }

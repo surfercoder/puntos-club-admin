@@ -1,6 +1,6 @@
 "use client";
 
-import { MapPin, Save, TriangleAlert } from 'lucide-react';
+import { MapPin, Save } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useActionState, useState } from 'react';
@@ -19,24 +19,15 @@ import { BranchSchema } from '@/schemas/branch.schema';
 import { AddressSchema } from '@/schemas/address.schema';
 import type { Branch } from '@/types/branch';
 
-export type CashierOption = { id: string; name: string; branchId: string | null };
-
 interface BranchFormWithAddressProps {
   branch?: Branch;
-  cashiers?: CashierOption[];
-  assignedCashierId?: string;
 }
 
-export default function BranchFormWithAddress({
-  branch,
-  cashiers = [],
-  assignedCashierId = '',
-}: BranchFormWithAddressProps) {
+export default function BranchFormWithAddress({ branch }: BranchFormWithAddressProps) {
   const t = useTranslations('Dashboard.branch.form');
   const tCommon = useTranslations('Common');
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [isActive, setIsActive] = useState<boolean>(branch?.active ?? true);
-  const [cashierId, setCashierId] = useState(assignedCashierId);
   const [locating, setLocating] = useState(false);
   const [addressData, setAddressData] = useState<Partial<GoogleAddressComponents>>({
     street: '',
@@ -212,33 +203,6 @@ export default function BranchFormWithAddress({
         onUseMyLocation={handleUseMyLocation}
         setAddressData={setAddressData}
       />
-
-      <div className="space-y-2 border-t pt-6">
-        <Label htmlFor="cashier_id">
-          {t('cashierLabel')} <span className="text-destructive">*</span>
-        </Label>
-        <select
-          className="flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 text-sm"
-          id="cashier_id"
-          name="cashier_id"
-          onChange={(event) => setCashierId(event.target.value)}
-          value={cashierId}
-        >
-          <option value="">{t('cashierPlaceholder')}</option>
-          {cashiers.map((cashier) => (
-            <option key={cashier.id} value={cashier.id}>
-              {cashier.name}
-            </option>
-          ))}
-        </select>
-        <p className="text-xs text-muted-foreground">{t('cashierHint')}</p>
-        {!cashierId && (
-          <p className="flex items-start gap-2 rounded-lg bg-destructive/10 p-3 text-xs text-destructive">
-            <TriangleAlert className="mt-0.5 size-3.5 shrink-0" />
-            {t('cashierWarning')}
-          </p>
-        )}
-      </div>
 
       <div className="grid grid-cols-2 gap-2">
         <Button asChild type="button" variant="secondary">

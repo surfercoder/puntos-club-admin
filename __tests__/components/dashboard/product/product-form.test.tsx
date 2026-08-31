@@ -223,6 +223,20 @@ describe('ProductForm', () => {
     // Validation should fail since name is empty and category_id is empty
   });
 
+  it('does not require the category select when a new category name is typed', async () => {
+    render(<ProductForm />);
+
+    const form = screen.getByRole('textbox', { name: /nameLabel/ }).closest('form')!;
+    fireEvent.change(screen.getByRole('textbox', { name: /nameLabel/ }), { target: { value: 'Conitos' } });
+    fireEvent.change(screen.getByRole('textbox', { name: /newCategoryLabel/ }), { target: { value: 'Golosinas' } });
+
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+
+    expect(screen.queryByText('Category is required')).not.toBeInTheDocument();
+  });
+
   it('loads categories with org filter from localStorage', async () => {
     localStorageGetItem.mockReturnValue('55');
     mockCategoryData = [{ id: 'cat-1', name: 'Electronics', active: true }];

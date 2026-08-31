@@ -157,36 +157,13 @@ describe('branchWithAddressFormAction cashier assignment', () => {
     zip_code: '1043',
   };
 
-  it('assigns the chosen cashier to the new branch', async () => {
-    assignCashierToBranch.mockResolvedValueOnce({ error: null });
-    await branchWithAddressFormAction(
-      EMPTY_ACTION_STATE,
-      formDataOf({ ...validFields, cashier_id: '5' }),
-    );
-    expect(assignCashierToBranch).toHaveBeenCalledWith('5', expect.any(String));
-  });
-
-  it('reports a failed assignment', async () => {
-    assignCashierToBranch.mockResolvedValueOnce({ error: { message: 'BRANCH_NOT_FOUND' } });
+  // La sucursal se crea sola: el cajero se asigna después, desde su propia alta.
+  it('never touches cashiers', async () => {
     const result = await branchWithAddressFormAction(
       EMPTY_ACTION_STATE,
       formDataOf({ ...validFields, cashier_id: '5' }),
     );
-    expect(result.status).toBe('error');
-  });
-
-  it('skips the assignment when the created branch has no id', async () => {
-    (createBranch as jest.Mock).mockResolvedValueOnce({ data: null, error: null });
-    await branchWithAddressFormAction(
-      EMPTY_ACTION_STATE,
-      formDataOf({ ...validFields, cashier_id: '5' }),
-    );
-    expect(assignCashierToBranch).not.toHaveBeenCalled();
-  });
-
-  it('leaves the cashier untouched when none was chosen', async () => {
-    await branchWithAddressFormAction(EMPTY_ACTION_STATE, formDataOf(validFields));
+    expect(result.status).toBe('success');
     expect(assignCashierToBranch).not.toHaveBeenCalled();
   });
 });
-

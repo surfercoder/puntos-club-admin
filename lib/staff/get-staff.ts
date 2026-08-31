@@ -59,6 +59,7 @@ export async function getStaff(role: "cashier" | "collaborator"): Promise<StaffP
           .from("purchase")
           .select("cashier_id, purchase_date")
           .eq("organization_id", orgId)
+          .neq("status", "cancelled")
           .gte("purchase_date", startOfMonth())
       : Promise.resolve({ data: [] as { cashier_id: number; purchase_date: string }[] }),
   ]);

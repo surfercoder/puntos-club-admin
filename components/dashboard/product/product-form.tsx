@@ -96,6 +96,10 @@ export default function ProductForm({ product }: ProductFormProps) {
     const formData = Object.fromEntries(new FormData(event.currentTarget));
     const formDataWithImages = {
       ...formData,
+      // Igual que la acción: si escribieron una categoría nueva, `category_id`
+      // lo completa el server después de crearla. Sale del state y no del
+      // FormData porque el input es controlado y siempre es un string.
+      category_id: newCategory.trim() ? 'pending' : formData.category_id,
       image_urls: imageUrls,
     };
     setValidation(null);

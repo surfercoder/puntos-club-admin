@@ -3,9 +3,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import { BranchFilters } from '@/components/dashboard/branch/branch-filters';
-import BranchFormWithAddress, {
-  type CashierOption,
-} from '@/components/dashboard/branch/branch-form-with-address';
+import BranchFormWithAddress from '@/components/dashboard/branch/branch-form-with-address';
 import DeleteModal from '@/components/dashboard/branch/delete-modal';
 import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
@@ -93,12 +91,12 @@ export default async function BranchListPage({ searchParams }: PageProps) {
   const cashiers = ((cashierData ?? []) as unknown as (CashierRow & { role: unknown })[])
     .filter((cashier) => cashier.role !== null);
 
-  const cashierByBranch = new Map<string, CashierRow>();
-  for (const cashier of cashiers) {
-    if (cashier.branch_id !== null) {
-      cashierByBranch.set(String(cashier.branch_id), cashier);
-    }
-  }
+  // Una sucursal puede tener varios cajeros (turnos, locales grandes), así que
+  // agrupamos en vez de quedarnos con el último.
+  const cashiersByBranch = Map.groupBy(
+    cashiers.filter((cashier) => cashier.branch_id !== null),
+    (cashier) => String(cashier.branch_id),
+  );
 
   const filters = {
     q: params.q?.trim() ?? '',
@@ -113,12 +111,12 @@ export default async function BranchListPage({ searchParams }: PageProps) {
     if (needle && !branch.name.toLowerCase().includes(needle)) return [];
     if (filters.status === 'active' && !branch.active) return [];
     if (filters.status === 'inactive' && branch.active) return [];
-    const cashier = cashierByBranch.get(String(branch.id)) ?? null;
-    if (filters.cashier === 'assigned' && !cashier) return [];
-    if (filters.cashier === 'unassigned' && cashier) return [];
+    const branchCashiers = cashiersByBranch.get(String(branch.id)) ?? [];
+    if (filters.cashier === 'assigned' && branchCashiers.length === 0) return [];
+    if (filters.cashier === 'unassigned' && branchCashiers.length > 0) return [];
     return [{
       ...branch,
-      cashier,
+      cashiers: branchCashiers,
       addressLine: branch.address
         ? [
             [branch.address.street, branch.address.number].filter(Boolean).join(' '),
@@ -135,13 +133,7 @@ export default async function BranchListPage({ searchParams }: PageProps) {
   const visible = rows.slice((page - 1) * perPage, page * perPage);
 
   const activeCount = rows.filter((branch) => branch.active).length;
-  const withoutCashier = rows.filter((branch) => !branch.cashier).length;
-
-  const cashierOptions: CashierOption[] = cashiers.map((cashier) => ({
-    id: String(cashier.id),
-    name: personName(cashier),
-    branchId: cashier.branch_id === null ? null : String(cashier.branch_id),
-  }));
+  const withoutCashier = rows.filter((branch) => branch.cashiers.length === 0).length;
 
   return (
     <div className="space-y-6">
@@ -176,9 +168,7 @@ export default async function BranchListPage({ searchParams }: PageProps) {
             </span>
           </p>
           <p className="flex items-center gap-2 rounded-xl border px-4 py-2.5">
-            <TriangleAlert
-              className={`size-4 ${withoutCashier > 0 ? 'text-destructive' : 'text-muted-foreground'}`}
-            />
+            <TriangleAlert className="size-4 text-muted-foreground" />
             <span>
               <span className="block text-lg font-bold leading-none">{withoutCashier}</span>
               <span className="block text-xs text-muted-foreground">
@@ -209,10 +199,7 @@ export default async function BranchListPage({ searchParams }: PageProps) {
               <TableBody>
                 {visible.length > 0 ? (
                   visible.map((branch) => (
-                    <TableRow
-                      key={branch.id}
-                      className={branch.cashier ? undefined : 'bg-destructive/5'}
-                    >
+                    <TableRow key={branch.id}>
                       <TableCell>
                         <span className="flex items-center gap-2.5">
                           <span className="grid size-8 shrink-0 place-items-center rounded-lg bg-brand-violet/10 text-brand-violet">
@@ -235,23 +222,25 @@ export default async function BranchListPage({ searchParams }: PageProps) {
                         </span>
                       </TableCell>
                       <TableCell>
-                        {branch.cashier ? (
-                          <span className="flex items-center gap-2">
-                            <span className="grid size-7 shrink-0 place-items-center rounded-full bg-brand-violet/10 text-[10px] font-semibold text-brand-violet">
-                              {initials(personName(branch.cashier))}
-                            </span>
-                            <span className="min-w-0">
-                              <span className="block font-medium">
-                                {personName(branch.cashier)}
+                        {branch.cashiers.length > 0 ? (
+                          <span className="space-y-1">
+                            {branch.cashiers.map((cashier) => (
+                              <span className="flex items-center gap-2" key={cashier.id}>
+                                <span className="grid size-7 shrink-0 place-items-center rounded-full bg-brand-violet/10 text-[10px] font-semibold text-brand-violet">
+                                  {initials(personName(cashier))}
+                                </span>
+                                <span className="min-w-0">
+                                  <span className="block font-medium">{personName(cashier)}</span>
+                                  <span className="block text-xs text-muted-foreground">
+                                    {cashier.email}
+                                  </span>
+                                </span>
                               </span>
-                              <span className="block text-xs text-muted-foreground">
-                                {branch.cashier.email}
-                              </span>
-                            </span>
+                            ))}
                           </span>
                         ) : (
-                          <span className="text-destructive">
-                            <span className="block font-medium">{t('noCashier')}</span>
+                          <span className="text-muted-foreground">
+                            <span className="block">{t('noCashier')}</span>
                             <Link
                               className="text-xs underline"
                               href={`/dashboard/cashiers?assignTo=${branch.id}`}
@@ -262,16 +251,13 @@ export default async function BranchListPage({ searchParams }: PageProps) {
                         )}
                       </TableCell>
                       <TableCell>
-                        {branch.cashier ? (
+                        {branch.cashiers.length > 0 ? (
                           <span className="inline-flex items-center gap-1.5 text-brand-green">
                             <CircleCheck className="size-3.5" />
-                            {tCommon('active')}
+                            {t('cashierCount', { count: branch.cashiers.length })}
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 text-destructive">
-                            <TriangleAlert className="size-3.5" />
-                            {t('withoutCashier')}
-                          </span>
+                          <span className="text-muted-foreground">{t('withoutCashier')}</span>
                         )}
                       </TableCell>
                       <TableCell className="text-right">
@@ -313,7 +299,7 @@ export default async function BranchListPage({ searchParams }: PageProps) {
             </div>
           </div>
           <div className="mt-5">
-            <BranchFormWithAddress cashiers={cashierOptions} />
+            <BranchFormWithAddress />
           </div>
         </section>
       </div>

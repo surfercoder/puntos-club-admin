@@ -3,7 +3,6 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import type { FilterOption } from '@/components/dashboard/purchase/purchase-filters';
-import DeleteModal from '@/components/dashboard/redemption/delete-modal';
 import { RedemptionDonut } from '@/components/dashboard/redemption/redemption-donut';
 import { RedemptionFilters } from '@/components/dashboard/redemption/redemption-filters';
 import { RedemptionStats } from '@/components/dashboard/redemption/redemption-stats';
@@ -273,13 +272,11 @@ export default async function RedemptionListPage({ searchParams }: PageProps) {
                       <TableCell>{redemption.deliveredByName ?? '—'}</TableCell>
                       <TableCell className="text-right">
                         <div className="flex items-center justify-end gap-2">
-                          {redemption.status === 'pending' && (
+                          {redemption.status === 'pending' ? (
                             <PendingRedemptionActions redemptionId={redemption.id} />
+                          ) : (
+                            <span className="text-xs text-muted-foreground">—</span>
                           )}
-                          <DeleteModal
-                            redemptionDescription={`${redemption.product?.name || 'Product'} - ${redemption.points_used} points`}
-                            redemptionId={redemption.id}
-                          />
                         </div>
                       </TableCell>
                     </TableRow>

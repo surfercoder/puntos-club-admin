@@ -26,7 +26,6 @@ type FormData = {
   percentage: string;
   is_active: boolean;
   is_default: boolean;
-  priority: string;
   display_name: string;
   display_icon: string;
   display_color: string;
@@ -151,20 +150,6 @@ function PointsCalculationSection({
             ))}
           </SelectContent>
         </Select>
-      </div>
-
-      <div>
-        <Label htmlFor="priority">{t("form.priority")}</Label>
-        <Input
-          id="priority"
-          type="number"
-          min="0"
-          value={formData.priority}
-          onChange={(e) => setFormData((prev) => ({ ...prev, priority: e.target.value }))}
-          placeholder="0"
-          required
-        />
-        <p className="text-sm text-muted-foreground mt-1">{t("form.priorityHint")}</p>
       </div>
 
       <div>
@@ -403,7 +388,6 @@ export default function NewPointsRulePage() {
     percentage: "10",
     is_active: true,
     is_default: false,
-    priority: "0",
     display_name: "",
     display_icon: "⭐",
     display_color: "#3B82F6",
@@ -485,7 +469,6 @@ export default function NewPointsRulePage() {
       config,
       is_active: formData.is_active,
       is_default: formData.is_default,
-      priority: parseInt(formData.priority),
       display_name: formData.display_name || formData.name,
       display_icon: formData.display_icon,
       display_color: formData.display_color,
@@ -507,8 +490,6 @@ export default function NewPointsRulePage() {
 
     if (result.success) {
       push("/dashboard/points-rules");
-    } else if (result.error === "DUPLICATE_PRIORITY") {
-      alert(t("form.duplicatePriority", { priority: formData.priority }));
     } else {
       alert(`Error: ${result.error}`);
     }

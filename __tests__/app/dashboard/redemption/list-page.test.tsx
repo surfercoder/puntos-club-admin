@@ -19,7 +19,6 @@ jest.mock('@/lib/supabase/admin', () => ({ createAdminClient: jest.fn(() => ({ f
 jest.mock('@/lib/auth/get-current-user', () => ({ getCurrentUser: jest.fn(() => Promise.resolve({ id: '1', role: { name: 'admin' } })) }));
 jest.mock('@/lib/auth/get-active-org-id', () => ({ getActiveOrgIdFilter: jest.fn(() => Promise.resolve(null)) }));
 jest.mock('@/lib/auth/roles', () => ({ isAdmin: jest.fn(() => true) }));
-jest.mock('@/components/dashboard/redemption/delete-modal', () => function Mock() { return <div />; });
 jest.mock('@/components/dashboard/redemption/row-actions', () => ({
   PendingRedemptionActions: ({ redemptionId }: { redemptionId: string }) => <div data-testid="pending-actions">{redemptionId}</div>,
 }));

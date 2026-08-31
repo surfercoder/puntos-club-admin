@@ -100,7 +100,6 @@ const sampleRule = {
   config: { points_per_dollar: 3 },
   is_active: true,
   is_default: false,
-  priority: 5,
   display_name: 'Display Test',
   display_icon: '🔥',
   display_color: '#FF0000',
@@ -181,7 +180,6 @@ describe('EditPointsRulePage', () => {
     expect(screen.getByDisplayValue('Test desc')).toBeInTheDocument();
     expect(screen.getByDisplayValue('Display Test')).toBeInTheDocument();
     expect(screen.getByDisplayValue('#FF0000')).toBeInTheDocument();
-    expect(screen.getByDisplayValue('5')).toBeInTheDocument(); // priority
     expect(screen.getByDisplayValue('3')).toBeInTheDocument(); // points_per_dollar
   });
 
@@ -300,20 +298,6 @@ describe('EditPointsRulePage', () => {
       fireEvent.change(input, { target: { value: '7' } });
     });
     expect(input).toHaveValue(7);
-  });
-
-  it('handles priority change', async () => {
-    await act(async () => {
-      render(<EditPointsRulePage />);
-    });
-    await waitFor(() => {
-      expect(screen.getByDisplayValue('5')).toBeInTheDocument(); // priority
-    });
-    const input = screen.getByLabelText('form.priority');
-    await act(async () => {
-      fireEvent.change(input, { target: { value: '99' } });
-    });
-    expect(screen.getByDisplayValue('99')).toBeInTheDocument();
   });
 
   it('handles branch change', async () => {
@@ -507,25 +491,6 @@ describe('EditPointsRulePage', () => {
     alertMock.mockRestore();
   });
 
-  it('shows the duplicate priority message instead of a raw error', async () => {
-    mockUpdatePointsRule.mockResolvedValue({ success: false, error: 'DUPLICATE_PRIORITY' });
-    const alertMock = jest.spyOn(window, 'alert').mockImplementation(() => {});
-    await act(async () => {
-      render(<EditPointsRulePage />);
-    });
-    await waitFor(() => {
-      expect(screen.getByText('form.editTitle')).toBeInTheDocument();
-    });
-    const form = document.querySelector('form')!;
-    await act(async () => {
-      fireEvent.submit(form);
-    });
-    await waitFor(() => {
-      expect(alertMock).toHaveBeenCalledWith('form.duplicatePriority');
-    });
-    alertMock.mockRestore();
-  });
-
   it('handles form submit with is_default true (clears schedule)', async () => {
     const defaultRule = {
       ...sampleRule,
@@ -644,7 +609,6 @@ describe('EditPointsRulePage', () => {
       config: {},
       is_active: undefined,
       is_default: undefined,
-      priority: undefined,
       display_name: '',
       display_icon: '',
       display_color: '',

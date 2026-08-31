@@ -93,7 +93,12 @@ export default async function ProductListPage() {
                   <TableCell className="font-medium">
                     {product.name}
                   </TableCell>
-                  <TableCell>{product.description || 'N/A'}</TableCell>
+                  <TableCell
+                    className="max-w-[160px] truncate md:max-w-[240px] lg:max-w-[320px]"
+                    title={product.description || undefined}
+                  >
+                    {product.description || 'N/A'}
+                  </TableCell>
                   <TableCell>{product.required_points}</TableCell>
                   <TableCell>
                     {product.stock > 0 ? (

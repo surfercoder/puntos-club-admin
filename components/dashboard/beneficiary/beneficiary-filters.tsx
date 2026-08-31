@@ -37,8 +37,9 @@ export async function BeneficiaryFilters({
       <FilterField label={t("status")}>
         <select className={FILTER_FIELD_CLASS} name="status" defaultValue={values.status}>
           <option value="">{t("all")}</option>
-          <option value="active">{t("statusActive")}</option>
-          <option value="inactive">{t("statusInactive")}</option>
+          <option value="member">{t("statusMember")}</option>
+          <option value="left">{t("statusLeft")}</option>
+          <option value="none">{t("statusNone")}</option>
         </select>
       </FilterField>
 

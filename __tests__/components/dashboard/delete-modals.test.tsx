@@ -17,7 +17,6 @@ jest.mock('@/components/ui/dialog', () => ({
 jest.mock('@/actions/dashboard/product/actions', () => ({ deleteProduct: jest.fn() }));
 jest.mock('@/actions/dashboard/branch/actions', () => ({ deleteBranch: jest.fn() }));
 jest.mock('@/actions/dashboard/beneficiary/actions', () => ({ deleteBeneficiary: jest.fn() }));
-jest.mock('@/actions/dashboard/redemption/actions', () => ({ deleteRedemption: jest.fn() }));
 jest.mock('@/actions/dashboard/address/actions', () => ({ deleteAddress: jest.fn() }));
 jest.mock('@/actions/dashboard/organization/actions', () => ({ deleteOrganization: jest.fn() }));
 
@@ -29,7 +28,6 @@ jest.mock('@/actions/dashboard/points-rules/actions', () => ({ deletePointsRule:
 import { deleteProduct } from '@/actions/dashboard/product/actions';
 import { deleteBranch } from '@/actions/dashboard/branch/actions';
 import { deleteBeneficiary } from '@/actions/dashboard/beneficiary/actions';
-import { deleteRedemption } from '@/actions/dashboard/redemption/actions';
 import { deleteAddress } from '@/actions/dashboard/address/actions';
 import { deleteOrganization } from '@/actions/dashboard/organization/actions';
 
@@ -41,7 +39,6 @@ import { deletePointsRule } from '@/actions/dashboard/points-rules/actions';
 import ProductDeleteModal from '@/components/dashboard/product/delete-modal';
 import BranchDeleteModal from '@/components/dashboard/branch/delete-modal';
 import BeneficiaryDeleteModal from '@/components/dashboard/beneficiary/delete-modal';
-import RedemptionDeleteModal from '@/components/dashboard/redemption/delete-modal';
 import AddressDeleteModal from '@/components/dashboard/address/delete-modal';
 import OrganizationDeleteModal from '@/components/dashboard/organization/delete-modal';
 
@@ -213,43 +210,6 @@ describe('BeneficiaryDeleteModal', () => {
 
   it('cancel button click', () => {
     render(<BeneficiaryDeleteModal beneficiaryId="1" beneficiaryName="Ben" />);
-    fireEvent.click(getCancelButton());
-  });
-});
-
-// ---- Redemption ----
-describe('RedemptionDeleteModal', () => {
-  const mock = deleteRedemption as jest.Mock;
-
-  it('renders', () => {
-    render(<RedemptionDeleteModal redemptionId="1" redemptionDescription="R" />);
-    expectRendered();
-  });
-
-  it('success path', async () => {
-    mock.mockResolvedValue({ error: null });
-    render(<RedemptionDeleteModal redemptionId="1" redemptionDescription="R" />);
-    fireEvent.click(getDeleteButton());
-    await waitFor(() => expect(toast.success).toHaveBeenCalled());
-    expect(mockRefresh).toHaveBeenCalled();
-  });
-
-  it('error path', async () => {
-    mock.mockResolvedValue({ error: { message: 'fail' } });
-    render(<RedemptionDeleteModal redemptionId="1" redemptionDescription="R" />);
-    fireEvent.click(getDeleteButton());
-    await waitFor(() => expect(toast.error).toHaveBeenCalled());
-  });
-
-  it('exception path', async () => {
-    mock.mockRejectedValue(new Error('Net'));
-    render(<RedemptionDeleteModal redemptionId="1" redemptionDescription="R" />);
-    fireEvent.click(getDeleteButton());
-    await waitFor(() => expect(toast.error).toHaveBeenCalled());
-  });
-
-  it('cancel button click', () => {
-    render(<RedemptionDeleteModal redemptionId="1" redemptionDescription="R" />);
     fireEvent.click(getCancelButton());
   });
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { FileText, Send, User } from 'lucide-react';
+import { FileText, Send } from 'lucide-react';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { useActionState, useCallback, useEffect, useReducer, useState } from 'react';
@@ -147,36 +147,20 @@ function PartiesFields({
   return (
     <>
       <div>
-        <div className="flex items-end gap-2">
-          <div className="min-w-0 flex-1">
-            <Label htmlFor="beneficiary_id">
-              {t('beneficiaryLabel')} <span className="text-destructive">*</span>
-            </Label>
-            <div className="mt-1.5">
-              <Combobox
-                defaultValue={beneficiaryId}
-                name="beneficiary_id"
-                onValueChange={onBeneficiaryChange}
-                options={beneficiaries.map(b => ({
-                  value: String(b.id),
-                  label: `${b.first_name} ${b.last_name}`,
-                }))}
-                placeholder={t('selectBeneficiary')}
-              />
-            </div>
-          </div>
-          <Button asChild type="button" variant="outline" className="h-9">
-            <Link
-              href={
-                beneficiaryId
-                  ? `/dashboard/beneficiary/edit/${beneficiaryId}`
-                  : '/dashboard/beneficiary'
-              }
-            >
-              <User className="size-4" />
-              {t('viewProfile')}
-            </Link>
-          </Button>
+        <Label htmlFor="beneficiary_id">
+          {t('beneficiaryLabel')} <span className="text-destructive">*</span>
+        </Label>
+        <div className="mt-1.5">
+          <Combobox
+            defaultValue={beneficiaryId}
+            name="beneficiary_id"
+            onValueChange={onBeneficiaryChange}
+            options={beneficiaries.map(b => ({
+              value: String(b.id),
+              label: `${b.first_name} ${b.last_name}`,
+            }))}
+            placeholder={t('selectBeneficiary')}
+          />
         </div>
         <FieldError actionState={errorState} name="beneficiary_id" />
       </div>

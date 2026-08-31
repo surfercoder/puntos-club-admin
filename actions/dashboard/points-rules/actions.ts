@@ -19,7 +19,6 @@ export interface PointsRuleInput {
   start_date?: string;
   end_date?: string;
   is_default?: boolean;
-  priority?: number;
   valid_from?: string;
   valid_until?: string;
   days_of_week?: number[];
@@ -118,15 +117,6 @@ export async function getPointsRuleById(id: number) {
 }
 
 /**
- * Two rules with the same priority make resolution ambiguous
- * (calculate_points_for_amount orders by priority desc, id desc), so a unique
- * index owns the rule. Translate its conflict into something the form can show.
- */
-function isPriorityConflict(error: { code?: string; message?: string }) {
-  return error.code === "23505" && !!error.message?.includes("points_rule_organization_priority_key");
-}
-
-/**
  * Create a new points rule
  */
 export async function createPointsRule(input: PointsRuleInput) {
@@ -203,7 +193,6 @@ export async function createPointsRule(input: PointsRuleInput) {
         start_date: normalizedInput.start_date,
         end_date: normalizedInput.end_date,
         is_default: normalizedInput.is_default ?? false,
-        priority: normalizedInput.priority ?? 0,
         valid_from: normalizedInput.valid_from,
         valid_until: normalizedInput.valid_until,
         days_of_week: normalizedInput.days_of_week,
@@ -218,10 +207,7 @@ export async function createPointsRule(input: PointsRuleInput) {
       .single();
 
     if (error) {
-      return {
-        success: false,
-        error: isPriorityConflict(error) ? "DUPLICATE_PRIORITY" : error.message,
-      };
+      return { success: false, error: error.message };
     }
 
     revalidatePath("/dashboard/points-rules");
@@ -298,7 +284,6 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
     if (normalizedInput.start_date !== undefined) updateData.start_date = normalizedInput.start_date;
     if (normalizedInput.end_date !== undefined) updateData.end_date = normalizedInput.end_date;
     if (normalizedInput.is_default !== undefined) updateData.is_default = normalizedInput.is_default;
-    if (normalizedInput.priority !== undefined) updateData.priority = normalizedInput.priority;
     if (normalizedInput.valid_from !== undefined) updateData.valid_from = normalizedInput.valid_from;
     if (normalizedInput.valid_until !== undefined) updateData.valid_until = normalizedInput.valid_until;
     if (normalizedInput.days_of_week !== undefined) updateData.days_of_week = normalizedInput.days_of_week;
@@ -317,10 +302,7 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
       .single();
 
     if (error) {
-      return {
-        success: false,
-        error: isPriorityConflict(error) ? "DUPLICATE_PRIORITY" : error.message,
-      };
+      return { success: false, error: error.message };
     }
 
     revalidatePath("/dashboard/points-rules");

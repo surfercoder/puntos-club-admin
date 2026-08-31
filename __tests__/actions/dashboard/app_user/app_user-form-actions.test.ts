@@ -159,28 +159,20 @@ describe('appUserFormAction branch assignment', () => {
     expect(assignCashierToBranch).not.toHaveBeenCalled();
   });
 
-  // El owner vacía el selector para liberar la sucursal: el campo viaja vacío y
-  // hay que desasignar, no ignorar.
-  it('unassigns the branch when the field arrives empty', async () => {
-    await appUserFormAction(
-      EMPTY_ACTION_STATE,
-      formDataOf({ ...validFields, id: '9', branch_id: '' }),
-    );
-    expect(checkBranchInActiveOrg).not.toHaveBeenCalled();
-    expect(assignCashierToBranch).toHaveBeenCalledWith('9', null);
-  });
-
-  it('surfaces a failed unassignment', async () => {
-    assignCashierToBranch.mockResolvedValueOnce({ error: { message: 'UPDATE_FAILED' } });
+  // Un cajero sin sucursal no puede operar: el selector vacío se rechaza y no
+  // se crea ni se toca nada.
+  it('rejects a cashier with no branch', async () => {
     const result = await appUserFormAction(
       EMPTY_ACTION_STATE,
       formDataOf({ ...validFields, id: '9', branch_id: '' }),
     );
     expect(result).toEqual({
       status: 'error',
-      message: 'UPDATE_FAILED',
-      fieldErrors: {},
+      message: 'BRANCH_REQUIRED',
+      fieldErrors: { branch_id: ['BRANCH_REQUIRED'] },
     });
+    expect(createAppUser).not.toHaveBeenCalled();
+    expect(assignCashierToBranch).not.toHaveBeenCalled();
   });
 });
 

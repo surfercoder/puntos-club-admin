@@ -1,3 +1,7 @@
+// Las analiticas ahora filtran `.neq('status','cancelled')` antes del rango de
+// fechas: withNeq intercala ese eslabon en los mocks de cadena.
+const withNeq = <T,>(next: T) => ({ neq: jest.fn().mockReturnValue(next), ...next });
+
 jest.mock('next/cache', () => ({ revalidatePath: jest.fn() }));
 
 const mockSupabase = {
@@ -7,6 +11,7 @@ const mockSupabase = {
   update: jest.fn(() => mockSupabase),
   delete: jest.fn(() => mockSupabase),
   eq: jest.fn(() => mockSupabase),
+  neq: jest.fn(() => mockSupabase),
   gte: jest.fn(() => mockSupabase),
   not: jest.fn(() => mockSupabase),
   order: jest.fn(() => mockSupabase),
@@ -126,7 +131,7 @@ describe('getDashboardKpis', () => {
     };
     const revenueChain = {
       select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnValue({
+      eq: jest.fn().mockReturnValue(withNeq({
         gte: jest.fn().mockReturnValue({
           data: [
             { total_amount: 100, points_earned: 10 },
@@ -134,7 +139,7 @@ describe('getDashboardKpis', () => {
           ],
           error: null,
         }),
-      }),
+      })),
     };
     const circulationChain = {
       select: jest.fn().mockReturnThis(),
@@ -143,12 +148,12 @@ describe('getDashboardKpis', () => {
     };
     const redemptionsChain = {
       select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnValue({
+      eq: jest.fn().mockReturnValue(withNeq({
         gte: jest.fn().mockReturnValue({
           data: [{ points_used: 15 }, { points_used: 25 }],
           error: null,
         }),
-      }),
+      })),
     };
 
     mockSupabase.from
@@ -175,7 +180,7 @@ describe('getDashboardKpis', () => {
     };
     const revenueChain = {
       select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnValue({
+      eq: jest.fn().mockReturnValue(withNeq({
         gte: jest.fn().mockReturnValue({
           data: [
             { total_amount: null, points_earned: null },
@@ -184,7 +189,7 @@ describe('getDashboardKpis', () => {
           ],
           error: null,
         }),
-      }),
+      })),
     };
     const circulationChain = {
       select: jest.fn().mockReturnThis(),
@@ -193,12 +198,12 @@ describe('getDashboardKpis', () => {
     };
     const redemptionsChain = {
       select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnValue({
+      eq: jest.fn().mockReturnValue(withNeq({
         gte: jest.fn().mockReturnValue({
           data: [{ points_used: null }, { points_used: 10 }],
           error: null,
         }),
-      }),
+      })),
     };
 
     mockSupabase.from
@@ -222,7 +227,7 @@ describe('getDashboardKpis', () => {
     };
     const chainWithEqGte = {
       select: jest.fn().mockReturnThis(),
-      eq: jest.fn().mockReturnValue({ gte: jest.fn().mockReturnValue(emptyTerminal) }),
+      eq: jest.fn().mockReturnValue(withNeq({ gte: jest.fn().mockReturnValue(emptyTerminal) })),
     };
     mockSupabase.from
       .mockReturnValueOnce(chainWithEqEq)    // members

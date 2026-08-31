@@ -167,6 +167,34 @@ describe('BeneficiaryListPage', () => {
     expect(result).toBeTruthy();
   });
 
+  // Antes esta vista hardcodeaba is_active: true y mostraba a todos como
+  // socios, incluso a quien no pertenece a ningun club.
+  it('derives the membership state from all memberships in the global admin view', async () => {
+    const { isAdmin } = require('@/lib/auth/roles');
+    const base = (id: string, first_name: string) => ({
+      id,
+      first_name,
+      last_name: 'Test',
+      email: `${first_name}@test.com`,
+      phone: null,
+      document_id: null,
+      registration_date: '2026-08-10',
+    });
+    isAdmin.mockReturnValueOnce(true);
+    mockSelect.mockResolvedValueOnce({
+      data: [
+        { ...base('1', 'Socia'), beneficiary_organization: [{ is_active: false }, { is_active: true }] },
+        { ...base('2', 'Baja'), beneficiary_organization: [{ is_active: false }] },
+        { ...base('3', 'SinClub'), beneficiary_organization: [] },
+      ],
+      error: null,
+    });
+    render(await BeneficiaryListPage({ searchParams: Promise.resolve({}) }));
+    expect(screen.getByText('membershipStatus.member')).toBeInTheDocument();
+    expect(screen.getByText('membershipStatus.left')).toBeInTheDocument();
+    expect(screen.getByText('membershipStatus.none')).toBeInTheDocument();
+  });
+
   it('handles non-admin with data that has null result.data (covers ?? null)', async () => {
     const { isAdmin } = require('@/lib/auth/roles');
     const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
@@ -230,8 +258,7 @@ describe('BeneficiaryListPage filters', () => {
     const eq = jest.fn().mockResolvedValue({ data: rows, error: null });
     mockFrom.mockReturnValueOnce({ select: jest.fn(() => ({ eq })) });
     const result = await BeneficiaryListPage({ searchParams: Promise.resolve(params) });
-    render(result);
-    return result;
+    return render(result);
   };
 
   beforeEach(() => { jest.clearAllMocks(); });
@@ -241,9 +268,23 @@ describe('BeneficiaryListPage filters', () => {
     expect(await renderWith({ q: 'zzz' }, [member()])).toBeTruthy();
   });
 
-  it('filters by activity status', async () => {
-    expect(await renderWith({ status: 'active' }, [member({ is_active: false })])).toBeTruthy();
-    expect(await renderWith({ status: 'inactive' }, [member()])).toBeTruthy();
+  // Con una org activa la fila es 'member' o 'left'; 'none' no se da nunca.
+  // Un caso por test: así cada uno arranca con los mocks y el DOM limpios.
+  it.each([
+    ['member', true, true],
+    ['member', false, false],
+    ['left', false, true],
+    ['left', true, false],
+    ['none', true, false],
+    // un valor que no es de la lista se ignora en vez de vaciar la tabla
+    ['active', true, true],
+  ])('status=%s con is_active=%s deja la fila visible: %s', async (status, isActive, visible) => {
+    const { queryByText } = await renderWith({ status }, [member({ is_active: isActive })]);
+    if (visible) {
+      expect(queryByText('Ana Diaz')).toBeInTheDocument();
+    } else {
+      expect(queryByText('Ana Diaz')).not.toBeInTheDocument();
+    }
   });
 
   it('filters by points balance', async () => {

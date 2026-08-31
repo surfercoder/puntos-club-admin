@@ -236,13 +236,10 @@ describe('BranchFormWithAddress', () => {
     });
   });
 
-  it('clears the warning once a cashier is picked', () => {
-    render(
-      <BranchFormWithAddress cashiers={[{ id: '5', name: 'María Juárez', branchId: null }]} />,
-    );
-    expect(screen.getByText('cashierWarning')).toBeInTheDocument();
-
-    fireEvent.change(screen.getByLabelText(/cashierLabel/), { target: { value: '5' } });
+  // Las sucursales se crean primero y sin cajeros: el alta no pide ninguno.
+  it('does not ask for a cashier', () => {
+    render(<BranchFormWithAddress />);
+    expect(screen.queryByLabelText(/cashierLabel/)).not.toBeInTheDocument();
     expect(screen.queryByText('cashierWarning')).not.toBeInTheDocument();
   });
 

@@ -3,7 +3,6 @@
 import { revalidatePath } from 'next/cache';
 
 import { createAddress } from '@/actions/dashboard/address/actions';
-import { assignCashierToBranch } from '@/actions/dashboard/branch/assign-cashier';
 import { createBranch, updateBranch } from '@/actions/dashboard/branch/actions';
 import { cleanFormData, fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
 import { BranchSchema } from '@/schemas/branch.schema';
@@ -54,8 +53,7 @@ export async function branchWithAddressFormAction(_prevState: ActionState, formD
       return fromErrorToActionState(parsedBranch.error);
     }
 
-    const cashierId = formDataObj.cashier_id ? String(formDataObj.cashier_id) : '';
-    let branchId = formDataObj.id ? String(formDataObj.id) : '';
+    const branchId = formDataObj.id ? String(formDataObj.id) : '';
 
     if (branchId) {
       // El error del update se miraba: sin esto, una edición que falla en la
@@ -70,14 +68,6 @@ export async function branchWithAddressFormAction(_prevState: ActionState, formD
 
       if (branchResult.error) {
         throw new Error(branchResult.error.message || 'Failed to create branch');
-      }
-      branchId = String(branchResult.data?.id ?? '');
-    }
-
-    if (cashierId && branchId) {
-      const assignment = await assignCashierToBranch(cashierId, branchId);
-      if (assignment.error) {
-        throw new Error(assignment.error.message);
       }
     }
 

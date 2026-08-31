@@ -43,7 +43,6 @@ jest.mock('@/lib/auth/get-current-user', () => ({
 
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import {
-  deleteRedemption,
   deliverRedemption,
   cancelRedemption,
 } from '@/actions/dashboard/redemption/actions';
@@ -100,65 +99,5 @@ describe('cancelRedemption', () => {
     rpcImpl.mockImplementationOnce(() => ({ data: null, error: { message: 'REDEMPTION_NOT_PENDING' } }));
     const result = await cancelRedemption('1');
     expect(result.error).toEqual({ message: 'REDEMPTION_NOT_PENDING' });
-  });
-});
-
-describe('deleteRedemption', () => {
-  it('cancels via rpc when row is pending', async () => {
-    fromChain.maybeSingle.mockReturnValueOnce({ data: { status: 'pending' }, error: null });
-    rpcImpl.mockImplementationOnce(() => ({ data: null, error: null }));
-    const result = await deleteRedemption('1');
-    expect(rpcImpl).toHaveBeenCalledWith('cancel_redemption', expect.objectContaining({ p_redemption_id: 1 }));
-    expect(result.error).toBeNull();
-  });
-
-  it('maps rpc error when cancel fails', async () => {
-    fromChain.maybeSingle.mockReturnValueOnce({ data: { status: 'pending' }, error: null });
-    rpcImpl.mockImplementationOnce(() => ({ data: null, error: { message: 'REDEMPTION_NOT_PENDING' } }));
-    const result = await deleteRedemption('1');
-    expect(result.error).toEqual({ message: 'REDEMPTION_NOT_PENDING' });
-  });
-
-  it('physically deletes when row is not pending', async () => {
-    fromChain.maybeSingle.mockReturnValueOnce({ data: { status: 'delivered' }, error: null });
-    const result = await deleteRedemption('1');
-    expect(fromChain.delete).toHaveBeenCalled();
-    expect(result.error).toBeNull();
-  });
-
-  it('returns delete error when physical delete fails', async () => {
-    fromChain.maybeSingle.mockReturnValueOnce({ data: { status: 'delivered' }, error: null });
-    deleteChain.error = { message: 'Error' };
-    const result = await deleteRedemption('1');
-    expect(result.error).toEqual({ message: 'Error' });
-  });
-
-  it('surfaces a lookup failure instead of reporting it as not found', async () => {
-    fromChain.maybeSingle.mockReturnValueOnce({ data: null, error: { message: 'connection reset' } });
-    const result = await deleteRedemption('1');
-    expect(fromChain.delete).not.toHaveBeenCalled();
-    expect(result.error).toEqual({ message: 'connection reset' });
-  });
-
-  it('does not delete when the row is not in the active org', async () => {
-    fromChain.maybeSingle.mockReturnValueOnce({ data: null, error: null });
-    const result = await deleteRedemption('1');
-    expect(fromChain.delete).not.toHaveBeenCalled();
-    expect(result.error).toEqual({ message: 'REDEMPTION_NOT_FOUND' });
-  });
-
-  it('scopes both the lookup and the delete to the active org', async () => {
-    fromChain.maybeSingle.mockReturnValueOnce({ data: { status: 'delivered' }, error: null });
-    await deleteRedemption('1');
-    expect(fromChain.eq).toHaveBeenCalledWith('organization_id', 123);
-    expect(deleteChain.eq).toHaveBeenCalledWith('organization_id', 123);
-  });
-
-  it('returns an error when there is no active organization', async () => {
-    mockCookieStore.get.mockReturnValue(undefined);
-    (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, organization_id: null });
-    const result = await deleteRedemption('1');
-    expect(result.error).toEqual({ message: 'Missing active organization' });
-    expect(fromChain.delete).not.toHaveBeenCalled();
   });
 });

@@ -214,24 +214,6 @@ describe('createPointsRule', () => {
     expect(result.success).toBe(true);
   });
 
-  it('should return error on insert failure', async () => {
-    mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Insert error' } });
-    const result = await createPointsRule(validRule);
-    expect(result).toEqual({ success: false, error: 'Insert error' });
-  });
-
-  it('should map the priority unique index conflict to DUPLICATE_PRIORITY', async () => {
-    mockSupabase.single.mockReturnValue({
-      data: null,
-      error: {
-        code: '23505',
-        message: 'duplicate key value violates unique constraint "points_rule_organization_priority_key"',
-      },
-    });
-    const result = await createPointsRule({ ...validRule, priority: 1 });
-    expect(result).toEqual({ success: false, error: 'DUPLICATE_PRIORITY' });
-  });
-
   it('should pass through a unique violation on another constraint', async () => {
     mockSupabase.single.mockReturnValue({
       data: null,
@@ -258,18 +240,6 @@ describe('createPointsRule', () => {
 });
 
 describe('updatePointsRule', () => {
-  it('should map the priority unique index conflict to DUPLICATE_PRIORITY', async () => {
-    mockSupabase.single.mockReturnValue({
-      data: null,
-      error: {
-        code: '23505',
-        message: 'duplicate key value violates unique constraint "points_rule_organization_priority_key"',
-      },
-    });
-    const result = await updatePointsRule(1, { priority: 2 });
-    expect(result).toEqual({ success: false, error: 'DUPLICATE_PRIORITY' });
-  });
-
   it('should update rule successfully', async () => {
     const result = await updatePointsRule(1, { name: 'Updated' });
     expect(result.success).toBe(true);
@@ -356,7 +326,6 @@ describe('updatePointsRule', () => {
       start_date: '2024-01-01',
       end_date: '2024-12-31',
       is_default: false,
-      priority: 10,
       valid_from: '2024-01-01',
       valid_until: '2024-12-31',
       days_of_week: [1, 2, 3],

@@ -809,7 +809,10 @@
         "cashierAppInfo": "El cajero trabaja desde la app PuntosClubCaja en su celular. Pedile que la descargue e instale escaneando este QR e inicie sesión con el correo y la contraseña que definís acá. Desde la app va a poder cargar y canjear puntos de los clientes.",
         "branchLabel": "Sucursal",
         "selectBranch": "Seleccionar sucursal",
-        "branchHint": "El cajero solo podrá asignar puntos en esta sucursal."
+        "branchHint": "El cajero solo podrá asignar puntos en esta sucursal.",
+        "branchRequired": "Elegí la sucursal donde va a trabajar el cajero.",
+        "branchRequiredEmpty": "Todavía no hay sucursales. Creá una sucursal antes de dar de alta un cajero.",
+        "branchRequiredEmptyLink": "Ir a Sucursales"
       },
       "roles": {
         "cashier": "Cajero",
@@ -984,21 +987,18 @@
         "update": "Actualizar",
         "useMyLocation": "Usar mi ubicación",
         "locating": "Buscando tu ubicación...",
-        "locationError": "No pudimos obtener tu ubicación",
-        "cashierLabel": "Cajero asignado",
-        "cashierPlaceholder": "Seleccionar cajero",
-        "cashierHint": "El cajero podrá operar en esta sucursal desde la App Cajeros.",
-        "cashierWarning": "Asigná un cajero para que esta sucursal pueda operar."
+        "locationError": "No pudimos obtener tu ubicación"
       },
       "showing": "Mostrando {shown} de {total} sucursales",
-      "noCashier": "Sin cajero asignado",
-      "assignCashier": "Asignar cajero",
-      "withoutCashier": "Sin cajero",
+      "noCashier": "Sin cajeros todavía",
+      "assignCashier": "Crear cajero",
+      "withoutCashier": "Sin cajeros",
+      "cashierCount": "{count, plural, one {# cajero} other {# cajeros}}",
       "cashierNotice": {
-        "title": "Cada sucursal debe tener un cajero asignado.",
-        "description": "El cajero será quien podrá asignar puntos en esa sucursal desde la App Cajeros.",
+        "title": "Primero las sucursales, después los cajeros.",
+        "description": "Podés crear una sucursal sin cajeros y asignarles la sucursal cuando los crees. Una sucursal puede tener varios cajeros (turnos, locales grandes).",
         "activeBranches": "Sucursales activas",
-        "withoutCashier": "Sin cajero asignado"
+        "withoutCashier": "Sin cajeros todavía"
       },
       "filters": {
         "search": "Buscar",
@@ -1104,7 +1104,7 @@
         "total": "Beneficiarios totales",
         "totalSubtitle": "De {limit} permitidos",
         "totalNoLimit": "Sin límite de plan",
-        "active": "Beneficiarios activos",
+        "active": "Socios activos",
         "percentOfTotal": "{percent}% del total",
         "withPoints": "Con puntos disponibles",
         "averagePoints": "Promedio de puntos",
@@ -1117,8 +1117,9 @@
         "searchPlaceholder": "Nombre, email, documento...",
         "searchPlaceholderName": "Nombre o apellido...",
         "status": "Estado",
-        "statusActive": "Activos",
-        "statusInactive": "Inactivos",
+        "statusMember": "Socios",
+        "statusLeft": "Dados de baja",
+        "statusNone": "Sin club",
         "points": "Puntos disponibles",
         "pointsWith": "Con puntos",
         "pointsWithout": "Sin puntos",
@@ -1139,6 +1140,11 @@
         "loading": "Cargando el mapa...",
         "empty": "Todavía no hay beneficiarios con dirección registrada en este período.",
         "error": "No pudimos cargar el mapa."
+      },
+      "membershipStatus": {
+        "member": "Socio",
+        "left": "Dado de baja",
+        "none": "Sin club"
       }
     },
     "product": {
@@ -1256,13 +1262,6 @@
       "deliverSuccess": "Canje entregado",
       "cancelSuccess": "Canje cancelado",
       "actionError": "No se pudo procesar el canje",
-      "deleteModal": {
-        "title": "Eliminar Canje",
-        "confirm": "¿Estás seguro de que deseas eliminar el canje <strong>{name}</strong>? Esta acción no se puede deshacer.",
-        "deleteError": "Error al eliminar el canje",
-        "deleteSuccess": "Canje eliminado correctamente",
-        "genericError": "Ocurrió un error al eliminar"
-      },
       "reportButton": "Reporte de canjes",
       "showing": "Mostrando {shown} de {total} canjes",
       "summaryTitle": "Resumen del período",
@@ -1417,15 +1416,8 @@
         "amount": "Monto",
         "points": "Puntos",
         "actions": "Acciones",
-        "type": "Tipo"
-      },
-      "deleteModal": {
-        "title": "Eliminar Operación",
-        "confirm": "¿Estás seguro de que deseas eliminar la operación <strong>{name}</strong>? Esta acción no se puede deshacer.",
-        "deleteError": "Error al eliminar la operación",
-        "trigger": "Eliminar la operación {name}",
-        "deleteSuccess": "Operación eliminada correctamente",
-        "genericError": "Ocurrió un error al eliminar"
+        "type": "Tipo",
+        "status": "Estado"
       },
       "form": {
         "step1": "1. ¿Qué deseas registrar?",
@@ -1443,7 +1435,6 @@
         "saleHint": "Los puntos se calcularán automáticamente según la regla activa del programa.",
         "beneficiaryLabel": "Beneficiario",
         "selectBeneficiary": "Buscar por nombre, email, documento o teléfono...",
-        "viewProfile": "Ver perfil",
         "branchLabel": "Sucursal (opcional)",
         "selectBranch": "Seleccionar sucursal",
         "totalAmountLabel": "Monto de la venta",
@@ -1561,7 +1552,18 @@
         "previewAuto": "Cálculo automático",
         "previewNote": "Este es solo un ejemplo. El cálculo se aplicará al guardar la operación."
       },
-      "createDescription": "Asigna puntos a un beneficiario desde el panel de administración."
+      "createDescription": "Asigna puntos a un beneficiario desde el panel de administración.",
+      "cancelModal": {
+        "title": "Cancelar operación",
+        "confirm": "¿Confirmás la cancelación de la operación <strong>{name}</strong>? Se le descuentan los puntos al beneficiario y la operación queda registrada como cancelada.",
+        "confirmButton": "Sí, cancelar",
+        "cancelError": "Error al cancelar la operación",
+        "trigger": "Cancelar la operación {name}",
+        "cancelSuccess": "Operación cancelada correctamente",
+        "genericError": "Ocurrió un error al cancelar"
+      },
+      "cancelledBadge": "Cancelada",
+      "activeBadge": "Activa"
     },
     "subscription": {
       "title": "Suscripciones",
@@ -2171,7 +2173,6 @@
       "type": "Tipo",
       "config": "Config",
       "schedule": "Horario",
-      "priority": "Prioridad",
       "showInApp": "Mostrar en App",
       "actions": "Acciones"
     },
@@ -2217,9 +2218,6 @@
       "showInApp": "Mostrar en App Móvil",
       "pointsCalc": "Cálculo de Puntos",
       "selectBranch": "Seleccionar una sucursal",
-      "priority": "Prioridad *",
-      "priorityHint": "Las reglas de mayor prioridad se aplican primero cuando coinciden varias reglas. Usa 0 para reglas por defecto y números más altos para promociones especiales.",
-      "duplicatePriority": "Ya existe otra regla con prioridad {priority}. Cada regla debe tener una prioridad distinta: la de mayor prioridad es la que se aplica.",
       "ruleType": "Tipo de Regla *",
       "ruleTypeFixed": "Puntos Fijos por Compra",
       "ruleTypePercentage": "Porcentaje del Monto",

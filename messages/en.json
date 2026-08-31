@@ -809,7 +809,10 @@
         "cashierAppInfo": "The cashier works from the PuntosClubCaja app on their phone. Ask them to download and install it by scanning this QR and sign in with the email and password you set here. From the app they'll be able to add and redeem customer points.",
         "branchLabel": "Branch",
         "selectBranch": "Select a branch",
-        "branchHint": "The cashier can only hand out points at this branch."
+        "branchHint": "The cashier can only hand out points at this branch.",
+        "branchRequired": "Pick the branch where this cashier will work.",
+        "branchRequiredEmpty": "There are no branches yet. Create a branch before adding a cashier.",
+        "branchRequiredEmptyLink": "Go to Branches"
       },
       "roles": {
         "cashier": "Cashier",
@@ -984,21 +987,18 @@
         "update": "Update",
         "useMyLocation": "Use my location",
         "locating": "Finding your location...",
-        "locationError": "We could not get your location",
-        "cashierLabel": "Assigned cashier",
-        "cashierPlaceholder": "Select a cashier",
-        "cashierHint": "The cashier will be able to operate this branch from the Cashiers app.",
-        "cashierWarning": "Assign a cashier so this branch can operate."
+        "locationError": "We could not get your location"
       },
       "showing": "Showing {shown} of {total} branches",
-      "noCashier": "No cashier assigned",
-      "assignCashier": "Assign a cashier",
-      "withoutCashier": "No cashier",
+      "noCashier": "No cashiers yet",
+      "assignCashier": "Create a cashier",
+      "withoutCashier": "No cashiers",
+      "cashierCount": "{count, plural, one {# cashier} other {# cashiers}}",
       "cashierNotice": {
-        "title": "Every branch needs a cashier assigned.",
-        "description": "The cashier is who can hand out points at that branch from the Cashiers app.",
+        "title": "Branches first, cashiers after.",
+        "description": "You can create a branch with no cashiers and assign them the branch when you create them. A branch can have several cashiers (shifts, larger stores).",
         "activeBranches": "Active branches",
-        "withoutCashier": "Without a cashier"
+        "withoutCashier": "No cashiers yet"
       },
       "filters": {
         "search": "Search",
@@ -1104,7 +1104,7 @@
         "total": "Total beneficiaries",
         "totalSubtitle": "Of {limit} allowed",
         "totalNoLimit": "No plan limit",
-        "active": "Active beneficiaries",
+        "active": "Active members",
         "percentOfTotal": "{percent}% of total",
         "withPoints": "With available points",
         "averagePoints": "Average points",
@@ -1117,8 +1117,9 @@
         "searchPlaceholder": "Name, email, document...",
         "searchPlaceholderName": "Name or last name...",
         "status": "Status",
-        "statusActive": "Active",
-        "statusInactive": "Inactive",
+        "statusMember": "Members",
+        "statusLeft": "Left",
+        "statusNone": "No club",
         "points": "Available points",
         "pointsWith": "Has points",
         "pointsWithout": "No points",
@@ -1139,6 +1140,11 @@
         "loading": "Loading the map...",
         "empty": "No beneficiaries with a registered address in this period yet.",
         "error": "We could not load the map."
+      },
+      "membershipStatus": {
+        "member": "Member",
+        "left": "Left",
+        "none": "No club"
       }
     },
     "product": {
@@ -1256,13 +1262,6 @@
       "deliverSuccess": "Redemption delivered",
       "cancelSuccess": "Redemption cancelled",
       "actionError": "Could not process the redemption",
-      "deleteModal": {
-        "title": "Delete Redemption",
-        "confirm": "Are you sure you want to delete redemption <strong>{name}</strong>? This action cannot be undone.",
-        "deleteError": "Error deleting redemption",
-        "deleteSuccess": "Redemption deleted successfully",
-        "genericError": "An error occurred while deleting"
-      },
       "reportButton": "Redemption report",
       "showing": "Showing {shown} of {total} redemptions",
       "summaryTitle": "Period summary",
@@ -1417,15 +1416,8 @@
         "amount": "Amount",
         "points": "Points",
         "actions": "Actions",
-        "type": "Type"
-      },
-      "deleteModal": {
-        "title": "Delete Operation",
-        "confirm": "Are you sure you want to delete operation <strong>{name}</strong>? This action cannot be undone.",
-        "deleteError": "Error deleting operation",
-        "trigger": "Delete operation {name}",
-        "deleteSuccess": "Operation deleted successfully",
-        "genericError": "An unexpected error occurred"
+        "type": "Type",
+        "status": "Status"
       },
       "form": {
         "step1": "1. What do you want to record?",
@@ -1443,7 +1435,6 @@
         "saleHint": "Points are calculated automatically from the program's active rule.",
         "beneficiaryLabel": "Beneficiary",
         "selectBeneficiary": "Search by name, email, document or phone...",
-        "viewProfile": "View profile",
         "branchLabel": "Branch (optional)",
         "selectBranch": "Select a branch",
         "totalAmountLabel": "Sale amount",
@@ -1561,7 +1552,18 @@
         "previewAuto": "Automatic calculation",
         "previewNote": "This is only an example. The calculation runs when you save the operation."
       },
-      "createDescription": "Assign points to a beneficiary from the admin panel."
+      "createDescription": "Assign points to a beneficiary from the admin panel.",
+      "cancelModal": {
+        "title": "Cancel operation",
+        "confirm": "Cancel operation <strong>{name}</strong>? The points are taken back from the beneficiary and the operation stays on record as cancelled.",
+        "confirmButton": "Yes, cancel",
+        "cancelError": "Error cancelling the operation",
+        "trigger": "Cancel operation {name}",
+        "cancelSuccess": "Operation cancelled successfully",
+        "genericError": "An unexpected error occurred"
+      },
+      "cancelledBadge": "Cancelled",
+      "activeBadge": "Active"
     },
     "subscription": {
       "title": "Subscriptions",
@@ -2171,7 +2173,6 @@
       "type": "Type",
       "config": "Config",
       "schedule": "Schedule",
-      "priority": "Priority",
       "showInApp": "Show in App",
       "actions": "Actions"
     },
@@ -2217,9 +2218,6 @@
       "showInApp": "Show in Mobile App",
       "pointsCalc": "Points Calculation",
       "selectBranch": "Select a branch",
-      "priority": "Priority *",
-      "priorityHint": "Higher priority rules are applied first when multiple rules match. Use 0 for default rules and higher numbers for special promotions.",
-      "duplicatePriority": "Another rule already uses priority {priority}. Each rule needs a distinct priority: the highest one wins.",
       "ruleType": "Rule Type *",
       "ruleTypeFixed": "Fixed Points per Purchase",
       "ruleTypePercentage": "Percentage of Amount",

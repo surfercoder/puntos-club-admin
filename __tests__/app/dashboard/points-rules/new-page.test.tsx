@@ -198,17 +198,6 @@ describe('NewPointsRulePage', () => {
     expect(screen.getByDisplayValue('5')).toBeInTheDocument();
   });
 
-  it('handles priority change', async () => {
-    await act(async () => {
-      render(<NewPointsRulePage />);
-    });
-    const input = screen.getByLabelText('form.priority');
-    await act(async () => {
-      fireEvent.change(input, { target: { value: '10' } });
-    });
-    expect(screen.getByDisplayValue('10')).toBeInTheDocument();
-  });
-
   it('handles rule type change to percentage', async () => {
     await act(async () => {
       render(<NewPointsRulePage />);
@@ -440,28 +429,6 @@ describe('NewPointsRulePage', () => {
     });
     await waitFor(() => {
       expect(alertMock).toHaveBeenCalledWith('Error: Validation failed');
-    });
-    expect(mockPush).not.toHaveBeenCalled();
-    alertMock.mockRestore();
-  });
-
-  it('shows the duplicate priority message instead of a raw error', async () => {
-    mockCreatePointsRule.mockResolvedValue({ success: false, error: 'DUPLICATE_PRIORITY' });
-    const alertMock = jest.spyOn(window, 'alert').mockImplementation(() => {});
-    await act(async () => {
-      render(<NewPointsRulePage />);
-    });
-    const nameInput = screen.getByLabelText('form.ruleName');
-    await act(async () => {
-      fireEvent.change(nameInput, { target: { value: 'Clashing Rule' } });
-    });
-
-    const form = document.querySelector('form')!;
-    await act(async () => {
-      fireEvent.submit(form);
-    });
-    await waitFor(() => {
-      expect(alertMock).toHaveBeenCalledWith('form.duplicatePriority');
     });
     expect(mockPush).not.toHaveBeenCalled();
     alertMock.mockRestore();

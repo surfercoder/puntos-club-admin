@@ -22,6 +22,7 @@ const mockSupabase = {
   gte: jest.fn(() => mockSupabase),
   lte: jest.fn(() => mockSupabase),
   order: jest.fn(() => mockSupabase),
+  maybeSingle: jest.fn(() => ({ data: { id: 1 }, error: null })),
   single: jest.fn(() => ({ data: { id: 1, organization_id: 10, purchase_number: 'P-001', total_amount: '100.00', points_earned: 100, available_points: 200 }, error: null })),
   rpc: jest.fn(() => ({ data: 100, error: null })),
   auth: {
@@ -37,6 +38,10 @@ jest.mock('@/lib/auth/get-current-user', () => ({
 }));
 jest.mock('@/lib/auth/roles', () => ({
   isAdmin: jest.fn(() => false),
+  hasOwnerPermissions: jest.fn(() => true),
+}));
+jest.mock('@/lib/auth/get-mutation-org-id', () => ({
+  getMutationOrgId: jest.fn(() => Promise.resolve(123)),
 }));
 
 import { revalidatePath } from 'next/cache';
@@ -48,9 +53,10 @@ import {
   verifyBeneficiary,
   getActivePointsRules,
   updatePurchase,
-  deletePurchase,
+  cancelPurchase,
 } from '@/actions/dashboard/purchase/actions';
-import { isAdmin } from '@/lib/auth/roles';
+import { getMutationOrgId } from '@/lib/auth/get-mutation-org-id';
+import { hasOwnerPermissions, isAdmin } from '@/lib/auth/roles';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -345,23 +351,51 @@ describe('updatePurchase', () => {
   });
 });
 
-describe('deletePurchase', () => {
-  it('should delete purchase successfully', async () => {
-    mockSupabase.eq.mockReturnValue({ error: null });
-    const result = await deletePurchase('1');
+describe('cancelPurchase', () => {
+  it('marks the purchase as cancelled instead of deleting it', async () => {
+    mockSupabase.maybeSingle.mockReturnValue({ data: { id: 1 }, error: null });
+    const result = await cancelPurchase('1', 'Error de carga');
     expect(result).toEqual({ success: true });
+    expect(mockSupabase.delete).not.toHaveBeenCalled();
+    expect(mockSupabase.update).toHaveBeenCalledWith(
+      expect.objectContaining({
+        status: 'cancelled',
+        cancelled_by: 1,
+        cancellation_reason: 'Error de carga',
+      }),
+    );
     expect(revalidatePath).toHaveBeenCalledWith('/dashboard/purchase');
   });
 
+  it('returns an error when the row is not cancellable (other org or already cancelled)', async () => {
+    mockSupabase.maybeSingle.mockReturnValue({ data: null, error: null });
+    const result = await cancelPurchase('1');
+    expect(result).toEqual({ success: false, error: 'PURCHASE_NOT_CANCELLABLE' });
+  });
+
   it('should return error on failure', async () => {
-    mockSupabase.eq.mockReturnValue({ error: { message: 'Delete failed' } });
-    const result = await deletePurchase('1');
-    expect(result).toEqual({ success: false, error: 'Delete failed' });
+    mockSupabase.maybeSingle.mockReturnValue({ data: null, error: { message: 'Update failed' } });
+    const result = await cancelPurchase('1');
+    expect(result).toEqual({ success: false, error: 'Update failed' });
   });
 
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
-    const result = await deletePurchase('1');
+    const result = await cancelPurchase('1');
     expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+  });
+
+  it('rejects a caller without admin-portal permissions', async () => {
+    (hasOwnerPermissions as jest.Mock).mockReturnValueOnce(false);
+    const result = await cancelPurchase('1');
+    expect(result).toEqual({ success: false, error: 'Forbidden' });
+    expect(mockSupabase.update).not.toHaveBeenCalled();
+  });
+
+  it('returns an error when there is no active organization', async () => {
+    (getMutationOrgId as jest.Mock).mockResolvedValueOnce(null);
+    const result = await cancelPurchase('1');
+    expect(result).toEqual({ success: false, error: 'Missing active organization' });
+    expect(mockSupabase.update).not.toHaveBeenCalled();
   });
 });

@@ -31,9 +31,13 @@ import { createClient } from '@/lib/supabase/server';
 import { formatDateOnly, parsePage, parsePerPage } from '@/lib/utils';
 import type { Beneficiary } from '@/types/beneficiary';
 
+// 'member' = socio activo de la org (o de alguna, en la vista global de admin);
+// 'left' = tiene membresia pero se dio de baja; 'none' = no es socio de ningun club.
+type MembershipState = 'member' | 'left' | 'none';
+
 type BeneficiaryRow = Beneficiary & {
   is_hidden: boolean;
-  is_active: boolean;
+  membership: MembershipState;
   available_points: number;
   latitude?: number | null;
   longitude?: number | null;
@@ -73,8 +77,9 @@ function startOfMonth(monthsBack: number) {
 // Las etiquetas llegan traducidas desde la página: así la fila no necesita el
 // traductor y se puede renderizar sola.
 type RowLabels = {
-  active: string;
-  inactive: string;
+  member: string;
+  left: string;
+  none: string;
   pointsWith: string;
   pointsWithout: string;
 };
@@ -103,12 +108,12 @@ function BeneficiaryTableRow({
             <span className="block font-medium">{fullName(beneficiary) || 'N/A'}</span>
             <span
               className={`mt-0.5 inline-block rounded px-1.5 py-0.5 text-[11px] font-medium ${
-                beneficiary.is_active
+                beneficiary.membership === 'member'
                   ? 'bg-brand-green/10 text-brand-green'
                   : 'bg-muted text-muted-foreground'
               }`}
             >
-              {beneficiary.is_active ? labels.active : labels.inactive}
+              {labels[beneficiary.membership]}
             </span>
           </span>
         </div>
@@ -219,27 +224,35 @@ export default async function BeneficiaryListPage({ searchParams }: PageProps) {
           ...beneficiary,
           available_points: (record.available_points as number) ?? 0,
           is_hidden: (record.is_hidden as boolean) ?? false,
-          is_active: (record.is_active as boolean) ?? true,
+          membership: record.is_active === false ? 'left' : 'member',
           latitude: beneficiary.address?.latitude ?? null,
           longitude: beneficiary.address?.longitude ?? null,
         });
       }
     }
   } else {
-    // Admin users or no active organization selected - show all beneficiaries
+    // Admin users or no active organization selected - show all beneficiaries.
+    // Sin una org de referencia el estado se resuelve sobre todas las membresías:
+    // socio si sigue activo en alguna, dado de baja si las dejó todas.
     const result = await supabase
       .from('beneficiary')
-      .select('*, address:address_id(latitude, longitude)');
+      .select('*, address:address_id(latitude, longitude), beneficiary_organization(is_active)');
     error = result.error;
     rows = (result.data ?? []).map((beneficiary) => {
       const b = beneficiary as Beneficiary & {
         address?: { latitude?: number; longitude?: number } | null;
+        beneficiary_organization?: { is_active: boolean | null }[] | null;
       };
+      const memberships = b.beneficiary_organization ?? [];
       return {
         ...b,
         available_points: 0,
         is_hidden: false,
-        is_active: true,
+        membership: memberships.some((m) => m.is_active !== false)
+          ? 'member'
+          : memberships.length > 0
+            ? 'left'
+            : 'none',
         latitude: b.address?.latitude ?? null,
         longitude: b.address?.longitude ?? null,
       };
@@ -256,7 +269,7 @@ export default async function BeneficiaryListPage({ searchParams }: PageProps) {
 
   const stats = {
     total: rows.length,
-    active: rows.filter((r) => r.is_active).length,
+    active: rows.filter((r) => r.membership === 'member').length,
     withPoints: rows.filter((r) => r.available_points > 0).length,
     averagePoints: rows.length ? Math.round(totalPoints / rows.length) : 0,
     newThisMonth: rows.filter((r) => new Date(r.registration_date) >= thisMonth).length,
@@ -269,7 +282,10 @@ export default async function BeneficiaryListPage({ searchParams }: PageProps) {
 
   const filters = {
     q: params.q?.trim() ?? '',
-    status: params.status === 'active' || params.status === 'inactive' ? params.status : '',
+    status:
+      params.status === 'member' || params.status === 'left' || params.status === 'none'
+        ? params.status
+        : '',
     points: params.points === 'with' || params.points === 'without' ? params.points : '',
     from: params.from?.match(/^\d{4}-\d{2}-\d{2}$/)?.[0] ?? '',
   };
@@ -285,8 +301,7 @@ export default async function BeneficiaryListPage({ searchParams }: PageProps) {
         .toLowerCase();
       if (!haystack.includes(needle)) return false;
     }
-    if (filters.status === 'active' && !row.is_active) return false;
-    if (filters.status === 'inactive' && row.is_active) return false;
+    if (filters.status && row.membership !== filters.status) return false;
     if (filters.points === 'with' && row.available_points <= 0) return false;
     if (filters.points === 'without' && row.available_points > 0) return false;
     if (filters.from && new Date(row.registration_date) < new Date(filters.from)) return false;
@@ -307,8 +322,9 @@ export default async function BeneficiaryListPage({ searchParams }: PageProps) {
   // Sólo los owners con org activa pueden ocultar beneficiarios.
   const hideOrganizationId = !userIsAdmin && orgIdFilter ? orgIdFilter.toString() : null;
   const rowLabels: RowLabels = {
-    active: tCommon('active'),
-    inactive: tCommon('inactive'),
+    member: t('membershipStatus.member'),
+    left: t('membershipStatus.left'),
+    none: t('membershipStatus.none'),
     pointsWith: t('pointsStatus.with'),
     pointsWithout: t('pointsStatus.without'),
   };

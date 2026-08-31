@@ -2,7 +2,7 @@ import { BarChart3, History, Pencil, Send } from 'lucide-react';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
-import DeleteModal from '@/components/dashboard/purchase/delete-modal';
+import CancelModal from '@/components/dashboard/purchase/cancel-modal';
 import {
   PurchaseFilters,
   type FilterOption,
@@ -70,12 +70,16 @@ type PurchaseRow = {
   amount: number;
   points: number;
   type: 'sale' | 'assignment';
+  cancelled: boolean;
 };
 
 // El tipo ya llega traducido desde la página: la fila no necesita el traductor.
-function PurchaseTableRow({ row, typeLabel }: { row: PurchaseRow; typeLabel: string }) {
+function PurchaseTableRow(
+  { row, typeLabel, cancelledLabel }:
+  { row: PurchaseRow; typeLabel: string; cancelledLabel: string },
+) {
   return (
-    <TableRow>
+    <TableRow className={row.cancelled ? 'text-muted-foreground line-through' : undefined}>
       <TableCell className="font-mono font-medium">{row.purchaseNumber}</TableCell>
       <TableCell>
         <span suppressHydrationWarning className="block">
@@ -101,7 +105,11 @@ function PurchaseTableRow({ row, typeLabel }: { row: PurchaseRow; typeLabel: str
       <TableCell>{row.branchName ?? 'N/A'}</TableCell>
       <TableCell className="text-right font-medium">{formatCurrency(row.amount)}</TableCell>
       <TableCell className="text-right">
-        <span className="inline-block rounded-md bg-brand-pink/10 px-2 py-0.5 text-xs font-semibold text-brand-pink">
+        <span
+          className={`inline-block rounded-md px-2 py-0.5 text-xs font-semibold ${
+            row.cancelled ? 'bg-muted text-muted-foreground' : 'bg-brand-pink/10 text-brand-pink'
+          }`}
+        >
           +{NUMBER_FORMATTER.format(row.points)} pts
         </span>
       </TableCell>
@@ -115,15 +123,24 @@ function PurchaseTableRow({ row, typeLabel }: { row: PurchaseRow; typeLabel: str
         >
           {typeLabel}
         </span>
+        {row.cancelled && (
+          <span className="ml-1 inline-block rounded-md border border-gray-300 bg-gray-200 px-2 py-0.5 text-xs font-medium text-gray-700 no-underline">
+            {cancelledLabel}
+          </span>
+        )}
       </TableCell>
       <TableCell className="text-right">
         <div className="flex items-center justify-end gap-2">
-          <Button asChild size="icon-sm" variant="outline">
-            <Link href={`/dashboard/purchase/edit/${row.id}`}>
-              <Pencil className="size-4" />
-            </Link>
-          </Button>
-          <DeleteModal purchaseId={row.id} purchaseNumber={row.purchaseNumber} />
+          {!row.cancelled && (
+            <>
+              <Button asChild size="icon-sm" variant="outline">
+                <Link href={`/dashboard/purchase/edit/${row.id}`}>
+                  <Pencil className="size-4" />
+                </Link>
+              </Button>
+              <CancelModal purchaseId={row.id} purchaseNumber={row.purchaseNumber} />
+            </>
+          )}
         </div>
       </TableCell>
     </TableRow>
@@ -217,6 +234,7 @@ export default async function PurchaseListPage({ searchParams }: PageProps) {
       // El modelo no guarda el tipo: una operación con importe es una venta,
       // y sin importe es una asignación manual de puntos.
       type: amount > 0 ? ('sale' as const) : ('assignment' as const),
+      cancelled: purchase.status === 'cancelled',
     };
   });
 
@@ -237,18 +255,20 @@ export default async function PurchaseListPage({ searchParams }: PageProps) {
   const page = parsePage(params.page, Math.ceil(filtered.length / perPage));
   const visible = filtered.slice((page - 1) * perPage, page * perPage);
 
-  const totalAmount = filtered.reduce((sum, r) => sum + r.amount, 0);
-  const totalPoints = filtered.reduce((sum, r) => sum + r.points, 0);
-  const reached = new Set(filtered.flatMap((r) => r.beneficiaryId || [])).size;
+  // Las canceladas siguen listadas (trazabilidad) pero no suman a los totales.
+  const live = filtered.filter((r) => !r.cancelled);
+  const totalAmount = live.reduce((sum, r) => sum + r.amount, 0);
+  const totalPoints = live.reduce((sum, r) => sum + r.points, 0);
+  const reached = new Set(live.flatMap((r) => r.beneficiaryId || [])).size;
   // Por id: dos cajeros homónimos son dos personas, no una.
-  const activeCashiers = new Set(filtered.flatMap((r) => r.cashierId || [])).size;
+  const activeCashiers = new Set(live.flatMap((r) => r.cashierId || [])).size;
 
   const stats = {
-    operations: filtered.length,
+    operations: live.length,
     totalAmount,
     pointsAssigned: totalPoints,
     beneficiariesReached: reached,
-    averagePoints: filtered.length ? Math.round(totalPoints / filtered.length) : 0,
+    averagePoints: live.length ? Math.round(totalPoints / live.length) : 0,
   };
 
   const branchOptions = unique(
@@ -304,10 +324,12 @@ export default async function PurchaseListPage({ searchParams }: PageProps) {
               t('tableHeaders.branch'),
               t('tableHeaders.amount'),
               t('tableHeaders.points'),
+              t('tableHeaders.status'),
             ]}
             rows={filtered.map((r) => [
               r.purchaseNumber, r.date, r.beneficiaryName, r.cashierName,
               r.branchName, r.amount, r.points,
+              r.cancelled ? t('cancelledBadge') : t('activeBadge'),
             ])}
           />
           <Link
@@ -355,6 +377,7 @@ export default async function PurchaseListPage({ searchParams }: PageProps) {
                       key={row.id}
                       row={row}
                       typeLabel={t(`types.${row.type}`)}
+                      cancelledLabel={t('cancelledBadge')}
                     />
                   ))
                 ) : (

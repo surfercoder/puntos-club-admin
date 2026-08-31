@@ -12,12 +12,12 @@ describe('BeneficiaryFilters', () => {
   it('submits over GET so the filters live in the URL', async () => {
     const { container } = render(
       await BeneficiaryFilters({
-        values: { q: 'ana', status: 'active', points: 'with', from: '2026-08-01' },
+        values: { q: 'ana', status: 'member', points: 'with', from: '2026-08-01' },
       }),
     );
     expect(container.querySelector('form')).toHaveAttribute('method', 'GET');
     expect(container.querySelector('input[name="q"]')).toHaveValue('ana');
-    expect(container.querySelector('select[name="status"]')).toHaveValue('active');
+    expect(container.querySelector('select[name="status"]')).toHaveValue('member');
     expect(container.querySelector('select[name="points"]')).toHaveValue('with');
     expect(container.querySelector('input[name="from"]')).toHaveValue('2026-08-01');
   });

@@ -7,6 +7,7 @@ const makeBuilder = (settle: () => Promise<unknown>) => {
   Object.assign(builder, {
     select: () => builder,
     eq: () => builder,
+    neq: () => builder,
     gte: () => Object.assign(settle(), builder),
     order: () => Object.assign(settle(), builder),
     then: (resolve: (v: unknown) => unknown) => settle().then(resolve),

@@ -22,6 +22,15 @@ export async function appUserFormAction(_prevState: ActionState, formData: FormD
     // La sucursal se valida antes de crear nada: si falla después, el app_user
     // y su usuario de Auth ya existen y el email queda tomado para el reintento.
     const branchId = formDataObject.branch_id ? String(formDataObject.branch_id) : '';
+    // El campo solo viaja cuando el rol elegido es cajero, y un cajero sin
+    // sucursal no puede operar: se crean las sucursales primero.
+    if (hasBranchField && !branchId) {
+      return {
+        status: 'error' as const,
+        message: 'BRANCH_REQUIRED',
+        fieldErrors: { branch_id: ['BRANCH_REQUIRED'] },
+      };
+    }
     if (branchId) {
       const branchCheck = await checkBranchInActiveOrg(branchId);
       if (branchCheck.error) {
@@ -47,7 +56,7 @@ export async function appUserFormAction(_prevState: ActionState, formData: FormD
       : String((result.data as { id?: string | number } | null)?.id ?? '');
 
     if (hasBranchField && savedId) {
-      const assignment = await assignCashierToBranch(savedId, branchId || null);
+      const assignment = await assignCashierToBranch(savedId, branchId);
       if (assignment.error) {
         return { status: 'error' as const, message: assignment.error.message, fieldErrors: {} };
       }

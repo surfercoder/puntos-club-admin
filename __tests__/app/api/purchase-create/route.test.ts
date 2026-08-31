@@ -240,6 +240,27 @@ describe('Purchase Create API Route', () => {
     expect(data.error).toBe('Failed to create purchase');
   });
 
+  it('returns 409 when the beneficiary is no longer a member', async () => {
+    // appUser
+    mockSingle.mockResolvedValueOnce({ data: { id: 1 }, error: null });
+    // branch
+    mockSingle.mockResolvedValueOnce({ data: { organization_id: 1 }, error: null });
+    // el trigger check_purchase_membership rechaza la venta
+    mockInsertSingle.mockResolvedValueOnce({
+      data: null,
+      error: { message: 'MEMBERSHIP_INACTIVE' },
+    });
+
+    const request = {
+      json: () => Promise.resolve({ beneficiary_id: 1, branch_id: 1, amount: 100 }),
+      headers: { get: () => null },
+    } as any;
+    const response = await POST(request);
+    expect(response.status).toBe(409);
+    const data = await response.json();
+    expect(data.code).toBe('MEMBERSHIP_INACTIVE');
+  });
+
   it('returns 500 on unexpected error (catch block)', async () => {
     mockGetUser.mockRejectedValueOnce(new Error('Unexpected'));
 

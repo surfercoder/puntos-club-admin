@@ -1,12 +1,12 @@
 "use client";
 
-import { Trash2 } from 'lucide-react';
+import { XCircle } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { toast } from 'sonner';
 
-import { deletePurchase } from '@/actions/dashboard/purchase/actions';
+import { cancelPurchase } from '@/actions/dashboard/purchase/actions';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -18,33 +18,33 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 
-interface DeleteModalProps {
+interface CancelModalProps {
   purchaseId: string;
   purchaseNumber: string;
 }
 
-export default function DeleteModal({ purchaseId, purchaseNumber }: DeleteModalProps) {
+export default function CancelModal({ purchaseId, purchaseNumber }: CancelModalProps) {
   const [open, setOpen] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
   const { refresh } = useRouter();
-  const t = useTranslations('Dashboard.purchase.deleteModal');
+  const t = useTranslations('Dashboard.purchase.cancelModal');
   const tCommon = useTranslations('Common');
 
-  const handleDelete = async () => {
-    setIsDeleting(true);
+  const handleCancel = async () => {
+    setIsCancelling(true);
     try {
-      const result = await deletePurchase(purchaseId);
+      const result = await cancelPurchase(purchaseId);
       if (!result.success) {
-        toast.error(result.error || t('deleteError'));
+        toast.error(result.error || t('cancelError'));
       } else {
-        toast.success(t('deleteSuccess'));
+        toast.success(t('cancelSuccess'));
         refresh();
         setOpen(false);
       }
     } catch {
       toast.error(t('genericError'));
     }
-    setIsDeleting(false);
+    setIsCancelling(false);
   };
 
   return (
@@ -56,7 +56,7 @@ export default function DeleteModal({ purchaseId, purchaseNumber }: DeleteModalP
           variant="outline"
           className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
         >
-          <Trash2 className="size-4" />
+          <XCircle className="size-4" />
         </Button>
       </DialogTrigger>
       <DialogContent>
@@ -67,11 +67,11 @@ export default function DeleteModal({ purchaseId, purchaseNumber }: DeleteModalP
           </DialogDescription>
         </DialogHeader>
         <DialogFooter>
-          <Button disabled={isDeleting} onClick={() => setOpen(false)} variant="outline">
+          <Button disabled={isCancelling} onClick={() => setOpen(false)} variant="outline">
             {tCommon('cancel')}
           </Button>
-          <Button disabled={isDeleting} onClick={handleDelete} variant="destructive">
-            {isDeleting ? tCommon('loading') : tCommon('delete')}
+          <Button disabled={isCancelling} onClick={handleCancel} variant="destructive">
+            {isCancelling ? tCommon('loading') : t('confirmButton')}
           </Button>
         </DialogFooter>
       </DialogContent>

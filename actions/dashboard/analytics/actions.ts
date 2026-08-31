@@ -67,6 +67,7 @@ export async function getDashboardKpis(): Promise<DashboardKpis | null> {
       .from("purchase")
       .select("total_amount")
       .eq("organization_id", orgId)
+      .neq("status", "cancelled")
       .gte("purchase_date", startOfMonth),
 
     supabase
@@ -79,6 +80,7 @@ export async function getDashboardKpis(): Promise<DashboardKpis | null> {
       .from("redemption")
       .select("points_used")
       .eq("organization_id", orgId)
+      .neq("status", "cancelled")
       .gte("redemption_date", startOfMonth),
   ]);
 
@@ -119,6 +121,7 @@ export async function getMonthlyPurchaseStats(
     .from("purchase")
     .select("purchase_date, total_amount, points_earned")
     .eq("organization_id", orgId)
+    .neq("status", "cancelled")
     .gte("purchase_date", since.toISOString())
     .order("purchase_date", { ascending: true });
 
@@ -160,11 +163,13 @@ export async function getMonthlyPointsStats(
       .from("purchase")
       .select("purchase_date, points_earned")
       .eq("organization_id", orgId)
+      .neq("status", "cancelled")
       .gte("purchase_date", since.toISOString()),
     supabase
       .from("redemption")
       .select("redemption_date, points_used")
       .eq("organization_id", orgId)
+      .neq("status", "cancelled")
       .gte("redemption_date", since.toISOString()),
   ]);
 
@@ -248,6 +253,7 @@ export async function getTopProducts(limit = 8): Promise<TopProductStat[]> {
       product:product(name, organization_id)
     `)
     .eq("organization_id", orgId)
+    .neq("status", "cancelled")
     .not("product_id", "is", null);
 
   if (error || !data) return [];
@@ -280,6 +286,7 @@ export async function getBranchPerformance(): Promise<BranchPerformanceStat[]> {
       branch:branch(name)
     `)
     .eq("organization_id", orgId)
+    .neq("status", "cancelled")
     .not("branch_id", "is", null);
 
   if (error || !data) return [];

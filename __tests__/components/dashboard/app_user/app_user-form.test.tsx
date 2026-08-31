@@ -426,6 +426,28 @@ describe('AppUserForm', () => {
     expect(container.querySelector('select[name="branch_id"]')).toHaveValue('3');
   });
 
+  // Los cajeros trabajan siempre en una sucursal: sin sucursales creadas el
+  // alta queda bloqueada, y con sucursales hay que elegir una para enviar.
+  it('blocks the cashier form when there are no branches', async () => {
+    mockRoleData = [{ id: '2', name: 'cashier', display_name: 'Cajero' }];
+    render(<AppUserForm branches={[]} lockedRoleName="cashier" />);
+
+    expect(await screen.findByText('form.branchRequiredEmpty')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'create' })).toBeDisabled();
+  });
+
+  it('does not submit a cashier with no branch picked', async () => {
+    mockRoleData = [{ id: '2', name: 'cashier', display_name: 'Cajero' }];
+    const { container } = render(
+      <AppUserForm branches={[{ id: '3', name: 'Sucursal Centro' }]} lockedRoleName="cashier" />,
+    );
+    await screen.findByText('form.branchLabel');
+
+    fireEvent.submit(container.querySelector('form') as HTMLFormElement);
+
+    expect(await screen.findByText('form.branchRequired')).toBeInTheDocument();
+  });
+
   it('keeps the role selector when no role is locked', async () => {
     render(<AppUserForm />);
     expect(await screen.findByText('form.roleLabel')).toBeInTheDocument();

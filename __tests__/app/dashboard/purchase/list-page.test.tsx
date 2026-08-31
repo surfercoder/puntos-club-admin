@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 
 import PurchaseListPage from '@/app/dashboard/purchase/page';
 
@@ -18,7 +18,7 @@ jest.mock('@/lib/supabase/admin', () => ({ createAdminClient: jest.fn(() => ({ f
 jest.mock('@/lib/auth/get-current-user', () => ({ getCurrentUser: jest.fn(() => Promise.resolve({ id: '1', role: { name: 'admin' } })) }));
 jest.mock('@/lib/auth/get-active-org-id', () => ({ getActiveOrgIdFilter: jest.fn(() => Promise.resolve(null)) }));
 jest.mock('@/lib/auth/roles', () => ({ isAdmin: jest.fn(() => true) }));
-jest.mock('@/components/dashboard/purchase/delete-modal', () => function Mock() { return <div />; });
+jest.mock('@/components/dashboard/purchase/cancel-modal', () => function Mock() { return <div />; });
 jest.mock('@/components/dashboard/purchase/toast-handler', () => function Mock() { return <div />; });
 jest.mock('@/components/dashboard/purchase/purchase-filters', () => ({
   PurchaseFilters: () => <div />,
@@ -111,6 +111,17 @@ describe('PurchaseListPage', () => {
     const result = await PurchaseListPage({ searchParams: Promise.resolve({}) });
     render(result);
     expect(result).toBeTruthy();
+  });
+
+  // Una compra cancelada se sigue listando, tachada y con la chapa de cancelada.
+  it('renders a cancelled purchase with the cancelled badge', async () => {
+    mockOrder.mockResolvedValueOnce({
+      data: [{ ...mockPurchases[0], status: 'cancelled' }],
+      error: null,
+    });
+    const result = await PurchaseListPage({ searchParams: Promise.resolve({}) });
+    render(result);
+    expect(screen.getAllByText('cancelledBadge').length).toBeGreaterThan(0);
   });
 
   it('handles array-wrapped relations (beneficiary, cashier, branch)', async () => {

@@ -4,8 +4,9 @@ import { createClient } from "@/lib/supabase/server";
 import { revalidatePath } from "next/cache";
 import { cookies } from "next/headers";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
+import { getMutationOrgId } from "@/lib/auth/get-mutation-org-id";
 import { requireUser } from "@/lib/auth/require-user";
-import { isAdmin } from "@/lib/auth/roles";
+import { hasOwnerPermissions, isAdmin } from "@/lib/auth/roles";
 
 export interface PurchaseItem {
   item_name: string;
@@ -282,21 +283,43 @@ export async function updatePurchase(id: string, input: Record<string, unknown>)
 }
 
 /**
- * Delete a purchase (admin only)
+ * Cancel a purchase (admin only). No la borra: queda como operacion cancelada
+ * y el trigger de puntos devuelve los que habia asignado.
  */
-export async function deletePurchase(id: string) {
+export async function cancelPurchase(id: string, reason?: string) {
   try {
-    await requireUser();
+    const user = await requireUser();
 
-    const supabase = await createClient();
+    // Cancelar devuelve puntos: lo hace quien administra el club, no un cajero.
+    if (!hasOwnerPermissions(user)) {
+      return { success: false, error: "Forbidden" };
+    }
 
-    const { error } = await supabase
+    const [supabase, orgId] = await Promise.all([createClient(), getMutationOrgId()]);
+
+    if (!orgId) {
+      return { success: false, error: "Missing active organization" };
+    }
+
+    const { data, error } = await supabase
       .from("purchase")
-      .delete()
-      .eq("id", id);
+      .update({
+        status: "cancelled",
+        cancelled_at: new Date().toISOString(),
+        cancelled_by: Number(user.id),
+        cancellation_reason: reason ?? null,
+      })
+      .eq("id", id)
+      .eq("organization_id", orgId)
+      .eq("status", "active")
+      .select("id")
+      .maybeSingle();
 
     if (error) {
       return { success: false, error: error.message };
+    }
+    if (!data) {
+      return { success: false, error: "PURCHASE_NOT_CANCELLABLE" };
     }
 
     revalidatePath("/dashboard/purchase");

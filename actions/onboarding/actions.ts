@@ -305,7 +305,6 @@ export async function completeOnboarding(input: {
       is_default: true,
       organization_id: organizationId,
       branch_id: branchId,
-      priority: 0,
       display_name: '1 punto por $1',
       display_icon: '⭐',
       display_color: '#059669',

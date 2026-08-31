@@ -59,9 +59,7 @@ jest.mock('@/components/dashboard/branch/delete-modal', () => function Mock() { 
 jest.mock('@/components/dashboard/branch/branch-filters', () => ({ BranchFilters: () => <div /> }));
 jest.mock('@/components/dashboard/branch/branch-form-with-address', () => ({
   __esModule: true,
-  default: ({ cashiers }: { cashiers: unknown[] }) => (
-    <div data-testid="branch-form">{JSON.stringify(cashiers)}</div>
-  ),
+  default: () => <div data-testid="branch-form" />,
 }));
 jest.mock('@/components/dashboard/plan/plan-usage-badge', () => ({ PlanUsageBadge: () => <div /> }));
 jest.mock('@/components/dashboard/plan/plan-usage-banner', () => ({ PlanUsageBanner: () => <div /> }));
@@ -157,10 +155,12 @@ describe('BranchListPage', () => {
     expect(await render()).toContain('noCashier');
   });
 
-  it('lists unassigned cashiers as options for the new-branch form', async () => {
-    cashierRows = [cashier({ branch_id: null, first_name: null, last_name: null })];
+  it('lists every cashier of a branch', async () => {
+    cashierRows = [cashier(), cashier({ id: 8, first_name: 'Juan', last_name: 'Pérez' })];
     const html = await render();
-    expect(html).toContain('maria@appcajeros.com');
+    expect(html).toContain('María Juárez');
+    expect(html).toContain('Juan Pérez');
+    expect(html).toContain('cashierCount');
   });
 
   it('falls back to a placeholder avatar for a nameless cashier', async () => {

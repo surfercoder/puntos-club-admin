@@ -121,6 +121,16 @@ export default function AppUserForm({
       return;
     }
 
+    if (isCashierSelected && !branchId) {
+      setValidation({
+        status: 'error',
+        message: '',
+        fieldErrors: { branch_id: [t('form.branchRequired')] },
+      });
+      event.preventDefault();
+      return;
+    }
+
     if (passwordValue && !allRulesPass(passwordValue)) {
       setValidation({
         status: 'error',
@@ -197,20 +207,38 @@ export default function AppUserForm({
         </div>
       )}
 
-      {isCashierSelected && branches.length > 0 && (
+      {isCashierSelected && (
         <div>
-          <Label htmlFor="branch_id">{t('form.branchLabel')}</Label>
-          <Select name="branch_id" onValueChange={setBranchId} value={branchId}>
-            <SelectTrigger className="w-full" id="branch_id">
-              <SelectValue placeholder={t('form.selectBranch')} />
-            </SelectTrigger>
-            <SelectContent>
-              {branches.map((branch) => (
-                <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <p className="mt-1.5 text-xs text-muted-foreground">{t('form.branchHint')}</p>
+          <Label htmlFor="branch_id">
+            {t('form.branchLabel')} <span className="text-destructive">*</span>
+          </Label>
+          {branches.length > 0 ? (
+            <>
+              <Select name="branch_id" onValueChange={setBranchId} value={branchId}>
+                <SelectTrigger className="w-full" id="branch_id">
+                  <SelectValue placeholder={t('form.selectBranch')} />
+                </SelectTrigger>
+                <SelectContent>
+                  {branches.map((branch) => (
+                    <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="mt-1.5 text-xs text-muted-foreground">{t('form.branchHint')}</p>
+              <FieldError actionState={validation ?? actionState} name="branch_id" />
+            </>
+          ) : (
+            // Sin sucursales no hay cajero posible: el orden es sucursal primero.
+            <p className="mt-1.5 flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
+              <Info className="mt-0.5 size-4 shrink-0 text-primary" />
+              <span>
+                {t('form.branchRequiredEmpty')}{' '}
+                <Link className="underline" href="/dashboard/branch">
+                  {t('form.branchRequiredEmptyLink')}
+                </Link>
+              </span>
+            </p>
+          )}
         </div>
       )}
 
@@ -287,7 +315,7 @@ export default function AppUserForm({
         <Button asChild type="button" variant="secondary">
           <Link href="/dashboard/app_user">{tCommon('cancel')}</Link>
         </Button>
-        <Button disabled={pending} type="submit">
+        <Button disabled={pending || (isCashierSelected && branches.length === 0)} type="submit">
           {appUser ? tCommon('update') : tCommon('create')}
         </Button>
       </div>
