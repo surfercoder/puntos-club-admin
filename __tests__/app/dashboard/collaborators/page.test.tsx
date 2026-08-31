@@ -33,7 +33,7 @@ jest.mock('@/components/dashboard/app_user/app_user-form', () => ({
 jest.mock('@/components/dashboard/plan/plan-usage-badge', () => ({ PlanUsageBadge: () => <div /> }));
 jest.mock('@/components/dashboard/plan/plan-usage-banner', () => ({ PlanUsageBanner: () => <div /> }));
 jest.mock('@/components/dashboard/shared/table-pagination', () => ({ TablePagination: () => <div /> }));
-jest.mock('@/components/dashboard/shared/csv-export-button', () => ({ CsvExportButton: () => <div /> }));
+jest.mock('@/components/dashboard/shared/excel-export-button', () => ({ ExcelExportButton: () => <div /> }));
 jest.mock('@/components/dashboard/staff/staff-filters', () => ({ StaffFilters: () => <div /> }));
 jest.mock('@/components/dashboard/staff/staff-stats', () => ({
   StaffStats: ({ data }: { data: unknown }) => <div data-testid="stats">{JSON.stringify(data)}</div>,

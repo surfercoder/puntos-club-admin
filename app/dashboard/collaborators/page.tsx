@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server';
 import AppUserForm from '@/components/dashboard/app_user/app_user-form';
 import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
-import { CsvExportButton } from '@/components/dashboard/shared/csv-export-button';
+import { ExcelExportButton } from '@/components/dashboard/shared/excel-export-button';
 import { TablePagination } from '@/components/dashboard/shared/table-pagination';
 import { StaffFilters } from '@/components/dashboard/staff/staff-filters';
 import { StaffStats } from '@/components/dashboard/staff/staff-stats';
@@ -76,8 +76,8 @@ export default async function CollaboratorsPage({ searchParams }: PageProps) {
           </h1>
           <p className="text-sm text-muted-foreground">{t('description')}</p>
         </div>
-        <CsvExportButton
-          filename="colaboradores.csv"
+        <ExcelExportButton
+          filename="colaboradores.xlsx"
           headers={[t('headers.collaborator'), tCommon('email'), t('headers.status')]}
           label={tCommon('export')}
           rows={rows.map((member) => [

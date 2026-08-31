@@ -120,20 +120,3 @@ export const POINT_RANGES = [
   { key: "5000-10000", min: 5000, max: 10000 },
   { key: "10000+", min: 10000, max: Number.POSITIVE_INFINITY },
 ] as const;
-
-/**
- * Escapa un valor para CSV: comillas dobles y separador quedan dentro del campo.
- *
- * Un valor que arranca con =, +, -, @, tab o CR lo interpretan como fórmula
- * Excel y Sheets al abrir el archivo. Los nombres y comentarios los escribe el
- * beneficiario, así que se les antepone una comilla simple para que viajen como
- * texto.
- */
-export function toCsv(headers: string[], rows: (string | number | null | undefined)[][]) {
-  const escape = (value: string | number | null | undefined) => {
-    const text = String(value ?? "");
-    const safe = /^[=+\-@\t\r]/.test(text) ? `'${text}` : text;
-    return `"${safe.replace(/"/g, '""')}"`;
-  };
-  return [headers, ...rows].map((row) => row.map(escape).join(",")).join("\r\n");
-}

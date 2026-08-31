@@ -2,11 +2,9 @@
 
 import { Download } from "lucide-react";
 import { useTranslations } from "next-intl";
+import writeXlsxFile from "write-excel-file/browser";
 
-import { toCsv } from "@/lib/utils";
-
-
-export function CsvExportButton({
+export function ExcelExportButton({
   filename,
   headers,
   rows,
@@ -19,18 +17,17 @@ export function CsvExportButton({
 }) {
   const t = useTranslations("Common");
 
-  const download = () => {
-    // El BOM hace que Excel abra los acentos correctamente.
-    const blob = new Blob(["﻿", toCsv(headers, rows)], {
-      type: "text/csv;charset=utf-8;",
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = filename;
-    link.click();
-    URL.revokeObjectURL(url);
-  };
+  const download = () =>
+    writeXlsxFile([headers.map((value) => ({ value, fontWeight: "bold" as const })), ...rows], {
+      stickyRowsCount: 1,
+      // Ancho por columna segun el contenido mas largo, para que no salga cortado.
+      columns: headers.map((header, column) => ({
+        width: Math.min(
+          50,
+          rows.reduce((max, row) => Math.max(max, String(row[column] ?? "").length), header.length) + 2,
+        ),
+      })),
+    }).toFile(filename);
 
   return (
     <button

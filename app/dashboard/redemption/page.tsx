@@ -10,7 +10,7 @@ import { RedemptionStats } from '@/components/dashboard/redemption/redemption-st
 import { PendingRedemptionActions } from '@/components/dashboard/redemption/row-actions';
 import { RedemptionStatusBadge } from '@/components/dashboard/redemption/status-badge';
 import { CopyableCode } from '@/components/dashboard/shared/copyable-code';
-import { CsvExportButton } from '@/components/dashboard/shared/csv-export-button';
+import { ExcelExportButton } from '@/components/dashboard/shared/excel-export-button';
 import { InfoCard } from '@/components/dashboard/shared/info-card';
 import { QuickActionsCard } from '@/components/dashboard/shared/quick-actions-card';
 import { TablePagination } from '@/components/dashboard/shared/table-pagination';
@@ -184,8 +184,8 @@ export default async function RedemptionListPage({ searchParams }: PageProps) {
           <p className="text-sm text-muted-foreground">{t('description')}</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <CsvExportButton
-            filename="canjes.csv"
+          <ExcelExportButton
+            filename="canjes.xlsx"
             label={tCommon('export')}
             headers={[
               t('tableHeaders.code'),

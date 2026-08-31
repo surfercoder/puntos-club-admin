@@ -8,7 +8,6 @@ import {
   previewPoints,
   formatDateTime,
   formatDateOnly,
-  toCsv,
 } from '@/lib/utils';
 
 describe('cn', () => {
@@ -186,27 +185,6 @@ describe('previewPoints', () => {
     expect(previewPoints('percentage', 0, 1000)).toBe(0);
     expect(previewPoints('percentage', -1, 1000)).toBe(0);
     expect(previewPoints('percentage', Number.NaN, 1000)).toBe(0);
-  });
-});
-
-describe('toCsv', () => {
-  it('quotes every field and doubles inner quotes', () => {
-    expect(toCsv(['a', 'b'], [['x', 'say "hi"'], [1, null]])).toBe(
-      '"a","b"\r\n"x","say ""hi"""\r\n"1",""',
-    );
-  });
-});
-
-describe('toCsv · inyección de fórmulas', () => {
-  it.each(['=1+1', '+1', '-1', '@SUM(A1)', '\tcmd', '\rcmd'])(
-    'neutraliza %j anteponiendo una comilla simple',
-    (payload) => {
-      expect(toCsv(['a'], [[payload]])).toBe(`"a"\r\n"'${payload}"`);
-    },
-  );
-
-  it('deja pasar un valor normal sin tocarlo', () => {
-    expect(toCsv(['a'], [['Ana Pérez']])).toBe('"a"\r\n"Ana Pérez"');
   });
 });
 

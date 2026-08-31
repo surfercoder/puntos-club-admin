@@ -9,7 +9,7 @@ import {
 } from '@/components/dashboard/purchase/purchase-filters';
 import { PurchaseStats } from '@/components/dashboard/purchase/purchase-stats';
 import ToastHandler from '@/components/dashboard/purchase/toast-handler';
-import { CsvExportButton } from '@/components/dashboard/shared/csv-export-button';
+import { ExcelExportButton } from '@/components/dashboard/shared/excel-export-button';
 import { InfoCard } from '@/components/dashboard/shared/info-card';
 import { QuickActionsCard } from '@/components/dashboard/shared/quick-actions-card';
 import { SummaryCard } from '@/components/dashboard/shared/summary-card';
@@ -293,8 +293,8 @@ export default async function PurchaseListPage({ searchParams }: PageProps) {
             <BarChart3 className="size-4" />
             {t('viewStats')}
           </Link>
-          <CsvExportButton
-            filename="cajero-virtual.csv"
+          <ExcelExportButton
+            filename="cajero-virtual.xlsx"
             label={tCommon('export')}
             headers={[
               t('tableHeaders.purchaseNumber'),

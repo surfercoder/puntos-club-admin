@@ -13,7 +13,7 @@ import { HideButton } from '@/components/dashboard/beneficiary/hide-button';
 import { PlanLimitCreateButton } from '@/components/dashboard/plan/plan-limit-create-button';
 import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
-import { CsvExportButton } from '@/components/dashboard/shared/csv-export-button';
+import { ExcelExportButton } from '@/components/dashboard/shared/excel-export-button';
 import { TablePagination } from '@/components/dashboard/shared/table-pagination';
 import { Button } from '@/components/ui/button';
 import {
@@ -331,8 +331,8 @@ export default async function BeneficiaryListPage({ searchParams }: PageProps) {
             <MapPin className="size-4" />
             {t('viewOnMap')}
           </Link>
-          <CsvExportButton
-            filename="beneficiarios.csv"
+          <ExcelExportButton
+            filename="beneficiarios.xlsx"
             label={tCommon('export')}
             headers={[
               t('tableHeaders.name'),

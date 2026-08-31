@@ -22,7 +22,7 @@ jest.mock('@/components/dashboard/beneficiary/hide-button', () => ({ HideButton:
 jest.mock('@/components/dashboard/beneficiary/beneficiary-filters', () => ({ BeneficiaryFilters: () => <div /> }));
 jest.mock('@/components/dashboard/beneficiary/beneficiary-stats', () => ({ BeneficiaryStats: () => <div /> }));
 jest.mock('@/components/dashboard/beneficiary/beneficiary-heatmap', () => ({ BeneficiaryHeatmap: () => <div /> }));
-jest.mock('@/components/dashboard/shared/csv-export-button', () => ({ CsvExportButton: () => <div /> }));
+jest.mock('@/components/dashboard/shared/excel-export-button', () => ({ ExcelExportButton: () => <div /> }));
 jest.mock('@/components/dashboard/shared/table-pagination', () => ({ TablePagination: () => <div /> }));
 jest.mock('@/components/ui/button', () => ({ Button: ({ children }: { children: React.ReactNode }) => <button>{children}</button> }));
 jest.mock('@/components/ui/table', () => ({

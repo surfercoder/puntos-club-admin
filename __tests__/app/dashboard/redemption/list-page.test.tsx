@@ -34,7 +34,7 @@ jest.mock('@/components/dashboard/redemption/redemption-filters', () => ({
 jest.mock('@/components/dashboard/shared/copyable-code', () => ({
   CopyableCode: ({ value }: { value: string }) => <span>{value}</span>,
 }));
-jest.mock('@/components/dashboard/shared/csv-export-button', () => ({ CsvExportButton: () => <div /> }));
+jest.mock('@/components/dashboard/shared/excel-export-button', () => ({ ExcelExportButton: () => <div /> }));
 jest.mock('@/components/dashboard/shared/info-card', () => ({ InfoCard: () => <div /> }));
 jest.mock('@/components/dashboard/shared/quick-actions-card', () => ({ QuickActionsCard: () => <div /> }));
 jest.mock('@/components/dashboard/shared/table-pagination', () => ({ TablePagination: () => <div /> }));

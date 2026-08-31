@@ -24,7 +24,7 @@ jest.mock('@/components/dashboard/purchase/purchase-filters', () => ({
   PurchaseFilters: () => <div />,
 }));
 jest.mock('@/components/dashboard/purchase/purchase-stats', () => ({ PurchaseStats: () => <div /> }));
-jest.mock('@/components/dashboard/shared/csv-export-button', () => ({ CsvExportButton: () => <div /> }));
+jest.mock('@/components/dashboard/shared/excel-export-button', () => ({ ExcelExportButton: () => <div /> }));
 jest.mock('@/components/dashboard/shared/info-card', () => ({ InfoCard: () => <div /> }));
 jest.mock('@/components/dashboard/shared/quick-actions-card', () => ({ QuickActionsCard: () => <div /> }));
 jest.mock('@/components/dashboard/shared/summary-card', () => ({ SummaryCard: () => <div /> }));
