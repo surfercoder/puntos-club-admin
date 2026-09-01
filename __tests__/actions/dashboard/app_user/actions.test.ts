@@ -77,7 +77,11 @@ const validAppUser = {
   first_name: 'John',
   last_name: 'Doe',
   email: 'john@example.com',
+  password: 'Secret123!',
 };
+
+// En la edición el id viaja dentro del input: es lo que hace opcional la contraseña.
+const validUpdate = { ...validAppUser, id: '1' };
 
 describe('createAppUser', () => {
   it('should create app user successfully', async () => {
@@ -158,10 +162,10 @@ describe('createAppUser', () => {
     mockSupabase.single
       .mockReturnValueOnce({ data: { id: '1', name: 'cashier' }, error: null }) // role lookup
       .mockReturnValue({ data: { id: '1' }, error: null }); // insert result
-    const result = await createAppUser({ ...validAppUser, password: 'secret123', role_id: '5' });
+    const result = await createAppUser({ ...validAppUser, password: 'Secret123!', role_id: '5' });
     expect(mockAdminClient.auth.admin.createUser).toHaveBeenCalledWith({
       email: 'john@example.com',
-      password: 'secret123',
+      password: 'Secret123!',
       email_confirm: true,
       user_metadata: {
         first_name: 'John',
@@ -179,14 +183,15 @@ describe('createAppUser', () => {
       data: { user: null },
       error: { message: 'Auth error: email already exists' },
     });
-    const result = await createAppUser({ ...validAppUser, password: 'secret123', role_id: '5' });
+    const result = await createAppUser({ ...validAppUser, password: 'Secret123!', role_id: '5' });
     expect(result).toEqual({ data: null, error: { message: 'Auth error: email already exists' } });
   });
 
-  it('should not create auth user when password is missing', async () => {
-    const result = await createAppUser(validAppUser);
+  it('should reject creating an app user without password', async () => {
+    const { password: _password, ...withoutPassword } = validAppUser;
+    const result = await createAppUser(withoutPassword as never);
     expect(mockAdminClient.auth.admin.createUser).not.toHaveBeenCalled();
-    expect(result.data).toBeDefined();
+    expect(result.error).toHaveProperty('fieldErrors');
   });
 
   it('should handle auth user creation where user id is undefined', async () => {
@@ -197,22 +202,21 @@ describe('createAppUser', () => {
       data: { user: undefined },
       error: null,
     });
-    const result = await createAppUser({ ...validAppUser, password: 'secret123', role_id: '5' });
+    const result = await createAppUser({ ...validAppUser, password: 'Secret123!', role_id: '5' });
     expect(result.data).toBeDefined();
   });
 
-  it('should create auth user with null first_name/last_name when names are empty', async () => {
-    mockSupabase.single
-      .mockReturnValueOnce({ data: { id: '1', name: 'cashier' }, error: null }) // role lookup
-      .mockReturnValue({ data: { id: '1' }, error: null }); // insert result
-    const result = await createAppUser({ email: 'noname@example.com', password: 'secret123', role_id: '5', first_name: '', last_name: '' });
-    expect(mockAdminClient.auth.admin.createUser).toHaveBeenCalledWith(expect.objectContaining({
-      user_metadata: expect.objectContaining({
-        first_name: null,
-        last_name: null,
-      }),
-    }));
-    expect(result.data).toBeDefined();
+  it('ignora un id mandado por el cliente y sigue exigiendo contraseña', async () => {
+    const { password: _password, ...withoutPassword } = validAppUser;
+    const result = await createAppUser({ ...withoutPassword, id: 'forjado' } as never);
+    expect(mockAdminClient.auth.admin.createUser).not.toHaveBeenCalled();
+    expect(result.error).toHaveProperty('fieldErrors');
+  });
+
+  it('should reject creating an app user with empty names', async () => {
+    const result = await createAppUser({ ...validAppUser, first_name: '', last_name: '' });
+    expect(mockAdminClient.auth.admin.createUser).not.toHaveBeenCalled();
+    expect(result.error).toHaveProperty('fieldErrors');
   });
 
   it('should handle NaN active_org_id cookie', async () => {
@@ -225,7 +229,7 @@ describe('createAppUser', () => {
 
 describe('updateAppUser', () => {
   it('should update app user successfully', async () => {
-    const result = await updateAppUser('1', validAppUser);
+    const result = await updateAppUser('1', validUpdate);
     expect(mockSupabase.update).toHaveBeenCalled();
     expect(result.data).toBeDefined();
   });
@@ -237,7 +241,7 @@ describe('updateAppUser', () => {
       success: false,
       error: { issues: [{ path: ['email'], message: 'Bad email' }] },
     }));
-    const result = await updateAppUser('1', { ...validAppUser, email: 'bad' });
+    const result = await updateAppUser('1', { ...validUpdate, email: 'bad' });
     expect(result.error).toHaveProperty('fieldErrors');
     schema.safeParse = orig;
   });
@@ -249,7 +253,7 @@ describe('updateAppUser', () => {
       success: false,
       error: { issues: [{ path: [], message: 'Root' }] },
     }));
-    const result = await updateAppUser('1', { ...validAppUser, email: 'bad' });
+    const result = await updateAppUser('1', { ...validUpdate, email: 'bad' });
     expect((result.error as { fieldErrors: Record<string, string> }).fieldErrors).toEqual({});
     schema.safeParse = orig;
   });
@@ -258,8 +262,8 @@ describe('updateAppUser', () => {
     mockSupabase.single
       .mockReturnValueOnce({ data: { auth_user_id: 'existing-auth-id', email: 'old@example.com', role_id: '5', first_name: 'Old', last_name: 'Name' }, error: null }) // existing user lookup
       .mockReturnValue({ data: { id: '1' }, error: null }); // update result
-    const result = await updateAppUser('1', { ...validAppUser, password: 'newpass123' });
-    expect(mockAdminClient.auth.admin.updateUserById).toHaveBeenCalledWith('existing-auth-id', { password: 'newpass123', email: 'john@example.com' });
+    const result = await updateAppUser('1', { ...validUpdate, password: 'Newpass123!' });
+    expect(mockAdminClient.auth.admin.updateUserById).toHaveBeenCalledWith('existing-auth-id', { password: 'Newpass123!', email: 'john@example.com' });
     expect(result.data).toBeDefined();
   });
 
@@ -267,7 +271,7 @@ describe('updateAppUser', () => {
     mockSupabase.single
       .mockReturnValueOnce({ data: { auth_user_id: 'existing-auth-id', email: 'old@example.com', role_id: '5', first_name: 'Old', last_name: 'Name' }, error: null })
       .mockReturnValue({ data: { id: '1' }, error: null });
-    const result = await updateAppUser('1', { first_name: 'John', last_name: 'Doe', email: 'new@example.com' });
+    const result = await updateAppUser('1', { ...validUpdate, password: '', email: 'new@example.com' });
     expect(mockAdminClient.auth.admin.updateUserById).toHaveBeenCalledWith('existing-auth-id', { email: 'new@example.com' });
     expect(result.data).toBeDefined();
   });
@@ -276,8 +280,8 @@ describe('updateAppUser', () => {
     mockSupabase.single
       .mockReturnValueOnce({ data: { auth_user_id: 'existing-auth-id', email: 'old@example.com', role_id: '5', first_name: 'Old', last_name: 'Name' }, error: null })
       .mockReturnValue({ data: { id: '1' }, error: null });
-    const result = await updateAppUser('1', { ...validAppUser, password: 'newpass123', email: 'new@example.com' });
-    expect(mockAdminClient.auth.admin.updateUserById).toHaveBeenCalledWith('existing-auth-id', { password: 'newpass123', email: 'new@example.com' });
+    const result = await updateAppUser('1', { ...validUpdate, password: 'Newpass123!', email: 'new@example.com' });
+    expect(mockAdminClient.auth.admin.updateUserById).toHaveBeenCalledWith('existing-auth-id', { password: 'Newpass123!', email: 'new@example.com' });
     expect(result.data).toBeDefined();
   });
 
@@ -285,7 +289,7 @@ describe('updateAppUser', () => {
     mockSupabase.single
       .mockReturnValueOnce({ data: { auth_user_id: 'existing-auth-id', email: 'old@example.com', role_id: '5', first_name: 'Old', last_name: 'Name' }, error: null });
     mockAdminClient.auth.admin.updateUserById.mockReturnValueOnce({ data: null, error: { message: 'Auth update failed' } });
-    const result = await updateAppUser('1', { ...validAppUser, password: 'newpass123' });
+    const result = await updateAppUser('1', { ...validUpdate, password: 'Newpass123!' });
     expect(result).toEqual({ data: null, error: { message: 'Auth update failed' } });
   });
 
@@ -294,10 +298,10 @@ describe('updateAppUser', () => {
       .mockReturnValueOnce({ data: { auth_user_id: null, email: 'existing@example.com', role_id: '5', first_name: 'Existing', last_name: 'User' }, error: null }) // existing user
       .mockReturnValueOnce({ data: { id: '5', name: 'cashier' }, error: null }) // role lookup
       .mockReturnValue({ data: { id: '1' }, error: null }); // update result
-    const result = await updateAppUser('1', { ...validAppUser, password: 'newpass123' });
+    const result = await updateAppUser('1', { ...validUpdate, password: 'Newpass123!' });
     expect(mockAdminClient.auth.admin.createUser).toHaveBeenCalledWith({
       email: 'john@example.com',
-      password: 'newpass123',
+      password: 'Newpass123!',
       email_confirm: true,
       user_metadata: {
         first_name: 'John',
@@ -308,26 +312,12 @@ describe('updateAppUser', () => {
     expect(result.data).toBeDefined();
   });
 
-  it('should use existing email when creating auth user without email in updateData', async () => {
-    mockSupabase.single
-      .mockReturnValueOnce({ data: { auth_user_id: null, email: 'existing@example.com', role_id: '5', first_name: 'Existing', last_name: 'User' }, error: null })
-      .mockReturnValueOnce({ data: { id: '5', name: 'cashier' }, error: null }) // role lookup
-      .mockReturnValue({ data: { id: '1' }, error: null });
-    // Input with no email, only password
-    const result = await updateAppUser('1', { first_name: 'John', last_name: 'Doe', password: 'newpass123' });
-    expect(mockAdminClient.auth.admin.createUser).toHaveBeenCalledWith(expect.objectContaining({
-      email: 'existing@example.com',
-      password: 'newpass123',
-    }));
-    expect(result.data).toBeDefined();
-  });
-
   it('should return error when creating auth user on update fails', async () => {
     mockSupabase.single
       .mockReturnValueOnce({ data: { auth_user_id: null, email: 'existing@example.com', role_id: '5', first_name: 'Existing', last_name: 'User' }, error: null })
       .mockReturnValueOnce({ data: { id: '5', name: 'cashier' }, error: null }); // role lookup
     mockAdminClient.auth.admin.createUser.mockReturnValueOnce({ data: { user: null }, error: { message: 'Create auth failed' } });
-    const result = await updateAppUser('1', { ...validAppUser, password: 'newpass123' });
+    const result = await updateAppUser('1', { ...validUpdate, password: 'Newpass123!' });
     expect(result).toEqual({ data: null, error: { message: 'Create auth failed' } });
   });
 
@@ -337,7 +327,7 @@ describe('updateAppUser', () => {
       .mockReturnValueOnce({ data: { id: '5', name: 'cashier' }, error: null })
       .mockReturnValue({ data: { id: '1' }, error: null });
     mockAdminClient.auth.admin.createUser.mockReturnValueOnce({ data: { user: { id: 'new-auth-id-456' } }, error: null });
-    const result = await updateAppUser('1', { ...validAppUser, password: 'newpass123' });
+    const result = await updateAppUser('1', { ...validUpdate, password: 'Newpass123!' });
     expect(result.data).toBeDefined();
   });
 
@@ -345,41 +335,11 @@ describe('updateAppUser', () => {
     mockSupabase.single
       .mockReturnValueOnce({ data: { auth_user_id: null, email: 'existing@example.com', role_id: null, first_name: null, last_name: null }, error: null })
       .mockReturnValue({ data: { id: '1' }, error: null });
-    const result = await updateAppUser('1', { password: 'newpass123', email: 'new@example.com' });
+    const result = await updateAppUser('1', { ...validUpdate, password: 'Newpass123!', email: 'new@example.com' });
     expect(mockAdminClient.auth.admin.createUser).toHaveBeenCalledWith(expect.objectContaining({
       email: 'new@example.com',
-      password: 'newpass123',
+      password: 'Newpass123!',
       user_metadata: expect.objectContaining({ role_name: null }),
-    }));
-    expect(result.data).toBeDefined();
-  });
-
-  it('should use existing user first/last name as fallback when creating auth user', async () => {
-    mockSupabase.single
-      .mockReturnValueOnce({ data: { auth_user_id: null, email: 'existing@example.com', role_id: null, first_name: 'ExistingFirst', last_name: 'ExistingLast' }, error: null })
-      .mockReturnValue({ data: { id: '1' }, error: null });
-    // Input with no first_name, no last_name
-    const result = await updateAppUser('1', { password: 'newpass123', email: 'test@example.com' });
-    expect(mockAdminClient.auth.admin.createUser).toHaveBeenCalledWith(expect.objectContaining({
-      user_metadata: expect.objectContaining({
-        first_name: 'ExistingFirst',
-        last_name: 'ExistingLast',
-      }),
-    }));
-    expect(result.data).toBeDefined();
-  });
-
-  it('should handle null first_name/last_name in both updateData and existingUser during auth creation', async () => {
-    mockSupabase.single
-      .mockReturnValueOnce({ data: { auth_user_id: null, email: 'existing@example.com', role_id: null, first_name: null, last_name: null }, error: null })
-      .mockReturnValue({ data: { id: '1' }, error: null });
-    // Input with empty names (schema transforms to null, then stripped by null filter)
-    const result = await updateAppUser('1', { password: 'newpass123', email: 'test@example.com', first_name: '', last_name: '' });
-    expect(mockAdminClient.auth.admin.createUser).toHaveBeenCalledWith(expect.objectContaining({
-      user_metadata: expect.objectContaining({
-        first_name: null,
-        last_name: null,
-      }),
     }));
     expect(result.data).toBeDefined();
   });
@@ -389,15 +349,15 @@ describe('updateAppUser', () => {
     mockSupabase.single
       .mockReturnValueOnce({ data: { auth_user_id: null, email: 'old@example.com', role_id: null, first_name: null, last_name: null }, error: null })
       .mockReturnValue({ data: { id: '1' }, error: null });
-    const result = await updateAppUser('1', { ...validAppUser, email: 'new@example.com' });
+    const result = await updateAppUser('1', { ...validUpdate, password: '', email: 'new@example.com' });
     expect(mockAdminClient.auth.admin.createUser).not.toHaveBeenCalled();
     expect(mockAdminClient.auth.admin.updateUserById).not.toHaveBeenCalled();
     expect(result.data).toBeDefined();
   });
 
-  it('should strip null fields from update data (empty strings become null and are stripped)', async () => {
-    // Empty string -> schema transforms to null -> null-stripping removes it from updateData
-    const result = await updateAppUser('1', { first_name: 'John', last_name: '', email: 'john@example.com', password: '' });
+  it('should strip the empty password from update data', async () => {
+    // Empty password -> schema transforms to undefined -> null-stripping removes it from updateData
+    const result = await updateAppUser('1', { ...validUpdate, password: '' });
     expect(mockSupabase.update).toHaveBeenCalled();
     expect(result.data).toBeDefined();
   });
@@ -407,7 +367,7 @@ describe('updateAppUser', () => {
       .mockReturnValueOnce({ data: { auth_user_id: null, email: 'existing@example.com', role_id: '5', first_name: 'Old', last_name: 'User' }, error: null })
       .mockReturnValueOnce({ data: null, error: null }) // role lookup returns null data
       .mockReturnValue({ data: { id: '1' }, error: null });
-    const result = await updateAppUser('1', { ...validAppUser, password: 'newpass123' });
+    const result = await updateAppUser('1', { ...validUpdate, password: 'Newpass123!' });
     expect(mockAdminClient.auth.admin.createUser).toHaveBeenCalledWith(expect.objectContaining({
       user_metadata: expect.objectContaining({ role_name: null }),
     }));
@@ -419,7 +379,7 @@ describe('updateAppUser', () => {
       .mockReturnValueOnce({ data: { auth_user_id: null, email: 'existing@example.com', role_id: null, first_name: 'Old', last_name: 'User' }, error: null })
       .mockReturnValueOnce({ data: { id: '10', name: 'collaborator' }, error: null }) // role lookup
       .mockReturnValue({ data: { id: '1' }, error: null });
-    const result = await updateAppUser('1', { ...validAppUser, password: 'newpass123', role_id: '10' });
+    const result = await updateAppUser('1', { ...validUpdate, password: 'Newpass123!', role_id: '10' });
     expect(mockAdminClient.auth.admin.createUser).toHaveBeenCalledWith(expect.objectContaining({
       user_metadata: expect.objectContaining({ role_name: 'collaborator' }),
     }));

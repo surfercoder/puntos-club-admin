@@ -12,7 +12,11 @@ import type { PlanFeatureKey } from '@/types/plan';
 export async function createAppUser(input: AppUserInput) {
   await requireUser();
 
-  const parsed = AppUserSchema.safeParse(input);
+  // `id` lo asigna la base. Si llegara desde el cliente, el schema lo leería como
+  // "esto es una edición" y dejaría pasar un alta sin contraseña, además de dejar
+  // elegir la clave primaria de la fila.
+  const { id: _clientId, ...payload } = input;
+  const parsed = AppUserSchema.safeParse(payload);
 
   if (!parsed.success) {
     const fieldErrors: Record<string, string> = {};
@@ -60,7 +64,7 @@ export async function createAppUser(input: AppUserInput) {
 
   // Create Supabase Auth user so the user can log in
   let authUserId: string | null = null;
-  if (parsed.data.email && parsed.data.password) {
+  if (parsed.data.password) {
     const adminClient = createAdminClient();
 
     const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
@@ -68,8 +72,8 @@ export async function createAppUser(input: AppUserInput) {
       password: parsed.data.password,
       email_confirm: true,
       user_metadata: {
-        first_name: parsed.data.first_name || null,
-        last_name: parsed.data.last_name || null,
+        first_name: parsed.data.first_name,
+        last_name: parsed.data.last_name,
         role_name: roleName,
       },
     });
@@ -146,39 +150,37 @@ export async function updateAppUser(id: string, input: AppUserInput) {
         return { data: null, error: { message: authError.message } };
       }
     } else if (updateData.password) {
-      // No auth user yet — create one so the user can log in
-      const email = (updateData.email || existingUser?.email) as string;
-      if (email) {
-        let roleName: string | null = null;
-        const roleId = updateData.role_id || existingUser?.role_id;
-        if (roleId) {
-          const { data: roleData } = await supabase
-            .from('user_role')
-            .select('name')
-            .eq('id', roleId)
-            .single();
-          roleName = roleData?.name ?? null;
-        }
+      // No auth user yet — create one so the user can log in. Nombre, apellido
+      // y correo son obligatorios en el schema, así que vienen siempre.
+      let roleName: string | null = null;
+      const roleId = updateData.role_id || existingUser?.role_id;
+      if (roleId) {
+        const { data: roleData } = await supabase
+          .from('user_role')
+          .select('name')
+          .eq('id', roleId)
+          .single();
+        roleName = roleData?.name ?? null;
+      }
 
-        const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
-          email,
-          password: updateData.password as string,
-          email_confirm: true,
-          user_metadata: {
-            first_name: updateData.first_name || existingUser?.first_name || null,
-            last_name: updateData.last_name || existingUser?.last_name || null,
-            role_name: roleName,
-          },
-        });
+      const { data: authData, error: authError } = await adminClient.auth.admin.createUser({
+        email: updateData.email as string,
+        password: updateData.password as string,
+        email_confirm: true,
+        user_metadata: {
+          first_name: updateData.first_name,
+          last_name: updateData.last_name,
+          role_name: roleName,
+        },
+      });
 
-        if (authError) {
-          return { data: null, error: { message: authError.message } };
-        }
+      if (authError) {
+        return { data: null, error: { message: authError.message } };
+      }
 
-        // Link the new auth user to the app_user record
-        if (authData.user) {
-          updateData.auth_user_id = authData.user.id;
-        }
+      // Link the new auth user to the app_user record
+      if (authData.user) {
+        updateData.auth_user_id = authData.user.id;
       }
     }
   }

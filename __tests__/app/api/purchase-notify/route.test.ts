@@ -28,10 +28,7 @@ jest.mock('@/lib/resend', () => ({
 }));
 
 jest.mock('@/lib/email-template', () => ({
-  brandedEmailLayout: jest.fn((body: string) => `<html>${body}</html>`),
-  sectionHeading: jest.fn((text: string) => `<h2>${text}</h2>`),
-  subtitle: jest.fn((text: string) => `<p>${text}</p>`),
-  dataTable: jest.fn(() => '<table></table>'),
+  pointsCreditedEmail: jest.fn(() => '<html>email</html>'),
 }));
 
 global.fetch = jest.fn();

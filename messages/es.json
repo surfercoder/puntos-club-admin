@@ -795,13 +795,13 @@
       "fetchError": "Error al obtener el usuario",
       "form": {
         "firstNameLabel": "Nombre",
-        "firstNamePlaceholder": "Ingresa el nombre (opcional)",
+        "firstNamePlaceholder": "Ingresa el nombre",
         "lastNameLabel": "Apellido",
-        "lastNamePlaceholder": "Ingresa el apellido (opcional)",
+        "lastNamePlaceholder": "Ingresa el apellido",
         "emailLabel": "Correo electrónico",
-        "emailPlaceholder": "Ingresa el correo electrónico (opcional)",
+        "emailPlaceholder": "Ingresa el correo electrónico",
         "passwordLabel": "Contraseña",
-        "passwordPlaceholder": "Ingresa la contraseña (opcional)",
+        "passwordPlaceholder": "Ingresa la contraseña",
         "roleLabel": "Rol",
         "selectRole": "Seleccionar un rol",
         "roleLimitReached": "{role} (límite alcanzado)",
@@ -1882,7 +1882,6 @@
     "clubProfile": {
       "title": "Perfil del Club",
       "description": "Administrá la información y configuración de tu organización en PuntosClub.",
-      "preview": "Vista previa del club",
       "saved": "Perfil del club actualizado",
       "visibility": {
         "title": "Visibilidad del club",

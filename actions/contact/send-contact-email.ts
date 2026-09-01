@@ -9,6 +9,7 @@ import {
   sectionHeading,
   subtitle,
   dataTable,
+  esc,
   messageBox,
 } from '@/lib/email-template';
 import { resend, EMAIL_FROM } from '@/lib/resend';
@@ -39,18 +40,19 @@ export async function sendContactEmail(
     return { success: true };
   }
 
+  // El form de contacto es público: todo lo que llega se escapa antes de entrar al HTML.
   const rows = [
-    { label: 'Nombre', value: fullName },
-    { label: 'Email', value: `<a href="mailto:${email}" style="color:#FD7E14;text-decoration:none">${email}</a>` },
-    { label: 'Teléfono', value: phoneNumber },
-    ...(business ? [{ label: 'Empresa', value: business }] : []),
+    { label: 'Nombre', value: esc(fullName) },
+    { label: 'Email', value: `<a href="mailto:${esc(email)}" style="color:#FD7E14;text-decoration:none">${esc(email)}</a>` },
+    { label: 'Teléfono', value: esc(phoneNumber) },
+    ...(business ? [{ label: 'Empresa', value: esc(business) }] : []),
   ];
 
   const body = `
     ${sectionHeading('Nueva consulta')}
     ${subtitle('Recibiste un mensaje desde el formulario de contacto de la landing page.')}
     ${dataTable(rows)}
-    ${messageBox('Mensaje', message)}
+    ${messageBox('Mensaje', esc(message))}
   `;
 
   const html = brandedEmailLayout(body);

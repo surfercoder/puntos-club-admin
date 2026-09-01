@@ -4,12 +4,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { resend, EMAIL_FROM } from "@/lib/resend";
-import {
-  brandedEmailLayout,
-  sectionHeading,
-  subtitle,
-  dataTable,
-} from "@/lib/email-template";
+import { pointsCreditedEmail } from "@/lib/email-template";
 
 interface ExpoPushMessage {
   to: string;
@@ -34,52 +29,6 @@ async function sendPushNotifications(messages: ExpoPushMessage[]) {
   }
 
   return response.json();
-}
-
-function buildPurchaseEmailHtml(params: {
-  beneficiaryName: string;
-  organizationName: string;
-  pointsEarned: number;
-  totalAmount: number;
-  newBalance: number;
-}): string {
-  const {
-    beneficiaryName,
-    organizationName,
-    pointsEarned,
-    totalAmount,
-    newBalance,
-  } = params;
-
-  const body = `
-    ${sectionHeading(`Ganaste ${pointsEarned.toLocaleString("es-AR")} puntos`)}
-    ${subtitle(`Tu operación en ${organizationName} te sumó puntos.`)}
-
-    <p style="margin:0 0 20px">
-      Hola <strong>${beneficiaryName}</strong>, tu operación fue registrada con éxito.
-    </p>
-
-    ${dataTable([
-      {
-        label: "Monto",
-        value: `$${totalAmount.toLocaleString("es-AR", { minimumFractionDigits: 2 })}`,
-      },
-      {
-        label: "Puntos ganados",
-        value: `<strong style="color:#4BB562">+${pointsEarned.toLocaleString("es-AR")}</strong>`,
-      },
-      {
-        label: "Tu saldo",
-        value: `<strong>${newBalance.toLocaleString("es-AR")} puntos</strong>`,
-      },
-    ])}
-
-    <p style="margin:20px 0 0;font-size:13px;color:#6B7280">
-      Seguí acumulando puntos con cada operación y canjealos por premios exclusivos.
-    </p>
-  `;
-
-  return brandedEmailLayout(body);
 }
 
 export async function POST(request: NextRequest) {
@@ -180,7 +129,7 @@ export async function POST(request: NextRequest) {
     // Fetch organization name
     const { data: organization } = await adminClient
       .from("organization")
-      .select("name")
+      .select("name, logo_url")
       .eq("id", organizationId || appUser.organization_id)
       .single();
 
@@ -254,12 +203,13 @@ export async function POST(request: NextRequest) {
     let emailSent = false;
 
     if (beneficiary.email) {
-      const html = buildPurchaseEmailHtml({
+      const html = pointsCreditedEmail({
         beneficiaryName,
         organizationName: orgName,
+        organizationLogoUrl: organization?.logo_url,
         pointsEarned,
-        totalAmount,
         newBalance,
+        accreditedAt: new Date(),
       });
 
       try {
@@ -267,7 +217,7 @@ export async function POST(request: NextRequest) {
           const { error: emailError } = await resend.emails.send({
             from: EMAIL_FROM,
             to: beneficiary.email,
-            subject: `Ganaste ${pointsEarned.toLocaleString("es-AR")} puntos en ${orgName}`,
+            subject: `¡Se acreditaron +${pointsEarned.toLocaleString("es-AR")} puntos en tu cuenta!`,
             html,
           });
 

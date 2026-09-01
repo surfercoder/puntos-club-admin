@@ -30,6 +30,12 @@ jest.mock('@/components/dashboard/app_user/app_user-form', () => ({
     <div data-testid="user-form">{lockedRoleName}</div>
   ),
 }));
+jest.mock('@/components/dashboard/app_user/delete-modal', () => ({
+  __esModule: true,
+  default: ({ appUserName }: { appUserName: string }) => (
+    <button data-testid="delete-user">{appUserName}</button>
+  ),
+}));
 jest.mock('@/components/dashboard/plan/plan-usage-badge', () => ({ PlanUsageBadge: () => <div /> }));
 jest.mock('@/components/dashboard/plan/plan-usage-banner', () => ({ PlanUsageBanner: () => <div /> }));
 jest.mock('@/components/dashboard/shared/table-pagination', () => ({ TablePagination: () => <div /> }));

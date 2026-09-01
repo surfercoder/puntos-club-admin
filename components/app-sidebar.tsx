@@ -129,7 +129,6 @@ export function AppSidebar({
         { title: t("products"), url: "/dashboard/product", icon: Package },
         { title: t("purchases"), url: "/dashboard/purchase", icon: Receipt },
         { title: t("redemptions"), url: "/dashboard/redemption", icon: Gift },
-        { title: t("appUsers"), url: "/dashboard/app_user", icon: Users },
       ]
         .slice()
         .sort((a, b) => a.title.localeCompare(b.title))
@@ -177,7 +176,6 @@ export function AppSidebar({
           { title: t("branches"), url: "/dashboard/branch" },
           { title: t("addresses"), url: "/dashboard/address" },
           { title: t("products"), url: "/dashboard/product" },
-          { title: t("appUsers"), url: "/dashboard/app_user" },
           { title: t("usersByOrg"), url: "/dashboard/app_user_organization" },
         ],
       },

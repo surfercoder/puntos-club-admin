@@ -795,13 +795,13 @@
       "fetchError": "Error fetching user",
       "form": {
         "firstNameLabel": "First Name",
-        "firstNamePlaceholder": "Enter first name (optional)",
+        "firstNamePlaceholder": "Enter first name",
         "lastNameLabel": "Last Name",
-        "lastNamePlaceholder": "Enter last name (optional)",
+        "lastNamePlaceholder": "Enter last name",
         "emailLabel": "Email",
-        "emailPlaceholder": "Enter email address (optional)",
+        "emailPlaceholder": "Enter email address",
         "passwordLabel": "Password",
-        "passwordPlaceholder": "Enter password (optional)",
+        "passwordPlaceholder": "Enter password",
         "roleLabel": "Role",
         "selectRole": "Select a role",
         "roleLimitReached": "{role} (limit reached)",
@@ -1882,7 +1882,6 @@
     "clubProfile": {
       "title": "Club profile",
       "description": "Manage your organization's information and settings on PuntosClub.",
-      "preview": "Preview the club",
       "saved": "Club profile updated",
       "visibility": {
         "title": "Club visibility",

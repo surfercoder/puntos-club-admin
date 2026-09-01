@@ -54,7 +54,7 @@ export default function DeleteModal({ appUserId, appUserName }: DeleteModalProps
   return (
     <Dialog onOpenChange={setOpen} open={open}>
       <DialogTrigger asChild>
-        <Button size="sm" variant="destructive">
+        <Button aria-label={`${tCommon('delete')} ${appUserName}`} size="sm" variant="destructive">
           <Trash2 className="size-4" />
         </Button>
       </DialogTrigger>

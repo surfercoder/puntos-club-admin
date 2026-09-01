@@ -30,9 +30,17 @@ function createFormData(data: Record<string, string>): FormData {
   return fd;
 }
 
+// Los cuatro campos son obligatorios: un form incompleto ni siquiera llega a createAppUser.
+const validForm = {
+  first_name: 'Test',
+  last_name: 'User',
+  email: 'test@test.com',
+  password: 'Sup3rSecret!',
+};
+
 describe('appUserFormAction', () => {
   it('should create app user successfully', async () => {
-    const fd = createFormData({ email: 'test@test.com' });
+    const fd = createFormData(validForm);
     const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
     expect(createAppUser).toHaveBeenCalled();
     expect(revalidatePath).toHaveBeenCalledWith('/dashboard/app_user');
@@ -40,28 +48,28 @@ describe('appUserFormAction', () => {
   });
 
   it('should update app user successfully', async () => {
-    const fd = createFormData({ id: '1', email: 'test@test.com' });
+    const fd = createFormData({ ...validForm, id: '1' });
     const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
     expect(updateAppUser).toHaveBeenCalledWith('1', expect.any(Object));
     expect(result.status).toBe('success');
   });
 
   it('should return validation error', async () => {
-    const fd = createFormData({ email: 'not-an-email' });
+    const fd = createFormData({ ...validForm, email: 'not-an-email' });
     const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
   });
 
   it('should handle thrown error', async () => {
     (createAppUser as jest.Mock).mockImplementation(() => { throw new Error('Error'); });
-    const fd = createFormData({ email: 'test@test.com' });
+    const fd = createFormData(validForm);
     const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
   });
 
   it('should return error message when result.error has message', async () => {
     (createAppUser as jest.Mock).mockReturnValueOnce({ data: null, error: { message: 'Limit reached' } });
-    const fd = createFormData({ email: 'test@test.com' });
+    const fd = createFormData(validForm);
     const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
     expect(result.message).toBe('Limit reached');
@@ -69,7 +77,7 @@ describe('appUserFormAction', () => {
 
   it('should return default error message when result.error has no message property', async () => {
     (createAppUser as jest.Mock).mockReturnValueOnce({ data: null, error: { fieldErrors: { email: 'bad' } } });
-    const fd = createFormData({ email: 'test@test.com' });
+    const fd = createFormData(validForm);
     const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
     expect(result.message).toBe('An unexpected error occurred');
@@ -77,7 +85,7 @@ describe('appUserFormAction', () => {
 
   it('should return default error message when result.error.message is null', async () => {
     (createAppUser as jest.Mock).mockReturnValueOnce({ data: null, error: { message: null } });
-    const fd = createFormData({ email: 'test@test.com' });
+    const fd = createFormData(validForm);
     const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
     expect(result.message).toBe('An unexpected error occurred');

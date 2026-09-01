@@ -8,8 +8,11 @@ jest.mock('next-intl/server', () => ({
 }));
 jest.mock('@/components/dashboard/app_user/app_user-form', () => function Mock(props: {
   branches?: { id: string; name: string }[];
+  redirectTo?: string;
 }) {
-  return <div data-testid="form">{JSON.stringify(props.branches)}</div>;
+  return (
+    <div data-testid="form" data-redirect={props.redirectTo}>{JSON.stringify(props.branches)}</div>
+  );
 });
 jest.mock('@/components/ui/card', () => ({
   Card: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
@@ -49,6 +52,24 @@ describe('EditAppUserPage', () => {
     expect(from).toHaveBeenCalledWith('branch');
     expect(eq).toHaveBeenCalledWith('organization_id', 3);
     expect(eq).toHaveBeenCalledWith('active', true);
+  });
+
+  it('vuelve al listado del rol del usuario editado', async () => {
+    userResult = {
+      data: { id: '1', first_name: 'Test', organization_id: 3, role: { name: 'cashier' } },
+      error: null,
+    };
+    render(await EditAppUserPage({ params: Promise.resolve({ id: '1' }) }));
+    expect(screen.getByTestId('form')).toHaveAttribute('data-redirect', '/dashboard/cashiers');
+  });
+
+  it('cae al listado genérico cuando el rol no tiene listado propio', async () => {
+    userResult = {
+      data: { id: '1', first_name: 'Test', organization_id: 3, role: { name: 'admin' } },
+      error: null,
+    };
+    render(await EditAppUserPage({ params: Promise.resolve({ id: '1' }) }));
+    expect(screen.getByTestId('form')).toHaveAttribute('data-redirect', '/dashboard/app_user');
   });
 
   it('sobrevive a un select de sucursales vacío', async () => {

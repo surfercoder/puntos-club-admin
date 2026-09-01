@@ -1,7 +1,9 @@
 import { CircleCheck, ShieldCheck, UserCog } from 'lucide-react';
+import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import AppUserForm from '@/components/dashboard/app_user/app_user-form';
+import DeleteModal from '@/components/dashboard/app_user/delete-modal';
 import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
 import { ExcelExportButton } from '@/components/dashboard/shared/excel-export-button';
@@ -109,6 +111,7 @@ export default async function CollaboratorsPage({ searchParams }: PageProps) {
                   <TableHead>{t('headers.role')}</TableHead>
                   <TableHead>{t('headers.status')}</TableHead>
                   <TableHead>{t('headers.since')}</TableHead>
+                  <TableHead className="text-right">{tCommon('actions')}</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -158,12 +161,23 @@ export default async function CollaboratorsPage({ searchParams }: PageProps) {
                             '—'
                           )}
                         </TableCell>
+                        <TableCell className="text-right">
+                          <span className="inline-flex items-center justify-end gap-2">
+                            <Link
+                              className="text-xs underline"
+                              href={`/dashboard/app_user/edit/${member.id}`}
+                            >
+                              {tCommon('edit')}
+                            </Link>
+                            <DeleteModal appUserId={member.id} appUserName={name} />
+                          </span>
+                        </TableCell>
                       </TableRow>
                     );
                   })
                 ) : (
                   <TableRow>
-                    <TableCell className="py-8 text-center" colSpan={4}>{t('empty')}</TableCell>
+                    <TableCell className="py-8 text-center" colSpan={5}>{t('empty')}</TableCell>
                   </TableRow>
                 )}
               </TableBody>

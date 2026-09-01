@@ -146,7 +146,7 @@ describe('AppUserForm', () => {
   it('renders without initial data in create mode', () => {
     render(<AppUserForm />);
 
-    const firstNameInput = screen.getByRole('textbox', { name: 'form.firstNameLabel' });
+    const firstNameInput = screen.getByRole('textbox', { name: /form.firstNameLabel/ });
     expect(firstNameInput).toHaveValue('');
   });
 
@@ -210,10 +210,17 @@ describe('AppUserForm', () => {
     expect(passwordInput).toHaveAttribute('type', 'password');
   });
 
+  function fillRequiredFields() {
+    fireEvent.change(screen.getByPlaceholderText('form.firstNamePlaceholder'), { target: { value: 'Ana' } });
+    fireEvent.change(screen.getByPlaceholderText('form.lastNamePlaceholder'), { target: { value: 'Gómez' } });
+    fireEvent.change(screen.getByPlaceholderText('form.emailPlaceholder'), { target: { value: 'ana@test.com' } });
+    fireEvent.change(screen.getByPlaceholderText('form.passwordPlaceholder'), { target: { value: 'Sup3rSecret!' } });
+  }
+
   it('validates form on submit', async () => {
     render(<AppUserForm />);
 
-    const form = screen.getByRole('textbox', { name: 'form.firstNameLabel' }).closest('form')!;
+    const form = screen.getByRole('textbox', { name: /form.firstNameLabel/ }).closest('form')!;
 
     await act(async () => {
       fireEvent.submit(form);
@@ -232,7 +239,7 @@ describe('AppUserForm', () => {
 
     render(<AppUserForm />);
 
-    const form = screen.getByRole('textbox', { name: 'form.firstNameLabel' }).closest('form')!;
+    const form = screen.getByRole('textbox', { name: /form.firstNameLabel/ }).closest('form')!;
 
     await act(async () => {
       fireEvent.submit(form);
@@ -360,6 +367,7 @@ describe('AppUserForm', () => {
   it('shows password weak error when password fails strength rules', async () => {
     render(<AppUserForm />);
 
+    fillRequiredFields();
     const passwordInput = screen.getByPlaceholderText('form.passwordPlaceholder');
     fireEvent.change(passwordInput, { target: { value: 'weak' } });
 
@@ -369,8 +377,24 @@ describe('AppUserForm', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('passwordWeak')).toBeInTheDocument();
+      expect(screen.getByText(/La contraseña debe tener/)).toBeInTheDocument();
     });
+  });
+
+  it('shows required field errors when the form is empty', async () => {
+    render(<AppUserForm />);
+
+    const form = screen.getByRole('textbox', { name: /form.firstNameLabel/ }).closest('form')!;
+    await act(async () => {
+      fireEvent.submit(form);
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('El nombre es requerido')).toBeInTheDocument();
+    });
+    expect(screen.getByText('El apellido es requerido')).toBeInTheDocument();
+    expect(screen.getByText('El correo electrónico es requerido')).toBeInTheDocument();
+    expect(screen.getByText('La contraseña es requerida')).toBeInTheDocument();
   });
 
   it('loads cashier and collaborator roles when currentUserRole is not collaborator', async () => {
@@ -443,6 +467,7 @@ describe('AppUserForm', () => {
     );
     await screen.findByText('form.branchLabel');
 
+    fillRequiredFields();
     fireEvent.submit(container.querySelector('form') as HTMLFormElement);
 
     expect(await screen.findByText('form.branchRequired')).toBeInTheDocument();

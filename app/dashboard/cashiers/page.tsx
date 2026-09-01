@@ -3,6 +3,7 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import AppUserForm from '@/components/dashboard/app_user/app_user-form';
+import DeleteModal from '@/components/dashboard/app_user/delete-modal';
 import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
 import { TablePagination } from '@/components/dashboard/shared/table-pagination';
@@ -168,12 +169,15 @@ export default async function CashiersPage({ searchParams }: PageProps) {
                           )}
                         </TableCell>
                         <TableCell className="text-right">
-                          <Link
-                            className="text-xs underline"
-                            href={`/dashboard/app_user/edit/${member.id}`}
-                          >
-                            {tCommon('edit')}
-                          </Link>
+                          <span className="inline-flex items-center justify-end gap-2">
+                            <Link
+                              className="text-xs underline"
+                              href={`/dashboard/app_user/edit/${member.id}`}
+                            >
+                              {tCommon('edit')}
+                            </Link>
+                            <DeleteModal appUserId={member.id} appUserName={name} />
+                          </span>
                         </TableCell>
                       </TableRow>
                     );

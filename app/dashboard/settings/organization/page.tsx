@@ -1,8 +1,6 @@
 import { cookies } from "next/headers"
-import Link from "next/link"
 import { redirect } from "next/navigation"
 import { getTranslations } from "next-intl/server"
-import { Eye } from "lucide-react"
 
 import { getOrganizationAddress, getOrganizationSettings } from "@/actions/dashboard/organization/actions"
 import { GiftIllustration } from "@/components/dashboard/home/gift-illustration"
@@ -48,16 +46,7 @@ export default async function OrgSettingsPage() {
           <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">{t("description")}</p>
         </div>
-        <div className="flex items-center gap-4">
-          <GiftIllustration className="hidden h-20 w-28 shrink-0 lg:block" />
-          <Link
-            className="inline-flex h-10 items-center gap-2 rounded-lg border bg-card px-4 text-sm font-medium transition-colors hover:bg-accent"
-            href="/dashboard/qr"
-          >
-            <Eye className="size-4" />
-            {t("preview")}
-          </Link>
-        </div>
+        <GiftIllustration className="hidden h-20 w-28 shrink-0 lg:block" />
       </div>
 
       <ClubProfileForm

@@ -13,6 +13,7 @@ jest.mock('@/lib/email-template', () => ({
   sectionHeading: jest.fn((text: string) => `<h2>${text}</h2>`),
   subtitle: jest.fn((text: string) => `<p>${text}</p>`),
   dataTable: jest.fn(() => '<table></table>'),
+  esc: jest.fn((value: string) => value),
   messageBox: jest.fn(() => '<div>message</div>'),
 }));
 

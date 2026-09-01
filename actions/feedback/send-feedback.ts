@@ -7,6 +7,7 @@ import {
   sectionHeading,
   subtitle,
   dataTable,
+  esc,
   messageBox,
   typeBadge,
 } from '@/lib/email-template';
@@ -63,16 +64,16 @@ export async function sendFeedback(
 
   const rows = [
     { label: 'Tipo', value: typeBadge(typeLabel, typeColor) },
-    { label: 'Usuario', value: userName },
-    { label: 'Email', value: `<a href="mailto:${userEmail}" style="color:#FD7E14;text-decoration:none">${userEmail}</a>` },
-    { label: 'Página', value: pageUrl },
+    { label: 'Usuario', value: esc(userName) },
+    { label: 'Email', value: `<a href="mailto:${esc(userEmail)}" style="color:#FD7E14;text-decoration:none">${esc(userEmail)}</a>` },
+    { label: 'Página', value: esc(pageUrl) },
   ];
 
   const body = `
     ${sectionHeading('Nuevo feedback de usuario')}
     ${subtitle('Un usuario de la plataforma envió un mensaje desde el panel de Puntos Club.')}
     ${dataTable(rows)}
-    ${messageBox('Mensaje', message)}
+    ${messageBox('Mensaje', esc(message))}
   `;
 
   const html = brandedEmailLayout(body);

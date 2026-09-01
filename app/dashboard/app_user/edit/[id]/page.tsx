@@ -5,6 +5,13 @@ import AppUserForm from '@/components/dashboard/app_user/app_user-form';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/server';
 
+// El listado genérico de usuarios ya no está en el menú de la organización:
+// desde Cajeros/Colaboradores se vuelve a la pantalla de donde se salió.
+const STAFF_LIST_BY_ROLE: Record<string, string> = {
+  cashier: '/dashboard/cashiers',
+  collaborator: '/dashboard/collaborators',
+};
+
 export default async function EditAppUserPage({ params }: { params: Promise<{ id: string }> }) {
   const [supabase, t, { id }] = await Promise.all([
     createClient(),
@@ -12,7 +19,11 @@ export default async function EditAppUserPage({ params }: { params: Promise<{ id
     params,
   ]);
 
-  const { data, error } = await supabase.from('app_user').select('*').eq('id', id).single();
+  const { data: row, error } = await supabase
+    .from('app_user')
+    .select('*, role:role_id(name)')
+    .eq('id', id)
+    .single();
 
   if (error) {
     return <div>{t('fetchError')}</div>;
@@ -20,9 +31,14 @@ export default async function EditAppUserPage({ params }: { params: Promise<{ id
 
   // `return` y no solo la llamada: abajo se usa data.organization_id, así que
   // acá tiene que cortar de verdad.
-  if (!data) {
+  if (!row) {
     return notFound();
   }
+
+  // El join solo se usa para saber a qué listado volver; el form recibe la fila
+  // tal cual la espera su tipo.
+  const { role, ...data } = row as typeof row & { role: { name?: string } | null };
+  const redirectTo = STAFF_LIST_BY_ROLE[role?.name ?? ''] ?? '/dashboard/app_user';
 
   // Sin esta lista el form esconde el selector de sucursal y un cajero ya creado
   // no se puede reasignar. Se filtra por la organización del usuario editado, no
@@ -49,6 +65,7 @@ export default async function EditAppUserPage({ params }: { params: Promise<{ id
         <CardContent>
           <AppUserForm
             appUser={data}
+            redirectTo={redirectTo}
             branches={(branchRows ?? []).map((branch) => ({
               id: String(branch.id),
               name: branch.name,

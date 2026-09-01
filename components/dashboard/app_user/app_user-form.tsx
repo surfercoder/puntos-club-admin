@@ -22,7 +22,6 @@ import { PUNTOS_CLUB_CAJA_APK_URL } from '@/lib/mobile-apps';
 import { createClient } from '@/lib/supabase/client';
 import { AppUserSchema } from '@/schemas/app_user.schema';
 import { PasswordStrengthChecklist } from '@/components/onboarding/password-strength-checklist';
-import { allRulesPass } from '@/components/onboarding/password-rules';
 import type { AppUser } from '@/types/app_user';
 import type { UserRole } from '@/types/user_role';
 
@@ -130,15 +129,6 @@ export default function AppUserForm({
       event.preventDefault();
       return;
     }
-
-    if (passwordValue && !allRulesPass(passwordValue)) {
-      setValidation({
-        status: 'error',
-        message: '',
-        fieldErrors: { password: [tCommon('passwordWeak')] },
-      });
-      event.preventDefault();
-    }
   };
 
   return (
@@ -243,7 +233,7 @@ export default function AppUserForm({
       )}
 
       <div>
-        <Label htmlFor="first_name">{t('form.firstNameLabel')}</Label>
+        <Label htmlFor="first_name">{t('form.firstNameLabel')} <span className="text-destructive">*</span></Label>
         <Input
           aria-describedby="first_name-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.first_name}
@@ -257,7 +247,7 @@ export default function AppUserForm({
       </div>
 
       <div>
-        <Label htmlFor="last_name">{t('form.lastNameLabel')}</Label>
+        <Label htmlFor="last_name">{t('form.lastNameLabel')} <span className="text-destructive">*</span></Label>
         <Input
           aria-describedby="last_name-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.last_name}
@@ -271,7 +261,7 @@ export default function AppUserForm({
       </div>
 
       <div>
-        <Label htmlFor="email">{t('form.emailLabel')}</Label>
+        <Label htmlFor="email">{t('form.emailLabel')} <span className="text-destructive">*</span></Label>
         <Input
           aria-describedby="email-error"
           aria-invalid={!!(validation ?? actionState).fieldErrors?.email}
@@ -285,7 +275,10 @@ export default function AppUserForm({
       </div>
 
       <div>
-        <Label htmlFor="password">{t('form.passwordLabel')}</Label>
+        <Label htmlFor="password">
+          {t('form.passwordLabel')}
+          {!appUser && <span className="text-destructive"> *</span>}
+        </Label>
         <div className="relative">
           <Input
             aria-describedby="password-error"
@@ -313,7 +306,7 @@ export default function AppUserForm({
 
       <div className="grid grid-cols-2 gap-2">
         <Button asChild type="button" variant="secondary">
-          <Link href="/dashboard/app_user">{tCommon('cancel')}</Link>
+          <Link href={redirectTo}>{tCommon('cancel')}</Link>
         </Button>
         <Button disabled={pending || (isCashierSelected && branches.length === 0)} type="submit">
           {appUser ? tCommon('update') : tCommon('create')}
