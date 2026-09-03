@@ -154,20 +154,8 @@ type PageProps = {
   }>;
 };
 
-export default async function PurchaseListPage({ searchParams }: PageProps) {
-  const [t, tCommon, currentUser, params] = await Promise.all([
-    getTranslations('Dashboard.purchase'),
-    getTranslations('Common'),
-    getCurrentUser(),
-    searchParams,
-  ]);
-  const userIsAdmin = isAdmin(currentUser);
-  const [supabase, orgIdFilter] = await Promise.all([
-    userIsAdmin ? Promise.resolve(createAdminClient()) : createClient(),
-    getActiveOrgIdFilter(currentUser),
-  ]);
-
-  const filters = {
+function parsePurchaseFilters(params: Awaited<PageProps['searchParams']>) {
+  return {
     q: params.q?.trim() ?? '',
     from: params.from?.match(/^\d{4}-\d{2}-\d{2}$/)?.[0] ?? '',
     to: params.to?.match(/^\d{4}-\d{2}-\d{2}$/)?.[0] ?? '',
@@ -177,44 +165,29 @@ export default async function PurchaseListPage({ searchParams }: PageProps) {
     type: params.type === 'sale' || params.type === 'assignment' ? params.type : '',
     points: POINT_RANGES.some((r) => r.key === params.points) ? (params.points as string) : '',
   };
+}
 
-  let query = supabase
-    .from('purchase')
-    .select(`
-      *,
-      beneficiary:beneficiary_id(id, first_name, last_name, email),
-      cashier:app_user!purchase_cashier_id_fkey(id, first_name, last_name),
-      branch:branch_id(id, name)
-    `)
-    .order('purchase_date', { ascending: false });
+type PurchaseFiltersValue = ReturnType<typeof parsePurchaseFilters>;
 
-  if (orgIdFilter) {
-    query = query.eq('organization_id', orgIdFilter);
-  }
-  if (filters.branch) {
-    query = query.eq('branch_id', filters.branch);
-  }
-  if (filters.cashier) {
-    query = query.eq('cashier_id', filters.cashier);
-  }
-  if (filters.beneficiary) {
-    query = query.eq('beneficiary_id', filters.beneficiary);
-  }
-  // ponytail: los límites de fecha se interpretan en la zona horaria de la DB.
-  if (filters.from) {
-    query = query.gte('purchase_date', filters.from);
-  }
-  if (filters.to) {
-    query = query.lte('purchase_date', `${filters.to}T23:59:59.999`);
-  }
+// Raw shape of a `purchase` row as selected below; scalar columns come back
+// untyped from this client (no generated Database generics), so they're
+// narrowed with casts/coercions at the point of use, same as before extraction.
+type RawPurchaseRow = {
+  id: unknown;
+  purchase_number: unknown;
+  purchase_date: unknown;
+  beneficiary_id: unknown;
+  cashier_id: unknown;
+  total_amount: unknown;
+  points_earned: unknown;
+  status: unknown;
+  beneficiary: unknown;
+  cashier: unknown;
+  branch: unknown;
+};
 
-  const { data, error } = await query;
-
-  if (error) {
-    return <div>{t('error')}</div>;
-  }
-
-  const rows: PurchaseRow[] = (data ?? []).map((purchase) => {
+function mapPurchaseRows(data: RawPurchaseRow[]): PurchaseRow[] {
+  return data.map((purchase) => {
     const beneficiary = one(purchase.beneficiary as Related | Related[]);
     const cashier = one(purchase.cashier as Related | Related[]);
     const branch = one(purchase.branch as Related | Related[]);
@@ -237,10 +210,12 @@ export default async function PurchaseListPage({ searchParams }: PageProps) {
       cancelled: purchase.status === 'cancelled',
     };
   });
+}
 
+function filterPurchaseRows(rows: PurchaseRow[], filters: PurchaseFiltersValue) {
   const needle = filters.q.toLowerCase();
   const range = POINT_RANGES.find((r) => r.key === filters.points);
-  const filtered = rows.filter((row) => {
+  return rows.filter((row) => {
     if (needle) {
       const haystack = [row.purchaseNumber, row.beneficiaryName, row.cashierName, row.branchName]
         .filter(Boolean).join(' ').toLowerCase();
@@ -250,11 +225,9 @@ export default async function PurchaseListPage({ searchParams }: PageProps) {
     if (range && (row.points < range.min || row.points >= range.max)) return false;
     return true;
   });
+}
 
-  const perPage = parsePerPage(params.perPage);
-  const page = parsePage(params.page, Math.ceil(filtered.length / perPage));
-  const visible = filtered.slice((page - 1) * perPage, page * perPage);
-
+function computePurchaseStats(filtered: PurchaseRow[]) {
   // Las canceladas siguen listadas (trazabilidad) pero no suman a los totales.
   const live = filtered.filter((r) => !r.cancelled);
   const totalAmount = live.reduce((sum, r) => sum + r.amount, 0);
@@ -263,22 +236,27 @@ export default async function PurchaseListPage({ searchParams }: PageProps) {
   // Por id: dos cajeros homónimos son dos personas, no una.
   const activeCashiers = new Set(live.flatMap((r) => r.cashierId || [])).size;
 
-  const stats = {
-    operations: live.length,
-    totalAmount,
-    pointsAssigned: totalPoints,
-    beneficiariesReached: reached,
-    averagePoints: live.length ? Math.round(totalPoints / live.length) : 0,
+  return {
+    stats: {
+      operations: live.length,
+      totalAmount,
+      pointsAssigned: totalPoints,
+      beneficiariesReached: reached,
+      averagePoints: live.length ? Math.round(totalPoints / live.length) : 0,
+    },
+    activeCashiers,
   };
+}
 
+function buildPurchaseFilterOptions(data: RawPurchaseRow[]) {
   const branchOptions = unique(
-    (data ?? []).map((p) => {
+    data.map((p) => {
       const branch = one(p.branch as Related | Related[]) as { id?: string; name?: string } | null;
       return branch?.id ? { id: String(branch.id), name: branch.name ?? '' } : null;
     }),
   );
   const cashierOptions = unique(
-    (data ?? []).map((p) => {
+    data.map((p) => {
       const cashier = one(p.cashier as Related | Related[]) as
         | { id?: string; first_name?: string; last_name?: string } | null;
       return cashier?.id
@@ -287,7 +265,7 @@ export default async function PurchaseListPage({ searchParams }: PageProps) {
     }),
   );
   const beneficiaryOptions = unique(
-    (data ?? []).map((p) => {
+    data.map((p) => {
       const beneficiary = one(p.beneficiary as Related | Related[]) as
         | { id?: string; first_name?: string; last_name?: string } | null;
       return beneficiary?.id
@@ -295,6 +273,62 @@ export default async function PurchaseListPage({ searchParams }: PageProps) {
         : null;
     }),
   );
+  return { branchOptions, cashierOptions, beneficiaryOptions };
+}
+
+export default async function PurchaseListPage({ searchParams }: PageProps) {
+  const [t, tCommon, currentUser, params] = await Promise.all([
+    getTranslations('Dashboard.purchase'),
+    getTranslations('Common'),
+    getCurrentUser(),
+    searchParams,
+  ]);
+  const userIsAdmin = isAdmin(currentUser);
+  const [supabase, orgIdFilter] = await Promise.all([
+    userIsAdmin ? Promise.resolve(createAdminClient()) : createClient(),
+    getActiveOrgIdFilter(currentUser),
+  ]);
+
+  const filters = parsePurchaseFilters(params);
+
+  let query = supabase
+    .from('purchase')
+    .select(`
+      *,
+      beneficiary:beneficiary_id(id, first_name, last_name, email),
+      cashier:app_user!purchase_cashier_id_fkey(id, first_name, last_name),
+      branch:branch_id(id, name)
+    `)
+    .order('purchase_date', { ascending: false });
+
+  // ponytail: los límites de fecha se interpretan en la zona horaria de la DB.
+  const eqFilters: [string, string | number | false][] = [
+    ['organization_id', orgIdFilter || false],
+    ['branch_id', filters.branch],
+    ['cashier_id', filters.cashier],
+    ['beneficiary_id', filters.beneficiary],
+  ];
+  for (const [column, value] of eqFilters) {
+    if (value) query = query.eq(column, value);
+  }
+  if (filters.from) query = query.gte('purchase_date', filters.from);
+  if (filters.to) query = query.lte('purchase_date', `${filters.to}T23:59:59.999`);
+
+  const { data, error } = await query;
+
+  if (error) {
+    return <div>{t('error')}</div>;
+  }
+
+  const rows = mapPurchaseRows(data ?? []);
+  const filtered = filterPurchaseRows(rows, filters);
+
+  const perPage = parsePerPage(params.perPage);
+  const page = parsePage(params.page, Math.ceil(filtered.length / perPage));
+  const visible = filtered.slice((page - 1) * perPage, page * perPage);
+
+  const { stats, activeCashiers } = computePurchaseStats(filtered);
+  const { branchOptions, cashierOptions, beneficiaryOptions } = buildPurchaseFilterOptions(data ?? []);
 
   return (
     <div className="space-y-6">

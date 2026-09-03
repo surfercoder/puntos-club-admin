@@ -8,13 +8,12 @@ import DeleteModal from '@/components/dashboard/branch/delete-modal';
 import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
 import { TablePagination } from '@/components/dashboard/shared/table-pagination';
+import { ListTableHeader } from '@/components/dashboard/shared/list-table-header';
 import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from '@/components/ui/table';
 import { getActiveOrgIdFilter } from '@/lib/auth/get-active-org-id';
@@ -185,17 +184,17 @@ export default async function BranchListPage({ searchParams }: PageProps) {
 
           <div className="rounded-xl border bg-card shadow-sm">
             <Table className="text-[13px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('tableHeaders.name')}</TableHead>
-                  <TableHead>{t('tableHeaders.address')}</TableHead>
-                  <TableHead>{t('tableHeaders.phone')}</TableHead>
-                  <TableHead>{t('tableHeaders.status')}</TableHead>
-                  <TableHead>{t('tableHeaders.cashier')}</TableHead>
-                  <TableHead>{t('tableHeaders.cashierStatus')}</TableHead>
-                  <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
+              <ListTableHeader
+                columns={[
+                  { label: t('tableHeaders.name') },
+                  { label: t('tableHeaders.address') },
+                  { label: t('tableHeaders.phone') },
+                  { label: t('tableHeaders.status') },
+                  { label: t('tableHeaders.cashier') },
+                  { label: t('tableHeaders.cashierStatus') },
+                  { label: t('tableHeaders.actions'), className: 'text-right' },
+                ]}
+              />
               <TableBody>
                 {visible.length > 0 ? (
                   visible.map((branch) => (

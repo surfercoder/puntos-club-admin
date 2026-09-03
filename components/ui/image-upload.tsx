@@ -20,6 +20,101 @@ interface ImageUploadProps {
   maxHeight?: number;
 }
 
+function ImagePreview({
+  preview,
+  aspectRatio,
+  maxHeight,
+  disabled,
+  uploading,
+  removeLabel,
+  onRemove,
+}: {
+  preview: string;
+  aspectRatio: 'square' | 'auto';
+  maxHeight: number;
+  disabled: boolean;
+  uploading: boolean;
+  removeLabel: string;
+  onRemove: () => void;
+}) {
+  return (
+    <div
+      className="relative inline-block"
+      style={aspectRatio === 'square' ? { width: `${maxHeight}px`, height: `${maxHeight}px` } : undefined}
+    >
+      <div
+        className={`relative overflow-hidden rounded-lg border bg-muted ${
+          aspectRatio === 'square' ? 'w-full h-full' : 'w-full max-w-md'
+        }`}
+        style={aspectRatio === 'auto' ? { maxHeight: `${maxHeight}px` } : undefined}
+      >
+        <Image
+          alt="Preview"
+          className={aspectRatio === 'square' ? 'object-contain w-full h-full' : 'object-contain'}
+          height={maxHeight}
+          src={preview}
+          style={aspectRatio === 'auto' ? { width: '100%', height: 'auto', maxHeight: `${maxHeight}px` } : undefined}
+          width={aspectRatio === 'square' ? maxHeight : 800}
+        />
+      </div>
+      <Button
+        aria-label={removeLabel}
+        className="absolute -right-2 -top-2"
+        disabled={disabled || uploading}
+        size="icon"
+        type="button"
+        variant="destructive"
+        onClick={onRemove}
+      >
+        <X className="size-4" />
+      </Button>
+    </div>
+  );
+}
+
+function ImageDropzone({
+  uploading,
+  uploadLabel,
+  uploadingLabel,
+  clickToUploadLabel,
+  maxSizeLabel,
+  onClick,
+}: {
+  uploading: boolean;
+  uploadLabel: string;
+  uploadingLabel: string;
+  clickToUploadLabel: string;
+  maxSizeLabel: string;
+  onClick: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      aria-label={uploadLabel}
+      className="flex w-full max-w-xs cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 p-8 transition-colors hover:border-muted-foreground/50 hover:bg-muted"
+      onClick={onClick}
+    >
+      {uploading ? (
+        <div className="flex flex-col items-center gap-2">
+          <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+          <p className="text-sm text-muted-foreground">{uploadingLabel}</p>
+        </div>
+      ) : (
+        <>
+          <div className="rounded-full bg-primary/10 p-4">
+            <ImageIcon className="size-8 text-primary" />
+          </div>
+          <div className="mt-4 flex flex-col items-center gap-1">
+            <p className="text-sm font-medium">{clickToUploadLabel}</p>
+            <p className="text-xs text-muted-foreground">{maxSizeLabel}</p>
+          </div>
+          <Upload className="mt-2 size-4 text-muted-foreground" />
+        </>
+      )}
+    </button>
+  );
+}
+
 export function ImageUpload({
   value,
   onChange,
@@ -115,63 +210,24 @@ export function ImageUpload({
       />
 
       {preview ? (
-        <div
-          className="relative inline-block"
-          style={aspectRatio === 'square' ? { width: `${maxHeight}px`, height: `${maxHeight}px` } : undefined}
-        >
-          <div
-            className={`relative overflow-hidden rounded-lg border bg-muted ${
-              aspectRatio === 'square' ? 'w-full h-full' : 'w-full max-w-md'
-            }`}
-            style={aspectRatio === 'auto' ? { maxHeight: `${maxHeight}px` } : undefined}
-          >
-            <Image
-              alt="Preview"
-              className={aspectRatio === 'square' ? 'object-contain w-full h-full' : 'object-contain'}
-              height={maxHeight}
-              src={preview}
-              style={aspectRatio === 'auto' ? { width: '100%', height: 'auto', maxHeight: `${maxHeight}px` } : undefined}
-              width={aspectRatio === 'square' ? maxHeight : 800}
-            />
-          </div>
-          <Button
-            className="absolute -right-2 -top-2"
-            disabled={disabled || uploading}
-            size="icon"
-            type="button"
-            variant="destructive"
-            onClick={handleRemove}
-          >
-            <X className="size-4" />
-          </Button>
-        </div>
+        <ImagePreview
+          aspectRatio={aspectRatio}
+          disabled={disabled}
+          maxHeight={maxHeight}
+          preview={preview}
+          removeLabel={t('remove')}
+          uploading={uploading}
+          onRemove={handleRemove}
+        />
       ) : (
-        <button
-          type="button"
-          aria-label={t('upload')}
-          className="flex w-full max-w-xs cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 p-8 transition-colors hover:border-muted-foreground/50 hover:bg-muted"
+        <ImageDropzone
+          clickToUploadLabel={t('clickToUpload')}
+          maxSizeLabel={t('maxSize', { maxSize: maxSizeMB })}
+          uploadLabel={t('upload')}
+          uploading={uploading}
+          uploadingLabel={t('uploading')}
           onClick={() => fileInputRef.current?.click()}
-        >
-          {uploading ? (
-            <div className="flex flex-col items-center gap-2">
-              <div className="size-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-              <p className="text-sm text-muted-foreground">{t('uploading')}</p>
-            </div>
-          ) : (
-            <>
-              <div className="rounded-full bg-primary/10 p-4">
-                <ImageIcon className="size-8 text-primary" />
-              </div>
-              <div className="mt-4 flex flex-col items-center gap-1">
-                <p className="text-sm font-medium">{t('clickToUpload')}</p>
-                <p className="text-xs text-muted-foreground">
-                  {t('maxSize', { maxSize: maxSizeMB })}
-                </p>
-              </div>
-              <Upload className="mt-2 size-4 text-muted-foreground" />
-            </>
-          )}
-        </button>
+        />
       )}
     </div>
   );

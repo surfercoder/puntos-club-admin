@@ -4,12 +4,11 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/organization/delete-modal';
+import { ListTableHeader } from '@/components/dashboard/shared/list-table-header';
 import { Button } from '@/components/ui/button';
 import {
   Table,
-  TableHeader,
   TableRow,
-  TableHead,
   TableBody,
   TableCell,
 } from '@/components/ui/table';
@@ -44,16 +43,16 @@ export default async function OrganizationListPage() {
 
       <div className="border rounded-lg">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('tableHeaders.logo')}</TableHead>
-              <TableHead>{t('tableHeaders.name')}</TableHead>
-              <TableHead>{t('tableHeaders.legalName')}</TableHead>
-              <TableHead>{t('tableHeaders.taxId')}</TableHead>
-              <TableHead>{t('tableHeaders.createdAt')}</TableHead>
-              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
+          <ListTableHeader
+            columns={[
+              { label: t('tableHeaders.logo') },
+              { label: t('tableHeaders.name') },
+              { label: t('tableHeaders.legalName') },
+              { label: t('tableHeaders.taxId') },
+              { label: t('tableHeaders.createdAt') },
+              { label: t('tableHeaders.actions'), className: 'text-right' },
+            ]}
+          />
           <TableBody>
             {data && data.length > 0 ? (
               data.map((organization: Organization) => (

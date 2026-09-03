@@ -77,7 +77,8 @@
       "removeError": "Error al eliminar la imagen",
       "uploading": "Subiendo...",
       "clickToUpload": "Haz clic para subir imagen",
-      "maxSize": "Tamaño máximo: {maxSize}MB"
+      "maxSize": "Tamaño máximo: {maxSize}MB",
+      "remove": "Eliminar imagen"
     },
     "passwordStrength": {
       "minLength": "Al menos 8 caracteres",
@@ -541,7 +542,8 @@
         "notesList4": "Los beneficiarios deben tener instalada la app PuntosClub para recibir notificaciones",
         "sentCount": "enviada(s)",
         "resend": "Reenviar Notificación",
-        "updateError": "Error al actualizar la notificación"
+        "updateError": "Error al actualizar la notificación",
+        "closeEmoji": "Cerrar selector de emoji"
       },
       "editForm": {
         "titleLabel": "Título",

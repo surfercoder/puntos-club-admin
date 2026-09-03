@@ -2,17 +2,16 @@
 
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
-import { redirect } from 'next/navigation';
-import { useActionState, useState, useEffect, useRef } from 'react';
-import { toast } from "sonner";
+import { useActionState, useState } from 'react';
 
 import { organizationFormAction } from '@/actions/dashboard/organization/organization-form-actions';
+import { TextFormField } from '@/components/dashboard/shared/text-form-field';
+import { OrganizationTextareaField } from '@/components/dashboard/organization/organization-textarea-field';
+import { useActionStateRedirect } from '@/components/dashboard/shared/use-action-state-redirect';
 import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { ImageUpload } from '@/components/ui/image-upload';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import type { ActionState} from '@/lib/error-handler';
 import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { OrganizationSchema } from '@/schemas/organization.schema';
@@ -35,21 +34,7 @@ export default function OrganizationForm({ organization, onSuccess, onCancel, re
 
   // Utils
   const [actionState, formAction, pending] = useActionState(organizationFormAction, EMPTY_ACTION_STATE);
-  const successHandledRef = useRef(false);
-
-  useEffect(() => {
-    if (actionState.status === 'success' && !successHandledRef.current) {
-      successHandledRef.current = true;
-      toast.success(actionState.message);
-      onSuccess?.();
-    } else if (actionState.status === 'error' && actionState.message) {
-      toast.error(actionState.message);
-    }
-  }, [actionState, onSuccess]);
-
-  if (actionState.status === 'success' && !onSuccess) {
-    redirect(redirectTo /* c8 ignore next */ ?? "/dashboard/organization");
-  }
+  useActionStateRedirect({ actionState, onSuccess, redirectTo });
 
   // Handlers
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -74,61 +59,38 @@ export default function OrganizationForm({ organization, onSuccess, onCancel, re
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
       {organization?.id && <input name="id" type="hidden" value={organization.id} />}
       
-      <div>
-        <Label htmlFor="name">{t('form.nameLabel')}</Label>
-        <Input
-          aria-describedby="name-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.name}
-          defaultValue={organization?.name ?? ''}
-          id="name"
-          name="name"
-          placeholder={t('form.namePlaceholder')}
-          type="text"
-        />
-        <FieldError actionState={validation ?? actionState} name="name" />
-      </div>
+      <TextFormField
+        actionState={validation ?? actionState}
+        defaultValue={organization?.name ?? ''}
+        label={t('form.nameLabel')}
+        name="name"
+        placeholder={t('form.namePlaceholder')}
+      />
 
-      <div>
-        <Label htmlFor="business_name">{t('form.legalName')}</Label>
-        <Input
-          aria-describedby="business_name-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.business_name}
-          defaultValue={organization?.business_name ?? ''}
-          id="business_name"
-          name="business_name"
-          placeholder={t('form.legalNamePlaceholder')}
-          type="text"
-        />
-        <FieldError actionState={validation ?? actionState} name="business_name" />
-      </div>
+      <TextFormField
+        actionState={validation ?? actionState}
+        defaultValue={organization?.business_name ?? ''}
+        label={t('form.legalName')}
+        name="business_name"
+        placeholder={t('form.legalNamePlaceholder')}
+      />
 
-      <div>
-        <Label htmlFor="tax_id">{t('form.taxId')}</Label>
-        <Input
-          aria-describedby="tax_id-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.tax_id}
-          defaultValue={organization?.tax_id ?? ''}
-          id="tax_id"
-          name="tax_id"
-          placeholder={t('form.taxIdPlaceholder')}
-          type="text"
-        />
-        <FieldError actionState={validation ?? actionState} name="tax_id" />
-      </div>
+      <TextFormField
+        actionState={validation ?? actionState}
+        defaultValue={organization?.tax_id ?? ''}
+        label={t('form.taxId')}
+        name="tax_id"
+        placeholder={t('form.taxIdPlaceholder')}
+      />
 
-      <div>
-        <Label htmlFor="public_info">{t('form.publicInfo')}</Label>
-        <Textarea
-          aria-describedby="public_info-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.public_info}
-          defaultValue={organization?.public_info ?? ''}
-          id="public_info"
-          name="public_info"
-          placeholder={t('form.publicInfoPlaceholder')}
-          rows={5}
-        />
-        <FieldError actionState={validation ?? actionState} name="public_info" />
-      </div>
+      <OrganizationTextareaField
+        actionState={validation ?? actionState}
+        defaultValue={organization?.public_info ?? ''}
+        label={t('form.publicInfo')}
+        name="public_info"
+        placeholder={t('form.publicInfoPlaceholder')}
+        rows={5}
+      />
 
       <div>
         <Label htmlFor="logo_url">{t('form.logoLabel')}</Label>

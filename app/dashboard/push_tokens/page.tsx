@@ -3,11 +3,12 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/push_tokens_crud/delete-modal';
+import { ListTableHeader } from '@/components/dashboard/shared/list-table-header';
 import ToastHandler from '@/components/dashboard/push_tokens_crud/toast-handler';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table, TableBody, TableCell, TableRow,
 } from '@/components/ui/table';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { isAdmin } from '@/lib/auth/roles';
@@ -47,17 +48,17 @@ export default async function PushTokensListPage() {
 
       <div className="border rounded-lg">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('tableHeaders.beneficiary')}</TableHead>
-              <TableHead>{t('tableHeaders.platform')}</TableHead>
-              <TableHead>{t('tableHeaders.deviceId')}</TableHead>
-              <TableHead>{t('tableHeaders.token')}</TableHead>
-              <TableHead>{t('tableHeaders.active')}</TableHead>
-              <TableHead>{t('tableHeaders.created')}</TableHead>
-              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
+          <ListTableHeader
+            columns={[
+              { label: t('tableHeaders.beneficiary') },
+              { label: t('tableHeaders.platform') },
+              { label: t('tableHeaders.deviceId') },
+              { label: t('tableHeaders.token') },
+              { label: t('tableHeaders.active') },
+              { label: t('tableHeaders.created') },
+              { label: t('tableHeaders.actions'), className: 'text-right' },
+            ]}
+          />
           <TableBody>
             {data && data.length > 0 ? (
               data.map((token) => {

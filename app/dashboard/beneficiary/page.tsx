@@ -182,92 +182,77 @@ function BeneficiaryTableRow({
   );
 }
 
-export default async function BeneficiaryListPage({ searchParams }: PageProps) {
-  const [supabase, currentUser, t, tCommon, params] = await Promise.all([
-    createClient(),
-    getCurrentUser(),
-    getTranslations('Dashboard.beneficiary'),
-    getTranslations('Common'),
-    searchParams,
-  ]);
-  const userIsAdmin = isAdmin(currentUser);
-  // Los owners solo ven nombre: nada de email, teléfono ni documento (PD-522).
-  const showPii = userIsAdmin;
-  const orgIdFilter = await getActiveOrgIdFilter(currentUser);
+async function fetchScopedBeneficiaries(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  orgIdFilter: number,
+) {
+  const rows: BeneficiaryRow[] = [];
+  const result = await supabase
+    .from('beneficiary_organization')
+    .select(`
+      is_hidden,
+      is_active,
+      available_points,
+      beneficiary:beneficiary_id(*, address:address_id(latitude, longitude))
+    `)
+    .eq('organization_id', orgIdFilter);
 
-  let rows: BeneficiaryRow[] = [];
-  let error = null;
-
-  // Scope to a single org when we have one (always true for non-admins; true for
-  // admins only if they explicitly selected one via the org switcher).
-  if (orgIdFilter) {
-    const result = await supabase
-      .from('beneficiary_organization')
-      .select(`
-        is_hidden,
-        is_active,
-        available_points,
-        beneficiary:beneficiary_id(*, address:address_id(latitude, longitude))
-      `)
-      .eq('organization_id', orgIdFilter);
-
-    if (result.error) {
-      error = result.error;
-    } else {
-      for (const item of result.data ?? []) {
-        const record = item as unknown as Record<string, unknown>;
-        const beneficiary = record.beneficiary as
-          | (Beneficiary & { address?: { latitude?: number; longitude?: number } | null })
-          | null;
-        if (!beneficiary) continue;
-        rows.push({
-          ...beneficiary,
-          available_points: (record.available_points as number) ?? 0,
-          is_hidden: (record.is_hidden as boolean) ?? false,
-          membership: record.is_active === false ? 'left' : 'member',
-          latitude: beneficiary.address?.latitude ?? null,
-          longitude: beneficiary.address?.longitude ?? null,
-        });
-      }
-    }
-  } else {
-    // Admin users or no active organization selected - show all beneficiaries.
-    // Sin una org de referencia el estado se resuelve sobre todas las membresías:
-    // socio si sigue activo en alguna, dado de baja si las dejó todas.
-    const result = await supabase
-      .from('beneficiary')
-      .select('*, address:address_id(latitude, longitude), beneficiary_organization(is_active)');
-    error = result.error;
-    rows = (result.data ?? []).map((beneficiary) => {
-      const b = beneficiary as Beneficiary & {
-        address?: { latitude?: number; longitude?: number } | null;
-        beneficiary_organization?: { is_active: boolean | null }[] | null;
-      };
-      const memberships = b.beneficiary_organization ?? [];
-      return {
-        ...b,
-        available_points: 0,
-        is_hidden: false,
-        membership: memberships.some((m) => m.is_active !== false)
-          ? 'member'
-          : memberships.length > 0
-            ? 'left'
-            : 'none',
-        latitude: b.address?.latitude ?? null,
-        longitude: b.address?.longitude ?? null,
-      };
+  if (result.error) {
+    return { rows, error: result.error };
+  }
+  for (const item of result.data ?? []) {
+    const record = item as unknown as Record<string, unknown>;
+    const beneficiary = record.beneficiary as
+      | (Beneficiary & { address?: { latitude?: number; longitude?: number } | null })
+      | null;
+    if (!beneficiary) continue;
+    rows.push({
+      ...beneficiary,
+      available_points: (record.available_points as number) ?? 0,
+      is_hidden: (record.is_hidden as boolean) ?? false,
+      membership: record.is_active === false ? 'left' : 'member',
+      latitude: beneficiary.address?.latitude ?? null,
+      longitude: beneficiary.address?.longitude ?? null,
     });
   }
+  return { rows, error: null };
+}
 
-  if (error) {
-    return <div>{t('error')}</div>;
-  }
+// Admin users or no active organization selected - show all beneficiaries.
+// Sin una org de referencia el estado se resuelve sobre todas las membresías:
+// socio si sigue activo en alguna, dado de baja si las dejó todas.
+async function fetchAllBeneficiaries(supabase: Awaited<ReturnType<typeof createClient>>) {
+  const result = await supabase
+    .from('beneficiary')
+    .select('*, address:address_id(latitude, longitude), beneficiary_organization(is_active)');
+  const rows: BeneficiaryRow[] = (result.data ?? []).map((beneficiary) => {
+    const b = beneficiary as Beneficiary & {
+      address?: { latitude?: number; longitude?: number } | null;
+      beneficiary_organization?: { is_active: boolean | null }[] | null;
+    };
+    const memberships = b.beneficiary_organization ?? [];
+    return {
+      ...b,
+      available_points: 0,
+      is_hidden: false,
+      membership: memberships.some((m) => m.is_active !== false)
+        ? 'member'
+        : memberships.length > 0
+          ? 'left'
+          : 'none',
+      latitude: b.address?.latitude ?? null,
+      longitude: b.address?.longitude ?? null,
+    };
+  });
+  return { rows, error: result.error };
+}
 
+function computeBeneficiaryStats(rows: BeneficiaryRow[]) {
   const thisMonth = startOfMonth(0);
   const lastMonth = startOfMonth(1);
   const totalPoints = rows.reduce((sum, r) => sum + r.available_points, 0);
 
-  const stats = {
+  return {
     total: rows.length,
     active: rows.filter((r) => r.membership === 'member').length,
     withPoints: rows.filter((r) => r.available_points > 0).length,
@@ -279,8 +264,15 @@ export default async function BeneficiaryListPage({ searchParams }: PageProps) {
     }).length,
     limit: null as number | null,
   };
+}
 
-  const filters = {
+function parseBeneficiaryFilters(params: {
+  q?: string;
+  status?: string;
+  points?: string;
+  from?: string;
+}) {
+  return {
     q: params.q?.trim() ?? '',
     status:
       params.status === 'member' || params.status === 'left' || params.status === 'none'
@@ -289,11 +281,17 @@ export default async function BeneficiaryListPage({ searchParams }: PageProps) {
     points: params.points === 'with' || params.points === 'without' ? params.points : '',
     from: params.from?.match(/^\d{4}-\d{2}-\d{2}$/)?.[0] ?? '',
   };
+}
 
-  // ponytail: filtramos en memoria porque el plan tope es 5.000 beneficiarios y
-  // la búsqueda cruza campos del join; si crece, mover el where a la consulta.
+// ponytail: filtramos en memoria porque el plan tope es 5.000 beneficiarios y
+// la búsqueda cruza campos del join; si crece, mover el where a la consulta.
+function filterBeneficiaryRows(
+  rows: BeneficiaryRow[],
+  filters: ReturnType<typeof parseBeneficiaryFilters>,
+  showPii: boolean,
+) {
   const needle = filters.q.toLowerCase();
-  const filtered = rows.filter((row) => {
+  return rows.filter((row) => {
     if (needle) {
       const haystack = (showPii ? [fullName(row), row.email, row.document_id, row.phone] : [fullName(row)])
         .filter(Boolean)
@@ -307,6 +305,34 @@ export default async function BeneficiaryListPage({ searchParams }: PageProps) {
     if (filters.from && new Date(row.registration_date) < new Date(filters.from)) return false;
     return true;
   });
+}
+
+export default async function BeneficiaryListPage({ searchParams }: PageProps) {
+  const [supabase, currentUser, t, tCommon, params] = await Promise.all([
+    createClient(),
+    getCurrentUser(),
+    getTranslations('Dashboard.beneficiary'),
+    getTranslations('Common'),
+    searchParams,
+  ]);
+  const userIsAdmin = isAdmin(currentUser);
+  // Los owners solo ven nombre: nada de email, teléfono ni documento (PD-522).
+  const showPii = userIsAdmin;
+  const orgIdFilter = await getActiveOrgIdFilter(currentUser);
+
+  // Scope to a single org when we have one (always true for non-admins; true for
+  // admins only if they explicitly selected one via the org switcher).
+  const { rows, error } = orgIdFilter
+    ? await fetchScopedBeneficiaries(supabase, orgIdFilter)
+    : await fetchAllBeneficiaries(supabase);
+
+  if (error) {
+    return <div>{t('error')}</div>;
+  }
+
+  const stats = computeBeneficiaryStats(rows);
+  const filters = parseBeneficiaryFilters(params);
+  const filtered = filterBeneficiaryRows(rows, filters, showPii);
 
   const perPage = parsePerPage(params.perPage);
   const totalPages = Math.ceil(filtered.length / perPage);

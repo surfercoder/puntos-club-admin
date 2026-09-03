@@ -8,15 +8,7 @@ import { useTranslations } from 'next-intl';
 
 import { deletePushNotification } from '@/actions/dashboard/push_notifications/actions';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { ConfirmDeleteDialog } from '@/components/dashboard/shared/confirm-delete-dialog';
 
 interface DeleteModalProps {
   notificationId: string;
@@ -49,31 +41,23 @@ export default function DeleteModal({ notificationId, notificationTitle }: Delet
   };
 
   return (
-    <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger asChild>
+    <ConfirmDeleteDialog
+      open={open}
+      onOpenChange={setOpen}
+      trigger={
         <Button size="sm" variant="destructive">
           <Trash2 className="size-4" />
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('title')}</DialogTitle>
-          <DialogDescription>
-            {t.rich('confirm', {
-              name: notificationTitle,
-              strong: (chunks) => <strong>{chunks}</strong>,
-            })}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter>
-          <Button disabled={isDeleting} onClick={() => setOpen(false)} variant="outline">
-            {tCommon('cancel')}
-          </Button>
-          <Button disabled={isDeleting} onClick={handleDelete} variant="destructive">
-            {isDeleting ? tCommon('deleting') : tCommon('delete')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      }
+      title={t('title')}
+      description={t.rich('confirm', {
+        name: notificationTitle,
+        strong: (chunks) => <strong>{chunks}</strong>,
+      })}
+      isDeleting={isDeleting}
+      onConfirm={handleDelete}
+      cancelLabel={tCommon('cancel')}
+      confirmLabel={isDeleting ? tCommon('deleting') : tCommon('delete')}
+    />
   );
 }

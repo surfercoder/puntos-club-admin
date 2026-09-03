@@ -77,7 +77,8 @@
       "removeError": "Failed to remove image",
       "uploading": "Uploading...",
       "clickToUpload": "Click to upload image",
-      "maxSize": "Max size: {maxSize}MB"
+      "maxSize": "Max size: {maxSize}MB",
+      "remove": "Remove image"
     },
     "passwordStrength": {
       "minLength": "At least 8 characters",
@@ -541,7 +542,8 @@
         "notesList4": "Beneficiaries must have the PuntosClub app installed to receive notifications",
         "sentCount": "sent",
         "resend": "Resend Notification",
-        "updateError": "Error updating notification"
+        "updateError": "Error updating notification",
+        "closeEmoji": "Close emoji picker"
       },
       "editForm": {
         "titleLabel": "Title",

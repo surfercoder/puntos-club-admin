@@ -7,6 +7,7 @@ import { useActionState, useEffect, useReducer, useState } from 'react';
 import { toast } from 'sonner';
 
 import { beneficiaryOrganizationFormAction } from '@/actions/dashboard/beneficiary_organization/beneficiary_organization-form-actions';
+import { OrganizationSelectField } from '@/components/dashboard/shared/organization-select-field';
 import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
@@ -32,6 +33,66 @@ interface BeneficiaryOption {
 interface OrganizationOption {
   id: string;
   name: string;
+}
+
+function BeneficiarySelectField({
+  beneficiaries,
+  defaultValue,
+  actionState,
+  t,
+}: {
+  beneficiaries: BeneficiaryOption[];
+  defaultValue: string;
+  actionState: ActionState;
+  t: (key: string) => string;
+}) {
+  return (
+    <div>
+      <Label htmlFor="beneficiary_id">{t('form.beneficiaryLabel')}</Label>
+      <Select defaultValue={defaultValue} name="beneficiary_id">
+        <SelectTrigger>
+          <SelectValue placeholder={t('form.selectBeneficiary')} />
+        </SelectTrigger>
+        <SelectContent>
+          {beneficiaries.map((b) => (
+            <SelectItem key={b.id} value={b.id}>
+              {/* c8 ignore next */ b.first_name || b.last_name ? `${b.first_name || ''} ${b.last_name || ''}`.trim() : b.email || t('form.noName')}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <FieldError actionState={actionState} name="beneficiary_id" />
+    </div>
+  );
+}
+
+type PointsFieldName = 'available_points' | 'total_points_earned' | 'total_points_redeemed';
+
+function PointsNumberField({
+  name,
+  label,
+  defaultValue,
+  actionState,
+}: {
+  name: PointsFieldName;
+  label: string;
+  defaultValue: number;
+  actionState: ActionState;
+}) {
+  return (
+    <div>
+      <Label htmlFor={name}>{label}</Label>
+      <Input
+        aria-describedby={`${name}-error`}
+        aria-invalid={!!actionState.fieldErrors?.[name]}
+        defaultValue={defaultValue}
+        id={name}
+        name={name}
+        type="number"
+      />
+      <FieldError actionState={actionState} name={name} />
+    </div>
+  );
 }
 
 export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }: BeneficiaryOrganizationFormProps) {
@@ -69,6 +130,8 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
     }
   }, [actionState]);
 
+  const currentActionState = validation ?? actionState;
+
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     const formData = Object.fromEntries(new FormData(event.currentTarget));
     setValidation(null);
@@ -85,78 +148,41 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
       {beneficiaryOrganization?.id && <input name="id" type="hidden" value={beneficiaryOrganization.id} />}
 
-      <div>
-        <Label htmlFor="beneficiary_id">{t('form.beneficiaryLabel')}</Label>
-        <Select defaultValue={beneficiaryOrganization?.beneficiary_id ?? ''} name="beneficiary_id">
-          <SelectTrigger>
-            <SelectValue placeholder={t('form.selectBeneficiary')} />
-          </SelectTrigger>
-          <SelectContent>
-            {beneficiaries.map((b) => (
-              <SelectItem key={b.id} value={b.id}>
-                {/* c8 ignore next */ b.first_name || b.last_name ? `${b.first_name || ''} ${b.last_name || ''}`.trim() : b.email || t('form.noName')}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <FieldError actionState={validation ?? actionState} name="beneficiary_id" />
-      </div>
+      <BeneficiarySelectField
+        actionState={currentActionState}
+        beneficiaries={beneficiaries}
+        defaultValue={beneficiaryOrganization?.beneficiary_id ?? ''}
+        t={t}
+      />
 
-      <div>
-        <Label htmlFor="organization_id">{t('form.organizationLabel')}</Label>
-        <Select defaultValue={beneficiaryOrganization?.organization_id ?? ''} name="organization_id">
-          <SelectTrigger>
-            <SelectValue placeholder={t('form.selectOrganization')} />
-          </SelectTrigger>
-          <SelectContent>
-            {orgs.map((o) => (
-              <SelectItem key={o.id} value={o.id}>
-                {o.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <FieldError actionState={validation ?? actionState} name="organization_id" />
-      </div>
+      <OrganizationSelectField
+        actionState={currentActionState}
+        defaultValue={beneficiaryOrganization?.organization_id ?? ''}
+        label={t('form.organizationLabel')}
+        organizations={orgs}
+        placeholder={t('form.selectOrganization')}
+      />
 
-      <div>
-        <Label htmlFor="available_points">{t('form.availablePoints')}</Label>
-        <Input
-          aria-describedby="available_points-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.available_points}
-          defaultValue={beneficiaryOrganization?.available_points ?? 0}
-          id="available_points"
-          name="available_points"
-          type="number"
-        />
-        <FieldError actionState={validation ?? actionState} name="available_points" />
-      </div>
+      <PointsNumberField
+        actionState={currentActionState}
+        defaultValue={beneficiaryOrganization?.available_points ?? 0}
+        label={t('form.availablePoints')}
+        name="available_points"
+      />
 
-      <div>
-        <Label htmlFor="total_points_earned">{t('form.totalPointsEarned')}</Label>
-        <Input
-          aria-describedby="total_points_earned-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.total_points_earned}
-          defaultValue={beneficiaryOrganization?.total_points_earned ?? 0}
-          id="total_points_earned"
-          name="total_points_earned"
-          type="number"
-        />
-        <FieldError actionState={validation ?? actionState} name="total_points_earned" />
-      </div>
+      <PointsNumberField
+        actionState={currentActionState}
+        defaultValue={beneficiaryOrganization?.total_points_earned ?? 0}
+        label={t('form.totalPointsEarned')}
+        name="total_points_earned"
+      />
 
-      <div>
-        <Label htmlFor="total_points_redeemed">{t('form.totalPointsRedeemed')}</Label>
-        <Input
-          aria-describedby="total_points_redeemed-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.total_points_redeemed}
-          defaultValue={beneficiaryOrganization?.total_points_redeemed ?? 0}
-          id="total_points_redeemed"
-          name="total_points_redeemed"
-          type="number"
-        />
-        <FieldError actionState={validation ?? actionState} name="total_points_redeemed" />
-      </div>
+      <PointsNumberField
+        actionState={currentActionState}
+        defaultValue={beneficiaryOrganization?.total_points_redeemed ?? 0}
+        label={t('form.totalPointsRedeemed')}
+        name="total_points_redeemed"
+      />
 
       <div className="flex items-center gap-2">
         <input

@@ -73,6 +73,105 @@ interface PageProps {
   }>;
 }
 
+function parseRedemptionFilters(params: Awaited<PageProps['searchParams']>) {
+  return {
+    q: params.q?.trim() ?? '',
+    status: REDEMPTION_STATUSES.find((s) => s === params.status) ?? '',
+    from: params.from?.match(/^\d{4}-\d{2}-\d{2}$/)?.[0] ?? '',
+    to: params.to?.match(/^\d{4}-\d{2}-\d{2}$/)?.[0] ?? '',
+    beneficiary: params.beneficiary ?? '',
+    product: params.product ?? '',
+  };
+}
+
+type RedemptionRow = RedemptionWithRelations & { code: string; beneficiaryName: string | null; deliveredByName: string | null };
+
+function mapRedemptionRows(all: RedemptionWithRelations[]): RedemptionRow[] {
+  return all.map((redemption) => ({
+    ...redemption,
+    code: redemptionCode(redemption.id, redemption.redemption_date),
+    beneficiaryName: personName(redemption.beneficiary),
+    deliveredByName: personName(redemption.deliveredBy),
+  }));
+}
+
+function computeRedemptionStats(filtered: RedemptionRow[]) {
+  const breakdown = {
+    pending: filtered.filter((r) => r.status === 'pending').length,
+    delivered: filtered.filter((r) => r.status === 'delivered').length,
+    cancelled: filtered.filter((r) => r.status === 'cancelled').length,
+  };
+
+  return {
+    breakdown,
+    stats: {
+      total: filtered.length,
+      pointsUsed: filtered.reduce((sum, r) => sum + (Number(r.points_used) || 0), 0),
+      ...breakdown,
+    },
+  };
+}
+
+function buildRedemptionFilterOptions(rows: RedemptionRow[]) {
+  const beneficiaryOptions = unique(
+    rows.map((r) =>
+      r.beneficiary?.id
+        ? { id: String(r.beneficiary.id), name: r.beneficiaryName ?? '' }
+        : null,
+    ),
+  );
+  const productOptions = unique(
+    rows.map((r) => (r.product?.id ? { id: String(r.product.id), name: r.product.name } : null)),
+  );
+  return { beneficiaryOptions, productOptions };
+}
+
+// Las etiquetas de estado y traducciones llegan resueltas desde la página.
+function RedemptionTableRow({ redemption }: { redemption: RedemptionRow }) {
+  return (
+    <TableRow>
+      <TableCell><CopyableCode value={redemption.code} /></TableCell>
+      <TableCell>
+        <span className="flex items-center gap-2">
+          <span className="grid size-7 shrink-0 place-items-center rounded-full bg-brand-violet/10 text-[10px] font-semibold text-brand-violet">
+            {initials(redemption.beneficiaryName)}
+          </span>
+          {redemption.beneficiaryName ?? 'N/A'}
+        </span>
+      </TableCell>
+      <TableCell>{redemption.product?.name || 'N/A'}</TableCell>
+      <TableCell className="text-right tabular-nums">
+        {NUMBER_FORMATTER.format(redemption.points_used)} pts
+      </TableCell>
+      <TableCell>
+        <RedemptionStatusBadge status={redemption.status} />
+      </TableCell>
+      <TableCell>
+        <span suppressHydrationWarning className="block">
+          {formatDateOnly(redemption.redemption_date, 'es-AR', {
+            day: '2-digit', month: '2-digit', year: 'numeric',
+          })}
+        </span>
+        <span suppressHydrationWarning className="block text-xs text-muted-foreground">
+          {new Date(redemption.redemption_date).toLocaleTimeString('es-AR', {
+            hour: '2-digit', minute: '2-digit',
+          })}
+        </span>
+      </TableCell>
+      <TableCell>{redemption.deliveredByName ?? '—'}</TableCell>
+      <TableCell className="text-right">
+        <div className="flex items-center justify-end gap-2">
+          {redemption.status === 'pending' ? (
+            <PendingRedemptionActions redemptionId={redemption.id} />
+          ) : (
+            <span className="text-xs text-muted-foreground">—</span>
+          )}
+        </div>
+      </TableCell>
+    </TableRow>
+  );
+}
+
 export default async function RedemptionListPage({ searchParams }: PageProps) {
   const [t, tCommon, currentUser, params] = await Promise.all([
     getTranslations('Dashboard.redemption'),
@@ -85,14 +184,7 @@ export default async function RedemptionListPage({ searchParams }: PageProps) {
   const supabase = userIsAdmin ? createAdminClient() : await createClient();
   const orgIdFilter = await getActiveOrgIdFilter(currentUser);
 
-  const filters = {
-    q: params.q?.trim() ?? '',
-    status: REDEMPTION_STATUSES.find((s) => s === params.status) ?? '',
-    from: params.from?.match(/^\d{4}-\d{2}-\d{2}$/)?.[0] ?? '',
-    to: params.to?.match(/^\d{4}-\d{2}-\d{2}$/)?.[0] ?? '',
-    beneficiary: params.beneficiary ?? '',
-    product: params.product ?? '',
-  };
+  const filters = parseRedemptionFilters(params);
 
   let query = supabase
     .from('redemption')
@@ -104,26 +196,19 @@ export default async function RedemptionListPage({ searchParams }: PageProps) {
     `)
     .order('redemption_date', { ascending: false });
 
-  if (orgIdFilter) {
-    query = query.eq('organization_id', orgIdFilter);
-  }
-  if (filters.status) {
-    query = query.eq('status', filters.status);
-  }
-  if (filters.beneficiary) {
-    query = query.eq('beneficiary_id', filters.beneficiary);
-  }
-  if (filters.product) {
-    query = query.eq('product_id', filters.product);
-  }
   // ponytail: date bounds are interpreted in the DB timezone; add an explicit
   // tz offset here if org-local day boundaries ever matter.
-  if (filters.from) {
-    query = query.gte('redemption_date', filters.from);
+  const eqFilters: [string, string | number | false][] = [
+    ['organization_id', orgIdFilter || false],
+    ['status', filters.status],
+    ['beneficiary_id', filters.beneficiary],
+    ['product_id', filters.product],
+  ];
+  for (const [column, value] of eqFilters) {
+    if (value) query = query.eq(column, value);
   }
-  if (filters.to) {
-    query = query.lte('redemption_date', `${filters.to}T23:59:59.999`);
-  }
+  if (filters.from) query = query.gte('redemption_date', filters.from);
+  if (filters.to) query = query.lte('redemption_date', `${filters.to}T23:59:59.999`);
 
   const { data, error } = await query;
 
@@ -132,13 +217,7 @@ export default async function RedemptionListPage({ searchParams }: PageProps) {
   }
 
   const all = (data ?? []) as unknown as RedemptionWithRelations[];
-
-  const rows = all.map((redemption) => ({
-    ...redemption,
-    code: redemptionCode(redemption.id, redemption.redemption_date),
-    beneficiaryName: personName(redemption.beneficiary),
-    deliveredByName: personName(redemption.deliveredBy),
-  }));
+  const rows = mapRedemptionRows(all);
 
   const needle = filters.q.toLowerCase();
   const filtered = needle
@@ -152,28 +231,8 @@ export default async function RedemptionListPage({ searchParams }: PageProps) {
   const page = parsePage(params.page, Math.ceil(filtered.length / perPage));
   const visible = filtered.slice((page - 1) * perPage, page * perPage);
 
-  const breakdown = {
-    pending: filtered.filter((r) => r.status === 'pending').length,
-    delivered: filtered.filter((r) => r.status === 'delivered').length,
-    cancelled: filtered.filter((r) => r.status === 'cancelled').length,
-  };
-
-  const stats = {
-    total: filtered.length,
-    pointsUsed: filtered.reduce((sum, r) => sum + (Number(r.points_used) || 0), 0),
-    ...breakdown,
-  };
-
-  const beneficiaryOptions = unique(
-    rows.map((r) =>
-      r.beneficiary?.id
-        ? { id: String(r.beneficiary.id), name: r.beneficiaryName ?? '' }
-        : null,
-    ),
-  );
-  const productOptions = unique(
-    rows.map((r) => (r.product?.id ? { id: String(r.product.id), name: r.product.name } : null)),
-  );
+  const { breakdown, stats } = computeRedemptionStats(filtered);
+  const { beneficiaryOptions, productOptions } = buildRedemptionFilterOptions(rows);
 
   return (
     <div className="space-y-6">
@@ -240,46 +299,7 @@ export default async function RedemptionListPage({ searchParams }: PageProps) {
               <TableBody>
                 {visible.length > 0 ? (
                   visible.map((redemption) => (
-                    <TableRow key={redemption.id}>
-                      <TableCell><CopyableCode value={redemption.code} /></TableCell>
-                      <TableCell>
-                        <span className="flex items-center gap-2">
-                          <span className="grid size-7 shrink-0 place-items-center rounded-full bg-brand-violet/10 text-[10px] font-semibold text-brand-violet">
-                            {initials(redemption.beneficiaryName)}
-                          </span>
-                          {redemption.beneficiaryName ?? 'N/A'}
-                        </span>
-                      </TableCell>
-                      <TableCell>{redemption.product?.name || 'N/A'}</TableCell>
-                      <TableCell className="text-right tabular-nums">
-                        {NUMBER_FORMATTER.format(redemption.points_used)} pts
-                      </TableCell>
-                      <TableCell>
-                        <RedemptionStatusBadge status={redemption.status} />
-                      </TableCell>
-                      <TableCell>
-                        <span suppressHydrationWarning className="block">
-                          {formatDateOnly(redemption.redemption_date, 'es-AR', {
-                            day: '2-digit', month: '2-digit', year: 'numeric',
-                          })}
-                        </span>
-                        <span suppressHydrationWarning className="block text-xs text-muted-foreground">
-                          {new Date(redemption.redemption_date).toLocaleTimeString('es-AR', {
-                            hour: '2-digit', minute: '2-digit',
-                          })}
-                        </span>
-                      </TableCell>
-                      <TableCell>{redemption.deliveredByName ?? '—'}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          {redemption.status === 'pending' ? (
-                            <PendingRedemptionActions redemptionId={redemption.id} />
-                          ) : (
-                            <span className="text-xs text-muted-foreground">—</span>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                    <RedemptionTableRow key={redemption.id} redemption={redemption} />
                   ))
                 ) : (
                   <TableRow>

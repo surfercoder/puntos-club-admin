@@ -8,12 +8,11 @@ import DeleteModal from '@/components/dashboard/product/delete-modal';
 import { PlanLimitCreateButton } from '@/components/dashboard/plan/plan-limit-create-button';
 import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
+import { ListTableHeader } from '@/components/dashboard/shared/list-table-header';
 import { Button } from '@/components/ui/button';
 import {
   Table,
-  TableHeader,
   TableRow,
-  TableHead,
   TableBody,
   TableCell,
 } from '@/components/ui/table';
@@ -51,17 +50,16 @@ export default async function ProductListPage() {
 
       <div className="border rounded-lg">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('tableHeaders.images')}</TableHead>
-              <TableHead>{t('tableHeaders.name')}</TableHead>
-              <TableHead>{t('tableHeaders.description')}</TableHead>
-              <TableHead>{t('tableHeaders.requiredPoints')}</TableHead>
-              <TableHead>{t('tableHeaders.stock')}</TableHead>
-
-              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
+          <ListTableHeader
+            columns={[
+              { label: t('tableHeaders.images') },
+              { label: t('tableHeaders.name') },
+              { label: t('tableHeaders.description') },
+              { label: t('tableHeaders.requiredPoints') },
+              { label: t('tableHeaders.stock') },
+              { label: t('tableHeaders.actions'), className: 'text-right' },
+            ]}
+          />
           <TableBody>
             {data && data.length > 0 ? (
               data.map((product: Product) => (

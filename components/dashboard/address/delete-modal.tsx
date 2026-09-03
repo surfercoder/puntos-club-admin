@@ -7,15 +7,7 @@ import { toast } from 'sonner';
 
 import { deleteAddress } from '@/actions/dashboard/address/actions';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from '@/components/ui/dialog';
+import { ConfirmDeleteDialog } from '@/components/dashboard/shared/confirm-delete-dialog';
 
 export default function DeleteModal({ id }: { id: number }) {
   const [open, setOpen] = useState(false);
@@ -39,28 +31,23 @@ export default function DeleteModal({ id }: { id: number }) {
   };
 
   return (
-    <Dialog onOpenChange={setOpen} open={open}>
-      <DialogTrigger asChild>
+    <ConfirmDeleteDialog
+      open={open}
+      onOpenChange={setOpen}
+      trigger={
         <Button size="sm" variant="destructive">
           {tCommon('delete')}
         </Button>
-      </DialogTrigger>
-      <DialogContent>
-        <DialogHeader>
-          <DialogTitle>{t('title')}</DialogTitle>
-          <DialogDescription>
-            {t('confirm')}
-          </DialogDescription>
-        </DialogHeader>
-        <DialogFooter className="flex gap-2 justify-end">
-          <Button disabled={loading} onClick={() => setOpen(false)} type="button" variant="secondary">
-            {tCommon('cancel')}
-          </Button>
-          <Button disabled={loading} onClick={handleDelete} type="button" variant="destructive">
-            {loading ? tCommon('loading') : tCommon('delete')}
-          </Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+      }
+      title={t('title')}
+      description={t('confirm')}
+      isDeleting={loading}
+      onConfirm={handleDelete}
+      cancelLabel={tCommon('cancel')}
+      confirmLabel={loading ? tCommon('loading') : tCommon('delete')}
+      cancelVariant="secondary"
+      buttonType="button"
+      footerClassName="flex gap-2 justify-end"
+    />
   );
 }

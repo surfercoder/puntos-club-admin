@@ -8,18 +8,18 @@ import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
 import { ExcelExportButton } from '@/components/dashboard/shared/excel-export-button';
 import { TablePagination } from '@/components/dashboard/shared/table-pagination';
+import { ListTableHeader } from '@/components/dashboard/shared/list-table-header';
 import { StaffFilters } from '@/components/dashboard/staff/staff-filters';
+import { StaffNameCell } from '@/components/dashboard/staff/staff-name-cell';
 import { StaffStats } from '@/components/dashboard/staff/staff-stats';
 import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from '@/components/ui/table';
 import { getUsageSummaryAction } from '@/actions/dashboard/usage/actions';
-import { filterStaff, getStaff, staffInitials, staffName } from '@/lib/staff/get-staff';
+import { filterStaff, getStaff, staffName } from '@/lib/staff/get-staff';
 import { formatDateOnly, parsePage, parsePerPage } from '@/lib/utils';
 
 const PERMISSIONS = [
@@ -105,34 +105,22 @@ export default async function CollaboratorsPage({ searchParams }: PageProps) {
 
           <div className="rounded-xl border bg-card shadow-sm">
             <Table className="text-[13px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('headers.collaborator')}</TableHead>
-                  <TableHead>{t('headers.role')}</TableHead>
-                  <TableHead>{t('headers.status')}</TableHead>
-                  <TableHead>{t('headers.since')}</TableHead>
-                  <TableHead className="text-right">{tCommon('actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
+              <ListTableHeader
+                columns={[
+                  { label: t('headers.collaborator') },
+                  { label: t('headers.role') },
+                  { label: t('headers.status') },
+                  { label: t('headers.since') },
+                  { label: tCommon('actions'), className: 'text-right' },
+                ]}
+              />
               <TableBody>
                 {visible.length > 0 ? (
                   visible.map((member) => {
                     const name = staffName(member);
                     return (
                       <TableRow key={member.id}>
-                        <TableCell>
-                          <span className="flex items-center gap-2.5">
-                            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-violet/10 text-[11px] font-semibold text-brand-violet">
-                              {staffInitials(name)}
-                            </span>
-                            <span className="min-w-0">
-                              <span className="block font-medium">{name || 'N/A'}</span>
-                              <span className="block text-xs text-muted-foreground">
-                                {member.email}
-                              </span>
-                            </span>
-                          </span>
-                        </TableCell>
+                        <StaffNameCell email={member.email} name={name} />
                         <TableCell>
                           <span className="inline-block rounded-md bg-brand-violet/10 px-2 py-0.5 text-xs font-medium text-brand-violet">
                             {t('roleName')}

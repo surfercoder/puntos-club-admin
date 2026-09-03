@@ -33,21 +33,184 @@ interface Category {
   active: boolean;
 }
 
+function CategoryFields({
+  categoryState,
+  selectedCategory,
+  setSelectedCategory,
+  newCategory,
+  setNewCategory,
+  actionState,
+  t,
+}: {
+  categoryState: { items: Category[]; loaded: boolean };
+  selectedCategory: string;
+  setSelectedCategory: (value: string) => void;
+  newCategory: string;
+  setNewCategory: (value: string) => void;
+  actionState: ActionState;
+  t: (key: string) => string;
+}) {
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <div>
+        <div className="flex flex-wrap items-baseline gap-2">
+          <Label htmlFor="category_id">{t('categoryLabel')}</Label>
+          <span className="text-xs text-muted-foreground">{t('orCreateCategory')}</span>
+        </div>
+        <select
+          id="category_id"
+          name="category_id"
+          value={selectedCategory}
+          onChange={(e) => setSelectedCategory(e.target.value)}
+          className="mt-1.5 flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          aria-describedby="category_id-error"
+          aria-invalid={!!actionState.fieldErrors?.category_id}
+        >
+          <option value="">{t('categoryPlaceholder')}</option>
+          {categoryState.items.map((category) => (
+            <option key={category.id} value={category.id}>
+              {category.name}
+            </option>
+          ))}
+        </select>
+        <FieldError actionState={actionState} name="category_id" />
+      </div>
+
+      <div>
+        <Label htmlFor="new_category">{t('newCategoryLabel')}</Label>
+        <Input
+          className="mt-1.5"
+          id="new_category"
+          name="new_category"
+          onChange={(e) => setNewCategory(e.target.value)}
+          placeholder={t('newCategoryPlaceholder')}
+          type="text"
+          value={newCategory}
+        />
+      </div>
+    </div>
+  );
+}
+
+function PointsStockFields({
+  points,
+  setPoints,
+  stock,
+  setStock,
+  productStock,
+  actionState,
+  t,
+}: {
+  points: string;
+  setPoints: (value: string) => void;
+  stock: string;
+  setStock: (value: string) => void;
+  productStock: number;
+  actionState: ActionState;
+  t: (key: string) => string;
+}) {
+  return (
+    <div className="grid gap-4 md:grid-cols-2">
+      <div>
+        <Label htmlFor="required_points">
+          {t('pointsLabel')} <span className="text-destructive">*</span>
+        </Label>
+        <div className="mt-1.5 flex">
+          <Input
+            aria-describedby="required_points-error"
+            aria-invalid={!!actionState.fieldErrors?.required_points}
+            className="rounded-r-none"
+            id="required_points"
+            min={0}
+            name="required_points"
+            onChange={(e) => setPoints(e.target.value)}
+            placeholder={t('pointsPlaceholder')}
+            type="number"
+            value={points}
+          />
+          <span className="grid place-items-center rounded-r-md border border-l-0 bg-muted px-3 text-sm text-muted-foreground">
+            pts
+          </span>
+        </div>
+        <p className="mt-1.5 text-xs text-muted-foreground">{t('pointsHelp')}</p>
+        <FieldError actionState={actionState} name="required_points" />
+      </div>
+
+      <div>
+        <Label htmlFor="stock">
+          {t('stockLabel')} <span className="text-destructive">*</span>
+        </Label>
+        <Input
+          aria-describedby="stock-error"
+          aria-invalid={!!actionState.fieldErrors?.stock}
+          className="mt-1.5"
+          id="stock"
+          min={0}
+          name="stock"
+          onChange={(e) => setStock(e.target.value)}
+          placeholder={t('stockPlaceholder')}
+          type="number"
+          value={stock}
+        />
+        <input defaultValue={productStock} name="stock_loaded" type="hidden" />
+        <p className="mt-1.5 text-xs text-muted-foreground">{t('stockHelp')}</p>
+        <FieldError actionState={actionState} name="stock" />
+      </div>
+    </div>
+  );
+}
+
+async function fetchCategories(): Promise<Category[]> {
+  const supabase = createClient();
+  let query = supabase
+    .from('category')
+    .select('id, name, active')
+    .eq('active', true)
+    .order('name');
+
+  try {
+    const activeOrgId = window.localStorage.getItem('active_org_id');
+    if (activeOrgId) {
+      const orgIdNumber = Number(activeOrgId);
+      if (!Number.isNaN(orgIdNumber)) {
+        query = query.eq('organization_id', orgIdNumber);
+      }
+    }
+  } catch {
+    // ignore
+  }
+
+  const { data } = await query;
+  return data ?? [];
+}
+
+function getInitialProductValues(product?: Product) {
+  return {
+    categoryId: product?.category_id ?? '',
+    imageUrls: product?.image_urls ?? [],
+    name: product?.name ?? '',
+    description: product?.description ?? '',
+    points: String(product?.required_points ?? 0),
+    stock: String(product?.stock ?? 0),
+  };
+}
+
 export default function ProductForm({ product }: ProductFormProps) {
   const t = useTranslations('Dashboard.product.form');
   const tCommon = useTranslations('Common');
 
   // State
+  const initialValues = getInitialProductValues(product);
   const [validation, setValidation] = useState<ActionState | null>(null);
   type CategoryState = { items: Category[]; loaded: boolean };
   const [categoryState, setCategoryState] = useReducer((_: CategoryState, next: CategoryState) => next, { items: [], loaded: false } as CategoryState);
-  const [selectedCategory, setSelectedCategory] = useState<string>(product?.category_id ?? '');
+  const [selectedCategory, setSelectedCategory] = useState<string>(initialValues.categoryId);
   const [newCategory, setNewCategory] = useState('');
-  const [imageUrls, setImageUrls] = useState<string[]>(product?.image_urls ?? []);
-  const [name, setName] = useState(product?.name ?? '');
-  const [description, setDescription] = useState(product?.description ?? '');
-  const [points, setPoints] = useState(String(product?.required_points ?? 0));
-  const [stock, setStock] = useState(String(product?.stock ?? 0));
+  const [imageUrls, setImageUrls] = useState<string[]>(initialValues.imageUrls);
+  const [name, setName] = useState(initialValues.name);
+  const [description, setDescription] = useState(initialValues.description);
+  const [points, setPoints] = useState(initialValues.points);
+  const [stock, setStock] = useState(initialValues.stock);
 
   // Utils
   const [actionState, formAction, pending] = useActionState(productFormAction, EMPTY_ACTION_STATE);
@@ -55,30 +218,7 @@ export default function ProductForm({ product }: ProductFormProps) {
 
   // Load categories
   useEffect(() => {
-    async function loadCategories() {
-      const supabase = createClient();
-      let query = supabase
-        .from('category')
-        .select('id, name, active')
-        .eq('active', true)
-        .order('name');
-
-      try {
-        const activeOrgId = window.localStorage.getItem('active_org_id');
-        if (activeOrgId) {
-          const orgIdNumber = Number(activeOrgId);
-          if (!Number.isNaN(orgIdNumber)) {
-            query = query.eq('organization_id', orgIdNumber);
-          }
-        }
-      } catch {
-        // ignore
-      }
-
-      const { data } = await query;
-      setCategoryState({ items: data ?? [], loaded: true });
-    }
-    loadCategories();
+    fetchCategories().then((items) => setCategoryState({ items, loaded: true }));
   }, []);
 
   useEffect(() => {
@@ -117,6 +257,8 @@ export default function ProductForm({ product }: ProductFormProps) {
     categoryState.items.find((c) => String(c.id) === selectedCategory)?.name ||
     '';
 
+  const errorState = validation ?? actionState;
+
   return (
     <form action={formAction} onSubmit={handleSubmit}>
       {product?.id && <input name="id" type="hidden" value={product.id} />}
@@ -127,44 +269,15 @@ export default function ProductForm({ product }: ProductFormProps) {
           <h2 className="text-base font-semibold">{t('sectionTitle')}</h2>
 
           <div className="mt-5 space-y-4">
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <div className="flex flex-wrap items-baseline gap-2">
-                  <Label htmlFor="category_id">{t('categoryLabel')}</Label>
-                  <span className="text-xs text-muted-foreground">{t('orCreateCategory')}</span>
-                </div>
-                <select
-                  id="category_id"
-                  name="category_id"
-                  value={selectedCategory}
-                  onChange={(e) => setSelectedCategory(e.target.value)}
-                  className="mt-1.5 flex h-9 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                  aria-describedby="category_id-error"
-                  aria-invalid={!!(validation ?? actionState).fieldErrors?.category_id}
-                >
-                  <option value="">{t('categoryPlaceholder')}</option>
-                  {categoryState.items.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-                <FieldError actionState={validation ?? actionState} name="category_id" />
-              </div>
-
-              <div>
-                <Label htmlFor="new_category">{t('newCategoryLabel')}</Label>
-                <Input
-                  className="mt-1.5"
-                  id="new_category"
-                  name="new_category"
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  placeholder={t('newCategoryPlaceholder')}
-                  type="text"
-                  value={newCategory}
-                />
-              </div>
-            </div>
+            <CategoryFields
+              actionState={errorState}
+              categoryState={categoryState}
+              newCategory={newCategory}
+              selectedCategory={selectedCategory}
+              setNewCategory={setNewCategory}
+              setSelectedCategory={setSelectedCategory}
+              t={t}
+            />
 
             <div className="grid gap-4 md:grid-cols-2">
               <div>
@@ -180,7 +293,7 @@ export default function ProductForm({ product }: ProductFormProps) {
                   type="text"
                   value={name}
                 />
-                <FieldError actionState={validation ?? actionState} name="name" />
+                <FieldError actionState={errorState} name="name" />
               </div>
 
               <div>
@@ -198,57 +311,19 @@ export default function ProductForm({ product }: ProductFormProps) {
                 <p className="mt-1.5 text-right text-xs text-muted-foreground">
                   {t('descriptionMax', { max: DESCRIPTION_MAX })}
                 </p>
-                <FieldError actionState={validation ?? actionState} name="description" />
+                <FieldError actionState={errorState} name="description" />
               </div>
             </div>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div>
-                <Label htmlFor="required_points">
-                  {t('pointsLabel')} <span className="text-destructive">*</span>
-                </Label>
-                <div className="mt-1.5 flex">
-                  <Input
-                    aria-describedby="required_points-error"
-                    aria-invalid={!!(validation ?? actionState).fieldErrors?.required_points}
-                    className="rounded-r-none"
-                    id="required_points"
-                    min={0}
-                    name="required_points"
-                    onChange={(e) => setPoints(e.target.value)}
-                    placeholder={t('pointsPlaceholder')}
-                    type="number"
-                    value={points}
-                  />
-                  <span className="grid place-items-center rounded-r-md border border-l-0 bg-muted px-3 text-sm text-muted-foreground">
-                    pts
-                  </span>
-                </div>
-                <p className="mt-1.5 text-xs text-muted-foreground">{t('pointsHelp')}</p>
-                <FieldError actionState={validation ?? actionState} name="required_points" />
-              </div>
-
-              <div>
-                <Label htmlFor="stock">
-                  {t('stockLabel')} <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  aria-describedby="stock-error"
-                  aria-invalid={!!(validation ?? actionState).fieldErrors?.stock}
-                  className="mt-1.5"
-                  id="stock"
-                  min={0}
-                  name="stock"
-                  onChange={(e) => setStock(e.target.value)}
-                  placeholder={t('stockPlaceholder')}
-                  type="number"
-                  value={stock}
-                />
-                <input defaultValue={product?.stock ?? 0} name="stock_loaded" type="hidden" />
-                <p className="mt-1.5 text-xs text-muted-foreground">{t('stockHelp')}</p>
-                <FieldError actionState={validation ?? actionState} name="stock" />
-              </div>
-            </div>
+            <PointsStockFields
+              actionState={errorState}
+              points={points}
+              productStock={product?.stock ?? 0}
+              setPoints={setPoints}
+              setStock={setStock}
+              stock={stock}
+              t={t}
+            />
 
             <div>
               <Label>{t('imagesLabel')}</Label>
@@ -259,7 +334,7 @@ export default function ProductForm({ product }: ProductFormProps) {
                   onImagesChange={setImageUrls}
                 />
               </div>
-              <FieldError actionState={validation ?? actionState} name="image_urls" />
+              <FieldError actionState={errorState} name="image_urls" />
             </div>
 
             <div className="flex justify-end gap-3 border-t pt-5">

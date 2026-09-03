@@ -3,12 +3,11 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/app_user_organization/delete-modal';
+import { ListTableHeader } from '@/components/dashboard/shared/list-table-header';
 import { Button } from '@/components/ui/button';
 import {
   Table,
-  TableHeader,
   TableRow,
-  TableHead,
   TableBody,
   TableCell,
 } from '@/components/ui/table';
@@ -62,14 +61,14 @@ export default async function AppUserOrganizationListPage() {
 
       <div className="border rounded-lg">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('tableHeaders.user')}</TableHead>
-              <TableHead>{t('tableHeaders.organization')}</TableHead>
-              <TableHead>{t('tableHeaders.status')}</TableHead>
-              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
+          <ListTableHeader
+            columns={[
+              { label: t('tableHeaders.user') },
+              { label: t('tableHeaders.organization') },
+              { label: t('tableHeaders.status') },
+              { label: t('tableHeaders.actions'), className: 'text-right' },
+            ]}
+          />
           <TableBody>
             {data && data.length > 0 ? (
               data.map((row: AppUserOrganizationWithRelations) => (

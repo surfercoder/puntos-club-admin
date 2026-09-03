@@ -354,6 +354,147 @@ function PlanChangeActions({
   );
 }
 
+function derivePlanChangeFlags(
+  selected: string | null,
+  currentPlan: PlanType | null,
+  selectedPlan: Plan
+) {
+  const isChangingPlan = selected !== currentPlan;
+  const isUpgrade =
+    selected !== currentPlan &&
+    selectedPlan.isPaid &&
+    (currentPlan === 'trial' ||
+      (currentPlan === 'advance' && selected === 'pro'));
+  const isCancelToTrial =
+    isChangingPlan && selected === 'trial' && (currentPlan === 'advance' || currentPlan === 'pro');
+  const isSwitchPaidToPaid =
+    isChangingPlan && currentPlan === 'pro' && selected === 'advance';
+
+  return { isChangingPlan, isUpgrade, isCancelToTrial, isSwitchPaidToPaid };
+}
+
+async function startCheckoutForSelected(
+  selected: string | null,
+  payerEmail: string,
+  t: ReturnType<typeof useTranslations>
+) {
+  const trimmedPayerEmail = payerEmail.trim();
+  if (!EMAIL_REGEX.test(trimmedPayerEmail)) {
+    throw new Error(t('payerEmailInvalid'));
+  }
+
+  const res = await fetch('/api/mercadopago/create-subscription', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      planId: selected,
+      backUrl: '/dashboard/settings/plan',
+      payerEmail: trimmedPayerEmail,
+    }),
+  });
+
+  if (!res.ok) {
+    const errorData = (await res.json()) as { error?: string };
+    throw new Error(errorData.error ?? t('paymentInitError'));
+  }
+
+  const data = (await res.json()) as {
+    initPoint?: string;
+    preapprovalId?: string;
+    error?: string;
+  };
+
+  if (!data.initPoint) {
+    throw new Error(data.error ?? t('paymentInitError'));
+  }
+
+  window.location.href = data.initPoint;
+}
+
+function buildPlanChangeHandlers({
+  selected,
+  payerEmail,
+  isChangingPlan,
+  isUpgrade,
+  isCancelToTrial,
+  isSwitchPaidToPaid,
+  dispatch,
+  invalidate,
+  t,
+  tSettings,
+}: {
+  selected: string | null;
+  payerEmail: string;
+  isChangingPlan: boolean;
+  isUpgrade: boolean;
+  isCancelToTrial: boolean;
+  isSwitchPaidToPaid: boolean;
+  dispatch: React.Dispatch<ChangePlanAction>;
+  invalidate: () => void;
+  t: ReturnType<typeof useTranslations>;
+  tSettings: ReturnType<typeof useTranslations>;
+}) {
+  const handleChangePlan = async () => {
+    /* c8 ignore next */
+    if (!selected || !isChangingPlan) return;
+
+    if (isUpgrade) {
+      dispatch({ type: 'SET_LOADING', payload: true });
+      try {
+        await startCheckoutForSelected(selected, payerEmail, t);
+      } catch (err) {
+        toast.error(err instanceof Error ? err.message : t('paymentError'));
+        dispatch({ type: 'SET_LOADING', payload: false });
+      }
+      return;
+    }
+
+    if (isSwitchPaidToPaid) {
+      dispatch({ type: 'OPEN_CONFIRM', payload: 'switch' });
+      return;
+    }
+
+    if (isCancelToTrial) {
+      dispatch({ type: 'OPEN_CONFIRM', payload: 'cancel' });
+    }
+  };
+
+  const handleConfirmCancel = async () => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    try {
+      const result = await cancelSubscriptionAction();
+      if (result.error) {
+        toast.error(result.error);
+      } else {
+        toast.success(tSettings('cancelSuccess'));
+        dispatch({ type: 'CLOSE_CONFIRM' });
+        invalidate();
+      }
+    } catch {
+      toast.error(tSettings('cancelError'));
+    }
+    dispatch({ type: 'SET_LOADING', payload: false });
+  };
+
+  const handleConfirmSwitch = async () => {
+    dispatch({ type: 'SET_LOADING', payload: true });
+    try {
+      const result = await cancelSubscriptionAction();
+      if (result.error) {
+        toast.error(result.error);
+        dispatch({ type: 'SET_LOADING', payload: false });
+        return;
+      }
+      await startCheckoutForSelected(selected, payerEmail, t);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : t('paymentError'));
+      dispatch({ type: 'SET_LOADING', payload: false });
+    }
+  };
+
+  return { handleChangePlan, handleConfirmCancel, handleConfirmSwitch };
+}
+
 interface PlanChangeConfirmDialogProps {
   confirmAction: 'cancel' | 'switch' | null;
   loading: boolean;
@@ -523,108 +664,21 @@ export function PlanSelectorInner() {
   ];
 
   const selectedPlan = plans.find((p) => p.id === selected) ?? plans[0];
-  const isChangingPlan = selected !== currentPlan;
-  const isUpgrade =
-    selected !== currentPlan &&
-    selectedPlan.isPaid &&
-    (currentPlan === 'trial' ||
-      (currentPlan === 'advance' && selected === 'pro'));
-  const isCancelToTrial =
-    isChangingPlan && selected === 'trial' && (currentPlan === 'advance' || currentPlan === 'pro');
-  const isSwitchPaidToPaid =
-    isChangingPlan && currentPlan === 'pro' && selected === 'advance';
+  const { isChangingPlan, isUpgrade, isCancelToTrial, isSwitchPaidToPaid } =
+    derivePlanChangeFlags(selected, currentPlan, selectedPlan);
 
-  const startCheckoutForSelected = async () => {
-    const trimmedPayerEmail = payerEmail.trim();
-    if (!EMAIL_REGEX.test(trimmedPayerEmail)) {
-      throw new Error(t('payerEmailInvalid'));
-    }
-
-    const res = await fetch('/api/mercadopago/create-subscription', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        planId: selected,
-        backUrl: '/dashboard/settings/plan',
-        payerEmail: trimmedPayerEmail,
-      }),
-    });
-
-    if (!res.ok) {
-      const errorData = (await res.json()) as { error?: string };
-      throw new Error(errorData.error ?? t('paymentInitError'));
-    }
-
-    const data = (await res.json()) as {
-      initPoint?: string;
-      preapprovalId?: string;
-      error?: string;
-    };
-
-    if (!data.initPoint) {
-      throw new Error(data.error ?? t('paymentInitError'));
-    }
-
-    window.location.href = data.initPoint;
-  };
-
-  const handleChangePlan = async () => {
-    /* c8 ignore next */
-    if (!selected || !isChangingPlan) return;
-
-    if (isUpgrade) {
-      dispatch({ type: 'SET_LOADING', payload: true });
-      try {
-        await startCheckoutForSelected();
-      } catch (err) {
-        toast.error(err instanceof Error ? err.message : t('paymentError'));
-        dispatch({ type: 'SET_LOADING', payload: false });
-      }
-      return;
-    }
-
-    if (isSwitchPaidToPaid) {
-      dispatch({ type: 'OPEN_CONFIRM', payload: 'switch' });
-      return;
-    }
-
-    if (isCancelToTrial) {
-      dispatch({ type: 'OPEN_CONFIRM', payload: 'cancel' });
-    }
-  };
-
-  const handleConfirmCancel = async () => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-    try {
-      const result = await cancelSubscriptionAction();
-      if (result.error) {
-        toast.error(result.error);
-      } else {
-        toast.success(tSettings('cancelSuccess'));
-        dispatch({ type: 'CLOSE_CONFIRM' });
-        invalidate();
-      }
-    } catch {
-      toast.error(tSettings('cancelError'));
-    }
-    dispatch({ type: 'SET_LOADING', payload: false });
-  };
-
-  const handleConfirmSwitch = async () => {
-    dispatch({ type: 'SET_LOADING', payload: true });
-    try {
-      const result = await cancelSubscriptionAction();
-      if (result.error) {
-        toast.error(result.error);
-        dispatch({ type: 'SET_LOADING', payload: false });
-        return;
-      }
-      await startCheckoutForSelected();
-    } catch (err) {
-      toast.error(err instanceof Error ? err.message : t('paymentError'));
-      dispatch({ type: 'SET_LOADING', payload: false });
-    }
-  };
+  const { handleChangePlan, handleConfirmCancel, handleConfirmSwitch } = buildPlanChangeHandlers({
+    selected,
+    payerEmail,
+    isChangingPlan,
+    isUpgrade,
+    isCancelToTrial,
+    isSwitchPaidToPaid,
+    dispatch,
+    invalidate,
+    t,
+    tSettings,
+  });
 
   if (fetching || !planLimits || verifying) {
     return (

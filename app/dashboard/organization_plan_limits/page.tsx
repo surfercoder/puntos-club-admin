@@ -3,11 +3,12 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/organization_plan_limits/delete-modal';
+import { ListTableHeader } from '@/components/dashboard/shared/list-table-header';
 import ToastHandler from '@/components/dashboard/organization_plan_limits/toast-handler';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Table, TableHeader, TableRow, TableHead, TableBody, TableCell,
+  Table, TableRow, TableBody, TableCell,
 } from '@/components/ui/table';
 import { createClient } from '@/lib/supabase/server';
 
@@ -41,16 +42,16 @@ export default async function OrganizationPlanLimitsListPage() {
 
       <div className="border rounded-lg">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('tableHeaders.organization')}</TableHead>
-              <TableHead>{t('tableHeaders.plan')}</TableHead>
-              <TableHead>{t('tableHeaders.feature')}</TableHead>
-              <TableHead>{t('tableHeaders.limit')}</TableHead>
-              <TableHead>{t('tableHeaders.warning')}</TableHead>
-              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
+          <ListTableHeader
+            columns={[
+              { label: t('tableHeaders.organization') },
+              { label: t('tableHeaders.plan') },
+              { label: t('tableHeaders.feature') },
+              { label: t('tableHeaders.limit') },
+              { label: t('tableHeaders.warning') },
+              { label: t('tableHeaders.actions'), className: 'text-right' },
+            ]}
+          />
           <TableBody>
             {data && data.length > 0 ? (
               data.map((limit) => (

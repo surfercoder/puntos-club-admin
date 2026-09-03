@@ -1,18 +1,20 @@
 'use client';
 
 import { z } from 'zod';
-import { Bell, Loader2, Send, ShieldCheck } from 'lucide-react';
 import { useRouter } from 'next/navigation';
-import { useReducer, useEffect } from 'react';
-import { toast } from 'sonner';
+import { useReducer } from 'react';
 import { useTranslations } from 'next-intl';
 
-import { Button } from '@/components/ui/button';
 import type { OrganizationNotificationLimit } from '@/types/organization_notification_limit';
 import type { PushNotification } from '@/types/push_notification';
 import NotificationLimitsPanel from './notification-limits-panel';
 import ModerationResultPanel, { type ModerationResult } from './notification-moderation-result';
 import NotificationFormFields from './notification-form-fields';
+import { NotificationFormActions } from './notification-form-actions';
+import { NotificationPreview } from './notification-preview';
+import { createNotificationFormHandlers } from './notification-form-handlers';
+import { getNotificationFormFlags } from './notification-form-flags';
+import { useNotificationCountdown } from './use-notification-countdown';
 
 const TITLE_MAX_LENGTH = 65;
 const BODY_MAX_LENGTH = 240;
@@ -37,7 +39,7 @@ interface NotificationFormState {
   timeRemaining: string;
 }
 
-type NotificationFormAction =
+export type NotificationFormAction =
   | { type: 'SET_CONTENT'; field: 'title' | 'body'; value: string }
   | { type: 'SET_TITLE_WITH_EMOJI'; value: string }
   | { type: 'SET_BODY_WITH_EMOJI'; value: string }
@@ -150,144 +152,36 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
   const titleCharsLeft = TITLE_MAX_LENGTH - title.length;
   const bodyCharsLeft = BODY_MAX_LENGTH - body.length;
 
-  useEffect(() => {
-    if (!canSend && limits?.last_notification_sent_at) {
-      const calculateTimeRemaining = () => {
-        if (!limits?.last_notification_sent_at || !limits?.min_hours_between_notifications) {
-          return null;
-        }
+  useNotificationCountdown(canSend, limits, dispatch);
 
-        const lastSent = new Date(limits.last_notification_sent_at);
-        const minHours = limits.min_hours_between_notifications;
-        const nextAvailable = new Date(lastSent.getTime() + minHours * 60 * 60 * 1000);
-        const now = new Date();
-        const diff = nextAvailable.getTime() - now.getTime();
+  const { handleCheckContent, handleSaveAndSend } = createNotificationFormHandlers({
+    schema: NotificationSchema,
+    title,
+    body,
+    notification,
+    organizationId,
+    canSend,
+    moderationResult,
+    dispatch,
+    t,
+    push,
+    refresh,
+    redirectPath,
+  });
 
-        if (diff <= 0) return null;
-
-        const hours = Math.floor(diff / (1000 * 60 * 60));
-        const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((diff % (1000 * 60)) / 1000);
-
-        if (hours > 0) return `${hours}h ${minutes}m ${seconds}s`;
-        if (minutes > 0) return `${minutes}m ${seconds}s`;
-        return `${seconds}s`;
-      };
-
-      const interval = setInterval(() => {
-        const remaining = calculateTimeRemaining();
-        if (remaining) {
-          dispatch({ type: 'UPDATE_TIMER', payload: remaining });
-        } else {
-          dispatch({ type: 'TIMER_EXPIRED' });
-          window.location.reload();
-        }
-      }, 1000);
-
-      return () => clearInterval(interval);
-    }
-  }, [canSend, limits]);
-
-  const handleCheckContent = async () => {
-    const validation = NotificationSchema.safeParse({ title: title.trim(), body: body.trim() });
-    if (!validation.success) { toast.error(validation.error.issues[0].message); return; }
-
-    dispatch({ type: 'START_MODERATION' });
-
-    try {
-      const moderateResponse = await fetch('/api/notifications/moderate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title, body, ...(/* c8 ignore next */ isEditing ? { notificationId: notification.id } : {}) }),
-      });
-      if (!moderateResponse.ok) {
-        const moderateError = await moderateResponse.json();
-        toast.error(moderateError.error || t('moderationVerifyError'));
-        dispatch({ type: 'MODERATION_ERROR' });
-        return;
-      }
-
-      const moderateData = await moderateResponse.json();
-      dispatch({ type: 'MODERATION_COMPLETE', payload: moderateData.data });
-      if (moderateData.data.isApproved) {
-        toast.success(moderateData.cached ? t('moderationAlreadyApproved') : t('moderationApproved'));
-      } else {
-        toast.error(t('moderationNeedsReview'));
-      }
-    } catch (_error) {
-      toast.error(t('moderationVerifyRetry'));
-      dispatch({ type: 'MODERATION_ERROR' });
-    }
-  };
-
-  const handleSaveAndSend = async () => {
-    const validation = NotificationSchema.safeParse({ title: title.trim(), body: body.trim() });
-    if (!validation.success) { toast.error(validation.error.issues[0].message); return; }
-    if (!canSend) { toast.error(t('limitReachedError')); return; }
-    if (!moderationResult?.isApproved) { toast.error(t('verifyBeforeSend')); return; }
-
-    dispatch({ type: 'START_CREATING' });
-
-    try {
-      let notificationId: string;
-
-      if (isEditing) {
-        const updateResponse = await fetch(`/api/notifications/${notification.id}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, body }),
-        });
-        if (!updateResponse.ok) {
-          const updateError = await updateResponse.json();
-          toast.error(updateError.error || t('updateError'));
-          dispatch({ type: 'CREATE_ERROR' });
-          return;
-        }
-
-        notificationId = notification.id;
-      } else {
-        const createResponse = await fetch('/api/notifications', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, body, ...(organizationId ? { organizationId } : {}) }),
-        });
-        if (!createResponse.ok) {
-          const createError = await createResponse.json();
-          toast.error(createError.error || t('createError'));
-          dispatch({ type: 'CREATE_ERROR' });
-          return;
-        }
-
-        const createData = await createResponse.json();
-        notificationId = createData.data.id;
-      }
-      dispatch({ type: 'CREATED_NOW_SENDING' });
-      toast.success(t('createSuccess'));
-
-      const sendResponse = await fetch('/api/notifications/send', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ notificationId }),
-      });
-      if (!sendResponse.ok) {
-        const sendError = await sendResponse.json();
-        toast.error(sendError.error || t('sendError'));
-        dispatch({ type: 'SEND_ERROR' });
-        return;
-      }
-
-      const sendData = await sendResponse.json();
-      toast.success(t('sendSuccess', { sent: sendData.sent, failed: sendData.failed }));
-      setTimeout(() => { push(redirectPath); refresh(); }, 1500);
-    } catch (_error) {
-      toast.error(t('unexpectedError'));
-      dispatch({ type: 'RESET_PROCESSING' });
-    }
-  };
-
-  const isProcessing = isCreating || isSending;
-  const isFormValid = title.trim() && body.trim() && titleCharsLeft >= 0 && bodyCharsLeft >= 0;
-  const canSendNotification = isFormValid && canSend && moderationResult?.isApproved && !isProcessing && !isModerating;
+  const { isProcessing, canVerify, canSendNotification, sendLabel } = getNotificationFormFlags({
+    title,
+    body,
+    titleCharsLeft,
+    bodyCharsLeft,
+    isCreating,
+    isSending,
+    isModerating,
+    isEditing,
+    canSend,
+    moderationResult,
+    t,
+  });
 
   return (
     <div className="space-y-6">
@@ -312,22 +206,13 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
           onBodyEmojiInsert={(value) => dispatch({ type: 'SET_BODY_WITH_EMOJI', value })}
         />
 
-        <div className="bg-muted/50 border rounded-lg p-4">
-          <div className="flex items-start gap-3">
-            <Bell className="size-5 text-primary mt-0.5" />
-            <div className="flex-1 text-sm min-w-0">
-              <p className="font-semibold text-foreground mb-1">{t('preview')}</p>
-              <div className="bg-background rounded-lg p-3 shadow-sm border min-w-0">
-                <p className="font-semibold text-sm mb-1 whitespace-pre-wrap break-words">
-                  {title || t('previewTitlePlaceholder')}
-                </p>
-                <p className="text-sm text-muted-foreground whitespace-pre-wrap break-words">
-                  {body || t('previewBodyPlaceholder')}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <NotificationPreview
+          body={body}
+          bodyPlaceholder={t('previewBodyPlaceholder')}
+          previewLabel={t('preview')}
+          title={title}
+          titlePlaceholder={t('previewTitlePlaceholder')}
+        />
 
         {moderationResult && <ModerationResultPanel result={moderationResult} />}
 
@@ -348,30 +233,15 @@ export default function NotificationForm({ limits, canSend, organizationId, redi
           </p>
         </div>
 
-        <div className="flex items-center justify-between pt-4 border-t gap-3">
-          <Button type="button" variant="outline" onClick={() => push(redirectPath)} disabled={isProcessing || isModerating}>
-            {tCommon('cancel')}
-          </Button>
-          <div className="flex gap-2">
-            <Button
-              type="button"
-              variant="secondary"
-              className={!(isProcessing || isModerating || !title.trim() || !body.trim() || titleCharsLeft < 0 || bodyCharsLeft < 0) ? 'hover:bg-primary hover:text-primary-foreground transition-colors' : 'cursor-not-allowed'}
-              onClick={handleCheckContent}
-              disabled={isProcessing || isModerating || !title.trim() || !body.trim() || titleCharsLeft < 0 || bodyCharsLeft < 0}
-            >
-              {isModerating && <Loader2 className="size-4 mr-2 animate-spin" />}
-              {!isModerating && <ShieldCheck className="size-4 mr-2" />}
-              {isModerating ? t('verifying') : t('verifyWithAI')}
-            </Button>
-            <Button onClick={handleSaveAndSend} disabled={!canSendNotification} className={!canSendNotification ? 'cursor-not-allowed' : ''}>
-              {isCreating && <Loader2 className="size-4 mr-2 animate-spin" />}
-              {isSending && <Loader2 className="size-4 mr-2 animate-spin" />}
-              {!isProcessing && <Send className="size-4 mr-2" />}
-              {isCreating ? t('creating') : isSending ? t('sending') : isEditing ? t('resend') : t('submit')}
-            </Button>
-          </div>
-        </div>
+        <NotificationFormActions
+          send={{ canSend: canSendNotification, isProcessing, label: sendLabel }}
+          t={t}
+          tCommon={tCommon}
+          verify={{ canVerify, isModerating }}
+          onCancel={() => push(redirectPath)}
+          onSend={handleSaveAndSend}
+          onVerify={handleCheckContent}
+        />
       </div>
 
       <div className="rounded-xl border bg-muted/30 p-4">

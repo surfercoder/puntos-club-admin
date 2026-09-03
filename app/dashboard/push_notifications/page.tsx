@@ -7,10 +7,11 @@ import ToastHandler from '@/components/dashboard/push_notifications_crud/toast-h
 import { PlanLimitCreateButton } from '@/components/dashboard/plan/plan-limit-create-button';
 import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
+import { ListTableHeader } from '@/components/dashboard/shared/list-table-header';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+  Table, TableBody, TableCell, TableRow,
 } from '@/components/ui/table';
 import { getActiveOrgIdFilter } from '@/lib/auth/get-active-org-id';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
@@ -65,17 +66,17 @@ export default async function PushNotificationsListPage() {
 
       <div className="border rounded-lg">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('tableHeaders.title')}</TableHead>
-              <TableHead>{t('tableHeaders.organization')}</TableHead>
-              <TableHead>{t('tableHeaders.status')}</TableHead>
-              <TableHead>{t('tableHeaders.sent')}</TableHead>
-              <TableHead>{t('tableHeaders.failed')}</TableHead>
-              <TableHead>{t('tableHeaders.createdAt')}</TableHead>
-              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
+          <ListTableHeader
+            columns={[
+              { label: t('tableHeaders.title') },
+              { label: t('tableHeaders.organization') },
+              { label: t('tableHeaders.status') },
+              { label: t('tableHeaders.sent') },
+              { label: t('tableHeaders.failed') },
+              { label: t('tableHeaders.createdAt') },
+              { label: t('tableHeaders.actions'), className: 'text-right' },
+            ]}
+          />
           <TableBody>
             {data && data.length > 0 ? (
               data.map((notification) => (

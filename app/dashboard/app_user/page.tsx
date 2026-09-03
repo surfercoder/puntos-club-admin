@@ -6,13 +6,12 @@ import DeleteModal from '@/components/dashboard/app_user/delete-modal';
 import { NewUserButton } from '@/components/dashboard/app_user/new-user-button';
 import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { Badge } from '@/components/ui/badge';
+import { ListTableHeader } from '@/components/dashboard/shared/list-table-header';
 import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from '@/components/ui/table';
 import { getActiveOrgIdFilter } from '@/lib/auth/get-active-org-id';
@@ -81,15 +80,15 @@ export default async function AppUserListPage() {
 
       <div className="border rounded-lg">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('tableHeaders.name')}</TableHead>
-              <TableHead>{t('tableHeaders.email')}</TableHead>
-              <TableHead>{t('tableHeaders.role')}</TableHead>
-              <TableHead>{t('tableHeaders.organization')}</TableHead>
-              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
+          <ListTableHeader
+            columns={[
+              { label: t('tableHeaders.name') },
+              { label: t('tableHeaders.email') },
+              { label: t('tableHeaders.role') },
+              { label: t('tableHeaders.organization') },
+              { label: t('tableHeaders.actions'), className: 'text-right' },
+            ]}
+          />
           <TableBody>
             {data && data.length > 0 ? (
               data.map((user: AppUserWithOrganization) => (

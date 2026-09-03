@@ -42,6 +42,221 @@ const roleToPlanFeature: Record<string, 'cashiers' | 'collaborators'> = {
   collaborator: 'collaborators',
 };
 
+type Translate = (key: string, values?: Record<string, string>) => string;
+
+function RoleSelectField({
+  roles,
+  roleId,
+  setRoleId,
+  currentRoleId,
+  isAtLimit,
+  actionState,
+  t,
+}: {
+  roles: UserRole[];
+  roleId: string;
+  setRoleId: (value: string) => void;
+  currentRoleId?: number | string | null;
+  isAtLimit: (feature: 'cashiers' | 'collaborators') => boolean;
+  actionState: ActionState;
+  t: Translate;
+}) {
+  return (
+    <div className="flex-1">
+      <Label htmlFor="role_id">{t('form.roleLabel')}</Label>
+      <Select value={roleId} onValueChange={setRoleId} name="role_id">
+        <SelectTrigger
+          id="role_id"
+          aria-describedby="role_id-error"
+          aria-invalid={!!actionState.fieldErrors?.role_id}
+        >
+          <SelectValue placeholder={t('form.selectRole')} />
+        </SelectTrigger>
+        <SelectContent>
+          {roles.map((role) => {
+            const feature = roleToPlanFeature[role.name];
+            const atLimit = feature ? isAtLimit(feature) : false;
+            const optionId = String(role.id);
+            const isCurrentRole = String(currentRoleId) === optionId;
+            return (
+              <SelectItem
+                key={optionId}
+                value={optionId}
+                disabled={atLimit && !isCurrentRole}
+              >
+                {atLimit && !isCurrentRole
+                  ? t('form.roleLimitReached', { role: role.display_name })
+                  : role.display_name}
+              </SelectItem>
+            );
+          })}
+        </SelectContent>
+      </Select>
+      <FieldError actionState={actionState} name="role_id" />
+    </div>
+  );
+}
+
+function CashierAppQr({ show }: { show: boolean }) {
+  const t = useTranslations('Dashboard.appUser');
+  if (!show) return null;
+  return (
+    <a
+      href={PUNTOS_CLUB_CAJA_APK_URL}
+      target="_blank"
+      rel="noopener noreferrer"
+      className="flex shrink-0 flex-col items-center rounded-lg border p-2"
+    >
+      <div className="rounded-md border-2 border-primary bg-white p-1.5">
+        <QRCodeSVG value={PUNTOS_CLUB_CAJA_APK_URL} size={96} bgColor="#ffffff" fgColor="#31A1D6" level="M" />
+      </div>
+      <span className="mt-1 max-w-28 text-center text-[10px] leading-tight text-muted-foreground">
+        {t('form.cashierAppQr')}
+      </span>
+    </a>
+  );
+}
+
+function CashierAppInfo({ show }: { show: boolean }) {
+  const t = useTranslations('Dashboard.appUser');
+  if (!show) return null;
+  return (
+    <div className="flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
+      <Info className="mt-0.5 size-4 shrink-0 text-primary" />
+      <span>{t('form.cashierAppInfo')}</span>
+    </div>
+  );
+}
+
+function BranchField({
+  show,
+  branches,
+  branchId,
+  setBranchId,
+  actionState,
+  t,
+}: {
+  show: boolean;
+  branches: BranchOption[];
+  branchId: string;
+  setBranchId: (value: string) => void;
+  actionState: ActionState;
+  t: Translate;
+}) {
+  if (!show) return null;
+  return (
+    <div>
+      <Label htmlFor="branch_id">
+        {t('form.branchLabel')} <span className="text-destructive">*</span>
+      </Label>
+      {branches.length > 0 ? (
+        <>
+          <Select name="branch_id" onValueChange={setBranchId} value={branchId}>
+            <SelectTrigger className="w-full" id="branch_id">
+              <SelectValue placeholder={t('form.selectBranch')} />
+            </SelectTrigger>
+            <SelectContent>
+              {branches.map((branch) => (
+                <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <p className="mt-1.5 text-xs text-muted-foreground">{t('form.branchHint')}</p>
+          <FieldError actionState={actionState} name="branch_id" />
+        </>
+      ) : (
+        // Sin sucursales no hay cajero posible: el orden es sucursal primero.
+        <p className="mt-1.5 flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
+          <Info className="mt-0.5 size-4 shrink-0 text-primary" />
+          <span>
+            {t('form.branchRequiredEmpty')}{' '}
+            <Link className="underline" href="/dashboard/branch">
+              {t('form.branchRequiredEmptyLink')}
+            </Link>
+          </span>
+        </p>
+      )}
+    </div>
+  );
+}
+
+type RequiredTextFieldName = 'first_name' | 'last_name' | 'email';
+
+function RequiredTextField({
+  name,
+  label,
+  placeholder,
+  defaultValue,
+  actionState,
+}: {
+  name: RequiredTextFieldName;
+  label: string;
+  placeholder: string;
+  defaultValue: string;
+  actionState: ActionState;
+}) {
+  return (
+    <div>
+      <Label htmlFor={name}>{label} <span className="text-destructive">*</span></Label>
+      <Input
+        aria-describedby={`${name}-error`}
+        aria-invalid={!!actionState.fieldErrors?.[name]}
+        defaultValue={defaultValue}
+        id={name}
+        name={name}
+        placeholder={placeholder}
+        type="text"
+      />
+      <FieldError actionState={actionState} name={name} />
+    </div>
+  );
+}
+
+function PasswordField({
+  isEditing,
+  actionState,
+  t,
+}: {
+  isEditing: boolean;
+  actionState: ActionState;
+  t: Translate;
+}) {
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordValue, setPasswordValue] = useState('');
+
+  return (
+    <div>
+      <Label htmlFor="password">
+        {t('form.passwordLabel')}
+        {!isEditing && <span className="text-destructive"> *</span>}
+      </Label>
+      <div className="relative">
+        <Input
+          aria-describedby="password-error"
+          aria-invalid={!!actionState.fieldErrors?.password}
+          className="pr-10"
+          id="password"
+          name="password"
+          placeholder={t('form.passwordPlaceholder')}
+          type={showPassword ? 'text' : 'password'}
+          value={passwordValue}
+          onChange={(e) => setPasswordValue(e.target.value)}
+        />
+        <button
+          type="button"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+          onClick={() => setShowPassword(!showPassword)}
+          aria-label={showPassword ? 'Hide password' : 'Show password'}
+        >
+          {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
+        </button>
+      </div>
+      <PasswordStrengthChecklist password={passwordValue} />
+      <FieldError actionState={actionState} name="password" />
+    </div>
+  );
+}
+
 export default function AppUserForm({
   appUser,
   lockedRoleName,
@@ -60,11 +275,10 @@ export default function AppUserForm({
   const [branchId, setBranchId] = useState(
     appUser?.branch_id ? String(appUser.branch_id) : defaultBranchId,
   );
-  const [showPassword, setShowPassword] = useState(false);
-  const [passwordValue, setPasswordValue] = useState('');
 
   // Utils
   const [actionState, formAction, pending] = useActionState(appUserFormAction, EMPTY_ACTION_STATE);
+  const currentActionState = validation ?? actionState;
 
   // Load roles
   useEffect(() => {
@@ -139,170 +353,56 @@ export default function AppUserForm({
         {lockedRoleName ? (
           <input name="role_id" type="hidden" value={roleId} />
         ) : (
-        <div className="flex-1">
-          <Label htmlFor="role_id">{t('form.roleLabel')}</Label>
-          <Select value={roleId} onValueChange={setRoleId} name="role_id">
-            <SelectTrigger
-              id="role_id"
-              aria-describedby="role_id-error"
-              aria-invalid={!!(validation ?? actionState).fieldErrors?.role_id}
-            >
-              <SelectValue placeholder={t('form.selectRole')} />
-            </SelectTrigger>
-            <SelectContent>
-              {roles.map((role) => {
-                const feature = roleToPlanFeature[role.name];
-                const atLimit = feature ? isAtLimit(feature) : false;
-                const optionId = String(role.id);
-                const isCurrentRole = String(appUser?.role_id) === optionId;
-                return (
-                  <SelectItem
-                    key={optionId}
-                    value={optionId}
-                    disabled={atLimit && !isCurrentRole}
-                  >
-                    {atLimit && !isCurrentRole
-                      ? t('form.roleLimitReached', { role: role.display_name })
-                      : role.display_name}
-                  </SelectItem>
-                );
-              })}
-            </SelectContent>
-          </Select>
-          <FieldError actionState={validation ?? actionState} name="role_id" />
-        </div>
-        )}
-
-        {isCashierSelected && !lockedRoleName && (
-          <a
-            href={PUNTOS_CLUB_CAJA_APK_URL}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex shrink-0 flex-col items-center rounded-lg border p-2"
-          >
-            <div className="rounded-md border-2 border-primary bg-white p-1.5">
-              <QRCodeSVG value={PUNTOS_CLUB_CAJA_APK_URL} size={96} bgColor="#ffffff" fgColor="#31A1D6" level="M" />
-            </div>
-            <span className="mt-1 max-w-28 text-center text-[10px] leading-tight text-muted-foreground">
-              {t('form.cashierAppQr')}
-            </span>
-          </a>
-        )}
-      </div>
-
-      {isCashierSelected && (
-        <div className="flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs text-muted-foreground">
-          <Info className="mt-0.5 size-4 shrink-0 text-primary" />
-          <span>{t('form.cashierAppInfo')}</span>
-        </div>
-      )}
-
-      {isCashierSelected && (
-        <div>
-          <Label htmlFor="branch_id">
-            {t('form.branchLabel')} <span className="text-destructive">*</span>
-          </Label>
-          {branches.length > 0 ? (
-            <>
-              <Select name="branch_id" onValueChange={setBranchId} value={branchId}>
-                <SelectTrigger className="w-full" id="branch_id">
-                  <SelectValue placeholder={t('form.selectBranch')} />
-                </SelectTrigger>
-                <SelectContent>
-                  {branches.map((branch) => (
-                    <SelectItem key={branch.id} value={branch.id}>{branch.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              <p className="mt-1.5 text-xs text-muted-foreground">{t('form.branchHint')}</p>
-              <FieldError actionState={validation ?? actionState} name="branch_id" />
-            </>
-          ) : (
-            // Sin sucursales no hay cajero posible: el orden es sucursal primero.
-            <p className="mt-1.5 flex items-start gap-2 rounded-md border border-primary/30 bg-primary/5 px-3 py-2 text-xs">
-              <Info className="mt-0.5 size-4 shrink-0 text-primary" />
-              <span>
-                {t('form.branchRequiredEmpty')}{' '}
-                <Link className="underline" href="/dashboard/branch">
-                  {t('form.branchRequiredEmptyLink')}
-                </Link>
-              </span>
-            </p>
-          )}
-        </div>
-      )}
-
-      <div>
-        <Label htmlFor="first_name">{t('form.firstNameLabel')} <span className="text-destructive">*</span></Label>
-        <Input
-          aria-describedby="first_name-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.first_name}
-          defaultValue={appUser?.first_name ?? ''}
-          id="first_name"
-          name="first_name"
-          placeholder={t('form.firstNamePlaceholder')}
-          type="text"
-        />
-        <FieldError actionState={validation ?? actionState} name="first_name" />
-      </div>
-
-      <div>
-        <Label htmlFor="last_name">{t('form.lastNameLabel')} <span className="text-destructive">*</span></Label>
-        <Input
-          aria-describedby="last_name-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.last_name}
-          defaultValue={appUser?.last_name ?? ''}
-          id="last_name"
-          name="last_name"
-          placeholder={t('form.lastNamePlaceholder')}
-          type="text"
-        />
-        <FieldError actionState={validation ?? actionState} name="last_name" />
-      </div>
-
-      <div>
-        <Label htmlFor="email">{t('form.emailLabel')} <span className="text-destructive">*</span></Label>
-        <Input
-          aria-describedby="email-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.email}
-          defaultValue={appUser?.email ?? ''}
-          id="email"
-          name="email"
-          placeholder={t('form.emailPlaceholder')}
-          type="text"
-        />
-        <FieldError actionState={validation ?? actionState} name="email" />
-      </div>
-
-      <div>
-        <Label htmlFor="password">
-          {t('form.passwordLabel')}
-          {!appUser && <span className="text-destructive"> *</span>}
-        </Label>
-        <div className="relative">
-          <Input
-            aria-describedby="password-error"
-            aria-invalid={!!(validation ?? actionState).fieldErrors?.password}
-            className="pr-10"
-            id="password"
-            name="password"
-            placeholder={t('form.passwordPlaceholder')}
-            type={showPassword ? 'text' : 'password'}
-            value={passwordValue}
-            onChange={(e) => setPasswordValue(e.target.value)}
+          <RoleSelectField
+            actionState={currentActionState}
+            currentRoleId={appUser?.role_id}
+            isAtLimit={isAtLimit}
+            roleId={roleId}
+            roles={roles}
+            setRoleId={setRoleId}
+            t={t}
           />
-          <button
-            type="button"
-            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-            onClick={() => setShowPassword(!showPassword)}
-            aria-label={showPassword ? 'Hide password' : 'Show password'}
-          >
-            {showPassword ? <EyeOff className="size-4" /> : <Eye className="size-4" />}
-          </button>
-        </div>
-        <PasswordStrengthChecklist password={passwordValue} />
-        <FieldError actionState={validation ?? actionState} name="password" />
+        )}
+
+        <CashierAppQr show={isCashierSelected && !lockedRoleName} />
       </div>
+
+      <CashierAppInfo show={isCashierSelected} />
+
+      <BranchField
+        actionState={currentActionState}
+        branchId={branchId}
+        branches={branches}
+        setBranchId={setBranchId}
+        show={isCashierSelected}
+        t={t}
+      />
+
+      <RequiredTextField
+        actionState={currentActionState}
+        defaultValue={appUser?.first_name ?? ''}
+        label={t('form.firstNameLabel')}
+        name="first_name"
+        placeholder={t('form.firstNamePlaceholder')}
+      />
+
+      <RequiredTextField
+        actionState={currentActionState}
+        defaultValue={appUser?.last_name ?? ''}
+        label={t('form.lastNameLabel')}
+        name="last_name"
+        placeholder={t('form.lastNamePlaceholder')}
+      />
+
+      <RequiredTextField
+        actionState={currentActionState}
+        defaultValue={appUser?.email ?? ''}
+        label={t('form.emailLabel')}
+        name="email"
+        placeholder={t('form.emailPlaceholder')}
+      />
+
+      <PasswordField actionState={currentActionState} isEditing={!!appUser} t={t} />
 
       <div className="grid grid-cols-2 gap-2">
         <Button asChild type="button" variant="secondary">

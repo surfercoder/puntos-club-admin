@@ -4,12 +4,11 @@ import { getTranslations } from "next-intl/server";
 
 import DeleteModal from "@/components/dashboard/points-rules/delete-modal";
 import { RuleRowActions } from "@/components/dashboard/points-rules/rule-row-actions";
+import { ListTableHeader } from "@/components/dashboard/shared/list-table-header";
 import {
   Table,
   TableBody,
   TableCell,
-  TableHead,
-  TableHeader,
   TableRow,
 } from "@/components/ui/table";
 import { CAMPAIGN_TABS, type CampaignTab } from "@/lib/utils";
@@ -74,16 +73,16 @@ export async function CampaignsCard({
 
       <div className="mt-4 overflow-x-auto">
         <Table className="text-[13px]">
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t("headers.campaign")}</TableHead>
-              <TableHead>{t("headers.benefit")}</TableHead>
-              <TableHead>{t("headers.appliesTo")}</TableHead>
-              <TableHead>{t("headers.validity")}</TableHead>
-              <TableHead>{t("headers.status")}</TableHead>
-              <TableHead className="text-right">{t("headers.actions")}</TableHead>
-            </TableRow>
-          </TableHeader>
+          <ListTableHeader
+            columns={[
+              { label: t("headers.campaign") },
+              { label: t("headers.benefit") },
+              { label: t("headers.appliesTo") },
+              { label: t("headers.validity") },
+              { label: t("headers.status") },
+              { label: t("headers.actions"), className: "text-right" },
+            ]}
+          />
           <TableBody>
             {visible.length > 0 ? (
               visible.map((campaign) => (

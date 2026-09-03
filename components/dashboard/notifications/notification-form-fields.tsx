@@ -130,6 +130,7 @@ export default function NotificationFormFields({
                   size="icon-sm"
                   onClick={onCloseTitleEmojiPicker}
                   className="absolute -top-2 -right-2 bg-background rounded-full shadow-md z-10"
+                  aria-label={t('closeEmoji')}
                 >
                   <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -189,6 +190,7 @@ export default function NotificationFormFields({
                   size="icon-sm"
                   onClick={onCloseEmojiPicker}
                   className="absolute -top-2 -right-2 bg-background rounded-full shadow-md z-10"
+                  aria-label={t('closeEmoji')}
                 >
                   <svg className="size-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

@@ -17,6 +17,55 @@ import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler'
 import { AddressSchema } from '@/schemas/address.schema';
 import type { Address } from '@/types/address';
 
+type AddressTextFieldName = 'street' | 'number' | 'city' | 'state' | 'zip_code';
+
+function AddressTextField({
+  name,
+  label,
+  value,
+  onChange,
+  actionState,
+}: {
+  name: AddressTextFieldName;
+  label: string;
+  value: string | undefined;
+  onChange: (value: string) => void;
+  actionState: ActionState;
+}) {
+  return (
+    <div className="space-y-2">
+      <Label htmlFor={name}>{label}</Label>
+      <Input
+        aria-describedby={`${name}-error`}
+        aria-invalid={!!actionState.fieldErrors?.[name]}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        id={name}
+        name={name}
+      />
+      <FieldError actionState={actionState} name={name} />
+    </div>
+  );
+}
+
+function AddressHiddenFields({ addressData }: { addressData: Partial<GoogleAddressComponents> }) {
+  return (
+    <>
+      {addressData.country && (
+        <input type="hidden" name="country" value={addressData.country} />
+      )}
+      {addressData.place_id && (
+        <input type="hidden" name="place_id" value={addressData.place_id} />
+      )}
+      {addressData.latitude !== undefined && (
+        <input type="hidden" name="latitude" value={addressData.latitude} />
+      )}
+      {addressData.longitude !== undefined && (
+        <input type="hidden" name="longitude" value={addressData.longitude} />
+      )}
+    </>
+  );
+}
 
 export default function AddressForm({ address }: { address?: Address }) {
   const t = useTranslations('Dashboard.address');
@@ -35,6 +84,7 @@ export default function AddressForm({ address }: { address?: Address }) {
 
   // Utils
   const [actionState, formAction, pending] = useActionState(addressFormAction, EMPTY_ACTION_STATE);
+  const currentActionState = validation ?? actionState;
 
   useEffect(() => {
     if (actionState.status === 'error' && actionState.message) {
@@ -59,6 +109,10 @@ export default function AddressForm({ address }: { address?: Address }) {
       latitude: components.latitude,
       longitude: components.longitude,
     });
+  };
+
+  const updateAddressField = (field: AddressTextFieldName) => (value: string) => {
+    setAddressData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
@@ -86,78 +140,42 @@ export default function AddressForm({ address }: { address?: Address }) {
         />
         <p className="text-xs text-muted-foreground">{t('form.searchHint')}</p>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="street">{t('form.street')}</Label>
-        <Input
-          aria-describedby="street-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.street}
-          value={addressData.street}
-          onChange={(e) => setAddressData((prev) => ({ ...prev, street: e.target.value }))}
-          id="street"
-          name="street"
-        />
-        <FieldError actionState={validation ?? actionState} name="street" />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="number">{t('form.number')}</Label>
-        <Input
-          aria-describedby="number-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.number}
-          value={addressData.number}
-          onChange={(e) => setAddressData((prev) => ({ ...prev, number: e.target.value }))}
-          id="number"
-          name="number"
-        />
-        <FieldError actionState={validation ?? actionState} name="number" />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="city">{t('form.city')}</Label>
-        <Input
-          aria-describedby="city-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.city}
-          value={addressData.city}
-          onChange={(e) => setAddressData((prev) => ({ ...prev, city: e.target.value }))}
-          id="city"
-          name="city"
-        />
-        <FieldError actionState={validation ?? actionState} name="city" />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="state">{t('form.state')}</Label>
-        <Input
-          aria-describedby="state-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.state}
-          value={addressData.state}
-          onChange={(e) => setAddressData((prev) => ({ ...prev, state: e.target.value }))}
-          id="state"
-          name="state"
-        />
-        <FieldError actionState={validation ?? actionState} name="state" />
-      </div>
-      <div className="space-y-2">
-        <Label htmlFor="zip_code">{t('form.zipCode')}</Label>
-        <Input
-          aria-describedby="zip_code-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.zip_code}
-          value={addressData.zip_code}
-          onChange={(e) => setAddressData((prev) => ({ ...prev, zip_code: e.target.value }))}
-          id="zip_code"
-          name="zip_code"
-        />
-        <FieldError actionState={validation ?? actionState} name="zip_code" />
-      </div>
-      {addressData.country && (
-        <input type="hidden" name="country" value={addressData.country} />
-      )}
-      {addressData.place_id && (
-        <input type="hidden" name="place_id" value={addressData.place_id} />
-      )}
-      {addressData.latitude && (
-        <input type="hidden" name="latitude" value={addressData.latitude} />
-      )}
-      {addressData.longitude && (
-        <input type="hidden" name="longitude" value={addressData.longitude} />
-      )}
+      <AddressTextField
+        actionState={currentActionState}
+        label={t('form.street')}
+        name="street"
+        onChange={updateAddressField('street')}
+        value={addressData.street}
+      />
+      <AddressTextField
+        actionState={currentActionState}
+        label={t('form.number')}
+        name="number"
+        onChange={updateAddressField('number')}
+        value={addressData.number}
+      />
+      <AddressTextField
+        actionState={currentActionState}
+        label={t('form.city')}
+        name="city"
+        onChange={updateAddressField('city')}
+        value={addressData.city}
+      />
+      <AddressTextField
+        actionState={currentActionState}
+        label={t('form.state')}
+        name="state"
+        onChange={updateAddressField('state')}
+        value={addressData.state}
+      />
+      <AddressTextField
+        actionState={currentActionState}
+        label={t('form.zipCode')}
+        name="zip_code"
+        onChange={updateAddressField('zip_code')}
+        value={addressData.zip_code}
+      />
+      <AddressHiddenFields addressData={addressData} />
       <div className="grid grid-cols-2 gap-2">
         <Button asChild type="button" variant="secondary">
           <Link href="/dashboard/address">{tCommon('cancel')}</Link>

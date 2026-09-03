@@ -1,18 +1,19 @@
 "use client";
 
 import Link from 'next/link';
-import { useActionState, useState, useEffect, useReducer } from 'react';
+import { useActionState, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { organizationPlanLimitFormAction } from '@/actions/dashboard/organization_plan_limits/organization-plan-limit-form-actions';
+import { OrganizationSelectField } from '@/components/dashboard/shared/organization-select-field';
+import { FeatureSelectField, PlanSelectField } from '@/components/dashboard/shared/plan-feature-select-fields';
+import { useOrganizations } from '@/components/dashboard/shared/use-organizations';
 import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { ActionState } from '@/lib/error-handler';
 import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
-import { createClient } from '@/lib/supabase/client';
 import { OrganizationPlanLimitSchema } from '@/schemas/organization_plan_limit.schema';
 import type { OrganizationPlanLimit } from '@/types/organization_plan_limit';
 
@@ -23,17 +24,7 @@ interface OrganizationPlanLimitFormProps {
 export default function OrganizationPlanLimitForm({ organizationPlanLimit }: OrganizationPlanLimitFormProps) {
   const t = useTranslations('Dashboard.orgPlanLimits.form');
   const [validation, setValidation] = useState<ActionState | null>(null);
-  type OrgRow = { id: string; name: string };
-  const [organizations, setOrganizations] = useReducer((_: OrgRow[], next: OrgRow[]) => next, [] as OrgRow[]);
-
-  useEffect(() => {
-    async function loadOrganizations() {
-      const supabase = createClient();
-      const { data } = await supabase.from('organization').select('id, name').order('name');
-      if (data) setOrganizations(data);
-    }
-    loadOrganizations();
-  }, []);
+  const organizations = useOrganizations();
 
   const [actionState, formAction, pending] = useActionState(organizationPlanLimitFormAction, EMPTY_ACTION_STATE);
 
@@ -52,47 +43,17 @@ export default function OrganizationPlanLimitForm({ organizationPlanLimit }: Org
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
       {organizationPlanLimit?.id && <input name="id" type="hidden" value={organizationPlanLimit.id} />}
 
-      <div>
-        <Label htmlFor="organization_id">{t('organizationLabel')}</Label>
-        <Select defaultValue={organizationPlanLimit?.organization_id ?? ''} name="organization_id">
-          <SelectTrigger><SelectValue placeholder={t('selectOrganization')} /></SelectTrigger>
-          <SelectContent>
-            {organizations.map((org) => (
-              <SelectItem key={org.id} value={org.id}>{org.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <FieldError actionState={validation ?? actionState} name="organization_id" />
-      </div>
+      <OrganizationSelectField
+        actionState={validation ?? actionState}
+        defaultValue={organizationPlanLimit?.organization_id ?? ''}
+        label={t('organizationLabel')}
+        organizations={organizations}
+        placeholder={t('selectOrganization')}
+      />
 
-      <div>
-        <Label htmlFor="plan">{t('planLabel')}</Label>
-        <Select defaultValue={organizationPlanLimit?.plan ?? 'trial'} name="plan">
-          <SelectTrigger><SelectValue placeholder={t('selectPlan')} /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="trial">{t('trial')}</SelectItem>
-            <SelectItem value="advance">{t('advance')}</SelectItem>
-            <SelectItem value="pro">{t('pro')}</SelectItem>
-          </SelectContent>
-        </Select>
-        <FieldError actionState={validation ?? actionState} name="plan" />
-      </div>
+      <PlanSelectField actionState={validation ?? actionState} defaultValue={organizationPlanLimit?.plan ?? 'trial'} t={t} />
 
-      <div>
-        <Label htmlFor="feature">{t('featureLabel')}</Label>
-        <Select defaultValue={organizationPlanLimit?.feature ?? ''} name="feature">
-          <SelectTrigger><SelectValue placeholder={t('selectFeature')} /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="beneficiaries">{t('beneficiaries')}</SelectItem>
-            <SelectItem value="push_notifications_monthly">{t('pushNotificationsMonthly')}</SelectItem>
-            <SelectItem value="cashiers">{t('cashiers')}</SelectItem>
-            <SelectItem value="branches">{t('branches')}</SelectItem>
-            <SelectItem value="collaborators">{t('collaborators')}</SelectItem>
-            <SelectItem value="redeemable_products">{t('redeemableProducts')}</SelectItem>
-          </SelectContent>
-        </Select>
-        <FieldError actionState={validation ?? actionState} name="feature" />
-      </div>
+      <FeatureSelectField actionState={validation ?? actionState} defaultValue={organizationPlanLimit?.feature ?? ''} t={t} />
 
       <div>
         <Label htmlFor="limit_value">{t('limitValueLabel')}</Label>

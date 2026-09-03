@@ -151,7 +151,7 @@ describe('ImageUpload', () => {
     await screen.findByRole('img');
 
     (global.fetch as jest.Mock).mockResolvedValue({ ok: true, json: async () => ({}) });
-    await userEvent.click(screen.getByRole('button', { name: '' }));
+    await userEvent.click(screen.getByRole('button', { name: 'remove' }));
 
     await waitFor(() => expect(onChange).toHaveBeenLastCalledWith(null));
     const deleteCall = (global.fetch as jest.Mock).mock.calls.at(-1);
@@ -164,7 +164,7 @@ describe('ImageUpload', () => {
     const onChange = jest.fn();
     render(<ImageUpload bucket="logos" onChange={onChange} value="https://cdn/existing.png" />);
 
-    await userEvent.click(screen.getByRole('button', { name: '' }));
+    await userEvent.click(screen.getByRole('button', { name: 'remove' }));
 
     await waitFor(() => expect(onChange).toHaveBeenCalledWith(null));
     expect(global.fetch).not.toHaveBeenCalled();
@@ -177,7 +177,7 @@ describe('ImageUpload', () => {
     await screen.findByRole('img');
 
     (global.fetch as jest.Mock).mockRejectedValue(new Error('network down'));
-    await userEvent.click(screen.getByRole('button', { name: '' }));
+    await userEvent.click(screen.getByRole('button', { name: 'remove' }));
 
     await waitFor(() => expect(toast.error).toHaveBeenCalledWith('removeError'));
   });
@@ -197,6 +197,6 @@ describe('ImageUpload', () => {
   it('disables both controls while disabled', () => {
     render(<ImageUpload bucket="logos" disabled onChange={jest.fn()} value="https://cdn/a.png" />);
     expect(fileInput()).toBeDisabled();
-    expect(screen.getByRole('button', { name: '' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'remove' })).toBeDisabled();
   });
 });

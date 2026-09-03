@@ -7,6 +7,7 @@ import { useActionState, useEffect, useReducer, useState } from 'react';
 import { toast } from 'sonner';
 
 import { appUserOrganizationFormAction } from '@/actions/dashboard/app_user_organization/app_user_organization-form-actions';
+import { OrganizationSelectField } from '@/components/dashboard/shared/organization-select-field';
 import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { Label } from '@/components/ui/label';
@@ -101,22 +102,13 @@ export default function AppUserOrganizationForm({ appUserOrganization }: AppUser
         <FieldError actionState={validation ?? actionState} name="app_user_id" />
       </div>
 
-      <div>
-        <Label htmlFor="organization_id">{t('form.organizationLabel')}</Label>
-        <Select defaultValue={appUserOrganization?.organization_id ?? ''} name="organization_id">
-          <SelectTrigger>
-            <SelectValue placeholder={t('form.selectOrganization')} />
-          </SelectTrigger>
-          <SelectContent>
-            {orgs.map((o) => (
-              <SelectItem key={o.id} value={o.id}>
-                {o.name}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        <FieldError actionState={validation ?? actionState} name="organization_id" />
-      </div>
+      <OrganizationSelectField
+        actionState={validation ?? actionState}
+        defaultValue={appUserOrganization?.organization_id ?? ''}
+        label={t('form.organizationLabel')}
+        organizations={orgs}
+        placeholder={t('form.selectOrganization')}
+      />
 
       <div className="flex items-center gap-2">
         <input

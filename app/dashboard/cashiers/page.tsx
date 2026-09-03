@@ -8,6 +8,7 @@ import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
 import { TablePagination } from '@/components/dashboard/shared/table-pagination';
 import { StaffFilters } from '@/components/dashboard/staff/staff-filters';
+import { StaffNameCell } from '@/components/dashboard/staff/staff-name-cell';
 import { StaffStats } from '@/components/dashboard/staff/staff-stats';
 import {
   Table,
@@ -19,7 +20,7 @@ import {
 } from '@/components/ui/table';
 import { getUsageSummaryAction } from '@/actions/dashboard/usage/actions';
 import { PUNTOS_CLUB_CAJA_APK_URL } from '@/lib/mobile-apps';
-import { filterStaff, getStaff, staffInitials, staffName } from '@/lib/staff/get-staff';
+import { filterStaff, getStaff, staffName } from '@/lib/staff/get-staff';
 import { formatDateOnly, parsePage, parsePerPage } from '@/lib/utils';
 
 const NUMBER_FORMATTER = new Intl.NumberFormat('es-AR');
@@ -112,19 +113,7 @@ export default async function CashiersPage({ searchParams }: PageProps) {
                     const name = staffName(member);
                     return (
                       <TableRow key={member.id}>
-                        <TableCell>
-                          <span className="flex items-center gap-2.5">
-                            <span className="grid size-8 shrink-0 place-items-center rounded-full bg-brand-violet/10 text-[11px] font-semibold text-brand-violet">
-                              {staffInitials(name)}
-                            </span>
-                            <span className="min-w-0">
-                              <span className="block font-medium">{name || 'N/A'}</span>
-                              <span className="block text-xs text-muted-foreground">
-                                {member.email}
-                              </span>
-                            </span>
-                          </span>
-                        </TableCell>
+                        <StaffNameCell email={member.email} name={name} />
                         <TableCell>
                           {member.branchName ? (
                             <span className="inline-flex items-center gap-1.5">

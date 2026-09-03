@@ -1,3 +1,5 @@
+import { render } from '@testing-library/react';
+
 import RedemptionListPage from '@/app/dashboard/redemption/page';
 
 // Supabase query builder mock — thenable so `await query` resolves
@@ -58,6 +60,7 @@ describe('RedemptionListPage', () => {
   it('renders without crashing', async () => {
     const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
+    render(result);
   });
 
   it('filters by organization for non-admin users', async () => {
@@ -75,6 +78,7 @@ describe('RedemptionListPage', () => {
     const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
     expect(mockEq).toHaveBeenCalledWith('organization_id', 1);
+    render(result);
   });
 
   it('renders redemption rows when data is returned', async () => {
@@ -84,12 +88,14 @@ describe('RedemptionListPage', () => {
     };
     const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
+    render(result);
   });
 
   it('renders error message when query fails', async () => {
     resolveData = { data: null, error: { message: 'DB error' } };
     const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
+    render(result);
   });
 
   it('renders redemptions with all optional fields null', async () => {
@@ -99,6 +105,7 @@ describe('RedemptionListPage', () => {
     };
     const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
+    render(result);
   });
 
   it('renders redemption with beneficiary email fallback', async () => {
@@ -108,6 +115,7 @@ describe('RedemptionListPage', () => {
     };
     const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
+    render(result);
   });
 
   it('renders redemption with beneficiary only last_name', async () => {
@@ -117,6 +125,7 @@ describe('RedemptionListPage', () => {
     };
     const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
+    render(result);
   });
 
   it('renders PendingRedemptionActions for pending rows', async () => {
@@ -126,6 +135,7 @@ describe('RedemptionListPage', () => {
     };
     const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
+    render(result);
   });
 
   it('applies status and date filters from searchParams', async () => {
@@ -136,6 +146,7 @@ describe('RedemptionListPage', () => {
     expect(mockEq).toHaveBeenCalledWith('status', 'pending');
     expect(mockGte).toHaveBeenCalledWith('redemption_date', '2024-01-01');
     expect(mockLte).toHaveBeenCalledWith('redemption_date', '2024-01-31T23:59:59.999');
+    render(result);
   });
 
   it('ignores invalid status and malformed dates', async () => {
@@ -153,6 +164,7 @@ describe('RedemptionListPage', () => {
     (cookies as jest.Mock).mockResolvedValueOnce({ get: jest.fn(() => undefined) });
     const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
     expect(result).toBeTruthy();
+    render(result);
   });
 });
 
@@ -187,6 +199,7 @@ describe('RedemptionListPage extra filters', () => {
     };
     const hit = await RedemptionListPage({ searchParams: Promise.resolve({ q: 'carlos' }) });
     expect(hit).toBeTruthy();
+    render(hit);
     const miss = await RedemptionListPage({ searchParams: Promise.resolve({ q: 'zzz' }) });
     expect(miss).toBeTruthy();
   });
@@ -220,6 +233,8 @@ describe('RedemptionListPage extra filters', () => {
       ],
       error: null,
     };
-    expect(await RedemptionListPage({ searchParams: Promise.resolve({}) })).toBeTruthy();
+    const result = await RedemptionListPage({ searchParams: Promise.resolve({}) });
+    expect(result).toBeTruthy();
+    render(result);
   });
 });

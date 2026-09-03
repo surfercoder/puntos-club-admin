@@ -3,11 +3,12 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/user_role_crud/delete-modal';
+import { ListTableHeader } from '@/components/dashboard/shared/list-table-header';
 import ToastHandler from '@/components/dashboard/user_role_crud/toast-handler';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
-  Table, TableHeader, TableRow, TableHead, TableBody, TableCell,
+  Table, TableRow, TableBody, TableCell,
 } from '@/components/ui/table';
 import { createClient } from '@/lib/supabase/server';
 
@@ -40,14 +41,14 @@ export default async function UserRoleListPage() {
 
       <div className="border rounded-lg">
         <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>{t('tableHeaders.roleType')}</TableHead>
-              <TableHead>{t('tableHeaders.displayName')}</TableHead>
-              <TableHead>{t('tableHeaders.description')}</TableHead>
-              <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
-            </TableRow>
-          </TableHeader>
+          <ListTableHeader
+            columns={[
+              { label: t('tableHeaders.roleType') },
+              { label: t('tableHeaders.displayName') },
+              { label: t('tableHeaders.description') },
+              { label: t('tableHeaders.actions'), className: 'text-right' },
+            ]}
+          />
           <TableBody>
             {data && data.length > 0 ? (
               data.map((role) => (

@@ -21,6 +21,38 @@ interface BeneficiaryFormProps {
   beneficiary?: Beneficiary;
 }
 
+type BeneficiaryTextFieldName = 'first_name' | 'last_name' | 'email' | 'phone' | 'document_id';
+
+function BeneficiaryTextField({
+  name,
+  label,
+  placeholder,
+  defaultValue,
+  actionState,
+}: {
+  name: BeneficiaryTextFieldName;
+  label: string;
+  placeholder: string;
+  defaultValue: string;
+  actionState: ActionState;
+}) {
+  return (
+    <div>
+      <Label htmlFor={name}>{label}</Label>
+      <Input
+        aria-describedby={`${name}-error`}
+        aria-invalid={!!actionState.fieldErrors?.[name]}
+        defaultValue={defaultValue}
+        id={name}
+        name={name}
+        placeholder={placeholder}
+        type="text"
+      />
+      <FieldError actionState={actionState} name={name} />
+    </div>
+  );
+}
+
 export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
   const t = useTranslations('Dashboard.beneficiary.form');
   const tCommon = useTranslations('Common');
@@ -31,6 +63,7 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
   // Utils
   const [actionState, formAction, pending] = useActionState(beneficiaryFormAction, EMPTY_ACTION_STATE);
   const { invalidate: _invalidate } = usePlanUsage();
+  const currentActionState = validation ?? actionState;
 
   useEffect(() => {
     if (actionState.status === 'error' && actionState.message) {
@@ -58,75 +91,45 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
   return (
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
       {beneficiary?.id && <input name="id" type="hidden" value={beneficiary.id} />}
-      <div>
-        <Label htmlFor="first_name">{t('firstNameLabel')}</Label>
-        <Input
-          aria-describedby="first_name-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.first_name}
-          defaultValue={beneficiary?.first_name ?? ''}
-          id="first_name"
-          name="first_name"
-          placeholder={t('firstNamePlaceholder')}
-          type="text"
-        />
-        <FieldError actionState={validation ?? actionState} name="first_name" />
-      </div>
+      <BeneficiaryTextField
+        actionState={currentActionState}
+        defaultValue={beneficiary?.first_name ?? ''}
+        label={t('firstNameLabel')}
+        name="first_name"
+        placeholder={t('firstNamePlaceholder')}
+      />
 
-      <div>
-        <Label htmlFor="last_name">{t('lastNameLabel')}</Label>
-        <Input
-          aria-describedby="last_name-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.last_name}
-          defaultValue={beneficiary?.last_name ?? ''}
-          id="last_name"
-          name="last_name"
-          placeholder={t('lastNamePlaceholder')}
-          type="text"
-        />
-        <FieldError actionState={validation ?? actionState} name="last_name" />
-      </div>
+      <BeneficiaryTextField
+        actionState={currentActionState}
+        defaultValue={beneficiary?.last_name ?? ''}
+        label={t('lastNameLabel')}
+        name="last_name"
+        placeholder={t('lastNamePlaceholder')}
+      />
 
-      <div>
-        <Label htmlFor="email">{t('emailLabel')}</Label>
-        <Input
-          aria-describedby="email-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.email}
-          defaultValue={beneficiary?.email ?? ''}
-          id="email"
-          name="email"
-          placeholder={t('emailPlaceholder')}
-          type="text"
-        />
-        <FieldError actionState={validation ?? actionState} name="email" />
-      </div>
+      <BeneficiaryTextField
+        actionState={currentActionState}
+        defaultValue={beneficiary?.email ?? ''}
+        label={t('emailLabel')}
+        name="email"
+        placeholder={t('emailPlaceholder')}
+      />
 
-      <div>
-        <Label htmlFor="phone">{t('phoneLabel')}</Label>
-        <Input
-          aria-describedby="phone-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.phone}
-          defaultValue={beneficiary?.phone ?? ''}
-          id="phone"
-          name="phone"
-          placeholder={t('phonePlaceholder')}
-          type="text"
-        />
-        <FieldError actionState={validation ?? actionState} name="phone" />
-      </div>
+      <BeneficiaryTextField
+        actionState={currentActionState}
+        defaultValue={beneficiary?.phone ?? ''}
+        label={t('phoneLabel')}
+        name="phone"
+        placeholder={t('phonePlaceholder')}
+      />
 
-      <div>
-        <Label htmlFor="document_id">{t('dniLabel')}</Label>
-        <Input
-          aria-describedby="document_id-error"
-          aria-invalid={!!(validation ?? actionState).fieldErrors?.document_id}
-          defaultValue={beneficiary?.document_id ?? ''}
-          id="document_id"
-          name="document_id"
-          placeholder={t('dniPlaceholder')}
-          type="text"
-        />
-        <FieldError actionState={validation ?? actionState} name="document_id" />
-      </div>
+      <BeneficiaryTextField
+        actionState={currentActionState}
+        defaultValue={beneficiary?.document_id ?? ''}
+        label={t('dniLabel')}
+        name="document_id"
+        placeholder={t('dniPlaceholder')}
+      />
 
       <div className="grid grid-cols-2 gap-2">
         <Button asChild type="button" variant="secondary">

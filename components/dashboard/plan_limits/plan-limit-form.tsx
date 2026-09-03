@@ -5,11 +5,11 @@ import { useActionState, useState } from 'react';
 import { useTranslations } from 'next-intl';
 
 import { planLimitFormAction } from '@/actions/dashboard/plan_limits/plan-limit-form-actions';
+import { FeatureSelectField, PlanSelectField } from '@/components/dashboard/shared/plan-feature-select-fields';
 import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { ActionState } from '@/lib/error-handler';
 import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
 import { PlanLimitSchema } from '@/schemas/plan_limit.schema';
@@ -39,34 +39,9 @@ export default function PlanLimitForm({ planLimit }: PlanLimitFormProps) {
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
       {planLimit?.id && <input name="id" type="hidden" value={planLimit.id} />}
 
-      <div>
-        <Label htmlFor="plan">{t('planLabel')}</Label>
-        <Select defaultValue={planLimit?.plan ?? 'trial'} name="plan">
-          <SelectTrigger><SelectValue placeholder={t('selectPlan')} /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="trial">{t('trial')}</SelectItem>
-            <SelectItem value="advance">{t('advance')}</SelectItem>
-            <SelectItem value="pro">{t('pro')}</SelectItem>
-          </SelectContent>
-        </Select>
-        <FieldError actionState={validation ?? actionState} name="plan" />
-      </div>
+      <PlanSelectField actionState={validation ?? actionState} defaultValue={planLimit?.plan ?? 'trial'} t={t} />
 
-      <div>
-        <Label htmlFor="feature">{t('featureLabel')}</Label>
-        <Select defaultValue={planLimit?.feature ?? ''} name="feature">
-          <SelectTrigger><SelectValue placeholder={t('selectFeature')} /></SelectTrigger>
-          <SelectContent>
-            <SelectItem value="beneficiaries">{t('beneficiaries')}</SelectItem>
-            <SelectItem value="push_notifications_monthly">{t('pushNotificationsMonthly')}</SelectItem>
-            <SelectItem value="cashiers">{t('cashiers')}</SelectItem>
-            <SelectItem value="branches">{t('branches')}</SelectItem>
-            <SelectItem value="collaborators">{t('collaborators')}</SelectItem>
-            <SelectItem value="redeemable_products">{t('redeemableProducts')}</SelectItem>
-          </SelectContent>
-        </Select>
-        <FieldError actionState={validation ?? actionState} name="feature" />
-      </div>
+      <FeatureSelectField actionState={validation ?? actionState} defaultValue={planLimit?.feature ?? ''} t={t} />
 
       <div>
         <Label htmlFor="limit_value">{t('limitValueLabel')}</Label>

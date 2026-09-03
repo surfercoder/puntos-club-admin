@@ -56,6 +56,69 @@ function formDataReducer(state: FormDataState, action: Partial<FormDataState>): 
   return { ...state, ...action };
 }
 
+async function fetchFormData(): Promise<FormDataState> {
+  const supabase = createClient();
+  const orgIdNumber = getOrgIdFromCookies();
+
+  const beneficiariesPromise = orgIdNumber
+    ? supabase
+        .from('beneficiary_organization')
+        .select('beneficiary:beneficiary_id(id, first_name, last_name)')
+        .eq('organization_id', orgIdNumber)
+        .eq('is_active', true)
+    : supabase.from('beneficiary').select('id, first_name, last_name').order('first_name');
+
+  let branchesQuery = supabase.from('branch').select('id, name').order('name');
+  if (orgIdNumber) {
+    branchesQuery = branchesQuery.eq('organization_id', orgIdNumber);
+  }
+
+  const [bRes, brRes] = await Promise.all([beneficiariesPromise, branchesQuery]);
+
+  let beneficiaries: Person[] = [];
+  if (bRes.data) {
+    if (orgIdNumber) {
+      const nested = bRes.data as unknown as { beneficiary: Person }[];
+      beneficiaries = nested.flatMap(r => r.beneficiary ? [r.beneficiary] : []);
+    } else {
+      beneficiaries = bRes.data as unknown as Person[];
+    }
+  }
+
+  return { beneficiaries, branches: brRes.data ?? [] };
+}
+
+async function fetchBeneficiaryBalance(
+  beneficiaryId: string,
+): Promise<{ balance: number; activity: Activity[] }> {
+  const supabase = createClient();
+  const orgIdNumber = getOrgIdFromCookies();
+
+  let balanceQuery = supabase
+    .from('beneficiary_organization')
+    .select('available_points')
+    .eq('beneficiary_id', beneficiaryId);
+  if (orgIdNumber) {
+    balanceQuery = balanceQuery.eq('organization_id', orgIdNumber);
+  }
+
+  let activityQuery = supabase
+    .from('purchase')
+    .select('id, purchase_date, total_amount, points_earned')
+    .eq('beneficiary_id', beneficiaryId)
+    .order('purchase_date', { ascending: false })
+    .limit(5);
+  if (orgIdNumber) {
+    activityQuery = activityQuery.eq('organization_id', orgIdNumber);
+  }
+
+  const [balanceRes, activityRes] = await Promise.all([balanceQuery, activityQuery]);
+  return {
+    balance: balanceRes.data?.[0]?.available_points ?? 0,
+    activity: (activityRes.data ?? []) as unknown as Activity[],
+  };
+}
+
 function getOrgIdFromCookies(): number | null {
   try {
     const activeOrgId = document.cookie
@@ -308,6 +371,36 @@ function OperationSummary({
   );
 }
 
+/** Motivo de la operación, cuando no es una venta con importe. */
+function ReasonSelect({
+  reason,
+  onReasonChange,
+}: {
+  reason: string;
+  onReasonChange: (value: string) => void;
+}) {
+  const t = useTranslations('Dashboard.purchase.form');
+
+  return (
+    <div>
+      <Label htmlFor="reason">{t('reasonLabel')}</Label>
+      <Select name="reason" value={reason} onValueChange={onReasonChange}>
+        <SelectTrigger className="mt-1.5 w-full" id="reason">
+          <SelectValue placeholder={t('selectReason')} />
+        </SelectTrigger>
+        <SelectContent>
+          {REASONS.map((option) => (
+            <SelectItem key={option} value={option}>
+              {t(`reasons.${option}`)}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <p className="mt-1.5 text-xs text-muted-foreground">{t('reasonHelp')}</p>
+    </div>
+  );
+}
+
 /** Últimos movimientos del beneficiario elegido. */
 function ActivityTable({ activity }: { activity: Activity[] }) {
   const t = useTranslations('Dashboard.purchase.form');
@@ -357,115 +450,27 @@ function ActivityTable({ activity }: { activity: Activity[] }) {
   );
 }
 
-export default function PurchaseForm({ purchase }: PurchaseFormProps) {
-  const t = useTranslations('Dashboard.purchase.form');
-  const tCommon = useTranslations('Common');
+function getInitialPurchaseValues(purchase?: Purchase) {
+  const isSale = !!purchase && Number(purchase.total_amount) > 0;
+  return {
+    mode: (isSale ? 'sale' : 'assignment') as PurchaseMode,
+    beneficiaryId: purchase?.beneficiary_id ? String(purchase.beneficiary_id) : '',
+    branchId: purchase?.branch_id ? String(purchase.branch_id) : '',
+    amount: isSale ? String(purchase!.total_amount) : '',
+    points: purchase?.points_earned ? String(purchase.points_earned) : '',
+    computedPoints: purchase?.points_earned ?? null,
+    observations: purchase?.notes ?? '',
+  };
+}
 
-  const [validation, setValidation] = useState<ActionState | null>(null);
-  const [mode, setMode] = useState<PurchaseMode>(
-    purchase && Number(purchase.total_amount) > 0 ? 'sale' : 'assignment',
-  );
-  const [beneficiaryId, setBeneficiaryId] = useState(
-    purchase?.beneficiary_id ? String(purchase.beneficiary_id) : '',
-  );
-  const [branchId, setBranchId] = useState(
-    purchase?.branch_id ? String(purchase.branch_id) : '',
-  );
-  const [amount, setAmount] = useState<string>(
-    purchase && Number(purchase.total_amount) > 0 ? String(purchase.total_amount) : '',
-  );
-  const [points, setPoints] = useState<string>(
-    purchase?.points_earned ? String(purchase.points_earned) : '',
-  );
-  const [computedPoints, setComputedPoints] = useState<number | null>(
-    purchase?.points_earned ?? null,
-  );
-  const [reason, setReason] = useState('');
-  const [observations, setObservations] = useState(purchase?.notes ?? '');
-  const [balance, setBalance] = useState<number | null>(null);
-  const [activity, setActivity] = useState<Activity[]>([]);
-  const [{ beneficiaries, branches }, dispatchFormData] = useReducer(
-    formDataReducer,
-    initialFormData,
-  );
-
-  useEffect(() => {
-    async function loadData() {
-      const supabase = createClient();
-      const orgIdNumber = getOrgIdFromCookies();
-
-      const beneficiariesPromise = orgIdNumber
-        ? supabase
-            .from('beneficiary_organization')
-            .select('beneficiary:beneficiary_id(id, first_name, last_name)')
-            .eq('organization_id', orgIdNumber)
-            .eq('is_active', true)
-        : supabase.from('beneficiary').select('id, first_name, last_name').order('first_name');
-
-      let branchesQuery = supabase.from('branch').select('id, name').order('name');
-      if (orgIdNumber) {
-        branchesQuery = branchesQuery.eq('organization_id', orgIdNumber);
-      }
-
-      const [bRes, brRes] = await Promise.all([beneficiariesPromise, branchesQuery]);
-
-      let loadedBeneficiaries: Person[] = [];
-      if (bRes.data) {
-        if (orgIdNumber) {
-          const nested = bRes.data as unknown as { beneficiary: Person }[];
-          loadedBeneficiaries = nested.flatMap(r => r.beneficiary ? [r.beneficiary] : []);
-        } else {
-          loadedBeneficiaries = bRes.data as unknown as Person[];
-        }
-      }
-
-      dispatchFormData({ beneficiaries: loadedBeneficiaries, branches: brRes.data ?? [] });
-    }
-    loadData();
-  }, []);
-
-  // Saldo y últimos movimientos del beneficiario elegido: el diseño los muestra
-  // antes de confirmar para que el owner vea el impacto de la operación.
-  useEffect(() => {
-    if (!beneficiaryId) {
-      setBalance(null);
-      setActivity([]);
-      return;
-    }
-    let cancelled = false;
-
-    async function loadBeneficiary() {
-      const supabase = createClient();
-      const orgIdNumber = getOrgIdFromCookies();
-
-      let balanceQuery = supabase
-        .from('beneficiary_organization')
-        .select('available_points')
-        .eq('beneficiary_id', beneficiaryId);
-      if (orgIdNumber) {
-        balanceQuery = balanceQuery.eq('organization_id', orgIdNumber);
-      }
-
-      let activityQuery = supabase
-        .from('purchase')
-        .select('id, purchase_date, total_amount, points_earned')
-        .eq('beneficiary_id', beneficiaryId)
-        .order('purchase_date', { ascending: false })
-        .limit(5);
-      if (orgIdNumber) {
-        activityQuery = activityQuery.eq('organization_id', orgIdNumber);
-      }
-
-      const [balanceRes, activityRes] = await Promise.all([balanceQuery, activityQuery]);
-      if (cancelled) return;
-
-      setBalance(balanceRes.data?.[0]?.available_points ?? 0);
-      setActivity((activityRes.data ?? []) as unknown as Activity[]);
-    }
-
-    loadBeneficiary();
-    return () => { cancelled = true; };
-  }, [beneficiaryId]);
+/** Puntos a otorgar por una venta: recalcula con espera mientras se tipea el importe. */
+function useComputedSalePoints(
+  mode: PurchaseMode,
+  amount: string,
+  branchId: string,
+  initialValue: number | null,
+) {
+  const [computedPoints, setComputedPoints] = useState<number | null>(initialValue);
 
   const calculatePoints = useCallback(async (saleAmount: number, branch: string) => {
     if (saleAmount <= 0) return 0;
@@ -500,6 +505,54 @@ export default function PurchaseForm({ purchase }: PurchaseFormProps) {
       clearTimeout(timer);
     };
   }, [mode, amount, branchId, calculatePoints]);
+
+  return computedPoints;
+}
+
+export default function PurchaseForm({ purchase }: PurchaseFormProps) {
+  const t = useTranslations('Dashboard.purchase.form');
+  const tCommon = useTranslations('Common');
+
+  const initialValues = getInitialPurchaseValues(purchase);
+  const [validation, setValidation] = useState<ActionState | null>(null);
+  const [mode, setMode] = useState<PurchaseMode>(initialValues.mode);
+  const [beneficiaryId, setBeneficiaryId] = useState(initialValues.beneficiaryId);
+  const [branchId, setBranchId] = useState(initialValues.branchId);
+  const [amount, setAmount] = useState<string>(initialValues.amount);
+  const [points, setPoints] = useState<string>(initialValues.points);
+  const [reason, setReason] = useState('');
+  const [observations, setObservations] = useState(initialValues.observations);
+  const [balance, setBalance] = useState<number | null>(null);
+  const [activity, setActivity] = useState<Activity[]>([]);
+  const [{ beneficiaries, branches }, dispatchFormData] = useReducer(
+    formDataReducer,
+    initialFormData,
+  );
+
+  useEffect(() => {
+    fetchFormData().then(dispatchFormData);
+  }, []);
+
+  // Saldo y últimos movimientos del beneficiario elegido: el diseño los muestra
+  // antes de confirmar para que el owner vea el impacto de la operación.
+  useEffect(() => {
+    if (!beneficiaryId) {
+      setBalance(null);
+      setActivity([]);
+      return;
+    }
+    let cancelled = false;
+
+    fetchBeneficiaryBalance(beneficiaryId).then(({ balance: loadedBalance, activity: loadedActivity }) => {
+      if (cancelled) return;
+      setBalance(loadedBalance);
+      setActivity(loadedActivity);
+    });
+
+    return () => { cancelled = true; };
+  }, [beneficiaryId]);
+
+  const computedPoints = useComputedSalePoints(mode, amount, branchId, initialValues.computedPoints);
 
   const [actionState, formAction, pending] = useActionState(purchaseFormAction, EMPTY_ACTION_STATE);
 
@@ -558,22 +611,7 @@ export default function PurchaseForm({ purchase }: PurchaseFormProps) {
             points={points}
           />
 
-          <div>
-            <Label htmlFor="reason">{t('reasonLabel')}</Label>
-            <Select name="reason" value={reason} onValueChange={setReason}>
-              <SelectTrigger className="mt-1.5 w-full" id="reason">
-                <SelectValue placeholder={t('selectReason')} />
-              </SelectTrigger>
-              <SelectContent>
-                {REASONS.map((reason) => (
-                  <SelectItem key={reason} value={reason}>
-                    {t(`reasons.${reason}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="mt-1.5 text-xs text-muted-foreground">{t('reasonHelp')}</p>
-          </div>
+          <ReasonSelect reason={reason} onReasonChange={setReason} />
 
           <div>
             <Label htmlFor="notes">{t('notesLabel')}</Label>

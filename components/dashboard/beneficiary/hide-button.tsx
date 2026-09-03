@@ -60,6 +60,7 @@ export function HideButton({
           <Button
             size="icon-sm"
             variant="outline"
+            aria-label={isHidden ? t('unhideTooltip') : t('hideTooltip')}
             className={
               isHidden
                 ? 'text-muted-foreground'
