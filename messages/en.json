@@ -224,13 +224,11 @@
     "pushNotifications": "Push Notifications",
     "pushTokens": "Push Tokens",
     "redemptions": "Redemptions",
-    "qrCode": "QR Code",
     "subscriptions": "Subscriptions",
     "planLimits": "Plan Limits",
     "orgPlanLimits": "Org Plan Limits",
     "userRoles": "User Roles",
     "users": "Users",
-    "notifications": "Notifications",
     "summary": "Summary",
     "panel": "Dashboard",
     "home": "Dashboard",
@@ -242,7 +240,13 @@
     "salesMarketing": "Sales & Marketing",
     "travel": "Travel",
     "cashiers": "Cashiers",
-    "collaborators": "Collaborators"
+    "collaborators": "Collaborators",
+    "pointsAssignment": "Points assignment",
+    "rewards": "Rewards",
+    "generalSettings": "General settings",
+    "pointsRulesAndCampaigns": "Points rules & campaigns",
+    "profile": "Profile",
+    "myQrs": "My QRs"
   },
   "Breadcrumb": {
     "panel": "Dashboard",

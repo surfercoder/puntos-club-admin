@@ -21,10 +21,10 @@ import {
   Shield,
   Users,
   HandHeart,
-  Bell,
   Star,
-  Receipt,
   Gift,
+  Coins,
+  Settings,
   LayoutDashboard,
   Map,
   PieChart,
@@ -117,23 +117,37 @@ export function AppSidebar({
     }
 
     if (isOwnerOrCollaborator) {
-      const ownerEntities = [
-        { title: t("qrCode"), url: "/dashboard/qr", icon: QrCode },
-
+      // Orden y agrupación definidos por negocio (ticket "ordenar el home"):
+      // no se ordena alfabéticamente, la posición es intencional.
+      return [
         { title: t("beneficiaries"), url: "/dashboard/beneficiary", icon: HandHeart },
-        { title: t("cashiers"), url: "/dashboard/cashiers", icon: Smartphone },
-        { title: t("collaborators"), url: "/dashboard/collaborators", icon: UserCog },
-        { title: t("branches"), url: "/dashboard/branch", icon: Store },
-        { title: t("notifications"), url: "/dashboard/notifications", icon: Bell },
-        { title: t("pointsRules"), url: "/dashboard/points-rules", icon: Star },
-        { title: t("products"), url: "/dashboard/product", icon: Package },
-        { title: t("purchases"), url: "/dashboard/purchase", icon: Receipt },
+        {
+          title: t("pointsAssignment"),
+          url: "/dashboard/purchase",
+          icon: Coins,
+          isActive: true,
+          items: [
+            { title: t("purchases"), url: "/dashboard/purchase" },
+            { title: t("cashiers"), url: "/dashboard/cashiers" },
+            { title: t("branches"), url: "/dashboard/branch" },
+          ],
+        },
+        { title: t("rewards"), url: "/dashboard/product", icon: Package },
         { title: t("redemptions"), url: "/dashboard/redemption", icon: Gift },
+        {
+          title: t("settings"),
+          url: "/dashboard/settings/organization",
+          icon: Settings,
+          isActive: true,
+          items: [
+            { title: t("generalSettings"), url: "/dashboard/settings/organization" },
+            { title: t("pointsRulesAndCampaigns"), url: "/dashboard/points-rules" },
+            { title: t("collaborators"), url: "/dashboard/collaborators" },
+            { title: t("profile"), url: "/dashboard/profile" },
+          ],
+        },
+        { title: t("myQrs"), url: "/dashboard/qr", icon: QrCode },
       ]
-        .slice()
-        .sort((a, b) => a.title.localeCompare(b.title))
-
-      return ownerEntities
     }
 
     return [

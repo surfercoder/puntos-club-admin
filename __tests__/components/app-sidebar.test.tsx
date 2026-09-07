@@ -3,8 +3,13 @@ import { AppSidebar } from '@/components/app-sidebar';
 
 // Mock child components to isolate the sidebar
 jest.mock('@/components/nav-main', () => ({
-  NavMain: ({ items }: { items: unknown[] }) => (
-    <div data-testid="nav-main">{items.length} items</div>
+  NavMain: ({ items }: { items: { title: string; items?: { title: string }[] }[] }) => (
+    <div data-testid="nav-main">
+      {items.length} items
+      <span data-testid="nav-main-structure">
+        {JSON.stringify(items.map((item) => [item.title, item.items?.map((sub) => sub.title) ?? []]))}
+      </span>
+    </div>
   ),
 }));
 
@@ -78,6 +83,20 @@ describe('AppSidebar', () => {
   it('renders nav-main with items', () => {
     render(<AppSidebar {...defaultProps} />);
     expect(screen.getByTestId('nav-main')).toBeInTheDocument();
+  });
+
+  it('groups the owner nav in the business-defined order', () => {
+    render(<AppSidebar {...defaultProps} userRole="owner" />);
+    expect(screen.getByTestId('nav-main-structure')).toHaveTextContent(
+      JSON.stringify([
+        ['beneficiaries', []],
+        ['pointsAssignment', ['purchases', 'cashiers', 'branches']],
+        ['rewards', []],
+        ['redemptions', []],
+        ['settings', ['generalSettings', 'pointsRulesAndCampaigns', 'collaborators', 'profile']],
+        ['myQrs', []],
+      ])
+    );
   });
 
   it('renders nav-user with user info', () => {

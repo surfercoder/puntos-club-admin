@@ -224,13 +224,11 @@
     "pushNotifications": "Notificaciones Push",
     "pushTokens": "Tokens Push",
     "redemptions": "Canjes",
-    "qrCode": "Código QR",
     "subscriptions": "Suscripciones",
     "planLimits": "Límites de Plan",
     "orgPlanLimits": "Límites de Plan por Org",
     "userRoles": "Roles de Usuario",
     "users": "Usuarios",
-    "notifications": "Notificaciones",
     "summary": "Resumen",
     "panel": "Panel",
     "home": "Dashboard",
@@ -242,7 +240,13 @@
     "salesMarketing": "Ventas y marketing",
     "travel": "Viajes",
     "cashiers": "Cajeros",
-    "collaborators": "Colaboradores"
+    "collaborators": "Colaboradores",
+    "pointsAssignment": "Asignación de puntos",
+    "rewards": "Premios",
+    "generalSettings": "Configuración general",
+    "pointsRulesAndCampaigns": "Reglas de puntos y campañas",
+    "profile": "Perfil",
+    "myQrs": "Mis QRs"
   },
   "Breadcrumb": {
     "panel": "Panel",
