@@ -169,7 +169,9 @@
       "submitButton": "Save new password",
       "submitting": "Saving...",
       "pageTitle": "New password - Puntos Club Admin",
-      "pageDescription": "Set a new password for your account"
+      "pageDescription": "Set a new password for your account",
+      "backToApp": "Done. Go back to the app and sign in with your new password.",
+      "linkExpired": "This link expired or was already used. Request a new one from the app."
     },
     "emailConfirmed": {
       "title": "Account confirmed",

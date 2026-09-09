@@ -9,6 +9,8 @@ let capturedReducer: ((state: Record<string, unknown>, action: Record<string, un
 describe('UpdatePasswordForm', () => {
   const mockPush = jest.fn();
   const mockUpdateUser = jest.fn();
+  const mockSetSession = jest.fn().mockResolvedValue({ error: null });
+  const mockSignOut = jest.fn().mockResolvedValue({ error: null });
 
   beforeEach(() => {
     (useRouter as jest.Mock).mockReturnValue({
@@ -23,8 +25,11 @@ describe('UpdatePasswordForm', () => {
     (createClient as jest.Mock).mockReturnValue({
       auth: {
         updateUser: mockUpdateUser,
+        setSession: mockSetSession,
+        signOut: mockSignOut,
       },
     });
+    window.location.hash = '';
   });
 
   const strongPassword = 'Strong1!';
@@ -172,5 +177,63 @@ describe('UpdatePasswordForm', () => {
     const state = { password: '', showPassword: false, error: null, submitted: false, isLoading: false };
     const result = capturedReducer!(state, { type: 'UNKNOWN_ACTION' } as Record<string, unknown>);
     expect(result).toBe(state);
+  });
+
+  // Link de recuperacion abierto desde las apps moviles: flujo implicit, los
+  // tokens llegan en el hash y al terminar no hay dashboard al que mandarlo.
+  it('takes the session from the url hash and signs out after updating', async () => {
+    window.location.hash = '#access_token=at&refresh_token=rt&type=recovery';
+    mockUpdateUser.mockResolvedValue({ error: null });
+
+    render(<UpdatePasswordForm />);
+    await waitFor(() =>
+      expect(mockSetSession).toHaveBeenCalledWith({ access_token: 'at', refresh_token: 'rt' }),
+    );
+
+    fireEvent.change(screen.getByLabelText('newPassword'), { target: { value: strongPassword } });
+    fireEvent.click(screen.getByRole('button', { name: 'submitButton' }));
+
+    await waitFor(() => expect(screen.getByText('backToApp')).toBeInTheDocument());
+    expect(mockSignOut).toHaveBeenCalledWith({ scope: 'local' });
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it('shows the expired message when the link comes back with an error instead of tokens', async () => {
+    window.location.hash = '#error_description=Email+link+is+invalid+or+has+expired';
+
+    render(<UpdatePasswordForm />);
+
+    await waitFor(() => expect(screen.getByText('linkExpired')).toBeInTheDocument());
+    expect(mockSetSession).not.toHaveBeenCalled();
+  });
+
+  // Un link recortado o mal reenviado llega sin access_token: sin sesion de
+  // recuperacion el form no puede quedar enviable contra la sesion del browser.
+  it('blocks the form when the recovery hash comes without an access token', async () => {
+    window.location.hash = '#refresh_token=rt&type=recovery';
+
+    render(<UpdatePasswordForm />);
+
+    await waitFor(() => expect(screen.getByText('linkExpired')).toBeInTheDocument());
+    expect(screen.queryByRole('button', { name: 'submitButton' })).not.toBeInTheDocument();
+    expect(mockSetSession).not.toHaveBeenCalled();
+  });
+
+  it('blocks the form when the recovery hash carries no tokens at all', async () => {
+    window.location.hash = '#type=recovery';
+
+    render(<UpdatePasswordForm />);
+
+    await waitFor(() => expect(screen.getByText('linkExpired')).toBeInTheDocument());
+    expect(screen.queryByRole('button', { name: 'submitButton' })).not.toBeInTheDocument();
+  });
+
+  it('shows the expired message when setSession rejects the tokens', async () => {
+    window.location.hash = '#access_token=at&refresh_token=rt&type=recovery';
+    mockSetSession.mockResolvedValueOnce({ error: { message: 'invalid' } });
+
+    render(<UpdatePasswordForm />);
+
+    await waitFor(() => expect(screen.getByText('linkExpired')).toBeInTheDocument());
   });
 });

@@ -169,7 +169,9 @@
       "submitButton": "Guardar nueva contraseña",
       "submitting": "Guardando...",
       "pageTitle": "Nueva contraseña - Puntos Club Admin",
-      "pageDescription": "Establecé una nueva contraseña para tu cuenta"
+      "pageDescription": "Establecé una nueva contraseña para tu cuenta",
+      "backToApp": "Listo. Volvé a la app e ingresá con tu nueva contraseña.",
+      "linkExpired": "El link expiró o ya se usó. Pedí uno nuevo desde la app."
     },
     "emailConfirmed": {
       "title": "Cuenta confirmada",

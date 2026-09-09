@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useReducer } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 
 import { Eye, EyeOff } from "lucide-react";
@@ -72,6 +72,37 @@ export function UpdatePasswordForm({
   const { password, showPassword, error, submitted, isLoading } = state;
   const { push } = useRouter();
 
+  // Las apps moviles usan el flujo implicit: Supabase vuelve con los tokens en
+  // el hash y este cliente (PKCE) no los levanta solo. Sin esto la pantalla
+  // abre bien pero updateUser falla por falta de sesion.
+  const fromApp = useRef(false);
+  // Cuando hay desenlace se oculta el form: con el link vencido no hay sesion de
+  // recuperacion, y dejarlo enviable cambiaria la clave de la sesion del browser.
+  const [outcome, setOutcome] = useState<"backToApp" | "linkExpired" | null>(null);
+
+  useEffect(() => {
+    const hash = new URLSearchParams(window.location.hash.slice(1));
+    const accessToken = hash.get('access_token');
+    const refreshToken = hash.get('refresh_token');
+    // Hash vacio = flujo normal de la web (PKCE, sesion en cookie). Cualquier
+    // marca de recovery en el hash, aunque venga incompleta, es un link de app.
+    if (!accessToken && !refreshToken && hash.get('type') !== 'recovery' && !hash.get('error_description')) return;
+
+    window.history.replaceState(null, '', window.location.pathname);
+    if (!accessToken || !refreshToken) {
+      setOutcome("linkExpired");
+      return;
+    }
+    fromApp.current = true;
+    dispatch({ type: 'SET_LOADING', payload: true });
+    createClient()
+      .auth.setSession({ access_token: accessToken, refresh_token: refreshToken })
+      .then(({ error }) => {
+        if (error) setOutcome("linkExpired");
+        dispatch({ type: 'SET_LOADING', payload: false });
+      });
+  }, []);
+
   const passwordValid = allRulesPass(password);
 
   const handleUpdatePassword = async (e: React.FormEvent) => {
@@ -90,6 +121,11 @@ export function UpdatePasswordForm({
 
     if (errorMessage) {
       dispatch({ type: 'SET_ERROR', payload: errorMessage });
+    } else if (fromApp.current) {
+      // Vino de la app: no tiene nada que hacer en el dashboard y la sesion de
+      // recuperacion no deberia quedar viva en el browser.
+      await supabase.auth.signOut({ scope: 'local' });
+      setOutcome("backToApp");
     } else {
       push("/dashboard");
     }
@@ -101,8 +137,9 @@ export function UpdatePasswordForm({
       <Card>
         <CardHeader>
           <CardTitle className="text-2xl">{t("title")}</CardTitle>
-          <CardDescription>{t("description")}</CardDescription>
+          <CardDescription>{outcome ? t(outcome) : t("description")}</CardDescription>
         </CardHeader>
+        {!outcome && (
         <CardContent>
           <form onSubmit={handleUpdatePassword} noValidate>
             <div className="flex flex-col gap-6">
@@ -140,6 +177,7 @@ export function UpdatePasswordForm({
             </div>
           </form>
         </CardContent>
+        )}
       </Card>
     </div>
   );
