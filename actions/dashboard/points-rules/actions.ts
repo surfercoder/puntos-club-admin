@@ -12,11 +12,13 @@ import { AppError } from '@/lib/errors';
 export interface PointsRuleInput {
   name: string;
   description?: string;
-  rule_type: 'fixed_amount' | 'percentage' | 'fixed_per_item' | 'tiered';
+  rule_type: 'fixed_amount' | 'percentage' | 'fixed_per_item' | 'tiered' | 'fixed_per_sale';
   config: Record<string, unknown>; // JSON config based on rule_type
   is_active?: boolean;
   organization_id?: number;
   branch_id?: number;
+  /** Campañas multi-sucursal. Vacío o ausente = todas las sucursales. */
+  branch_ids?: number[];
   category_id?: number;
   start_date?: string;
   end_date?: string;
@@ -30,6 +32,25 @@ export interface PointsRuleInput {
   display_icon?: string;
   display_color?: string;
   show_in_app?: boolean;
+}
+
+/**
+ * Las sucursales de una campaña multi-sucursal tienen que ser todas de la
+ * organización activa: es el mismo control que ya hacía `branch_id`, sobre una
+ * lista. Una sucursal ajena (o inexistente) no vuelve en el select.
+ */
+async function branchesBelongToOrg(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  branchIds: number[],
+  organizationId: number,
+) {
+  const { data, error } = await supabase
+    .from("branch")
+    .select("id")
+    .in("id", branchIds)
+    .eq("organization_id", organizationId);
+
+  return !error && (data ?? []).length === branchIds.length;
 }
 
 /**
@@ -91,34 +112,6 @@ export async function getActivePointsRules() {
 }
 
 /**
- * Get a single points rule by ID
- */
-export async function getPointsRuleById(id: number) {
-  try {
-    const supabase = await createClient();
-
-    const { data, error } = await supabase
-      .from("points_rule")
-      .select(`
-        *,
-        organization:organization(id, name),
-        branch:branch(id, name),
-        category:category(id, name)
-      `)
-      .eq("id", id)
-      .single();
-
-    if (error) {
-      return { success: false, error: await translateError(error) };
-    }
-
-    return { success: true, data };
-  } catch (error) {
-    return { success: false, error: await translateError(error) };
-  }
-}
-
-/**
  * Create a new points rule
  */
 export async function createPointsRule(input: PointsRuleInput) {
@@ -165,6 +158,13 @@ export async function createPointsRule(input: PointsRuleInput) {
       }
     }
 
+    if (
+      input.branch_ids?.length &&
+      !(await branchesBelongToOrg(supabase, input.branch_ids, activeOrgIdNumber))
+    ) {
+      return { success: false, error: await errorText('db.forbidden') };
+    }
+
     const normalizedInput: PointsRuleInput = {
       ...input,
       organization_id: activeOrgIdNumber,
@@ -191,6 +191,7 @@ export async function createPointsRule(input: PointsRuleInput) {
         is_active: normalizedInput.is_active ?? true,
         organization_id: normalizedInput.organization_id,
         branch_id: normalizedInput.branch_id,
+        branch_ids: normalizedInput.branch_ids?.length ? normalizedInput.branch_ids : null,
         category_id: normalizedInput.category_id,
         start_date: normalizedInput.start_date,
         end_date: normalizedInput.end_date,
@@ -274,7 +275,14 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
         return { success: false, error: await errorText('db.forbidden') };
       }
     }
-    
+
+    if (
+      normalizedInput.branch_ids?.length &&
+      !(await branchesBelongToOrg(supabase, normalizedInput.branch_ids, activeOrgIdNumber))
+    ) {
+      return { success: false, error: await errorText('db.forbidden') };
+    }
+
     if (normalizedInput.name !== undefined) updateData.name = normalizedInput.name;
     if (normalizedInput.description !== undefined) updateData.description = normalizedInput.description;
     if (normalizedInput.rule_type !== undefined) updateData.rule_type = normalizedInput.rule_type;
@@ -282,6 +290,8 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
     if (normalizedInput.is_active !== undefined) updateData.is_active = normalizedInput.is_active;
     updateData.organization_id = activeOrgIdNumber;
     if (normalizedInput.branch_id !== undefined) updateData.branch_id = normalizedInput.branch_id;
+    if (normalizedInput.branch_ids !== undefined)
+      updateData.branch_ids = normalizedInput.branch_ids.length ? normalizedInput.branch_ids : null;
     if (normalizedInput.category_id !== undefined) updateData.category_id = normalizedInput.category_id;
     if (normalizedInput.start_date !== undefined) updateData.start_date = normalizedInput.start_date;
     if (normalizedInput.end_date !== undefined) updateData.end_date = normalizedInput.end_date;

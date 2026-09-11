@@ -184,23 +184,21 @@ test.describe.serial('Owner Dashboard CRUD Tests', () => {
     await waitForPageLoad(page);
   });
 
-  // ━━━ 5. POINTS RULE ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  // ━━━ 5. CAMPAIGN ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   test('Points Rule: create', async ({ page }) => {
     await navigateTo(page, '/dashboard/points-rules/new');
 
-    await page.locator('#name').fill('E2E Test Rule');
-    await page.locator('#description').fill('E2E test');
+    await page.locator('#campaign-name').fill('E2E Test Rule');
+    await page.locator('#campaign-description').fill('E2E test');
+    await page.locator('#campaign-start').fill('2026-01-01');
+    await page.locator('#campaign-end').fill('2026-12-31');
+    await page.locator('#campaign-fixed_per_sale').fill('50');
+    await page.getByRole('button', { name: /Seleccionar todas/ }).click();
 
-    const ppd = page.locator('#points_per_dollar');
-    if (await ppd.isVisible()) {
-      await ppd.clear();
-      await ppd.fill('5');
-    }
+    await page.getByRole('button', { name: /Crear campaña/ }).click();
 
-    await page.locator('button[type="submit"]').click();
-
-    // Points rule uses router.push - wait for navigation away from /new
+    // La campaña navega con router.push: se espera a salir de /new
     await expect(page).not.toHaveURL(/\/new$/, { timeout: 30000 });
     await waitForPageLoad(page);
     // Navigate to the list to verify
@@ -221,10 +219,10 @@ test.describe.serial('Owner Dashboard CRUD Tests', () => {
     await editLink.click();
     await waitForPageLoad(page);
 
-    await page.locator('#name').clear();
-    await page.locator('#name').fill('E2E Rule Updated');
+    await page.locator('#campaign-name').clear();
+    await page.locator('#campaign-name').fill('E2E Rule Updated');
 
-    await page.locator('button[type="submit"]').click();
+    await page.getByRole('button', { name: /Guardar campaña/ }).click();
 
     await expect(page).not.toHaveURL(/\/edit\//, { timeout: 30000 });
     await waitForPageLoad(page);

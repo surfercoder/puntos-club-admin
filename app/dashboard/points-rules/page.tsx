@@ -31,6 +31,7 @@ type RuleRow = {
   time_start: string | null;
   time_end: string | null;
   days_of_week: number[] | null;
+  branch_ids: number[] | null;
   branch: { name: string } | null;
 };
 
@@ -77,7 +78,9 @@ export default async function PointsRulesPage({
 
   const describeBenefit = (rule: RuleRow) => {
     const config = rule.config ?? {};
-    const points = Number(config.points_per_dollar ?? config.points_per_item);
+    const points = Number(
+      config.points_per_sale ?? config.points_per_dollar ?? config.points_per_item,
+    );
     const percentage = Number(config.percentage);
     if (Number.isFinite(percentage) && rule.rule_type === "percentage") {
       return tCampaigns("benefit.percentage", {
@@ -121,7 +124,9 @@ export default async function PointsRulesPage({
           displayIcon: rule.display_icon,
           benefit: describeBenefit(rule),
           benefitDetail: rule.description ? null : tCampaigns("benefit.overMother"),
-          appliesTo: rule.branch?.name ?? tMother("allBranches"),
+          appliesTo: rule.branch_ids?.length
+            ? tCampaigns("appliesToBranches", { count: rule.branch_ids.length })
+            : (rule.branch?.name ?? tMother("allBranches")),
           validity: describeValidity(rule),
           schedule: describeSchedule(rule),
           tab: classify(rule, today),

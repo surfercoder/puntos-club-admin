@@ -249,7 +249,7 @@
     "pointsAssignment": "Points assignment",
     "rewards": "Rewards",
     "generalSettings": "General settings",
-    "pointsRulesAndCampaigns": "Points rules & campaigns",
+    "pointsRulesAndCampaigns": "Campaigns",
     "profile": "Profile",
     "myQrs": "My QRs",
     "notificationsAndComms": "Notifications & communication"
@@ -270,7 +270,7 @@
     "notifications": "Notifications",
     "organization": "Organizations",
     "organization_notification_limits": "Notification Limits",
-    "points-rules": "Points Rules",
+    "points-rules": "Campaigns",
     "product": "Products",
     "profile": "Profile",
     "purchase": "Virtual Cashier",
@@ -2161,109 +2161,12 @@
     "title": "Points Rules and Campaigns",
     "description": "Define how your customers earn points on every purchase.",
     "createButton": "+ New campaign",
-    "backToList": "Back to Rules",
-    "calculator": {
-      "title": "Points Calculator",
-      "description": "Test how many points a purchase would earn with the current active rules",
-      "purchaseAmount": "Purchase Amount",
-      "branch": "Branch *",
-      "selectBranch": "Select branch",
-      "calculating": "Calculating...",
-      "calculate": "Calculate",
-      "pointsEarned": "Points earned",
-      "selectBranchAlert": "Please select a branch"
-    },
-    "table": {
-      "title": "All Rules",
-      "refresh": "Refresh",
-      "loading": "Loading rules...",
-      "empty": "No rules found. Create your first rule to get started.",
-      "status": "Status",
-      "display": "Display",
-      "name": "Name",
-      "type": "Type",
-      "config": "Config",
-      "schedule": "Schedule",
-      "showInApp": "Show in App",
-      "actions": "Actions"
-    },
-    "status": {
-      "active": "Active",
-      "inactive": "Inactive",
-      "default": "Default",
-      "visible": "Visible",
-      "hidden": "Hidden"
-    },
-    "ruleTypes": {
-      "fixed_amount": "Fixed per purchase",
-      "percentage": "Percentage",
-      "fixed_per_item": "Fixed per item",
-      "tiered": "Tiered",
-      "multiplelevels": "Multiple levels"
-    },
-    "schedule": {
-      "allDay": "All day",
-      "allDays": "All days",
-      "always": "Always",
-      "from": "From {date}",
-      "until": "Until {date}"
-    },
     "deleteModal": {
       "title": "Delete Points Rule",
       "confirm": "Are you sure you want to delete <strong>{name}</strong>? This action cannot be undone.",
       "deleteError": "Error deleting the points rule",
       "deleteSuccess": "Points rule deleted successfully",
       "genericError": "An error occurred while deleting"
-    },
-    "form": {
-      "createTitle": "Create New Points Rule",
-      "editTitle": "Edit Points Rule",
-      "createDescription": "Define how customers earn points on their purchases",
-      "basicInfo": "Basic Information",
-      "ruleName": "Rule Name *",
-      "ruleNamePlaceholder": "e.g. Double Night Points",
-      "description": "Description",
-      "descriptionPlaceholder": "Describe when and how this rule applies",
-      "active": "Active",
-      "default": "Default",
-      "showInApp": "Show in Mobile App",
-      "pointsCalc": "Points Calculation",
-      "selectBranch": "Select a branch",
-      "ruleType": "Rule Type *",
-      "ruleTypeFixed": "Fixed Points per Purchase",
-      "ruleTypePercentage": "Percentage of Amount",
-      "pointsPerPurchase": "Points per Purchase *",
-      "pointsPerPurchaseHint": "Example: 2 means customers earn 2 points for every $1 spent",
-      "percentage": "Percentage *",
-      "percentageHint": "Example: 10 means customers earn points equal to 10% of the purchase amount",
-      "schedule": "Schedule (Optional)",
-      "startDate": "Start Date",
-      "endDate": "End Date",
-      "startTime": "Start Time",
-      "endTime": "End Time",
-      "timeHint": "Leave empty for all day. Supports overnight ranges (e.g. 18:00 to 06:00).",
-      "activeDays": "Active Days",
-      "daysHint": "Leave unchecked for all days",
-      "days": {
-        "0": "Sunday",
-        "1": "Monday",
-        "2": "Tuesday",
-        "3": "Wednesday",
-        "4": "Thursday",
-        "5": "Friday",
-        "6": "Saturday"
-      },
-      "displaySettings": "Display Settings",
-      "displayName": "Display Name",
-      "displayNamePlaceholder": "e.g. 🌙 Night Bonus",
-      "displayNameHint": "Friendly name shown in the mobile app. Defaults to the rule name.",
-      "icon": "Icon",
-      "color": "Color",
-      "loadError": "Error loading rule",
-      "creating": "Creating...",
-      "createRule": "Create Rule",
-      "saving": "Saving...",
-      "saveRule": "Save Changes"
     },
     "mother": {
       "title": "1. Base rule (always on)",
@@ -2325,7 +2228,8 @@
         "active": "No campaigns are running right now.",
         "scheduled": "No campaigns are scheduled.",
         "finished": "No campaign has finished yet."
-      }
+      },
+      "appliesToBranches": "{count, plural, one {# branch} other {# branches}}"
     },
     "rowActions": {
       "open": "Open actions",
@@ -2413,6 +2317,121 @@
       "saveError": "We could not save the base rule",
       "invalidValue": "Enter a valid number for the base rule",
       "branchRequired": "Pick the branch where the rule applies"
+    },
+    "campaignForm": {
+      "noOrganization": "Pick an organization to create campaigns.",
+      "notFound": "We couldn't find that campaign in your club.",
+      "back": "Back to Campaigns",
+      "createTitle": "Create a new points campaign",
+      "createSubtitle": "Build promotions and motivate your customers to earn more points.",
+      "editTitle": "Edit points campaign",
+      "editSubtitle": "Change the promotion's conditions whenever you need to.",
+      "legacyType": "This campaign uses an old calculation type (points per $1) that is no longer configured here. Pick how it awards points again before saving.",
+      "addEmoji": "Add emoji",
+      "created": "Campaign created",
+      "saved": "Campaign updated",
+      "submitCreate": "Create campaign 🎉",
+      "submitEdit": "Save campaign",
+      "basic": {
+        "title": "1. Basic information",
+        "name": "Campaign name",
+        "namePlaceholder": "E.g.: Double Points on Weekends",
+        "description": "Description",
+        "descriptionPlaceholder": "Tell your customers what the promotion is about"
+      },
+      "validity": {
+        "title": "2. Campaign period",
+        "startDate": "Start date",
+        "endDate": "End date",
+        "repeat": "Repetition",
+        "repeatWeekly": "Repeat weekly on the days you choose.",
+        "weekDays": "Days of the week",
+        "schedule": "Time range",
+        "scheduleHelp": "Limit the campaign to a time range.",
+        "startTime": "Start time",
+        "endTime": "End time"
+      },
+      "points": {
+        "title": "3. Points assignment",
+        "subtitle": "Assignment type",
+        "unit": "pts",
+        "note": "Points are awarded on every sale made within the configured period and time range.",
+        "fixed_per_sale": {
+          "title": "Fixed points amount",
+          "description": "Award a fixed number of points per sale",
+          "field": "Points per sale"
+        },
+        "percentage": {
+          "title": "Percentage of the sale",
+          "description": "Award points based on a percentage of the sale",
+          "field": "Percentage"
+        }
+      },
+      "scope": {
+        "title": "4. Where the campaign applies",
+        "branches": "Branches",
+        "selectAll": "Select all",
+        "clear": "Clear selection",
+        "search": "Search branch",
+        "noResults": "No branch matches your search.",
+        "selectedCount": "Selected: {selected} of {total} branches"
+      },
+      "communication": {
+        "title": "5. Communication",
+        "optional": "(optional)",
+        "notify": "Announce this campaign",
+        "notifyHelp": "When the campaign is created, a push notification is sent to every beneficiary announcing the new promotion.",
+        "credits": "Push notifications consume credits according to your plan.",
+        "asideTitle": "Optional communication",
+        "asideBody": "You can choose whether to announce this campaign to beneficiaries with a push notification when you create it.",
+        "optionalBadge": "Optional"
+      },
+      "summary": {
+        "title": "Campaign summary",
+        "noName": "Untitled campaign",
+        "active": "Active",
+        "dates": "{from} to {to}",
+        "noDates": "No dates set",
+        "everyDay": "Every day",
+        "allDay": "00:00 to 23:59",
+        "fixed_per_sale": "{value} fixed points per sale",
+        "percentage": "{value}% of every sale as points",
+        "branches": "{count, plural, =0 {No branches selected} one {# branch selected} other {# branches selected}}"
+      },
+      "tips": {
+        "title": "Tips",
+        "overlap": "Campaigns can overlap with each other.",
+        "sum": "Campaign points add up on top of the base points.",
+        "edit": "You can edit or pause the campaign at any time."
+      },
+      "days": {
+        "0": "Sunday",
+        "1": "Monday",
+        "2": "Tuesday",
+        "3": "Wednesday",
+        "4": "Thursday",
+        "5": "Friday",
+        "6": "Saturday"
+      },
+      "daysShort": {
+        "0": "Sun",
+        "1": "Mon",
+        "2": "Tue",
+        "3": "Wed",
+        "4": "Thu",
+        "5": "Fri",
+        "6": "Sat"
+      },
+      "errors": {
+        "basicInfo": "Fill in the campaign name and description.",
+        "dates": "Choose the start and end dates.",
+        "dateOrder": "The end date can't be earlier than the start date.",
+        "days": "Choose at least one day of the week.",
+        "amount": "Enter a value greater than zero.",
+        "branches": "Choose at least one branch.",
+        "save": "We couldn't save the campaign",
+        "notify": "The campaign was created, but we couldn't send the notification"
+      }
     }
   },
   "UserRole": {

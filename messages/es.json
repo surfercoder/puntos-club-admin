@@ -249,7 +249,7 @@
     "pointsAssignment": "Asignación de puntos",
     "rewards": "Premios",
     "generalSettings": "Configuración general",
-    "pointsRulesAndCampaigns": "Reglas de puntos y campañas",
+    "pointsRulesAndCampaigns": "Campañas",
     "profile": "Perfil",
     "myQrs": "Mis QRs",
     "notificationsAndComms": "Notificaciones y comunicación"
@@ -270,7 +270,7 @@
     "notifications": "Notificaciones",
     "organization": "Organizaciones",
     "organization_notification_limits": "Límites de Notificaciones",
-    "points-rules": "Reglas de Puntos",
+    "points-rules": "Campañas",
     "product": "Productos",
     "profile": "Perfil",
     "purchase": "Cajero Virtual",
@@ -2161,109 +2161,12 @@
     "title": "Reglas de Puntos y Campañas",
     "description": "Definí cómo tus clientes acumulan puntos en cada compra.",
     "createButton": "+ Nueva campaña",
-    "backToList": "Volver a las Reglas",
-    "calculator": {
-      "title": "Calculadora de Puntos",
-      "description": "Prueba cuántos puntos acumularía una compra con las reglas activas actuales",
-      "purchaseAmount": "Monto de Compra",
-      "branch": "Sucursal *",
-      "selectBranch": "Seleccionar sucursal",
-      "calculating": "Calculando...",
-      "calculate": "Calcular",
-      "pointsEarned": "Puntos obtenidos",
-      "selectBranchAlert": "Por favor selecciona una sucursal"
-    },
-    "table": {
-      "title": "Todas las Reglas",
-      "refresh": "Actualizar",
-      "loading": "Cargando reglas...",
-      "empty": "No se encontraron reglas. Crea tu primera regla para comenzar.",
-      "status": "Estado",
-      "display": "Visualización",
-      "name": "Nombre",
-      "type": "Tipo",
-      "config": "Config",
-      "schedule": "Horario",
-      "showInApp": "Mostrar en App",
-      "actions": "Acciones"
-    },
-    "status": {
-      "active": "Activo",
-      "inactive": "Inactivo",
-      "default": "Por defecto",
-      "visible": "Visible",
-      "hidden": "Oculto"
-    },
-    "ruleTypes": {
-      "fixed_amount": "Fijo por compra",
-      "percentage": "Porcentaje",
-      "fixed_per_item": "Fijo por ítem",
-      "tiered": "Escalonado",
-      "multiplelevels": "Múltiples niveles"
-    },
-    "schedule": {
-      "allDay": "Todo el día",
-      "allDays": "Todos los días",
-      "always": "Siempre",
-      "from": "Desde {date}",
-      "until": "Hasta {date}"
-    },
     "deleteModal": {
       "title": "Eliminar Regla de Puntos",
       "confirm": "¿Estás seguro de que deseas eliminar <strong>{name}</strong>? Esta acción no se puede deshacer.",
       "deleteError": "Error al eliminar la regla de puntos",
       "deleteSuccess": "Regla de puntos eliminada correctamente",
       "genericError": "Ocurrió un error al eliminar"
-    },
-    "form": {
-      "createTitle": "Crear Nueva Regla de Puntos",
-      "editTitle": "Editar Regla de Puntos",
-      "createDescription": "Define cómo los clientes acumulan puntos en sus compras",
-      "basicInfo": "Información Básica",
-      "ruleName": "Nombre de la Regla *",
-      "ruleNamePlaceholder": "Ej.: Puntos Dobles Nocturnos",
-      "description": "Descripción",
-      "descriptionPlaceholder": "Describe cuándo y cómo aplica esta regla",
-      "active": "Activo",
-      "default": "Por Defecto",
-      "showInApp": "Mostrar en App Móvil",
-      "pointsCalc": "Cálculo de Puntos",
-      "selectBranch": "Seleccionar una sucursal",
-      "ruleType": "Tipo de Regla *",
-      "ruleTypeFixed": "Puntos Fijos por Compra",
-      "ruleTypePercentage": "Porcentaje del Monto",
-      "pointsPerPurchase": "Puntos por Compra *",
-      "pointsPerPurchaseHint": "Ejemplo: 2 significa que los clientes ganan 2 puntos por cada $1 gastado",
-      "percentage": "Porcentaje *",
-      "percentageHint": "Ejemplo: 10 significa que los clientes ganan puntos equivalentes al 10% del monto de compra",
-      "schedule": "Horario (Opcional)",
-      "startDate": "Fecha de Inicio",
-      "endDate": "Fecha de Fin",
-      "startTime": "Hora de Inicio",
-      "endTime": "Hora de Fin",
-      "timeHint": "Dejar vacío para todo el día. Soporta rangos nocturnos (ej.: 18:00 a 06:00).",
-      "activeDays": "Días Activos",
-      "daysHint": "Dejar sin marcar para todos los días",
-      "days": {
-        "0": "Domingo",
-        "1": "Lunes",
-        "2": "Martes",
-        "3": "Miércoles",
-        "4": "Jueves",
-        "5": "Viernes",
-        "6": "Sábado"
-      },
-      "displaySettings": "Configuración de Visualización",
-      "displayName": "Nombre a Mostrar",
-      "displayNamePlaceholder": "Ej.: 🌙 Bonus Nocturno",
-      "displayNameHint": "Nombre amigable mostrado en la app móvil. Por defecto usa el nombre de la regla.",
-      "icon": "Ícono",
-      "color": "Color",
-      "loadError": "Error al cargar la regla",
-      "creating": "Creando...",
-      "createRule": "Crear Regla",
-      "saving": "Guardando...",
-      "saveRule": "Guardar Cambios"
     },
     "mother": {
       "title": "1. Regla madre (siempre activa)",
@@ -2325,7 +2228,8 @@
         "active": "No hay campañas activas en este momento.",
         "scheduled": "No hay campañas programadas.",
         "finished": "Todavía no finalizó ninguna campaña."
-      }
+      },
+      "appliesToBranches": "{count, plural, one {# sucursal} other {# sucursales}}"
     },
     "rowActions": {
       "open": "Abrir acciones",
@@ -2413,6 +2317,121 @@
       "saveError": "No pudimos guardar la regla madre",
       "invalidValue": "Ingresá un valor numérico válido para la regla madre",
       "branchRequired": "Elegí la sucursal donde se aplica la regla"
+    },
+    "campaignForm": {
+      "noOrganization": "Elegí una organización para crear campañas.",
+      "notFound": "No encontramos esa campaña en tu club.",
+      "back": "Volver a Campañas",
+      "createTitle": "Crear nueva campaña de puntos",
+      "createSubtitle": "Creá promociones y motivá a tus clientes a sumar más puntos.",
+      "editTitle": "Editar campaña de puntos",
+      "editSubtitle": "Cambiá las condiciones de la promoción cuando quieras.",
+      "legacyType": "Esta campaña usa un tipo de cálculo viejo (puntos por cada $1), que ya no se configura desde acá. Elegí de nuevo cómo asigna puntos antes de guardar.",
+      "addEmoji": "Agregar emoji",
+      "created": "Campaña creada",
+      "saved": "Campaña actualizada",
+      "submitCreate": "Crear campaña 🎉",
+      "submitEdit": "Guardar campaña",
+      "basic": {
+        "title": "1. Información básica",
+        "name": "Nombre de la campaña",
+        "namePlaceholder": "Ej.: Doble Puntos los Fines de Semana",
+        "description": "Descripción",
+        "descriptionPlaceholder": "Contale a tus clientes de qué se trata la promoción"
+      },
+      "validity": {
+        "title": "2. Vigencia de la campaña",
+        "startDate": "Fecha de inicio",
+        "endDate": "Fecha de finalización",
+        "repeat": "Repetición",
+        "repeatWeekly": "Repetir semanalmente en los días que elijas.",
+        "weekDays": "Días de la semana",
+        "schedule": "Horario",
+        "scheduleHelp": "Limitar la campaña a una franja horaria.",
+        "startTime": "Hora de inicio",
+        "endTime": "Hora de finalización"
+      },
+      "points": {
+        "title": "3. Asignación de puntos",
+        "subtitle": "Tipo de asignación",
+        "unit": "pts",
+        "note": "Los puntos se asignarán por cada venta realizada dentro del período y horario configurado.",
+        "fixed_per_sale": {
+          "title": "Monto fijo de puntos",
+          "description": "Asignar una cantidad fija de puntos por venta",
+          "field": "Puntos por venta"
+        },
+        "percentage": {
+          "title": "Porcentaje de la venta",
+          "description": "Asignar puntos en base a un porcentaje de la venta",
+          "field": "Porcentaje"
+        }
+      },
+      "scope": {
+        "title": "4. Aplicación de la campaña",
+        "branches": "Sucursales",
+        "selectAll": "Seleccionar todas",
+        "clear": "Limpiar selección",
+        "search": "Buscar sucursal",
+        "noResults": "Ninguna sucursal coincide con la búsqueda.",
+        "selectedCount": "Seleccionadas: {selected} de {total} sucursales"
+      },
+      "communication": {
+        "title": "5. Comunicación",
+        "optional": "(opcional)",
+        "notify": "Notificar esta campaña",
+        "notifyHelp": "Al crear la campaña, se enviará una notificación push a todos los beneficiarios informando la nueva promoción.",
+        "credits": "Las notificaciones push consumen créditos según tu plan contratado.",
+        "asideTitle": "Comunicación opcional",
+        "asideBody": "Podés elegir si querés comunicar esta campaña a los beneficiarios mediante una notificación push al crearla.",
+        "optionalBadge": "Opcional"
+      },
+      "summary": {
+        "title": "Resumen de la campaña",
+        "noName": "Campaña sin nombre",
+        "active": "Activa",
+        "dates": "{from} al {to}",
+        "noDates": "Sin fechas definidas",
+        "everyDay": "Todos los días",
+        "allDay": "00:00 a 23:59",
+        "fixed_per_sale": "{value} puntos fijos por venta",
+        "percentage": "{value}% de cada venta en puntos",
+        "branches": "{count, plural, =0 {Sin sucursales seleccionadas} one {# sucursal seleccionada} other {# sucursales seleccionadas}}"
+      },
+      "tips": {
+        "title": "Consejos",
+        "overlap": "Las campañas pueden superponerse entre sí.",
+        "sum": "Los puntos de la campaña se suman a los puntos base.",
+        "edit": "Podés editar o pausar la campaña en cualquier momento."
+      },
+      "days": {
+        "0": "Domingo",
+        "1": "Lunes",
+        "2": "Martes",
+        "3": "Miércoles",
+        "4": "Jueves",
+        "5": "Viernes",
+        "6": "Sábado"
+      },
+      "daysShort": {
+        "0": "Dom",
+        "1": "Lun",
+        "2": "Mar",
+        "3": "Mié",
+        "4": "Jue",
+        "5": "Vie",
+        "6": "Sáb"
+      },
+      "errors": {
+        "basicInfo": "Completá el nombre y la descripción de la campaña.",
+        "dates": "Elegí la fecha de inicio y la de finalización.",
+        "dateOrder": "La fecha de finalización no puede ser anterior a la de inicio.",
+        "days": "Elegí al menos un día de la semana.",
+        "amount": "Ingresá un valor mayor a cero.",
+        "branches": "Elegí al menos una sucursal.",
+        "save": "No pudimos guardar la campaña",
+        "notify": "La campaña se creó, pero no pudimos enviar la notificación"
+      }
     }
   },
   "UserRole": {

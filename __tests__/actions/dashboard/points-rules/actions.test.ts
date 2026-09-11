@@ -19,6 +19,7 @@ const mockSupabase = {
   update: jest.fn(() => mockSupabase),
   delete: jest.fn(() => mockSupabase),
   eq: jest.fn(() => mockSupabase),
+  in: jest.fn(() => mockSupabase),
   order: jest.fn(() => mockSupabase),
   single: jest.fn(() => ({ data: { id: 1, name: 'Rule', organization_id: 123 }, error: null })),
   rpc: jest.fn(() => ({ data: 100, error: null })),
@@ -36,7 +37,6 @@ import { revalidatePath } from 'next/cache';
 import {
   getAllPointsRules,
   getActivePointsRules,
-  getPointsRuleById,
   createPointsRule,
   updatePointsRule,
   togglePointsRuleStatus,
@@ -58,6 +58,7 @@ beforeEach(() => {
   mockSupabase.update.mockReturnValue(mockSupabase);
   mockSupabase.delete.mockReturnValue(mockSupabase);
   mockSupabase.eq.mockReturnValue(mockSupabase);
+  mockSupabase.in.mockReturnValue(mockSupabase);
   mockSupabase.order.mockReturnValue(mockSupabase);
   mockSupabase.single.mockReturnValue({ data: { id: 1, name: 'Rule', organization_id: 123 }, error: null });
   mockSupabase.rpc.mockReturnValue({ data: 100, error: null });
@@ -127,25 +128,6 @@ describe('getActivePointsRules', () => {
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await getActivePointsRules();
-    expect(result).toEqual({ success: false, error: 'unexpected' });
-  });
-});
-
-describe('getPointsRuleById', () => {
-  it('should return rule by id', async () => {
-    const result = await getPointsRuleById(1);
-    expect(result.success).toBe(true);
-  });
-
-  it('should return error on failure', async () => {
-    mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Not found' } });
-    const result = await getPointsRuleById(999);
-    expect(result).toEqual({ success: false, error: 'unexpected' });
-  });
-
-  it('should handle unexpected error', async () => {
-    mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
-    const result = await getPointsRuleById(1);
     expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });
@@ -447,5 +429,81 @@ describe('testPointsCalculation', () => {
     mockSupabase.rpc.mockReturnValue({ data: 30, error: null });
     const result = await testPointsCalculation(100);
     expect(result).toEqual({ success: true, points: 30 });
+  });
+});
+
+describe('multi-branch campaigns', () => {
+  // branchesBelongToOrg cierra con .eq(), así que ese es el mock terminal.
+  const branchLookup = (rows: unknown[] | null, error: unknown = null) =>
+    mockSupabase.eq.mockReturnValueOnce({ data: rows, error });
+
+  it('stores the chosen branches when they all belong to the org', async () => {
+    branchLookup([{ id: 5 }, { id: 6 }]);
+    const result = await createPointsRule({ ...validRule, branch_ids: [5, 6] });
+
+    expect(result.success).toBe(true);
+    expect(mockSupabase.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ branch_ids: [5, 6] })
+    );
+  });
+
+  it('rejects a branch that belongs to another org', async () => {
+    branchLookup([{ id: 5 }]);
+    const result = await createPointsRule({ ...validRule, branch_ids: [5, 6] });
+
+    expect(result.success).toBe(false);
+    expect(result.error).toBe('db.forbidden');
+    expect(mockSupabase.insert).not.toHaveBeenCalled();
+  });
+
+  it('rejects when the branch lookup fails', async () => {
+    branchLookup(null, { message: 'boom' });
+    const result = await createPointsRule({ ...validRule, branch_ids: [5] });
+
+    expect(result.error).toBe('db.forbidden');
+  });
+
+  it('rejects when the branch lookup comes back empty', async () => {
+    branchLookup(null);
+    const result = await createPointsRule({ ...validRule, branch_ids: [5] });
+
+    expect(result.error).toBe('db.forbidden');
+  });
+
+  it('treats an empty selection as every branch', async () => {
+    const result = await createPointsRule({ ...validRule, branch_ids: [] });
+
+    expect(result.success).toBe(true);
+    expect(mockSupabase.in).not.toHaveBeenCalled();
+    expect(mockSupabase.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ branch_ids: null })
+    );
+  });
+
+  it('updates the branches of an existing campaign', async () => {
+    branchLookup([{ id: 5 }]);
+    const result = await updatePointsRule(1, { branch_ids: [5] });
+
+    expect(result.success).toBe(true);
+    expect(mockSupabase.update).toHaveBeenCalledWith(
+      expect.objectContaining({ branch_ids: [5] })
+    );
+  });
+
+  it('clears the branch restriction on update', async () => {
+    const result = await updatePointsRule(1, { branch_ids: [] });
+
+    expect(result.success).toBe(true);
+    expect(mockSupabase.update).toHaveBeenCalledWith(
+      expect.objectContaining({ branch_ids: null })
+    );
+  });
+
+  it('refuses an update pointing at a foreign branch', async () => {
+    branchLookup([]);
+    const result = await updatePointsRule(1, { branch_ids: [99] });
+
+    expect(result.error).toBe('db.forbidden');
+    expect(mockSupabase.update).not.toHaveBeenCalled();
   });
 });

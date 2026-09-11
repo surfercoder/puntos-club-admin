@@ -41,6 +41,7 @@ const rule = (over: Record<string, unknown> = {}) => ({
   time_start: null,
   time_end: null,
   days_of_week: null,
+  branch_ids: null,
   branch: null,
   ...over,
 });
@@ -71,6 +72,24 @@ describe('PointsRulesPage', () => {
   it('survives a successful load with no data', async () => {
     getAllPointsRules.mockResolvedValue({ success: true, data: null });
     expect(await renderPage()).toContain('campaigns');
+  });
+
+  it('counts the branches of a multi-branch campaign', async () => {
+    getAllPointsRules.mockResolvedValue({
+      success: true,
+      data: [
+        rule({
+          id: 2,
+          is_default: false,
+          rule_type: 'fixed_per_sale',
+          config: { points_per_sale: 200 },
+          branch_ids: [1, 2, 3],
+        }),
+      ],
+    });
+    const html = await renderPage();
+    expect(html).toContain('appliesToBranches');
+    expect(html).toContain('benefit.points');
   });
 
   it('classifies a future campaign as scheduled', async () => {
