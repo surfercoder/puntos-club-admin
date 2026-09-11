@@ -12,8 +12,9 @@ import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { GoogleAddressAutocomplete, type GoogleAddressComponents } from '@/components/ui/google-address-autocomplete';
-import type { ActionState} from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import type { ActionState } from '@/lib/action-state';
+import { EMPTY_ACTION_STATE } from '@/lib/action-state';
+import { useValidationState } from '@/lib/use-validation-state';
 import { AddressSchema } from '@/schemas/address.schema';
 import type { Address } from '@/types/address';
 
@@ -68,6 +69,7 @@ function AddressHiddenFields({ addressData }: { addressData: Partial<GoogleAddre
 }
 
 export default function AddressForm({ address }: { address?: Address }) {
+  const toValidationState = useValidationState();
   const t = useTranslations('Dashboard.address');
   const tCommon = useTranslations('Common');
 
@@ -122,7 +124,7 @@ export default function AddressForm({ address }: { address?: Address }) {
     try {
       AddressSchema.parse(formData);
     } catch (error) {
-      setValidation(fromErrorToActionState(error));
+      setValidation(toValidationState(error));
       event.preventDefault();
     }
   };

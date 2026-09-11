@@ -6,6 +6,7 @@ jest.mock('next-intl', () => ({
     const t = (key: string) => key;
     t.rich = (key: string) => key;
     t.raw = () => ({});
+    t.has = () => true;
     return t;
   }),
   useLocale: jest.fn(() => 'es'),

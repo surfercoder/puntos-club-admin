@@ -58,7 +58,7 @@ describe('checkAdminPortalAccess', () => {
   it('should return not allowed when no authenticated user', async () => {
     mockSupabase.auth.getUser.mockReturnValue({ data: { user: null }, error: { message: 'No session' } });
     const result = await checkAdminPortalAccess();
-    expect(result).toEqual({ allowed: false, role: null, error: 'No authenticated user' });
+    expect(result).toEqual({ allowed: false, role: null, error: 'auth.notAuthenticated' });
   });
 
   it('should fallback to email lookup when auth_user_id not found', async () => {
@@ -129,7 +129,7 @@ describe('signInAdminPortal', () => {
   it('should return error on sign in failure', async () => {
     mockSupabase.auth.signInWithPassword.mockReturnValue({ error: { message: 'Invalid credentials' } });
     const result = await signInAdminPortal('bad@test.com', 'wrong');
-    expect(result).toEqual({ success: false, role: null, error: 'Invalid credentials' });
+    expect(result).toEqual({ success: false, role: null, error: 'unexpected' });
   });
 
   it('should return error when access check fails', async () => {

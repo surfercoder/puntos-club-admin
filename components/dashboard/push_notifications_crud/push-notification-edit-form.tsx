@@ -11,8 +11,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { ActionState } from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import type { ActionState } from '@/lib/action-state';
+import { EMPTY_ACTION_STATE } from '@/lib/action-state';
+import { useValidationState } from '@/lib/use-validation-state';
 import { PushNotificationSchema } from '@/schemas/push_notification.schema';
 import type { PushNotification } from '@/types/push_notification';
 
@@ -21,6 +22,7 @@ interface PushNotificationEditFormProps {
 }
 
 export default function PushNotificationEditForm({ notification }: PushNotificationEditFormProps) {
+  const toValidationState = useValidationState();
   const t = useTranslations('Dashboard.notifications.editForm');
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [actionState, formAction, pending] = useActionState(pushNotificationFormAction, EMPTY_ACTION_STATE);
@@ -31,7 +33,7 @@ export default function PushNotificationEditForm({ notification }: PushNotificat
     try {
       PushNotificationSchema.parse(formData);
     } catch (error) {
-      setValidation(fromErrorToActionState(error));
+      setValidation(toValidationState(error));
       event.preventDefault();
     }
   };

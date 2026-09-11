@@ -2,6 +2,7 @@
 
 import { getCurrentUser } from './get-current-user';
 import type { AppUserWithRelations } from '@/types/app_user';
+import { AppError } from '@/lib/errors';
 
 /**
  * Auth guard for server actions. Resolves the current authenticated user or
@@ -11,7 +12,7 @@ import type { AppUserWithRelations } from '@/types/app_user';
 export async function requireUser(): Promise<AppUserWithRelations> {
   const user = await getCurrentUser();
   if (!user) {
-    throw new Error('Unauthorized');
+    throw new AppError('auth.sessionExpired');
   }
   return user;
 }

@@ -6,6 +6,7 @@ import { createAppUser, updateAppUser } from '@/actions/dashboard/app_user/actio
 import { assignCashierToBranch, checkBranchInActiveOrg } from '@/actions/dashboard/branch/assign-cashier';
 import { cleanFormData, fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
 import { AppUserSchema } from '@/schemas/app_user.schema';
+import { translateError } from '@/lib/error-handler';
 
 export async function appUserFormAction(_prevState: ActionState, formData: FormData): Promise<ActionState> {
   try {
@@ -13,7 +14,7 @@ export async function appUserFormAction(_prevState: ActionState, formData: FormD
     const parsed = AppUserSchema.safeParse(formDataObject);
 
     if (!parsed.success) {
-      return fromErrorToActionState(parsed.error);
+      return await fromErrorToActionState(parsed.error);
     }
 
     // Distinguimos "el form no trae el campo" (no tocar la sucursal) de "lo trae
@@ -34,7 +35,7 @@ export async function appUserFormAction(_prevState: ActionState, formData: FormD
     if (branchId) {
       const branchCheck = await checkBranchInActiveOrg(branchId);
       if (branchCheck.error) {
-        return { status: 'error' as const, message: branchCheck.error.message, fieldErrors: {} };
+        return { status: 'error' as const, message: await translateError(branchCheck.error), fieldErrors: {} };
       }
     }
 
@@ -43,10 +44,11 @@ export async function appUserFormAction(_prevState: ActionState, formData: FormD
       : await createAppUser(parsed.data);
 
     if (result.error) {
-      const message = 'message' in result.error
-        ? (result.error.message ?? 'An unexpected error occurred')
-        : 'An unexpected error occurred';
-      return { status: 'error' as const, message, fieldErrors: {} };
+      return {
+        status: 'error' as const,
+        message: await translateError(result.error),
+        fieldErrors: {},
+      };
     }
 
     // La sucursal del cajero vive en app_user.branch_id y se guarda aparte para
@@ -58,7 +60,7 @@ export async function appUserFormAction(_prevState: ActionState, formData: FormD
     if (hasBranchField && savedId) {
       const assignment = await assignCashierToBranch(savedId, branchId);
       if (assignment.error) {
-        return { status: 'error' as const, message: assignment.error.message, fieldErrors: {} };
+        return { status: 'error' as const, message: await translateError(assignment.error), fieldErrors: {} };
       }
     }
 
@@ -67,8 +69,8 @@ export async function appUserFormAction(_prevState: ActionState, formData: FormD
     revalidatePath('/dashboard/cashiers');
     revalidatePath('/dashboard/collaborators');
 
-    return toActionState(formDataObject.id ? 'App User updated successfully!' : 'App User created successfully!');
+    return await toActionState(formDataObject.id ? 'appUserUpdated' : 'appUserCreated');
   } catch (error) {
-    return fromErrorToActionState(error);
+    return await fromErrorToActionState(error);
   }
 }

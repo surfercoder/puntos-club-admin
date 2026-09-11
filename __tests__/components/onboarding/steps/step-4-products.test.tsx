@@ -8,6 +8,7 @@ jest.mock('next-intl', () => ({
       values ? `${key}:${Object.values(values).join(',')}` : key;
     t.rich = (key: string) => key;
     t.raw = () => ({});
+    t.has = () => true;
     return t;
   }),
   useLocale: jest.fn(() => 'es'),

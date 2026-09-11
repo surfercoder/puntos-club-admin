@@ -189,7 +189,7 @@ describe('UserSchema', () => {
       if (!result.success) {
         const passwordError = result.error.issues.find((i) => i.path.includes('password'));
         expect(passwordError).toBeDefined();
-        expect(passwordError?.message).toBe('Password is required for new users');
+        expect(passwordError?.message).toBe('passwordRequiredNewUser');
       }
     });
 

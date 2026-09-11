@@ -18,6 +18,7 @@ import {
   cn,
 } from "@/lib/utils";
 import { LoginSchema } from "@/schemas/auth.schema";
+import { useFieldErrors, useErrorMessage } from '@/lib/use-validation-state';
 
 type LoginFormState = {
   email: string;
@@ -77,6 +78,8 @@ export function LoginForm({
   const t = useTranslations("Auth.login");
   const tCommon = useTranslations("Common");
 
+  const toFieldErrors = useFieldErrors();
+  const toErrorMessage = useErrorMessage();
   const [state, dispatch] = useReducer(loginFormReducer, initialState);
   const { email, password, error, fieldErrors, isLoading, showPassword } = state;
   const { push, refresh } = useRouter();
@@ -88,11 +91,7 @@ export function LoginForm({
     const result = LoginSchema.safeParse({ email, password });
 
     if (!result.success) {
-      const errors: Record<string, string> = {};
-      for (const issue of result.error.issues) {
-        const field = String(issue.path[0]);
-        if (!errors[field]) errors[field] = issue.message;
-      }
+      const errors = toFieldErrors(result.error);
       dispatch({ type: "SET_FIELD_ERRORS", payload: errors });
       return;
     }
@@ -103,7 +102,7 @@ export function LoginForm({
       (r) => ({ ok: true as const, result: r }),
       (err: unknown) => ({
         ok: false as const,
-        error: err instanceof Error ? err.message : tCommon("error"),
+        error: toErrorMessage(err),
       }),
     );
 

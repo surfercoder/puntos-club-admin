@@ -13,8 +13,9 @@ import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { GoogleAddressAutocomplete, type GoogleAddressComponents } from '@/components/ui/google-address-autocomplete';
-import type { ActionState} from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import type { ActionState } from '@/lib/action-state';
+import { EMPTY_ACTION_STATE } from '@/lib/action-state';
+import { useValidationState } from '@/lib/use-validation-state';
 import { BranchSchema } from '@/schemas/branch.schema';
 import { AddressSchema } from '@/schemas/address.schema';
 import type { Branch } from '@/types/branch';
@@ -24,6 +25,7 @@ interface BranchFormWithAddressProps {
 }
 
 export default function BranchFormWithAddress({ branch }: BranchFormWithAddressProps) {
+  const toValidationState = useValidationState();
   const t = useTranslations('Dashboard.branch.form');
   const tCommon = useTranslations('Common');
   const [validation, setValidation] = useState<ActionState | null>(null);
@@ -140,7 +142,7 @@ export default function BranchFormWithAddress({ branch }: BranchFormWithAddressP
       };
       BranchSchema.parse(branchFields);
     } catch (error) {
-      setValidation(fromErrorToActionState(error));
+      setValidation(toValidationState(error));
       event.preventDefault();
     }
   };

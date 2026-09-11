@@ -19,12 +19,15 @@ import { Label } from '@/components/ui/label';
 import { createClient } from '@/lib/supabase/client';
 import { ProfileSchema } from '@/schemas/auth.schema';
 import type { AppUserWithRelations } from '@/types/app_user';
+import { useFieldErrors, useErrorMessage } from '@/lib/use-validation-state';
 
 type ProfileFormProps = {
   user: AppUserWithRelations;
 };
 
 export function ProfileForm({ user }: ProfileFormProps) {
+  const toFieldErrors = useFieldErrors();
+  const toErrorMessage = useErrorMessage();
   const { refresh, back } = useRouter();
   const t = useTranslations('Dashboard.profile');
   const tCommon = useTranslations('Common');
@@ -44,11 +47,7 @@ export function ProfileForm({ user }: ProfileFormProps) {
     const result = ProfileSchema.safeParse(formData);
 
     if (!result.success) {
-      const errors: Record<string, string> = {};
-      for (const issue of result.error.issues) {
-        const field = String(issue.path[0]);
-        if (!errors[field]) errors[field] = issue.message;
-      }
+      const errors = toFieldErrors(result.error);
       setFieldErrors(errors);
       return;
     }
@@ -64,9 +63,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
         })
         .eq('id', user.id)
         .then(
-          (r: { error: { message?: string } | null }) =>
-            r.error ? (r.error.message /* c8 ignore next */ ?? tCommon('error')) : null,
-          () => tCommon('error'),
+          (r: { error: unknown }) => (r.error ? toErrorMessage(r.error) : null),
+          (err: unknown) => toErrorMessage(err),
         );
 
       if (updateErrorMessage) {
@@ -78,8 +76,8 @@ export function ProfileForm({ user }: ProfileFormProps) {
         const emailErrorMessage = await supabase.auth
           .updateUser({ email: formData.email })
           .then(
-            (r) => (r.error ? r.error.message : null),
-            () => tCommon('error'),
+            (r) => (r.error ? toErrorMessage(r.error) : null),
+            (err: unknown) => toErrorMessage(err),
           );
 
         if (emailErrorMessage) {

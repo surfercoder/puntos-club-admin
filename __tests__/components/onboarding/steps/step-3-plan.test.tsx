@@ -5,6 +5,7 @@ jest.mock('next-intl', () => ({
     const t = (key: string, values?: Record<string, unknown>) =>
       values ? `${key}:${Object.values(values).join(',')}` : key;
     t.rich = (key: string) => key;
+    t.has = () => true;
     t.raw = () => ({
       rewards: 'Premios',
       beneficiaries: 'Beneficiarios',

@@ -2,18 +2,18 @@ import { z } from 'zod';
 
 export const UserSchema = z.object({
   id: z.string().optional(),
-  organization_id: z.string().min(1, 'Organization is required'),
-  first_name: z.string().min(1, 'First name is required'),
-  last_name: z.string().min(1, 'Last name is required'),
-  email: z.email('Invalid email address').min(1, 'Email is required'),
-  password: z.string().min(6, 'Password must be at least 6 characters').optional().or(z.literal('')).transform(val => val === '' ? null : val),
+  organization_id: z.string().min(1, 'organizationRequired'),
+  first_name: z.string().min(1, 'firstNameRequired'),
+  last_name: z.string().min(1, 'lastNameRequired'),
+  email: z.email('emailInvalid').min(1, 'emailRequired'),
+  password: z.string().min(6, 'passwordMinLength6').optional().or(z.literal('')).transform(val => val === '' ? null : val),
   phone: z.string().optional().or(z.literal('')).transform(val => val === '' ? null : val),
   document_id: z.string().optional().or(z.literal('')).transform(val => val === '' ? null : val),
   active: z.union([z.boolean(), z.string()]).transform(val => {
     if (typeof val === 'boolean') return val;
     return val === 'true' || val === 'on';
   }),
-  role_id: z.string().min(1, 'Role is required'),
+  role_id: z.string().min(1, 'roleRequired'),
   user_type: z.enum(['app_user', 'beneficiary']),
 }).refine((data) => {
   // Password is required for new app_users (when id is not present)
@@ -22,7 +22,7 @@ export const UserSchema = z.object({
   }
   return true;
 }, {
-  message: 'Password is required for new users',
+  message: 'passwordRequiredNewUser',
   path: ['password'],
 });
 

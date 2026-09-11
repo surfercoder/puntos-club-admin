@@ -12,8 +12,9 @@ import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { ActionState } from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import type { ActionState } from '@/lib/action-state';
+import { EMPTY_ACTION_STATE } from '@/lib/action-state';
+import { useValidationState } from '@/lib/use-validation-state';
 import { OrganizationPlanLimitSchema } from '@/schemas/organization_plan_limit.schema';
 import type { OrganizationPlanLimit } from '@/types/organization_plan_limit';
 
@@ -22,6 +23,7 @@ interface OrganizationPlanLimitFormProps {
 }
 
 export default function OrganizationPlanLimitForm({ organizationPlanLimit }: OrganizationPlanLimitFormProps) {
+  const toValidationState = useValidationState();
   const t = useTranslations('Dashboard.orgPlanLimits.form');
   const [validation, setValidation] = useState<ActionState | null>(null);
   const organizations = useOrganizations();
@@ -34,7 +36,7 @@ export default function OrganizationPlanLimitForm({ organizationPlanLimit }: Org
     try {
       OrganizationPlanLimitSchema.parse(formData);
     } catch (error) {
-      setValidation(fromErrorToActionState(error));
+      setValidation(toValidationState(error));
       event.preventDefault();
     }
   };

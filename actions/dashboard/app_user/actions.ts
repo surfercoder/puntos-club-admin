@@ -8,6 +8,7 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { AppUserSchema, type AppUserInput } from '@/schemas/app_user.schema';
 import { enforcePlanLimit } from '@/lib/plans/usage';
 import type { PlanFeatureKey } from '@/types/plan';
+import { translateError } from '@/lib/error-handler';
 
 export async function createAppUser(input: AppUserInput) {
   await requireUser();
@@ -57,7 +58,7 @@ export async function createAppUser(input: AppUserInput) {
     if (feature) {
       const limitError = await enforcePlanLimit(activeOrgIdNumber, feature);
       if (limitError) {
-        return { data: null, error: { message: limitError.message } };
+        return { data: null, error: { message: await translateError(limitError) } };
       }
     }
   }
@@ -79,7 +80,7 @@ export async function createAppUser(input: AppUserInput) {
     });
 
     if (authError) {
-      return { data: null, error: { message: authError.message } };
+      return { data: null, error: { message: await translateError(authError) } };
     }
 
     authUserId = authData.user?.id ?? null;
@@ -147,7 +148,7 @@ export async function updateAppUser(id: string, input: AppUserInput) {
       );
 
       if (authError) {
-        return { data: null, error: { message: authError.message } };
+        return { data: null, error: { message: await translateError(authError) } };
       }
     } else if (updateData.password) {
       // No auth user yet — create one so the user can log in. Nombre, apellido
@@ -175,7 +176,7 @@ export async function updateAppUser(id: string, input: AppUserInput) {
       });
 
       if (authError) {
-        return { data: null, error: { message: authError.message } };
+        return { data: null, error: { message: await translateError(authError) } };
       }
 
       // Link the new auth user to the app_user record
@@ -221,7 +222,7 @@ export async function deleteAppUser(id: string) {
     const { error: authError } = await adminClient.auth.admin.deleteUser(authUserId);
 
     if (authError) {
-      return { error: { message: `User deleted but failed to remove auth record: ${authError.message}` } };
+      return { error: { message: await translateError(authError) } };
     }
   }
 

@@ -1,7 +1,10 @@
+jest.mock('sonner', () => ({ toast: { error: jest.fn(), success: jest.fn(), info: jest.fn() } }));
+
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import EditPointsRulePage from '@/app/dashboard/points-rules/edit/[id]/page';
 import { getPointsRuleById, updatePointsRule } from '@/actions/dashboard/points-rules/actions';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 const mockGetPointsRuleById = getPointsRuleById as jest.Mock;
 const mockUpdatePointsRule = updatePointsRule as jest.Mock;
@@ -486,7 +489,7 @@ describe('EditPointsRulePage', () => {
       fireEvent.submit(form);
     });
     await waitFor(() => {
-      expect(alertMock).toHaveBeenCalledWith('Error: Server error');
+      expect(toast.error).toHaveBeenCalledWith('Server error');
     });
     alertMock.mockRestore();
   });

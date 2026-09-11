@@ -9,6 +9,7 @@ import { BranchSchema } from '@/schemas/branch.schema';
 import { AddressSchema } from '@/schemas/address.schema';
 import type { Branch } from '@/types/branch';
 import type { Address } from '@/types/address';
+import { AppError } from '@/lib/errors';
 
 export async function branchWithAddressFormAction(_prevState: ActionState, formData: FormData) {
   try {
@@ -28,17 +29,17 @@ export async function branchWithAddressFormAction(_prevState: ActionState, formD
 
     const parsedAddress = AddressSchema.safeParse(addressFields);
     if (!parsedAddress.success) {
-      return fromErrorToActionState(parsedAddress.error);
+      return await fromErrorToActionState(parsedAddress.error);
     }
 
     const addressResult = await createAddress(parsedAddress.data as Address);
     
     if (addressResult.error) {
-      throw new Error(addressResult.error.message || 'Failed to create address');
+      throw new AppError('address.createFailed');
     }
 
     if (!addressResult.data?.id) {
-      throw new Error('Failed to create address - no ID returned');
+      throw new AppError('address.noId');
     }
 
     const branchFields = {
@@ -50,7 +51,7 @@ export async function branchWithAddressFormAction(_prevState: ActionState, formD
 
     const parsedBranch = BranchSchema.safeParse(branchFields);
     if (!parsedBranch.success) {
-      return fromErrorToActionState(parsedBranch.error);
+      return await fromErrorToActionState(parsedBranch.error);
     }
 
     const branchId = formDataObj.id ? String(formDataObj.id) : '';
@@ -61,21 +62,21 @@ export async function branchWithAddressFormAction(_prevState: ActionState, formD
       const updateResult = await updateBranch(branchId, parsedBranch.data as Branch);
 
       if (updateResult.error) {
-        throw new Error(updateResult.error.message || 'Failed to update branch');
+        throw new AppError('branch.updateFailed');
       }
     } else {
       const branchResult = await createBranch(parsedBranch.data as Branch);
 
       if (branchResult.error) {
-        throw new Error(branchResult.error.message || 'Failed to create branch');
+        throw new AppError('branch.createFailed');
       }
     }
 
     revalidatePath('/dashboard/branch');
     revalidatePath('/dashboard/address');
 
-    return toActionState(formDataObj.id ? 'Branch updated successfully!' : 'Branch created successfully!');
+    return await toActionState(formDataObj.id ? 'branchUpdated' : 'branchCreated');
   } catch (error) {
-    return fromErrorToActionState(error);
+    return await fromErrorToActionState(error);
   }
 }

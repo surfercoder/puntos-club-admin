@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 
 jest.mock('next-intl', () => ({
-  useTranslations: jest.fn(() => (key: string) => key),
+  useTranslations: jest.fn(() => Object.assign((key: string) => key, { has: () => true })),
 }));
 
 import { Combobox } from '@/components/ui/combobox';

@@ -77,7 +77,7 @@ describe('createBranch', () => {
   it('should return error when plan limit is reached', async () => {
     (enforcePlanLimit as jest.Mock).mockReturnValue({ message: 'Plan limit reached' });
     const result = await createBranch(validBranch);
-    expect(result).toEqual({ data: null, error: { message: 'Plan limit reached' } });
+    expect(result).toEqual({ data: null, error: { message: 'unexpected' } });
   });
 
   it('should return supabase error on failure', async () => {
@@ -155,6 +155,6 @@ describe('deleteBranch', () => {
       .mockReturnValueOnce(mockSupabase)
       .mockReturnValueOnce({ error: { message: 'FK constraint', code: '23503' } });
     const result = await deleteBranch('1');
-    expect(result.error).toEqual({ message: 'FK constraint', code: '23503' });
+    expect(result.error).toEqual({ message: 'db.inUse', code: '23503' });
   });
 });

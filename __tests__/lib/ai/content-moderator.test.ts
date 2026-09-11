@@ -70,13 +70,13 @@ describe('moderateNotificationContent', () => {
     });
   });
 
-  it('handles non-text content type gracefully', async () => {
+  it('deja pasar la clave del AppError sin envolverla en texto suelto', async () => {
     mockCreate.mockResolvedValue({
       content: [{ type: 'image', source: {} }],
     });
 
     await expect(moderateNotificationContent('T', 'B')).rejects.toThrow(
-      'Error al moderar el contenido'
+      'notifications.emptyAiResponse'
     );
   });
 

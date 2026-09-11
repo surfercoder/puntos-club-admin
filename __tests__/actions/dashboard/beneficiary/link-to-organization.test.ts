@@ -85,7 +85,7 @@ describe('linkBeneficiaryToOrganization', () => {
       .mockReturnValueOnce({ data: { id: '1' }, error: null })
       .mockReturnValueOnce({ data: { id: 5, is_active: false }, error: null });
     const result = await linkBeneficiaryToOrganization('1');
-    expect(result).toEqual({ data: null, error: { message: 'Limit reached' } });
+    expect(result).toEqual({ data: null, error: { message: 'unexpected' } });
   });
 
   it('should create new relationship', async () => {
@@ -105,7 +105,7 @@ describe('linkBeneficiaryToOrganization', () => {
       .mockReturnValueOnce({ data: { id: '1' }, error: null })
       .mockReturnValueOnce({ data: null, error: { message: 'Not found' } });
     const result = await linkBeneficiaryToOrganization('1');
-    expect(result).toEqual({ data: null, error: { message: 'Limit' } });
+    expect(result).toEqual({ data: null, error: { message: 'unexpected' } });
   });
 
   it('should normalize supabase error on insert', async () => {
@@ -161,7 +161,7 @@ describe('linkAllUnlinkedBeneficiaries', () => {
   it('should return error on relationships fetch failure', async () => {
     mockSupabase.range.mockReturnValue({ data: null, error: { message: 'DB error' } });
     const result = await linkAllUnlinkedBeneficiaries();
-    expect(result.error).toEqual({ message: expect.stringContaining('Error fetching relationships') });
+    expect(result.error).toEqual({ message: 'unexpected' });
   });
 
   it('should return error on beneficiaries fetch failure', async () => {
@@ -169,7 +169,7 @@ describe('linkAllUnlinkedBeneficiaries', () => {
       .mockReturnValueOnce({ data: [], error: null })
       .mockReturnValueOnce({ data: null, error: { message: 'DB error' } });
     const result = await linkAllUnlinkedBeneficiaries();
-    expect(result.error).toEqual({ message: expect.stringContaining('Error fetching beneficiaries') });
+    expect(result.error).toEqual({ message: 'unexpected' });
   });
 
   it('should normalize supabase error on bulk insert', async () => {

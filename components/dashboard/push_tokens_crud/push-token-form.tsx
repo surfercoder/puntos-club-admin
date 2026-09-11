@@ -10,8 +10,9 @@ import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { ActionState } from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import type { ActionState } from '@/lib/action-state';
+import { EMPTY_ACTION_STATE } from '@/lib/action-state';
+import { useValidationState } from '@/lib/use-validation-state';
 import { createClient } from '@/lib/supabase/client';
 import { PushTokenSchema } from '@/schemas/push_token.schema';
 import type { PushToken } from '@/types/push_token';
@@ -21,6 +22,7 @@ interface PushTokenFormProps {
 }
 
 export default function PushTokenForm({ pushToken }: PushTokenFormProps) {
+  const toValidationState = useValidationState();
   const t = useTranslations('Dashboard.pushTokensCrud.form');
   const [validation, setValidation] = useState<ActionState | null>(null);
   type BeneficiaryRow = { id: string; first_name: string; last_name: string; email: string };
@@ -43,7 +45,7 @@ export default function PushTokenForm({ pushToken }: PushTokenFormProps) {
     try {
       PushTokenSchema.parse(formData);
     } catch (error) {
-      setValidation(fromErrorToActionState(error));
+      setValidation(toValidationState(error));
       event.preventDefault();
     }
   };

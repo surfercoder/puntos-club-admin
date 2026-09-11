@@ -55,13 +55,13 @@ describe('getAllUserRoles', () => {
   it('should return error on failure', async () => {
     mockSupabase.order.mockReturnValue({ data: null, error: { message: 'Error' } });
     const result = await getAllUserRoles();
-    expect(result).toEqual({ success: false, error: 'Error' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected errors', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await getAllUserRoles();
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });
 
@@ -74,13 +74,13 @@ describe('getUserRoleById', () => {
   it('should return error on failure', async () => {
     mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Not found' } });
     const result = await getUserRoleById(999);
-    expect(result).toEqual({ success: false, error: 'Not found' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected errors', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await getUserRoleById(1);
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });
 
@@ -99,13 +99,13 @@ describe('updateUserRole', () => {
   it('should return error on failure', async () => {
     mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Error' } });
     const result = await updateUserRole(1, { display_name: 'Test' });
-    expect(result).toEqual({ success: false, error: 'Error' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected errors', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await updateUserRole(1, { display_name: 'Test' });
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });
 
@@ -128,7 +128,7 @@ describe('getUsersCountByRole', () => {
   it('should return error on app_user query failure', async () => {
     mockSupabase.not.mockReturnValue({ data: null, error: { message: 'Error' } });
     const result = await getUsersCountByRole();
-    expect(result).toEqual({ success: false, error: 'Error' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should return error on beneficiary count failure', async () => {
@@ -138,13 +138,13 @@ describe('getUsersCountByRole', () => {
       .mockReturnValueOnce(mockSupabase)
       .mockReturnValueOnce({ count: null, error: { message: 'Error' } });
     const result = await getUsersCountByRole();
-    expect(result).toEqual({ success: false, error: 'Error' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected errors', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await getUsersCountByRole();
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle null role_id in counts', async () => {
@@ -174,13 +174,13 @@ describe('createUserRole', () => {
   it('should return error on failure', async () => {
     mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Duplicate' } });
     const result = await createUserRole(validInput);
-    expect(result).toEqual({ success: false, error: 'Duplicate' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected errors', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await createUserRole(validInput);
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });
 
@@ -195,12 +195,12 @@ describe('deleteUserRole', () => {
   it('should return error on failure', async () => {
     mockSupabase.eq.mockReturnValue({ error: { message: 'Delete failed' } });
     const result = await deleteUserRole('1');
-    expect(result).toEqual({ success: false, error: 'Delete failed' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected errors', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await deleteUserRole('1');
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });

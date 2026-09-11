@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const OrganizationNotificationLimitSchema = z.object({
   id: z.string().optional(),
-  organization_id: z.string().min(1, 'Organization is required'),
+  organization_id: z.string().min(1, 'organizationRequired'),
   plan_type: z.enum(['free', 'light', 'pro', 'premium']).default('free'),
   daily_limit: z.number().int().min(1).default(1),
   monthly_limit: z.number().int().min(1).default(5),

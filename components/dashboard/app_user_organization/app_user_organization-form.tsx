@@ -12,8 +12,9 @@ import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { ActionState } from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import type { ActionState } from '@/lib/action-state';
+import { EMPTY_ACTION_STATE } from '@/lib/action-state';
+import { useValidationState } from '@/lib/use-validation-state';
 import { createClient } from '@/lib/supabase/client';
 import { AppUserOrganizationSchema } from '@/schemas/app_user_organization.schema';
 import type { AppUserOrganization } from '@/schemas/app_user_organization.schema';
@@ -35,6 +36,7 @@ interface OrganizationOption {
 }
 
 export default function AppUserOrganizationForm({ appUserOrganization }: AppUserOrganizationFormProps) {
+  const toValidationState = useValidationState();
   const t = useTranslations('Dashboard.appUserOrganization');
   const tCommon = useTranslations('Common');
 
@@ -76,7 +78,7 @@ export default function AppUserOrganizationForm({ appUserOrganization }: AppUser
     try {
       AppUserOrganizationSchema.parse(formData);
     } catch (error) {
-      setValidation(fromErrorToActionState(error));
+      setValidation(toValidationState(error));
       event.preventDefault();
     }
   };

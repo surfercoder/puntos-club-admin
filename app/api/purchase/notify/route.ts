@@ -5,6 +5,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { resend, EMAIL_FROM } from "@/lib/resend";
 import { pointsCreditedEmail } from "@/lib/email-template";
+import { AppError } from '@/lib/errors';
 
 interface ExpoPushMessage {
   to: string;
@@ -25,7 +26,7 @@ async function sendPushNotifications(messages: ExpoPushMessage[]) {
   });
 
   if (!response.ok) {
-    throw new Error(`Expo push service error: ${response.statusText}`);
+    throw new AppError('notifications.sendFailed');
   }
 
   return response.json();

@@ -111,7 +111,7 @@ describe('createProduct', () => {
   it('should return error when plan limit reached', async () => {
     (enforcePlanLimit as jest.Mock).mockReturnValue({ message: 'Limit reached' });
     const result = await createProduct(validProduct);
-    expect(result).toEqual({ data: null, error: { message: 'Limit reached' } });
+    expect(result).toEqual({ data: null, error: { message: 'unexpected' } });
   });
 
   it('should return supabase error on failure', async () => {
@@ -250,7 +250,7 @@ describe('createCategory', () => {
 
   it('returns field errors on invalid input', async () => {
     const result = await createCategory({ name: '' });
-    expect(result).toEqual({ data: null, error: { fieldErrors: { name: 'Name is required' } } });
+    expect(result).toEqual({ data: null, error: { fieldErrors: { name: 'nameRequired' } } });
     expect(mockSupabase.insert).not.toHaveBeenCalled();
   });
 

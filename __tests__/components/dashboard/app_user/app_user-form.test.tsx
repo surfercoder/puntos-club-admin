@@ -5,6 +5,7 @@ jest.mock('next-intl', () => ({
     const t = (key: string) => key;
     t.rich = (key: string) => key;
     t.raw = () => ({});
+    t.has = () => true;
     return t;
   }),
   useLocale: jest.fn(() => 'es'),
@@ -377,7 +378,7 @@ describe('AppUserForm', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText(/La contraseña debe tener/)).toBeInTheDocument();
+      expect(screen.getByText('passwordWeak')).toBeInTheDocument();
     });
   });
 
@@ -390,11 +391,11 @@ describe('AppUserForm', () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText('El nombre es requerido')).toBeInTheDocument();
+      expect(screen.getByText('firstNameRequired')).toBeInTheDocument();
     });
-    expect(screen.getByText('El apellido es requerido')).toBeInTheDocument();
-    expect(screen.getByText('El correo electrónico es requerido')).toBeInTheDocument();
-    expect(screen.getByText('La contraseña es requerida')).toBeInTheDocument();
+    expect(screen.getByText('lastNameRequired')).toBeInTheDocument();
+    expect(screen.getByText('emailRequired')).toBeInTheDocument();
+    expect(screen.getByText('passwordRequired')).toBeInTheDocument();
   });
 
   it('loads cashier and collaborator roles when currentUserRole is not collaborator', async () => {

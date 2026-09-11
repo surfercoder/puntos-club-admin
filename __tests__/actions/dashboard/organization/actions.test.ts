@@ -85,13 +85,13 @@ describe('createOrganization', () => {
 
   it('should throw on org insert error', async () => {
     mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Insert failed' } });
-    await expect(createOrganization(validOrg)).rejects.toThrow('Insert failed');
+    await expect(createOrganization(validOrg)).rejects.toThrow('organization.createFailed');
   });
 
   it('should throw and cleanup when auth fails', async () => {
     mockSupabase.single.mockReturnValueOnce({ data: { id: '1' }, error: null });
     mockSupabase.auth.getUser.mockReturnValue({ data: { user: null }, error: { message: 'Auth error' } });
-    await expect(createOrganization(validOrg)).rejects.toThrow('Not authenticated');
+    await expect(createOrganization(validOrg)).rejects.toThrow('auth.notAuthenticated');
     // Verify cleanup: delete org
     expect(mockSupabase.delete).toHaveBeenCalled();
   });
@@ -101,7 +101,7 @@ describe('createOrganization', () => {
     mockSupabase.single
       .mockReturnValueOnce({ data: { id: '1' }, error: null }) // org insert
       .mockReturnValueOnce({ data: null, error: { message: 'Not found' } }); // app_user lookup
-    await expect(createOrganization(validOrg)).rejects.toThrow('Could not resolve app user');
+    await expect(createOrganization(validOrg)).rejects.toThrow('auth.noAppUser');
   });
 
   it('should skip app_user_organization for admin users', async () => {
@@ -124,7 +124,7 @@ describe('createOrganization', () => {
     mockSupabase.insert
       .mockReturnValueOnce(mockSupabase)
       .mockReturnValueOnce({ error: { message: 'Membership failed' } });
-    await expect(createOrganization(validOrg)).rejects.toThrow('Membership failed');
+    await expect(createOrganization(validOrg)).rejects.toThrow('organization.membershipFailed');
   });
 
   it('should use fallback message when membership error has empty message', async () => {
@@ -136,7 +136,7 @@ describe('createOrganization', () => {
     mockSupabase.insert
       .mockReturnValueOnce(mockSupabase)
       .mockReturnValueOnce({ error: { message: '' } });
-    await expect(createOrganization(validOrg)).rejects.toThrow('Failed to associate user to organization');
+    await expect(createOrganization(validOrg)).rejects.toThrow('organization.membershipFailed');
   });
 });
 
@@ -171,14 +171,14 @@ describe('updateOrganization - empty path validation', () => {
 describe('createOrganization - data null but no error', () => {
   it('should throw when org insert returns null data without error', async () => {
     mockSupabase.single.mockReturnValue({ data: null, error: null });
-    await expect(createOrganization(validOrg)).rejects.toThrow('Failed to create organization');
+    await expect(createOrganization(validOrg)).rejects.toThrow('organization.createFailed');
   });
 });
 
 describe('updateOrganization - data null but no error', () => {
   it('should throw when update returns null data without error', async () => {
     mockSupabase.single.mockReturnValue({ data: null, error: null });
-    await expect(updateOrganization('1', validOrg)).rejects.toThrow('Failed to update organization');
+    await expect(updateOrganization('1', validOrg)).rejects.toThrow('organization.updateFailed');
   });
 });
 
@@ -196,7 +196,7 @@ describe('updateOrganization', () => {
 
   it('should throw on update failure', async () => {
     mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Update failed' } });
-    await expect(updateOrganization('1', validOrg)).rejects.toThrow('Update failed');
+    await expect(updateOrganization('1', validOrg)).rejects.toThrow('organization.updateFailed');
   });
 });
 
@@ -288,7 +288,7 @@ describe('updateOrganizationVisibility', () => {
   it('should return not authenticated when user is null', async () => {
     (getCurrentUser as jest.Mock).mockResolvedValue(null);
     const result = await updateOrganizationVisibility('1', true);
-    expect(result).toEqual({ error: 'Not authenticated' });
+    expect(result).toEqual({ error: 'auth.notAuthenticated' });
   });
 
   it('should return error when update fails', async () => {
@@ -296,7 +296,7 @@ describe('updateOrganizationVisibility', () => {
     (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, role: { name: 'admin' } });
     mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Update failed' } });
     const result = await updateOrganizationVisibility('1', true);
-    expect(result).toEqual({ error: 'Update failed' });
+    expect(result).toEqual({ error: 'unexpected' });
   });
 
   it('should return invalid input for non-boolean', async () => {
@@ -436,7 +436,7 @@ describe('updateClubProfile', () => {
     mockSupabase.insert.mockReturnValueOnce({ error: { message: 'address boom' } });
 
     expect(await updateClubProfile('5', { ...profile, address })).toEqual({
-      error: 'address boom',
+      error: 'unexpected',
     });
   });
 });

@@ -27,7 +27,7 @@ export const PurchaseSchema = z
     // "sale" cobra un importe y el motor calcula los puntos; "assignment" otorga
     // puntos a mano, sin importe. La lista deriva el tipo del importe.
     mode: z.enum(['sale', 'assignment']).default('sale'),
-    beneficiary_id: z.string().min(1, 'Beneficiary is required'),
+    beneficiary_id: z.string().min(1, 'beneficiaryRequired'),
     // cashier_id is not accepted from the client: the owner is always the virtual
     // cashier, injected server-side. Keeps an owner from impersonating a cashier.
     branch_id: z.string().optional().nullable().transform(val => val === '' ? null : val),
@@ -40,14 +40,14 @@ export const PurchaseSchema = z
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['total_amount'],
-        message: 'Amount is required',
+        message: 'amountRequired',
       });
     }
     if (data.mode === 'assignment' && data.points_earned === undefined) {
       ctx.addIssue({
         code: z.ZodIssueCode.custom,
         path: ['points_earned'],
-        message: 'Points are required',
+        message: 'pointsRequired',
       });
     }
   });

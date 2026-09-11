@@ -19,7 +19,7 @@ export async function beneficiaryFormAction(_prevState: ActionState, formData: F
     const parsed = BeneficiarySchema.safeParse(formDataObject);
 
     if (!parsed.success) {
-      return fromErrorToActionState(parsed.error);
+      return await fromErrorToActionState(parsed.error);
     }
 
     const isCreate = !formDataObject.id;
@@ -56,8 +56,8 @@ export async function beneficiaryFormAction(_prevState: ActionState, formData: F
     // Revalidate the beneficiary list page
     revalidatePath('/dashboard/beneficiary');
 
-    return toActionState(isCreate ? 'Beneficiary created successfully!' : 'Beneficiary updated successfully!');
+    return await toActionState(isCreate ? 'beneficiaryCreated' : 'beneficiaryUpdated');
   } catch (error) {
-    return fromErrorToActionState(error);
+    return await fromErrorToActionState(error);
   }
 }

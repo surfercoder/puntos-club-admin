@@ -17,6 +17,7 @@ import {
   cn,
 } from "@/lib/utils";
 import { ForgotPasswordSchema } from "@/schemas/auth.schema";
+import { useFieldErrors, useErrorMessage } from '@/lib/use-validation-state';
 
 type ForgotPasswordState = {
   email: string;
@@ -71,6 +72,8 @@ export function ForgotPasswordForm({
   const t = useTranslations("Auth.forgotPassword");
   const tCommon = useTranslations("Common");
 
+  const toFieldErrors = useFieldErrors();
+  const toErrorMessage = useErrorMessage();
   const [state, dispatch] = useReducer(forgotPasswordReducer, initialState);
   const { email, error, fieldErrors, success, isLoading } = state;
 
@@ -81,11 +84,7 @@ export function ForgotPasswordForm({
     const result = ForgotPasswordSchema.safeParse({ email });
 
     if (!result.success) {
-      const errors: Record<string, string> = {};
-      for (const issue of result.error.issues) {
-        const field = String(issue.path[0]);
-        if (!errors[field]) errors[field] = issue.message;
-      }
+      const errors = toFieldErrors(result.error);
       dispatch({ type: "SET_FIELD_ERRORS", payload: errors });
       return;
     }
@@ -97,9 +96,11 @@ export function ForgotPasswordForm({
       .resetPasswordForEmail(email, {
         redirectTo: `${window.location.origin}/auth/update-password`,
       })
+      // El rate limit de GoTrue ("you can only request this after 60 seconds")
+      // llega siempre en ingles: se mapea por code y sale en el idioma activo.
       .then(
-        (r) => (r.error ? r.error.message : null),
-        () => tCommon("error"),
+        (r) => (r.error ? toErrorMessage(r.error) : null),
+        (err: unknown) => toErrorMessage(err),
       );
 
     if (errorMessage) {

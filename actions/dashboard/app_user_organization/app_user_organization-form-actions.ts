@@ -16,7 +16,7 @@ export async function appUserOrganizationFormAction(_prevState: ActionState, for
     const parsed = AppUserOrganizationSchema.safeParse(formDataObject);
 
     if (!parsed.success) {
-      return fromErrorToActionState(parsed.error);
+      return await fromErrorToActionState(parsed.error);
     }
 
     if (formDataObject.id) {
@@ -27,8 +27,8 @@ export async function appUserOrganizationFormAction(_prevState: ActionState, for
 
     revalidatePath('/dashboard/app_user_organization');
 
-    return toActionState(formDataObject.id ? 'Membership updated successfully!' : 'Membership created successfully!');
+    return await toActionState(formDataObject.id ? 'membershipUpdated' : 'membershipCreated');
   } catch (error) {
-    return fromErrorToActionState(error);
+    return await fromErrorToActionState(error);
   }
 }

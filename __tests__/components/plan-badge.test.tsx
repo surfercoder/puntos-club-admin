@@ -5,7 +5,7 @@ import { usePlanUsage } from '@/components/providers/plan-usage-provider';
 import { useSidebar } from '@/components/ui/sidebar';
 
 jest.mock('next-intl', () => ({
-  useTranslations: jest.fn(() => (key: string) => key),
+  useTranslations: jest.fn(() => Object.assign((key: string) => key, { has: () => true })),
 }));
 jest.mock('@/components/providers/plan-usage-provider', () => ({
   usePlanUsage: jest.fn(() => ({ plan: 'trial', isLoading: false })),

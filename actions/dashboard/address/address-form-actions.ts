@@ -14,7 +14,7 @@ export async function addressFormAction(_prevState: ActionState, formData: FormD
     const parsed = AddressSchema.safeParse(formDataObject);
 
     if (!parsed.success) {
-      return fromErrorToActionState(parsed.error);
+      return await fromErrorToActionState(parsed.error);
     }
 
     if (formDataObject.id) {
@@ -26,8 +26,8 @@ export async function addressFormAction(_prevState: ActionState, formData: FormD
     // Revalidate the address list page
     revalidatePath('/dashboard/address');
 
-    return toActionState(formDataObject.id ? 'Address updated successfully!' : 'Address created successfully!');
+    return await toActionState(formDataObject.id ? 'addressUpdated' : 'addressCreated');
   } catch (error) {
-    return fromErrorToActionState(error);
+    return await fromErrorToActionState(error);
   }
 }

@@ -7,7 +7,7 @@ const mockToastSuccess = jest.fn();
 const mockToastError = jest.fn();
 
 jest.mock('next-intl', () => ({
-  useTranslations: jest.fn(() => (key: string) => `t:${key}`),
+  useTranslations: jest.fn(() => Object.assign((key: string) => `t:${key}`, { has: () => true })),
 }));
 
 jest.mock('next/navigation', () => ({

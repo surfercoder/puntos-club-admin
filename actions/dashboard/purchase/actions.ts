@@ -7,6 +7,8 @@ import { getCurrentUser } from "@/lib/auth/get-current-user";
 import { getMutationOrgId } from "@/lib/auth/get-mutation-org-id";
 import { requireUser } from "@/lib/auth/require-user";
 import { hasOwnerPermissions, isAdmin } from "@/lib/auth/roles";
+import { translateError } from '@/lib/error-handler';
+import { AppError } from '@/lib/errors';
 
 export interface PurchaseItem {
   item_name: string;
@@ -153,10 +155,10 @@ export async function createPurchase(
         beneficiary_new_balance: beneficiaryOrg?.available_points || 0,
       },
     };
-  } catch (_error) {
+  } catch (error) {
     return {
       success: false,
-      error: "An unexpected error occurred",
+      error: await translateError(error),
     };
   }
 }
@@ -181,12 +183,12 @@ export async function getBeneficiaryPurchases(beneficiary_id: number) {
       .order("purchase_date", { ascending: false });
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     return { success: true, data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -235,7 +237,7 @@ export async function getAllPurchases(filters?: {
     const { data, error } = await query;
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     // Only filter by organization for non-admin users
@@ -250,8 +252,8 @@ export async function getAllPurchases(filters?: {
     }
 
     return { success: true, data: filteredData };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -272,13 +274,13 @@ export async function updatePurchase(id: string, input: Record<string, unknown>)
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     revalidatePath("/dashboard/purchase");
     return { success: true, data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -316,7 +318,7 @@ export async function cancelPurchase(id: string, reason?: string) {
       .maybeSingle();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
     if (!data) {
       return { success: false, error: "PURCHASE_NOT_CANCELLABLE" };
@@ -324,8 +326,8 @@ export async function cancelPurchase(id: string, reason?: string) {
 
     revalidatePath("/dashboard/purchase");
     return { success: true };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -350,12 +352,12 @@ export async function getPurchaseById(purchase_id: number) {
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     return { success: true, data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -371,7 +373,7 @@ export async function verifyBeneficiary(_user_id: string) {
     const { data: authUser } = await supabase.auth.getUser();
     
     if (!authUser.user) {
-      return { success: false, error: "Not authenticated" };
+      return { success: false, error: await translateError(new AppError('auth.notAuthenticated')) };
     }
 
     const { data, error } = await supabase
@@ -385,8 +387,8 @@ export async function verifyBeneficiary(_user_id: string) {
     }
 
     return { success: true, data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -404,11 +406,11 @@ export async function getActivePointsRules() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     return { success: true, data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }

@@ -3,6 +3,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { requireUser } from "@/lib/auth/require-user";
 import { revalidatePath } from "next/cache";
+import { translateError } from '@/lib/error-handler';
 
 /**
  * Get all user roles
@@ -17,12 +18,12 @@ export async function getAllUserRoles() {
       .order("display_name");
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     return { success: true, data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -40,12 +41,12 @@ export async function getUserRoleById(id: number) {
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     return { success: true, data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -73,13 +74,13 @@ export async function updateUserRole(
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     revalidatePath("/dashboard/user-role");
     return { success: true, data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -98,13 +99,13 @@ export async function createUserRole(input: { name: string; display_name: string
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     revalidatePath("/dashboard/user-role");
     return { success: true, data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -122,13 +123,13 @@ export async function deleteUserRole(id: string) {
       .eq("id", id);
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     revalidatePath("/dashboard/user-role");
     return { success: true };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -146,7 +147,7 @@ export async function getUsersCountByRole() {
       .not("role_id", "is", null);
 
     if (appUserError) {
-      return { success: false, error: appUserError.message };
+      return { success: false, error: await translateError(appUserError) };
     }
 
     // Get beneficiary counts (all beneficiaries have final_user role)
@@ -155,7 +156,7 @@ export async function getUsersCountByRole() {
       .select("*", { count: "exact", head: true });
 
     if (beneficiaryError) {
-      return { success: false, error: beneficiaryError.message };
+      return { success: false, error: await translateError(beneficiaryError) };
     }
 
     // Count app users by role
@@ -174,8 +175,8 @@ export async function getUsersCountByRole() {
         beneficiaryCount: beneficiaryCount || 0,
       },
     };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 

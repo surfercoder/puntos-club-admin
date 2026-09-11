@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save, Loader2 } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
 const EMOJI_OPTIONS = ["⭐", "🌙", "🎉", "💎", "🔥", "🍽️", "☀️", "🎁", "💰", "🏆"];
@@ -619,7 +620,7 @@ export default function EditPointsRulePage() {
     if (result.success) {
       push("/dashboard/points-rules");
     } else {
-      alert(`Error: ${result.error}`);
+      toast.error(result.error);
     }
   };
 

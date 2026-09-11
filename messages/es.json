@@ -112,7 +112,6 @@
   },
   "Error": {
     "title": "¡Algo salió mal!",
-    "defaultMessage": "Ocurrió un error inesperado",
     "retry": "Intentar de nuevo"
   },
   "Auth": {
@@ -241,6 +240,10 @@
     "designEngineering": "Ingeniería de diseño",
     "salesMarketing": "Ventas y marketing",
     "travel": "Viajes",
+    "assignments": "Asignaciones",
+    "virtualCashier": "Cajero virtual",
+    "createCashiers": "Crear cajeros",
+    "createBranches": "Crear sucursales",
     "cashiers": "Cajeros",
     "collaborators": "Colaboradores",
     "pointsAssignment": "Asignación de puntos",
@@ -248,7 +251,8 @@
     "generalSettings": "Configuración general",
     "pointsRulesAndCampaigns": "Reglas de puntos y campañas",
     "profile": "Perfil",
-    "myQrs": "Mis QRs"
+    "myQrs": "Mis QRs",
+    "notificationsAndComms": "Notificaciones y comunicación"
   },
   "Breadcrumb": {
     "panel": "Panel",
@@ -2673,5 +2677,167 @@
       "title": "¡Todo listo!",
       "text": "Tu programa de fidelidad está listo para funcionar. Explora el panel a tu ritmo — todo está a un clic de distancia."
     }
+  },
+  "Errors": {
+    "unexpected": "Ocurrió un error inesperado. Intentá nuevamente.",
+    "network": "No pudimos conectarnos. Revisá tu conexión a internet e intentá de nuevo.",
+    "auth": {
+      "invalidCredentials": "El email o la contraseña no son correctos. Revisalos e intentá de nuevo.",
+      "emailNotConfirmed": "Todavía no confirmaste tu email. Buscá el correo que te enviamos y tocá el enlace para activar tu cuenta.",
+      "emailExists": "Ya existe una cuenta registrada con ese email.",
+      "weakPassword": "La contraseña es demasiado débil. Usá al menos 8 caracteres con mayúscula, minúscula, número y símbolo.",
+      "samePassword": "La contraseña nueva tiene que ser distinta de la actual.",
+      "emailInvalid": "Ese email no es válido. Revisá cómo lo escribiste.",
+      "validationFailed": "Faltan datos o alguno no es válido. Revisá el formulario e intentá de nuevo.",
+      "signupDisabled": "El registro no está disponible en este momento. Probá más tarde.",
+      "userBanned": "Esta cuenta está suspendida. Escribinos para recuperar el acceso.",
+      "userNotFound": "No encontramos una cuenta con ese email.",
+      "linkExpired": "El enlace venció o ya se usó. Pedí uno nuevo e intentá otra vez.",
+      "sessionExpired": "Tu sesión expiró. Volvé a iniciar sesión para continuar.",
+      "captchaFailed": "No pudimos verificar que seas una persona. Intentá de nuevo.",
+      "reauthNeeded": "Por seguridad, volvé a iniciar sesión antes de hacer este cambio.",
+      "rateLimit": "Hiciste demasiados intentos seguidos. Esperá un momento antes de volver a probar.",
+      "rateLimitSeconds": "Por seguridad, esperá {seconds} segundos antes de volver a intentarlo.",
+      "noPortalAccess": "No tenés permisos para acceder al portal de administración. Solo administradores, propietarios y colaboradores pueden entrar.",
+      "notAuthenticated": "No hay una sesión activa. Volvé a iniciar sesión.",
+      "noAppUser": "No pudimos identificar tu usuario en esta organización."
+    },
+    "db": {
+      "duplicate": "Ese dato ya está registrado. Revisalo e intentá de nuevo.",
+      "inUse": "No se puede completar la operación porque este registro está en uso.",
+      "missingField": "Faltan datos obligatorios. Revisá el formulario.",
+      "invalidValue": "Alguno de los datos no es válido. Revisalo e intentá de nuevo.",
+      "forbidden": "No tenés permiso para hacer esta acción.",
+      "notFound": "No encontramos lo que buscabas."
+    },
+    "rpc": {
+      "insufficientPoints": "El beneficiario no tiene puntos suficientes.",
+      "outOfStock": "El producto no tiene stock disponible.",
+      "membershipInactive": "Este beneficiario ya no es socio del club.",
+      "notPending": "Este canje ya no está pendiente.",
+      "redemptionNotFound": "No encontramos ese canje.",
+      "planLimitReached": "Alcanzaste el límite de tu plan. Actualizá el plan para seguir."
+    },
+    "organization": {
+      "createFailed": "No pudimos crear la organización. Intentá nuevamente.",
+      "updateFailed": "No pudimos actualizar la organización. Intentá nuevamente.",
+      "membershipFailed": "No pudimos asociar el usuario a la organización.",
+      "notFound": "No encontramos esa organización.",
+      "noActive": "No hay una organización activa seleccionada."
+    },
+    "address": {
+      "createFailed": "No pudimos guardar la dirección. Intentá nuevamente.",
+      "noId": "No pudimos guardar la dirección. Intentá nuevamente."
+    },
+    "branch": {
+      "createFailed": "No pudimos crear la sucursal. Intentá nuevamente.",
+      "updateFailed": "No pudimos actualizar la sucursal. Intentá nuevamente.",
+      "notInOrganization": "Esa sucursal no existe o no es de tu organización."
+    },
+    "user": {
+      "createFailed": "No pudimos crear el usuario. Intentá nuevamente.",
+      "updateFailed": "No pudimos actualizar el usuario. Intentá nuevamente.",
+      "lookupFailed": "No pudimos encontrar el usuario recién creado."
+    },
+    "notifications": {
+      "loadFailed": "No pudimos cargar las notificaciones. Intentá nuevamente.",
+      "sendFailed": "No pudimos enviar la notificación. Intentá nuevamente.",
+      "moderationFailed": "No pudimos revisar el contenido. Intentá nuevamente.",
+      "emptyAiResponse": "No pudimos revisar el contenido. Intentá nuevamente."
+    },
+    "config": {
+      "missing": "El servicio no está configurado. Avisale al equipo técnico."
+    },
+    "onboarding": {
+      "orgCreateFailed": "No pudimos crear la organización. Intentá nuevamente.",
+      "addressCreateFailed": "No pudimos crear la dirección. Intentá nuevamente.",
+      "branchCreateFailed": "No pudimos crear la sucursal. Intentá nuevamente.",
+      "ownerRoleFailed": "No pudimos asignarte el rol de propietario. Intentá nuevamente.",
+      "profileUpdateFailed": "No pudimos actualizar tu perfil. Intentá nuevamente.",
+      "appUserCreateFailed": "No pudimos crear tu perfil de usuario. Intentá nuevamente.",
+      "verificationFailed": "No pudimos verificarlo. Intentá de nuevo."
+    }
+  },
+  "Actions": {
+    "addressCreated": "Se creó la dirección correctamente.",
+    "addressUpdated": "Se actualizó la dirección correctamente.",
+    "appUserCreated": "Se creó el usuario correctamente.",
+    "appUserUpdated": "Se actualizó el usuario correctamente.",
+    "membershipCreated": "Se creó la membresía correctamente.",
+    "membershipUpdated": "Se actualizó la membresía correctamente.",
+    "beneficiaryCreated": "Se creó el beneficiario correctamente.",
+    "beneficiaryUpdated": "Se actualizó el beneficiario correctamente.",
+    "beneficiaryMembershipCreated": "Se creó la membresía del beneficiario correctamente.",
+    "beneficiaryMembershipUpdated": "Se actualizó la membresía del beneficiario correctamente.",
+    "branchCreated": "Se creó la sucursal correctamente.",
+    "branchUpdated": "Se actualizó la sucursal correctamente.",
+    "organizationCreated": "Se creó la organización correctamente.",
+    "organizationUpdated": "Se actualizó la organización correctamente.",
+    "organizationNotificationLimitCreated": "Se creó el límite de notificaciones correctamente.",
+    "organizationNotificationLimitUpdated": "Se actualizó el límite de notificaciones correctamente.",
+    "organizationPlanLimitCreated": "Se creó el límite del plan de la organización correctamente.",
+    "organizationPlanLimitUpdated": "Se actualizó el límite del plan de la organización correctamente.",
+    "planLimitCreated": "Se creó el límite del plan correctamente.",
+    "planLimitUpdated": "Se actualizó el límite del plan correctamente.",
+    "productCreated": "Se creó el producto correctamente.",
+    "productUpdated": "Se actualizó el producto correctamente.",
+    "purchaseCreated": "Se creó la compra correctamente.",
+    "purchaseUpdated": "Se actualizó la compra correctamente.",
+    "pushNotificationCreated": "Se creó la notificación push correctamente.",
+    "pushNotificationUpdated": "Se actualizó la notificación push correctamente.",
+    "pushTokenCreated": "Se creó el token push correctamente.",
+    "pushTokenUpdated": "Se actualizó el token push correctamente.",
+    "subscriptionCreated": "Se creó la suscripción correctamente.",
+    "subscriptionUpdated": "Se actualizó la suscripción correctamente.",
+    "userRoleCreated": "Se creó el rol correctamente.",
+    "userRoleUpdated": "Se actualizó el rol correctamente."
+  },
+  "Validation": {
+    "addressRequired": "Elegí una dirección.",
+    "amountRequired": "Ingresá un monto.",
+    "beneficiaryRequired": "Elegí un beneficiario.",
+    "bodyRequired": "Escribí el mensaje.",
+    "categoryRequired": "Elegí una categoría.",
+    "cityRequired": "Ingresá la ciudad.",
+    "creatorRequired": "Falta indicar quién la creó.",
+    "displayNameRequired": "Ingresá un nombre para mostrar.",
+    "emailInvalid": "Ingresá un email válido.",
+    "emailRequired": "Ingresá el email.",
+    "firstNameRequired": "Ingresá el nombre.",
+    "lastNameRequired": "Ingresá el apellido.",
+    "maxImages": "Podés subir hasta 3 imágenes.",
+    "mercadopagoPlanRequired": "Ingresá el ID de plan de MercadoPago.",
+    "mercadopagoPreapprovalRequired": "Ingresá el ID de preaprobación de MercadoPago.",
+    "nameRequired": "Ingresá un nombre.",
+    "numberRequired": "Ingresá la altura.",
+    "organizationRequired": "Elegí una organización.",
+    "passwordMinLength": "La contraseña debe tener al menos 8 caracteres.",
+    "passwordMinLength6": "La contraseña debe tener al menos 6 caracteres.",
+    "passwordRequired": "La contraseña es obligatoria.",
+    "passwordRequiredNewUser": "Los usuarios nuevos necesitan una contraseña.",
+    "passwordWeak": "La contraseña debe tener 8 caracteres, mayúscula, minúscula, número y símbolo.",
+    "pointsRequired": "Ingresá los puntos.",
+    "pushTokenRequired": "Ingresá el token de Expo.",
+    "required": "Este campo es obligatorio.",
+    "roleRequired": "Elegí un rol.",
+    "stateRequired": "Ingresá la provincia o estado.",
+    "streetRequired": "Ingresá la calle.",
+    "titleRequired": "Ingresá un título.",
+    "userRequired": "Elegí un usuario.",
+    "zipRequired": "Ingresá el código postal."
+  },
+  "CrudPages": {
+    "createOrganizationPlanLimit": "Crear límite del plan de la organización",
+    "createPlanLimit": "Crear límite del plan",
+    "createPushToken": "Crear token push",
+    "createSubscription": "Crear suscripción",
+    "createUserRole": "Crear rol",
+    "editOrganizationNotificationLimit": "Editar límite de notificaciones",
+    "editOrganizationPlanLimit": "Editar límite del plan de la organización",
+    "editPlanLimit": "Editar límite del plan",
+    "editPushNotification": "Editar notificación push",
+    "editPushToken": "Editar token push",
+    "editSubscription": "Editar suscripción",
+    "editUserRole": "Editar rol"
   }
 }

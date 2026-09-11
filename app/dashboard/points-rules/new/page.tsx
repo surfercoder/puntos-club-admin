@@ -14,6 +14,7 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { ArrowLeft, Save } from "lucide-react";
 import Link from "next/link";
+import { toast } from "sonner";
 import { createClient } from "@/lib/supabase/client";
 
 const EMOJI_OPTIONS = ["⭐", "🌙", "🎉", "💎", "🔥", "🍽️", "☀️", "🎁", "💰", "🏆"];
@@ -452,46 +453,48 @@ export default function NewPointsRulePage() {
     e.preventDefault();
     setLoading(true);
 
-    let config: Record<string, unknown> = {};
-    switch (formData.rule_type) {
-      case "fixed_amount":
-        config = { points_per_dollar: parseFloat(formData.points_per_dollar) };
-        break;
-      case "percentage":
-        config = { percentage: parseFloat(formData.percentage) };
-        break;
-    }
+    try {
+      let config: Record<string, unknown> = {};
+      switch (formData.rule_type) {
+        case "fixed_amount":
+          config = { points_per_dollar: parseFloat(formData.points_per_dollar) };
+          break;
+        case "percentage":
+          config = { percentage: parseFloat(formData.percentage) };
+          break;
+      }
 
-    const result = await createPointsRule({
-      name: formData.name,
-      description: formData.description,
-      rule_type: formData.rule_type,
-      config,
-      is_active: formData.is_active,
-      is_default: formData.is_default,
-      display_name: formData.display_name || formData.name,
-      display_icon: formData.display_icon,
-      display_color: formData.display_color,
-      show_in_app: formData.is_default ? false : formData.show_in_app,
-      branch_id: formData.branch_id ? Number(formData.branch_id) : undefined,
-      start_date: formData.is_default ? undefined : formData.start_date || undefined,
-      end_date: formData.is_default ? undefined : formData.end_date || undefined,
-      time_start: formData.is_default ? undefined : formData.time_start || undefined,
-      time_end: formData.is_default ? undefined : formData.time_end || undefined,
-      days_of_week:
-        formData.is_default
-          ? undefined
-          : formData.days_of_week.length > 0
-            ? formData.days_of_week
-            : undefined,
-    });
+      const result = await createPointsRule({
+        name: formData.name,
+        description: formData.description,
+        rule_type: formData.rule_type,
+        config,
+        is_active: formData.is_active,
+        is_default: formData.is_default,
+        display_name: formData.display_name || formData.name,
+        display_icon: formData.display_icon,
+        display_color: formData.display_color,
+        show_in_app: formData.is_default ? false : formData.show_in_app,
+        branch_id: formData.branch_id ? Number(formData.branch_id) : undefined,
+        start_date: formData.is_default ? undefined : formData.start_date || undefined,
+        end_date: formData.is_default ? undefined : formData.end_date || undefined,
+        time_start: formData.is_default ? undefined : formData.time_start || undefined,
+        time_end: formData.is_default ? undefined : formData.time_end || undefined,
+        days_of_week:
+          formData.is_default
+            ? undefined
+            : formData.days_of_week.length > 0
+              ? formData.days_of_week
+              : undefined,
+      });
 
-    setLoading(false);
-
-    if (result.success) {
-      push("/dashboard/points-rules");
-    } else {
-      alert(`Error: ${result.error}`);
+      if (result.success) {
+        push("/dashboard/points-rules");
+      } else {
+        toast.error(result.error);
+      }
+    } finally {
+      setLoading(false);
     }
   };
 

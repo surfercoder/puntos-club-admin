@@ -62,7 +62,7 @@ jest.mock("@gsap/react", () => ({
 
 /* ── component-specific mocks ── */
 jest.mock("next-intl", () => ({
-  useTranslations: jest.fn(() => (key: string) => key),
+  useTranslations: jest.fn(() => Object.assign((key: string) => key, { has: () => true })),
 }));
 
 jest.mock("@/actions/contact/send-contact-email", () => ({

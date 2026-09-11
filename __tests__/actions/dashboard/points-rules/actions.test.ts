@@ -94,13 +94,13 @@ describe('getAllPointsRules', () => {
     // For non-admin, eq is terminal; mock eq to return error
     mockSupabase.eq.mockReturnValueOnce({ data: null, error: { message: 'Error' } });
     const result = await getAllPointsRules();
-    expect(result).toEqual({ success: false, error: 'Error' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await getAllPointsRules();
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should not filter by org for non-admin with no org cookie', async () => {
@@ -121,13 +121,13 @@ describe('getActivePointsRules', () => {
   it('should return error on failure', async () => {
     mockSupabase.order.mockReturnValue({ data: null, error: { message: 'Error' } });
     const result = await getActivePointsRules();
-    expect(result).toEqual({ success: false, error: 'Error' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await getActivePointsRules();
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });
 
@@ -140,13 +140,13 @@ describe('getPointsRuleById', () => {
   it('should return error on failure', async () => {
     mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Not found' } });
     const result = await getPointsRuleById(999);
-    expect(result).toEqual({ success: false, error: 'Not found' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await getPointsRuleById(1);
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });
 
@@ -174,7 +174,7 @@ describe('createPointsRule', () => {
     mockSupabase.single.mockReturnValueOnce({ data: { id: 5, organization_id: 999 }, error: null });
     const result = await createPointsRule({ ...validRule, branch_id: 5 });
     expect(result.success).toBe(false);
-    expect(result.error).toBe('Branch does not belong to active organization');
+    expect(result.error).toBe('db.forbidden');
   });
 
   it('should return error when branch not found', async () => {
@@ -182,7 +182,7 @@ describe('createPointsRule', () => {
     mockSupabase.single.mockReturnValueOnce({ data: null, error: { message: 'Not found' } });
     const result = await createPointsRule({ ...validRule, branch_id: 999 });
     expect(result.success).toBe(false);
-    expect(result.error).toBe('Not found');
+    expect(result.error).toBe('unexpected');
   });
 
   it('should return error when branch not found and no error message', async () => {
@@ -190,7 +190,7 @@ describe('createPointsRule', () => {
     mockSupabase.single.mockReturnValueOnce({ data: null, error: null });
     const result = await createPointsRule({ ...validRule, branch_id: 999 });
     expect(result.success).toBe(false);
-    expect(result.error).toBe('Invalid branch');
+    expect(result.error).toBe('db.notFound');
   });
 
   it('should return error when branch org mismatch in create', async () => {
@@ -198,7 +198,7 @@ describe('createPointsRule', () => {
     mockSupabase.single.mockReturnValueOnce({ data: { id: 5, organization_id: 999 }, error: null });
     const result = await createPointsRule({ ...validRule, branch_id: 5 });
     expect(result.success).toBe(false);
-    expect(result.error).toBe('Branch does not belong to active organization');
+    expect(result.error).toBe('db.forbidden');
   });
 
   it('should clear temporal fields when is_default is true', async () => {
@@ -223,19 +223,19 @@ describe('createPointsRule', () => {
       },
     });
     const result = await createPointsRule({ ...validRule, is_default: true });
-    expect(result.error).toContain('points_rule_one_default_per_org');
+    expect(result.error).toBe('db.duplicate');
   });
 
-  it('should pass through a non-unique-violation error untouched', async () => {
+  it('mapea una violacion de FK a su propio mensaje, no al generico', async () => {
     mockSupabase.single.mockReturnValue({ data: null, error: { code: '23503', message: 'FK violation' } });
     const result = await createPointsRule(validRule);
-    expect(result).toEqual({ success: false, error: 'FK violation' });
+    expect(result).toEqual({ success: false, error: 'db.inUse' });
   });
 
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await createPointsRule(validRule);
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });
 
@@ -257,7 +257,7 @@ describe('updatePointsRule', () => {
     mockSupabase.single.mockReturnValueOnce({ data: { id: 5, organization_id: 999 }, error: null });
     const result = await updatePointsRule(1, { branch_id: 5 });
     expect(result.success).toBe(false);
-    expect(result.error).toBe('Branch does not belong to active organization');
+    expect(result.error).toBe('db.forbidden');
   });
 
   it('should clear temporal fields when is_default is true', async () => {
@@ -268,20 +268,20 @@ describe('updatePointsRule', () => {
   it('should return error on update failure', async () => {
     mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Update error' } });
     const result = await updatePointsRule(1, { name: 'Updated' });
-    expect(result).toEqual({ success: false, error: 'Update error' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await updatePointsRule(1, { name: 'Updated' });
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle branch not found error', async () => {
     mockSupabase.single.mockReturnValueOnce({ data: null, error: null });
     const result = await updatePointsRule(1, { branch_id: 999 });
     expect(result.success).toBe(false);
-    expect(result.error).toBe('Invalid branch');
+    expect(result.error).toBe('db.notFound');
   });
 
   it('should handle branch fetch error in update', async () => {
@@ -289,7 +289,7 @@ describe('updatePointsRule', () => {
     mockSupabase.single.mockReturnValueOnce({ data: null, error: { message: 'DB error' } });
     const result = await updatePointsRule(1, { branch_id: 5 });
     expect(result.success).toBe(false);
-    expect(result.error).toBe('DB error');
+    expect(result.error).toBe('unexpected');
   });
 
   it('should handle branch org mismatch in update', async () => {
@@ -297,7 +297,7 @@ describe('updatePointsRule', () => {
     mockSupabase.single.mockReturnValueOnce({ data: { id: 5, organization_id: 999 }, error: null });
     const result = await updatePointsRule(1, { branch_id: 5 });
     expect(result.success).toBe(false);
-    expect(result.error).toBe('Branch does not belong to active organization');
+    expect(result.error).toBe('db.forbidden');
   });
 
   it('should successfully validate branch_id that belongs to same org in update', async () => {
@@ -352,13 +352,13 @@ describe('togglePointsRuleStatus', () => {
   it('should return error on failure', async () => {
     mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Error' } });
     const result = await togglePointsRuleStatus(1, false);
-    expect(result).toEqual({ success: false, error: 'Error' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await togglePointsRuleStatus(1, true);
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });
 
@@ -373,13 +373,13 @@ describe('deletePointsRule', () => {
   it('should return error on failure', async () => {
     mockSupabase.eq.mockReturnValue({ error: { message: 'Error' } });
     const result = await deletePointsRule(1);
-    expect(result).toEqual({ success: false, error: 'Error' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await deletePointsRule(1);
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });
 
@@ -399,13 +399,13 @@ describe('getActiveOffers', () => {
   it('should return error on failure', async () => {
     mockSupabase.rpc.mockReturnValue({ data: null, error: { message: 'Error' } });
     const result = await getActiveOffers();
-    expect(result).toEqual({ success: false, error: 'Error' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected error', async () => {
     mockSupabase.rpc.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await getActiveOffers();
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });
 
@@ -425,13 +425,13 @@ describe('testPointsCalculation', () => {
   it('should return error on failure', async () => {
     mockSupabase.rpc.mockReturnValue({ data: null, error: { message: 'Error' } });
     const result = await testPointsCalculation(100);
-    expect(result).toEqual({ success: false, error: 'Error' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected error', async () => {
     mockSupabase.rpc.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await testPointsCalculation(100);
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle no org cookie and no orgId', async () => {

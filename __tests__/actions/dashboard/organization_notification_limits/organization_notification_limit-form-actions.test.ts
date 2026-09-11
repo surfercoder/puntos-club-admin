@@ -68,7 +68,7 @@ describe('organizationNotificationLimitFormAction', () => {
     const fd = createFormData(validFields);
     const result = await organizationNotificationLimitFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
-    expect(result.message).toBe('DB error');
+    expect(result.message).toBe('unexpected');
   });
 
   it('should handle API error result with fieldErrors', async () => {
@@ -89,7 +89,7 @@ describe('organizationNotificationLimitFormAction', () => {
     const fd = createFormData(validFields);
     const result = await organizationNotificationLimitFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
-    expect(result.message).toBe('Failed to save organization notification limit');
+    expect(result.message).toBe('unexpected');
   });
 
   it('should use default number values when fields are empty', async () => {

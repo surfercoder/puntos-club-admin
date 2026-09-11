@@ -44,9 +44,9 @@ describe('LoginForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'title' }));
 
     await waitFor(() => {
-      expect(screen.getByText('El correo electrónico es requerido')).toBeInTheDocument();
+      expect(screen.getByText('emailRequired')).toBeInTheDocument();
     });
-    expect(screen.getByText('La contraseña es requerida')).toBeInTheDocument();
+    expect(screen.getByText('passwordRequired')).toBeInTheDocument();
   });
 
   it('shows validation error for invalid email', async () => {
@@ -56,7 +56,7 @@ describe('LoginForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'title' }));
 
     await waitFor(() => {
-      expect(screen.getByText('Dirección de correo inválida')).toBeInTheDocument();
+      expect(screen.getByText('emailInvalid')).toBeInTheDocument();
     });
   });
 
@@ -113,7 +113,7 @@ describe('LoginForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'title' }));
 
     await waitFor(() => {
-      expect(screen.getByText('error')).toBeInTheDocument();
+      expect(screen.getByText('unexpected')).toBeInTheDocument();
     });
   });
 
@@ -126,7 +126,7 @@ describe('LoginForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'title' }));
 
     await waitFor(() => {
-      expect(screen.getByText('Network error')).toBeInTheDocument();
+      expect(screen.getByText('unexpected')).toBeInTheDocument();
     });
   });
 

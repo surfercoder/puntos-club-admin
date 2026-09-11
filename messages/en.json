@@ -112,7 +112,6 @@
   },
   "Error": {
     "title": "Something went wrong!",
-    "defaultMessage": "An unexpected error occurred",
     "retry": "Try again"
   },
   "Auth": {
@@ -241,6 +240,10 @@
     "designEngineering": "Design Engineering",
     "salesMarketing": "Sales & Marketing",
     "travel": "Travel",
+    "assignments": "Assignments",
+    "virtualCashier": "Virtual cashier",
+    "createCashiers": "Create cashiers",
+    "createBranches": "Create branches",
     "cashiers": "Cashiers",
     "collaborators": "Collaborators",
     "pointsAssignment": "Points assignment",
@@ -248,7 +251,8 @@
     "generalSettings": "General settings",
     "pointsRulesAndCampaigns": "Points rules & campaigns",
     "profile": "Profile",
-    "myQrs": "My QRs"
+    "myQrs": "My QRs",
+    "notificationsAndComms": "Notifications & communication"
   },
   "Breadcrumb": {
     "panel": "Dashboard",
@@ -2673,5 +2677,167 @@
       "title": "You're all set!",
       "text": "Your loyalty program is ready to go. Explore the dashboard at your own pace — everything is just a click away."
     }
+  },
+  "Errors": {
+    "unexpected": "Something went wrong. Please try again.",
+    "network": "We couldn't connect. Check your internet connection and try again.",
+    "auth": {
+      "invalidCredentials": "That email or password is not correct. Check them and try again.",
+      "emailNotConfirmed": "You haven't confirmed your email yet. Open the message we sent you and click the link to activate your account.",
+      "emailExists": "An account with that email already exists.",
+      "weakPassword": "That password is too weak. Use at least 8 characters with an uppercase letter, a lowercase letter, a number and a symbol.",
+      "samePassword": "Your new password has to be different from the current one.",
+      "emailInvalid": "That email isn't valid. Check how you typed it.",
+      "validationFailed": "Some details are missing or invalid. Check the form and try again.",
+      "signupDisabled": "Sign-up is unavailable right now. Please try again later.",
+      "userBanned": "This account is suspended. Contact us to restore access.",
+      "userNotFound": "We couldn't find an account with that email.",
+      "linkExpired": "That link expired or was already used. Request a new one and try again.",
+      "sessionExpired": "Your session expired. Please sign in again to continue.",
+      "captchaFailed": "We couldn't verify that you're human. Please try again.",
+      "reauthNeeded": "For security, sign in again before making this change.",
+      "rateLimit": "Too many attempts in a row. Wait a moment before trying again.",
+      "rateLimitSeconds": "For security reasons, wait {seconds} seconds before trying again.",
+      "noPortalAccess": "You don't have permission to access the admin portal. Only administrators, owners and collaborators can sign in.",
+      "notAuthenticated": "There is no active session. Please sign in again.",
+      "noAppUser": "We couldn't identify your user in this organization."
+    },
+    "db": {
+      "duplicate": "That value is already registered. Check it and try again.",
+      "inUse": "We can't complete this because the record is still in use.",
+      "missingField": "Some required fields are missing. Check the form.",
+      "invalidValue": "Some of the data isn't valid. Check it and try again.",
+      "forbidden": "You don't have permission to do this.",
+      "notFound": "We couldn't find what you were looking for."
+    },
+    "rpc": {
+      "insufficientPoints": "The member doesn't have enough points.",
+      "outOfStock": "This reward is out of stock.",
+      "membershipInactive": "This member no longer belongs to the club.",
+      "notPending": "This redemption is no longer pending.",
+      "redemptionNotFound": "We couldn't find that redemption.",
+      "planLimitReached": "You've reached your plan's limit. Upgrade your plan to continue."
+    },
+    "organization": {
+      "createFailed": "We couldn't create the organization. Please try again.",
+      "updateFailed": "We couldn't update the organization. Please try again.",
+      "membershipFailed": "We couldn't link the user to the organization.",
+      "notFound": "We couldn't find that organization.",
+      "noActive": "No active organization is selected."
+    },
+    "address": {
+      "createFailed": "We couldn't save the address. Please try again.",
+      "noId": "We couldn't save the address. Please try again."
+    },
+    "branch": {
+      "createFailed": "We couldn't create the branch. Please try again.",
+      "updateFailed": "We couldn't update the branch. Please try again.",
+      "notInOrganization": "That branch doesn't exist or doesn't belong to your organization."
+    },
+    "user": {
+      "createFailed": "We couldn't create the user. Please try again.",
+      "updateFailed": "We couldn't update the user. Please try again.",
+      "lookupFailed": "We couldn't find the user we just created."
+    },
+    "notifications": {
+      "loadFailed": "We couldn't load the notifications. Please try again.",
+      "sendFailed": "We couldn't send the notification. Please try again.",
+      "moderationFailed": "We couldn't review the content. Please try again.",
+      "emptyAiResponse": "We couldn't review the content. Please try again."
+    },
+    "config": {
+      "missing": "This service isn't configured. Let the technical team know."
+    },
+    "onboarding": {
+      "orgCreateFailed": "We couldn't create the organization. Please try again.",
+      "addressCreateFailed": "We couldn't create the address. Please try again.",
+      "branchCreateFailed": "We couldn't create the branch. Please try again.",
+      "ownerRoleFailed": "We couldn't assign you the owner role. Please try again.",
+      "profileUpdateFailed": "We couldn't update your profile. Please try again.",
+      "appUserCreateFailed": "We couldn't create your user profile. Please try again.",
+      "verificationFailed": "We couldn't verify it. Please try again."
+    }
+  },
+  "Actions": {
+    "addressCreated": "Address created successfully.",
+    "addressUpdated": "Address updated successfully.",
+    "appUserCreated": "User created successfully.",
+    "appUserUpdated": "User updated successfully.",
+    "membershipCreated": "Membership created successfully.",
+    "membershipUpdated": "Membership updated successfully.",
+    "beneficiaryCreated": "Member created successfully.",
+    "beneficiaryUpdated": "Member updated successfully.",
+    "beneficiaryMembershipCreated": "Member membership created successfully.",
+    "beneficiaryMembershipUpdated": "Member membership updated successfully.",
+    "branchCreated": "Branch created successfully.",
+    "branchUpdated": "Branch updated successfully.",
+    "organizationCreated": "Organization created successfully.",
+    "organizationUpdated": "Organization updated successfully.",
+    "organizationNotificationLimitCreated": "Notification limit created successfully.",
+    "organizationNotificationLimitUpdated": "Notification limit updated successfully.",
+    "organizationPlanLimitCreated": "Organization plan limit created successfully.",
+    "organizationPlanLimitUpdated": "Organization plan limit updated successfully.",
+    "planLimitCreated": "Plan limit created successfully.",
+    "planLimitUpdated": "Plan limit updated successfully.",
+    "productCreated": "Product created successfully.",
+    "productUpdated": "Product updated successfully.",
+    "purchaseCreated": "Purchase created successfully.",
+    "purchaseUpdated": "Purchase updated successfully.",
+    "pushNotificationCreated": "Push notification created successfully.",
+    "pushNotificationUpdated": "Push notification updated successfully.",
+    "pushTokenCreated": "Push token created successfully.",
+    "pushTokenUpdated": "Push token updated successfully.",
+    "subscriptionCreated": "Subscription created successfully.",
+    "subscriptionUpdated": "Subscription updated successfully.",
+    "userRoleCreated": "Role created successfully.",
+    "userRoleUpdated": "Role updated successfully."
+  },
+  "Validation": {
+    "addressRequired": "Pick an address.",
+    "amountRequired": "Enter an amount.",
+    "beneficiaryRequired": "Pick a member.",
+    "bodyRequired": "Write the message body.",
+    "categoryRequired": "Pick a category.",
+    "cityRequired": "Enter the city.",
+    "creatorRequired": "The creator is missing.",
+    "displayNameRequired": "Enter a display name.",
+    "emailInvalid": "Enter a valid email address.",
+    "emailRequired": "Enter the email address.",
+    "firstNameRequired": "Enter the first name.",
+    "lastNameRequired": "Enter the last name.",
+    "maxImages": "You can upload up to 3 images.",
+    "mercadopagoPlanRequired": "Enter the MercadoPago plan ID.",
+    "mercadopagoPreapprovalRequired": "Enter the MercadoPago preapproval ID.",
+    "nameRequired": "Enter a name.",
+    "numberRequired": "Enter the street number.",
+    "organizationRequired": "Pick an organization.",
+    "passwordMinLength": "The password must be at least 8 characters long.",
+    "passwordMinLength6": "The password must be at least 6 characters long.",
+    "passwordRequired": "Password is required.",
+    "passwordRequiredNewUser": "New users need a password.",
+    "passwordWeak": "The password needs 8 characters, an uppercase letter, a lowercase letter, a number and a symbol.",
+    "pointsRequired": "Enter the points.",
+    "pushTokenRequired": "Enter the Expo push token.",
+    "required": "This field is required.",
+    "roleRequired": "Pick a role.",
+    "stateRequired": "Enter the state or province.",
+    "streetRequired": "Enter the street.",
+    "titleRequired": "Enter a title.",
+    "userRequired": "Pick a user.",
+    "zipRequired": "Enter the ZIP code."
+  },
+  "CrudPages": {
+    "createOrganizationPlanLimit": "Create organization plan limit",
+    "createPlanLimit": "Create plan limit",
+    "createPushToken": "Create push token",
+    "createSubscription": "Create subscription",
+    "createUserRole": "Create role",
+    "editOrganizationNotificationLimit": "Edit notification limit",
+    "editOrganizationPlanLimit": "Edit organization plan limit",
+    "editPlanLimit": "Edit plan limit",
+    "editPushNotification": "Edit push notification",
+    "editPushToken": "Edit push token",
+    "editSubscription": "Edit subscription",
+    "editUserRole": "Edit role"
   }
 }

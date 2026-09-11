@@ -5,6 +5,7 @@ jest.mock('next-intl', () => ({
     const t = (key: string) => key;
     t.rich = (key: string) => key;
     t.raw = () => ({});
+    t.has = () => true;
     return t;
   }),
   useLocale: jest.fn(() => 'es'),
@@ -306,14 +307,14 @@ describe('AddressForm', () => {
   // -- Renders field errors --
   it('renders field errors from validation state', () => {
     (React.useActionState as jest.Mock).mockReturnValue([
-      { status: 'error', message: '', fieldErrors: { street: ['Street is required'] } },
+      { status: 'error', message: '', fieldErrors: { street: ['streetRequired'] } },
       jest.fn(),
       false,
     ]);
 
     render(<AddressForm />);
 
-    expect(screen.getByText('Street is required')).toBeInTheDocument();
+    expect(screen.getByText('streetRequired')).toBeInTheDocument();
   });
 
   // -- Edit mode with address id shows hidden input --

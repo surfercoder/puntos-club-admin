@@ -145,7 +145,7 @@ describe('PurchaseSchema', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].path).toEqual(['total_amount']);
-        expect(result.error.issues[0].message).toBe('Amount is required');
+        expect(result.error.issues[0].message).toBe('amountRequired');
       }
     });
 
@@ -155,7 +155,7 @@ describe('PurchaseSchema', () => {
       expect(result.success).toBe(false);
       if (!result.success) {
         expect(result.error.issues[0].path).toEqual(['points_earned']);
-        expect(result.error.issues[0].message).toBe('Points are required');
+        expect(result.error.issues[0].message).toBe('pointsRequired');
       }
     });
 

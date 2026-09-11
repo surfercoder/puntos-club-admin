@@ -8,6 +8,8 @@ import type { Organization } from '@/types/organization';
 import { hasOwnerPermissions, isAdmin } from '@/lib/auth/roles';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { requireUser } from '@/lib/auth/require-user';
+import { AppError } from '@/lib/errors';
+import { translateError } from '@/lib/error-handler';
 
 export async function createOrganization(input: Organization) {
   await requireUser();
@@ -26,7 +28,7 @@ export async function createOrganization(input: Organization) {
   const { data, error } = await supabase.from('organization').insert([parsed.data]).select().single();
 
   if (error || !data) {
-    throw new Error(error?.message || 'Failed to create organization');
+    throw new AppError('organization.createFailed');
   }
 
   const {
@@ -36,7 +38,7 @@ export async function createOrganization(input: Organization) {
 
   if (authError || !user) {
     await supabase.from('organization').delete().eq('id', data.id);
-    throw new Error('Not authenticated');
+    throw new AppError('auth.notAuthenticated');
   }
 
   const { data: appUserRow, error: appUserError } = await supabase
@@ -47,7 +49,7 @@ export async function createOrganization(input: Organization) {
 
   if (appUserError || !appUserRow?.id) {
     await supabase.from('organization').delete().eq('id', data.id);
-    throw new Error('Could not resolve app user for current session');
+    throw new AppError('auth.noAppUser');
   }
 
   const currentUser = await getCurrentUser();
@@ -69,7 +71,7 @@ export async function createOrganization(input: Organization) {
 
     if (membershipError) {
       await supabase.from('organization').delete().eq('id', data.id);
-      throw new Error(membershipError.message || 'Failed to associate user to organization');
+      throw new AppError('organization.membershipFailed');
     }
   }
 
@@ -93,7 +95,7 @@ export async function updateOrganization(id: string, input: Organization) {
   const { data, error } = await supabase.from('organization').update(parsed.data).eq('id', id).select().single();
 
   if (error || !data) {
-    throw new Error(error?.message || 'Failed to update organization');
+    throw new AppError('organization.updateFailed');
   }
 
   return { data, error: null };
@@ -158,7 +160,7 @@ export async function updateOrganizationVisibility(id: string, isPublic: boolean
 
   const currentUser = await getCurrentUser();
   if (!currentUser) {
-    return { error: 'Not authenticated' };
+    return { error: await translateError(new AppError('auth.notAuthenticated')) };
   }
 
   const supabase = await createClient();
@@ -185,7 +187,7 @@ export async function updateOrganizationVisibility(id: string, isPublic: boolean
     .single();
 
   if (error) {
-    return { error: error.message };
+    return { error: await translateError(error) };
   }
 
   return { data, error: null };
@@ -276,7 +278,7 @@ export async function updateClubProfile(id: string, input: ClubProfileInput) {
     if (error.code === '23505') {
       return { error: 'Ya existe una empresa con ese nombre. Probá con otro.' };
     }
-    return { error: error.message };
+    return { error: await translateError(error) };
   }
 
   if (address) {
@@ -293,7 +295,7 @@ export async function updateClubProfile(id: string, input: ClubProfileInput) {
       : await supabase.from('address').insert({ ...address, organization_id: Number(id) });
 
     if (addressError) {
-      return { error: addressError.message };
+      return { error: await translateError(addressError) };
     }
   }
 

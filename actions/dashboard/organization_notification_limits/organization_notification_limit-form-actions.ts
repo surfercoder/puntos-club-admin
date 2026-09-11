@@ -23,7 +23,7 @@ export async function organizationNotificationLimitFormAction(_prevState: Action
     const parsed = OrganizationNotificationLimitSchema.safeParse(parsedData);
 
     if (!parsed.success) {
-      return fromErrorToActionState(parsed.error);
+      return await fromErrorToActionState(parsed.error);
     }
 
     let result;
@@ -36,19 +36,16 @@ export async function organizationNotificationLimitFormAction(_prevState: Action
 
     if (result.error) {
       // Handle both PostgrestError and custom validation error
-      const errorMessage = 'message' in result.error 
-        ? result.error.message 
-        : 'fieldErrors' in result.error 
-          ? Object.values(result.error.fieldErrors).join(', ')
-          : 'Failed to save organization notification limit';
-      throw new Error(errorMessage);
+      // Se relanza el error tal cual para que fromErrorToActionState lo mapee
+      // por `code`: el texto de PostgREST expone tablas y constraints.
+      throw result.error;
     }
 
     revalidatePath('/dashboard/organization_notification_limits');
     revalidatePath('/dashboard');
 
-    return toActionState(formDataObject.id ? 'Organization notification limit updated successfully!' : 'Organization notification limit created successfully!');
+    return await toActionState(formDataObject.id ? 'organizationNotificationLimitUpdated' : 'organizationNotificationLimitCreated');
   } catch (error) {
-    return fromErrorToActionState(error);
+    return await fromErrorToActionState(error);
   }
 }

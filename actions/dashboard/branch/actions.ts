@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/server';
 import { BranchSchema } from '@/schemas/branch.schema';
 import type { Branch } from '@/types/branch';
 import { enforcePlanLimit } from '@/lib/plans/usage';
+import { translateError } from '@/lib/error-handler';
 
 export async function createBranch(input: Branch) {
   await requireUser();
@@ -33,7 +34,7 @@ export async function createBranch(input: Branch) {
 
   const limitError = await enforcePlanLimit(activeOrgIdNumber, 'branches');
   if (limitError) {
-    return { data: null, error: { message: limitError.message } };
+    return { data: null, error: { message: await translateError(limitError) } };
   }
 
   const { data, error } = await supabase.from('branch').insert([{
@@ -99,5 +100,5 @@ export async function deleteBranch(id: string) {
     .eq('id', id)
     .eq('organization_id', activeOrgIdNumber);
 
-  return { error: error ? { message: error.message, code: error.code } : null };
+  return { error: error ? { message: await translateError(error), code: error.code } : null };
 }

@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 export const OrganizationPlanLimitSchema = z.object({
   id: z.string().optional(),
-  organization_id: z.string().min(1, 'Organization is required'),
+  organization_id: z.string().min(1, 'organizationRequired'),
   plan: z.enum(['trial', 'advance', 'pro']),
   feature: z.enum(['beneficiaries', 'push_notifications_monthly', 'cashiers', 'branches', 'collaborators', 'redeemable_products']),
   limit_value: z.union([z.number(), z.string()]).transform(val => {

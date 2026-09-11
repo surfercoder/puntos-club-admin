@@ -11,8 +11,9 @@ import { useOrganizations } from '@/components/dashboard/shared/use-organization
 import FieldError from '@/components/ui/field-error';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { ActionState } from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import type { ActionState } from '@/lib/action-state';
+import { EMPTY_ACTION_STATE } from '@/lib/action-state';
+import { useValidationState } from '@/lib/use-validation-state';
 import { SubscriptionSchema } from '@/schemas/subscription.schema';
 import type { Subscription } from '@/types/subscription';
 import { resolveSubscriptionFormDefaults } from './subscription-form-defaults';
@@ -22,6 +23,7 @@ interface SubscriptionFormProps {
 }
 
 export default function SubscriptionForm({ subscription }: SubscriptionFormProps) {
+  const toValidationState = useValidationState();
   const t = useTranslations('Dashboard.subscription.form');
   const [validation, setValidation] = useState<ActionState | null>(null);
   const organizations = useOrganizations();
@@ -35,7 +37,7 @@ export default function SubscriptionForm({ subscription }: SubscriptionFormProps
     try {
       SubscriptionSchema.parse(formData);
     } catch (error) {
-      setValidation(fromErrorToActionState(error));
+      setValidation(toValidationState(error));
       event.preventDefault();
     }
   };

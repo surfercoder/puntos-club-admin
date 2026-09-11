@@ -90,11 +90,13 @@ describe('AppSidebar', () => {
     expect(screen.getByTestId('nav-main-structure')).toHaveTextContent(
       JSON.stringify([
         ['beneficiaries', []],
-        ['pointsAssignment', ['purchases', 'cashiers', 'branches']],
+        ['pointsAssignment', ['assignments', 'virtualCashier', 'createCashiers', 'createBranches']],
         ['rewards', []],
         ['redemptions', []],
-        ['settings', ['generalSettings', 'pointsRulesAndCampaigns', 'collaborators', 'profile']],
+        ['pointsRulesAndCampaigns', []],
+        ['notificationsAndComms', []],
         ['myQrs', []],
+        ['settings', ['generalSettings', 'collaborators', 'profile']],
       ])
     );
   });

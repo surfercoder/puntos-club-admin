@@ -1,66 +1,60 @@
+import { getTranslations } from 'next-intl/server';
 import { ZodError } from 'zod';
 
-export type ActionState = {
-  status: 'success' | 'error' | '';
-  message: string;
-  fieldErrors: Record<string, string[] | undefined>;
-};
+import { zodFieldErrors, type ActionState } from '@/lib/action-state';
+import { errorDescriptor } from '@/lib/errors';
 
-export const EMPTY_ACTION_STATE: ActionState = {
-  status: '',
-  message: "",
-  fieldErrors: {},
-};
-
-export const fromErrorToActionState = (error: unknown): ActionState => {
-  // Supabase returns PostgrestError as a plain object, not an Error, so without
-  // this every DB failure surfaced as "An unknown error occurred".
-  const plainMessage = (error as { message?: unknown } | null)?.message;
-
-  if (error instanceof ZodError) {
-    return {
-      status: 'error',
-      message: "",
-      fieldErrors: error.flatten().fieldErrors,
-    };
-  } else if (error instanceof Error) {
-    return {
-      status: 'error',
-      message: error.message,
-      fieldErrors: {},
-    };
-  } else if (typeof plainMessage === 'string' && plainMessage !== '') {
-    return {
-      status: 'error',
-      message: plainMessage,
-      fieldErrors: {},
-    };
-  } else {
-    return {
-      status: 'error',
-      message: "An unknown error occurred",
-      fieldErrors: {},
-    };
-  }
-};
-
-export const toActionState = (message: string): ActionState => ({
-  status: 'success',
-  message,
-  fieldErrors: {},
-});
+export type { ActionState } from '@/lib/action-state';
+export { EMPTY_ACTION_STATE, cleanFormData } from '@/lib/action-state';
 
 /**
- * Strip the numeric prefix added by React's useActionState
- * (e.g., "1_order_number" -> "order_number", pure index keys like "0" are skipped)
+ * Traduce un error de servidor al idioma del usuario.
+ *
+ * Los server actions corren dentro del request, asi que `getTranslations` lee
+ * la cookie NEXT_LOCALE igual que el resto de la app. Traducir aca (y no en el
+ * cliente) mantiene `ActionState.message` como texto listo para mostrar, que es
+ * lo que ya esperan los formularios y los toast-handler.
  */
-export const cleanFormData = (formData: FormData): Record<string, FormDataEntryValue> => {
-  const raw = Object.fromEntries(formData);
-  const cleaned: Record<string, FormDataEntryValue> = {};
-  for (const [key, value] of Object.entries(raw)) {
-    if (key.match(/^\d+$/)) continue;
-    const cleanKey = key.match(/^\d+_/) ? key.substring(key.indexOf('_') + 1) : key;
-    if (cleanKey) cleaned[cleanKey] = value;
+export const translateError = async (error: unknown): Promise<string> => {
+  const t = await getTranslations('Errors');
+  const { key, params } = errorDescriptor(error);
+  return t(key, params);
+};
+
+export const fromErrorToActionState = async (
+  error: unknown,
+): Promise<ActionState> => {
+  if (error instanceof ZodError) {
+    const t = await getTranslations('Validation');
+    return { status: 'error', message: '', fieldErrors: zodFieldErrors(error, t) };
   }
-  return cleaned;
+
+  // Supabase devuelve PostgrestError como objeto plano, no como Error, asi que
+  // errorDescriptor mira `code`/`message` en vez de usar instanceof.
+  return {
+    status: 'error',
+    message: await translateError(error),
+    fieldErrors: {},
+  };
+};
+
+/**
+ * `key` es una clave del namespace `Actions` de messages/{es,en}.json
+ * ("branchUpdated", "productCreated", ...). Se traduce aca para que ningun
+ * literal en ingles llegue a un toast.
+ */
+export const toActionState = async (key: string): Promise<ActionState> => {
+  const t = await getTranslations('Actions');
+  return {
+    status: 'success',
+    message: t(key),
+    fieldErrors: {},
+  };
+};
+
+/** Igual que `toActionState` pero devuelve solo el texto, para los redirect
+ *  que mandan el mensaje por `?success=`. */
+export const actionMessage = async (key: string): Promise<string> => {
+  const t = await getTranslations('Actions');
+  return t(key);
 };

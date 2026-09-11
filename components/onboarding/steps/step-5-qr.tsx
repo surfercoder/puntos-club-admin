@@ -28,19 +28,22 @@ type State =
   | { status: 'error'; message: string }
   | { status: 'missing_data' };
 
+// `tErrors` llega por parametro: esto corre fuera del componente y no puede
+// usar hooks, pero el mensaje igual tiene que salir en el idioma activo.
 async function runCreation(
   step2: OnboardingStep2Data,
   plan: string | undefined,
   mpPreapprovalId: string | null | undefined,
   step4: OnboardingStep4Data | null | undefined,
+  tErrors: ReturnType<typeof useTranslations>,
 ): Promise<State> {
   try {
     const result = await completeOnboarding({ step2, plan, mpPreapprovalId: mpPreapprovalId ?? undefined, step4 });
     return result.success && result.data
       ? { status: 'success', organizationId: result.data.organizationId, orgName: result.data.orgName }
-      : { status: 'error', message: result.error ?? 'Error desconocido.' };
+      : { status: 'error', message: result.error ?? tErrors('unexpected') };
   } catch {
-    return { status: 'error', message: 'Error de conexión. Por favor intenta de nuevo.' };
+    return { status: 'error', message: tErrors('network') };
   }
 }
 
@@ -181,6 +184,7 @@ export function Step5QR({
   onCreationComplete,
 }: Step5Props) {
   const t = useTranslations('Onboarding.step6');
+  const tErrors = useTranslations('Errors');
   // ponytail: the promise is created once and cached in this ref, so the
   // non-idempotent completeOnboarding call fires exactly once even under
   // StrictMode's dev remount. Each effect run subscribes with its own `active`
@@ -203,7 +207,7 @@ export function Step5QR({
     let active = true;
     const creation =
       creationRef.current ??
-      (creationRef.current = runCreation(step2Data!, selectedPlan, mpPreapprovalId, step4Data));
+      (creationRef.current = runCreation(step2Data!, selectedPlan, mpPreapprovalId, step4Data, tErrors));
     creation.then((nextState) => {
       if (active) setState(nextState);
     });
@@ -211,7 +215,7 @@ export function Step5QR({
     return () => {
       active = false;
     };
-  }, [state.status, step2Data, selectedPlan, mpPreapprovalId, step4Data]);
+  }, [state.status, step2Data, selectedPlan, mpPreapprovalId, step4Data, tErrors]);
 
   useEffect(() => {
     if (prevStatusRef.current === 'creating' && state.status === 'success') {

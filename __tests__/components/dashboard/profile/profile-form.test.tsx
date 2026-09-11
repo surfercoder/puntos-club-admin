@@ -136,7 +136,7 @@ describe('ProfileForm', () => {
     fireEvent.change(screen.getByDisplayValue('Doe'), { target: { value: '' } });
     fireEvent.submit(screen.getByRole('button', { name: 'saveChanges' }).closest('form')!);
     await waitFor(() => {
-      expect(screen.getByText('El nombre es requerido')).toBeInTheDocument();
+      expect(screen.getByText('firstNameRequired')).toBeInTheDocument();
     });
   });
 
@@ -149,7 +149,7 @@ describe('ProfileForm', () => {
 
     render(<ProfileForm user={mockUser} />);
     fireEvent.submit(screen.getByRole('button', { name: 'saveChanges' }).closest('form')!);
-    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('error'));
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('unexpected'));
   });
 
   it('renders with null/undefined fields using defaults', () => {
@@ -187,8 +187,8 @@ describe('ProfileForm', () => {
     fireEvent.change(screen.getByDisplayValue('john@example.com'), { target: { value: 'not-an-email' } });
     fireEvent.submit(screen.getByRole('button', { name: 'saveChanges' }).closest('form')!);
     await waitFor(() => {
-      // Should show email validation error
-      expect(screen.getByText(/email/i)).toBeInTheDocument();
+      // El schema devuelve la clave de i18n; el mock del traductor la deja pasar.
+      expect(screen.getByText('emailInvalid')).toBeInTheDocument();
     });
   });
 

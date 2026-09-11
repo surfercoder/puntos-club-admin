@@ -5,6 +5,8 @@ import { revalidatePath } from "next/cache";
 import { getMutationOrgId } from "@/lib/auth/get-mutation-org-id";
 import { requireUser } from "@/lib/auth/require-user";
 import { createClient } from "@/lib/supabase/server";
+import { translateError } from '@/lib/error-handler';
+import { AppError } from '@/lib/errors';
 
 /**
  * Asigna (o libera) la sucursal de un cajero. Cada sucursal necesita un cajero
@@ -21,7 +23,7 @@ export async function checkBranchInActiveOrg(branchId: string) {
   const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
   if (!activeOrgIdNumber) {
-    return { error: { message: "Missing active organization" } };
+    return { error: { message: await translateError(new AppError('organization.noActive')) } };
   }
 
   const { data: branch, error: branchError } = await supabase
@@ -31,8 +33,8 @@ export async function checkBranchInActiveOrg(branchId: string) {
     .eq("organization_id", activeOrgIdNumber)
     .maybeSingle();
 
-  if (branchError) return { error: { message: branchError.message } };
-  if (!branch) return { error: { message: "BRANCH_NOT_FOUND" } };
+  if (branchError) return { error: { message: await translateError(branchError) } };
+  if (!branch) return { error: { message: await translateError(new AppError('branch.notInOrganization')) } };
   return { error: null };
 }
 
@@ -47,7 +49,7 @@ export async function assignCashierToBranch(cashierId: string, branchId: string 
   const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
   if (!activeOrgIdNumber) {
-    return { error: { message: "Missing active organization" } };
+    return { error: { message: await translateError(new AppError('organization.noActive')) } };
   }
 
   const { error } = await supabase
@@ -56,7 +58,7 @@ export async function assignCashierToBranch(cashierId: string, branchId: string 
     .eq("id", cashierId)
     .eq("organization_id", activeOrgIdNumber);
 
-  if (error) return { error: { message: error.message } };
+  if (error) return { error: { message: await translateError(error) } };
 
   revalidatePath("/dashboard/branch");
   revalidatePath("/dashboard/cashiers");

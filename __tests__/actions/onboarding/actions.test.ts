@@ -77,7 +77,7 @@ describe('completeOnboarding', () => {
     mockSupabase.auth.getUser.mockReturnValue({ data: { user: null }, error: { message: 'No session' } });
     const result = await completeOnboarding({ step2: step2Data });
     expect(result.success).toBe(false);
-    expect(result.error).toContain('No autenticado');
+    expect(result.error).toBe('auth.notAuthenticated');
   });
 
   it('should create all entities for new onboarding', async () => {
@@ -101,7 +101,7 @@ describe('completeOnboarding', () => {
     mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Org insert failed' } });
     const result = await completeOnboarding({ step2: step2Data });
     expect(result.success).toBe(false);
-    expect(result.error).toContain('Org insert failed');
+    expect(result.error).toBe('onboarding.orgCreateFailed');
   });
 
   it('should cleanup and return error on address creation failure', async () => {
@@ -190,7 +190,7 @@ describe('completeOnboarding', () => {
       .mockReturnValueOnce({ data: null, error: { message: 'Role insert failed' } }); // role insert fails
     const result = await completeOnboarding({ step2: step2Data });
     expect(result.success).toBe(false);
-    expect(result.error).toContain('Error al obtener o crear el rol de propietario');
+    expect(result.error).toBe('onboarding.ownerRoleFailed');
   });
 
   it('should update existing app_user when it exists without org', async () => {
@@ -220,7 +220,7 @@ describe('completeOnboarding', () => {
       .mockReturnValueOnce({ data: null, error: { message: 'Update failed' } }); // app_user update fails
     const result = await completeOnboarding({ step2: step2Data });
     expect(result.success).toBe(false);
-    expect(result.error).toContain('Update failed');
+    expect(result.error).toBe('onboarding.profileUpdateFailed');
   });
 
   it('should rollback and return error when new app_user insert fails', async () => {
@@ -235,7 +235,7 @@ describe('completeOnboarding', () => {
       .mockReturnValueOnce({ data: null, error: { message: 'App user insert failed' } }); // app_user fails
     const result = await completeOnboarding({ step2: step2Data });
     expect(result.success).toBe(false);
-    expect(result.error).toContain('App user insert failed');
+    expect(result.error).toBe('onboarding.appUserCreateFailed');
   });
 
   it('should create cashier user when cashier data provided', async () => {
@@ -315,14 +315,14 @@ describe('completeOnboarding', () => {
     mockSupabase.auth.getUser.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await completeOnboarding({ step2: step2Data });
     expect(result.success).toBe(false);
-    expect(result.error).toBe('Unexpected');
+    expect(result.error).toBe('unexpected');
   });
 
   it('should handle non-Error throw', async () => {
     mockSupabase.auth.getUser.mockImplementation(() => { throw 'string error'; });
     const result = await completeOnboarding({ step2: step2Data });
     expect(result.success).toBe(false);
-    expect(result.error).toContain('Error inesperado');
+    expect(result.error).toBe('unexpected');
   });
 
   it('should return linked count of 0 when bulk insert returns null data', async () => {
@@ -452,7 +452,7 @@ describe('completeOnboarding', () => {
     mockSupabase.single.mockReturnValue({ data: null, error: null }); // data=null, error=null
     const result = await completeOnboarding({ step2: step2Data });
     expect(result.success).toBe(false);
-    expect(result.error).toContain('Error al crear la organización');
+    expect(result.error).toBe('onboarding.orgCreateFailed');
   });
 
   it('should handle address creation when addressData is null (line 173 fallback)', async () => {
@@ -462,7 +462,7 @@ describe('completeOnboarding', () => {
       .mockReturnValueOnce({ data: null, error: null }); // address: data=null, error=null
     const result = await completeOnboarding({ step2: step2Data });
     expect(result.success).toBe(false);
-    expect(result.error).toContain('Error al crear la dirección');
+    expect(result.error).toBe('onboarding.addressCreateFailed');
   });
 
   it('should handle branch creation when branchData is null (line 192 fallback)', async () => {
@@ -473,7 +473,7 @@ describe('completeOnboarding', () => {
       .mockReturnValueOnce({ data: null, error: null }); // branch: data=null, error=null
     const result = await completeOnboarding({ step2: step2Data });
     expect(result.success).toBe(false);
-    expect(result.error).toContain('Error al crear la sucursal');
+    expect(result.error).toBe('onboarding.branchCreateFailed');
   });
 
   it('should handle app_user update when updatedUser is null (line 236 fallback)', async () => {
@@ -487,7 +487,7 @@ describe('completeOnboarding', () => {
       .mockReturnValueOnce({ data: null, error: null }); // app_user update: data=null, error=null
     const result = await completeOnboarding({ step2: step2Data });
     expect(result.success).toBe(false);
-    expect(result.error).toContain('Error al actualizar el perfil');
+    expect(result.error).toBe('onboarding.profileUpdateFailed');
   });
 
   it('should handle app_user insert when appUserData is null (line 258 fallback)', async () => {
@@ -501,7 +501,7 @@ describe('completeOnboarding', () => {
       .mockReturnValueOnce({ data: null, error: null }); // app_user insert: data=null, error=null
     const result = await completeOnboarding({ step2: step2Data });
     expect(result.success).toBe(false);
-    expect(result.error).toContain('Error al crear el perfil de usuario');
+    expect(result.error).toBe('onboarding.appUserCreateFailed');
   });
 
   it('should handle user_metadata missing (line 221 || {})', async () => {
@@ -715,7 +715,7 @@ describe('getOnboardingStatus', () => {
     mockSupabase.auth.getUser.mockImplementation(() => { throw 'string error'; });
     const result = await getOnboardingStatus();
     expect(result.status).toBe('error');
-    expect(result.error).toBe('Unknown error');
+    expect(result.error).toBe('unexpected');
   });
 });
 

@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 
 jest.mock('next-intl', () => ({
-  useTranslations: jest.fn(() => (key: string) => `t:${key}`),
+  useTranslations: jest.fn(() => Object.assign((key: string) => `t:${key}`, { has: () => true })),
 }));
 
 import { RedemptionStatusBadge } from '@/components/dashboard/redemption/status-badge';

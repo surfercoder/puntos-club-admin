@@ -5,6 +5,7 @@ jest.mock('next-intl', () => ({
     const t = (key: string) => key;
     t.rich = (key: string) => key;
     t.raw = () => ({});
+    t.has = () => true;
     return t;
   }),
   useLocale: jest.fn(() => 'es'),
@@ -234,7 +235,7 @@ describe('ProductForm', () => {
       fireEvent.submit(form);
     });
 
-    expect(screen.queryByText('Category is required')).not.toBeInTheDocument();
+    expect(screen.queryByText('categoryRequired')).not.toBeInTheDocument();
   });
 
   it('loads categories with org filter from localStorage', async () => {

@@ -1,6 +1,9 @@
 'use server';
 
 import { createClient } from '@/lib/supabase/server';
+import { getTranslations } from 'next-intl/server';
+
+import { translateError } from '@/lib/error-handler';
 
 /**
  * Check if the currently authenticated user is allowed to access the admin portal
@@ -12,12 +15,13 @@ export async function checkAdminPortalAccess(): Promise<{
   error: string | null;
 }> {
   const supabase = await createClient();
+  const t = await getTranslations('Errors');
 
   // Get the authenticated user
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError || !user) {
-    return { allowed: false, role: null, error: 'No authenticated user' };
+    return { allowed: false, role: null, error: t('auth.notAuthenticated') };
   }
 
   // Try to find the app_user by auth_user_id first
@@ -55,7 +59,7 @@ export async function checkAdminPortalAccess(): Promise<{
     return { 
       allowed: false, 
       role: null, 
-      error: 'No tienes permisos para acceder al portal de administración. Solo administradores, propietarios y colaboradores pueden acceder.' 
+      error: t('auth.noPortalAccess'),
     };
   }
 
@@ -69,7 +73,7 @@ export async function checkAdminPortalAccess(): Promise<{
     return {
       allowed: false,
       role: roleName || null,
-      error: 'No tienes permisos para acceder al portal de administración. Solo administradores, propietarios y colaboradores pueden acceder.'
+      error: t('auth.noPortalAccess'),
     };
   }
 
@@ -89,7 +93,7 @@ export async function signInAdminPortal(email: string, password: string): Promis
   });
 
   if (signInError) {
-    return { success: false, role: null, error: signInError.message };
+    return { success: false, role: null, error: await translateError(signInError) };
   }
 
   // After server-side sign-in, cookies are set and we can check portal access.

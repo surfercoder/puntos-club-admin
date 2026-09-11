@@ -170,7 +170,7 @@ describe('createPurchase', () => {
   it('should handle unexpected errors', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await createPurchase(validInput);
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle zero points from rpc', async () => {
@@ -194,13 +194,13 @@ describe('getBeneficiaryPurchases', () => {
   it('should return error on failure', async () => {
     mockSupabase.order.mockReturnValue({ data: null, error: { message: 'Error' } });
     const result = await getBeneficiaryPurchases(1);
-    expect(result).toEqual({ success: false, error: 'Error' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await getBeneficiaryPurchases(1);
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });
 
@@ -244,13 +244,13 @@ describe('getAllPurchases', () => {
   it('should return error on failure', async () => {
     mockSupabase.order.mockReturnValue({ data: null, error: { message: 'Error' } });
     const result = await getAllPurchases();
-    expect(result).toEqual({ success: false, error: 'Error' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await getAllPurchases();
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle non-admin with no org', async () => {
@@ -271,13 +271,13 @@ describe('getPurchaseById', () => {
   it('should return error on failure', async () => {
     mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Not found' } });
     const result = await getPurchaseById(999);
-    expect(result).toEqual({ success: false, error: 'Not found' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await getPurchaseById(1);
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });
 
@@ -294,7 +294,7 @@ describe('verifyBeneficiary', () => {
   it('should return error when not authenticated', async () => {
     mockSupabase.auth.getUser.mockReturnValue({ data: { user: null }, error: null });
     const result = await verifyBeneficiary('id');
-    expect(result).toEqual({ success: false, error: 'Not authenticated' });
+    expect(result).toEqual({ success: false, error: 'auth.notAuthenticated' });
   });
 
   it('should return error when beneficiary not found', async () => {
@@ -306,7 +306,7 @@ describe('verifyBeneficiary', () => {
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await verifyBeneficiary('id');
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });
 
@@ -320,13 +320,13 @@ describe('getActivePointsRules', () => {
   it('should return error on failure', async () => {
     mockSupabase.order.mockReturnValue({ data: null, error: { message: 'Error' } });
     const result = await getActivePointsRules();
-    expect(result).toEqual({ success: false, error: 'Error' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await getActivePointsRules();
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });
 
@@ -341,13 +341,13 @@ describe('updatePurchase', () => {
   it('should return error on failure', async () => {
     mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Update failed' } });
     const result = await updatePurchase('1', { total_amount: '200.00' });
-    expect(result).toEqual({ success: false, error: 'Update failed' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await updatePurchase('1', { total_amount: '200.00' });
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 });
 
@@ -376,13 +376,13 @@ describe('cancelPurchase', () => {
   it('should return error on failure', async () => {
     mockSupabase.maybeSingle.mockReturnValue({ data: null, error: { message: 'Update failed' } });
     const result = await cancelPurchase('1');
-    expect(result).toEqual({ success: false, error: 'Update failed' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('should handle unexpected error', async () => {
     mockSupabase.from.mockImplementation(() => { throw new Error('Unexpected'); });
     const result = await cancelPurchase('1');
-    expect(result).toEqual({ success: false, error: 'An unexpected error occurred' });
+    expect(result).toEqual({ success: false, error: 'unexpected' });
   });
 
   it('rejects a caller without admin-portal permissions', async () => {

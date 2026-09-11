@@ -286,6 +286,7 @@ interface Step5ConsentProps {
 export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5ConsentProps) {
   const t = useTranslations('Onboarding.step5');
   const tCommon = useTranslations('Common');
+  const tErrors = useTranslations('Errors');
   const scrollRef = useRef<HTMLDivElement>(null);
   const recaptchaRef = useRef<ReCAPTCHA>(null);
   const [state, dispatch] = useReducer(consentReducer, initialState);
@@ -338,11 +339,11 @@ export function Step5Consent({ onNext, onBack, initialConsent = false }: Step5Co
         onNext();
       } else {
         recaptchaRef.current?.reset();
-        dispatch({ type: 'VERIFY_FAILED', error: result.error ?? 'Verificación fallida. Intentá de nuevo.' });
+        dispatch({ type: 'VERIFY_FAILED', error: result.error ?? tErrors('onboarding.verificationFailed') });
       }
     } catch {
       recaptchaRef.current?.reset();
-      dispatch({ type: 'VERIFY_FAILED', error: 'Error inesperado. Intentá de nuevo.' });
+      dispatch({ type: 'VERIFY_FAILED', error: tErrors('unexpected') });
     }
   };
 

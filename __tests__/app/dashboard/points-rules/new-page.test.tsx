@@ -1,7 +1,10 @@
+jest.mock('sonner', () => ({ toast: { error: jest.fn(), success: jest.fn(), info: jest.fn() } }));
+
 import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import NewPointsRulePage from '@/app/dashboard/points-rules/new/page';
 import { createPointsRule } from '@/actions/dashboard/points-rules/actions';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
 
 const mockCreatePointsRule = createPointsRule as jest.Mock;
 const mockPush = jest.fn();
@@ -428,7 +431,7 @@ describe('NewPointsRulePage', () => {
       fireEvent.submit(form);
     });
     await waitFor(() => {
-      expect(alertMock).toHaveBeenCalledWith('Error: Validation failed');
+      expect(toast.error).toHaveBeenCalledWith('Validation failed');
     });
     expect(mockPush).not.toHaveBeenCalled();
     alertMock.mockRestore();

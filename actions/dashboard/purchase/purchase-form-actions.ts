@@ -4,7 +4,7 @@ import { cookies } from 'next/headers';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import { cleanFormData, fromErrorToActionState, type ActionState } from '@/lib/error-handler';
+import { actionMessage, cleanFormData, fromErrorToActionState, type ActionState } from '@/lib/error-handler';
 import { PurchaseSchema } from '@/schemas/purchase.schema';
 import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth/require-user';
@@ -15,7 +15,7 @@ export async function purchaseFormAction(_prevState: ActionState, formData: Form
   const parsed = PurchaseSchema.safeParse(formDataObject);
 
   if (!parsed.success) {
-    return fromErrorToActionState(parsed.error);
+    return await fromErrorToActionState(parsed.error);
   }
 
   // Get active org from cookies — never trust client-submitted org_id
@@ -74,7 +74,7 @@ export async function purchaseFormAction(_prevState: ActionState, formData: Form
     const { error } = await query.select().single();
 
     if (error) {
-      return fromErrorToActionState(error);
+      return await fromErrorToActionState(error);
     }
   } else {
     const { error } = await supabase
@@ -84,11 +84,11 @@ export async function purchaseFormAction(_prevState: ActionState, formData: Form
       .single();
 
     if (error) {
-      return fromErrorToActionState(error);
+      return await fromErrorToActionState(error);
     }
   }
 
   revalidatePath('/dashboard/purchase');
-  const message = isUpdate ? 'Purchase updated successfully!' : 'Purchase created successfully!';
+  const message = await actionMessage(isUpdate ? 'purchaseUpdated' : 'purchaseCreated');
   redirect(`/dashboard/purchase?success=${encodeURIComponent(message)}`);
 }

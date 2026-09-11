@@ -11,6 +11,7 @@ import type { Product } from '@/types/product';
 import type { Category } from '@/types/category';
 import { CategorySchema } from '@/schemas/category.schema';
 import { enforcePlanLimit } from '@/lib/plans/usage';
+import { translateError } from '@/lib/error-handler';
 
 // El ABM de categorías se eliminó: se crean sólo desde el alta de producto y
 // desde el onboarding. La tabla y el tipo siguen existiendo.
@@ -86,7 +87,7 @@ export async function createProduct(input: Product) {
 
   const limitError = await enforcePlanLimit(activeOrgIdNumber, 'redeemable_products');
   if (limitError) {
-    return { data: null, error: { message: limitError.message } };
+    return { data: null, error: { message: await translateError(limitError) } };
   }
 
   const { data, error } = await supabase

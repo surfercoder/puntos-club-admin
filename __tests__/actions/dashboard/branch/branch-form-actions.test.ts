@@ -53,6 +53,6 @@ describe('branchFormAction', () => {
     const fd = createFormData({ name: 'Branch', address_id: '10' });
     const result = await branchFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
-    expect(result.message).toBe('API error');
+    expect(result.message).toBe('unexpected');
   });
 });

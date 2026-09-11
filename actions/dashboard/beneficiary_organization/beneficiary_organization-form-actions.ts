@@ -16,7 +16,7 @@ export async function beneficiaryOrganizationFormAction(_prevState: ActionState,
     const parsed = BeneficiaryOrganizationSchema.safeParse(formDataObject);
 
     if (!parsed.success) {
-      return fromErrorToActionState(parsed.error);
+      return await fromErrorToActionState(parsed.error);
     }
 
     if (formDataObject.id) {
@@ -27,8 +27,8 @@ export async function beneficiaryOrganizationFormAction(_prevState: ActionState,
 
     revalidatePath('/dashboard/beneficiary_organization');
 
-    return toActionState(formDataObject.id ? 'Beneficiary membership updated successfully!' : 'Beneficiary membership created successfully!');
+    return await toActionState(formDataObject.id ? 'beneficiaryMembershipUpdated' : 'beneficiaryMembershipCreated');
   } catch (error) {
-    return fromErrorToActionState(error);
+    return await fromErrorToActionState(error);
   }
 }

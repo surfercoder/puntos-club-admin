@@ -3,7 +3,7 @@
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
 
-import { cleanFormData, fromErrorToActionState, type ActionState } from '@/lib/error-handler';
+import { actionMessage, cleanFormData, fromErrorToActionState, type ActionState } from '@/lib/error-handler';
 import { UserRoleSchema } from '@/schemas/user_role.schema';
 import { createClient } from '@/lib/supabase/server';
 import { requireUser } from '@/lib/auth/require-user';
@@ -14,7 +14,7 @@ export async function userRoleFormAction(_prevState: ActionState, formData: Form
   const parsed = UserRoleSchema.safeParse(formDataObject);
 
   if (!parsed.success) {
-    return fromErrorToActionState(parsed.error);
+    return await fromErrorToActionState(parsed.error);
   }
 
   const supabase = await createClient();
@@ -32,7 +32,7 @@ export async function userRoleFormAction(_prevState: ActionState, formData: Form
       .single();
 
     if (error) {
-      return fromErrorToActionState(error);
+      return await fromErrorToActionState(error);
     }
   } else {
     const { error } = await supabase
@@ -42,11 +42,11 @@ export async function userRoleFormAction(_prevState: ActionState, formData: Form
       .single();
 
     if (error) {
-      return fromErrorToActionState(error);
+      return await fromErrorToActionState(error);
     }
   }
 
   revalidatePath('/dashboard/user-role');
-  const message = isUpdate ? 'User role updated successfully!' : 'User role created successfully!';
+  const message = await actionMessage(isUpdate ? 'userRoleUpdated' : 'userRoleCreated');
   redirect(`/dashboard/user-role?success=${encodeURIComponent(message)}`);
 }

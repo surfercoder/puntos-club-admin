@@ -12,8 +12,9 @@ import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { Label } from '@/components/ui/label';
-import type { ActionState} from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import type { ActionState } from '@/lib/action-state';
+import { EMPTY_ACTION_STATE } from '@/lib/action-state';
+import { useValidationState } from '@/lib/use-validation-state';
 import { OrganizationSchema } from '@/schemas/organization.schema';
 import type { Organization } from '@/types/organization';
 
@@ -25,6 +26,7 @@ interface OrganizationFormProps {
 }
 
 export default function OrganizationForm({ organization, onSuccess, onCancel, redirectTo = "/dashboard/organization" }: OrganizationFormProps) {
+  const toValidationState = useValidationState();
   const t = useTranslations('Dashboard.organization');
   const tCommon = useTranslations('Common');
 
@@ -50,7 +52,7 @@ export default function OrganizationForm({ organization, onSuccess, onCancel, re
     try {
       OrganizationSchema.parse(formDataObject);
     } catch (error) {
-      setValidation(fromErrorToActionState(error));
+      setValidation(toValidationState(error));
       event.preventDefault();
     }
   };

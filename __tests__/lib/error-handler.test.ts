@@ -1,10 +1,13 @@
 import { type ZodError, z } from 'zod';
 import {
   EMPTY_ACTION_STATE,
+  actionMessage,
   fromErrorToActionState,
   toActionState,
+  translateError,
   cleanFormData,
 } from '@/lib/error-handler';
+import { AppError } from '@/lib/errors';
 
 describe('EMPTY_ACTION_STATE', () => {
   it('has empty status, empty message, and empty fieldErrors', () => {
@@ -16,10 +19,12 @@ describe('EMPTY_ACTION_STATE', () => {
   });
 });
 
+// El mock de next-intl devuelve la clave tal cual (ver jest.setup.js), asi que
+// las aserciones miran la CLAVE de i18n que elige el mapeo, no el texto final.
 describe('fromErrorToActionState', () => {
-  it('handles ZodError with field errors', () => {
+  it('handles ZodError with field errors', async () => {
     const schema = z.object({
-      name: z.string().min(1, 'Name is required'),
+      name: z.string().min(1, 'nameRequired'),
       email: z.string().email('Invalid email'),
     });
 
@@ -30,7 +35,7 @@ describe('fromErrorToActionState', () => {
       zodError = e as ZodError;
     }
 
-    const result = fromErrorToActionState(zodError!);
+    const result = await fromErrorToActionState(zodError!);
     expect(result.status).toBe('error');
     expect(result.message).toBe('');
     expect(result.fieldErrors).toBeDefined();
@@ -38,18 +43,18 @@ describe('fromErrorToActionState', () => {
     expect(result.fieldErrors.email).toBeDefined();
   });
 
-  it('handles regular Error', () => {
-    const error = new Error('Something went wrong');
-    const result = fromErrorToActionState(error);
+  it('mapea un Error cualquiera al mensaje generico', async () => {
+    const result = await fromErrorToActionState(new Error('Something went wrong'));
     expect(result).toEqual({
       status: 'error',
-      message: 'Something went wrong',
+      message: 'unexpected',
       fieldErrors: {},
     });
   });
 
-  it('surfaces the message of a Supabase PostgrestError (plain object, not an Error)', () => {
-    const result = fromErrorToActionState({
+  // El texto de PostgREST nombra la constraint: nunca se muestra, se mapea por code.
+  it('mapea un PostgrestError por su code sin exponer el detalle', async () => {
+    const result = await fromErrorToActionState({
       message: 'new row violates check constraint "product_stock_non_negative"',
       code: '23514',
       details: null,
@@ -57,81 +62,151 @@ describe('fromErrorToActionState', () => {
     });
     expect(result).toEqual({
       status: 'error',
-      message: 'new row violates check constraint "product_stock_non_negative"',
+      message: 'db.invalidValue',
       fieldErrors: {},
     });
   });
 
-  it('falls back to the generic message for an object with an empty message', () => {
-    const result = fromErrorToActionState({ message: '' });
+  it('traduce el rate limit de GoTrue con los segundos que faltan', async () => {
+    const result = await fromErrorToActionState({
+      message: 'For security purposes, you can only request this after 60 seconds.',
+      code: 'over_email_send_rate_limit',
+      status: 429,
+    });
+    expect(result.message).toBe('auth.rateLimitSeconds');
+  });
+
+  it('cae al rate limit generico cuando el texto no trae los segundos', async () => {
+    const result = await fromErrorToActionState({ status: 429, message: 'slow down' });
+    expect(result.message).toBe('auth.rateLimit');
+  });
+
+  it('traduce "Email not confirmed", el error del ticket', async () => {
+    const result = await fromErrorToActionState({
+      message: 'Email not confirmed',
+      code: 'email_not_confirmed',
+    });
+    expect(result.message).toBe('auth.emailNotConfirmed');
+  });
+
+  it('reconoce las excepciones RAISE de las funciones de la base', async () => {
+    const result = await fromErrorToActionState({
+      message: 'DB error: INSUFFICIENT_POINTS for beneficiary 42',
+    });
+    expect(result.message).toBe('rpc.insufficientPoints');
+  });
+
+  it('trata un fallo de red como tal', async () => {
+    const result = await fromErrorToActionState(new TypeError('Network request failed'));
+    expect(result.message).toBe('network');
+  });
+
+  it.each([
+    'Failed to fetch',
+    'NetworkError when attempting to fetch resource.',
+    'Load failed',
+    'fetch failed',
+  ])('reconoce el fallo de fetch de cada navegador: %s', async (message) => {
+    const result = await fromErrorToActionState(new TypeError(message));
+    expect(result.message).toBe('network');
+  });
+
+  // Un bug nuestro tambien levanta TypeError. Si lo contaramos como red, el
+  // usuario iria a mirar el WiFi por un null deref y el bug quedaria tapado.
+  it('no confunde un TypeError de un bug de codigo con un fallo de red', async () => {
+    const result = await fromErrorToActionState(
+      new TypeError("Cannot read properties of undefined (reading 'id')"),
+    );
+    expect(result.message).toBe('unexpected');
+  });
+
+  it('deja pasar la clave de un AppError', async () => {
+    const result = await fromErrorToActionState(new AppError('branch.createFailed'));
+    expect(result.message).toBe('branch.createFailed');
+  });
+
+  it('falls back to the generic message for an object with an empty message', async () => {
+    const result = await fromErrorToActionState({ message: '' });
     expect(result).toEqual({
       status: 'error',
-      message: 'An unknown error occurred',
+      message: 'unexpected',
       fieldErrors: {},
     });
   });
 
-  it('falls back to the generic message for an object with a non-string message', () => {
-    const result = fromErrorToActionState({ message: 500 });
+  it('falls back to the generic message for an object with a non-string message', async () => {
+    const result = await fromErrorToActionState({ message: 500 });
     expect(result).toEqual({
       status: 'error',
-      message: 'An unknown error occurred',
+      message: 'unexpected',
       fieldErrors: {},
     });
   });
 
-  it('handles unknown error (string)', () => {
-    const result = fromErrorToActionState('random string');
+  it('handles unknown error (string)', async () => {
+    const result = await fromErrorToActionState('random string');
     expect(result).toEqual({
       status: 'error',
-      message: 'An unknown error occurred',
+      message: 'unexpected',
       fieldErrors: {},
     });
   });
 
-  it('handles unknown error (number)', () => {
-    const result = fromErrorToActionState(42);
+  it('handles unknown error (number)', async () => {
+    const result = await fromErrorToActionState(42);
     expect(result).toEqual({
       status: 'error',
-      message: 'An unknown error occurred',
+      message: 'unexpected',
       fieldErrors: {},
     });
   });
 
-  it('handles null', () => {
-    const result = fromErrorToActionState(null);
+  it('handles null', async () => {
+    const result = await fromErrorToActionState(null);
     expect(result).toEqual({
       status: 'error',
-      message: 'An unknown error occurred',
+      message: 'unexpected',
       fieldErrors: {},
     });
   });
 
-  it('handles undefined', () => {
-    const result = fromErrorToActionState(undefined);
+  it('handles undefined', async () => {
+    const result = await fromErrorToActionState(undefined);
     expect(result).toEqual({
       status: 'error',
-      message: 'An unknown error occurred',
+      message: 'unexpected',
       fieldErrors: {},
     });
   });
 });
 
 describe('toActionState', () => {
-  it('returns success state with given message', () => {
-    expect(toActionState('Created successfully')).toEqual({
+  it('devuelve el estado de exito con el mensaje traducido de la clave', async () => {
+    expect(await toActionState('branchCreated')).toEqual({
       status: 'success',
-      message: 'Created successfully',
+      message: 'branchCreated',
       fieldErrors: {},
     });
   });
 
-  it('handles empty message', () => {
-    expect(toActionState('')).toEqual({
+  it('devuelve la clave de actualizacion tal cual la traduce el namespace', async () => {
+    expect(await toActionState('branchUpdated')).toEqual({
       status: 'success',
-      message: '',
+      message: 'branchUpdated',
       fieldErrors: {},
     });
+  });
+});
+
+describe('actionMessage', () => {
+  it('devuelve solo el texto, para los redirect con ?success=', async () => {
+    expect(await actionMessage('purchaseCreated')).toBe('purchaseCreated');
+  });
+});
+
+describe('translateError', () => {
+  it('devuelve el texto del error ya traducido', async () => {
+    expect(await translateError({ code: '23505' })).toBe('db.duplicate');
   });
 });
 

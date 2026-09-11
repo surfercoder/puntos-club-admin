@@ -4,6 +4,7 @@ import * as Sentry from '@sentry/nextjs';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { verifyRegistrationToken } from '@/lib/registration-token';
+import { AppError } from '@/lib/errors';
 
 // ponytail: linear scan over auth users — fine for an admin-sized owner base;
 // swap for an indexed RPC lookup if this ever holds thousands of owners.
@@ -57,12 +58,12 @@ export async function GET(request: Request) {
     // below fails with "Invalid login credentials".
     if (createError) {
       if (!createError.message?.toLowerCase().includes('already been registered')) {
-        throw new Error(`createUser failed: ${createError.message}`);
+        throw new AppError('user.createFailed');
       }
 
       const existingId = await findAuthUserIdByEmail(adminClient, pending.email);
       if (!existingId) {
-        throw new Error('user reported as existing but not found during lookup');
+        throw new AppError('user.lookupFailed');
       }
 
       const { error: updateError } = await adminClient.auth.admin.updateUserById(existingId, {
@@ -76,7 +77,7 @@ export async function GET(request: Request) {
         },
       });
       if (updateError) {
-        throw new Error(`updateUser failed: ${updateError.message}`);
+        throw new AppError('user.updateFailed');
       }
     }
 

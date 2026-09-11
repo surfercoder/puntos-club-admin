@@ -72,7 +72,7 @@ describe('appUserFormAction', () => {
     const fd = createFormData(validForm);
     const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
-    expect(result.message).toBe('Limit reached');
+    expect(result.message).toBe('unexpected');
   });
 
   it('should return default error message when result.error has no message property', async () => {
@@ -80,7 +80,7 @@ describe('appUserFormAction', () => {
     const fd = createFormData(validForm);
     const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
-    expect(result.message).toBe('An unexpected error occurred');
+    expect(result.message).toBe('unexpected');
   });
 
   it('should return default error message when result.error.message is null', async () => {
@@ -88,7 +88,7 @@ describe('appUserFormAction', () => {
     const fd = createFormData(validForm);
     const result = await appUserFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
-    expect(result.message).toBe('An unexpected error occurred');
+    expect(result.message).toBe('unexpected');
   });
 });
 
@@ -127,14 +127,14 @@ describe('appUserFormAction branch assignment', () => {
   });
 
   it('surfaces a failed assignment', async () => {
-    assignCashierToBranch.mockResolvedValueOnce({ error: { message: 'BRANCH_NOT_FOUND' } });
+    assignCashierToBranch.mockResolvedValueOnce({ error: { message: 'branch.notInOrganization' } });
     const result = await appUserFormAction(
       EMPTY_ACTION_STATE,
       formDataOf({ ...validFields, branch_id: '3' }),
     );
     expect(result).toEqual({
       status: 'error',
-      message: 'BRANCH_NOT_FOUND',
+      message: 'branch.notInOrganization',
       fieldErrors: {},
     });
   });
@@ -142,14 +142,14 @@ describe('appUserFormAction branch assignment', () => {
   // Una sucursal de otra organización tiene que frenar ANTES del alta: si no,
   // quedan el app_user y su usuario de Auth creados y el email ya tomado.
   it('rejects a branch outside the organization without creating the user', async () => {
-    checkBranchInActiveOrg.mockResolvedValueOnce({ error: { message: 'BRANCH_NOT_FOUND' } });
+    checkBranchInActiveOrg.mockResolvedValueOnce({ error: { message: 'branch.notInOrganization' } });
     const result = await appUserFormAction(
       EMPTY_ACTION_STATE,
       formDataOf({ ...validFields, branch_id: '99' }),
     );
     expect(result).toEqual({
       status: 'error',
-      message: 'BRANCH_NOT_FOUND',
+      message: 'branch.notInOrganization',
       fieldErrors: {},
     });
     expect(createAppUser).not.toHaveBeenCalled();

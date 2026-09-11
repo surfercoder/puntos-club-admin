@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 
 jest.mock('next-intl', () => ({
-  useTranslations: jest.fn(() => (key: string) => key),
+  useTranslations: jest.fn(() => Object.assign((key: string) => key, { has: () => true })),
 }));
 
 jest.mock('sonner', () => ({

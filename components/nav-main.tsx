@@ -60,7 +60,12 @@ export function NavMain({
             )
           }
 
-          const groupActive = item.items.some((sub) => isNavItemActive(pathname, sub.url))
+          // Con rutas anidadas ("/x" y "/x/create") gana la mas larga, si no se
+          // marcarian dos sub-items activos a la vez.
+          const activeSubUrl = item.items
+            .filter((sub) => isNavItemActive(pathname, sub.url))
+            .sort((a, b) => b.url.length - a.url.length)[0]?.url
+          const groupActive = Boolean(activeSubUrl)
           const shouldOpen = item.isActive || groupActive
 
           return (
@@ -86,7 +91,7 @@ export function NavMain({
                       <SidebarMenuSubItem key={subItem.title}>
                         <SidebarMenuSubButton
                           asChild
-                          isActive={isNavItemActive(pathname, subItem.url)}
+                          isActive={subItem.url === activeSubUrl}
                         >
                           <Link href={subItem.url}>
                             <span>{subItem.title}</span>

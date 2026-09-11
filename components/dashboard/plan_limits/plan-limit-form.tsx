@@ -10,8 +10,9 @@ import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { ActionState } from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import type { ActionState } from '@/lib/action-state';
+import { EMPTY_ACTION_STATE } from '@/lib/action-state';
+import { useValidationState } from '@/lib/use-validation-state';
 import { PlanLimitSchema } from '@/schemas/plan_limit.schema';
 import type { PlanLimit } from '@/types/plan';
 
@@ -20,6 +21,7 @@ interface PlanLimitFormProps {
 }
 
 export default function PlanLimitForm({ planLimit }: PlanLimitFormProps) {
+  const toValidationState = useValidationState();
   const t = useTranslations('Dashboard.planLimits.form');
   const [validation, setValidation] = useState<ActionState | null>(null);
   const [actionState, formAction, pending] = useActionState(planLimitFormAction, EMPTY_ACTION_STATE);
@@ -30,7 +32,7 @@ export default function PlanLimitForm({ planLimit }: PlanLimitFormProps) {
     try {
       PlanLimitSchema.parse(formData);
     } catch (error) {
-      setValidation(fromErrorToActionState(error));
+      setValidation(toValidationState(error));
       event.preventDefault();
     }
   };

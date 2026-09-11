@@ -5,6 +5,7 @@ jest.mock('next-intl', () => ({
     const t = (key: string) => key;
     t.rich = (key: string) => key;
     t.raw = () => ({});
+    t.has = () => true;
     return t;
   }),
   useLocale: jest.fn(() => 'es'),
@@ -261,13 +262,13 @@ describe('OrganizationForm', () => {
   // -- Renders field errors --
   it('renders field errors from validation state', () => {
     (React.useActionState as jest.Mock).mockReturnValue([
-      { status: 'error', message: '', fieldErrors: { name: ['Name is required'] } },
+      { status: 'error', message: '', fieldErrors: { name: ['nameRequired'] } },
       jest.fn(),
       false,
     ]);
 
     render(<OrganizationForm />);
 
-    expect(screen.getByText('Name is required')).toBeInTheDocument();
+    expect(screen.getByText('nameRequired')).toBeInTheDocument();
   });
 });

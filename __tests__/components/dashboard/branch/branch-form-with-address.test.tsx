@@ -146,11 +146,11 @@ describe('BranchFormWithAddress', () => {
     fireEvent.submit(document.querySelector('form') as HTMLFormElement);
 
     // AddressSchema rejects every blank address field
-    expect(screen.getByText('Street is required')).toBeInTheDocument();
-    expect(screen.getByText('City is required')).toBeInTheDocument();
-    expect(screen.getByText('Number is required')).toBeInTheDocument();
-    expect(screen.getByText('State is required')).toBeInTheDocument();
-    expect(screen.getByText('Zip code is required')).toBeInTheDocument();
+    expect(screen.getByText('streetRequired')).toBeInTheDocument();
+    expect(screen.getByText('cityRequired')).toBeInTheDocument();
+    expect(screen.getByText('numberRequired')).toBeInTheDocument();
+    expect(screen.getByText('stateRequired')).toBeInTheDocument();
+    expect(screen.getByText('zipRequired')).toBeInTheDocument();
   });
 
   it('raises no client-side errors once the form is complete', () => {
@@ -166,11 +166,11 @@ describe('BranchFormWithAddress', () => {
     render(<BranchFormWithAddress />);
 
     fireEvent.submit(document.querySelector('form') as HTMLFormElement);
-    expect(screen.getByText('Street is required')).toBeInTheDocument();
+    expect(screen.getByText('streetRequired')).toBeInTheDocument();
 
     fillRequiredFields();
     fireEvent.submit(document.querySelector('form') as HTMLFormElement);
-    expect(screen.queryByText('Street is required')).not.toBeInTheDocument();
+    expect(screen.queryByText('streetRequired')).not.toBeInTheDocument();
   });
 
   it('toasts and navigates back to the list after a successful save', async () => {

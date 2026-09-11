@@ -5,6 +5,7 @@ jest.mock('next-intl', () => ({
     const t = (key: string) => key;
     t.rich = (key: string) => key;
     t.raw = () => ({});
+    t.has = () => true;
     return t;
   }),
   useLocale: jest.fn(() => 'es'),
@@ -375,8 +376,8 @@ describe('PurchaseForm', () => {
     const form = container.querySelector('form') as HTMLFormElement;
     fireEvent.submit(form);
 
-    await waitFor(() => expect(screen.getByText('Beneficiary is required')).toBeInTheDocument());
-    expect(screen.getByText('Points are required')).toBeInTheDocument();
+    await waitFor(() => expect(screen.getByText('beneficiaryRequired')).toBeInTheDocument());
+    expect(screen.getByText('pointsRequired')).toBeInTheDocument();
   });
 
   it('opens in sale mode when editing an operation that has an amount', async () => {

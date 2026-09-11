@@ -1,3 +1,5 @@
+import { getTranslations } from 'next-intl/server';
+
 import { notFound } from 'next/navigation';
 
 import OrganizationNotificationLimitForm from '@/components/dashboard/organization_notification_limits/organization_notification_limit-form';
@@ -5,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { createAdminClient } from '@/lib/supabase/admin';
 
 export default async function EditOrganizationNotificationLimitPage({ params }: { params: Promise<{ id: string }> }) {
+  const t = await getTranslations('CrudPages');
   const supabase = createAdminClient();
   const { id } = await params;
 
@@ -27,7 +30,7 @@ export default async function EditOrganizationNotificationLimitPage({ params }: 
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Edit Organization Notification Limit</CardTitle>
+        <CardTitle>{t('editOrganizationNotificationLimit')}</CardTitle>
       </CardHeader>
       <CardContent>
         <OrganizationNotificationLimitForm 

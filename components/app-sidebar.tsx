@@ -16,6 +16,7 @@ import {
   Package,
   CreditCard,
   BellRing,
+  Megaphone,
   KeyRound,
   Ticket,
   Shield,
@@ -127,13 +128,17 @@ export function AppSidebar({
           icon: Coins,
           isActive: true,
           items: [
-            { title: t("purchases"), url: "/dashboard/purchase" },
-            { title: t("cashiers"), url: "/dashboard/cashiers" },
-            { title: t("branches"), url: "/dashboard/branch" },
+            { title: t("assignments"), url: "/dashboard/purchase" },
+            { title: t("virtualCashier"), url: "/dashboard/purchase/create" },
+            { title: t("createCashiers"), url: "/dashboard/cashiers" },
+            { title: t("createBranches"), url: "/dashboard/branch" },
           ],
         },
         { title: t("rewards"), url: "/dashboard/product", icon: Package },
         { title: t("redemptions"), url: "/dashboard/redemption", icon: Gift },
+        { title: t("pointsRulesAndCampaigns"), url: "/dashboard/points-rules", icon: Trophy },
+        { title: t("notificationsAndComms"), url: "/dashboard/notifications", icon: Megaphone },
+        { title: t("myQrs"), url: "/dashboard/qr", icon: QrCode },
         {
           title: t("settings"),
           url: "/dashboard/settings/organization",
@@ -141,12 +146,10 @@ export function AppSidebar({
           isActive: true,
           items: [
             { title: t("generalSettings"), url: "/dashboard/settings/organization" },
-            { title: t("pointsRulesAndCampaigns"), url: "/dashboard/points-rules" },
             { title: t("collaborators"), url: "/dashboard/collaborators" },
             { title: t("profile"), url: "/dashboard/profile" },
           ],
         },
-        { title: t("myQrs"), url: "/dashboard/qr", icon: QrCode },
       ]
     }
 

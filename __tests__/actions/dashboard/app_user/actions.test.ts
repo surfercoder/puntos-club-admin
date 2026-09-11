@@ -105,7 +105,7 @@ describe('createAppUser', () => {
   it('should enforce plan limit for cashier role', async () => {
     (enforcePlanLimit as jest.Mock).mockReturnValue({ message: 'Limit reached' });
     const result = await createAppUser({ ...validAppUser, role_id: '5' });
-    expect(result).toEqual({ data: null, error: { message: 'Limit reached' } });
+    expect(result).toEqual({ data: null, error: { message: 'unexpected' } });
   });
 
   it('should not enforce plan limit when role lookup returns non-mapped role', async () => {
@@ -184,7 +184,7 @@ describe('createAppUser', () => {
       error: { message: 'Auth error: email already exists' },
     });
     const result = await createAppUser({ ...validAppUser, password: 'Secret123!', role_id: '5' });
-    expect(result).toEqual({ data: null, error: { message: 'Auth error: email already exists' } });
+    expect(result).toEqual({ data: null, error: { message: 'unexpected' } });
   });
 
   it('should reject creating an app user without password', async () => {
@@ -290,7 +290,7 @@ describe('updateAppUser', () => {
       .mockReturnValueOnce({ data: { auth_user_id: 'existing-auth-id', email: 'old@example.com', role_id: '5', first_name: 'Old', last_name: 'Name' }, error: null });
     mockAdminClient.auth.admin.updateUserById.mockReturnValueOnce({ data: null, error: { message: 'Auth update failed' } });
     const result = await updateAppUser('1', { ...validUpdate, password: 'Newpass123!' });
-    expect(result).toEqual({ data: null, error: { message: 'Auth update failed' } });
+    expect(result).toEqual({ data: null, error: { message: 'unexpected' } });
   });
 
   it('should create auth user when no auth_user_id exists and password is provided', async () => {
@@ -318,7 +318,7 @@ describe('updateAppUser', () => {
       .mockReturnValueOnce({ data: { id: '5', name: 'cashier' }, error: null }); // role lookup
     mockAdminClient.auth.admin.createUser.mockReturnValueOnce({ data: { user: null }, error: { message: 'Create auth failed' } });
     const result = await updateAppUser('1', { ...validUpdate, password: 'Newpass123!' });
-    expect(result).toEqual({ data: null, error: { message: 'Create auth failed' } });
+    expect(result).toEqual({ data: null, error: { message: 'unexpected' } });
   });
 
   it('should link new auth user id to app_user record', async () => {
@@ -424,7 +424,7 @@ describe('deleteAppUser', () => {
       .mockReturnValueOnce({ error: null });
     mockAdminClient.auth.admin.deleteUser.mockReturnValueOnce({ error: { message: 'Auth delete failed' } });
     const result = await deleteAppUser('1');
-    expect(result).toEqual({ error: { message: 'User deleted but failed to remove auth record: Auth delete failed' } });
+    expect(result).toEqual({ error: { message: 'unexpected' } });
   });
 
   it('should handle missing appUser data (no auth_user_id to delete)', async () => {

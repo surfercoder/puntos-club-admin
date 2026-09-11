@@ -13,8 +13,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import type { ActionState } from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import type { ActionState } from '@/lib/action-state';
+import { EMPTY_ACTION_STATE } from '@/lib/action-state';
+import { useValidationState } from '@/lib/use-validation-state';
 import { createClient } from '@/lib/supabase/client';
 import { formatDateTime } from '@/lib/utils';
 import { PurchaseSchema } from '@/schemas/purchase.schema';
@@ -510,6 +511,7 @@ function useComputedSalePoints(
 }
 
 export default function PurchaseForm({ purchase }: PurchaseFormProps) {
+  const toValidationState = useValidationState();
   const t = useTranslations('Dashboard.purchase.form');
   const tCommon = useTranslations('Common');
 
@@ -562,7 +564,7 @@ export default function PurchaseForm({ purchase }: PurchaseFormProps) {
     try {
       PurchaseSchema.parse(formData);
     } catch (error) {
-      setValidation(fromErrorToActionState(error));
+      setValidation(toValidationState(error));
       event.preventDefault();
     }
   };

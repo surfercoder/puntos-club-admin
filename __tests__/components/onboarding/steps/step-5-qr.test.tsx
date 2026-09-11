@@ -134,21 +134,21 @@ describe('Step5QR', () => {
     jest.mocked(completeOnboarding).mockResolvedValue({ success: false });
     renderStep();
 
-    expect(await screen.findByText('Error desconocido.')).toBeInTheDocument();
+    expect(await screen.findByText('unexpected')).toBeInTheDocument();
   });
 
   it('treats a success payload with no data as an error', async () => {
     jest.mocked(completeOnboarding).mockResolvedValue({ success: true });
     renderStep();
 
-    expect(await screen.findByText('Error desconocido.')).toBeInTheDocument();
+    expect(await screen.findByText('unexpected')).toBeInTheDocument();
   });
 
   it('reports a network failure', async () => {
     jest.mocked(completeOnboarding).mockRejectedValue(new Error('offline'));
     renderStep();
 
-    expect(await screen.findByText('Error de conexión. Por favor intenta de nuevo.')).toBeInTheDocument();
+    expect(await screen.findByText('network')).toBeInTheDocument();
   });
 
   it('goes back from the error screen', async () => {

@@ -1,21 +1,21 @@
 import { z } from 'zod';
 
 export const LoginSchema = z.object({
-  email: z.string().min(1, 'El correo electrónico es requerido').email('Dirección de correo inválida'),
-  password: z.string().min(1, 'La contraseña es requerida'),
+  email: z.string().min(1, 'emailRequired').email('emailInvalid'),
+  password: z.string().min(1, 'passwordRequired'),
 });
 
 export const ProfileSchema = z.object({
-  first_name: z.string().min(1, 'El nombre es requerido'),
-  last_name: z.string().min(1, 'El apellido es requerido'),
-  email: z.string().min(1, 'El correo electrónico es requerido').email('Dirección de correo inválida'),
+  first_name: z.string().min(1, 'firstNameRequired'),
+  last_name: z.string().min(1, 'lastNameRequired'),
+  email: z.string().min(1, 'emailRequired').email('emailInvalid'),
 });
 
 export const ForgotPasswordSchema = z.object({
-  email: z.string().min(1, 'El correo electrónico es requerido').email('Dirección de correo inválida'),
+  email: z.string().min(1, 'emailRequired').email('emailInvalid'),
 });
 
 export const UpdatePasswordSchema = z.object({
-  password: z.string().min(8, 'La contraseña debe tener al menos 8 caracteres'),
+  password: z.string().min(8, 'passwordMinLength'),
 });
 

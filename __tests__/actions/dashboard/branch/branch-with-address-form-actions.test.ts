@@ -53,7 +53,7 @@ describe('branchWithAddressFormAction', () => {
     expect(revalidatePath).toHaveBeenCalledWith('/dashboard/branch');
     expect(revalidatePath).toHaveBeenCalledWith('/dashboard/address');
     expect(result.status).toBe('success');
-    expect(result.message).toContain('created');
+    expect(result.message).toBe('branchCreated');
   });
 
   it('should create address and update branch when id provided', async () => {
@@ -61,7 +61,7 @@ describe('branchWithAddressFormAction', () => {
     const result = await branchWithAddressFormAction(EMPTY_ACTION_STATE, fd);
     expect(createAddress).toHaveBeenCalled();
     expect(updateBranch).toHaveBeenCalledWith('1', expect.any(Object));
-    expect(result.message).toContain('updated');
+    expect(result.message).toBe('branchUpdated');
   });
 
   // Una edición que falla en la base no puede reportar "guardado con éxito".
@@ -70,7 +70,7 @@ describe('branchWithAddressFormAction', () => {
     const fd = createFormData({ ...validFields, id: '1' });
     const result = await branchWithAddressFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
-    expect(result.message).toBe('DB down');
+    expect(result.message).toBe('branch.updateFailed');
   });
 
   it('should fall back to a generic message when the update error has none', async () => {
@@ -78,7 +78,7 @@ describe('branchWithAddressFormAction', () => {
     const fd = createFormData({ ...validFields, id: '1' });
     const result = await branchWithAddressFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
-    expect(result.message).toBe('Failed to update branch');
+    expect(result.message).toBe('branch.updateFailed');
   });
 
   it('should return validation error for invalid address', async () => {
@@ -99,7 +99,7 @@ describe('branchWithAddressFormAction', () => {
     const fd = createFormData(validFields);
     const result = await branchWithAddressFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
-    expect(result.message).toContain('Failed to create address');
+    expect(result.message).toContain('address.createFailed');
   });
 
   it('should return error when branch creation error has no message', async () => {
@@ -107,7 +107,7 @@ describe('branchWithAddressFormAction', () => {
     const fd = createFormData(validFields);
     const result = await branchWithAddressFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
-    expect(result.message).toContain('Failed to create branch');
+    expect(result.message).toContain('branch.createFailed');
   });
 
   it('should return error when address returns no id', async () => {
@@ -115,7 +115,7 @@ describe('branchWithAddressFormAction', () => {
     const fd = createFormData(validFields);
     const result = await branchWithAddressFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
-    expect(result.message).toContain('no ID returned');
+    expect(result.message).toBe('address.noId');
   });
 
   it('should return error when branch creation fails', async () => {

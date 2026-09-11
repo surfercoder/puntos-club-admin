@@ -13,8 +13,9 @@ import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { ActionState } from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import type { ActionState } from '@/lib/action-state';
+import { EMPTY_ACTION_STATE } from '@/lib/action-state';
+import { useValidationState } from '@/lib/use-validation-state';
 import { createClient } from '@/lib/supabase/client';
 import { BeneficiaryOrganizationSchema } from '@/schemas/beneficiary_organization.schema';
 import type { BeneficiaryOrganization } from '@/schemas/beneficiary_organization.schema';
@@ -96,6 +97,7 @@ function PointsNumberField({
 }
 
 export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }: BeneficiaryOrganizationFormProps) {
+  const toValidationState = useValidationState();
   const t = useTranslations('Dashboard.beneficiaryOrganization');
   const tCommon = useTranslations('Common');
 
@@ -139,7 +141,7 @@ export default function BeneficiaryOrganizationForm({ beneficiaryOrganization }:
     try {
       BeneficiaryOrganizationSchema.parse(formData);
     } catch (error) {
-      setValidation(fromErrorToActionState(error));
+      setValidation(toValidationState(error));
       event.preventDefault();
     }
   };

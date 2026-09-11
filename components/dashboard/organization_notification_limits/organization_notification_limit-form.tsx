@@ -8,8 +8,9 @@ import { FormCancelSubmitActions } from '@/components/dashboard/shared/form-canc
 import { NativeSelectField } from '@/components/dashboard/shared/native-select-field';
 import { TextFormField } from '@/components/dashboard/shared/text-form-field';
 import { useActionStateRedirect } from '@/components/dashboard/shared/use-action-state-redirect';
-import type { ActionState} from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import type { ActionState } from '@/lib/action-state';
+import { EMPTY_ACTION_STATE } from '@/lib/action-state';
+import { useValidationState } from '@/lib/use-validation-state';
 import { buildNotificationLimitPayload, resolveNotificationLimitDefaults } from './organization-notification-limit-form-helpers';
 import { OrganizationNotificationLimitSchema } from '@/schemas/organization_notification_limit.schema';
 import type { OrganizationNotificationLimit } from '@/types/organization_notification_limit';
@@ -30,6 +31,7 @@ export default function OrganizationNotificationLimitForm({
   onCancel, 
   redirectTo = "/dashboard/organization_notification_limits" 
 }: OrganizationNotificationLimitFormProps) {
+  const toValidationState = useValidationState();
   const t = useTranslations('Dashboard.organizationNotificationLimit');
   const tCommon = useTranslations('Common');
 
@@ -52,7 +54,7 @@ export default function OrganizationNotificationLimitForm({
     try {
       OrganizationNotificationLimitSchema.parse(buildNotificationLimitPayload(formDataObject));
     } catch (error) {
-      setValidation(fromErrorToActionState(error));
+      setValidation(toValidationState(error));
       event.preventDefault();
     }
   };

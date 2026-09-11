@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 export const BeneficiaryOrganizationSchema = z.object({
   id: z.string().optional(),
-  beneficiary_id: z.string().min(1, 'Beneficiary is required'),
-  organization_id: z.string().min(1, 'Organization is required'),
+  beneficiary_id: z.string().min(1, 'beneficiaryRequired'),
+  organization_id: z.string().min(1, 'organizationRequired'),
   available_points: z.coerce.number().int().min(0).default(0),
   total_points_earned: z.coerce.number().int().min(0).default(0),
   total_points_redeemed: z.coerce.number().int().min(0).default(0),

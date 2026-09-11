@@ -13,7 +13,7 @@ export async function branchFormAction(_prevState: ActionState, formData: FormDa
     const parsed = BranchSchema.safeParse(formDataObject);
 
     if (!parsed.success) {
-      return fromErrorToActionState(parsed.error);
+      return await fromErrorToActionState(parsed.error);
     }
 
     if (formDataObject.id) {
@@ -25,8 +25,8 @@ export async function branchFormAction(_prevState: ActionState, formData: FormDa
     // Revalidate the branch list page
     revalidatePath('/dashboard/branch');
 
-    return toActionState(formDataObject.id ? 'Branch updated successfully!' : 'Branch created successfully!');
+    return await toActionState(formDataObject.id ? 'branchUpdated' : 'branchCreated');
   } catch (error) {
-    return fromErrorToActionState(error);
+    return await fromErrorToActionState(error);
   }
 }

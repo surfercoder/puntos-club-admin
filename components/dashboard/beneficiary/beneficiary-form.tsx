@@ -12,8 +12,9 @@ import { Button } from '@/components/ui/button';
 import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import type { ActionState} from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import type { ActionState } from '@/lib/action-state';
+import { EMPTY_ACTION_STATE } from '@/lib/action-state';
+import { useValidationState } from '@/lib/use-validation-state';
 import { BeneficiarySchema } from '@/schemas/beneficiary.schema';
 import type { Beneficiary } from '@/types/beneficiary';
 
@@ -54,6 +55,7 @@ function BeneficiaryTextField({
 }
 
 export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
+  const toValidationState = useValidationState();
   const t = useTranslations('Dashboard.beneficiary.form');
   const tCommon = useTranslations('Common');
 
@@ -83,7 +85,7 @@ export default function BeneficiaryForm({ beneficiary }: BeneficiaryFormProps) {
     try {
       BeneficiarySchema.parse(formData);
     } catch (error) {
-      setValidation(fromErrorToActionState(error));
+      setValidation(toValidationState(error));
       event.preventDefault();
     }
   };

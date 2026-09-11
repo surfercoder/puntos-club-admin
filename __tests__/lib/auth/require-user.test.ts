@@ -24,6 +24,6 @@ describe('requireUser', () => {
   it('throws when there is no authenticated user', async () => {
     (getCurrentUser as jest.Mock).mockResolvedValue(null);
 
-    await expect(requireUser()).rejects.toThrow('Unauthorized');
+    await expect(requireUser()).rejects.toThrow('auth.sessionExpired');
   });
 });

@@ -13,7 +13,7 @@ export async function organizationFormAction(_prevState: ActionState, formData: 
     const parsed = OrganizationSchema.safeParse(formDataObject);
 
     if (!parsed.success) {
-      return fromErrorToActionState(parsed.error);
+      return await fromErrorToActionState(parsed.error);
     }
 
     if (formDataObject.id) {
@@ -26,8 +26,8 @@ export async function organizationFormAction(_prevState: ActionState, formData: 
     revalidatePath('/dashboard/organization');
     revalidatePath('/dashboard');
 
-    return toActionState(formDataObject.id ? 'Organization updated successfully!' : 'Organization created successfully!');
+    return await toActionState(formDataObject.id ? 'organizationUpdated' : 'organizationCreated');
   } catch (error) {
-    return fromErrorToActionState(error);
+    return await fromErrorToActionState(error);
   }
 }

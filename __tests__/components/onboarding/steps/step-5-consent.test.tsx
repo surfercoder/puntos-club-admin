@@ -246,7 +246,7 @@ describe('Step5Consent', () => {
 
     fireEvent.click(continueButton());
 
-    expect(await screen.findByText(/Verificación fallida/)).toBeInTheDocument();
+    expect(await screen.findByText('onboarding.verificationFailed')).toBeInTheDocument();
   });
 
   it('reports an unexpected verification failure', async () => {
@@ -257,7 +257,7 @@ describe('Step5Consent', () => {
 
     fireEvent.click(continueButton());
 
-    expect(await screen.findByText(/Error inesperado/)).toBeInTheDocument();
+    expect(await screen.findByText('unexpected')).toBeInTheDocument();
     expect(onNext).not.toHaveBeenCalled();
   });
 

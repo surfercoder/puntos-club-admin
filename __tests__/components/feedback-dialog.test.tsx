@@ -8,7 +8,7 @@ jest.mock('next/navigation', () => ({
   usePathname: jest.fn(() => '/es/dashboard'),
 }));
 jest.mock('next-intl', () => ({
-  useTranslations: jest.fn(() => (key: string) => key),
+  useTranslations: jest.fn(() => Object.assign((key: string) => key, { has: () => true })),
 }));
 jest.mock('@/actions/feedback/send-feedback', () => ({
   sendFeedback: jest.fn(),

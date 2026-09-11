@@ -40,6 +40,8 @@ jest.mock('next-intl', () => ({
     const t = (key) => key;
     t.rich = (key, _params) => key;
     t.raw = (_key) => ({});
+    // La app usa t.has() para decidir si una clave existe antes de traducirla.
+    t.has = (_key) => true;
     return t;
   }),
   useLocale: jest.fn(() => 'es'),
@@ -51,6 +53,7 @@ jest.mock('next-intl/server', () => ({
     const t = (key) => key;
     t.rich = (key, _params) => key;
     t.raw = (_key) => ({});
+    t.has = (_key) => true;
     return t;
   }),
   getLocale: jest.fn(async () => 'es'),

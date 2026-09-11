@@ -2,8 +2,8 @@ import { z } from 'zod';
 
 export const AppUserOrganizationSchema = z.object({
   id: z.string().optional(),
-  app_user_id: z.string().min(1, 'User is required'),
-  organization_id: z.string().min(1, 'Organization is required'),
+  app_user_id: z.string().min(1, 'userRequired'),
+  organization_id: z.string().min(1, 'organizationRequired'),
   is_active: z
     .union([z.boolean(), z.string()])
     .transform((val) => {

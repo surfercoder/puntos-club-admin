@@ -1,30 +1,29 @@
 jest.mock('next-intl', () => ({
-  useTranslations: jest.fn(() => (key: string) => key),
+  useTranslations: jest.fn(() => Object.assign((key: string) => key, { has: () => true })),
 }));
 
 import { render, screen, fireEvent } from '@testing-library/react';
 import ErrorPage from '@/app/error';
+import { AppError } from '@/lib/errors';
 
 describe('Error page', () => {
-  it('renders error message and retry button', () => {
-    const mockReset = jest.fn();
-    const error = new Error('Test error');
-
-    render(<ErrorPage error={error} reset={mockReset} />);
+  it('traduce la clave que trae un AppError del servidor', () => {
+    render(<ErrorPage error={new AppError('auth.sessionExpired')} reset={jest.fn()} />);
 
     expect(screen.getByText('title')).toBeInTheDocument();
-    expect(screen.getByText('Test error')).toBeInTheDocument();
-
-    const retryButton = screen.getByText('retry');
-    fireEvent.click(retryButton);
-    expect(mockReset).toHaveBeenCalled();
+    expect(screen.getByText('auth.sessionExpired')).toBeInTheDocument();
   });
 
-  it('shows default message when error.message is empty', () => {
+  it('no deja pasar el texto crudo de Supabase y permite reintentar', () => {
     const mockReset = jest.fn();
-    const error = new Error('');
+    const error = new Error('duplicate key value violates unique constraint "branch_pkey"');
 
     render(<ErrorPage error={error} reset={mockReset} />);
-    expect(screen.getByText('defaultMessage')).toBeInTheDocument();
+
+    expect(screen.queryByText(/branch_pkey/)).not.toBeInTheDocument();
+    expect(screen.getByText('unexpected')).toBeInTheDocument();
+
+    fireEvent.click(screen.getByText('retry'));
+    expect(mockReset).toHaveBeenCalled();
   });
 });

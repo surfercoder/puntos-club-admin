@@ -15,8 +15,9 @@ import FieldError from '@/components/ui/field-error';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { ActionState} from '@/lib/error-handler';
-import { EMPTY_ACTION_STATE, fromErrorToActionState } from '@/lib/error-handler';
+import type { ActionState } from '@/lib/action-state';
+import { EMPTY_ACTION_STATE } from '@/lib/action-state';
+import { useValidationState } from '@/lib/use-validation-state';
 import { USER_ROLES } from '@/lib/auth/roles';
 import { PUNTOS_CLUB_CAJA_APK_URL } from '@/lib/mobile-apps';
 import { createClient } from '@/lib/supabase/client';
@@ -264,6 +265,7 @@ export default function AppUserForm({
   defaultBranchId = '',
   redirectTo = '/dashboard/app_user',
 }: AppUserFormProps) {
+  const toValidationState = useValidationState();
   const t = useTranslations('Dashboard.appUser');
   const tCommon = useTranslations('Common');
   const { isAtLimit, invalidate } = usePlanUsage();
@@ -329,7 +331,7 @@ export default function AppUserForm({
     try {
       AppUserSchema.parse(formData);
     } catch (error) {
-      setValidation(fromErrorToActionState(error));
+      setValidation(toValidationState(error));
       event.preventDefault();
       return;
     }

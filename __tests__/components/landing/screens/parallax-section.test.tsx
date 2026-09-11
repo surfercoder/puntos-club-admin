@@ -83,7 +83,7 @@ jest.mock("@gsap/react", () => ({
 }));
 
 jest.mock("next-intl", () => ({
-  useTranslations: jest.fn(() => (key: string) => key),
+  useTranslations: jest.fn(() => Object.assign((key: string) => key, { has: () => true })),
 }));
 
 let shouldThrowIn3D = false;

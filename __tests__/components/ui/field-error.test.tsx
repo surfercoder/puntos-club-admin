@@ -8,13 +8,13 @@ describe('FieldError', () => {
       status: 'error',
       message: '',
       fieldErrors: {
-        email: ['Email is required', 'Email must be valid'],
+        email: ['emailRequired', 'Email must be valid'],
       },
     };
 
     render(<FieldError actionState={actionState} name="email" />);
 
-    const errorElement = screen.getByText('Email is required');
+    const errorElement = screen.getByText('emailRequired');
     expect(errorElement).toBeInTheDocument();
     expect(errorElement.tagName).toBe('P');
     expect(errorElement).toHaveAttribute('id', 'email-error');
@@ -26,7 +26,7 @@ describe('FieldError', () => {
       status: 'error',
       message: '',
       fieldErrors: {
-        email: ['Email is required'],
+        email: ['emailRequired'],
       },
     };
 

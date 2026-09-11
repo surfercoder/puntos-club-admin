@@ -31,14 +31,14 @@ export async function productFormAction(_prevState: ActionState, formData: FormD
     const parsed = ProductSchema.safeParse(formDataObj);
 
     if (!parsed.success) {
-      return fromErrorToActionState(parsed.error);
+      return await fromErrorToActionState(parsed.error);
     }
 
     let createdCategoryId: string | null = null;
     if (newCategory) {
       const created = await createCategory({ name: newCategory, active: true });
       if (created.error || !created.data) {
-        return fromErrorToActionState(created.error);
+        return await fromErrorToActionState(created.error);
       }
       // Sólo la borramos después si la dimos de alta nosotros, no si se reusó una existente.
       if (created.created) {
@@ -68,14 +68,14 @@ export async function productFormAction(_prevState: ActionState, formData: FormD
       if (createdCategoryId) {
         await deleteCategory(createdCategoryId);
       }
-      return fromErrorToActionState(result.error);
+      return await fromErrorToActionState(result.error);
     }
 
     // Revalidate the product list page
     revalidatePath('/dashboard/product');
 
-    return toActionState(formDataObj.id ? 'Product updated successfully!' : 'Product created successfully!');
+    return await toActionState(formDataObj.id ? 'productUpdated' : 'productCreated');
   } catch (error) {
-    return fromErrorToActionState(error);
+    return await fromErrorToActionState(error);
   }
 }

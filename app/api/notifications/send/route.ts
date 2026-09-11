@@ -3,6 +3,7 @@ import { createAdminClient } from "@/lib/supabase/admin";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { checkPlanLimit } from "@/lib/plans/usage";
+import { AppError } from '@/lib/errors';
 
 interface ExpoPushMessage {
   to: string;
@@ -23,7 +24,7 @@ async function sendPushNotifications(messages: ExpoPushMessage[]) {
   });
 
   if (!response.ok) {
-    throw new Error(`Expo push service error: ${response.statusText}`);
+    throw new AppError('notifications.sendFailed');
   }
 
   return response.json();

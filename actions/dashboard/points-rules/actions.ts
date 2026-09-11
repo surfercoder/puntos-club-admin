@@ -6,6 +6,8 @@ import { revalidatePath } from "next/cache";
 import { getActiveOrgIdFilter } from "@/lib/auth/get-active-org-id";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
 import { requireUser } from "@/lib/auth/require-user";
+import { translateError } from '@/lib/error-handler';
+import { AppError } from '@/lib/errors';
 
 export interface PointsRuleInput {
   name: string;
@@ -56,12 +58,12 @@ export async function getAllPointsRules() {
     const { data, error } = await query;
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     return { success: true, data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -79,12 +81,12 @@ export async function getActivePointsRules() {
       .order("created_at", { ascending: false });
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     return { success: true, data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -107,12 +109,12 @@ export async function getPointsRuleById(id: number) {
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     return { success: true, data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -155,11 +157,11 @@ export async function createPointsRule(input: PointsRuleInput) {
         .single();
 
       if (branchError || !branchData) {
-        return { success: false, error: branchError?.message || "Invalid branch" };
+        return { success: false, error: await translateError(branchError ?? new AppError('db.notFound')) };
       }
 
       if (Number(branchData.organization_id) !== activeOrgIdNumber) {
-        return { success: false, error: "Branch does not belong to active organization" };
+        return { success: false, error: await translateError(new AppError('db.forbidden')) };
       }
     }
 
@@ -207,13 +209,13 @@ export async function createPointsRule(input: PointsRuleInput) {
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     revalidatePath("/dashboard/points-rules");
     return { success: true, data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -265,11 +267,11 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
         .single();
 
       if (branchError || !branchData) {
-        return { success: false, error: branchError?.message || "Invalid branch" };
+        return { success: false, error: await translateError(branchError ?? new AppError('db.notFound')) };
       }
 
       if (Number(branchData.organization_id) !== activeOrgIdNumber) {
-        return { success: false, error: "Branch does not belong to active organization" };
+        return { success: false, error: await translateError(new AppError('db.forbidden')) };
       }
     }
     
@@ -302,13 +304,13 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     revalidatePath("/dashboard/points-rules");
     return { success: true, data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -329,13 +331,13 @@ export async function togglePointsRuleStatus(id: number, is_active: boolean) {
       .single();
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     revalidatePath("/dashboard/points-rules");
     return { success: true, data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -354,13 +356,13 @@ export async function deletePointsRule(id: number) {
       .eq("id", id);
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     revalidatePath("/dashboard/points-rules");
     return { success: true };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -378,12 +380,12 @@ export async function getActiveOffers(organizationId?: number, branchId?: number
     });
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     return { success: true, data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }
 
@@ -413,11 +415,11 @@ export async function testPointsCalculation(
     });
 
     if (error) {
-      return { success: false, error: error.message };
+      return { success: false, error: await translateError(error) };
     }
 
     return { success: true, points: data };
-  } catch (_error) {
-    return { success: false, error: "An unexpected error occurred" };
+  } catch (error) {
+    return { success: false, error: await translateError(error) };
   }
 }

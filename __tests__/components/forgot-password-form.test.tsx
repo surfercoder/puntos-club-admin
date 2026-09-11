@@ -30,7 +30,7 @@ describe('ForgotPasswordForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'submitButton' }));
 
     await waitFor(() => {
-      expect(screen.getByText('El correo electrónico es requerido')).toBeInTheDocument();
+      expect(screen.getByText('emailRequired')).toBeInTheDocument();
     });
   });
 
@@ -40,7 +40,7 @@ describe('ForgotPasswordForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'submitButton' }));
 
     await waitFor(() => {
-      expect(screen.getByText('Dirección de correo inválida')).toBeInTheDocument();
+      expect(screen.getByText('emailInvalid')).toBeInTheDocument();
     });
   });
 
@@ -57,9 +57,14 @@ describe('ForgotPasswordForm', () => {
     });
   });
 
-  it('shows error message on reset failure', async () => {
+  // El rate limit de GoTrue llega en ingles: sale mapeado por code.
+  it('traduce el rate limit de Supabase', async () => {
     mockResetPasswordForEmail.mockResolvedValue({
-      error: new Error('Rate limit exceeded'),
+      error: {
+        message: 'For security purposes, you can only request this after 60 seconds.',
+        code: 'over_email_send_rate_limit',
+        status: 429,
+      },
     });
 
     render(<ForgotPasswordForm />);
@@ -67,7 +72,7 @@ describe('ForgotPasswordForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'submitButton' }));
 
     await waitFor(() => {
-      expect(screen.getByText('Rate limit exceeded')).toBeInTheDocument();
+      expect(screen.getByText('auth.rateLimitSeconds')).toBeInTheDocument();
     });
   });
 
@@ -79,7 +84,7 @@ describe('ForgotPasswordForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'submitButton' }));
 
     await waitFor(() => {
-      expect(screen.getByText('error')).toBeInTheDocument();
+      expect(screen.getByText('unexpected')).toBeInTheDocument();
     });
   });
 

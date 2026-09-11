@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { enforcePlanLimit } from '@/lib/plans/usage';
+import { translateError } from '@/lib/error-handler';
 
 /**
  * Links an existing beneficiary to the current user's organization
@@ -47,7 +48,7 @@ export async function linkBeneficiaryToOrganization(beneficiaryId: string) {
       // Re-activating counts as a new beneficiary — enforce the limit
       const limitError = await enforcePlanLimit(Number(currentUser.organization_id), 'beneficiaries');
       if (limitError) {
-        return { data: null, error: { message: limitError.message } };
+        return { data: null, error: { message: await translateError(limitError) } };
       }
 
       const { data, error } = await supabase
@@ -70,7 +71,7 @@ export async function linkBeneficiaryToOrganization(beneficiaryId: string) {
   // Enforce beneficiary limit before creating a new link
   const limitError = await enforcePlanLimit(Number(currentUser.organization_id), 'beneficiaries');
   if (limitError) {
-    return { data: null, error: { message: limitError.message } };
+    return { data: null, error: { message: await translateError(limitError) } };
   }
 
   // Create the beneficiary_organization relationship
@@ -134,10 +135,7 @@ export async function linkAllUnlinkedBeneficiaries() {
       .range(relationshipsOffset, relationshipsOffset + BATCH_SIZE - 1);
 
     if (relationshipsError) {
-      return { 
-        data: null, 
-        error: { message: `Error fetching relationships: ${relationshipsError.message}` } 
-      };
+      return { data: null, error: { message: await translateError(relationshipsError) } };
     }
 
     if (relationshipsBatch && relationshipsBatch.length > 0) {
@@ -160,10 +158,7 @@ export async function linkAllUnlinkedBeneficiaries() {
       .range(beneficiariesOffset, beneficiariesOffset + BATCH_SIZE - 1);
 
     if (beneficiariesError) {
-      return { 
-        data: null, 
-        error: { message: `Error fetching beneficiaries: ${beneficiariesError.message}` } 
-      };
+      return { data: null, error: { message: await translateError(beneficiariesError) } };
     }
 
     if (beneficiariesBatch && beneficiariesBatch.length > 0) {

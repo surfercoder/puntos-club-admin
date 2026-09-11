@@ -1,3 +1,5 @@
+import { getTranslations } from 'next-intl/server';
+
 import { notFound } from 'next/navigation';
 
 import SubscriptionForm from '@/components/dashboard/subscription/subscription-form';
@@ -5,6 +7,7 @@ import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { createClient } from '@/lib/supabase/server';
 
 export default async function EditSubscriptionPage({ params }: { params: Promise<{ id: string }> }) {
+  const t = await getTranslations('CrudPages');
   const supabase = await createClient();
   const id = (await params).id;
   const { data, error } = await supabase.from('subscription').select('*').eq('id', id).single();
@@ -17,7 +20,7 @@ export default async function EditSubscriptionPage({ params }: { params: Promise
     <div className="w-full max-w-3xl mx-auto">
       <Card>
         <CardHeader>
-          <CardTitle>Edit Subscription</CardTitle>
+          <CardTitle>{t('editSubscription')}</CardTitle>
         </CardHeader>
         <CardContent>
           <SubscriptionForm subscription={data} />

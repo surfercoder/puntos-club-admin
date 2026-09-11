@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import { AppError } from '@/lib/errors';
 
 export interface ModerationResult {
   isApproved: boolean;
@@ -86,7 +87,7 @@ Para errores de ortografía, usa severity "low" y en las razones indica el error
     // Structured outputs guarantee the text block is JSON matching MODERATION_SCHEMA.
     const responseText = message.content.find((b) => b.type === 'text')?.text;
     if (!responseText) {
-      throw new Error('Respuesta vacía de la IA');
+      throw new AppError('notifications.emptyAiResponse');
     }
 
     const result: ModerationResult = JSON.parse(responseText);
@@ -94,6 +95,9 @@ Para errores de ortografía, usa severity "low" y en las razones indica el error
     return result;
   } catch (_error: unknown) {
     console.error('[content-moderator] moderation failed:', _error);
+    // Un AppError ya trae la clave de i18n: envolverlo la convertiria en texto
+    // suelto dentro de un literal en castellano y el llamador no podria traducirlo.
+    if (_error instanceof AppError) {throw _error;}
     const detail = _error instanceof Error ? _error.message : String(_error);
     throw new Error(`Error al moderar el contenido: ${detail}`, { cause: _error });
   }
