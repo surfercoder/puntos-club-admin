@@ -115,6 +115,35 @@ describe("InputField", () => {
     expect(wrapper.className).toContain("md:col-span-2");
   });
 
+  it("entrega el email en minuscula y pide el teclado de email", () => {
+    // El input es controlado: React restaura el value despues del handler, asi
+    // que hay que leerlo dentro del propio onChange.
+    const onChange = jest.fn(
+      (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
+        e.target.value
+    );
+    render(
+      <InputField
+        name="email"
+        value=""
+        label="Email"
+        color="#FF0000"
+        errors={defaultErrors}
+        onChange={onChange}
+        setCircleRef={noopSetRef}
+      />
+    );
+    const input = screen.getByLabelText("Email");
+    expect(input).toHaveAttribute("type", "email");
+    expect(input).toHaveAttribute("inputmode", "email");
+    expect(input).toHaveAttribute("autocapitalize", "none");
+    expect(input).toHaveAttribute("autocorrect", "off");
+    expect(input).toHaveAttribute("spellcheck", "false");
+
+    fireEvent.change(input, { target: { value: "Fede@Owner.COM" } });
+    expect(onChange.mock.results[0].value).toBe("fede@owner.com");
+  });
+
   it("calls setCircleRef with the mounted element", () => {
     const setRef = jest.fn();
     render(

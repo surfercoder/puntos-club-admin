@@ -2,7 +2,24 @@ import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
-function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+// Los emails se guardan siempre en minuscula. En vez de repetir la regla en
+// cada formulario, el input de type="email" la aplica solo: teclado de email,
+// sin autocapitalizado y el valor pasa a minuscula antes de llegar al onChange
+// de quien lo use (controlado o no).
+// ponytail: al escribir una mayuscula en el medio del texto el cursor salta al
+// final, porque un input type="email" no expone setSelectionRange. Si molesta,
+// normalizar en onBlur en vez de onChange.
+function Input({ className, type, onChange, ...props }: React.ComponentProps<"input">) {
+  const isEmail = type === "email"
+
+  const handleChange = isEmail
+    ? (event: React.ChangeEvent<HTMLInputElement>) => {
+        const lower = event.target.value.toLowerCase()
+        if (event.target.value !== lower) event.target.value = lower
+        onChange?.(event)
+      }
+    : onChange
+
   return (
     <input
       type={type}
@@ -13,7 +30,14 @@ function Input({ className, type, ...props }: React.ComponentProps<"input">) {
         "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
         className
       )}
+      {...(isEmail && {
+        inputMode: "email" as const,
+        autoCapitalize: "none",
+        autoCorrect: "off",
+        spellCheck: false,
+      })}
       {...props}
+      onChange={handleChange}
     />
   )
 }

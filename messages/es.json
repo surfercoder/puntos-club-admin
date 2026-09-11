@@ -2718,6 +2718,7 @@
       "notPending": "Este canje ya no está pendiente.",
       "outOfStock": "El producto no tiene stock disponible.",
       "planLimitReached": "Alcanzaste el límite de tu plan. Actualizá el plan para seguir.",
+      "purchasePointsSpent": "No se puede cancelar: el beneficiario ya usó esos puntos en un canje. Cancelá primero el canje o ajustá los puntos a mano.",
       "redemptionNotFound": "No encontramos ese canje."
     },
     "organization": {

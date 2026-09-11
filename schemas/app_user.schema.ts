@@ -6,7 +6,7 @@ export const AppUserSchema = z.object({
   id: z.string().optional(),
   first_name: z.string().trim().min(1, 'firstNameRequired'),
   last_name: z.string().trim().min(1, 'lastNameRequired'),
-  email: z.string().trim().min(1, 'emailRequired').email('emailInvalid'),
+  email: z.string().trim().toLowerCase().min(1, 'emailRequired').email('emailInvalid'),
   password: z.string().optional().transform(val => val || undefined),
   role_id: z.string().optional().nullable(),
 }).superRefine((data, ctx) => {

@@ -206,7 +206,7 @@ function RequiredTextField({
         id={name}
         name={name}
         placeholder={placeholder}
-        type="text"
+        type={name === 'email' ? 'email' : 'text'}
       />
       <FieldError actionState={actionState} name={name} />
     </div>

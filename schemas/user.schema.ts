@@ -5,7 +5,7 @@ export const UserSchema = z.object({
   organization_id: z.string().min(1, 'organizationRequired'),
   first_name: z.string().min(1, 'firstNameRequired'),
   last_name: z.string().min(1, 'lastNameRequired'),
-  email: z.email('emailInvalid').min(1, 'emailRequired'),
+  email: z.string().trim().toLowerCase().min(1, 'emailRequired').email('emailInvalid'),
   password: z.string().min(6, 'passwordMinLength6').optional().or(z.literal('')).transform(val => val === '' ? null : val),
   phone: z.string().optional().or(z.literal('')).transform(val => val === '' ? null : val),
   document_id: z.string().optional().or(z.literal('')).transform(val => val === '' ? null : val),

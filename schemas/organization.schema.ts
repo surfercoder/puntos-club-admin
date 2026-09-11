@@ -41,7 +41,7 @@ export const ClubProfileSchema = z.object({
   business_name: z.string().nullable(),
   tax_id: z.string().nullable(),
   description: z.string().nullable(),
-  contact_email: z.string().nullable(),
+  contact_email: z.string().trim().toLowerCase().nullable(),
   contact_phone: z.string().nullable(),
   website: z.string().nullable(),
   industry: z.string().nullable(),

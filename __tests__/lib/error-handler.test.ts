@@ -96,6 +96,14 @@ describe('fromErrorToActionState', () => {
     expect(result.message).toBe('rpc.insufficientPoints');
   });
 
+  it('reconoce la compra cuyos puntos el socio ya gasto', async () => {
+    const result = await fromErrorToActionState({
+      code: 'P0001',
+      message: 'PURCHASE_POINTS_ALREADY_SPENT',
+    });
+    expect(result.message).toBe('rpc.purchasePointsSpent');
+  });
+
   it('trata un fallo de red como tal', async () => {
     const result = await fromErrorToActionState(new TypeError('Network request failed'));
     expect(result.message).toBe('network');

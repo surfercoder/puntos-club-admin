@@ -31,6 +31,15 @@ export const InputField: FC<InputFieldProps> = ({
   colSpanMd = 1,
 }) => {
   const { resolvedTheme: theme } = useTheme();
+  // Mismo criterio que el Input del dashboard: el campo de email va con su
+  // teclado, sin autocapitalizar y siempre en minuscula.
+  const isEmail = name === "email";
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    if (isEmail) e.target.value = e.target.value.toLowerCase();
+    onChange(e);
+  };
 
   return (
     <div
@@ -48,11 +57,15 @@ export const InputField: FC<InputFieldProps> = ({
         <input
           aria-label={label}
           key={theme}
-          type="text"
+          type={isEmail ? "email" : "text"}
+          inputMode={isEmail ? "email" : undefined}
+          autoCapitalize={isEmail ? "none" : undefined}
+          autoCorrect={isEmail ? "off" : undefined}
+          spellCheck={isEmail ? false : undefined}
           name={name}
           value={value}
-          onChange={onChange}
-          onBlur={onChange}
+          onChange={handleChange}
+          onBlur={handleChange}
           className="w-full pl-14 pr-4 py-4 md:py-5 dark:border-2 dark:border-white rounded-full bg-[#D9D9D9] dark:bg-transparent shadow-sm text-black dark:text-white text-sm lg:text-base focus:outline-none"
         />
       </div>

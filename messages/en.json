@@ -2718,6 +2718,7 @@
       "notPending": "This redemption is no longer pending.",
       "outOfStock": "This reward is out of stock.",
       "planLimitReached": "You've reached your plan's limit. Upgrade your plan to continue.",
+      "purchasePointsSpent": "Can't cancel: the member already spent those points on a redemption. Cancel the redemption first, or adjust the points manually.",
       "redemptionNotFound": "We couldn't find that redemption."
     },
     "organization": {

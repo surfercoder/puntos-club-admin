@@ -13,6 +13,8 @@ export const contactFieldSchemas = {
     .min(2, 'validation.lastNameMinLength'),
   email: z
     .string()
+    .trim()
+    .toLowerCase()
     .min(1, 'validation.emailRequired')
     .email('validation.emailInvalid'),
   phoneNumber: z

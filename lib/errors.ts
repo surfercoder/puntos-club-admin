@@ -60,13 +60,14 @@ const PG_CODES: Record<string, ErrorKey> = {
 
 // Excepciones que levantan las funciones del backend (RAISE EXCEPTION). Llegan
 // en el message porque Postgres no las expone en el code.
-const RPC_TOKENS: [string, ErrorKey][] = [
+export const RPC_TOKENS: [string, ErrorKey][] = [
   ['INSUFFICIENT_POINTS', 'rpc.insufficientPoints'],
   ['OUT_OF_STOCK', 'rpc.outOfStock'],
   ['MEMBERSHIP_INACTIVE', 'rpc.membershipInactive'],
   ['REDEMPTION_NOT_PENDING', 'rpc.notPending'],
   ['REDEMPTION_NOT_FOUND', 'rpc.redemptionNotFound'],
   ['PLAN_LIMIT_REACHED', 'rpc.planLimitReached'],
+  ['PURCHASE_POINTS_ALREADY_SPENT', 'rpc.purchasePointsSpent'],
 ];
 
 // Claves propias que el codigo de la app lanza a proposito (`throw new
