@@ -44,7 +44,7 @@ describe('Beneficiary Hide API Route', () => {
     const response = await POST(request);
     const data = await response.json();
     expect(response.status).toBe(401);
-    expect(data.error).toBe('Unauthorized');
+    expect(data.error).toBe('auth.notAuthenticated');
   });
 
   it('returns 400 when missing beneficiary_id', async () => {
@@ -54,7 +54,7 @@ describe('Beneficiary Hide API Route', () => {
     const response = await POST(request);
     const data = await response.json();
     expect(response.status).toBe(400);
-    expect(data.error).toBe('beneficiary_id, organization_id, and is_hidden are required');
+    expect(data.error).toBe('db.missingField');
   });
 
   it('returns 400 when missing organization_id', async () => {
@@ -64,7 +64,7 @@ describe('Beneficiary Hide API Route', () => {
     const response = await POST(request);
     const data = await response.json();
     expect(response.status).toBe(400);
-    expect(data.error).toBe('beneficiary_id, organization_id, and is_hidden are required');
+    expect(data.error).toBe('db.missingField');
   });
 
   it('returns 400 when is_hidden is not boolean', async () => {
@@ -74,7 +74,7 @@ describe('Beneficiary Hide API Route', () => {
     const response = await POST(request);
     const data = await response.json();
     expect(response.status).toBe(400);
-    expect(data.error).toBe('beneficiary_id, organization_id, and is_hidden are required');
+    expect(data.error).toBe('db.missingField');
   });
 
   it('returns 403 when org does not match', async () => {
@@ -86,7 +86,7 @@ describe('Beneficiary Hide API Route', () => {
     const response = await POST(request);
     const data = await response.json();
     expect(response.status).toBe(403);
-    expect(data.error).toBe('You can only hide beneficiaries from your own organization');
+    expect(data.error).toBe('beneficiary.hideForbidden');
   });
 
   it('updates existing record successfully', async () => {
@@ -154,6 +154,6 @@ describe('Beneficiary Hide API Route', () => {
     const response = await POST(request);
     const data = await response.json();
     expect(response.status).toBe(500);
-    expect(data.error).toBe('An unexpected error occurred');
+    expect(data.error).toBe('unexpected');
   });
 });

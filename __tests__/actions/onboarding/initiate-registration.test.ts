@@ -64,7 +64,7 @@ describe('initiateRegistration', () => {
     });
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
     const result = await initiateRegistration(validInput);
-    expect(result).toEqual({ success: false, error: 'Error de configuración del servidor.' });
+    expect(result).toEqual({ success: false, error: 'config.missing' });
     consoleSpy.mockRestore();
   });
 
@@ -73,7 +73,7 @@ describe('initiateRegistration', () => {
     mockSend.mockResolvedValue({ data: null, error: { message: 'Invalid API key' } });
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
     const result = await initiateRegistration(validInput);
-    expect(result).toEqual({ success: false, error: 'No se pudo enviar el email de verificación.' });
+    expect(result).toEqual({ success: false, error: 'onboarding.emailSendFailed' });
     consoleSpy.mockRestore();
   });
 
@@ -82,7 +82,7 @@ describe('initiateRegistration', () => {
     mockSend.mockRejectedValue(new Error('Network error'));
     const consoleSpy = jest.spyOn(console, 'error').mockImplementation();
     const result = await initiateRegistration(validInput);
-    expect(result).toEqual({ success: false, error: 'No se pudo enviar el email de verificación.' });
+    expect(result).toEqual({ success: false, error: 'onboarding.emailSendFailed' });
     consoleSpy.mockRestore();
   });
 

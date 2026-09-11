@@ -7,6 +7,7 @@ import { isAdmin } from '@/lib/auth/roles';
 import { createClient } from '@/lib/supabase/server';
 import { AddressSchema } from '@/schemas/address.schema';
 import type { Address } from '@/types/address';
+import { AppError } from '@/lib/errors';
 
 export async function createAddress(input: Address) {
   await requireUser();
@@ -25,7 +26,7 @@ export async function createAddress(input: Address) {
   const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
   if (!activeOrgIdNumber) {
-    return { data: null, error: { message: 'Missing active organization' } };
+    return { data: null, error: new AppError('organization.noActive') };
   }
 
   const { data, error } = await supabase
@@ -63,7 +64,7 @@ export async function updateAddress(id: number, input: Address) {
 
   // Non-admin users require an active organization
   if (!userIsAdmin && (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber))) {
-    return { data: null, error: { message: 'Missing active organization' } };
+    return { data: null, error: new AppError('organization.noActive') };
   }
 
   // For admins, fetch the existing address to preserve its organization_id
@@ -108,7 +109,7 @@ export async function deleteAddress(id: number) {
 
   // Non-admin users require an active organization
   if (!userIsAdmin && (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber))) {
-    return { error: { message: 'Missing active organization' } };
+    return { error: new AppError('organization.noActive') };
   }
 
   let query = supabase

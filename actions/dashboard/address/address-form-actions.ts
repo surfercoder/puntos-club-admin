@@ -17,11 +17,14 @@ export async function addressFormAction(_prevState: ActionState, formData: FormD
       return await fromErrorToActionState(parsed.error);
     }
 
-    if (formDataObject.id) {
-      await updateAddress(Number(formDataObject.id), parsed.data as Address);
-    } else {
-      await createAddress(parsed.data as Address);
-    }
+    // `create*`/`update*` NO tiran: devuelven { data, error }. Sin este
+    // chequeo un INSERT fallado seguia de largo y el form contestaba "guardado
+    // con exito". Se relanza para que el catch de abajo lo traduzca por `code`.
+    const result = formDataObject.id
+      ? await updateAddress(Number(formDataObject.id), parsed.data as Address)
+      : await createAddress(parsed.data as Address);
+
+    if (result.error) throw result.error;
 
     // Revalidate the address list page
     revalidatePath('/dashboard/address');

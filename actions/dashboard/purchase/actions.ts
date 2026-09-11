@@ -7,8 +7,7 @@ import { getCurrentUser } from "@/lib/auth/get-current-user";
 import { getMutationOrgId } from "@/lib/auth/get-mutation-org-id";
 import { requireUser } from "@/lib/auth/require-user";
 import { hasOwnerPermissions, isAdmin } from "@/lib/auth/roles";
-import { translateError } from '@/lib/error-handler';
-import { AppError } from '@/lib/errors';
+import { errorText, translateError } from '@/lib/error-handler';
 
 export interface PurchaseItem {
   item_name: string;
@@ -49,14 +48,14 @@ export async function createPurchase(
     if (!input.beneficiary_id || !input.cashier_id || !input.branch_id) {
       return {
         success: false,
-        error: "Missing required fields: beneficiary_id, cashier_id, or branch_id",
+        error: await errorText('purchase.fieldsRequired'),
       };
     }
 
     if (!input.items || input.items.length === 0) {
       return {
         success: false,
-        error: "At least one item is required",
+        error: await errorText('purchase.itemsRequired'),
       };
     }
 
@@ -65,7 +64,7 @@ export async function createPurchase(
       if (!item.item_name || item.quantity <= 0 || item.unit_price < 0) {
         return {
           success: false,
-          error: "Invalid item data",
+          error: await errorText('db.invalidValue'),
         };
       }
     }
@@ -88,7 +87,7 @@ export async function createPurchase(
     if (branchError || !branch) {
       return {
         success: false,
-        error: "Branch not found",
+        error: await errorText('branch.notFound'),
       };
     }
 
@@ -106,7 +105,7 @@ export async function createPurchase(
     if (pointsError) {
       return {
         success: false,
-        error: "Failed to calculate points",
+        error: await errorText('purchase.pointsFailed'),
       };
     }
 
@@ -129,7 +128,7 @@ export async function createPurchase(
     if (purchaseError || !purchase) {
       return {
         success: false,
-        error: "Failed to create purchase",
+        error: await errorText('purchase.createFailed'),
       };
     }
 
@@ -294,13 +293,13 @@ export async function cancelPurchase(id: string, reason?: string) {
 
     // Cancelar devuelve puntos: lo hace quien administra el club, no un cajero.
     if (!hasOwnerPermissions(user)) {
-      return { success: false, error: "Forbidden" };
+      return { success: false, error: await errorText('db.forbidden') };
     }
 
     const [supabase, orgId] = await Promise.all([createClient(), getMutationOrgId()]);
 
     if (!orgId) {
-      return { success: false, error: "Missing active organization" };
+      return { success: false, error: await errorText('organization.noActive') };
     }
 
     const { data, error } = await supabase
@@ -321,7 +320,7 @@ export async function cancelPurchase(id: string, reason?: string) {
       return { success: false, error: await translateError(error) };
     }
     if (!data) {
-      return { success: false, error: "PURCHASE_NOT_CANCELLABLE" };
+      return { success: false, error: await errorText('purchase.notCancellable') };
     }
 
     revalidatePath("/dashboard/purchase");
@@ -373,7 +372,7 @@ export async function verifyBeneficiary(_user_id: string) {
     const { data: authUser } = await supabase.auth.getUser();
     
     if (!authUser.user) {
-      return { success: false, error: await translateError(new AppError('auth.notAuthenticated')) };
+      return { success: false, error: await errorText('auth.notAuthenticated') };
     }
 
     const { data, error } = await supabase
@@ -383,7 +382,7 @@ export async function verifyBeneficiary(_user_id: string) {
       .single();
 
     if (error || !data) {
-      return { success: false, error: "Beneficiary not found" };
+      return { success: false, error: await errorText('beneficiary.notFound') };
     }
 
     return { success: true, data };

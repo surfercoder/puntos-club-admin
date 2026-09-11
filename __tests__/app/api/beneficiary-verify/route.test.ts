@@ -52,7 +52,7 @@ describe('Beneficiary Verify API Route', () => {
     const response = await POST(request);
     const data = await response.json();
     expect(response.status).toBe(400);
-    expect(data.error).toBe('userId or email is required');
+    expect(data.error).toBe('user.idOrEmailRequired');
   });
 
   it('returns 404 when beneficiary not found', async () => {
@@ -65,7 +65,7 @@ describe('Beneficiary Verify API Route', () => {
     const response = await POST(request);
     const data = await response.json();
     expect(response.status).toBe(404);
-    expect(data.error).toBe('Beneficiary not found');
+    expect(data.error).toBe('beneficiary.notFound');
   });
 
   it('returns beneficiary data on success', async () => {
@@ -99,6 +99,6 @@ describe('Beneficiary Verify API Route', () => {
     const response = await POST(request);
     const data = await response.json();
     expect(response.status).toBe(500);
-    expect(data.error).toBe('An unexpected error occurred');
+    expect(data.error).toBe('unexpected');
   });
 });

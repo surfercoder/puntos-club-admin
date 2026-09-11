@@ -32,7 +32,7 @@ describe('getCurrentUser', () => {
   });
 
   it('returns null when auth error occurs', async () => {
-    mockGetUser.mockResolvedValue({ data: {}, error: { message: 'Unauthorized' } });
+    mockGetUser.mockResolvedValue({ data: {}, error: { message: 'auth.notAuthenticated' } });
 
     const result = await getCurrentUser();
     expect(result).toBeNull();

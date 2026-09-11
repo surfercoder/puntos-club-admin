@@ -111,7 +111,7 @@ describe('NotificationsPage', () => {
   it('throws when fetch fails', async () => {
     mockOrder.mockResolvedValue({ data: null, error: { message: 'DB error' } });
 
-    await expect(NotificationsPage({ searchParams: Promise.resolve({}) })).rejects.toThrow('Failed to fetch notifications');
+    await expect(NotificationsPage({ searchParams: Promise.resolve({}) })).rejects.toThrow('notifications.loadFailed');
   });
 
   it('renders notifications list', async () => {

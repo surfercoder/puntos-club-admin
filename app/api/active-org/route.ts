@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { errorText, translateError } from '@/lib/error-handler';
 
 export async function POST(req: Request) {
   try {
@@ -6,7 +7,7 @@ export async function POST(req: Request) {
     const orgId = body.orgId;
 
     if (!orgId) {
-      return NextResponse.json({ error: "Missing orgId" }, { status: 400 });
+      return NextResponse.json({ error: await errorText('organization.noActive') }, { status: 400 });
     }
 
     const res = NextResponse.json({ success: true });
@@ -19,7 +20,7 @@ export async function POST(req: Request) {
     return res;
   } catch (error) {
     return NextResponse.json(
-      { error: error instanceof Error ? error.message : "Unknown error" },
+      { error: await translateError(error) },
       { status: 500 },
     );
   }

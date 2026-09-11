@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { NextRequest} from "next/server";
 import { NextResponse } from "next/server";
+import { errorText } from '@/lib/error-handler';
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized - Please log in" },
+        { success: false, error: await errorText('auth.notAuthenticated') },
         { status: 401 }
       );
     }
@@ -47,7 +48,7 @@ export async function POST(request: NextRequest) {
 
     if (!userId && !email) {
       return NextResponse.json(
-        { success: false, error: "userId or email is required" },
+        { success: false, error: await errorText('user.idOrEmailRequired') },
         { status: 400 }
       );
     }
@@ -61,7 +62,7 @@ export async function POST(request: NextRequest) {
 
     if (error || !data) {
       return NextResponse.json(
-        { success: false, error: "Beneficiary not found" },
+        { success: false, error: await errorText('beneficiary.notFound') },
         { status: 404 }
       );
     }
@@ -72,7 +73,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (_error) {
     return NextResponse.json(
-      { success: false, error: "An unexpected error occurred" },
+      { success: false, error: await errorText('unexpected') },
       { status: 500 }
     );
   }

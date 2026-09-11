@@ -13,6 +13,7 @@ import {
   messageBox,
 } from '@/lib/email-template';
 import { resend, EMAIL_FROM } from '@/lib/resend';
+import { errorText } from '@/lib/error-handler';
 
 const CONTACT_RECIPIENT = 'acassani@puntosclub.com.ar';
 
@@ -22,7 +23,7 @@ export async function sendContactEmail(
   const parsed = ContactSchema.safeParse(input);
 
   if (!parsed.success) {
-    return { success: false, error: 'Invalid form data.' };
+    return { success: false, error: await errorText('contact.invalidData') };
   }
 
   const { firstName, lastName, email, phoneNumber, business, message } = parsed.data;
@@ -72,7 +73,7 @@ export async function sendContactEmail(
         tags: { area: 'contact.email' },
         extra: { sender: email },
       });
-      return { success: false, error: 'Failed to send contact email.' };
+      return { success: false, error: await errorText('contact.sendFailed') };
     }
   } catch (err) {
     console.error('[sendContactEmail] Resend error:', err);
@@ -80,7 +81,7 @@ export async function sendContactEmail(
       tags: { area: 'contact.email' },
       extra: { sender: email },
     });
-    return { success: false, error: 'Failed to send contact email.' };
+    return { success: false, error: await errorText('contact.sendFailed') };
   }
 
   return { success: true };

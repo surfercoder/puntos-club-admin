@@ -16,11 +16,14 @@ export async function branchFormAction(_prevState: ActionState, formData: FormDa
       return await fromErrorToActionState(parsed.error);
     }
 
-    if (formDataObject.id) {
-      await updateBranch(formDataObject.id as string, parsed.data as Branch);
-    } else {
-      await createBranch(parsed.data as Branch);
-    }
+    // `create*`/`update*` NO tiran: devuelven { data, error }. Sin este
+    // chequeo un INSERT fallado seguia de largo y el form contestaba "guardado
+    // con exito". Se relanza para que el catch de abajo lo traduzca por `code`.
+    const result = formDataObject.id
+      ? await updateBranch(formDataObject.id as string, parsed.data as Branch)
+      : await createBranch(parsed.data as Branch);
+
+    if (result.error) throw result.error;
 
     // Revalidate the branch list page
     revalidatePath('/dashboard/branch');

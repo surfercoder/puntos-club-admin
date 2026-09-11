@@ -67,7 +67,7 @@ describe('Purchase Create API Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(404);
     const data = await response.json();
-    expect(data.error).toContain('Cashier profile not found');
+    expect(data.error).toBe('cashier.profileNotFound');
   });
 
   it('returns 400 when required fields are missing', async () => {
@@ -78,7 +78,7 @@ describe('Purchase Create API Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(400);
     const data = await response.json();
-    expect(data.error).toContain('beneficiary_id or branch_id');
+    expect(data.error).toBe('purchase.fieldsRequired');
   });
 
   it('returns 400 for invalid amount', async () => {
@@ -89,7 +89,7 @@ describe('Purchase Create API Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(400);
     const data = await response.json();
-    expect(data.error).toBe('Invalid purchase amount');
+    expect(data.error).toBe('purchase.invalidAmount');
   });
 
   it('returns 400 for NaN amount', async () => {
@@ -109,7 +109,7 @@ describe('Purchase Create API Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(400);
     const data = await response.json();
-    expect(data.error).toBe('Either amount or items array is required');
+    expect(data.error).toBe('purchase.amountOrItemsRequired');
   });
 
   it('returns 400 for invalid item data', async () => {
@@ -124,7 +124,7 @@ describe('Purchase Create API Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(400);
     const data = await response.json();
-    expect(data.error).toBe('Invalid item data');
+    expect(data.error).toBe('db.invalidValue');
   });
 
   it('creates purchase with items array (calculates total from items)', async () => {
@@ -200,7 +200,7 @@ describe('Purchase Create API Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(404);
     const data = await response.json();
-    expect(data.error).toBe('Branch not found');
+    expect(data.error).toBe('branch.notFound');
   });
 
   it('falls back to simple calculation when points RPC fails', async () => {
@@ -237,7 +237,7 @@ describe('Purchase Create API Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(500);
     const data = await response.json();
-    expect(data.error).toBe('Failed to create purchase');
+    expect(data.error).toBe('purchase.createFailed');
   });
 
   it('returns 409 when the beneficiary is no longer a member', async () => {
@@ -271,7 +271,7 @@ describe('Purchase Create API Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(500);
     const data = await response.json();
-    expect(data.error).toBe('An unexpected error occurred');
+    expect(data.error).toBe('unexpected');
   });
 
   it('handles beneficiary balance fetch error gracefully', async () => {

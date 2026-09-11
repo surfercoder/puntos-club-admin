@@ -12,6 +12,7 @@ import type { Category } from '@/types/category';
 import { CategorySchema } from '@/schemas/category.schema';
 import { enforcePlanLimit } from '@/lib/plans/usage';
 import { translateError } from '@/lib/error-handler';
+import { AppError } from '@/lib/errors';
 
 // El ABM de categorías se eliminó: se crean sólo desde el alta de producto y
 // desde el onboarding. La tabla y el tipo siguen existiendo.
@@ -31,7 +32,7 @@ export async function createCategory(input: Category) {
   const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
   if (!activeOrgIdNumber) {
-    return { data: null, error: { message: 'Missing active organization' } };
+    return { data: null, error: new AppError('organization.noActive') };
   }
 
   // Ya no hay ABM para borrar duplicados, así que reusamos la categoría existente
@@ -64,7 +65,7 @@ export async function deleteCategory(id: string) {
   const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
   if (!activeOrgIdNumber) {
-    return { error: { message: 'Missing active organization' } };
+    return { error: new AppError('organization.noActive') };
   }
 
   const { error } = await supabase
@@ -82,7 +83,7 @@ export async function createProduct(input: Product) {
   const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
   if (!activeOrgIdNumber) {
-    return { data: null, error: { message: 'Missing active organization' } };
+    return { data: null, error: new AppError('organization.noActive') };
   }
 
   const limitError = await enforcePlanLimit(activeOrgIdNumber, 'redeemable_products');
@@ -110,7 +111,7 @@ export async function updateProduct(id: string, input: Partial<Product>) {
   const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
   if (!activeOrgIdNumber) {
-    return { data: null, error: { message: 'Missing active organization' } };
+    return { data: null, error: new AppError('organization.noActive') };
   }
 
   const { data, error } = await supabase
@@ -133,7 +134,7 @@ export async function deleteProduct(id: string) {
   const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
   if (!activeOrgIdNumber) {
-    return { error: { message: 'Missing active organization' } };
+    return { error: new AppError('organization.noActive') };
   }
 
   const { error } = await supabase

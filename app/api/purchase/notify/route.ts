@@ -6,6 +6,7 @@ import { NextResponse } from "next/server";
 import { resend, EMAIL_FROM } from "@/lib/resend";
 import { pointsCreditedEmail } from "@/lib/email-template";
 import { AppError } from '@/lib/errors';
+import { errorText } from '@/lib/error-handler';
 
 interface ExpoPushMessage {
   to: string;
@@ -39,7 +40,7 @@ export async function POST(request: NextRequest) {
 
     if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json(
-        { success: false, error: "Missing authorization header" },
+        { success: false, error: await errorText('auth.notAuthenticated') },
         { status: 401 }
       );
     }
@@ -64,7 +65,7 @@ export async function POST(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
+        { success: false, error: await errorText('auth.notAuthenticated') },
         { status: 401 }
       );
     }
@@ -78,7 +79,7 @@ export async function POST(request: NextRequest) {
 
     if (!appUser?.organization_id) {
       return NextResponse.json(
-        { success: false, error: "User not associated with an organization" },
+        { success: false, error: await errorText('auth.noOrganization') },
         { status: 403 }
       );
     }
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
       )
     ) {
       return NextResponse.json(
-        { success: false, error: "Insufficient permissions" },
+        { success: false, error: await errorText('db.forbidden') },
         { status: 403 }
       );
     }
@@ -122,7 +123,7 @@ export async function POST(request: NextRequest) {
 
     if (!beneficiary) {
       return NextResponse.json(
-        { success: false, error: "Beneficiary not found" },
+        { success: false, error: await errorText('beneficiary.notFound') },
         { status: 404 }
       );
     }
@@ -252,7 +253,7 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error("[purchase/notify] Unexpected error:", error);
     return NextResponse.json(
-      { success: false, error: "An unexpected error occurred" },
+      { success: false, error: await errorText('unexpected') },
       { status: 500 }
     );
   }

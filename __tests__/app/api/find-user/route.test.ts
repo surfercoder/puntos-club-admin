@@ -98,7 +98,7 @@ describe('Find User API Route', () => {
     const request = { url: 'http://localhost:3001/api/find-user?email=test@test.com' } as Request;
     const response = await GET(request);
     const data = await response.json();
-    expect(data.error).toBe('DB error');
+    expect(data.error).toBe('unexpected');
     expect(data.stack).toBeDefined();
   });
 
@@ -109,7 +109,7 @@ describe('Find User API Route', () => {
     const request = { url: 'http://localhost:3001/api/find-user?email=test@test.com' } as Request;
     const response = await GET(request);
     const data = await response.json();
-    expect(data.error).toBe('Unknown error');
+    expect(data.error).toBe('unexpected');
     expect(data.stack).toBeUndefined();
   });
 });

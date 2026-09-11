@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { translateError } from '@/lib/error-handler';
 
 export async function GET() {
   try {
@@ -26,7 +27,7 @@ export async function GET() {
     });
   } catch (error) {
     return NextResponse.json({
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: await translateError(error)
     });
   }
 }

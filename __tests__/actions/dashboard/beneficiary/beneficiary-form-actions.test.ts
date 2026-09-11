@@ -121,4 +121,17 @@ describe('beneficiaryFormAction', () => {
     const result = await beneficiaryFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
   });
+
+  // Regresion: `updateBeneficiary` NO tira, devuelve { data, error }. Sin el
+  // chequeo, una edicion fallada contestaba "guardado con exito".
+  it('reporta el error del update en vez de fingir exito', async () => {
+    (updateBeneficiary as jest.Mock).mockReturnValue({
+      data: null,
+      error: { message: 'duplicate key value violates unique constraint', code: '23505' },
+    });
+    const fd = createFormData({ id: '1', first_name: 'John', available_points: '0' });
+    const result = await beneficiaryFormAction(EMPTY_ACTION_STATE, fd);
+    expect(result.status).toBe('error');
+    expect(result.message).toBe('db.duplicate');
+  });
 });

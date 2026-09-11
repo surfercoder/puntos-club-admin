@@ -6,6 +6,7 @@ import type { PreApprovalResponse } from 'mercadopago/dist/clients/preApproval/c
 import { getMercadoPagoClient, type PlanId } from '@/lib/mercadopago/client';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { errorText } from '@/lib/error-handler';
 
 const statusMap: Record<string, string> = {
   authorized: 'authorized',
@@ -24,14 +25,14 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+      return NextResponse.json({ error: await errorText('auth.notAuthenticated') }, { status: 401 });
     }
 
     const body = await request.json() as { preapprovalId: string };
     const { preapprovalId } = body;
 
     if (!preapprovalId) {
-      return NextResponse.json({ error: 'preapprovalId requerido' }, { status: 400 });
+      return NextResponse.json({ error: await errorText('subscription.preapprovalRequired') }, { status: 400 });
     }
 
     // Fetch current status from MercadoPago
@@ -87,6 +88,6 @@ export async function POST(request: NextRequest) {
     });
   } catch (err) {
     console.error('[verify-subscription]', err);
-    return NextResponse.json({ error: 'Error verificando suscripción' }, { status: 500 });
+    return NextResponse.json({ error: await errorText('subscription.verifyFailed') }, { status: 500 });
   }
 }

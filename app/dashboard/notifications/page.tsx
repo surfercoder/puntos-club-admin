@@ -25,6 +25,7 @@ import { getUsageSummaryAction } from '@/actions/dashboard/usage/actions';
 import { createClient } from '@/lib/supabase/server';
 import { NOTIFICATION_STATUSES, formatDateOnly, parsePage, parsePerPage } from '@/lib/utils';
 import type { PushNotification, PushNotificationStatus } from '@/types/push_notification';
+import { AppError } from '@/lib/errors';
 
 const NUMBER_FORMATTER = new Intl.NumberFormat('es-AR');
 
@@ -86,7 +87,7 @@ export default async function NotificationsPage({ searchParams }: PageProps) {
   const { data, error } = await query;
 
   if (error) {
-    throw new Error('Failed to fetch notifications');
+    throw new AppError('notifications.loadFailed');
   }
 
   const needle = filters.q.toLowerCase();

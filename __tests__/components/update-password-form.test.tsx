@@ -99,9 +99,10 @@ describe('UpdatePasswordForm', () => {
     });
   });
 
-  it('shows error message on update failure', async () => {
+  // GoTrue responde en ingles; se mapea por `code` como el resto de la app.
+  it('traduce el error de GoTrue en vez de mostrar su texto', async () => {
     mockUpdateUser.mockResolvedValue({
-      error: new Error('Password too weak'),
+      error: { message: 'New password should be different from the old password', code: 'same_password' },
     });
 
     render(<UpdatePasswordForm />);
@@ -109,7 +110,7 @@ describe('UpdatePasswordForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'submitButton' }));
 
     await waitFor(() => {
-      expect(screen.getByText('Password too weak')).toBeInTheDocument();
+      expect(screen.getByText('auth.samePassword')).toBeInTheDocument();
     });
   });
 
@@ -121,7 +122,7 @@ describe('UpdatePasswordForm', () => {
     fireEvent.click(screen.getByRole('button', { name: 'submitButton' }));
 
     await waitFor(() => {
-      expect(screen.getByText('error')).toBeInTheDocument();
+      expect(screen.getByText('unexpected')).toBeInTheDocument();
     });
   });
 

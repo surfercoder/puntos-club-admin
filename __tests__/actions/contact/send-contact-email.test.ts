@@ -41,7 +41,7 @@ describe('sendContactEmail', () => {
       phoneNumber: '',
       message: '',
     });
-    expect(result).toEqual({ success: false, error: 'Invalid form data.' });
+    expect(result).toEqual({ success: false, error: 'contact.invalidData' });
   });
 
   it('should succeed without sending email when no RESEND_API_KEY', async () => {
@@ -79,7 +79,7 @@ describe('sendContactEmail', () => {
     mockSend.mockResolvedValue({ data: null, error: { message: 'API error' } });
 
     const result = await sendContactEmail(validInput);
-    expect(result).toEqual({ success: false, error: 'Failed to send contact email.' });
+    expect(result).toEqual({ success: false, error: 'contact.sendFailed' });
   });
 
   it('should return error when send throws', async () => {
@@ -87,6 +87,6 @@ describe('sendContactEmail', () => {
     mockSend.mockRejectedValue(new Error('Network error'));
 
     const result = await sendContactEmail(validInput);
-    expect(result).toEqual({ success: false, error: 'Failed to send contact email.' });
+    expect(result).toEqual({ success: false, error: 'contact.sendFailed' });
   });
 });

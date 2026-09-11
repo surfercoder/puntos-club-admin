@@ -91,7 +91,8 @@ describe('createAddress', () => {
   it('should return error when no active org', async () => {
     mockCookieStore.get.mockReturnValue(undefined);
     const result = await createAddress(validAddress);
-    expect(result).toEqual({ data: null, error: { message: 'Missing active organization' } });
+    expect(result.data).toBeNull();
+    expect(result.error?.message).toBe('organization.noActive');
   });
 });
 
@@ -138,7 +139,8 @@ describe('updateAddress', () => {
   it('should return error when non-admin has no active org', async () => {
     mockCookieStore.get.mockReturnValue(undefined);
     const result = await updateAddress(1, validAddress);
-    expect(result).toEqual({ data: null, error: { message: 'Missing active organization' } });
+    expect(result.data).toBeNull();
+    expect(result.error?.message).toBe('organization.noActive');
   });
 
   it('should preserve org_id for admin users', async () => {
@@ -172,7 +174,7 @@ describe('deleteAddress', () => {
   it('should return error when non-admin has no active org', async () => {
     mockCookieStore.get.mockReturnValue(undefined);
     const result = await deleteAddress(1);
-    expect(result).toEqual({ error: { message: 'Missing active organization' } });
+    expect(result.error?.message).toBe('organization.noActive');
   });
 
   it('should allow admin to delete without org filter', async () => {

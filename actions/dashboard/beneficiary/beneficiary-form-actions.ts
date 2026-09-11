@@ -50,7 +50,14 @@ export async function beneficiaryFormAction(_prevState: ActionState, formData: F
         }
       }
     } else {
-      await updateBeneficiary(formDataObject.id as string, parsed.data as Beneficiary);
+      // updateBeneficiary NO tira: devuelve { data, error }. Sin este chequeo
+      // una edicion fallada contestaba "guardado con exito". Se relanza para
+      // que el catch de abajo lo traduzca por `code`.
+      const result = await updateBeneficiary(
+        formDataObject.id as string,
+        parsed.data as Beneficiary,
+      );
+      if (result.error) throw result.error;
     }
 
     // Revalidate the beneficiary list page

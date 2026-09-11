@@ -82,7 +82,7 @@ describe('MercadoPago Create Subscription Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(400);
     const data = await response.json();
-    expect(data.error).toBe('Plan inválido');
+    expect(data.error).toBe('subscription.invalidPlan');
   });
 
   it('returns 400 when planId is missing', async () => {
@@ -137,7 +137,7 @@ describe('MercadoPago Create Subscription Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(400);
     const data = await response.json();
-    expect(data.error).toBe('El email de pago no es válido');
+    expect(data.error).toBe('subscription.invalidPayerEmail');
     expect(mockCreate).not.toHaveBeenCalled();
   });
 
@@ -335,7 +335,7 @@ describe('MercadoPago Create Subscription Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(400);
     const data = await response.json();
-    expect(data.error).toBe('payer_email is required');
+    expect(data.error).toBe('subscription.payerEmailRequired');
   });
 
   it('appends ngrok hint when error mentions back_url', async () => {

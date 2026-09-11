@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { errorText } from '@/lib/error-handler';
 
 export async function GET(_request: NextRequest) {
   try {
@@ -13,7 +14,7 @@ export async function GET(_request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
+        { success: false, error: await errorText('auth.notAuthenticated') },
         { status: 401 }
       );
     }
@@ -26,7 +27,7 @@ export async function GET(_request: NextRequest) {
 
     if (!appUser?.organization_id) {
       return NextResponse.json(
-        { success: false, error: "User not associated with an organization" },
+        { success: false, error: await errorText('auth.noOrganization') },
         { status: 403 }
       );
     }
@@ -39,7 +40,7 @@ export async function GET(_request: NextRequest) {
 
     if (error && error.code !== 'PGRST116') {
       return NextResponse.json(
-        { success: false, error: "Failed to fetch limits" },
+        { success: false, error: await errorText('notifications.limitsLoadFailed') },
         { status: 500 }
       );
     }
@@ -73,7 +74,7 @@ export async function GET(_request: NextRequest) {
     });
   } catch (_error) {
     return NextResponse.json(
-      { success: false, error: "An unexpected error occurred" },
+      { success: false, error: await errorText('unexpected') },
       { status: 500 }
     );
   }

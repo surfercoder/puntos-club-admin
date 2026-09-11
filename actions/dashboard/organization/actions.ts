@@ -9,7 +9,7 @@ import { hasOwnerPermissions, isAdmin } from '@/lib/auth/roles';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { requireUser } from '@/lib/auth/require-user';
 import { AppError } from '@/lib/errors';
-import { translateError } from '@/lib/error-handler';
+import { errorText, translateError } from '@/lib/error-handler';
 
 export async function createOrganization(input: Organization) {
   await requireUser();
@@ -155,12 +155,12 @@ export async function updateOrganizationVisibility(id: string, isPublic: boolean
   const parsed = OrganizationVisibilitySchema.safeParse({ is_public: isPublic });
 
   if (!parsed.success) {
-    return { error: 'Invalid input' };
+    return { error: await errorText('db.invalidValue') };
   }
 
   const currentUser = await getCurrentUser();
   if (!currentUser) {
-    return { error: await translateError(new AppError('auth.notAuthenticated')) };
+    return { error: await errorText('auth.notAuthenticated') };
   }
 
   const supabase = await createClient();
@@ -175,7 +175,7 @@ export async function updateOrganizationVisibility(id: string, isPublic: boolean
       .single();
 
     if (!membership) {
-      return { error: 'Forbidden' };
+      return { error: await errorText('db.forbidden') };
     }
   }
 
@@ -248,19 +248,19 @@ export async function updateClubProfile(id: string, input: ClubProfileInput) {
 
   const currentUser = await getCurrentUser();
   if (!currentUser || !hasOwnerPermissions(currentUser)) {
-    return { error: 'Not authorized' };
+    return { error: await errorText('db.forbidden') };
   }
 
   // El owner sólo puede tocar su propia organización.
   if (String(currentUser.organization_id) !== String(id)) {
-    return { error: 'Not authorized' };
+    return { error: await errorText('db.forbidden') };
   }
 
   // El tipo no existe en runtime: se valida para no escribir campos que el
   // formulario no ofrece (plan, trial_started_at, ...).
   const parsed = ClubProfileSchema.safeParse(input);
   if (!parsed.success) {
-    return { error: 'Invalid club profile' };
+    return { error: await errorText('db.invalidValue') };
   }
   const { address, ...orgFields } = parsed.data;
 
@@ -276,7 +276,7 @@ export async function updateClubProfile(id: string, input: ClubProfileInput) {
   if (error) {
     // organization_name_unique: el nombre es la identidad visible del club.
     if (error.code === '23505') {
-      return { error: 'Ya existe una empresa con ese nombre. Probá con otro.' };
+      return { error: await errorText('organization.nameTaken') };
     }
     return { error: await translateError(error) };
   }

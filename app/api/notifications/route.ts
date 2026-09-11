@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { errorText } from '@/lib/error-handler';
 
 export async function GET(_request: NextRequest) {
   try {
@@ -14,7 +15,7 @@ export async function GET(_request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
+        { success: false, error: await errorText('auth.notAuthenticated') },
         { status: 401 }
       );
     }
@@ -27,7 +28,7 @@ export async function GET(_request: NextRequest) {
 
     if (!appUser?.organization_id) {
       return NextResponse.json(
-        { success: false, error: "User not associated with an organization" },
+        { success: false, error: await errorText('auth.noOrganization') },
         { status: 403 }
       );
     }
@@ -48,7 +49,7 @@ export async function GET(_request: NextRequest) {
 
     if (error) {
       return NextResponse.json(
-        { success: false, error: "Failed to fetch notifications" },
+        { success: false, error: await errorText('notifications.loadFailed') },
         { status: 500 }
       );
     }
@@ -59,7 +60,7 @@ export async function GET(_request: NextRequest) {
     });
   } catch (_error) {
     return NextResponse.json(
-      { success: false, error: "An unexpected error occurred" },
+      { success: false, error: await errorText('unexpected') },
       { status: 500 }
     );
   }
@@ -76,7 +77,7 @@ export async function POST(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
+        { success: false, error: await errorText('auth.notAuthenticated') },
         { status: 401 }
       );
     }
@@ -89,7 +90,7 @@ export async function POST(request: NextRequest) {
 
     if (!appUser?.organization_id) {
       return NextResponse.json(
-        { success: false, error: "User not associated with an organization" },
+        { success: false, error: await errorText('auth.noOrganization') },
         { status: 403 }
       );
     }
@@ -99,7 +100,7 @@ export async function POST(request: NextRequest) {
 
     if (!role || !['owner', 'collaborator', 'admin'].includes(role.name)) {
       return NextResponse.json(
-        { success: false, error: "Only owners and admins can create notifications" },
+        { success: false, error: await errorText('auth.onlyOwnersAdmins') },
         { status: 403 }
       );
     }
@@ -109,21 +110,21 @@ export async function POST(request: NextRequest) {
 
     if (!title || !notificationBody) {
       return NextResponse.json(
-        { success: false, error: "Title and body are required" },
+        { success: false, error: await errorText('notifications.titleAndBodyRequired') },
         { status: 400 }
       );
     }
 
     if (title.length > 65) {
       return NextResponse.json(
-        { success: false, error: "Title must be 65 characters or less" },
+        { success: false, error: await errorText('notifications.titleTooLong') },
         { status: 400 }
       );
     }
 
     if (notificationBody.length > 240) {
       return NextResponse.json(
-        { success: false, error: "Body must be 240 characters or less" },
+        { success: false, error: await errorText('notifications.bodyTooLong') },
         { status: 400 }
       );
     }
@@ -133,7 +134,7 @@ export async function POST(request: NextRequest) {
 
     if (!targetOrgId) {
       return NextResponse.json(
-        { success: false, error: "No target organization found" },
+        { success: false, error: await errorText('organization.noActive') },
         { status: 400 }
       );
     }
@@ -155,7 +156,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "Notification limit reached",
+          error: await errorText('notifications.limitReached'),
           limits,
         },
         { status: 429 }
@@ -176,7 +177,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       return NextResponse.json(
-        { success: false, error: "Failed to create notification" },
+        { success: false, error: await errorText('notifications.createFailed') },
         { status: 500 }
       );
     }
@@ -187,7 +188,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (_error) {
     return NextResponse.json(
-      { success: false, error: "An unexpected error occurred" },
+      { success: false, error: await errorText('unexpected') },
       { status: 500 }
     );
   }

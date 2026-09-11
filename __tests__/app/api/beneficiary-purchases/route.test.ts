@@ -35,17 +35,17 @@ describe('Beneficiary Purchases API Route', () => {
     const response = await GET(request as any, { params: Promise.resolve({ id: 'abc' }) });
     const data = await response.json();
     expect(response.status).toBe(400);
-    expect(data.error).toBe('Invalid beneficiary ID');
+    expect(data.error).toBe('beneficiary.invalidId');
   });
 
   it('returns 401 when user is not authenticated', async () => {
-    mockGetUser.mockResolvedValueOnce({ data: { user: null }, error: { message: 'Unauthorized' } });
+    mockGetUser.mockResolvedValueOnce({ data: { user: null }, error: { message: 'auth.notAuthenticated' } });
 
     const request = new Request('http://localhost:3001/api/beneficiary/1/purchases');
     const response = await GET(request as any, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
     expect(response.status).toBe(401);
-    expect(data.error).toBe('Unauthorized');
+    expect(data.error).toBe('auth.notAuthenticated');
   });
 
   it('returns purchases for valid beneficiary ID', async () => {
@@ -64,7 +64,7 @@ describe('Beneficiary Purchases API Route', () => {
     const response = await GET(request as any, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
     expect(response.status).toBe(500);
-    expect(data.error).toBe('Failed to fetch purchases');
+    expect(data.error).toBe('purchase.loadFailed');
   });
 
   it('returns empty array when no purchases exist', async () => {
@@ -84,6 +84,6 @@ describe('Beneficiary Purchases API Route', () => {
     const response = await GET(request as any, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
     expect(response.status).toBe(500);
-    expect(data.error).toBe('An unexpected error occurred');
+    expect(data.error).toBe('unexpected');
   });
 });

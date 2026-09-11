@@ -61,14 +61,14 @@ describe('MercadoPago Verify Subscription Route', () => {
     const response = await POST(createRequest({ preapprovalId: 'pa_123' }));
     expect(response.status).toBe(401);
     const data = await response.json();
-    expect(data.error).toBe('No autenticado');
+    expect(data.error).toBe('auth.notAuthenticated');
   });
 
   it('returns 400 when no preapprovalId', async () => {
     const response = await POST(createRequest({}));
     expect(response.status).toBe(400);
     const data = await response.json();
-    expect(data.error).toBe('preapprovalId requerido');
+    expect(data.error).toBe('subscription.preapprovalRequired');
   });
 
   it('returns mapped status when existing subscription found', async () => {
@@ -147,7 +147,7 @@ describe('MercadoPago Verify Subscription Route', () => {
     const response = await POST(createRequest({ preapprovalId: 'pa_123' }));
     expect(response.status).toBe(500);
     const data = await response.json();
-    expect(data.error).toBe('Error verificando suscripción');
+    expect(data.error).toBe('subscription.verifyFailed');
   });
 
   it('maps paused status correctly', async () => {

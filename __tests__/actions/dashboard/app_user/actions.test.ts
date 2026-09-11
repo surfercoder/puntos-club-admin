@@ -126,7 +126,7 @@ describe('createAppUser', () => {
     const { cookies } = require('next/headers');
     cookies.mockReturnValueOnce({ get: jest.fn(() => undefined), set: jest.fn() });
     const result = await createAppUser(validAppUser);
-    expect(result.error).toEqual({ message: 'No active organization selected' });
+    expect(result.error?.message).toBe('organization.noActive');
   });
 
   it('should skip validation errors with empty path[0]', async () => {
@@ -223,7 +223,7 @@ describe('createAppUser', () => {
     const { cookies } = require('next/headers');
     cookies.mockReturnValueOnce({ get: jest.fn(() => ({ value: 'not-a-number' })), set: jest.fn() });
     const result = await createAppUser(validAppUser);
-    expect(result.error).toEqual({ message: 'No active organization selected' });
+    expect(result.error?.message).toBe('organization.noActive');
   });
 });
 

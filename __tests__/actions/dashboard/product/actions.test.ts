@@ -105,7 +105,8 @@ describe('createProduct', () => {
     mockCookieStore.get.mockReturnValue(undefined);
     (getCurrentUser as jest.Mock).mockReturnValue({ id: 1, organization_id: null });
     const result = await createProduct(validProduct);
-    expect(result).toEqual({ data: null, error: { message: 'Missing active organization' } });
+    expect(result.data).toBeNull();
+    expect(result.error?.message).toBe('organization.noActive');
   });
 
   it('should return error when plan limit reached', async () => {
@@ -155,7 +156,8 @@ describe('updateProduct', () => {
     mockCookieStore.get.mockReturnValue(undefined);
     (getCurrentUser as jest.Mock).mockReturnValue({ id: 1, organization_id: null });
     const result = await updateProduct('1', validProduct);
-    expect(result).toEqual({ data: null, error: { message: 'Missing active organization' } });
+    expect(result.data).toBeNull();
+    expect(result.error?.message).toBe('organization.noActive');
   });
 
   it('should return supabase error on failure', async () => {
@@ -179,7 +181,7 @@ describe('deleteProduct', () => {
     mockCookieStore.get.mockReturnValue(undefined);
     (getCurrentUser as jest.Mock).mockReturnValue({ id: 1, organization_id: null });
     const result = await deleteProduct('1');
-    expect(result).toEqual({ error: { message: 'Missing active organization' } });
+    expect(result.error?.message).toBe('organization.noActive');
   });
 
   it('should return supabase error on failure', async () => {
@@ -258,7 +260,8 @@ describe('createCategory', () => {
     mockCookieStore.get.mockReturnValue(undefined);
     (getCurrentUser as jest.Mock).mockReturnValue({ id: 1 });
     const result = await createCategory({ name: 'Bebidas' });
-    expect(result).toEqual({ data: null, error: { message: 'Missing active organization' } });
+    expect(result.data).toBeNull();
+    expect(result.error?.message).toBe('organization.noActive');
   });
 
   it('reuses an existing category matching by name, ignoring case and spaces', async () => {
@@ -288,7 +291,7 @@ describe('deleteCategory', () => {
     mockCookieStore.get.mockReturnValue(undefined);
     (getCurrentUser as jest.Mock).mockReturnValue({ id: 1 });
     const result = await deleteCategory('9');
-    expect(result).toEqual({ error: { message: 'Missing active organization' } });
+    expect(result.error?.message).toBe('organization.noActive');
     expect(mockSupabase.delete).not.toHaveBeenCalled();
   });
 });

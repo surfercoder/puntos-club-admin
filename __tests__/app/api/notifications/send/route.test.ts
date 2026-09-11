@@ -198,7 +198,7 @@ describe('Notifications Send API Route', () => {
     const data = await response.json();
     expect(data.success).toBe(true);
     expect(data.sent).toBe(0);
-    expect(data.message).toBe('No active beneficiaries to send to');
+    expect(data.message).toBe('notifications.noBeneficiaries');
   });
 
   it('returns success with 0 sent when beneficiaryOrgs is null', async () => {
@@ -245,7 +245,7 @@ describe('Notifications Send API Route', () => {
     const data = await response.json();
     expect(data.success).toBe(true);
     expect(data.sent).toBe(0);
-    expect(data.message).toBe('No push tokens found for beneficiaries');
+    expect(data.message).toBe('notifications.noPushTokens');
   });
 
   it('returns success with 0 sent when push tokens null', async () => {
@@ -454,7 +454,7 @@ describe('Notifications Send API Route', () => {
     const response = await POST(makeRequest());
     expect(response.status).toBe(500);
     const data = await response.json();
-    expect(data.error).toBe('An unexpected error occurred');
+    expect(data.error).toBe('unexpected');
   });
 
   it('handles sendPushNotifications returning null data (line 201 false branch)', async () => {

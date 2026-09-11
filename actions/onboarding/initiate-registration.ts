@@ -8,6 +8,7 @@ import {
 } from '@/lib/registration-token';
 import { benefitGrid, brandedEmailLayout, ctaButton, noticeBox } from '@/lib/email-template';
 import { resend, EMAIL_FROM } from '@/lib/resend';
+import { errorText } from '@/lib/error-handler';
 
 export async function initiateRegistration(input: {
   email: string;
@@ -35,7 +36,7 @@ export async function initiateRegistration(input: {
   } catch (err) {
     console.error('[initiateRegistration] Token creation failed:', err);
     Sentry.captureException(err, { tags: { area: 'onboarding.token' } });
-    return { success: false, error: 'Error de configuración del servidor.' };
+    return { success: false, error: await errorText('config.missing') };
   }
 
   const verificationUrl = `${siteUrl}/auth/complete-registration?token=${token}`;
@@ -146,7 +147,7 @@ export async function initiateRegistration(input: {
         tags: { area: 'onboarding.email' },
         extra: { recipient: input.email },
       });
-      return { success: false, error: 'No se pudo enviar el email de verificación.' };
+      return { success: false, error: await errorText('onboarding.emailSendFailed') };
     }
   } catch (err) {
     console.error('[initiateRegistration] Resend error:', err);
@@ -154,7 +155,7 @@ export async function initiateRegistration(input: {
       tags: { area: 'onboarding.email' },
       extra: { recipient: input.email },
     });
-    return { success: false, error: 'No se pudo enviar el email de verificación.' };
+    return { success: false, error: await errorText('onboarding.emailSendFailed') };
   }
 
   return { success: true };

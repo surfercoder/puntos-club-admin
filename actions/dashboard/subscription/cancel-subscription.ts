@@ -5,6 +5,7 @@ import { PreApproval } from 'mercadopago/dist/clients/preApproval';
 import { getMercadoPagoClient } from '@/lib/mercadopago/client';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { errorText } from '@/lib/error-handler';
 
 interface CancelResult {
   success?: boolean;
@@ -42,7 +43,7 @@ export async function cancelSubscriptionAction(): Promise<CancelResult> {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return { error: 'No autenticado' };
+      return { error: await errorText('auth.notAuthenticated') };
     }
 
     const admin = createAdminClient();
@@ -54,7 +55,7 @@ export async function cancelSubscriptionAction(): Promise<CancelResult> {
       .maybeSingle();
 
     if (!appUser?.organization_id) {
-      return { error: 'Organización no encontrada' };
+      return { error: await errorText('organization.notFound') };
     }
 
     // Fetch ALL non-cancelled subscriptions for the org — not just the latest.
@@ -73,7 +74,7 @@ export async function cancelSubscriptionAction(): Promise<CancelResult> {
     const toCancel = (subscriptions ?? []).filter((s) => s.mp_preapproval_id);
 
     if (toCancel.length === 0) {
-      return { error: 'No hay suscripción activa para cancelar' };
+      return { error: await errorText('subscription.noActive') };
     }
 
     const mp = getMercadoPagoClient();
@@ -114,6 +115,6 @@ export async function cancelSubscriptionAction(): Promise<CancelResult> {
     return { success: true, preapprovalId: toCancel[0].mp_preapproval_id };
   } catch (err) {
     console.error('[cancel-subscription]', err);
-    return { error: 'Error cancelando suscripción' };
+    return { error: await errorText('subscription.cancelFailed') };
   }
 }

@@ -6,7 +6,7 @@ import { revalidatePath } from "next/cache";
 import { getActiveOrgIdFilter } from "@/lib/auth/get-active-org-id";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
 import { requireUser } from "@/lib/auth/require-user";
-import { translateError } from '@/lib/error-handler';
+import { errorText, translateError } from '@/lib/error-handler';
 import { AppError } from '@/lib/errors';
 
 export interface PointsRuleInput {
@@ -134,7 +134,7 @@ export async function createPointsRule(input: PointsRuleInput) {
     if (!input.name || !input.rule_type || !input.config) {
       return {
         success: false,
-        error: "Missing required fields: name, rule_type, or config",
+        error: await errorText('pointsRule.fieldsRequired'),
       };
     }
 
@@ -142,7 +142,7 @@ export async function createPointsRule(input: PointsRuleInput) {
     if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
       return {
         success: false,
-        error: "No active organization selected",
+        error: await errorText('organization.noActive'),
       };
     }
 
@@ -161,7 +161,7 @@ export async function createPointsRule(input: PointsRuleInput) {
       }
 
       if (Number(branchData.organization_id) !== activeOrgIdNumber) {
-        return { success: false, error: await translateError(new AppError('db.forbidden')) };
+        return { success: false, error: await errorText('db.forbidden') };
       }
     }
 
@@ -239,7 +239,7 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
     if (!activeOrgIdNumber || Number.isNaN(activeOrgIdNumber)) {
       return {
         success: false,
-        error: "No active organization selected",
+        error: await errorText('organization.noActive'),
       };
     }
 
@@ -271,7 +271,7 @@ export async function updatePointsRule(id: number, input: Partial<PointsRuleInpu
       }
 
       if (Number(branchData.organization_id) !== activeOrgIdNumber) {
-        return { success: false, error: await translateError(new AppError('db.forbidden')) };
+        return { success: false, error: await errorText('db.forbidden') };
       }
     }
     

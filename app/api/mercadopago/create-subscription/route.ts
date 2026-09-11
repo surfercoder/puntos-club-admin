@@ -5,6 +5,7 @@ import { PreApproval } from 'mercadopago/dist/clients/preApproval';
 import { getMercadoPagoClient, PLAN_CONFIG, type PlanId } from '@/lib/mercadopago/client';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { errorText } from '@/lib/error-handler';
 
 /**
  * Create a subscription without associated plan (status: pending).
@@ -17,14 +18,14 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return NextResponse.json({ error: 'No autenticado' }, { status: 401 });
+      return NextResponse.json({ error: await errorText('auth.notAuthenticated') }, { status: 401 });
     }
 
     const body = await request.json() as { planId: string; backUrl?: string; payerEmail?: string };
     const { planId, backUrl: customBackUrl, payerEmail: requestedPayerEmailRaw } = body;
 
     if (!planId || !['advance', 'pro'].includes(planId)) {
-      return NextResponse.json({ error: 'Plan inválido' }, { status: 400 });
+      return NextResponse.json({ error: await errorText('subscription.invalidPlan') }, { status: 400 });
     }
 
     // The payer's email can differ from the registration email: owners often
@@ -35,7 +36,7 @@ export async function POST(request: NextRequest) {
       typeof requestedPayerEmailRaw === 'string' ? requestedPayerEmailRaw.trim().toLowerCase() : '';
 
     if (requestedPayerEmail && !emailRegex.test(requestedPayerEmail)) {
-      return NextResponse.json({ error: 'El email de pago no es válido' }, { status: 400 });
+      return NextResponse.json({ error: await errorText('subscription.invalidPayerEmail') }, { status: 400 });
     }
 
     const typedPlanId = planId as PlanId;
@@ -70,7 +71,7 @@ export async function POST(request: NextRequest) {
     const payerEmail = requestedPayerEmail || user.email;
 
     if (!payerEmail) {
-      return NextResponse.json({ error: 'payer_email is required' }, { status: 400 });
+      return NextResponse.json({ error: await errorText('subscription.payerEmailRequired') }, { status: 400 });
     }
 
     // Subscription WITHOUT plan + status pending = redirect to MP checkout, no card_token_id

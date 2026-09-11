@@ -13,7 +13,7 @@ describe('Active Org API Route', () => {
     const response = await POST(mockReq);
     const data = await response.json();
     expect(response.status).toBe(400);
-    expect(data.error).toBe('Missing orgId');
+    expect(data.error).toBe('organization.noActive');
   });
 
   it('returns 400 when body has empty orgId', async () => {
@@ -24,7 +24,7 @@ describe('Active Org API Route', () => {
     const response = await POST(mockReq);
     const data = await response.json();
     expect(response.status).toBe(400);
-    expect(data.error).toBe('Missing orgId');
+    expect(data.error).toBe('organization.noActive');
   });
 
   it('sets cookie and returns success when orgId is provided', async () => {
@@ -44,16 +44,16 @@ describe('Active Org API Route', () => {
 
   it('returns 500 when req.json() throws', async () => {
     const mockReq = {
-      json: jest.fn().mockRejectedValue(new Error('Invalid JSON')),
+      json: jest.fn().mockRejectedValue(new Error('unexpected')),
     } as unknown as Request;
 
     const response = await POST(mockReq);
     const data = await response.json();
     expect(response.status).toBe(500);
-    expect(data.error).toBe('Invalid JSON');
+    expect(data.error).toBe('unexpected');
   });
 
-  it('returns "Unknown error" for non-Error throws', async () => {
+  it('returns "unexpected" for non-Error throws', async () => {
     const mockReq = {
       json: jest.fn().mockRejectedValue('string error'),
     } as unknown as Request;
@@ -61,6 +61,6 @@ describe('Active Org API Route', () => {
     const response = await POST(mockReq);
     const data = await response.json();
     expect(response.status).toBe(500);
-    expect(data.error).toBe('Unknown error');
+    expect(data.error).toBe('unexpected');
   });
 });

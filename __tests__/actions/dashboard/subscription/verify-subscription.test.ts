@@ -52,12 +52,12 @@ describe('verifySubscriptionAction', () => {
     });
 
     const result = await verifySubscriptionAction('pa_123');
-    expect(result.error).toBe('No autenticado');
+    expect(result.error).toBe('auth.notAuthenticated');
   });
 
   it('returns error when no preapprovalId', async () => {
     const result = await verifySubscriptionAction('');
-    expect(result.error).toBe('preapprovalId requerido');
+    expect(result.error).toBe('subscription.preapprovalRequired');
   });
 
   it('returns mapped status when existing subscription found', async () => {
@@ -123,7 +123,7 @@ describe('verifySubscriptionAction', () => {
     mockGet.mockRejectedValueOnce(new Error('MP error'));
 
     const result = await verifySubscriptionAction('pa_123');
-    expect(result.error).toBe('Error verificando suscripción');
+    expect(result.error).toBe('subscription.verifyFailed');
   });
 
   it('maps paused status correctly', async () => {

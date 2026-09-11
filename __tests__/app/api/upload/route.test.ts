@@ -45,7 +45,7 @@ describe('Upload API Route', () => {
       const response = await POST(request);
       const data = await response.json();
       expect(response.status).toBe(400);
-      expect(data.error).toBe('No file provided');
+      expect(data.error).toBe('upload.noFile');
     });
 
     it('returns 400 when no bucket specified', async () => {
@@ -56,7 +56,7 @@ describe('Upload API Route', () => {
       const response = await POST(request);
       const data = await response.json();
       expect(response.status).toBe(400);
-      expect(data.error).toBe('No bucket specified');
+      expect(data.error).toBe('upload.noBucket');
     });
 
     it('returns 403 for non-public bucket', async () => {
@@ -68,7 +68,7 @@ describe('Upload API Route', () => {
       const response = await POST(request);
       const data = await response.json();
       expect(response.status).toBe(403);
-      expect(data.error).toBe('Bucket not allowed for public uploads');
+      expect(data.error).toBe('upload.bucketNotAllowed');
     });
 
     it('returns 400 for disallowed mime type', async () => {
@@ -154,7 +154,7 @@ describe('Upload API Route', () => {
       const response = await POST(request);
       const data = await response.json();
       expect(response.status).toBe(500);
-      expect(data.error).toBe('Internal server error');
+      expect(data.error).toBe('upload.failed');
     });
   });
 
@@ -166,7 +166,7 @@ describe('Upload API Route', () => {
       const response = await DELETE(request);
       const data = await response.json();
       expect(response.status).toBe(400);
-      expect(data.error).toBe('Bucket and path are required');
+      expect(data.error).toBe('upload.pathRequired');
     });
 
     it('returns 403 for non-public bucket', async () => {
@@ -207,7 +207,7 @@ describe('Upload API Route', () => {
       const response = await DELETE(request);
       const data = await response.json();
       expect(response.status).toBe(500);
-      expect(data.error).toBe('Internal server error');
+      expect(data.error).toBe('upload.failed');
     });
   });
 });

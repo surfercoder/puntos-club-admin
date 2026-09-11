@@ -35,7 +35,7 @@ describe('Test Query Users API Route', () => {
 
     const response = await GET();
     const data = await response.json();
-    expect(data.error).toBe('Connection failed');
+    expect(data.error).toBe('unexpected');
     expect(data.stack).toBeDefined();
   });
 
@@ -45,7 +45,7 @@ describe('Test Query Users API Route', () => {
 
     const response = await GET();
     const data = await response.json();
-    expect(data.error).toBe('Unknown error');
+    expect(data.error).toBe('unexpected');
     expect(data.stack).toBeUndefined();
   });
 

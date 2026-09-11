@@ -55,7 +55,7 @@ describe('Notifications API Route', () => {
       const response = await GET(request);
       const data = await response.json();
       expect(response.status).toBe(401);
-      expect(data.error).toBe('Unauthorized');
+      expect(data.error).toBe('auth.notAuthenticated');
     });
 
     it('returns 403 when user has no organization', async () => {
@@ -77,7 +77,7 @@ describe('Notifications API Route', () => {
       const response = await GET(request);
       const data = await response.json();
       expect(response.status).toBe(500);
-      expect(data.error).toBe('Failed to fetch notifications');
+      expect(data.error).toBe('notifications.loadFailed');
     });
 
     it('returns notifications list on success', async () => {
@@ -99,7 +99,7 @@ describe('Notifications API Route', () => {
       const response = await GET(request);
       const data = await response.json();
       expect(response.status).toBe(500);
-      expect(data.error).toBe('An unexpected error occurred');
+      expect(data.error).toBe('unexpected');
     });
   });
 
@@ -123,7 +123,7 @@ describe('Notifications API Route', () => {
       const response = await POST(request);
       expect(response.status).toBe(403);
       const data = await response.json();
-      expect(data.error).toBe('User not associated with an organization');
+      expect(data.error).toBe('auth.noOrganization');
     });
 
     it('returns 403 when user role is not owner or admin', async () => {
@@ -153,7 +153,7 @@ describe('Notifications API Route', () => {
       const response = await POST(request);
       const data = await response.json();
       expect(response.status).toBe(400);
-      expect(data.error).toBe('Title and body are required');
+      expect(data.error).toBe('notifications.titleAndBodyRequired');
     });
 
     it('returns 400 when title exceeds 65 characters', async () => {
@@ -163,7 +163,7 @@ describe('Notifications API Route', () => {
       const response = await POST(request);
       const data = await response.json();
       expect(response.status).toBe(400);
-      expect(data.error).toBe('Title must be 65 characters or less');
+      expect(data.error).toBe('notifications.titleTooLong');
     });
 
     it('returns 400 when body exceeds 240 characters', async () => {
@@ -173,7 +173,7 @@ describe('Notifications API Route', () => {
       const response = await POST(request);
       const data = await response.json();
       expect(response.status).toBe(400);
-      expect(data.error).toBe('Body must be 240 characters or less');
+      expect(data.error).toBe('notifications.bodyTooLong');
     });
 
     it('returns 429 when notification limit is reached', async () => {
@@ -185,7 +185,7 @@ describe('Notifications API Route', () => {
       const response = await POST(request);
       const data = await response.json();
       expect(response.status).toBe(429);
-      expect(data.error).toBe('Notification limit reached');
+      expect(data.error).toBe('notifications.limitReached');
     });
 
     it('returns 400 when no target organization found (edge case)', async () => {
@@ -214,7 +214,7 @@ describe('Notifications API Route', () => {
       const response = await POST(request);
       const data = await response.json();
       expect(response.status).toBe(500);
-      expect(data.error).toBe('Failed to create notification');
+      expect(data.error).toBe('notifications.createFailed');
     });
 
     it('creates notification successfully', async () => {
@@ -246,7 +246,7 @@ describe('Notifications API Route', () => {
       const response = await POST(request);
       const data = await response.json();
       expect(response.status).toBe(400);
-      expect(data.error).toBe('No target organization found');
+      expect(data.error).toBe('organization.noActive');
     });
 
     it('returns 500 on unexpected error (catch block)', async () => {
@@ -258,7 +258,7 @@ describe('Notifications API Route', () => {
       const response = await POST(request);
       const data = await response.json();
       expect(response.status).toBe(500);
-      expect(data.error).toBe('An unexpected error occurred');
+      expect(data.error).toBe('unexpected');
     });
 
     it('handles role as non-array (single object)', async () => {

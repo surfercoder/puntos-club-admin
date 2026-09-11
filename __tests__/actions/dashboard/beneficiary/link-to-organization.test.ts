@@ -51,14 +51,16 @@ describe('linkBeneficiaryToOrganization', () => {
   it('should return error when no organization', async () => {
     (getCurrentUser as jest.Mock).mockReturnValue({ id: 1, organization_id: null });
     const result = await linkBeneficiaryToOrganization('1');
-    expect(result).toEqual({ data: null, error: { message: 'No organization found for current user' } });
+    expect(result.data).toBeNull();
+    expect(result.error?.message).toBe('organization.noActive');
   });
 
   it('should return error when beneficiary not found', async () => {
     mockSupabase.single
       .mockReturnValueOnce({ data: null, error: { message: 'Not found' } });
     const result = await linkBeneficiaryToOrganization('999');
-    expect(result).toEqual({ data: null, error: { message: 'Beneficiary not found' } });
+    expect(result.data).toBeNull();
+    expect(result.error?.message).toBe('beneficiary.notFound');
   });
 
   it('should return existing relationship when already active', async () => {
@@ -127,7 +129,8 @@ describe('linkAllUnlinkedBeneficiaries', () => {
   it('should return error when no organization', async () => {
     (getCurrentUser as jest.Mock).mockReturnValue({ id: 1, organization_id: null });
     const result = await linkAllUnlinkedBeneficiaries();
-    expect(result).toEqual({ data: null, error: { message: 'No organization found for current user' } });
+    expect(result.data).toBeNull();
+    expect(result.error?.message).toBe('organization.noActive');
   });
 
   it('should return message when all already linked', async () => {

@@ -289,11 +289,11 @@ describe('ClubProfileForm', () => {
   });
 
   it('surfaces a save error', async () => {
-    updateClubProfile.mockResolvedValue({ error: 'Not authorized' });
+    updateClubProfile.mockResolvedValue({ error: 'db.forbidden' });
     const { container } = render(<ClubProfileForm organization={organization} />);
     submit(container);
 
-    await waitFor(() => expect(toastError).toHaveBeenCalledWith('Not authorized'));
+    await waitFor(() => expect(toastError).toHaveBeenCalledWith('db.forbidden'));
     expect(refresh).not.toHaveBeenCalled();
   });
 

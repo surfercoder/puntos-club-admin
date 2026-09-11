@@ -8,6 +8,7 @@ import { BranchSchema } from '@/schemas/branch.schema';
 import type { Branch } from '@/types/branch';
 import { enforcePlanLimit } from '@/lib/plans/usage';
 import { translateError } from '@/lib/error-handler';
+import { AppError } from '@/lib/errors';
 
 export async function createBranch(input: Branch) {
   await requireUser();
@@ -29,7 +30,7 @@ export async function createBranch(input: Branch) {
   const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
 
   if (!activeOrgIdNumber) {
-    return { data: null, error: { message: 'No active organization selected' } };
+    return { data: null, error: new AppError('organization.noActive') };
   }
 
   const limitError = await enforcePlanLimit(activeOrgIdNumber, 'branches');
@@ -65,7 +66,7 @@ export async function updateBranch(id: string, input: Branch) {
   const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
 
   if (!activeOrgIdNumber) {
-    return { data: null, error: { message: 'No active organization selected' } };
+    return { data: null, error: new AppError('organization.noActive') };
   }
 
   const { data, error } = await supabase
@@ -91,7 +92,7 @@ export async function deleteBranch(id: string) {
   const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
 
   if (!activeOrgIdNumber) {
-    return { error: { message: 'No active organization selected' } };
+    return { error: new AppError('organization.noActive') };
   }
 
   const { error } = await supabase

@@ -119,10 +119,10 @@ describe('Step5QR', () => {
   });
 
   it('reports the server error and retries on demand', async () => {
-    jest.mocked(completeOnboarding).mockResolvedValueOnce({ success: false, error: 'Plan inválido' });
+    jest.mocked(completeOnboarding).mockResolvedValueOnce({ success: false, error: 'subscription.invalidPlan' });
     renderStep();
 
-    expect(await screen.findByText('Plan inválido')).toBeInTheDocument();
+    expect(await screen.findByText('subscription.invalidPlan')).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: /tryAgain/ }));
 
@@ -152,9 +152,9 @@ describe('Step5QR', () => {
   });
 
   it('goes back from the error screen', async () => {
-    jest.mocked(completeOnboarding).mockResolvedValue({ success: false, error: 'Plan inválido' });
+    jest.mocked(completeOnboarding).mockResolvedValue({ success: false, error: 'subscription.invalidPlan' });
     const { onBack } = renderStep();
-    await screen.findByText('Plan inválido');
+    await screen.findByText('subscription.invalidPlan');
 
     fireEvent.click(screen.getByRole('button', { name: /reviewBack/ }));
     expect(onBack).toHaveBeenCalled();

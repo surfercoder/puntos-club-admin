@@ -347,7 +347,7 @@ describe('MercadoPago Webhook Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(401);
     const data = await response.json();
-    expect(data.error).toBe('Invalid signature');
+    expect(data.error).toBe('subscription.invalidSignature');
   });
 
   it('always returns 200 even on error', async () => {

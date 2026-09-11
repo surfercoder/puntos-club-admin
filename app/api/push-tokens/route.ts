@@ -1,6 +1,7 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { errorText } from '@/lib/error-handler';
 
 export async function POST(request: NextRequest) {
   try {
@@ -8,7 +9,7 @@ export async function POST(request: NextRequest) {
     
     if (!authHeader?.startsWith("Bearer ")) {
       return NextResponse.json(
-        { success: false, error: "Missing authorization header" },
+        { success: false, error: await errorText('auth.notAuthenticated') },
         { status: 401 }
       );
     }
@@ -33,7 +34,7 @@ export async function POST(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
+        { success: false, error: await errorText('auth.notAuthenticated') },
         { status: 401 }
       );
     }
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     if (!beneficiary) {
       return NextResponse.json(
-        { success: false, error: "Beneficiary not found" },
+        { success: false, error: await errorText('beneficiary.notFound') },
         { status: 404 }
       );
     }
@@ -56,7 +57,7 @@ export async function POST(request: NextRequest) {
 
     if (!expoPushToken) {
       return NextResponse.json(
-        { success: false, error: "expoPushToken is required" },
+        { success: false, error: await errorText('pushToken.required') },
         { status: 400 }
       );
     }
@@ -82,7 +83,7 @@ export async function POST(request: NextRequest) {
 
       if (error) {
         return NextResponse.json(
-          { success: false, error: "Failed to update push token" },
+          { success: false, error: await errorText('pushToken.saveFailed') },
           { status: 500 }
         );
       }
@@ -107,7 +108,7 @@ export async function POST(request: NextRequest) {
 
     if (error) {
       return NextResponse.json(
-        { success: false, error: "Failed to create push token" },
+        { success: false, error: await errorText('pushToken.saveFailed') },
         { status: 500 }
       );
     }
@@ -118,7 +119,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (_error) {
     return NextResponse.json(
-      { success: false, error: "An unexpected error occurred" },
+      { success: false, error: await errorText('unexpected') },
       { status: 500 }
     );
   }

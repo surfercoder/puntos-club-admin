@@ -4,6 +4,7 @@ import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { checkPlanLimit } from "@/lib/plans/usage";
 import { AppError } from '@/lib/errors';
+import { errorText } from '@/lib/error-handler';
 
 interface ExpoPushMessage {
   to: string;
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
+        { success: false, error: await errorText('auth.notAuthenticated') },
         { status: 401 }
       );
     }
@@ -57,14 +58,14 @@ export async function POST(request: NextRequest) {
 
     if (!userIsAdmin && !appUser?.organization_id) {
       return NextResponse.json(
-        { success: false, error: "User not associated with an organization" },
+        { success: false, error: await errorText('auth.noOrganization') },
         { status: 403 }
       );
     }
 
     if (!role || !['owner', 'collaborator', 'admin'].includes(role.name)) {
       return NextResponse.json(
-        { success: false, error: "Only owners and admins can send notifications" },
+        { success: false, error: await errorText('auth.onlyOwnersAdmins') },
         { status: 403 }
       );
     }
@@ -74,7 +75,7 @@ export async function POST(request: NextRequest) {
 
     if (!notificationId) {
       return NextResponse.json(
-        { success: false, error: "notificationId is required" },
+        { success: false, error: await errorText('notifications.idRequired') },
         { status: 400 }
       );
     }
@@ -96,14 +97,14 @@ export async function POST(request: NextRequest) {
 
     if (notifError || !notification) {
       return NextResponse.json(
-        { success: false, error: "Notification not found" },
+        { success: false, error: await errorText('notifications.notFound') },
         { status: 404 }
       );
     }
 
     if (notification.status === 'sent') {
       return NextResponse.json(
-        { success: false, error: "Notification already sent" },
+        { success: false, error: await errorText('notifications.alreadySent') },
         { status: 400 }
       );
     }
@@ -151,7 +152,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: "No active beneficiaries to send to",
+        message: await errorText('notifications.noBeneficiaries'),
         sent: 0,
       });
     }
@@ -172,7 +173,7 @@ export async function POST(request: NextRequest) {
 
       return NextResponse.json({
         success: true,
-        message: "No push tokens found for beneficiaries",
+        message: await errorText('notifications.noPushTokens'),
         sent: 0,
       });
     }
@@ -263,7 +264,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (_error) {
     return NextResponse.json(
-      { success: false, error: "An unexpected error occurred" },
+      { success: false, error: await errorText('unexpected') },
       { status: 500 }
     );
   }

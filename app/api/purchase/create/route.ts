@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { NextRequest} from "next/server";
 import { NextResponse } from "next/server";
+import { errorText } from '@/lib/error-handler';
 
 export async function POST(request: NextRequest) {
   try {
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized - Please log in" },
+        { success: false, error: await errorText('auth.notAuthenticated') },
         { status: 401 }
       );
     }
@@ -54,7 +55,7 @@ export async function POST(request: NextRequest) {
 
     if (appUserError || !appUser) {
       return NextResponse.json(
-        { success: false, error: "Cashier profile not found. Please contact administrator." },
+        { success: false, error: await errorText('cashier.profileNotFound') },
         { status: 404 }
       );
     }
@@ -66,7 +67,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: "Missing required fields: beneficiary_id or branch_id",
+          error: await errorText('purchase.fieldsRequired'),
         },
         { status: 400 }
       );
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
       total_amount = parseFloat(amount);
       if (isNaN(total_amount) || total_amount <= 0) {
         return NextResponse.json(
-          { success: false, error: "Invalid purchase amount" },
+          { success: false, error: await errorText('purchase.invalidAmount') },
           { status: 400 }
         );
       }
@@ -90,7 +91,7 @@ export async function POST(request: NextRequest) {
       for (const item of items) {
         if (!item.item_name || item.quantity <= 0 || item.unit_price < 0) {
           return NextResponse.json(
-            { success: false, error: "Invalid item data" },
+            { success: false, error: await errorText('db.invalidValue') },
             { status: 400 }
           );
         }
@@ -102,7 +103,7 @@ export async function POST(request: NextRequest) {
       );
     } else {
       return NextResponse.json(
-        { success: false, error: "Either amount or items array is required" },
+        { success: false, error: await errorText('purchase.amountOrItemsRequired') },
         { status: 400 }
       );
     }
@@ -116,7 +117,7 @@ export async function POST(request: NextRequest) {
 
     if (branchError || !branch) {
       return NextResponse.json(
-        { success: false, error: "Branch not found" },
+        { success: false, error: await errorText('branch.notFound') },
         { status: 404 }
       );
     }
@@ -171,7 +172,7 @@ export async function POST(request: NextRequest) {
         );
       }
       return NextResponse.json(
-        { success: false, error: "Failed to create purchase" },
+        { success: false, error: await errorText('purchase.createFailed') },
         { status: 500 }
       );
     }
@@ -196,7 +197,7 @@ export async function POST(request: NextRequest) {
     });
   } catch (_error) {
     return NextResponse.json(
-      { success: false, error: "An unexpected error occurred" },
+      { success: false, error: await errorText('unexpected') },
       { status: 500 }
     );
   }

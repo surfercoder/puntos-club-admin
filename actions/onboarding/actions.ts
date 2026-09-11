@@ -2,8 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
-import { translateError } from '@/lib/error-handler';
-import { AppError } from '@/lib/errors';
+import { errorText, translateError } from '@/lib/error-handler';
 
 // ─── Input types ─────────────────────────────────────────────────────────────
 
@@ -114,7 +113,7 @@ export async function completeOnboarding(input: {
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return { success: false, error: await translateError(new AppError('auth.notAuthenticated')) };
+      return { success: false, error: await errorText('auth.notAuthenticated') };
     }
 
     // ── Idempotency: return existing data if step 2 was already completed ──
@@ -172,7 +171,7 @@ export async function completeOnboarding(input: {
             'Ya existe una empresa con ese nombre. Probá con otro, por ejemplo agregando la ciudad o el barrio.',
         };
       }
-      return { success: false, error: await translateError(new AppError('onboarding.orgCreateFailed')) };
+      return { success: false, error: await errorText('onboarding.orgCreateFailed') };
     }
 
     const organizationId = Number(orgData.id);
@@ -197,7 +196,7 @@ export async function completeOnboarding(input: {
 
     if (addressError || !addressData) {
       await adminClient.from('organization').delete().eq('id', organizationId);
-      return { success: false, error: await translateError(new AppError('onboarding.addressCreateFailed')) };
+      return { success: false, error: await errorText('onboarding.addressCreateFailed') };
     }
 
     // ── 3. Create branch ──────────────────────────────────────────────────────
@@ -216,7 +215,7 @@ export async function completeOnboarding(input: {
     if (branchError || !branchData) {
       await adminClient.from('address').delete().eq('id', addressData.id);
       await adminClient.from('organization').delete().eq('id', organizationId);
-      return { success: false, error: await translateError(new AppError('onboarding.branchCreateFailed')) };
+      return { success: false, error: await errorText('onboarding.branchCreateFailed') };
     }
 
     const branchId = Number(branchData.id);
@@ -239,7 +238,7 @@ export async function completeOnboarding(input: {
         await adminClient.from('branch').delete().eq('id', branchId);
         await adminClient.from('address').delete().eq('id', addressData.id);
         await adminClient.from('organization').delete().eq('id', organizationId);
-        return { success: false, error: await translateError(new AppError('onboarding.ownerRoleFailed')) };
+        return { success: false, error: await errorText('onboarding.ownerRoleFailed') };
       }
       roleData = inserted;
     }
@@ -260,7 +259,7 @@ export async function completeOnboarding(input: {
         await adminClient.from('branch').delete().eq('id', branchId);
         await adminClient.from('address').delete().eq('id', addressData.id);
         await adminClient.from('organization').delete().eq('id', organizationId);
-        return { success: false, error: await translateError(new AppError('onboarding.profileUpdateFailed')) };
+        return { success: false, error: await errorText('onboarding.profileUpdateFailed') };
       }
       appUserId = Number(updatedUser.id);
     } else {
@@ -282,7 +281,7 @@ export async function completeOnboarding(input: {
         await adminClient.from('branch').delete().eq('id', branchId);
         await adminClient.from('address').delete().eq('id', addressData.id);
         await adminClient.from('organization').delete().eq('id', organizationId);
-        return { success: false, error: await translateError(new AppError('onboarding.appUserCreateFailed')) };
+        return { success: false, error: await errorText('onboarding.appUserCreateFailed') };
       }
       appUserId = Number(appUserData.id);
     }

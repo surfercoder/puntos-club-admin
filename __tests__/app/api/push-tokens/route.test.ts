@@ -49,7 +49,7 @@ describe('Push Tokens API Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(401);
     const data = await response.json();
-    expect(data.error).toBe('Missing authorization header');
+    expect(data.error).toBe('auth.notAuthenticated');
   });
 
   it('returns 401 when user auth fails', async () => {
@@ -73,7 +73,7 @@ describe('Push Tokens API Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(404);
     const data = await response.json();
-    expect(data.error).toBe('Beneficiary not found');
+    expect(data.error).toBe('beneficiary.notFound');
   });
 
   it('returns 400 when expoPushToken is missing', async () => {
@@ -84,7 +84,7 @@ describe('Push Tokens API Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(400);
     const data = await response.json();
-    expect(data.error).toBe('expoPushToken is required');
+    expect(data.error).toBe('pushToken.required');
   });
 
   it('updates existing token when found', async () => {
@@ -117,7 +117,7 @@ describe('Push Tokens API Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(500);
     const data = await response.json();
-    expect(data.error).toBe('Failed to update push token');
+    expect(data.error).toBe('pushToken.saveFailed');
   });
 
   it('creates new token when not existing', async () => {
@@ -150,7 +150,7 @@ describe('Push Tokens API Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(500);
     const data = await response.json();
-    expect(data.error).toBe('Failed to create push token');
+    expect(data.error).toBe('pushToken.saveFailed');
   });
 
   it('returns 500 on unexpected error (catch block)', async () => {
@@ -163,6 +163,6 @@ describe('Push Tokens API Route', () => {
     const response = await POST(request);
     expect(response.status).toBe(500);
     const data = await response.json();
-    expect(data.error).toBe('An unexpected error occurred');
+    expect(data.error).toBe('unexpected');
   });
 });

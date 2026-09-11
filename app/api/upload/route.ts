@@ -1,6 +1,7 @@
 import { type NextRequest, NextResponse } from 'next/server';
 
 import { createAdminClient } from '@/lib/supabase/admin';
+import { errorText } from '@/lib/error-handler';
 
 const ALLOWED_MIME_TYPES = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
 const MAX_FILE_SIZE_BYTES = 10 * 1024 * 1024; // 10MB
@@ -16,15 +17,15 @@ export async function POST(request: NextRequest) {
     const path = formData.get('path') as string | null;
 
     if (!file) {
-      return NextResponse.json({ error: 'No file provided' }, { status: 400 });
+      return NextResponse.json({ error: await errorText('upload.noFile') }, { status: 400 });
     }
 
     if (!bucket) {
-      return NextResponse.json({ error: 'No bucket specified' }, { status: 400 });
+      return NextResponse.json({ error: await errorText('upload.noBucket') }, { status: 400 });
     }
 
     if (!PUBLIC_BUCKETS.includes(bucket)) {
-      return NextResponse.json({ error: 'Bucket not allowed for public uploads' }, { status: 403 });
+      return NextResponse.json({ error: await errorText('upload.bucketNotAllowed') }, { status: 403 });
     }
 
     if (!ALLOWED_MIME_TYPES.includes(file.type)) {
@@ -69,7 +70,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ url: urlData.publicUrl, path: uploadData.path });
   } catch (error) {
     console.error('Upload route error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: await errorText('upload.failed') }, { status: 500 });
   }
 }
 
@@ -78,11 +79,11 @@ export async function DELETE(request: NextRequest) {
     const { bucket, path } = await request.json();
 
     if (!bucket || !path) {
-      return NextResponse.json({ error: 'Bucket and path are required' }, { status: 400 });
+      return NextResponse.json({ error: await errorText('upload.pathRequired') }, { status: 400 });
     }
 
     if (!PUBLIC_BUCKETS.includes(bucket)) {
-      return NextResponse.json({ error: 'Bucket not allowed' }, { status: 403 });
+      return NextResponse.json({ error: await errorText('upload.bucketNotAllowed') }, { status: 403 });
     }
 
     const adminClient = createAdminClient();
@@ -96,6 +97,6 @@ export async function DELETE(request: NextRequest) {
     return NextResponse.json({ success: true });
   } catch (error) {
     console.error('Delete route error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: await errorText('upload.failed') }, { status: 500 });
   }
 }

@@ -92,7 +92,7 @@ describe('cancelSubscriptionAction', () => {
     });
 
     const result = await cancelSubscriptionAction();
-    expect(result.error).toBe('No autenticado');
+    expect(result.error).toBe('auth.notAuthenticated');
     expect(mockUpdate).not.toHaveBeenCalled();
   });
 
@@ -100,7 +100,7 @@ describe('cancelSubscriptionAction', () => {
     appUserResponse = { data: null };
 
     const result = await cancelSubscriptionAction();
-    expect(result.error).toBe('Organización no encontrada');
+    expect(result.error).toBe('organization.notFound');
     expect(mockUpdate).not.toHaveBeenCalled();
   });
 
@@ -108,7 +108,7 @@ describe('cancelSubscriptionAction', () => {
     subscriptionListResponse = { data: [] };
 
     const result = await cancelSubscriptionAction();
-    expect(result.error).toBe('No hay suscripción activa para cancelar');
+    expect(result.error).toBe('subscription.noActive');
     expect(mockUpdate).not.toHaveBeenCalled();
   });
 
@@ -118,7 +118,7 @@ describe('cancelSubscriptionAction', () => {
     subscriptionListResponse = { data: null };
 
     const result = await cancelSubscriptionAction();
-    expect(result.error).toBe('No hay suscripción activa para cancelar');
+    expect(result.error).toBe('subscription.noActive');
     expect(mockUpdate).not.toHaveBeenCalled();
   });
 
@@ -173,7 +173,7 @@ describe('cancelSubscriptionAction', () => {
     mockUpdate.mockRejectedValueOnce(new Error('MP down'));
 
     const result = await cancelSubscriptionAction();
-    expect(result.error).toBe('Error cancelando suscripción');
+    expect(result.error).toBe('subscription.cancelFailed');
 
     // DB writes must not happen if MP call failed
     const orgUpdate = adminCalls.find((c) => c.table === 'organization' && c.op === 'update');
@@ -223,7 +223,7 @@ describe('cancelSubscriptionAction', () => {
     mockUpdate.mockRejectedValueOnce({ error: 'something else entirely' });
 
     const result = await cancelSubscriptionAction();
-    expect(result.error).toBe('Error cancelando suscripción');
+    expect(result.error).toBe('subscription.cancelFailed');
 
     const orgUpdate = adminCalls.find((c) => c.table === 'organization' && c.op === 'update');
     expect(orgUpdate).toBeUndefined();
@@ -233,13 +233,13 @@ describe('cancelSubscriptionAction', () => {
     mockUpdate.mockRejectedValueOnce(null);
 
     const result = await cancelSubscriptionAction();
-    expect(result.error).toBe('Error cancelando suscripción');
+    expect(result.error).toBe('subscription.cancelFailed');
   });
 
   it('returns generic error when MP rejects with a string primitive', async () => {
     mockUpdate.mockRejectedValueOnce('opaque failure');
 
     const result = await cancelSubscriptionAction();
-    expect(result.error).toBe('Error cancelando suscripción');
+    expect(result.error).toBe('subscription.cancelFailed');
   });
 });

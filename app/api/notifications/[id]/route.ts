@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
+import { errorText } from '@/lib/error-handler';
 
 export async function PATCH(
   request: NextRequest,
@@ -17,7 +18,7 @@ export async function PATCH(
 
     if (authError || !user) {
       return NextResponse.json(
-        { success: false, error: "Unauthorized" },
+        { success: false, error: await errorText('auth.notAuthenticated') },
         { status: 401 }
       );
     }
@@ -30,7 +31,7 @@ export async function PATCH(
 
     if (!appUser?.organization_id) {
       return NextResponse.json(
-        { success: false, error: "User not associated with an organization" },
+        { success: false, error: await errorText('auth.noOrganization') },
         { status: 403 }
       );
     }
@@ -39,7 +40,7 @@ export async function PATCH(
 
     if (!role || !['owner', 'collaborator', 'admin'].includes(role.name)) {
       return NextResponse.json(
-        { success: false, error: "Only owners and admins can edit notifications" },
+        { success: false, error: await errorText('auth.onlyOwnersAdmins') },
         { status: 403 }
       );
     }
@@ -49,21 +50,21 @@ export async function PATCH(
 
     if (!title || !notificationBody) {
       return NextResponse.json(
-        { success: false, error: "Title and body are required" },
+        { success: false, error: await errorText('notifications.titleAndBodyRequired') },
         { status: 400 }
       );
     }
 
     if (title.length > 65) {
       return NextResponse.json(
-        { success: false, error: "Title must be 65 characters or less" },
+        { success: false, error: await errorText('notifications.titleTooLong') },
         { status: 400 }
       );
     }
 
     if (notificationBody.length > 240) {
       return NextResponse.json(
-        { success: false, error: "Body must be 240 characters or less" },
+        { success: false, error: await errorText('notifications.bodyTooLong') },
         { status: 400 }
       );
     }
@@ -81,7 +82,7 @@ export async function PATCH(
 
     if (error) {
       return NextResponse.json(
-        { success: false, error: "Failed to update notification" },
+        { success: false, error: await errorText('notifications.updateFailed') },
         { status: 500 }
       );
     }
@@ -92,7 +93,7 @@ export async function PATCH(
     });
   } catch (_error) {
     return NextResponse.json(
-      { success: false, error: "An unexpected error occurred" },
+      { success: false, error: await errorText('unexpected') },
       { status: 500 }
     );
   }

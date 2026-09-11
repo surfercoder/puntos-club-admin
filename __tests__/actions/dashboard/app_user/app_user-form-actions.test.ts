@@ -176,8 +176,8 @@ describe('appUserFormAction branch assignment', () => {
     );
     expect(result).toEqual({
       status: 'error',
-      message: 'BRANCH_REQUIRED',
-      fieldErrors: { branch_id: ['BRANCH_REQUIRED'] },
+      message: 'branch.required',
+      fieldErrors: { branch_id: ['branch.required'] },
     });
     expect(createAppUser).not.toHaveBeenCalled();
     expect(assignCashierToBranch).not.toHaveBeenCalled();

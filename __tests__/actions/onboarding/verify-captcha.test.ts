@@ -35,7 +35,7 @@ describe('verifyCaptchaToken', () => {
       json: jest.fn().mockResolvedValue({ success: false }),
     });
     const result = await verifyCaptchaToken('invalid-token');
-    expect(result).toEqual({ success: false, error: 'Verificación fallida. Intentá de nuevo.' });
+    expect(result).toEqual({ success: false, error: 'auth.captchaFailed' });
   });
 
   it('should return error when the verify endpoint responds with a non-ok status', async () => {
@@ -44,18 +44,18 @@ describe('verifyCaptchaToken', () => {
       json: jest.fn(),
     });
     const result = await verifyCaptchaToken('token');
-    expect(result).toEqual({ success: false, error: 'Verificación fallida. Intentá de nuevo.' });
+    expect(result).toEqual({ success: false, error: 'auth.captchaFailed' });
   });
 
   it('should return error when secret key not configured', async () => {
     delete process.env.RECAPTCHA_SECRET_KEY;
     const result = await verifyCaptchaToken('token');
-    expect(result).toEqual({ success: false, error: 'Captcha not configured' });
+    expect(result).toEqual({ success: false, error: 'config.missing' });
   });
 
   it('should return error when fetch throws', async () => {
     mockFetch.mockRejectedValue(new Error('Network error'));
     const result = await verifyCaptchaToken('token');
-    expect(result).toEqual({ success: false, error: 'Error al verificar el captcha.' });
+    expect(result).toEqual({ success: false, error: 'auth.captchaFailed' });
   });
 });

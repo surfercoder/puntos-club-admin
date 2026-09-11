@@ -42,7 +42,7 @@ describe('Notifications [id] API Route', () => {
     const response = await PATCH(request, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
     expect(response.status).toBe(401);
-    expect(data.error).toBe('Unauthorized');
+    expect(data.error).toBe('auth.notAuthenticated');
   });
 
   it('returns 403 when user has no organization', async () => {
@@ -54,7 +54,7 @@ describe('Notifications [id] API Route', () => {
     const response = await PATCH(request, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
     expect(response.status).toBe(403);
-    expect(data.error).toBe('User not associated with an organization');
+    expect(data.error).toBe('auth.noOrganization');
   });
 
   it('returns 403 when role is not admin or owner', async () => {
@@ -66,7 +66,7 @@ describe('Notifications [id] API Route', () => {
     const response = await PATCH(request, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
     expect(response.status).toBe(403);
-    expect(data.error).toBe('Only owners and admins can edit notifications');
+    expect(data.error).toBe('auth.onlyOwnersAdmins');
   });
 
   it('returns 403 when user has no role', async () => {
@@ -78,7 +78,7 @@ describe('Notifications [id] API Route', () => {
     const response = await PATCH(request, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
     expect(response.status).toBe(403);
-    expect(data.error).toBe('Only owners and admins can edit notifications');
+    expect(data.error).toBe('auth.onlyOwnersAdmins');
   });
 
   it('returns 400 when title is missing', async () => {
@@ -88,7 +88,7 @@ describe('Notifications [id] API Route', () => {
     const response = await PATCH(request, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
     expect(response.status).toBe(400);
-    expect(data.error).toBe('Title and body are required');
+    expect(data.error).toBe('notifications.titleAndBodyRequired');
   });
 
   it('returns 400 when body is missing', async () => {
@@ -98,7 +98,7 @@ describe('Notifications [id] API Route', () => {
     const response = await PATCH(request, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
     expect(response.status).toBe(400);
-    expect(data.error).toBe('Title and body are required');
+    expect(data.error).toBe('notifications.titleAndBodyRequired');
   });
 
   it('returns 400 when title exceeds 65 characters', async () => {
@@ -108,7 +108,7 @@ describe('Notifications [id] API Route', () => {
     const response = await PATCH(request, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
     expect(response.status).toBe(400);
-    expect(data.error).toBe('Title must be 65 characters or less');
+    expect(data.error).toBe('notifications.titleTooLong');
   });
 
   it('returns 400 when body exceeds 240 characters', async () => {
@@ -118,7 +118,7 @@ describe('Notifications [id] API Route', () => {
     const response = await PATCH(request, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
     expect(response.status).toBe(400);
-    expect(data.error).toBe('Body must be 240 characters or less');
+    expect(data.error).toBe('notifications.bodyTooLong');
   });
 
   it('updates notification successfully', async () => {
@@ -147,7 +147,7 @@ describe('Notifications [id] API Route', () => {
     const response = await PATCH(request, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
     expect(response.status).toBe(500);
-    expect(data.error).toBe('Failed to update notification');
+    expect(data.error).toBe('notifications.updateFailed');
   });
 
   it('returns 500 on unexpected error (catch block)', async () => {
@@ -159,7 +159,7 @@ describe('Notifications [id] API Route', () => {
     const response = await PATCH(request, { params: Promise.resolve({ id: '1' }) });
     const data = await response.json();
     expect(response.status).toBe(500);
-    expect(data.error).toBe('An unexpected error occurred');
+    expect(data.error).toBe('unexpected');
   });
 
   it('handles role as non-array (single object)', async () => {

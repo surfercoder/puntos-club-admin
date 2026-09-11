@@ -2,7 +2,7 @@ import { getTranslations } from 'next-intl/server';
 import { ZodError } from 'zod';
 
 import { zodFieldErrors, type ActionState } from '@/lib/action-state';
-import { errorDescriptor } from '@/lib/errors';
+import { AppError, errorDescriptor, type ErrorKey } from '@/lib/errors';
 
 export type { ActionState } from '@/lib/action-state';
 export { EMPTY_ACTION_STATE, cleanFormData } from '@/lib/action-state';
@@ -20,6 +20,15 @@ export const translateError = async (error: unknown): Promise<string> => {
   const { key, params } = errorDescriptor(error);
   return t(key, params);
 };
+
+/**
+ * Texto ya traducido de una clave de `Errors`. Atajo para los ~140 sitios que
+ * devuelven el mensaje como string suelto (rutas de API y acciones con
+ * `{ success, error }`), en vez de repetir `translateError(new AppError(k))`.
+ * Las capas de datos NO usan esto: transportan el `AppError` y traduce arriba.
+ */
+export const errorText = (key: ErrorKey): Promise<string> =>
+  translateError(new AppError(key));
 
 export const fromErrorToActionState = async (
   error: unknown,

@@ -5,6 +5,7 @@ import type { PreApprovalResponse } from 'mercadopago/dist/clients/preApproval/c
 import { getMercadoPagoClient, type PlanId } from '@/lib/mercadopago/client';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { errorText } from '@/lib/error-handler';
 
 export async function verifySubscriptionAction(
   preapprovalId: string
@@ -17,11 +18,11 @@ export async function verifySubscriptionAction(
     } = await supabase.auth.getUser();
 
     if (authError || !user) {
-      return { error: 'No autenticado' };
+      return { error: await errorText('auth.notAuthenticated') };
     }
 
     if (!preapprovalId) {
-      return { error: 'preapprovalId requerido' };
+      return { error: await errorText('subscription.preapprovalRequired') };
     }
 
     const mp = getMercadoPagoClient();
@@ -76,6 +77,6 @@ export async function verifySubscriptionAction(
     return { status: mappedStatus, plan };
   } catch (err) {
     console.error('[verify-subscription]', err);
-    return { error: 'Error verificando suscripción' };
+    return { error: await errorText('subscription.verifyFailed') };
   }
 }

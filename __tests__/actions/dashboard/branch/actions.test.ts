@@ -71,7 +71,8 @@ describe('createBranch', () => {
   it('should return error when no active org', async () => {
     mockCookieStore.get.mockReturnValue(undefined);
     const result = await createBranch(validBranch);
-    expect(result).toEqual({ data: null, error: { message: 'No active organization selected' } });
+    expect(result.data).toBeNull();
+    expect(result.error?.message).toBe('organization.noActive');
   });
 
   it('should return error when plan limit is reached', async () => {
@@ -130,7 +131,8 @@ describe('updateBranch', () => {
   it('should return error when no active org', async () => {
     mockCookieStore.get.mockReturnValue(undefined);
     const result = await updateBranch('1', validBranch);
-    expect(result).toEqual({ data: null, error: { message: 'No active organization selected' } });
+    expect(result.data).toBeNull();
+    expect(result.error?.message).toBe('organization.noActive');
   });
 });
 
@@ -147,7 +149,7 @@ describe('deleteBranch', () => {
   it('should return error when no active org', async () => {
     mockCookieStore.get.mockReturnValue(undefined);
     const result = await deleteBranch('1');
-    expect(result).toEqual({ error: { message: 'No active organization selected' } });
+    expect(result.error?.message).toBe('organization.noActive');
   });
 
   it('should return formatted error on failure', async () => {

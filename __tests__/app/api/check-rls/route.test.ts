@@ -49,13 +49,13 @@ describe('Check RLS API Route', () => {
     mockRpc.mockRejectedValueOnce(new Error('RPC failed'));
     const response = await GET();
     const data = await response.json();
-    expect(data.error).toBe('RPC failed');
+    expect(data.error).toBe('unexpected');
   });
 
-  it('handles exception with non-Error and returns "Unknown error"', async () => {
+  it('handles exception with non-Error and returns "unexpected"', async () => {
     mockRpc.mockRejectedValueOnce('string error');
     const response = await GET();
     const data = await response.json();
-    expect(data.error).toBe('Unknown error');
+    expect(data.error).toBe('unexpected');
   });
 });

@@ -23,7 +23,7 @@ export async function checkBranchInActiveOrg(branchId: string) {
   const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
   if (!activeOrgIdNumber) {
-    return { error: { message: await translateError(new AppError('organization.noActive')) } };
+    return { error: new AppError('organization.noActive') };
   }
 
   const { data: branch, error: branchError } = await supabase
@@ -34,7 +34,7 @@ export async function checkBranchInActiveOrg(branchId: string) {
     .maybeSingle();
 
   if (branchError) return { error: { message: await translateError(branchError) } };
-  if (!branch) return { error: { message: await translateError(new AppError('branch.notInOrganization')) } };
+  if (!branch) return { error: new AppError('branch.notInOrganization') };
   return { error: null };
 }
 
@@ -49,7 +49,7 @@ export async function assignCashierToBranch(cashierId: string, branchId: string 
   const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
 
   if (!activeOrgIdNumber) {
-    return { error: { message: await translateError(new AppError('organization.noActive')) } };
+    return { error: new AppError('organization.noActive') };
   }
 
   const { error } = await supabase

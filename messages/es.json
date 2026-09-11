@@ -2682,48 +2682,51 @@
     "unexpected": "Ocurrió un error inesperado. Intentá nuevamente.",
     "network": "No pudimos conectarnos. Revisá tu conexión a internet e intentá de nuevo.",
     "auth": {
-      "invalidCredentials": "El email o la contraseña no son correctos. Revisalos e intentá de nuevo.",
-      "emailNotConfirmed": "Todavía no confirmaste tu email. Buscá el correo que te enviamos y tocá el enlace para activar tu cuenta.",
+      "captchaFailed": "No pudimos verificar que seas una persona. Intentá de nuevo.",
       "emailExists": "Ya existe una cuenta registrada con ese email.",
-      "weakPassword": "La contraseña es demasiado débil. Usá al menos 8 caracteres con mayúscula, minúscula, número y símbolo.",
-      "samePassword": "La contraseña nueva tiene que ser distinta de la actual.",
       "emailInvalid": "Ese email no es válido. Revisá cómo lo escribiste.",
-      "validationFailed": "Faltan datos o alguno no es válido. Revisá el formulario e intentá de nuevo.",
+      "emailNotConfirmed": "Todavía no confirmaste tu email. Buscá el correo que te enviamos y tocá el enlace para activar tu cuenta.",
+      "invalidCredentials": "El email o la contraseña no son correctos. Revisalos e intentá de nuevo.",
+      "linkExpired": "El enlace venció o ya se usó. Pedí uno nuevo e intentá otra vez.",
+      "noAppUser": "No pudimos identificar tu usuario en esta organización.",
+      "noOrganization": "Tu usuario no está asociado a ninguna organización.",
+      "noPortalAccess": "No tenés permisos para acceder al portal de administración. Solo administradores, propietarios y colaboradores pueden entrar.",
+      "notAuthenticated": "No hay una sesión activa. Volvé a iniciar sesión.",
+      "onlyOwnersAdmins": "Solo los propietarios y administradores pueden hacer esto.",
+      "rateLimit": "Hiciste demasiados intentos seguidos. Esperá un momento antes de volver a probar.",
+      "rateLimitSeconds": "Por seguridad, esperá {seconds} segundos antes de volver a intentarlo.",
+      "reauthNeeded": "Por seguridad, volvé a iniciar sesión antes de hacer este cambio.",
+      "samePassword": "La contraseña nueva tiene que ser distinta de la actual.",
+      "sessionExpired": "Tu sesión expiró. Volvé a iniciar sesión para continuar.",
       "signupDisabled": "El registro no está disponible en este momento. Probá más tarde.",
       "userBanned": "Esta cuenta está suspendida. Escribinos para recuperar el acceso.",
       "userNotFound": "No encontramos una cuenta con ese email.",
-      "linkExpired": "El enlace venció o ya se usó. Pedí uno nuevo e intentá otra vez.",
-      "sessionExpired": "Tu sesión expiró. Volvé a iniciar sesión para continuar.",
-      "captchaFailed": "No pudimos verificar que seas una persona. Intentá de nuevo.",
-      "reauthNeeded": "Por seguridad, volvé a iniciar sesión antes de hacer este cambio.",
-      "rateLimit": "Hiciste demasiados intentos seguidos. Esperá un momento antes de volver a probar.",
-      "rateLimitSeconds": "Por seguridad, esperá {seconds} segundos antes de volver a intentarlo.",
-      "noPortalAccess": "No tenés permisos para acceder al portal de administración. Solo administradores, propietarios y colaboradores pueden entrar.",
-      "notAuthenticated": "No hay una sesión activa. Volvé a iniciar sesión.",
-      "noAppUser": "No pudimos identificar tu usuario en esta organización."
+      "validationFailed": "Faltan datos o alguno no es válido. Revisá el formulario e intentá de nuevo.",
+      "weakPassword": "La contraseña es demasiado débil. Usá al menos 8 caracteres con mayúscula, minúscula, número y símbolo."
     },
     "db": {
       "duplicate": "Ese dato ya está registrado. Revisalo e intentá de nuevo.",
-      "inUse": "No se puede completar la operación porque este registro está en uso.",
-      "missingField": "Faltan datos obligatorios. Revisá el formulario.",
-      "invalidValue": "Alguno de los datos no es válido. Revisalo e intentá de nuevo.",
       "forbidden": "No tenés permiso para hacer esta acción.",
+      "inUse": "No se puede completar la operación porque este registro está en uso.",
+      "invalidValue": "Alguno de los datos no es válido. Revisalo e intentá de nuevo.",
+      "missingField": "Faltan datos obligatorios. Revisá el formulario.",
       "notFound": "No encontramos lo que buscabas."
     },
     "rpc": {
       "insufficientPoints": "El beneficiario no tiene puntos suficientes.",
-      "outOfStock": "El producto no tiene stock disponible.",
       "membershipInactive": "Este beneficiario ya no es socio del club.",
       "notPending": "Este canje ya no está pendiente.",
-      "redemptionNotFound": "No encontramos ese canje.",
-      "planLimitReached": "Alcanzaste el límite de tu plan. Actualizá el plan para seguir."
+      "outOfStock": "El producto no tiene stock disponible.",
+      "planLimitReached": "Alcanzaste el límite de tu plan. Actualizá el plan para seguir.",
+      "redemptionNotFound": "No encontramos ese canje."
     },
     "organization": {
       "createFailed": "No pudimos crear la organización. Intentá nuevamente.",
-      "updateFailed": "No pudimos actualizar la organización. Intentá nuevamente.",
       "membershipFailed": "No pudimos asociar el usuario a la organización.",
+      "nameTaken": "Ya existe una empresa con ese nombre. Probá con otro.",
+      "noActive": "No hay una organización activa seleccionada.",
       "notFound": "No encontramos esa organización.",
-      "noActive": "No hay una organización activa seleccionada."
+      "updateFailed": "No pudimos actualizar la organización. Intentá nuevamente."
     },
     "address": {
       "createFailed": "No pudimos guardar la dirección. Intentá nuevamente.",
@@ -2731,31 +2734,98 @@
     },
     "branch": {
       "createFailed": "No pudimos crear la sucursal. Intentá nuevamente.",
-      "updateFailed": "No pudimos actualizar la sucursal. Intentá nuevamente.",
-      "notInOrganization": "Esa sucursal no existe o no es de tu organización."
+      "notFound": "No encontramos esa sucursal.",
+      "notInOrganization": "Esa sucursal no existe o no es de tu organización.",
+      "required": "Elegí una sucursal para el cajero.",
+      "updateFailed": "No pudimos actualizar la sucursal. Intentá nuevamente."
     },
     "user": {
       "createFailed": "No pudimos crear el usuario. Intentá nuevamente.",
-      "updateFailed": "No pudimos actualizar el usuario. Intentá nuevamente.",
-      "lookupFailed": "No pudimos encontrar el usuario recién creado."
+      "idOrEmailRequired": "Indicá el usuario o su email.",
+      "lookupFailed": "No pudimos encontrar el usuario recién creado.",
+      "updateFailed": "No pudimos actualizar el usuario. Intentá nuevamente."
     },
     "notifications": {
+      "alreadySent": "Esa notificación ya fue enviada.",
+      "bodyTooLong": "El mensaje no puede superar los 240 caracteres.",
+      "createFailed": "No pudimos crear la notificación. Intentá nuevamente.",
+      "emptyAiResponse": "No pudimos revisar el contenido. Intentá nuevamente.",
+      "idRequired": "Falta indicar qué notificación.",
+      "limitReached": "Alcanzaste el límite de notificaciones de tu plan.",
+      "limitsLoadFailed": "No pudimos cargar los límites de notificaciones.",
       "loadFailed": "No pudimos cargar las notificaciones. Intentá nuevamente.",
-      "sendFailed": "No pudimos enviar la notificación. Intentá nuevamente.",
       "moderationFailed": "No pudimos revisar el contenido. Intentá nuevamente.",
-      "emptyAiResponse": "No pudimos revisar el contenido. Intentá nuevamente."
+      "moderationNotConfigured": "La moderación de contenido no está configurada. Escribinos a soporte.",
+      "noBeneficiaries": "No hay beneficiarios activos a quienes enviar.",
+      "noPushTokens": "Ningún beneficiario tiene la app instalada para recibirla.",
+      "notFound": "No encontramos esa notificación.",
+      "sendFailed": "No pudimos enviar la notificación. Intentá nuevamente.",
+      "titleAndBodyRequired": "El título y el mensaje son obligatorios.",
+      "titleTooLong": "El título no puede superar los 65 caracteres.",
+      "updateFailed": "No pudimos actualizar la notificación. Intentá nuevamente."
     },
     "config": {
       "missing": "El servicio no está configurado. Avisale al equipo técnico."
     },
     "onboarding": {
-      "orgCreateFailed": "No pudimos crear la organización. Intentá nuevamente.",
       "addressCreateFailed": "No pudimos crear la dirección. Intentá nuevamente.",
+      "appUserCreateFailed": "No pudimos crear tu perfil de usuario. Intentá nuevamente.",
       "branchCreateFailed": "No pudimos crear la sucursal. Intentá nuevamente.",
+      "emailSendFailed": "No pudimos enviar el email de verificación. Intentá nuevamente.",
+      "orgCreateFailed": "No pudimos crear la organización. Intentá nuevamente.",
       "ownerRoleFailed": "No pudimos asignarte el rol de propietario. Intentá nuevamente.",
       "profileUpdateFailed": "No pudimos actualizar tu perfil. Intentá nuevamente.",
-      "appUserCreateFailed": "No pudimos crear tu perfil de usuario. Intentá nuevamente.",
       "verificationFailed": "No pudimos verificarlo. Intentá de nuevo."
+    },
+    "beneficiary": {
+      "hideForbidden": "Solo podés ocultar beneficiarios de tu propia organización.",
+      "invalidId": "El identificador del beneficiario no es válido.",
+      "notFound": "No encontramos a ese beneficiario."
+    },
+    "purchase": {
+      "amountOrItemsRequired": "Ingresá un monto o al menos un artículo.",
+      "createFailed": "No pudimos registrar la compra. Intentá nuevamente.",
+      "fieldsRequired": "Faltan datos de la compra. Revisá el formulario.",
+      "invalidAmount": "El monto de la compra no es válido.",
+      "itemsRequired": "Agregá al menos un artículo.",
+      "loadFailed": "No pudimos cargar las compras. Intentá nuevamente.",
+      "notCancellable": "Esta compra ya no se puede cancelar.",
+      "pointsFailed": "No pudimos calcular los puntos de la compra."
+    },
+    "cashier": {
+      "profileNotFound": "No encontramos tu perfil de cajero. Contactá a un administrador."
+    },
+    "pointsRule": {
+      "fieldsRequired": "Faltan datos de la regla. Revisá el formulario."
+    },
+    "contact": {
+      "invalidData": "Revisá los datos del formulario e intentá de nuevo.",
+      "sendFailed": "No pudimos enviar tu consulta. Intentá nuevamente."
+    },
+    "feedback": {
+      "messageRequired": "Escribí tu mensaje antes de enviarlo.",
+      "sendFailed": "No pudimos enviar tu feedback. Intentá nuevamente."
+    },
+    "subscription": {
+      "cancelFailed": "No pudimos cancelar la suscripción. Intentá nuevamente.",
+      "invalidPayerEmail": "El email de pago no es válido.",
+      "invalidPlan": "Ese plan no es válido.",
+      "invalidSignature": "No pudimos validar el aviso de pago.",
+      "noActive": "No hay una suscripción activa para cancelar.",
+      "payerEmailRequired": "Ingresá el email de pago.",
+      "preapprovalRequired": "Falta el identificador de la suscripción.",
+      "verifyFailed": "No pudimos verificar la suscripción. Intentá nuevamente."
+    },
+    "pushToken": {
+      "required": "Falta el token de notificaciones.",
+      "saveFailed": "No pudimos guardar el token de notificaciones."
+    },
+    "upload": {
+      "bucketNotAllowed": "Ese destino no está habilitado.",
+      "failed": "No pudimos subir el archivo. Intentá nuevamente.",
+      "noBucket": "Falta indicar el destino del archivo.",
+      "noFile": "Elegí un archivo para subir.",
+      "pathRequired": "Faltan datos del archivo."
     }
   },
   "Actions": {

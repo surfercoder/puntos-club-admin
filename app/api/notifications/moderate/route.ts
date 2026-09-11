@@ -3,6 +3,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { moderateNotificationContent } from '@/lib/ai/content-moderator';
 import { computeContentHash } from '@/lib/notifications/content-hash';
 import { createClient } from '@/lib/supabase/server';
+import { errorText } from '@/lib/error-handler';
 
 export async function POST(request: NextRequest) {
   try {
@@ -15,7 +16,7 @@ export async function POST(request: NextRequest) {
 
     if (authError || !user) {
       return NextResponse.json(
-        { success: false, error: 'No autorizado' },
+        { success: false, error: await errorText('auth.notAuthenticated') },
         { status: 401 }
       );
     }
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     if (!appUser?.organization_id) {
       return NextResponse.json(
-        { success: false, error: 'Usuario no asociado con una organización' },
+        { success: false, error: await errorText('auth.noOrganization') },
         { status: 403 }
       );
     }
@@ -36,7 +37,7 @@ export async function POST(request: NextRequest) {
     const role = Array.isArray(appUser.role) ? appUser.role[0] : appUser.role;
     if (!role || !['owner', 'collaborator', 'admin'].includes(role.name)) {
       return NextResponse.json(
-        { success: false, error: 'Solo los propietarios y administradores pueden crear notificaciones' },
+        { success: false, error: await errorText('auth.onlyOwnersAdmins') },
         { status: 403 }
       );
     }
@@ -46,7 +47,7 @@ export async function POST(request: NextRequest) {
 
     if (!title || !notificationBody) {
       return NextResponse.json(
-        { success: false, error: 'El título y el cuerpo son requeridos' },
+        { success: false, error: await errorText('notifications.titleAndBodyRequired') },
         { status: 400 }
       );
     }
@@ -71,7 +72,7 @@ export async function POST(request: NextRequest) {
 
     if (!process.env.ANTHROPIC_API_KEY) {
       return NextResponse.json(
-        { success: false, error: 'La moderación de contenido no está configurada. Por favor contacta a soporte.' },
+        { success: false, error: await errorText('notifications.moderationNotConfigured') },
         { status: 503 }
       );
     }
@@ -94,11 +95,11 @@ export async function POST(request: NextRequest) {
       success: true,
       data: moderationResult,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { 
         success: false, 
-        error: error instanceof Error ? error.message : 'Ocurrió un error inesperado durante la moderación' 
+        error: await errorText('notifications.moderationFailed') 
       },
       { status: 500 }
     );

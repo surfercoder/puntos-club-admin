@@ -20,6 +20,7 @@ import { createClient } from "@/lib/supabase/client";
 import { cn } from "@/lib/utils";
 import { PasswordStrengthChecklist } from "@/components/onboarding/password-strength-checklist";
 import { allRulesPass } from "@/components/onboarding/password-rules";
+import { useErrorMessage } from '@/lib/use-validation-state';
 
 interface FormState {
   password: string;
@@ -65,6 +66,7 @@ export function UpdatePasswordForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const toErrorMessage = useErrorMessage();
   const t = useTranslations("Auth.updatePassword");
   const tCommon = useTranslations("Common");
 
@@ -114,9 +116,11 @@ export function UpdatePasswordForm({
     const supabase = createClient();
     dispatch({ type: 'SET_LOADING', payload: true });
 
+    // GoTrue responde en ingles ("New password should be different from the
+    // old password"): se mapea por `code` como en el resto de la app.
     const errorMessage = await supabase.auth.updateUser({ password }).then(
-      (r) => (r.error ? r.error.message : null),
-      () => tCommon("error"),
+      (r) => (r.error ? toErrorMessage(r.error) : null),
+      (err: unknown) => toErrorMessage(err),
     );
 
     if (errorMessage) {

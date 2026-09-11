@@ -19,11 +19,14 @@ export async function appUserOrganizationFormAction(_prevState: ActionState, for
       return await fromErrorToActionState(parsed.error);
     }
 
-    if (formDataObject.id) {
-      await updateAppUserOrganization(String(formDataObject.id), parsed.data as AppUserOrganization);
-    } else {
-      await createAppUserOrganization(parsed.data as AppUserOrganization);
-    }
+    // `create*`/`update*` NO tiran: devuelven { data, error }. Sin este
+    // chequeo un INSERT fallado seguia de largo y el form contestaba "guardado
+    // con exito". Se relanza para que el catch de abajo lo traduzca por `code`.
+    const result = formDataObject.id
+      ? await updateAppUserOrganization(String(formDataObject.id), parsed.data as AppUserOrganization)
+      : await createAppUserOrganization(parsed.data as AppUserOrganization);
+
+    if (result.error) throw result.error;
 
     revalidatePath('/dashboard/app_user_organization');
 

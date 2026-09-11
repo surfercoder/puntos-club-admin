@@ -282,7 +282,7 @@ describe('updateOrganizationVisibility', () => {
     (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, role: { name: 'owner' } });
     mockSupabase.single.mockReturnValue({ data: null, error: null });
     const result = await updateOrganizationVisibility('1', true);
-    expect(result).toEqual({ error: 'Forbidden' });
+    expect(result).toEqual({ error: 'db.forbidden' });
   });
 
   it('should return not authenticated when user is null', async () => {
@@ -301,7 +301,7 @@ describe('updateOrganizationVisibility', () => {
 
   it('should return invalid input for non-boolean', async () => {
     const result = await updateOrganizationVisibility('1', 'not-boolean' as unknown as boolean);
-    expect(result).toEqual({ error: 'Invalid input' });
+    expect(result).toEqual({ error: 'db.invalidValue' });
   });
 });
 
@@ -368,22 +368,22 @@ describe('updateClubProfile', () => {
       '5',
       { name: '' } as unknown as Parameters<typeof updateClubProfile>[1],
     );
-    expect(result).toEqual({ error: 'Invalid club profile' });
+    expect(result).toEqual({ error: 'db.invalidValue' });
     expect(mockSupabase.update).not.toHaveBeenCalled();
   });
 
   it('refuses a user without owner permissions', async () => {
     (hasOwnerPermissions as jest.Mock).mockReturnValueOnce(false);
-    expect(await updateClubProfile('5', profile)).toEqual({ error: 'Not authorized' });
+    expect(await updateClubProfile('5', profile)).toEqual({ error: 'db.forbidden' });
   });
 
   it('refuses an unauthenticated user', async () => {
     (getCurrentUser as jest.Mock).mockResolvedValueOnce(null);
-    expect(await updateClubProfile('5', profile)).toEqual({ error: 'Not authorized' });
+    expect(await updateClubProfile('5', profile)).toEqual({ error: 'db.forbidden' });
   });
 
   it('refuses editing another organization', async () => {
-    expect(await updateClubProfile('9', profile)).toEqual({ error: 'Not authorized' });
+    expect(await updateClubProfile('9', profile)).toEqual({ error: 'db.forbidden' });
   });
 
   it('surfaces a database error', async () => {
@@ -395,7 +395,7 @@ describe('updateClubProfile', () => {
   it('translates the unique-name violation', async () => {
     mockSupabase.eq.mockReturnValueOnce({ error: { code: '23505', message: 'duplicate key' } });
     expect(await updateClubProfile('5', profile)).toEqual({
-      error: 'Ya existe una empresa con ese nombre. Probá con otro.',
+      error: 'organization.nameTaken',
     });
   });
 

@@ -54,7 +54,7 @@ describe('assignCashierToBranch', () => {
   it('refuses a branch from another organization', async () => {
     maybeSingle.mockResolvedValue({ data: null, error: null });
     const result = await assignCashierToBranch('5', '3');
-    expect(result.error).toEqual({ message: 'branch.notInOrganization' });
+    expect(result.error?.message).toBe('branch.notInOrganization');
     expect(update).not.toHaveBeenCalled();
   });
 
@@ -67,16 +67,12 @@ describe('assignCashierToBranch', () => {
   // que el guard de organización sigue haciendo falta en esa rama.
   it('requires an active organization when unassigning', async () => {
     getMutationOrgId.mockResolvedValue(null);
-    expect(await assignCashierToBranch('5', null)).toEqual({
-      error: { message: 'organization.noActive' },
-    });
+    expect((await assignCashierToBranch('5', null)).error?.message).toBe('organization.noActive');
   });
 
   it('requires an active organization', async () => {
     getMutationOrgId.mockResolvedValue(null);
-    expect(await assignCashierToBranch('5', '3')).toEqual({
-      error: { message: 'organization.noActive' },
-    });
+    expect((await assignCashierToBranch('5', '3')).error?.message).toBe('organization.noActive');
   });
 
   it('surfaces an update error', async () => {

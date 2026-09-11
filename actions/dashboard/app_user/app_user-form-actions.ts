@@ -4,7 +4,7 @@ import { revalidatePath } from 'next/cache';
 
 import { createAppUser, updateAppUser } from '@/actions/dashboard/app_user/actions';
 import { assignCashierToBranch, checkBranchInActiveOrg } from '@/actions/dashboard/branch/assign-cashier';
-import { cleanFormData, fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
+import { errorText, cleanFormData, fromErrorToActionState, toActionState, type ActionState } from '@/lib/error-handler';
 import { AppUserSchema } from '@/schemas/app_user.schema';
 import { translateError } from '@/lib/error-handler';
 
@@ -28,8 +28,8 @@ export async function appUserFormAction(_prevState: ActionState, formData: FormD
     if (hasBranchField && !branchId) {
       return {
         status: 'error' as const,
-        message: 'BRANCH_REQUIRED',
-        fieldErrors: { branch_id: ['BRANCH_REQUIRED'] },
+        message: await errorText('branch.required'),
+        fieldErrors: { branch_id: [await errorText('branch.required')] },
       };
     }
     if (branchId) {

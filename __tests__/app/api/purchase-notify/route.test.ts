@@ -123,14 +123,14 @@ describe('Purchase Notify API Route', () => {
     const response = await POST(makeRequest({}, null));
     expect(response.status).toBe(401);
     const data = await response.json();
-    expect(data.error).toBe('Missing authorization header');
+    expect(data.error).toBe('auth.notAuthenticated');
   });
 
   it('returns 401 when authorization header does not start with Bearer', async () => {
     const response = await POST(makeRequest({}, 'Basic abc'));
     expect(response.status).toBe(401);
     const data = await response.json();
-    expect(data.error).toBe('Missing authorization header');
+    expect(data.error).toBe('auth.notAuthenticated');
   });
 
   it('returns 401 when user auth fails with error', async () => {
@@ -138,7 +138,7 @@ describe('Purchase Notify API Route', () => {
     const response = await POST(makeRequest());
     expect(response.status).toBe(401);
     const data = await response.json();
-    expect(data.error).toBe('Unauthorized');
+    expect(data.error).toBe('auth.notAuthenticated');
   });
 
   it('returns 401 when user is null without error', async () => {
@@ -157,7 +157,7 @@ describe('Purchase Notify API Route', () => {
     const response = await POST(makeRequest());
     expect(response.status).toBe(403);
     const data = await response.json();
-    expect(data.error).toBe('User not associated with an organization');
+    expect(data.error).toBe('auth.noOrganization');
   });
 
   it('returns 403 when appUser is null', async () => {
@@ -174,7 +174,7 @@ describe('Purchase Notify API Route', () => {
     const response = await POST(makeRequest());
     expect(response.status).toBe(403);
     const data = await response.json();
-    expect(data.error).toBe('Insufficient permissions');
+    expect(data.error).toBe('db.forbidden');
   });
 
   it('returns 403 when role is not cashier/owner/admin', async () => {
@@ -185,7 +185,7 @@ describe('Purchase Notify API Route', () => {
     const response = await POST(makeRequest());
     expect(response.status).toBe(403);
     const data = await response.json();
-    expect(data.error).toBe('Insufficient permissions');
+    expect(data.error).toBe('db.forbidden');
   });
 
   it('allows owner role', async () => {
@@ -250,7 +250,7 @@ describe('Purchase Notify API Route', () => {
     const response = await POST(makeRequest());
     expect(response.status).toBe(404);
     const data = await response.json();
-    expect(data.error).toBe('Beneficiary not found');
+    expect(data.error).toBe('beneficiary.notFound');
   });
 
   // --- Successful flow ---
@@ -614,7 +614,7 @@ describe('Purchase Notify API Route', () => {
     const response = await POST(makeRequest());
     expect(response.status).toBe(500);
     const data = await response.json();
-    expect(data.error).toBe('An unexpected error occurred');
+    expect(data.error).toBe('unexpected');
     consoleSpy.mockRestore();
   });
 

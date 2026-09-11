@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { enforcePlanLimit } from '@/lib/plans/usage';
 import { translateError } from '@/lib/error-handler';
+import { AppError } from '@/lib/errors';
 
 /**
  * Links an existing beneficiary to the current user's organization
@@ -16,7 +17,7 @@ export async function linkBeneficiaryToOrganization(beneficiaryId: string) {
   if (!currentUser?.organization_id) {
     return { 
       data: null, 
-      error: { message: 'No organization found for current user' } 
+      error: new AppError('organization.noActive') 
     };
   }
 
@@ -30,7 +31,7 @@ export async function linkBeneficiaryToOrganization(beneficiaryId: string) {
   if (beneficiaryError || !beneficiary) {
     return { 
       data: null, 
-      error: { message: 'Beneficiary not found' } 
+      error: new AppError('beneficiary.notFound') 
     };
   }
 
@@ -115,7 +116,7 @@ export async function linkAllUnlinkedBeneficiaries() {
   if (!currentUser?.organization_id) {
     return { 
       data: null, 
-      error: { message: 'No organization found for current user' } 
+      error: new AppError('organization.noActive') 
     };
   }
 

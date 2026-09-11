@@ -1,13 +1,14 @@
 import { getCurrentUser } from "@/lib/auth/get-current-user";
 import { createClient } from "@/lib/supabase/server";
 import { NextResponse } from "next/server";
+import { errorText } from '@/lib/error-handler';
 
 export async function POST(request: Request) {
   try {
     const currentUser = await getCurrentUser();
     if (!currentUser) {
       return NextResponse.json(
-        { error: "Unauthorized" },
+        { error: await errorText('auth.notAuthenticated') },
         { status: 401 }
       );
     }
@@ -16,7 +17,7 @@ export async function POST(request: Request) {
 
     if (!beneficiary_id || !organization_id || typeof is_hidden !== "boolean") {
       return NextResponse.json(
-        { error: "beneficiary_id, organization_id, and is_hidden are required" },
+        { error: await errorText('db.missingField') },
         { status: 400 }
       );
     }
@@ -24,7 +25,7 @@ export async function POST(request: Request) {
     // Verify the current user belongs to the organization
     if (currentUser.organization_id?.toString() !== organization_id.toString()) {
       return NextResponse.json(
-        { error: "You can only hide beneficiaries from your own organization" },
+        { error: await errorText('beneficiary.hideForbidden') },
         { status: 403 }
       );
     }
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json(
-      { error: "An unexpected error occurred" },
+      { error: await errorText('unexpected') },
       { status: 500 }
     );
   }

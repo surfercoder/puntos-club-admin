@@ -52,4 +52,17 @@ describe('beneficiaryOrganizationFormAction', () => {
     const result = await beneficiaryOrganizationFormAction(EMPTY_ACTION_STATE, fd);
     expect(result.status).toBe('error');
   });
+
+  // Regresion: `createBeneficiaryOrganization` NO tira, devuelve { data, error }. Sin el chequeo, un
+  // INSERT fallado seguia de largo y el form contestaba "guardado con exito".
+  it('reporta el error del insert en vez de fingir exito', async () => {
+    (createBeneficiaryOrganization as jest.Mock).mockReturnValue({
+      data: null,
+      error: { message: 'duplicate key value violates unique constraint', code: '23505' },
+    });
+    const fd = createFormData({ beneficiary_id: '10', organization_id: '20' });
+    const result = await beneficiaryOrganizationFormAction(EMPTY_ACTION_STATE, fd);
+    expect(result.status).toBe('error');
+    expect(result.message).toBe('db.duplicate');
+  });
 });

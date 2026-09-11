@@ -118,7 +118,7 @@ describe('Notification Moderate API Route', () => {
   });
 
   it('returns 500 when moderation throws Error instance', async () => {
-    mockModerate.mockRejectedValueOnce(new Error('AI service down'));
+    mockModerate.mockRejectedValueOnce(new Error('notifications.moderationFailed'));
 
     const request = {
       json: () => Promise.resolve({ title: 'Test', body: 'Body' }),
@@ -127,7 +127,7 @@ describe('Notification Moderate API Route', () => {
     const response = await POST(request);
     const data = await response.json();
     expect(response.status).toBe(500);
-    expect(data.error).toBe('AI service down');
+    expect(data.error).toBe('notifications.moderationFailed');
   });
 
   it('returns 500 with default message when moderation throws non-Error', async () => {
@@ -140,7 +140,7 @@ describe('Notification Moderate API Route', () => {
     const response = await POST(request);
     const data = await response.json();
     expect(response.status).toBe(500);
-    expect(data.error).toBe('Ocurrió un error inesperado durante la moderación');
+    expect(data.error).toBe('notifications.moderationFailed');
   });
 
   it('returns cached moderation result when notification has matching hash', async () => {

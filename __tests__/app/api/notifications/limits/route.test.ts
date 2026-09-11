@@ -41,7 +41,7 @@ describe('Notification Limits API Route', () => {
     const response = await GET(request);
     const data = await response.json();
     expect(response.status).toBe(401);
-    expect(data.error).toBe('Unauthorized');
+    expect(data.error).toBe('auth.notAuthenticated');
   });
 
   it('returns 403 when user has no organization', async () => {
@@ -95,7 +95,7 @@ describe('Notification Limits API Route', () => {
     const response = await GET(request);
     const data = await response.json();
     expect(response.status).toBe(500);
-    expect(data.error).toBe('Failed to fetch limits');
+    expect(data.error).toBe('notifications.limitsLoadFailed');
   });
 
   it('returns 500 on unexpected error (catch block)', async () => {
@@ -106,6 +106,6 @@ describe('Notification Limits API Route', () => {
     const response = await GET(request);
     const data = await response.json();
     expect(response.status).toBe(500);
-    expect(data.error).toBe('An unexpected error occurred');
+    expect(data.error).toBe('unexpected');
   });
 });

@@ -6,6 +6,7 @@ import { PreApproval } from 'mercadopago/dist/clients/preApproval';
 import type { PreApprovalResponse } from 'mercadopago/dist/clients/preApproval/commonTypes';
 import { getMercadoPagoClient, PLAN_CONFIG, type PlanId } from '@/lib/mercadopago/client';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { errorText } from '@/lib/error-handler';
 
 /**
  * Mercado Pago sends webhook notifications for subscription events.
@@ -65,7 +66,7 @@ export async function POST(request: NextRequest) {
   try {
     // Verify the request comes from MP before doing any privileged work
     if (!authenticateMercadoPagoWebhook(request).valid) {
-      return NextResponse.json({ error: 'Invalid signature' }, { status: 401 });
+      return NextResponse.json({ error: await errorText('subscription.invalidSignature') }, { status: 401 });
     }
 
     const body = await request.json() as {

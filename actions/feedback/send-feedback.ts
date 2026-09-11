@@ -12,6 +12,7 @@ import {
   typeBadge,
 } from '@/lib/email-template';
 import { resend, EMAIL_FROM } from '@/lib/resend';
+import { errorText } from '@/lib/error-handler';
 
 type FeedbackType = 'comment' | 'feedback' | 'error' | 'improvement' | 'question';
 
@@ -45,7 +46,7 @@ export async function sendFeedback(
   const { type, message, userEmail, userName, pageUrl } = input;
 
   if (!message.trim()) {
-    return { success: false, error: 'Message is required.' };
+    return { success: false, error: await errorText('feedback.messageRequired') };
   }
 
   if (!process.env.RESEND_API_KEY) {
@@ -93,7 +94,7 @@ export async function sendFeedback(
         tags: { area: 'feedback.email' },
         extra: { type, userEmail },
       });
-      return { success: false, error: 'Failed to send feedback.' };
+      return { success: false, error: await errorText('feedback.sendFailed') };
     }
   } catch (err) {
     console.error('[sendFeedback] Resend error:', err);
@@ -101,7 +102,7 @@ export async function sendFeedback(
       tags: { area: 'feedback.email' },
       extra: { type, userEmail },
     });
-    return { success: false, error: 'Failed to send feedback.' };
+    return { success: false, error: await errorText('feedback.sendFailed') };
   }
 
   return { success: true };

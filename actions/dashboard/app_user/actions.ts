@@ -9,6 +9,7 @@ import { AppUserSchema, type AppUserInput } from '@/schemas/app_user.schema';
 import { enforcePlanLimit } from '@/lib/plans/usage';
 import type { PlanFeatureKey } from '@/types/plan';
 import { translateError } from '@/lib/error-handler';
+import { AppError } from '@/lib/errors';
 
 export async function createAppUser(input: AppUserInput) {
   await requireUser();
@@ -35,7 +36,7 @@ export async function createAppUser(input: AppUserInput) {
   const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
 
   if (!activeOrgIdNumber) {
-    return { data: null, error: { message: 'No active organization selected' } };
+    return { data: null, error: new AppError('organization.noActive') };
   }
 
   // Resolve role name (used for plan limits and auth metadata)

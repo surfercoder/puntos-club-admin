@@ -109,7 +109,7 @@ describe('createPurchase', () => {
       items: [],
     });
     expect(result.success).toBe(false);
-    expect(result.error).toContain('Missing required fields');
+    expect(result.error).toBe('purchase.fieldsRequired');
   });
 
   it('should return error when no items', async () => {
@@ -120,7 +120,7 @@ describe('createPurchase', () => {
       items: [],
     });
     expect(result.success).toBe(false);
-    expect(result.error).toBe('At least one item is required');
+    expect(result.error).toBe('purchase.itemsRequired');
   });
 
   it('should return error for invalid item data', async () => {
@@ -131,21 +131,21 @@ describe('createPurchase', () => {
       items: [{ item_name: '', quantity: 0, unit_price: -1 }],
     });
     expect(result.success).toBe(false);
-    expect(result.error).toBe('Invalid item data');
+    expect(result.error).toBe('db.invalidValue');
   });
 
   it('should return error when branch not found', async () => {
     mockSupabase.single.mockReturnValueOnce({ data: null, error: { message: 'Not found' } });
     const result = await createPurchase(validInput);
     expect(result.success).toBe(false);
-    expect(result.error).toBe('Branch not found');
+    expect(result.error).toBe('branch.notFound');
   });
 
   it('should return error when points calculation fails', async () => {
     mockSupabase.rpc.mockReturnValue({ data: null, error: { message: 'RPC error' } });
     const result = await createPurchase(validInput);
     expect(result.success).toBe(false);
-    expect(result.error).toBe('Failed to calculate points');
+    expect(result.error).toBe('purchase.pointsFailed');
   });
 
   it('should return error when purchase insert fails', async () => {
@@ -154,7 +154,7 @@ describe('createPurchase', () => {
       .mockReturnValueOnce({ data: null, error: { message: 'Insert failed' } }); // purchase
     const result = await createPurchase(validInput);
     expect(result.success).toBe(false);
-    expect(result.error).toBe('Failed to create purchase');
+    expect(result.error).toBe('purchase.createFailed');
   });
 
   it('should succeed with zero balance when beneficiary balance fetch fails', async () => {
@@ -300,7 +300,7 @@ describe('verifyBeneficiary', () => {
   it('should return error when beneficiary not found', async () => {
     mockSupabase.single.mockReturnValue({ data: null, error: { message: 'Not found' } });
     const result = await verifyBeneficiary('id');
-    expect(result).toEqual({ success: false, error: 'Beneficiary not found' });
+    expect(result).toEqual({ success: false, error: 'beneficiary.notFound' });
   });
 
   it('should handle unexpected error', async () => {
@@ -370,7 +370,7 @@ describe('cancelPurchase', () => {
   it('returns an error when the row is not cancellable (other org or already cancelled)', async () => {
     mockSupabase.maybeSingle.mockReturnValue({ data: null, error: null });
     const result = await cancelPurchase('1');
-    expect(result).toEqual({ success: false, error: 'PURCHASE_NOT_CANCELLABLE' });
+    expect(result).toEqual({ success: false, error: 'purchase.notCancellable' });
   });
 
   it('should return error on failure', async () => {
@@ -388,14 +388,14 @@ describe('cancelPurchase', () => {
   it('rejects a caller without admin-portal permissions', async () => {
     (hasOwnerPermissions as jest.Mock).mockReturnValueOnce(false);
     const result = await cancelPurchase('1');
-    expect(result).toEqual({ success: false, error: 'Forbidden' });
+    expect(result).toEqual({ success: false, error: 'db.forbidden' });
     expect(mockSupabase.update).not.toHaveBeenCalled();
   });
 
   it('returns an error when there is no active organization', async () => {
     (getMutationOrgId as jest.Mock).mockResolvedValueOnce(null);
     const result = await cancelPurchase('1');
-    expect(result).toEqual({ success: false, error: 'Missing active organization' });
+    expect(result).toEqual({ success: false, error: 'organization.noActive' });
     expect(mockSupabase.update).not.toHaveBeenCalled();
   });
 });

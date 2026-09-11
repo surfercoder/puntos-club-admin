@@ -30,7 +30,7 @@ describe('sendFeedback', () => {
       message: '   ',
     });
 
-    expect(result).toEqual({ success: false, error: 'Message is required.' });
+    expect(result).toEqual({ success: false, error: 'feedback.messageRequired' });
   });
 
   it('returns success without sending email when RESEND_API_KEY is not set', async () => {
@@ -81,7 +81,7 @@ describe('sendFeedback', () => {
 
     const result = await sendFeedback(validInput);
 
-    expect(result).toEqual({ success: false, error: 'Failed to send feedback.' });
+    expect(result).toEqual({ success: false, error: 'feedback.sendFailed' });
     expect(consoleSpy).toHaveBeenCalled();
 
     consoleSpy.mockRestore();
@@ -94,7 +94,7 @@ describe('sendFeedback', () => {
 
     const result = await sendFeedback(validInput);
 
-    expect(result).toEqual({ success: false, error: 'Failed to send feedback.' });
+    expect(result).toEqual({ success: false, error: 'feedback.sendFailed' });
     expect(consoleSpy).toHaveBeenCalled();
 
     consoleSpy.mockRestore();

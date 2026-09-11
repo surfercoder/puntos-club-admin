@@ -16,11 +16,14 @@ export async function organizationFormAction(_prevState: ActionState, formData: 
       return await fromErrorToActionState(parsed.error);
     }
 
-    if (formDataObject.id) {
-      await updateOrganization(String(formDataObject.id), parsed.data as Organization);
-    } else {
-      await createOrganization(parsed.data as Organization);
-    }
+    // `create*`/`update*` NO tiran: devuelven { data, error }. Sin este
+    // chequeo un INSERT fallado seguia de largo y el form contestaba "guardado
+    // con exito". Se relanza para que el catch de abajo lo traduzca por `code`.
+    const result = formDataObject.id
+      ? await updateOrganization(String(formDataObject.id), parsed.data as Organization)
+      : await createOrganization(parsed.data as Organization);
+
+    if (result.error) throw result.error;
 
     // Revalidate the organization list page
     revalidatePath('/dashboard/organization');

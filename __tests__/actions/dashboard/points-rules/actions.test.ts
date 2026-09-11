@@ -160,14 +160,14 @@ describe('createPointsRule', () => {
   it('should return error when missing required fields', async () => {
     const result = await createPointsRule({ name: '', rule_type: '' as 'fixed_amount', config: {} });
     expect(result.success).toBe(false);
-    expect(result.error).toContain('Missing required fields');
+    expect(result.error).toBe('pointsRule.fieldsRequired');
   });
 
   it('should return error when no active org', async () => {
     mockCookieStore.get.mockReturnValue(undefined);
     const result = await createPointsRule(validRule);
     expect(result.success).toBe(false);
-    expect(result.error).toBe('No active organization selected');
+    expect(result.error).toBe('organization.noActive');
   });
 
   it('should validate branch belongs to org', async () => {
@@ -250,7 +250,7 @@ describe('updatePointsRule', () => {
     mockCookieStore.get.mockReturnValue(undefined);
     const result = await updatePointsRule(1, { name: 'Updated' });
     expect(result.success).toBe(false);
-    expect(result.error).toBe('No active organization selected');
+    expect(result.error).toBe('organization.noActive');
   });
 
   it('should validate branch belongs to org when branch_id provided', async () => {
