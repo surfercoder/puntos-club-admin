@@ -331,4 +331,17 @@ describe('ClubProfileForm', () => {
       ),
     );
   });
+
+  it('marks the public fields with the hint and leaves the private ones alone', () => {
+    render(<ClubProfileForm organization={organization} />);
+
+    // Los 7 datos que el beneficiario ve en "Informacion de la empresa": nombre,
+    // descripcion, email, telefono, sitio web, rubro y logo. CUIT y razon social no.
+    expect(screen.getAllByLabelText('general.publicHint')).toHaveLength(7);
+
+    for (const key of ['general.taxId', 'general.businessName']) {
+      const field = screen.getByLabelText(key).closest('div');
+      expect(field?.querySelector('[aria-label="general.publicHint"]')).toBeNull();
+    }
+  });
 });

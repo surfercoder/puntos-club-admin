@@ -1916,7 +1916,8 @@
         "logo": "Logo de la organización",
         "logoHint": "Recomendado: PNG o JPG. Máx. 2MB. Tamaño sugerido 512x512px.",
         "businessName": "Razón social (opcional)",
-        "taxId": "CUIT / Identificación fiscal (opcional)"
+        "taxId": "CUIT / Identificación fiscal (opcional)",
+        "publicHint": "Este dato se muestra en el perfil público de tu empresa, dentro de la app de beneficiarios."
       },
       "industries": {
         "retail": "Retail",

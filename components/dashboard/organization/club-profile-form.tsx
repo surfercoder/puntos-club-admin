@@ -7,6 +7,7 @@ import {
   Check,
   Clock,
   Copy,
+  Eye,
   Globe,
   Lock,
   Mail,
@@ -42,6 +43,12 @@ import {
 } from "@/components/ui/select";
 import { Switch } from "@/components/ui/switch";
 import { Textarea } from "@/components/ui/textarea";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import type { Organization } from "@/types/organization";
 
 const INDUSTRIES = ["retail", "gastronomy", "services", "health", "beauty", "other"] as const;
@@ -206,7 +213,7 @@ export function ClubProfileForm({
 
   return (
     <form className="space-y-4" onSubmit={onSubmit}>
-      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+      <div className="grid items-start gap-4">
         <div className="min-w-0 space-y-4">
           <section className="rounded-xl border bg-card p-5 shadow-sm">
             <h2 className="flex items-center gap-2 text-base font-semibold">
@@ -302,17 +309,21 @@ export function ClubProfileForm({
           </section>
         </div>
 
-        <SettingsSection
-          invitationCode={invitationCode}
-          onInvitationCodeChange={setInvitationCode}
-          onPointsLabelChange={setPointsLabel}
-          onTimezoneChange={setTimezone}
-          onToggle={toggle}
-          organization={organization}
-          pointsLabel={pointsLabel}
-          timezone={timezone}
-          toggles={toggles}
-        />
+        {/* Oculto hasta que exista la lógica de estas preferencias: sigue montado (hidden)
+            para que los valores se guarden igual; sacar el div para volver a mostrarlo. */}
+        <div hidden>
+          <SettingsSection
+            invitationCode={invitationCode}
+            onInvitationCodeChange={setInvitationCode}
+            onPointsLabelChange={setPointsLabel}
+            onTimezoneChange={setTimezone}
+            onToggle={toggle}
+            organization={organization}
+            pointsLabel={pointsLabel}
+            timezone={timezone}
+            toggles={toggles}
+          />
+        </div>
       </div>
 
       <div className="flex flex-wrap justify-end gap-3">
@@ -353,6 +364,28 @@ function SettingRow({
   );
 }
 
+/** Ojito en los campos que el beneficiario ve en el perfil público de la organización. */
+function PublicHint() {
+  const t = useTranslations("Dashboard.clubProfile");
+
+  return (
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            aria-label={t("general.publicHint")}
+            className="text-muted-foreground transition-colors hover:text-brand-violet"
+            type="button"
+          >
+            <Eye className="size-3.5" />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent className="max-w-60">{t("general.publicHint")}</TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
+  );
+}
+
 /** Datos generales del club: razón social, contacto, rubro y logo. */
 function GeneralSection({
   industry,
@@ -380,9 +413,12 @@ function GeneralSection({
 
       <div className="mt-4 grid gap-4 md:grid-cols-2">
         <div>
-          <Label htmlFor="name">
-            {t("general.name")} <span className="text-destructive">*</span>
-          </Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="name">
+              {t("general.name")} <span className="text-destructive">*</span>
+            </Label>
+            <PublicHint />
+          </div>
           <Input className="mt-1.5" defaultValue={organization.name} id="name" name="name" required />
         </div>
         <div>
@@ -404,7 +440,10 @@ function GeneralSection({
           />
         </div>
         <div>
-          <Label htmlFor="description">{t("general.description")}</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="description">{t("general.description")}</Label>
+            <PublicHint />
+          </div>
           <Textarea
             className="mt-1.5"
             defaultValue={organization.description ?? ""}
@@ -414,9 +453,12 @@ function GeneralSection({
           />
         </div>
         <div>
-          <Label htmlFor="contact_email">
-            {t("general.email")} <span className="text-destructive">*</span>
-          </Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="contact_email">
+              {t("general.email")} <span className="text-destructive">*</span>
+            </Label>
+            <PublicHint />
+          </div>
           <div className="relative mt-1.5">
             <Mail className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -430,7 +472,10 @@ function GeneralSection({
           </div>
         </div>
         <div>
-          <Label htmlFor="contact_phone">{t("general.phone")}</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="contact_phone">{t("general.phone")}</Label>
+            <PublicHint />
+          </div>
           <div className="relative mt-1.5">
             <Phone className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -442,7 +487,10 @@ function GeneralSection({
           </div>
         </div>
         <div>
-          <Label htmlFor="website">{t("general.website")}</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="website">{t("general.website")}</Label>
+            <PublicHint />
+          </div>
           <div className="relative mt-1.5">
             <Globe className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
             <Input
@@ -455,7 +503,10 @@ function GeneralSection({
           </div>
         </div>
         <div>
-          <Label htmlFor="industry">{t("general.industry")}</Label>
+          <div className="flex items-center gap-2">
+            <Label htmlFor="industry">{t("general.industry")}</Label>
+            <PublicHint />
+          </div>
           <Select onValueChange={onIndustryChange} value={industry}>
             <SelectTrigger className="mt-1.5 w-full" id="industry">
               <SelectValue placeholder={t("general.industryPlaceholder")} />
@@ -473,7 +524,10 @@ function GeneralSection({
 
       <div className="mt-5 flex flex-wrap items-center gap-4 border-t pt-5">
         <div className="min-w-0 flex-1">
-          <p className="text-sm font-medium">{t("general.logo")}</p>
+          <p className="flex items-center gap-2 text-sm font-medium">
+            {t("general.logo")}
+            <PublicHint />
+          </p>
           <p className="text-xs text-muted-foreground">{t("general.logoHint")}</p>
         </div>
         <div className="w-48 shrink-0">

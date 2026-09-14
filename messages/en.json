@@ -1916,7 +1916,8 @@
         "logo": "Organization logo",
         "logoHint": "Recommended: PNG or JPG. Max 2MB. Suggested size 512x512px.",
         "businessName": "Legal name (optional)",
-        "taxId": "Tax ID (optional)"
+        "taxId": "Tax ID (optional)",
+        "publicHint": "This field is shown on your company's public profile in the beneficiary app."
       },
       "industries": {
         "retail": "Retail",
