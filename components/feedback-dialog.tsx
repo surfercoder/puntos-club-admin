@@ -38,13 +38,23 @@ type FeedbackType = (typeof FEEDBACK_TYPES)[number];
 interface FeedbackDialogProps {
   userEmail: string;
   userName: string;
+  defaultType?: FeedbackType;
+  // ReactElement, no ReactNode: DialogTrigger usa `asChild` (Radix Slot), que
+  // necesita exactamente un elemento al que clonarle props. Un string o un
+  // Fragment revientan en runtime.
+  trigger?: React.ReactElement;
 }
 
-export function FeedbackDialog({ userEmail, userName }: FeedbackDialogProps) {
+export function FeedbackDialog({
+  userEmail,
+  userName,
+  defaultType = "feedback",
+  trigger,
+}: FeedbackDialogProps) {
   const t = useTranslations("Feedback");
   const tCommon = useTranslations("Common");
   const [open, setOpen] = React.useState(false);
-  const [type, setType] = React.useState<FeedbackType>("feedback");
+  const [type, setType] = React.useState<FeedbackType>(defaultType);
   const [message, setMessage] = React.useState("");
   const [isPending, startTransition] = React.useTransition();
 
@@ -66,7 +76,7 @@ export function FeedbackDialog({ userEmail, userName }: FeedbackDialogProps) {
           toast.success(t("successMessage"));
           setOpen(false);
           setMessage("");
-          setType("feedback");
+          setType(defaultType);
         } else {
           toast.error(result.error || t("errorMessage"));
         }
@@ -79,16 +89,18 @@ export function FeedbackDialog({ userEmail, userName }: FeedbackDialogProps) {
   return (
     <Dialog open={open} onOpenChange={setOpen}>
       <DialogTrigger asChild>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="h-8 gap-1.5 px-2 text-muted-foreground hover:text-foreground"
-        >
-          <MessageSquarePlus className="size-4" />
-          <span className="hidden text-xs font-medium sm:inline">
-            {t("trigger")}
-          </span>
-        </Button>
+        {trigger ?? (
+          <Button
+            variant="ghost"
+            size="sm"
+            className="h-8 gap-1.5 px-2 text-muted-foreground hover:text-foreground"
+          >
+            <MessageSquarePlus className="size-4" />
+            <span className="hidden text-xs font-medium sm:inline">
+              {t("trigger")}
+            </span>
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent className="sm:max-w-md">
         <form onSubmit={handleSubmit}>

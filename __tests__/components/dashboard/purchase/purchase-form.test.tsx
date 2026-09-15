@@ -198,6 +198,22 @@ describe('PurchaseForm', () => {
     (createClient as jest.Mock).mockReturnValue(client);
   };
 
+  // El bug del ticket: el server action volvia con el error de la base (RLS,
+  // trigger, constraint) y el formulario no lo mostraba en ningun lado, asi que
+  // la operacion no se hacia y nadie veia por que.
+  it('surfaces a server action error as a toast', async () => {
+    const { toast } = require('sonner');
+    (React.useActionState as jest.Mock).mockReturnValue([
+      { status: 'error', message: 'db.forbidden', fieldErrors: {} },
+      jest.fn(),
+      false,
+    ]);
+    setClient(makeOrgAwareClient());
+    render(<PurchaseForm />);
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('db.forbidden'));
+  });
+
   it('starts in assignment mode and posts it as the operation mode', async () => {
     setClient(makeOrgAwareClient());
     const { container } = render(<PurchaseForm />);

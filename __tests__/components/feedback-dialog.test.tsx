@@ -171,4 +171,29 @@ describe('FeedbackDialog', () => {
       expect(toast.error).toHaveBeenCalledWith('Custom error');
     });
   });
+
+  it('uses a custom trigger and the default type when provided', async () => {
+    (sendFeedback as jest.Mock).mockResolvedValue({ success: true });
+    render(
+      <FeedbackDialog
+        userEmail="test@test.com"
+        userName="Test"
+        defaultType="question"
+        trigger={<button type="button">Contactar soporte</button>}
+      />
+    );
+
+    expect(screen.getByText('Contactar soporte')).toBeTruthy();
+    expect(screen.queryByText('trigger')).toBeNull();
+
+    const textarea = screen.getByRole('textbox');
+    fireEvent.change(textarea, { target: { value: 'Necesito ayuda con el plan' } });
+    fireEvent.submit(textarea.closest('form')!);
+
+    await waitFor(() => {
+      expect(sendFeedback).toHaveBeenCalledWith(
+        expect.objectContaining({ type: 'question', message: 'Necesito ayuda con el plan' })
+      );
+    });
+  });
 });

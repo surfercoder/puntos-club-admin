@@ -6,6 +6,7 @@ import { useTranslations } from 'next-intl';
 import { useActionState, useCallback, useEffect, useReducer, useState } from 'react';
 
 import { purchaseFormAction } from '@/actions/dashboard/purchase/purchase-form-actions';
+import { useActionStateRedirect } from '@/components/dashboard/shared/use-action-state-redirect';
 import { Button } from '@/components/ui/button';
 import { Combobox } from '@/components/ui/combobox';
 import FieldError from '@/components/ui/field-error';
@@ -557,6 +558,10 @@ export default function PurchaseForm({ purchase }: PurchaseFormProps) {
   const computedPoints = useComputedSalePoints(mode, amount, branchId, initialValues.computedPoints);
 
   const [actionState, formAction, pending] = useActionState(purchaseFormAction, EMPTY_ACTION_STATE);
+  // Sin esto el error del server action no se ve en ningun lado: la accion
+  // redirige sola al guardar bien, asi que si vuelve con estado el owner se
+  // queda mirando el formulario sin saber que fallo.
+  useActionStateRedirect({ actionState });
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     const formData = Object.fromEntries(new FormData(event.currentTarget));

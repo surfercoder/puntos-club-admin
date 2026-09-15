@@ -1,9 +1,10 @@
 import { CircleCheck, Headphones, Lock, ShieldCheck, Tag } from 'lucide-react';
-import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import { Clubi } from '@/components/dashboard/home/clubi';
 import { PlanSelector } from '@/components/dashboard/plan/plan-selector';
+import { FeedbackDialog } from '@/components/feedback-dialog';
+import { getCurrentUser } from '@/lib/auth/get-current-user';
 
 const TRUST = [
   { key: 'payments', icon: ShieldCheck, tint: 'bg-brand-violet/10 text-brand-violet' },
@@ -14,6 +15,8 @@ const TRUST = [
 
 export default async function PlanSettingsPage() {
   const t = await getTranslations('Dashboard.planSettings');
+  const user = await getCurrentUser();
+  const userName = `${user?.first_name ?? ''} ${user?.last_name ?? ''}`.trim() || user?.email || 'User';
 
   return (
     <div className="space-y-6">
@@ -76,12 +79,19 @@ export default async function PlanSettingsPage() {
               {t('help.title')}
             </h2>
             <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{t('help.body')}</p>
-            <Link
-              className="brand-cta mt-4 inline-flex h-9 items-center rounded-lg px-4 text-sm font-medium"
-              href="/dashboard"
-            >
-              {t('help.cta')}
-            </Link>
+            <FeedbackDialog
+              userEmail={user?.email ?? 'unknown'}
+              userName={userName}
+              defaultType="question"
+              trigger={
+                <button
+                  type="button"
+                  className="brand-cta mt-4 inline-flex h-9 items-center rounded-lg px-4 text-sm font-medium"
+                >
+                  {t('help.cta')}
+                </button>
+              }
+            />
           </section>
         </div>
       </div>
