@@ -1,4 +1,5 @@
-import { BookOpen, Smartphone, Store } from 'lucide-react';
+import { Smartphone, Store } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
@@ -19,7 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { getUsageSummaryAction } from '@/actions/dashboard/usage/actions';
-import { PUNTOS_CLUB_CAJA_APK_URL } from '@/lib/mobile-apps';
+import { PUNTOS_CLUB_CAJA_APK_URL, PUNTOS_CLUB_CAJA_LOGO } from '@/lib/mobile-apps';
 import { filterStaff, getStaff, staffName } from '@/lib/staff/get-staff';
 import { formatDateOnly, parsePage, parsePerPage } from '@/lib/utils';
 
@@ -77,7 +78,7 @@ export default async function CashiersPage({ searchParams }: PageProps) {
           rel="noopener noreferrer"
           target="_blank"
         >
-          <BookOpen className="size-4" />
+          <Image alt="" aria-hidden height={20} src={PUNTOS_CLUB_CAJA_LOGO} width={20} />
           {t('appGuide')}
         </a>
       </div>
@@ -218,7 +219,7 @@ export default async function CashiersPage({ searchParams }: PageProps) {
               rel="noopener noreferrer"
               target="_blank"
             >
-              <Smartphone className="size-4" />
+              <Image alt="" aria-hidden height={20} src={PUNTOS_CLUB_CAJA_LOGO} width={20} />
               {t('whatsNext.download')}
             </a>
           </div>

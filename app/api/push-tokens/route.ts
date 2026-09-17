@@ -2,6 +2,7 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { errorText } from '@/lib/error-handler';
+import { createAdminClient } from '@/lib/supabase/admin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -61,6 +62,17 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
+
+    // Un mismo telefono que cambia de cuenta reusa el token de Expo: si el
+    // anterior queda activo, al beneficiario viejo le siguen llegando —en el
+    // telefono de otro— sus puntos y sus canjes. Admin client porque las filas
+    // a dar de baja son de otro beneficiario y no pasan RLS.
+    await createAdminClient()
+      .from("push_tokens")
+      .update({ is_active: false })
+      .eq("expo_push_token", expoPushToken)
+      .eq("is_active", true)
+      .neq("beneficiary_id", beneficiary.id);
 
     const { data: existingToken } = await supabase
       .from("push_tokens")

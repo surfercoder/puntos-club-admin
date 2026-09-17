@@ -7,6 +7,7 @@ import { redirect } from 'next/navigation';
 import { actionMessage, cleanFormData, fromErrorToActionState, type ActionState } from '@/lib/error-handler';
 import { PurchaseSchema } from '@/schemas/purchase.schema';
 import { createClient } from '@/lib/supabase/server';
+import { notifyPointsCredited } from '@/lib/notify-purchase';
 import { requireUser } from '@/lib/auth/require-user';
 
 export async function purchaseFormAction(_prevState: ActionState, formData: FormData) {
@@ -85,6 +86,17 @@ export async function purchaseFormAction(_prevState: ActionState, formData: Form
 
     if (error) {
       return await fromErrorToActionState(error);
+    }
+
+    // Misma notificacion que manda la app de cajero: sin esto, los puntos
+    // cargados desde la caja virtual no le avisaban nada al beneficiario.
+    // Best-effort — la compra ya esta guardada, un push caido no la voltea.
+    if (pointsEarned > 0 && orgIdNumber) {
+      await notifyPointsCredited({
+        beneficiaryId: rest.beneficiary_id,
+        organizationId: orgIdNumber,
+        pointsEarned,
+      }).catch(() => undefined);
     }
   }
 

@@ -2,11 +2,12 @@ import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 import type { NextRequest } from "next/server";
 import { NextResponse } from "next/server";
 import { errorText } from '@/lib/error-handler';
-import { notifyPointsCredited } from '@/lib/notify-purchase';
+import { notifyRedemptionResolved } from '@/lib/notify-redemption';
 
+// La app de cajero entrega y cancela con RPC contra la base, asi que el aviso no
+// puede salir de ahi: este es el unico camino que tiene para pedirlo.
 export async function POST(request: NextRequest) {
   try {
-    // Authenticate the cashier via their Supabase access token
     const authHeader = request.headers.get("authorization");
 
     if (!authHeader?.startsWith("Bearer ")) {
@@ -41,7 +42,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Verify this is a cashier
     const { data: appUser } = await supabase
       .from("app_user")
       .select("id, organization_id, role:user_role(name)")
@@ -69,37 +69,43 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { beneficiaryId, pointsEarned, totalAmount } = body;
+    const { redemptionId } = body;
 
-    if (!beneficiaryId || pointsEarned == null || !totalAmount) {
+    if (!redemptionId) {
       return NextResponse.json(
-        {
-          success: false,
-          error:
-            "beneficiaryId, pointsEarned, and totalAmount are required",
-        },
+        { success: false, error: "redemptionId is required" },
         { status: 400 }
       );
     }
 
-    const result = await notifyPointsCredited({
-      beneficiaryId,
-      // La organizacion sale del cajero autenticado y no del body: si no,
-      // cualquier cajero avisa puntos a nombre de otra organizacion.
-      organizationId: appUser.organization_id,
-      pointsEarned,
-    });
+    // El canje tiene que ser de la organizacion del cajero: sin esto cualquier
+    // cajero podria disparar avisos de canjes ajenos.
+    const { data: redemption } = await supabase
+      .from("redemption")
+      .select("id")
+      .eq("id", redemptionId)
+      .eq("organization_id", appUser.organization_id)
+      .single();
 
-    if (!result) {
+    if (!redemption) {
       return NextResponse.json(
-        { success: false, error: await errorText('beneficiary.notFound') },
+        { success: false, error: await errorText('db.forbidden') },
+        { status: 403 }
+      );
+    }
+
+    const push = await notifyRedemptionResolved(redemptionId);
+
+    if (!push) {
+      return NextResponse.json(
+        { success: false, error: await errorText('db.notFound') },
         { status: 404 }
       );
     }
 
-    return NextResponse.json({ success: true, ...result });
+    return NextResponse.json({ success: true, push });
   } catch (error) {
-    console.error("[purchase/notify] Unexpected error:", error);
+    console.error("[redemption/notify] Unexpected error:", error);
     return NextResponse.json(
       { success: false, error: await errorText('unexpected') },
       { status: 500 }

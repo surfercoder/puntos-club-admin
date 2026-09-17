@@ -2,6 +2,7 @@
 
 import { Eye, EyeOff, Info } from 'lucide-react';
 import { QRCodeSVG } from 'qrcode.react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
 import { redirect } from 'next/navigation';
@@ -19,7 +20,7 @@ import type { ActionState } from '@/lib/action-state';
 import { EMPTY_ACTION_STATE } from '@/lib/action-state';
 import { useValidationState } from '@/lib/use-validation-state';
 import { USER_ROLES } from '@/lib/auth/roles';
-import { PUNTOS_CLUB_CAJA_APK_URL } from '@/lib/mobile-apps';
+import { PUNTOS_CLUB_CAJA_APK_URL, PUNTOS_CLUB_CAJA_LOGO } from '@/lib/mobile-apps';
 import { createClient } from '@/lib/supabase/client';
 import { AppUserSchema } from '@/schemas/app_user.schema';
 import { PasswordStrengthChecklist } from '@/components/onboarding/password-strength-checklist';
@@ -108,6 +109,7 @@ function CashierAppQr({ show }: { show: boolean }) {
       rel="noopener noreferrer"
       className="flex shrink-0 flex-col items-center rounded-lg border p-2"
     >
+      <Image alt="" aria-hidden className="mb-1" height={32} src={PUNTOS_CLUB_CAJA_LOGO} width={32} />
       <div className="rounded-md border-2 border-primary bg-white p-1.5">
         <QRCodeSVG value={PUNTOS_CLUB_CAJA_APK_URL} size={96} bgColor="#ffffff" fgColor="#31A1D6" level="M" />
       </div>

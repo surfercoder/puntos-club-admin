@@ -195,10 +195,32 @@ otp_expiry = 3600
 # admin_email = "admin@email.com"
 # sender_name = "Admin"
 
-# Uncomment to customize email template
-# [auth.email.template.invite]
-# subject = "You have been invited"
-# content_path = "./supabase/templates/invite.html"
+# Templates en español y con branding. Se generan con `npm run auth:emails`
+# (scripts/build-auth-emails.ts). Ojo: esto vale SOLO para el stack local; en el
+# proyecto hosted hay que pegarlos en Dashboard → Authentication → Emails.
+[auth.email.template.confirmation]
+subject = "Confirmá tu email - Puntos Club"
+content_path = "./supabase/templates/confirmation.html"
+
+[auth.email.template.recovery]
+subject = "Restablecé tu contraseña - Puntos Club"
+content_path = "./supabase/templates/recovery.html"
+
+[auth.email.template.email_change]
+subject = "Confirmá tu nuevo email - Puntos Club"
+content_path = "./supabase/templates/email-change.html"
+
+[auth.email.template.invite]
+subject = "Te invitaron a Puntos Club"
+content_path = "./supabase/templates/invite.html"
+
+[auth.email.template.magic_link]
+subject = "Tu enlace de acceso - Puntos Club"
+content_path = "./supabase/templates/magic-link.html"
+
+[auth.email.template.reauthentication]
+subject = "Tu código de verificación - Puntos Club"
+content_path = "./supabase/templates/reauthentication.html"
 
 # Uncomment to customize notification email template
 # [auth.email.notification.password_changed]

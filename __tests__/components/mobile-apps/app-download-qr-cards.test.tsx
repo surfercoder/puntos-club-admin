@@ -141,8 +141,9 @@ describe('AppDownloadQRCards', () => {
   });
 
   it('opens a print window and prints', () => {
+    const logoImg = document.createElement('img');
     const mockPrintWindow = {
-      document: { write: jest.fn(), close: jest.fn() },
+      document: { write: jest.fn(), close: jest.fn(), images: [logoImg] },
       focus: jest.fn(),
       print: jest.fn(),
     };
@@ -155,6 +156,7 @@ describe('AppDownloadQRCards', () => {
     const html = mockPrintWindow.document.write.mock.calls[0][0] as string;
     expect(html).toContain('puntosClubTitle');
     expect(mockPrintWindow.document.close).toHaveBeenCalled();
+    expect(logoImg.getAttribute('src')).toBe(`${window.location.origin}/images/logos/app-puntosclub.png`);
     expect(mockPrintWindow.focus).toHaveBeenCalled();
 
     jest.advanceTimersByTime(500);

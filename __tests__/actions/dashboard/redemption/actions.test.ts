@@ -35,6 +35,11 @@ const mockSupabase = {
 };
 
 jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => mockSupabase) }));
+
+const mockNotify = jest.fn(async () => ({ sent: 1, failed: 0 }));
+jest.mock('@/lib/notify-redemption', () => ({
+  notifyRedemptionResolved: (...a: unknown[]) => mockNotify(...(a as [])),
+}));
 // requireUser and getMutationOrgId both resolve the current user; keep them off
 // the shared query mock so they don't consume its `single()` sequencing.
 jest.mock('@/lib/auth/get-current-user', () => ({
@@ -63,6 +68,7 @@ beforeEach(() => {
   mockSupabase.from.mockReturnValue(fromChain);
   (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, organization_id: 123 });
   rpcImpl.mockReset();
+  mockNotify.mockClear();
 });
 
 describe('deliverRedemption', () => {
@@ -78,6 +84,24 @@ describe('deliverRedemption', () => {
     rpcImpl.mockImplementationOnce(() => ({ data: null, error: { message: 'PRODUCT_NOT_FOUND' } }));
     const result = await deliverRedemption('1');
     expect(result.error).toEqual({ message: 'PRODUCT_NOT_FOUND' });
+  });
+
+  it('avisa al beneficiario al entregar, y no si la rpc falla', async () => {
+    rpcImpl.mockImplementationOnce(() => ({ data: { id: 1, status: 'delivered' }, error: null }));
+    await deliverRedemption('1');
+    expect(mockNotify).toHaveBeenCalledWith(1);
+
+    mockNotify.mockClear();
+    rpcImpl.mockImplementationOnce(() => ({ data: null, error: { message: 'PRODUCT_NOT_FOUND' } }));
+    await deliverRedemption('1');
+    expect(mockNotify).not.toHaveBeenCalled();
+  });
+
+  it('un push caido no voltea la entrega', async () => {
+    rpcImpl.mockImplementationOnce(() => ({ data: { id: 1, status: 'delivered' }, error: null }));
+    mockNotify.mockRejectedValueOnce(new Error('expo down'));
+    const result = await deliverRedemption('1');
+    expect(result.error).toBeNull();
   });
 });
 
@@ -99,5 +123,11 @@ describe('cancelRedemption', () => {
     rpcImpl.mockImplementationOnce(() => ({ data: null, error: { message: 'REDEMPTION_NOT_PENDING' } }));
     const result = await cancelRedemption('1');
     expect(result.error).toEqual({ message: 'REDEMPTION_NOT_PENDING' });
+  });
+
+  it('avisa al beneficiario al cancelar', async () => {
+    rpcImpl.mockImplementationOnce(() => ({ data: { id: 1, status: 'cancelled' }, error: null }));
+    await cancelRedemption('1');
+    expect(mockNotify).toHaveBeenCalledWith(1);
   });
 });

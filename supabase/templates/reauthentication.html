@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lexend:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+  <!--[if mso]>
+  <style>
+    body, td { font-family: Arial, sans-serif !important; }
+  </style>
+  <![endif]-->
+</head>
+<body style="margin:0;padding:0;background-color:#F3F4F6;font-family:'Lexend',Arial,sans-serif">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color:#F3F4F6;padding:32px 16px">
+    <tr>
+      <td align="center">
+
+        <!-- Card -->
+        <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:620px;background:#FFFFFF;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+
+          <!-- Gradient bar -->
+          <tr><td>
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td style="background:#FD7E14;height:4px;width:33%"></td>
+      <td style="background:#FF4573;height:4px;width:34%"></td>
+      <td style="background:#31A1D6;height:4px;width:33%"></td>
+    </tr>
+  </table></td></tr>
+
+          <!-- Header: el wordmark va en texto, no en una imagen. Los clientes de
+               mail (y el preview del Dashboard de Supabase) bloquean imágenes
+               remotas por default: el logo se vería como un cuadradito roto. -->
+          <tr>
+            <td style="background:#1A1A2E;padding:28px 36px;text-align:center">
+              <span style="font-family:'Poppins',Arial,sans-serif;font-size:24px;font-weight:700;letter-spacing:-0.3px;color:#FFFFFF;vertical-align:middle">
+                Puntos
+              </span>
+              <span style="font-family:'Poppins',Arial,sans-serif;font-size:24px;font-weight:700;letter-spacing:-0.3px;color:#FF4573;vertical-align:middle">
+                Club
+              </span>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:36px 36px 28px;background:#FFFFFF;font-family:'Lexend',Arial,sans-serif;font-size:15px;color:#1A1A2E;line-height:1.7">
+              
+    <h2 style="font-family:'Poppins',Arial,sans-serif;font-size:20px;font-weight:700;color:#1A1A2E;margin:0 0 6px">Confirmá que sos vos 🛡️</h2>
+    <p style="font-family:'Lexend',Arial,sans-serif;font-size:15px;color:#374151;margin:0 0 12px;line-height:1.7">Para completar esta operación necesitamos verificar tu identidad. Ingresá este código en la app:</p>
+    
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin:24px 0">
+    <tr>
+      <td align="center" style="background:#FFF5F5;border:1px solid #E8E0DE;border-radius:10px;padding:22px 16px">
+        <p style="margin:0 0 8px;font-family:'Lexend',Arial,sans-serif;font-size:13px;color:#6B7280">Tu código de verificación</p>
+        <p style="margin:0;font-family:'Poppins',Arial,sans-serif;font-size:38px;font-weight:700;letter-spacing:6px;color:#FF4573">{{ .Token }}</p>
+      </td>
+    </tr>
+  </table>
+    <p style="font-family:'Lexend',Arial,sans-serif;font-size:15px;color:#374151;margin:0 0 12px;line-height:1.7">El código sirve una sola vez. Si no estabas haciendo nada en Puntos Club, cambiá tu contraseña por precaución.</p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:20px 36px 24px;background:#FFF5F5;border-top:1px solid #E8E0DE;text-align:center;font-family:'Lexend',Arial,sans-serif">
+              <p style="margin:0;font-size:12px;color:#6B7280">
+      © 2026 Puntos Club. Todos los derechos reservados.
+    </p>
+            </td>
+          </tr>
+
+          <!-- Bottom gradient bar -->
+          <tr><td>
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td style="background:#FD7E14;height:4px;width:33%"></td>
+      <td style="background:#FF4573;height:4px;width:34%"></td>
+      <td style="background:#31A1D6;height:4px;width:33%"></td>
+    </tr>
+  </table></td></tr>
+
+        </table>
+        <!-- /Card -->
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

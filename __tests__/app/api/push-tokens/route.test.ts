@@ -27,6 +27,16 @@ jest.mock('@supabase/supabase-js', () => ({
   })),
 }));
 
+// Baja del mismo token en otras cuentas: pasa por el admin client.
+const mockAdminNeq = jest.fn(() => Promise.resolve({ error: null }));
+const mockAdminUpdate = jest.fn(() => ({
+  eq: jest.fn(() => ({ eq: jest.fn(() => ({ neq: mockAdminNeq })) })),
+}));
+const mockAdminFrom = jest.fn(() => ({ update: mockAdminUpdate }));
+jest.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: jest.fn(() => ({ from: (...a: unknown[]) => mockAdminFrom(...(a as [])) })),
+}));
+
 describe('Push Tokens API Route', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -133,6 +143,21 @@ describe('Push Tokens API Route', () => {
     const response = await POST(request);
     const data = await response.json();
     expect(data.success).toBe(true);
+  });
+
+  it('da de baja el mismo token en las otras cuentas del telefono', async () => {
+    mockSingle.mockResolvedValueOnce({ data: { id: 1 }, error: null });
+    mockSingle.mockResolvedValueOnce({ data: null, error: null });
+
+    const request = {
+      json: () => Promise.resolve({ expoPushToken: 'new-token', deviceId: 'dev1', platform: 'android' }),
+      headers: { get: (name: string) => name === 'authorization' ? 'Bearer valid-token' : null },
+    } as any;
+    await POST(request);
+
+    expect(mockAdminFrom).toHaveBeenCalledWith('push_tokens');
+    expect(mockAdminUpdate).toHaveBeenCalledWith({ is_active: false });
+    expect(mockAdminNeq).toHaveBeenCalledWith('beneficiary_id', 1);
   });
 
   it('returns 500 when insert fails', async () => {

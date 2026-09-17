@@ -1,6 +1,7 @@
 "use server";
 
 import { createClient } from '@/lib/supabase/server';
+import { notifyRedemptionResolved } from '@/lib/notify-redemption';
 
 // Redemptions are only created by beneficiaries from the app / cashier flow —
 // the admin portal deliberately has no create path so an owner cannot force a
@@ -13,6 +14,7 @@ export async function deliverRedemption(id: string) {
   if (error) {
     return { error };
   }
+  await notify(id);
   return { data, error: null };
 }
 
@@ -25,5 +27,11 @@ export async function cancelRedemption(id: string, reason?: string) {
   if (error) {
     return { error };
   }
+  await notify(id);
   return { data, error: null };
 }
+
+// Best-effort: el canje ya cambio de estado en la base, un push caido no lo
+// vuelve atras.
+const notify = (id: string) =>
+  notifyRedemptionResolved(Number(id)).catch(() => undefined);

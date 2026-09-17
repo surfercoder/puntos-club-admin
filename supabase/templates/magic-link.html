@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Lexend:wght@300;400;700&display=swap"
+    rel="stylesheet"
+  />
+  <!--[if mso]>
+  <style>
+    body, td { font-family: Arial, sans-serif !important; }
+  </style>
+  <![endif]-->
+</head>
+<body style="margin:0;padding:0;background-color:#F3F4F6;font-family:'Lexend',Arial,sans-serif">
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color:#F3F4F6;padding:32px 16px">
+    <tr>
+      <td align="center">
+
+        <!-- Card -->
+        <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="max-width:620px;background:#FFFFFF;border-radius:12px;overflow:hidden;box-shadow:0 4px 24px rgba(0,0,0,0.08)">
+
+          <!-- Gradient bar -->
+          <tr><td>
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td style="background:#FD7E14;height:4px;width:33%"></td>
+      <td style="background:#FF4573;height:4px;width:34%"></td>
+      <td style="background:#31A1D6;height:4px;width:33%"></td>
+    </tr>
+  </table></td></tr>
+
+          <!-- Header: el wordmark va en texto, no en una imagen. Los clientes de
+               mail (y el preview del Dashboard de Supabase) bloquean imágenes
+               remotas por default: el logo se vería como un cuadradito roto. -->
+          <tr>
+            <td style="background:#1A1A2E;padding:28px 36px;text-align:center">
+              <span style="font-family:'Poppins',Arial,sans-serif;font-size:24px;font-weight:700;letter-spacing:-0.3px;color:#FFFFFF;vertical-align:middle">
+                Puntos
+              </span>
+              <span style="font-family:'Poppins',Arial,sans-serif;font-size:24px;font-weight:700;letter-spacing:-0.3px;color:#FF4573;vertical-align:middle">
+                Club
+              </span>
+            </td>
+          </tr>
+
+          <!-- Body -->
+          <tr>
+            <td style="padding:36px 36px 28px;background:#FFFFFF;font-family:'Lexend',Arial,sans-serif;font-size:15px;color:#1A1A2E;line-height:1.7">
+              
+    <h2 style="font-family:'Poppins',Arial,sans-serif;font-size:20px;font-weight:700;color:#1A1A2E;margin:0 0 6px">Tu enlace de acceso 🔑</h2>
+    <p style="font-family:'Lexend',Arial,sans-serif;font-size:15px;color:#374151;margin:0 0 12px;line-height:1.7">Pediste entrar a Puntos Club sin escribir tu contraseña. Tocá el botón y listo:</p>
+    
+    <table role="presentation" cellpadding="0" cellspacing="0" style="margin:24px 0">
+      <tr>
+        <td style="border-radius:8px;background:#FF4573">
+          <a
+            href="{{ .ConfirmationURL }}"
+            style="display:inline-block;padding:14px 32px;font-family:'Poppins',Arial,sans-serif;font-size:15px;font-weight:600;color:#fff;text-decoration:none;border-radius:8px;letter-spacing:0.2px"
+          >Entrar a Puntos Club</a>
+        </td>
+      </tr>
+    </table>
+    
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background:#31A1D60D;border-radius:10px;margin:20px 0">
+      <tr>
+        <td width="56" align="center" valign="top" style="padding:16px 0 16px 16px">
+          <div style="width:40px;height:40px;line-height:40px;border-radius:50%;background:#31A1D61A;font-size:18px;text-align:center">🔒</div>
+        </td>
+        <td style="padding:16px">
+          <p style="margin:0 0 4px;font-family:'Poppins',Arial,sans-serif;font-size:14px;font-weight:600;color:#31A1D6">No compartas este enlace</p>
+          <p style="margin:0;font-family:'Lexend',Arial,sans-serif;font-size:12px;color:#6B7280;line-height:1.6">Cualquiera que lo abra entra a tu cuenta. Si no lo pediste, ignorá este mensaje.</p>
+        </td>
+      </tr>
+    </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td style="padding:20px 36px 24px;background:#FFF5F5;border-top:1px solid #E8E0DE;text-align:center;font-family:'Lexend',Arial,sans-serif">
+              
+  <p style="margin:0 0 4px;font-size:13px;color:#6B7280;font-family:'Lexend',Arial,sans-serif">
+    🔗 Si el botón no funciona, copiá y pegá este enlace en tu navegador:
+  </p>
+  <p style="margin:0 0 16px;font-size:11px;word-break:break-all">
+    <a href="{{ .ConfirmationURL }}" style="color:#31A1D6">{{ .ConfirmationURL }}</a>
+  </p>
+  <p style="margin:0;font-size:12px;color:#6B7280;font-family:'Lexend',Arial,sans-serif">
+    © 2026 Puntos Club. Todos los derechos reservados.
+  </p>
+            </td>
+          </tr>
+
+          <!-- Bottom gradient bar -->
+          <tr><td>
+  <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+    <tr>
+      <td style="background:#FD7E14;height:4px;width:33%"></td>
+      <td style="background:#FF4573;height:4px;width:34%"></td>
+      <td style="background:#31A1D6;height:4px;width:33%"></td>
+    </tr>
+  </table></td></tr>
+
+        </table>
+        <!-- /Card -->
+
+      </td>
+    </tr>
+  </table>
+</body>
+</html>

@@ -27,9 +27,14 @@ export function esc(value: string): string {
     .replace(/'/g, "&#39;");
 }
 
-/** Las imágenes de un email tienen que ser absolutas: no hay página que resuelva rutas relativas. */
+/**
+ * Las imágenes de un email tienen que ser absolutas: no hay página que resuelva
+ * rutas relativas. El fallback es el host de la app y no www.puntosclub.com.ar
+ * porque la landing no sirve `/images/*`: ahí el logo sale 404 y el mail llega
+ * con el cuadradito roto.
+ */
 const EMAIL_BASE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.puntosclub.com.ar'
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://puntos-club-admin.vercel.app'
 ).replace(/\/+$/, '');
 
 const BRAND = {
@@ -90,10 +95,11 @@ export function brandedEmailLayout(body: string, footer?: string): string {
           <!-- Gradient bar -->
           <tr><td>${GRADIENT_BAR}</td></tr>
 
-          <!-- Header -->
+          <!-- Header: el wordmark va en texto, no en una imagen. Los clientes de
+               mail (y el preview del Dashboard de Supabase) bloquean imágenes
+               remotas por default: el logo se vería como un cuadradito roto. -->
           <tr>
-            <td style="background:${BRAND.dark};padding:24px 36px;text-align:center">
-              <img src="${EMAIL_BASE_URL}/images/logos/LogoImage.png" width="34" height="34" alt="" style="display:inline-block;vertical-align:middle;border:0;border-radius:50%;margin-right:10px" />
+            <td style="background:${BRAND.dark};padding:28px 36px;text-align:center">
               <span style="font-family:'Poppins',Arial,sans-serif;font-size:24px;font-weight:700;letter-spacing:-0.3px;color:${BRAND.white};vertical-align:middle">
                 Puntos
               </span>

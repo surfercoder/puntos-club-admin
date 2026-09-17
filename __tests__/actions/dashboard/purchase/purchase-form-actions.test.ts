@@ -15,6 +15,9 @@ const mockSupabase = {
 };
 jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => mockSupabase) }));
 
+const mockNotify = jest.fn(async () => ({ push: { sent: 1, failed: 0 }, emailSent: true }));
+jest.mock('@/lib/notify-purchase', () => ({ notifyPointsCredited: (...a: unknown[]) => mockNotify(...(a as [])) }));
+
 import { redirect } from 'next/navigation';
 import { revalidatePath } from 'next/cache';
 import { purchaseFormAction } from '@/actions/dashboard/purchase/purchase-form-actions';
@@ -45,6 +48,22 @@ describe('purchaseFormAction', () => {
     expect(mockSupabase.insert).toHaveBeenCalled();
     expect(revalidatePath).toHaveBeenCalledWith('/dashboard/purchase');
     expect(redirect).toHaveBeenCalled();
+  });
+
+  it('avisa al beneficiario cuando la caja virtual acredita puntos', async () => {
+    const fd = createFormData({ beneficiary_id: 'ben-1', cashier_id: 'cash-1', total_amount: '100.50' });
+    await purchaseFormAction(EMPTY_ACTION_STATE, fd);
+    expect(mockNotify).toHaveBeenCalledWith({
+      beneficiaryId: 'ben-1',
+      organizationId: 123,
+      pointsEarned: 10,
+    });
+  });
+
+  it('no avisa al editar una compra existente', async () => {
+    const fd = createFormData({ id: '1', beneficiary_id: 'ben-1', total_amount: '100.50' });
+    await purchaseFormAction(EMPTY_ACTION_STATE, fd);
+    expect(mockNotify).not.toHaveBeenCalled();
   });
 
   it('stamps the authenticated owner as cashier on create, ignoring client cashier_id', async () => {

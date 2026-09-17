@@ -296,9 +296,9 @@ describe('Purchase Notify API Route', () => {
     expect(data.emailSent).toBe(true);
   });
 
-  // --- Falls back to appUser.organization_id ---
+  // --- La organizacion sale siempre del cajero autenticado ---
 
-  it('falls back to appUser.organization_id when organizationId is not in body', async () => {
+  it('uses appUser.organization_id when organizationId is not in body', async () => {
     setupAdminMocks({
       beneficiary: { id: 'b1', first_name: 'Test', last_name: 'User', email: null },
       organization: { name: 'Org' },
