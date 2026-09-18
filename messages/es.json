@@ -252,7 +252,8 @@
     "pointsRulesAndCampaigns": "Campañas",
     "profile": "Perfil",
     "myQrs": "Mis QRs",
-    "notificationsAndComms": "Notificaciones y comunicación"
+    "notificationsAndComms": "Notificaciones y comunicación",
+    "help": "Ayuda y aprendizaje"
   },
   "Breadcrumb": {
     "panel": "Panel",
@@ -287,7 +288,8 @@
     "organization-settings": "Configuración de Organización",
     "mother": "Regla madre",
     "cashiers": "Cajeros",
-    "collaborators": "Colaboradores"
+    "collaborators": "Colaboradores",
+    "help": "Ayuda y aprendizaje"
   },
   "Dashboard": {
     "analytics": {
@@ -1963,6 +1965,17 @@
         "city": "Ciudad",
         "state": "Provincia",
         "zip_code": "Código postal"
+      }
+    },
+    "help": {
+      "title": "Ayuda y aprendizaje",
+      "description": "Manuales y guías para sacarle el máximo provecho a Puntos Club. Vamos a ir sumando más material acá.",
+      "download": "Descargar {format}",
+      "manuals": {
+        "owner": {
+          "title": "Manual del Owner",
+          "description": "Guía completa para configurar tu club, cargar premios, asignar puntos y gestionar canjes."
+        }
       }
     }
   },

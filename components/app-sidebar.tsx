@@ -148,6 +148,7 @@ export function AppSidebar({
             { title: t("generalSettings"), url: "/dashboard/settings/organization" },
             { title: t("collaborators"), url: "/dashboard/collaborators" },
             { title: t("profile"), url: "/dashboard/profile" },
+            { title: t("help"), url: "/dashboard/settings/help" },
           ],
         },
       ]

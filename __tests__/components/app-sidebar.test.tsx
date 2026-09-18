@@ -96,7 +96,7 @@ describe('AppSidebar', () => {
         ['pointsRulesAndCampaigns', []],
         ['notificationsAndComms', []],
         ['myQrs', []],
-        ['settings', ['generalSettings', 'collaborators', 'profile']],
+        ['settings', ['generalSettings', 'collaborators', 'profile', 'help']],
       ])
     );
   });

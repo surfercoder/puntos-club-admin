@@ -252,7 +252,8 @@
     "pointsRulesAndCampaigns": "Campaigns",
     "profile": "Profile",
     "myQrs": "My QRs",
-    "notificationsAndComms": "Notifications & communication"
+    "notificationsAndComms": "Notifications & communication",
+    "help": "Help & learning"
   },
   "Breadcrumb": {
     "panel": "Dashboard",
@@ -287,7 +288,8 @@
     "organization-settings": "Organization Settings",
     "mother": "Base rule",
     "cashiers": "Cashiers",
-    "collaborators": "Collaborators"
+    "collaborators": "Collaborators",
+    "help": "Help & learning"
   },
   "Dashboard": {
     "analytics": {
@@ -1963,6 +1965,17 @@
         "city": "City",
         "state": "State",
         "zip_code": "Zip code"
+      }
+    },
+    "help": {
+      "title": "Help & learning",
+      "description": "Manuals and guides to get the most out of Puntos Club. More material will be added here.",
+      "download": "Download {format}",
+      "manuals": {
+        "owner": {
+          "title": "Owner manual",
+          "description": "Complete guide to set up your club, load rewards, assign points and manage redemptions."
+        }
       }
     }
   },

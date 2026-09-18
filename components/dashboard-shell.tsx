@@ -51,7 +51,7 @@ const KNOWN_SEGMENTS = [
   "notifications", "organization", "organization_notification_limits",
   "points-rules", "product", "profile", "purchase", "push_notifications", "mother",
   "push_tokens", "redemption", "user-role", "users", "qr", "cashiers", "collaborators",
-  "settings", "organization-settings",
+  "settings", "organization-settings", "help",
 ] as const;
 
 type KnownSegment = typeof KNOWN_SEGMENTS[number];
