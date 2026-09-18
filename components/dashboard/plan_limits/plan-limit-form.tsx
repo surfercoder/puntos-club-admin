@@ -47,7 +47,7 @@ export default function PlanLimitForm({ planLimit }: PlanLimitFormProps) {
 
       <div>
         <Label htmlFor="limit_value">{t('limitValueLabel')}</Label>
-        <Input defaultValue={planLimit?.limit_value ?? ''} id="limit_value" name="limit_value" placeholder="100" type="number" min="0" />
+        <Input defaultValue={planLimit?.limit_value ?? ''} id="limit_value" name="limit_value" placeholder="100" type="number" min="-1" />
         <FieldError actionState={validation ?? actionState} name="limit_value" />
       </div>
 

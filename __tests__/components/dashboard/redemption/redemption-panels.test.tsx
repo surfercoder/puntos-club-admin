@@ -63,10 +63,11 @@ describe('RedemptionFilters', () => {
       await RedemptionFilters({
         values: {
           q: 'CAN', status: 'pending', from: '2026-07-01',
-          to: '2026-08-15', beneficiary: '1', product: '2',
+          to: '2026-08-15', beneficiary: '1', product: '2', branch: '3',
         },
         beneficiaries: [{ id: '1', name: 'Ana Diaz' }],
         products: [{ id: '2', name: 'Botella Térmica' }],
+        branches: [{ id: '3', name: 'Sucursal Centro' }],
       }),
     );
     expect(container.querySelector('input[name="q"]')).toHaveValue('CAN');
@@ -75,14 +76,16 @@ describe('RedemptionFilters', () => {
     expect(container.querySelector('input[name="to"]')).toHaveValue('2026-08-15');
     expect(container.querySelector('select[name="beneficiary"]')).toHaveValue('1');
     expect(container.querySelector('select[name="product"]')).toHaveValue('2');
+    expect(container.querySelector('select[name="branch"]')).toHaveValue('3');
   });
 
   it('clears back to the bare route', async () => {
     render(
       await RedemptionFilters({
-        values: { q: '', status: '', from: '', to: '', beneficiary: '', product: '' },
+        values: { q: '', status: '', from: '', to: '', beneficiary: '', product: '', branch: '' },
         beneficiaries: [],
         products: [],
+        branches: [],
       }),
     );
     expect(screen.getByRole('link', { name: 'clear' })).toHaveAttribute(

@@ -204,6 +204,47 @@ describe('RedemptionListPage extra filters', () => {
     expect(miss).toBeTruthy();
   });
 
+  it('filters by the branch of the user who delivered it', async () => {
+    resolveData = {
+      data: [
+        {
+          id: 131,
+          points_used: 100,
+          redemption_date: '2026-08-14T22:30:00Z',
+          status: 'delivered',
+          beneficiary: { id: 1, first_name: 'Enzo', last_name: 'Centro' },
+          product: { id: 1, name: 'Premio' },
+          deliveredBy: { first_name: 'Enzo', last_name: 'D', branch: { id: 10, name: 'Centro' } },
+        },
+        {
+          id: 132,
+          points_used: 200,
+          redemption_date: '2026-08-14T22:30:00Z',
+          status: 'delivered',
+          beneficiary: { id: 2, first_name: 'Ana', last_name: 'Norte' },
+          product: { id: 1, name: 'Premio' },
+          deliveredBy: { first_name: 'Ana', last_name: 'P', branch: { id: 11, name: 'Norte' } },
+        },
+        {
+          id: 133,
+          points_used: 300,
+          redemption_date: '2026-08-14T22:30:00Z',
+          status: 'delivered',
+          beneficiary: { id: 3, first_name: 'Paula', last_name: 'SinSucursal' },
+          product: { id: 1, name: 'Premio' },
+          deliveredBy: { first_name: 'Paula', last_name: 'B', branch: null },
+        },
+      ],
+      error: null,
+    };
+    const { queryByText } = render(
+      await RedemptionListPage({ searchParams: Promise.resolve({ branch: '10' }) }),
+    );
+    expect(queryByText('Enzo Centro')).toBeTruthy();
+    expect(queryByText('Ana Norte')).toBeNull();
+    expect(queryByText('Paula SinSucursal')).toBeNull();
+  });
+
   it('survives a null data payload', async () => {
     resolveData = { data: null, error: null };
     expect(await RedemptionListPage({ searchParams: Promise.resolve({}) })).toBeTruthy();

@@ -59,7 +59,7 @@ export default function OrganizationPlanLimitForm({ organizationPlanLimit }: Org
 
       <div>
         <Label htmlFor="limit_value">{t('limitValueLabel')}</Label>
-        <Input defaultValue={organizationPlanLimit?.limit_value ?? ''} id="limit_value" name="limit_value" placeholder="100" type="number" min="0" />
+        <Input defaultValue={organizationPlanLimit?.limit_value ?? ''} id="limit_value" name="limit_value" placeholder="100" type="number" min="-1" />
         <FieldError actionState={validation ?? actionState} name="limit_value" />
       </div>
 

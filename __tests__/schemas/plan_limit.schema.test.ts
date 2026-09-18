@@ -127,8 +127,24 @@ describe('PlanLimitSchema', () => {
       }
     });
 
-    it('should reject negative limit_value', () => {
+    it('should accept -1 as "sin límite"', () => {
+      const result = PlanLimitSchema.safeParse({ ...validInput, limit_value: -1 });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject limit_value below -1', () => {
       expect(() => PlanLimitSchema.parse({ ...validInput, limit_value: -5 })).toThrow();
+    });
+
+    it('should accept 0 and 1 on a feature flag', () => {
+      expect(PlanLimitSchema.safeParse({ ...validInput, feature: 'sso', limit_value: 0 }).success).toBe(true);
+      expect(PlanLimitSchema.safeParse({ ...validInput, feature: 'sso', limit_value: 1 }).success).toBe(true);
+    });
+
+    it('should reject any other value on a feature flag', () => {
+      // Un flag en 2 o -1 lo leeria check_plan_limit() como "incluido".
+      expect(PlanLimitSchema.safeParse({ ...validInput, feature: 'sso', limit_value: 2 }).success).toBe(false);
+      expect(PlanLimitSchema.safeParse({ ...validInput, feature: 'sso', limit_value: -1 }).success).toBe(false);
     });
 
     it('should reject non-numeric string limit_value', () => {

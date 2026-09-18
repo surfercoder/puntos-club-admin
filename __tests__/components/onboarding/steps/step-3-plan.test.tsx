@@ -1,27 +1,24 @@
-// The plan grid reads its feature labels through t.raw('features'), so this suite
-// needs a richer translator than the global stub.
+// Las tarjetas traducen cada feature con t('features.<key>'); el stub devuelve la clave.
 jest.mock('next-intl', () => ({
   useTranslations: jest.fn(() => {
     const t = (key: string, values?: Record<string, unknown>) =>
       values ? `${key}:${Object.values(values).join(',')}` : key;
     t.rich = (key: string) => key;
     t.has = () => true;
-    t.raw = () => ({
-      rewards: 'Premios',
-      beneficiaries: 'Beneficiarios',
-      notificationsPerMonth: 'Notificaciones',
-      cashiers: 'Cajeros',
-      branches: 'Sucursales',
-      collaborators: 'Colaboradores',
-      beneficiaryMap: 'Mapa',
-      dashboard: 'Dashboard',
-      excelPdfExport: 'Exportación',
-      customAI: 'IA',
-      businessIntelligence: 'BI',
-    });
+    t.raw = () => ({});
     return t;
   }),
   useLocale: jest.fn(() => 'es'),
+}));
+
+// Los valores de cada plan salen de plan_limits; el server action se mockea.
+jest.mock('@/actions/dashboard/usage/actions', () => ({
+  getAllPlanLimitsAction: jest.fn().mockResolvedValue({
+    trial:      { beneficiaries: 100,  redeemable_products: 2,  push_notifications_monthly: 200,   cashiers: 1,  branches: 1,  collaborators: 0,  campaigns: 0 },
+    advance:    { beneficiaries: 1000, redeemable_products: 6,  push_notifications_monthly: 2000,  cashiers: 10, branches: 10, collaborators: 1,  campaigns: 0 },
+    pro:        { beneficiaries: -1,   redeemable_products: 20, push_notifications_monthly: 5000,  cashiers: 50, branches: 50, collaborators: -1, campaigns: 1 },
+    enterprise: { beneficiaries: -1,   redeemable_products: -1, push_notifications_monthly: 10000, cashiers: -1, branches: -1, collaborators: -1, campaigns: 1 },
+  }),
 }));
 
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
@@ -36,7 +33,7 @@ const renderStep = (props: Partial<React.ComponentProps<typeof Step3Plan>> = {})
   return { onNext, onBack };
 };
 
-const selectPlan = (name: 'trialPlan' | 'advancePlan' | 'proPlan') =>
+const selectPlan = (name: 'trialPlan' | 'advancePlan' | 'proPlan' | 'enterprisePlan') =>
   fireEvent.click(screen.getByText(name).closest('button') as HTMLElement);
 
 const continueButton = () => screen.getByRole('button', { name: /continueWith/ });
@@ -60,15 +57,37 @@ describe('Step3Plan', () => {
     consoleError.mockRestore();
   });
 
-  it('renders the three plans with their prices', () => {
+  it('renders the four plans with their prices', () => {
     renderStep();
 
     expect(screen.getByText('trialPlan')).toBeInTheDocument();
     expect(screen.getByText('advancePlan')).toBeInTheDocument();
     expect(screen.getByText('proPlan')).toBeInTheDocument();
+    expect(screen.getByText('enterprisePlan')).toBeInTheDocument();
     expect(screen.getByText('$50')).toBeInTheDocument();
     expect(screen.getByText('$89')).toBeInTheDocument();
+    // Enterprise no tiene precio de lista
+    expect(screen.getByText('customPriceLabel')).toBeInTheDocument();
     expect(screen.getByText('popularBadge')).toBeInTheDocument();
+  });
+
+  it('sends Enterprise to sales: the account starts on trial', () => {
+    const { onNext } = renderStep();
+
+    selectPlan('enterprisePlan');
+    expect(screen.getByText('enterpriseOnboardingNote')).toBeInTheDocument();
+    expect(screen.queryByLabelText('payerEmailLabel')).not.toBeInTheDocument();
+    expect(continueButton()).toHaveTextContent('trialPlan');
+
+    fireEvent.click(continueButton());
+    expect(onNext).toHaveBeenCalledWith('trial');
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('shows the unlimited label instead of a number', async () => {
+    renderStep();
+    // Pro tiene beneficiarios "sin límite" (-1 en plan_limits)
+    await waitFor(() => expect(screen.getAllByText('unlimited').length).toBeGreaterThan(0));
   });
 
   it('preselects the trial plan and marks it as selected', () => {
@@ -218,10 +237,10 @@ describe('Step3Plan', () => {
     await waitFor(() => expect(localStorage.getItem('onboarding_plan')).toBe('pro'));
   });
 
-  it('renders boolean features as a tick or a dash', () => {
+  it('renders boolean features as a tick or a dash', async () => {
     const { container } = render(<Step3Plan onBack={jest.fn()} onNext={jest.fn()} />);
-    // the trial plan has beneficiaryMap=false (dash) and pro has it true (tick)
+    // trial tiene campaigns=0 (guion) y pro campaigns=1 (tilde)
+    await waitFor(() => expect(screen.getAllByText('-').length).toBeGreaterThan(0));
     expect(container.querySelectorAll('svg').length).toBeGreaterThan(0);
-    expect(screen.getAllByText('-').length).toBeGreaterThan(0);
   });
 });

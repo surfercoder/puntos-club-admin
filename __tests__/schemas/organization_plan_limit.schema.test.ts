@@ -82,8 +82,13 @@ describe('OrganizationPlanLimitSchema', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should reject invalid plan', () => {
+    it('should accept "enterprise" plan', () => {
       const result = OrganizationPlanLimitSchema.safeParse({ ...validInput, plan: 'enterprise' });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject invalid plan', () => {
+      const result = OrganizationPlanLimitSchema.safeParse({ ...validInput, plan: 'free' });
       expect(result.success).toBe(false);
     });
 
@@ -140,8 +145,24 @@ describe('OrganizationPlanLimitSchema', () => {
       }
     });
 
-    it('should reject negative limit_value', () => {
-      expect(() => OrganizationPlanLimitSchema.parse({ ...validInput, limit_value: -1 })).toThrow();
+    it('should accept -1 as "sin límite"', () => {
+      const result = OrganizationPlanLimitSchema.safeParse({ ...validInput, limit_value: -1 });
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject limit_value below -1', () => {
+      expect(() => OrganizationPlanLimitSchema.parse({ ...validInput, limit_value: -5 })).toThrow();
+    });
+
+    it('should accept 0 and 1 on a feature flag', () => {
+      expect(OrganizationPlanLimitSchema.safeParse({ ...validInput, feature: 'sso', limit_value: 0 }).success).toBe(true);
+      expect(OrganizationPlanLimitSchema.safeParse({ ...validInput, feature: 'sso', limit_value: 1 }).success).toBe(true);
+    });
+
+    it('should reject any other value on a feature flag', () => {
+      // Un flag en 2 o -1 lo leeria check_plan_limit() como "incluido".
+      expect(OrganizationPlanLimitSchema.safeParse({ ...validInput, feature: 'sso', limit_value: 2 }).success).toBe(false);
+      expect(OrganizationPlanLimitSchema.safeParse({ ...validInput, feature: 'sso', limit_value: -1 }).success).toBe(false);
     });
 
     it('should reject non-numeric string limit_value', () => {

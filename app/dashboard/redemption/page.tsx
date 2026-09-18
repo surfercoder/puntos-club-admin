@@ -33,6 +33,7 @@ import type { RedemptionStatus } from '@/types/redemption';
 const NUMBER_FORMATTER = new Intl.NumberFormat('es-AR');
 
 type Person = { id?: number | string; first_name?: string | null; last_name?: string | null; email?: string | null } | null;
+type Branch = { id?: number | string; name: string } | null;
 
 interface RedemptionWithRelations {
   id: string;
@@ -43,7 +44,7 @@ interface RedemptionWithRelations {
   status: RedemptionStatus | null;
   beneficiary: Person;
   product: { id?: number | string; name: string } | null;
-  deliveredBy: Person;
+  deliveredBy: (NonNullable<Person> & { branch?: Branch }) | null;
 }
 
 // Deduplica por id y ordena por nombre para los combos de filtro.
@@ -69,7 +70,7 @@ function initials(name: string | null) {
 interface PageProps {
   searchParams: Promise<{
     q?: string; status?: string; from?: string; to?: string;
-    beneficiary?: string; product?: string; page?: string; perPage?: string;
+    beneficiary?: string; product?: string; branch?: string; page?: string; perPage?: string;
   }>;
 }
 
@@ -81,10 +82,16 @@ function parseRedemptionFilters(params: Awaited<PageProps['searchParams']>) {
     to: params.to?.match(/^\d{4}-\d{2}-\d{2}$/)?.[0] ?? '',
     beneficiary: params.beneficiary ?? '',
     product: params.product ?? '',
+    branch: params.branch ?? '',
   };
 }
 
-type RedemptionRow = RedemptionWithRelations & { code: string; beneficiaryName: string | null; deliveredByName: string | null };
+type RedemptionRow = RedemptionWithRelations & {
+  code: string;
+  beneficiaryName: string | null;
+  deliveredByName: string | null;
+  branch: Branch;
+};
 
 function mapRedemptionRows(all: RedemptionWithRelations[]): RedemptionRow[] {
   return all.map((redemption) => ({
@@ -92,6 +99,9 @@ function mapRedemptionRows(all: RedemptionWithRelations[]): RedemptionRow[] {
     code: redemptionCode(redemption.id, redemption.redemption_date),
     beneficiaryName: personName(redemption.beneficiary),
     deliveredByName: personName(redemption.deliveredBy),
+    // La sucursal del canje es la del usuario que lo entregó: los dueños no
+    // tienen sucursal, así que sus entregas quedan sin sucursal.
+    branch: redemption.deliveredBy?.branch ?? null,
   }));
 }
 
@@ -123,7 +133,10 @@ function buildRedemptionFilterOptions(rows: RedemptionRow[]) {
   const productOptions = unique(
     rows.map((r) => (r.product?.id ? { id: String(r.product.id), name: r.product.name } : null)),
   );
-  return { beneficiaryOptions, productOptions };
+  const branchOptions = unique(
+    rows.map((r) => (r.branch?.id ? { id: String(r.branch.id), name: r.branch.name } : null)),
+  );
+  return { beneficiaryOptions, productOptions, branchOptions };
 }
 
 // Las etiquetas de estado y traducciones llegan resueltas desde la página.
@@ -192,7 +205,7 @@ export default async function RedemptionListPage({ searchParams }: PageProps) {
       *,
       beneficiary:beneficiary(id, first_name, last_name, email),
       product:product(id, name, organization_id),
-      deliveredBy:app_user!redemption_delivered_by_fkey(first_name, last_name)
+      deliveredBy:app_user!redemption_delivered_by_fkey(first_name, last_name, branch:branch_id(id, name))
     `)
     .order('redemption_date', { ascending: false });
 
@@ -220,19 +233,19 @@ export default async function RedemptionListPage({ searchParams }: PageProps) {
   const rows = mapRedemptionRows(all);
 
   const needle = filters.q.toLowerCase();
-  const filtered = needle
-    ? rows.filter((row) =>
-        [row.code, row.beneficiaryName, row.product?.name]
-          .filter(Boolean).join(' ').toLowerCase().includes(needle),
-      )
-    : rows;
+  const filtered = rows.filter((row) => {
+    if (filters.branch && String(row.branch?.id ?? '') !== filters.branch) return false;
+    if (!needle) return true;
+    return [row.code, row.beneficiaryName, row.product?.name]
+      .filter(Boolean).join(' ').toLowerCase().includes(needle);
+  });
 
   const perPage = parsePerPage(params.perPage);
   const page = parsePage(params.page, Math.ceil(filtered.length / perPage));
   const visible = filtered.slice((page - 1) * perPage, page * perPage);
 
   const { breakdown, stats } = computeRedemptionStats(filtered);
-  const { beneficiaryOptions, productOptions } = buildRedemptionFilterOptions(rows);
+  const { beneficiaryOptions, productOptions, branchOptions } = buildRedemptionFilterOptions(rows);
 
   return (
     <div className="space-y-6">
@@ -277,6 +290,7 @@ export default async function RedemptionListPage({ searchParams }: PageProps) {
             values={filters}
             beneficiaries={beneficiaryOptions}
             products={productOptions}
+            branches={branchOptions}
           />
 
           <div className="rounded-xl border bg-card shadow-sm">

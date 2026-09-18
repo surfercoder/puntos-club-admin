@@ -135,10 +135,10 @@ describe('PlanUsageSummary', () => {
     expect(screen.getByText('upgradePlanButton')).toBeInTheDocument();
   });
 
-  it('hides upgrade button when plan is pro', () => {
+  it('hides upgrade button on the top plan', () => {
     (usePlanUsage as jest.Mock).mockReturnValue({
       summary: {
-        plan: 'pro',
+        plan: 'enterprise',
         features: [
           {
             feature: 'beneficiaries',
@@ -156,6 +156,30 @@ describe('PlanUsageSummary', () => {
 
     render(<PlanUsageSummary />);
     expect(screen.queryByText('upgradePlanButton')).not.toBeInTheDocument();
+  });
+
+  it('shows ∞ and no progress bar for an unlimited quota', () => {
+    (usePlanUsage as jest.Mock).mockReturnValue({
+      summary: {
+        plan: 'pro',
+        features: [
+          {
+            feature: 'beneficiaries',
+            limit_value: -1,
+            current_usage: 4200,
+            usage_percentage: 0,
+            is_at_limit: false,
+            should_warn: false,
+            warning_threshold: 0.8,
+          },
+        ],
+      },
+      isLoading: false,
+    });
+
+    render(<PlanUsageSummary />);
+    expect(screen.getByText('4200 / ∞')).toBeInTheDocument();
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });
 
   it('shows correct color for feature at limit (red)', () => {

@@ -1,6 +1,6 @@
 'use client';
 
-import { Star, Zap, Rocket } from 'lucide-react';
+import { Building2, Rocket, Star, Zap } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import Link from 'next/link';
 
@@ -31,12 +31,18 @@ const planConfig: Record<PlanType, { icon: React.ComponentType<{ className?: str
     colorClass: 'bg-brand-pink/15 text-brand-pink hover:bg-brand-pink/25',
     dotClass: 'bg-brand-pink',
   },
+  enterprise: {
+    icon: Building2,
+    colorClass: 'bg-brand-violet/15 text-brand-violet hover:bg-brand-violet/25',
+    dotClass: 'bg-brand-violet',
+  },
 };
 
 const planTranslationKey: Record<PlanType, string> = {
   trial: 'planTrial',
   advance: 'planAdvance',
   pro: 'planPro',
+  enterprise: 'planEnterprise',
 };
 
 export function PlanBadge() {

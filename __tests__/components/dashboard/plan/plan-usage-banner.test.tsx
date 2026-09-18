@@ -194,10 +194,10 @@ describe('PlanUsageBanner', () => {
     expect(button).toHaveAttribute('href', '/dashboard/settings/plan');
   });
 
-  it('does not show upgrade button when plan is pro', () => {
+  it('does not show upgrade button on the top plan', () => {
     (usePlanUsage as jest.Mock).mockReturnValue({
       summary: {
-        plan: 'pro',
+        plan: 'enterprise',
         features: [
           {
             feature: 'beneficiaries',

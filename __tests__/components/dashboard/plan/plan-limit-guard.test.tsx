@@ -122,10 +122,10 @@ describe('PlanLimitGuard', () => {
     expect(screen.getByText('upgradePlanButton')).toBeInTheDocument();
   });
 
-  it('hides upgrade button when plan is pro', () => {
+  it('hides upgrade button on the top plan', () => {
     (usePlanUsage as jest.Mock).mockReturnValue({
       summary: {
-        plan: 'pro',
+        plan: 'enterprise',
         features: [
           { feature: 'branches', limit_value: 15, current_usage: 15, is_at_limit: true },
         ],

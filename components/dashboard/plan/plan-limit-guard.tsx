@@ -6,7 +6,7 @@ import { useTranslations } from 'next-intl';
 
 import { usePlanUsage } from '@/components/providers/plan-usage-provider';
 import { Button } from '@/components/ui/button';
-import { PLAN_FEATURE_LABELS, PLAN_DISPLAY_NAMES } from '@/lib/plans/config';
+import { PLAN_FEATURE_LABELS, PLAN_DISPLAY_NAMES, TOP_PLAN } from '@/lib/plans/config';
 import type { PlanFeatureKey } from '@/types/plan';
 
 interface PlanLimitGuardProps {
@@ -72,7 +72,7 @@ export function PlanLimitGuard({ features, backHref, mode = 'any', children }: P
         <Button variant="outline" asChild>
           <Link href={backHref}>{t('goBack')}</Link>
         </Button>
-        {summary.plan !== 'pro' && (
+        {summary.plan !== TOP_PLAN && (
           <Button asChild>
             <Link href="/dashboard/settings/plan">{t('upgradePlanButton')}</Link>
           </Button>

@@ -8,7 +8,7 @@ import { useTranslations } from 'next-intl';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { usePlanUsage } from '@/components/providers/plan-usage-provider';
-import { PLAN_FEATURE_LABELS, PLAN_DISPLAY_NAMES } from '@/lib/plans/config';
+import { PLAN_FEATURE_LABELS, PLAN_DISPLAY_NAMES, TOP_PLAN } from '@/lib/plans/config';
 import type { FeatureUsage, PlanFeatureKey } from '@/types/plan';
 
 interface PlanUsageBannerProps {
@@ -82,7 +82,7 @@ export function PlanUsageBanner({ features, className }: PlanUsageBannerProps) {
               ))}
             </div>
 
-            {summary.plan !== 'pro' && (
+            {summary.plan !== TOP_PLAN && (
               <p className="text-xs mt-2 opacity-80">
                 <Link
                   href="/dashboard/settings/plan"
@@ -105,7 +105,7 @@ export function PlanUsageBanner({ features, className }: PlanUsageBannerProps) {
           >
             <X className="size-4" />
           </button>
-          {summary.plan !== 'pro' && (
+          {summary.plan !== TOP_PLAN && (
             <Button size="sm" variant={hasAtLimit ? 'destructive' : 'default'} asChild>
               <Link href="/dashboard/settings/plan">{t('upgradePlanButton')}</Link>
             </Button>

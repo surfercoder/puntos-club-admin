@@ -38,9 +38,10 @@ jest.mock('@/lib/supabase/client', () => ({
 
 jest.mock('@/actions/dashboard/usage/actions', () => ({
   getAllPlanLimitsAction: jest.fn().mockResolvedValue({
-    trial: { beneficiaries: 10, push_notifications_monthly: 3, cashiers: 1, branches: 1, collaborators: 1, redeemable_products: 2 },
-    advance: { beneficiaries: 500, push_notifications_monthly: 10, cashiers: 10, branches: 5, collaborators: 3, redeemable_products: 10 },
-    pro: { beneficiaries: 5000, push_notifications_monthly: 50, cashiers: 100, branches: 15, collaborators: 10, redeemable_products: 30 },
+    trial: { beneficiaries: 100, push_notifications_monthly: 200, cashiers: 1, branches: 1, collaborators: 0, redeemable_products: 2, campaigns: 0 },
+    advance: { beneficiaries: 1000, push_notifications_monthly: 2000, cashiers: 10, branches: 10, collaborators: 1, redeemable_products: 6, campaigns: 0 },
+    pro: { beneficiaries: -1, push_notifications_monthly: 5000, cashiers: 50, branches: 50, collaborators: -1, redeemable_products: 20, campaigns: 1 },
+    enterprise: { beneficiaries: -1, push_notifications_monthly: 10000, cashiers: -1, branches: -1, collaborators: -1, redeemable_products: -1, campaigns: 1 },
   }),
 }));
 
@@ -106,6 +107,36 @@ describe('PlanSelector', () => {
     expect(screen.getByText('trialPlan')).toBeInTheDocument();
     expect(screen.getByText('advancePlan')).toBeInTheDocument();
     expect(screen.getByText('proPlan')).toBeInTheDocument();
+    expect(screen.getByText('enterprisePlan')).toBeInTheDocument();
+  });
+
+  it('offers contact sales instead of checkout for enterprise', async () => {
+    (usePlanUsage as jest.Mock).mockReturnValue({
+      summary: mockSummary,
+      isLoading: false,
+    });
+
+    await act(async () => { render(<PlanSelector />); });
+    fireEvent.click(screen.getByText('enterprisePlan'));
+
+    const contact = screen.getByText('contactSales').closest('a') as HTMLAnchorElement;
+    expect(contact).toHaveAttribute('href', expect.stringContaining('mailto:'));
+    // Enterprise no pasa por Mercado Pago: ni email de pago ni botón de upgrade
+    expect(screen.queryByLabelText('payerEmailLabel')).not.toBeInTheDocument();
+    expect(screen.queryByText(/upgradeTo/)).not.toBeInTheDocument();
+  });
+
+  it('routes an enterprise org back through sales to change plan', async () => {
+    (usePlanUsage as jest.Mock).mockReturnValue({
+      summary: { ...mockSummary, plan: 'enterprise' },
+      isLoading: false,
+    });
+
+    await act(async () => { render(<PlanSelector />); });
+    fireEvent.click(screen.getByText('proPlan'));
+
+    expect(screen.getByText('contactSales')).toBeInTheDocument();
+    expect(screen.queryByText(/upgradeTo/)).not.toBeInTheDocument();
   });
 
   it('shows current plan badge on active plan', async () => {

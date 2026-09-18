@@ -4,6 +4,7 @@
       "__tests__/**",
       "e2e/**",
       ".next/**",
+      "playwright-report/**",
       "components/landing/screens/smartphone-3d.tsx",
       "components/ui/sidebar.tsx",
       "components/dashboard/organization/org-visibility-toggle.tsx",

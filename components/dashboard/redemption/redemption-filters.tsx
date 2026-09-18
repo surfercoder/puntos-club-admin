@@ -18,16 +18,19 @@ export type RedemptionFilterValues = {
   to: string;
   beneficiary: string;
   product: string;
+  branch: string;
 };
 
 export async function RedemptionFilters({
   values,
   beneficiaries,
   products,
+  branches,
 }: {
   values: RedemptionFilterValues;
   beneficiaries: FilterOption[];
   products: FilterOption[];
+  branches: FilterOption[];
 }) {
   const t = await getTranslations("Dashboard.redemption.filters");
   const tStatus = await getTranslations("Dashboard.redemption.status");
@@ -93,6 +96,15 @@ export async function RedemptionFilters({
           <option value="">{t("allProducts")}</option>
           {products.map((p) => (
             <option key={p.id} value={p.id}>{p.name}</option>
+          ))}
+        </select>
+      </FilterField>
+
+      <FilterField label={t("branch")}>
+        <select className={FILTER_FIELD_CLASS} name="branch" defaultValue={values.branch}>
+          <option value="">{t("allBranches")}</option>
+          {branches.map((b) => (
+            <option key={b.id} value={b.id}>{b.name}</option>
           ))}
         </select>
       </FilterField>

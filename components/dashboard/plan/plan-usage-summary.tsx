@@ -19,11 +19,13 @@ import { usePlanUsage } from '@/components/providers/plan-usage-provider';
 import {
   PLAN_FEATURE_LABELS,
   PLAN_DISPLAY_NAMES,
-  PLAN_FEATURE_ORDER,
+  PLAN_QUOTA_ORDER,
+  TOP_PLAN,
+  UNLIMITED,
 } from '@/lib/plans/config';
-import type { FeatureUsage, PlanFeatureKey } from '@/types/plan';
+import type { FeatureUsage, PlanQuotaKey } from '@/types/plan';
 
-const FEATURE_ICONS: Record<PlanFeatureKey, React.ComponentType<{ className?: string }>> = {
+const FEATURE_ICONS: Record<PlanQuotaKey, React.ComponentType<{ className?: string }>> = {
   beneficiaries:              Users,
   push_notifications_monthly: Bell,
   cashiers:                   UserCheck,
@@ -48,6 +50,7 @@ function textColor(pct: number, isAtLimit: boolean): string {
 function FeatureRow({ usage }: { usage: FeatureUsage }) {
   const Icon = FEATURE_ICONS[usage.feature];
   const label = PLAN_FEATURE_LABELS[usage.feature];
+  const isUnlimited = usage.limit_value === UNLIMITED;
   const color = usageColor(usage.usage_percentage, usage.is_at_limit);
   const pctText = textColor(usage.usage_percentage, usage.is_at_limit);
 
@@ -59,22 +62,27 @@ function FeatureRow({ usage }: { usage: FeatureUsage }) {
           <span className="text-xs font-medium truncate">{label}</span>
         </div>
         <span className={cn('text-[11px] font-mono shrink-0', pctText)}>
-          {usage.current_usage} / {usage.limit_value}
+          {usage.current_usage} / {isUnlimited ? '∞' : usage.limit_value}
         </span>
       </div>
 
-      <progress
-        className="sr-only"
-        value={usage.current_usage}
-        max={usage.limit_value}
-        aria-label={label}
-      />
-      <div aria-hidden="true" className="h-1 w-full rounded-full bg-muted overflow-hidden">
-        <div
-          className={cn('h-full rounded-full transition-all duration-500', color)}
-          style={{ width: `${Math.min(100, usage.usage_percentage)}%` }}
-        />
-      </div>
+      {/* Sin límite: no hay barra que llenar. */}
+      {!isUnlimited && (
+        <>
+          <progress
+            className="sr-only"
+            value={usage.current_usage}
+            max={usage.limit_value}
+            aria-label={label}
+          />
+          <div aria-hidden="true" className="h-1 w-full rounded-full bg-muted overflow-hidden">
+            <div
+              className={cn('h-full rounded-full transition-all duration-500', color)}
+              style={{ width: `${Math.min(100, usage.usage_percentage)}%` }}
+            />
+          </div>
+        </>
+      )}
     </div>
   );
 }
@@ -99,7 +107,7 @@ export function PlanUsageSummary({ className, compact = false, hideUpgradeLink =
 
   if (!summary) return null;
 
-  const orderedFeatures = PLAN_FEATURE_ORDER.flatMap((key) => {
+  const orderedFeatures = PLAN_QUOTA_ORDER.flatMap((key) => {
     const f = summary.features.find((feat) => feat.feature === key);
     return f ? [f] : [];
   });
@@ -133,7 +141,7 @@ export function PlanUsageSummary({ className, compact = false, hideUpgradeLink =
           </span>
         </div>
 
-        {!hideUpgradeLink && summary.plan !== 'pro' && (
+        {!hideUpgradeLink && summary.plan !== TOP_PLAN && (
           <Link
             href="/dashboard/settings/plan"
             className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
