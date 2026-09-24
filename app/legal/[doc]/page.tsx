@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 
-import { PRIVACY_TEXT, PRIVACY_VERSION, TERMS_TEXT, TERMS_VERSION } from "@/lib/legal";
+import { PRIVACY_TEXT, TERMS_TEXT } from "@/lib/legal";
 
 // Los documentos legales publicos. Google Play exige que la Politica de
 // Privacidad viva en una URL publica y estable: es la que se declara en la
@@ -13,12 +13,10 @@ const DOCS = {
   privacidad: {
     title: "Política de Privacidad",
     text: PRIVACY_TEXT,
-    version: PRIVACY_VERSION,
   },
   terminos: {
     title: "Términos y Condiciones",
     text: TERMS_TEXT,
-    version: TERMS_VERSION,
   },
 } as const;
 
@@ -74,17 +72,16 @@ export default async function LegalPage({
   const { doc } = await params;
   if (!isDoc(doc)) notFound();
 
-  const { title, text, version } = DOCS[doc];
-  // Las dos primeras lineas del documento son el nombre y el titulo, que ya
-  // estan en el encabezado de la pagina: se saltean para no repetirlos.
+  const { title, text } = DOCS[doc];
+  // Las dos primeras lineas son el nombre y el titulo del documento, que ya
+  // salen en el <h1>. La version y la fecha de vigencia (lineas 3 y 4) SI se
+  // dejan: las escribe el propio documento y en los T&C avisan que siguen
+  // siendo un borrador, asi que taparlas seria esconder la advertencia.
   const lines = text.split("\n").slice(2);
 
   return (
     <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
-      <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
-      <p className="mt-2 mb-8 text-sm text-muted-foreground">
-        Puntos Club · Versión {version}
-      </p>
+      <h1 className="mb-6 text-3xl font-semibold tracking-tight">{title}</h1>
       {lines.map((line, i) => (
         <LegalLine key={`l${i}`} line={line} />
       ))}
