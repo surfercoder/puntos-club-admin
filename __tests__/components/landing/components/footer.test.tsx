@@ -25,11 +25,6 @@ describe("Footer", () => {
     expect(screen.getByText("terms")).toBeInTheDocument();
   });
 
-  it("renders legal link", () => {
-    render(<Footer />);
-    expect(screen.getByText("legal")).toBeInTheDocument();
-  });
-
   it("renders privacy link", () => {
     render(<Footer />);
     expect(screen.getByText("privacy")).toBeInTheDocument();
@@ -43,15 +38,16 @@ describe("Footer", () => {
     ).toBeInTheDocument();
   });
 
-  it("renders download links with correct hrefs", () => {
+  // Los dos links apuntan a paginas propias y no a un PDF descargable. Hasta el
+  // 24/09/2026 apuntaban a Aviso_Legal.pdf y Politica_de_Privacidad_*.pdf, que
+  // eran la plantilla de otra empresa (Vibranio, S.L.) servida como propia.
+  // Google Play ademas exige que la politica se pueda LEER en una URL publica.
+  it("renders the legal links pointing to the public pages", () => {
     render(<Footer />);
     const links = screen.getAllByRole("link");
-    expect(links).toHaveLength(3);
-    expect(links[0]).toHaveAttribute("href", "/legal/Aviso_Legal.pdf");
-    expect(links[1]).toHaveAttribute("href", "/legal/Aviso_Legal.pdf");
-    expect(links[2]).toHaveAttribute(
-      "href",
-      "/legal/Politica_de_Privacidad_y_Politica_de_Cookies.pdf"
-    );
+    expect(links).toHaveLength(2);
+    expect(links[0]).toHaveAttribute("href", "/legal/terminos");
+    expect(links[1]).toHaveAttribute("href", "/legal/privacidad");
+    links.forEach((link) => expect(link).not.toHaveAttribute("download"));
   });
 });

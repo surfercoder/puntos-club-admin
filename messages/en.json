@@ -2644,8 +2644,7 @@
     },
     "footer": {
       "terms": "Terms and conditions",
-      "legal": "Legal notice",
-      "privacy": "Privacy and cookies policy",
+      "privacy": "Privacy policy",
       "copyright": "©2019-{year} Puntos Club"
     }
   },

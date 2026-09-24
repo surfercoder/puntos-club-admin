@@ -76,7 +76,10 @@ export async function updateSession(request: NextRequest) {
     !request.nextUrl.pathname.startsWith("/login") &&
     !request.nextUrl.pathname.startsWith("/auth") &&
     !request.nextUrl.pathname.startsWith("/owner/onboarding") &&
-    !request.nextUrl.pathname.startsWith("/mobile-apps")
+    !request.nextUrl.pathname.startsWith("/mobile-apps") &&
+    // Los documentos legales son publicos por obligacion: Google Play exige
+    // poder abrir la Politica de Privacidad sin sesion para revisar la ficha.
+    !request.nextUrl.pathname.startsWith("/legal")
   ) {
     // no user, potentially respond by redirecting the user to the login page
     return redirectTo("/auth/login");

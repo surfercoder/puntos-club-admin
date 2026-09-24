@@ -15,22 +15,13 @@ const Footer = () => {
         <div className="flex flex-1 flex-col md:flex-row items-center gap-2 md:gap-5">
           <Link
             className="font-light landing-footer-link text-sm"
-            href="/legal/Aviso_Legal.pdf"
-            download="Aviso legal"
+            href="/legal/terminos"
           >
             {t("terms")}
           </Link>
           <Link
             className="font-light landing-footer-link text-sm"
-            href="/legal/Aviso_Legal.pdf"
-            download="Aviso legal"
-          >
-            {t("legal")}
-          </Link>
-          <Link
-            className="font-light landing-footer-link text-sm"
-            href="/legal/Politica_de_Privacidad_y_Politica_de_Cookies.pdf"
-            download="Politica de Privacidad y Politica de Cookies"
+            href="/legal/privacidad"
           >
             {t("privacy")}
           </Link>
