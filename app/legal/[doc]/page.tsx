@@ -82,8 +82,9 @@ export default async function LegalPage({
   return (
     <article className="mx-auto max-w-3xl px-4 py-12 sm:px-6">
       <h1 className="mb-6 text-3xl font-semibold tracking-tight">{title}</h1>
-      {lines.map((line, i) => (
-        <LegalLine key={`l${i}`} line={line} />
+      {/* Key por contenido: no hay lineas repetidas y lo cubre el test. */}
+      {lines.map((line) => (
+        <LegalLine key={line} line={line} />
       ))}
     </article>
   );

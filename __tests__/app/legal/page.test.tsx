@@ -1,7 +1,7 @@
 import { render } from '@testing-library/react';
 
 import LegalPage, { generateMetadata, generateStaticParams } from '@/app/legal/[doc]/page';
-import { PRIVACY_VERSION } from '@/lib/legal';
+import { PRIVACY_TEXT, PRIVACY_VERSION, TERMS_TEXT } from '@/lib/legal';
 
 const notFound = jest.fn(() => {
   throw new Error('NEXT_NOT_FOUND');
@@ -73,6 +73,17 @@ describe('LegalPage', () => {
     expect(text).toContain('Expo');
     expect(text).toContain('fuera de la República Argentina');
     expect(text).not.toContain('no declaramos transferencias internacionales');
+  });
+
+  // La pagina usa el texto de cada linea como key de React. Si alguien mete
+  // una linea repetida (o un renglon en blanco) en lib/legal.ts, hay dos keys
+  // iguales: que salte aca y no en la consola del navegador.
+  it.each([
+    ['privacidad', PRIVACY_TEXT],
+    ['terminos', TERMS_TEXT],
+  ])('has no repeated lines in %s, so the line keys stay unique', (_doc, text) => {
+    const lines = text.split('\n').slice(2);
+    expect(new Set(lines).size).toBe(lines.length);
   });
 
   it('builds the metadata title per document', async () => {
