@@ -12,7 +12,7 @@ export async function PublicHeader() {
   return (
     <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="mx-auto flex h-20 max-w-[96rem] items-center justify-between gap-4 px-4 sm:px-6 lg:h-32 lg:px-10">
-        <Link href="/" className="flex items-center gap-2.5 lg:gap-3.5">
+        <Link href="/" aria-label="Puntos Club" className="flex items-center gap-2.5 lg:gap-3.5">
           <Image
             src="/images/logos/LogoImage.png"
             alt=""
@@ -21,7 +21,7 @@ export async function PublicHeader() {
             priority
             className="size-11 lg:size-[4.875rem]"
           />
-          <span className="font-sans text-xl font-bold tracking-tight whitespace-nowrap sm:text-2xl lg:text-[2.375rem]">
+          <span className="hidden font-sans text-xl font-bold tracking-tight whitespace-nowrap sm:inline sm:text-2xl lg:text-[2.375rem]">
             Puntos <span className="text-brand-pink">Club</span>
           </span>
         </Link>
@@ -29,7 +29,7 @@ export async function PublicHeader() {
           <LanguageSwitcher className="hidden sm:flex lg:h-10 lg:px-3 lg:[&_span]:text-base" />
           <ThemeToggle className="lg:size-11" iconClassName="lg:size-8" />
           <span aria-hidden className="mx-1 hidden h-6 w-px bg-border sm:block lg:mx-6 lg:h-9" />
-          <Button variant="ghost" size="sm" className="hidden sm:inline-flex lg:h-10 lg:px-4 lg:text-[1.1875rem]" asChild>
+          <Button variant="ghost" size="sm" className="lg:h-10 lg:px-4 lg:text-[1.1875rem]" asChild>
             <Link href="/auth/login">{t("signIn")}</Link>
           </Button>
           <Button
