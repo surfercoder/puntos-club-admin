@@ -170,6 +170,9 @@ describe('BeneficiaryListPage', () => {
   // Antes esta vista hardcodeaba is_active: true y mostraba a todos como
   // socios, incluso a quien no pertenece a ningun club.
   it('derives the membership state from all memberships in the global admin view', async () => {
+    // Relativa a hoy: una fecha fija deja de ser "el mes pasado" al mes siguiente.
+    const now = new Date();
+    const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 15).toISOString();
     const { isAdmin } = require('@/lib/auth/roles');
     const base = (id: string, first_name: string) => ({
       id,
@@ -178,7 +181,7 @@ describe('BeneficiaryListPage', () => {
       email: `${first_name}@test.com`,
       phone: null,
       document_id: null,
-      registration_date: '2026-08-10',
+      registration_date: lastMonthDate,
     });
     isAdmin.mockReturnValueOnce(true);
     mockSelect.mockResolvedValueOnce({
