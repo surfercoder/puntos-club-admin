@@ -84,6 +84,11 @@ export function ProfileForm({ user }: ProfileFormProps) {
           toast.error(emailErrorMessage);
           return;
         }
+
+        // double_confirm_changes: hasta que confirme las dos casillas sigue el mail viejo.
+        toast.info(t('emailChangePending'), { duration: 10000 });
+        refresh();
+        return;
       }
 
       toast.success(tCommon('saveChanges'));

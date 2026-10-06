@@ -97,7 +97,11 @@ describe('ProfileForm', () => {
     });
     fireEvent.submit(screen.getByRole('button', { name: 'saveChanges' }).closest('form')!);
     await waitFor(() => expect(mockUpdateUser).toHaveBeenCalledWith({ email: 'new@example.com' }));
-    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('saveChanges'));
+    await waitFor(() =>
+      expect(toast.info).toHaveBeenCalledWith('emailChangePending', { duration: 10000 }),
+    );
+    expect(toast.success).not.toHaveBeenCalled();
+    expect(mockRefresh).toHaveBeenCalled();
   });
 
   it('does not call updateUser when email is unchanged', async () => {
