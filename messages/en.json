@@ -414,7 +414,8 @@
       "section": "Personal Information",
       "sectionDescription": "Update your personal and contact details",
       "organization": "Organization",
-      "role": "Role"
+      "role": "Role",
+      "emailChangePending": "We sent an email to both addresses (current and new). Your email changes only after you confirm both."
     },
     "organization": {
       "title": "Organizations",
@@ -471,6 +472,14 @@
         "pointsUnit": "pts",
         "unitsLabel": "{count} units",
         "outOfStock": "Out of stock"
+      },
+      "hide": {
+        "badge": "Hidden",
+        "hide": "Hide from members",
+        "show": "Show again",
+        "hiddenSuccess": "Organization hidden from members",
+        "shownSuccess": "Organization visible again",
+        "error": "Could not change visibility"
       }
     },
     "notifications": {

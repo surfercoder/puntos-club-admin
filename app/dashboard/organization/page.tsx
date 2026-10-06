@@ -4,7 +4,9 @@ import Link from 'next/link';
 import { getTranslations } from 'next-intl/server';
 
 import DeleteModal from '@/components/dashboard/organization/delete-modal';
+import HiddenToggle from '@/components/dashboard/organization/hidden-toggle';
 import { ListTableHeader } from '@/components/dashboard/shared/list-table-header';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -79,6 +81,9 @@ export default async function OrganizationListPage() {
                     >
                       {organization.name}
                     </Link>
+                    {organization.hidden_by_admin && (
+                      <Badge className="ml-2" variant="secondary">{t('hide.badge')}</Badge>
+                    )}
                   </TableCell>
                   <TableCell>{organization.business_name || 'N/A'}</TableCell>
                   <TableCell>{organization.tax_id || 'N/A'}</TableCell>
@@ -87,6 +92,10 @@ export default async function OrganizationListPage() {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
+                      <HiddenToggle
+                        hidden={Boolean(organization.hidden_by_admin)}
+                        organizationId={organization.id}
+                      />
                       <Button asChild size="sm" variant="secondary">
                         <Link href={`/dashboard/organization/edit/${organization.id}`}>
                           <Pencil className="size-4" />

@@ -193,6 +193,26 @@ export async function updateOrganizationVisibility(id: string, isPublic: boolean
   return { data, error: null };
 }
 
+/** Solo el superadmin: oculta/muestra la org a los beneficiarios (falta de pago, pedido del club). */
+export async function setOrganizationHidden(id: string, hidden: boolean) {
+  await requireUser();
+
+  const currentUser = await getCurrentUser();
+  if (!isAdmin(currentUser) || typeof hidden !== 'boolean') {
+    return { error: await errorText('db.forbidden') };
+  }
+
+  const supabase = await createClient();
+  const { error } = await supabase.from('organization').update({ hidden_by_admin: hidden }).eq('id', id);
+
+  if (error) {
+    return { error: await translateError(error) };
+  }
+
+  revalidatePath('/dashboard/organization');
+  return { error: null };
+}
+
 export async function getOrganizationProducts(organizationId: string) {
   const supabase = await createClient();
   const { data, error } = await supabase

@@ -399,7 +399,8 @@
       "section": "Información Personal",
       "sectionDescription": "Actualiza tus datos personales y de contacto",
       "organization": "Organización",
-      "role": "Rol"
+      "role": "Rol",
+      "emailChangePending": "Te mandamos un mail a cada casilla (la actual y la nueva). El email cambia recién cuando confirmes las dos."
     },
     "beneficiaryLinkAll": {
       "title": "Vincular Beneficiarios No Vinculados",
@@ -471,6 +472,14 @@
         "pointsUnit": "pts",
         "unitsLabel": "{count} unidades",
         "outOfStock": "Sin stock"
+      },
+      "hide": {
+        "badge": "Oculta",
+        "hide": "Ocultar a los beneficiarios",
+        "show": "Volver a mostrar",
+        "hiddenSuccess": "Organización oculta para los beneficiarios",
+        "shownSuccess": "Organización visible nuevamente",
+        "error": "No se pudo cambiar la visibilidad"
       }
     },
     "notifications": {

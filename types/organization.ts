@@ -11,6 +11,7 @@ export type Organization = {
   plan: PlanType;
   trial_started_at?: string | null;
   is_public?: boolean;
+  hidden_by_admin?: boolean;
   description?: string | null;
   contact_email?: string | null;
   contact_phone?: string | null;

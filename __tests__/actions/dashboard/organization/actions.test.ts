@@ -43,6 +43,7 @@ import {
   getOrganizationAddress,
   updateOrganizationVisibility,
   updateClubProfile,
+  setOrganizationHidden,
 } from '@/actions/dashboard/organization/actions';
 import { hasOwnerPermissions, isAdmin } from '@/lib/auth/roles';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
@@ -441,3 +442,32 @@ describe('updateClubProfile', () => {
   });
 });
 
+
+describe('setOrganizationHidden', () => {
+  it('lets the platform admin hide an organization', async () => {
+    (isAdmin as jest.Mock).mockReturnValue(true);
+    mockSupabase.eq.mockReturnValueOnce({ error: null });
+    const result = await setOrganizationHidden('1', true);
+    expect(mockSupabase.update).toHaveBeenCalledWith({ hidden_by_admin: true });
+    expect(result).toEqual({ error: null });
+  });
+
+  it('forbids non-admins without touching the db', async () => {
+    const result = await setOrganizationHidden('1', true);
+    expect(result).toEqual({ error: 'db.forbidden' });
+    expect(mockSupabase.update).not.toHaveBeenCalled();
+  });
+
+  it('rejects a non-boolean value', async () => {
+    (isAdmin as jest.Mock).mockReturnValue(true);
+    const result = await setOrganizationHidden('1', 'yes' as unknown as boolean);
+    expect(result).toEqual({ error: 'db.forbidden' });
+  });
+
+  it('returns the translated db error', async () => {
+    (isAdmin as jest.Mock).mockReturnValue(true);
+    mockSupabase.eq.mockReturnValueOnce({ error: { code: '42501', message: 'nope' } });
+    const result = await setOrganizationHidden('1', false);
+    expect(result.error).toBeTruthy();
+  });
+});
