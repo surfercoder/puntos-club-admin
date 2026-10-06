@@ -1,3 +1,5 @@
+import { render, screen } from '@testing-library/react';
+
 import Page, { generateMetadata } from '@/app/auth/error/page';
 
 jest.mock('next-intl/server', () => ({ getTranslations: jest.fn(() => Promise.resolve((key: string) => key)) }));
@@ -10,6 +12,11 @@ describe('Auth Error Page', () => {
   it('renders with null-ish searchParams', async () => {
     const result = await Page({ searchParams: Promise.resolve({ error: undefined as unknown as string }) });
     expect(result).toBeTruthy();
+  });
+
+  it('explains the missing portal permission when bounced by the proxy', async () => {
+    render(await Page({ searchParams: Promise.resolve({ reason: 'no_access' }) }));
+    expect(screen.getByText('auth.noPortalAccess')).toBeInTheDocument();
   });
 
   it('generateMetadata returns correct metadata', async () => {

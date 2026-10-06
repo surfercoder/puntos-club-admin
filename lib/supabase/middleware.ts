@@ -4,6 +4,15 @@ import { NextResponse, type NextRequest } from "next/server";
 import { env } from "../env";
 import { hasEnvVars } from "../utils";
 
+const ADMIN_PORTAL_ROLES = ["admin", "owner", "collaborator"];
+
+// Rutas que no exigen sesión ni rol de portal: públicas, el flujo de auth
+// (incluye la recuperación de contraseña de los cajeros) y el alta de owners.
+// /legal es público por obligación: Google Play abre la Política sin sesión.
+const OPEN_PATHS = ["/auth", "/api", "/legal", "/mobile-apps", "/owner/onboarding", "/login"];
+const isOpenPath = (pathname: string) =>
+  pathname === "/" || OPEN_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -49,9 +58,10 @@ export async function updateSession(request: NextRequest) {
 
   // `getUser()` puede haber refrescado la sesión: esas cookies viven en
   // supabaseResponse, así que un redirect que no las copie desloguea al usuario.
-  const redirectTo = (pathname: string) => {
+  const redirectTo = (pathname: string, search = "") => {
     const url = request.nextUrl.clone();
     url.pathname = pathname;
+    url.search = search;
     const response = NextResponse.redirect(url);
     supabaseResponse.cookies
       .getAll()
@@ -70,19 +80,30 @@ export async function updateSession(request: NextRequest) {
     return supabaseResponse;
   }
 
-  if (
-    request.nextUrl.pathname !== "/" &&
-    !user &&
-    !request.nextUrl.pathname.startsWith("/login") &&
-    !request.nextUrl.pathname.startsWith("/auth") &&
-    !request.nextUrl.pathname.startsWith("/owner/onboarding") &&
-    !request.nextUrl.pathname.startsWith("/mobile-apps") &&
-    // Los documentos legales son publicos por obligacion: Google Play exige
-    // poder abrir la Politica de Privacidad sin sesion para revisar la ficha.
-    !request.nextUrl.pathname.startsWith("/legal")
-  ) {
+  if (!user && !isOpenPath(request.nextUrl.pathname)) {
     // no user, potentially respond by redirecting the user to the login page
     return redirectTo("/auth/login");
+  }
+
+  // El login ya rechaza a cajeros y beneficiarios, pero hay sesiones que no
+  // pasan por ahí: el link de recuperación que manda la app de Caja, /auth/callback
+  // y /auth/confirm. Por eso el rol se valida acá, que también cubre las server
+  // actions (varias usan service role y RLS no las frena).
+  if (user && !isOpenPath(request.nextUrl.pathname)) {
+    const { data, error } = await supabase
+      .from("app_user")
+      .select("role:user_role(name)")
+      .eq("auth_user_id", user.id)
+      .maybeSingle();
+    // Un fallo de la consulta no prueba que no tenga rol: se corta igual, pero sin desloguear.
+    if (error) {
+      return redirectTo("/auth/error");
+    }
+    const role = (data?.role as unknown as { name: string } | null)?.name;
+    if (!role || !ADMIN_PORTAL_ROLES.includes(role)) {
+      await supabase.auth.signOut({ scope: "local" });
+      return redirectTo("/auth/error", "?reason=no_access");
+    }
   }
 
   // IMPORTANT: You *must* return the supabaseResponse object as it is.

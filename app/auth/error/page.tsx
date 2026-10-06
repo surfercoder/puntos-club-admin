@@ -14,9 +14,13 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Page({
   searchParams,
 }: {
-  searchParams: Promise<{ error: string }>;
+  searchParams: Promise<{ error?: string; reason?: string }>;
 }) {
-  const [params, t] = await Promise.all([searchParams, getTranslations("Auth.error")]);
+  const [params, t, tErrors] = await Promise.all([
+    searchParams,
+    getTranslations("Auth.error"),
+    getTranslations("Errors"),
+  ]);
 
   return (
     <div className="flex min-h-svh w-full items-center justify-center p-6 md:p-10">
@@ -27,7 +31,11 @@ export default async function Page({
               <CardTitle className="text-2xl">{t("title")}</CardTitle>
             </CardHeader>
             <CardContent>
-              {params?.error ? (
+              {params?.reason === "no_access" ? (
+                <p className="text-sm text-muted-foreground">
+                  {tErrors("auth.noPortalAccess")}
+                </p>
+              ) : params?.error ? (
                 <p className="text-sm text-muted-foreground">
                   {t("errorCode")} {params.error}
                 </p>

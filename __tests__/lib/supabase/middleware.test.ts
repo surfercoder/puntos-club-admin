@@ -53,9 +53,18 @@ const buildRequest = (pathname: string) =>
     cookies: { getAll: jest.fn(() => [{ name: 'sb', value: 'token' }]), set: jest.fn() },
   }) as unknown as NextRequest;
 
-const mockUser = (user: { id: string } | null) => {
+const mockSignOut = jest.fn();
+
+const mockUser = (user: { id: string } | null, role: string | null = 'owner', error: unknown = null) => {
   (createServerClient as jest.Mock).mockReturnValue({
-    auth: { getUser: jest.fn().mockResolvedValue({ data: { user } }) },
+    auth: { getUser: jest.fn().mockResolvedValue({ data: { user } }), signOut: mockSignOut },
+    from: jest.fn(() => ({
+      select: () => ({
+        eq: () => ({
+          maybeSingle: jest.fn().mockResolvedValue({ data: role ? { role: { name: role } } : null, error }),
+        }),
+      }),
+    })),
   });
 };
 
@@ -120,6 +129,41 @@ describe('lib/supabase/middleware updateSession', () => {
     const result = await updateSession(buildRequest('/dashboard/purchase'));
     expect(result).toEqual(expect.objectContaining({ kind: 'next' }));
     expect(NextResponse.redirect).not.toHaveBeenCalled();
+  });
+
+  it.each(['admin', 'owner', 'collaborator'])('lets a %s into the dashboard', async (role) => {
+    mockUser({ id: 'user-1' }, role);
+    const result = await updateSession(buildRequest('/dashboard'));
+    expect(result).toEqual(expect.objectContaining({ kind: 'next' }));
+  });
+
+  // Ticket: un cajero que abre el link de recuperación de Caja queda con sesión
+  // en el admin; el login no lo ve, el proxy sí.
+  it.each([['cashier'], [null]])('signs out and bounces role %s off the dashboard', async (role) => {
+    mockUser({ id: 'user-1' }, role);
+    const result = await updateSession(buildRequest('/dashboard/app_user'));
+    expect(result).toEqual(expect.objectContaining({ kind: 'redirect:/auth/error' }));
+    expect(mockSignOut).toHaveBeenCalledWith({ scope: 'local' });
+  });
+
+  it('blocks without signing out when the role lookup fails', async () => {
+    mockUser({ id: 'user-1' }, null, { message: 'timeout' });
+    const result = await updateSession(buildRequest('/dashboard'));
+    expect(result).toEqual(expect.objectContaining({ kind: 'redirect:/auth/error' }));
+    expect(mockSignOut).not.toHaveBeenCalled();
+  });
+
+  it('does not treat a path that only shares the prefix as open', async () => {
+    mockUser(null);
+    const result = await updateSession(buildRequest('/legalese'));
+    expect(result).toEqual(expect.objectContaining({ kind: 'redirect:/auth/login' }));
+  });
+
+  it('lets a cashier finish the password reset under /auth', async () => {
+    mockUser({ id: 'user-1' }, 'cashier');
+    const result = await updateSession(buildRequest('/auth/update-password'));
+    expect(result).toEqual(expect.objectContaining({ kind: 'next' }));
+    expect(mockSignOut).not.toHaveBeenCalled();
   });
 
   it.each([
