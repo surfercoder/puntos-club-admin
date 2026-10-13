@@ -18,20 +18,13 @@
     "!coverage/**",
     "!types/supabase.ts"
   ],
-  "ignore": [
-    "components/ui/**"
-  ],
   "ignoreDependencies": [
     "@fontsource/lexend",
     "@fontsource/poppins",
     "tw-animate-css",
-    "shadcn",
-    "babel-jest",
-    "jsdom"
+    "babel-jest"
   ],
   "ignoreBinaries": [
-    "dotenv",
-    "dotenv-cli",
     "supabase"
   ],
   "ignoreExportsUsedInFile": true

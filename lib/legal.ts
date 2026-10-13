@@ -14,7 +14,6 @@
 // Al reemplazar un documento hay que subir tambien su version de abajo: es la
 // que queda guardada como constancia de aceptacion en beneficiary.
 
-export const TERMS_VERSION = '1.1';
 export const PRIVACY_VERSION = '1.1';
 
 export const TERMS_TEXT = `PuntosClub
