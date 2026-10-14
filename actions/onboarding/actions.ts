@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { errorText, translateError } from '@/lib/error-handler';
+import { PLAN_PRICES } from '@/lib/plans/config';
 
 // ─── Input types ─────────────────────────────────────────────────────────────
 
@@ -318,7 +319,6 @@ export async function completeOnboarding(input: {
 
     // ── 8. Create subscription record for paid plans ─────────────────────────
     if (input.mpPreapprovalId && (plan === 'advance' || plan === 'pro')) {
-      const PLAN_AMOUNTS: Record<string, number> = { advance: 50, pro: 89 };
       await adminClient.from('subscription').upsert(
         {
           organization_id: organizationId,
@@ -327,7 +327,7 @@ export async function completeOnboarding(input: {
           plan,
           status: 'pending',
           payer_email: user.email /* c8 ignore next */ ?? '',
-          amount: PLAN_AMOUNTS[plan] /* c8 ignore next */ ?? 0,
+          amount: PLAN_PRICES[plan] /* c8 ignore next */ ?? 0,
           currency: 'ARS',
         },
         { onConflict: 'mp_preapproval_id' }

@@ -5,11 +5,15 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useGSAP } from "@gsap/react";
 import { useTranslations } from "next-intl";
 import Image from "next/image";
+import { useRef } from "react";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
 export default function Engines() {
   const t = useTranslations("Landing.engines");
+  // Scope por ref, no por selector: useGSAP arma el contexto en el render y en
+  // el servidor un selector rompe (no hay document) y tira abajo el SSR de la home.
+  const container = useRef<HTMLDivElement>(null);
 
   useGSAP(
     () => {
@@ -71,11 +75,11 @@ export default function Engines() {
         );
       });
     },
-    { scope: ".landing-engines-container" }
+    { scope: container }
   );
 
   return (
-    <div className="flex flex-col landing-engines-container w-full relative h-[960px] md:h-[900px] overflow-hidden -mt-4">
+    <div ref={container} className="flex flex-col landing-engines-container w-full relative h-[960px] md:h-[900px] overflow-hidden -mt-4">
       <div
         className="w-full h-4 absolute top-0 z-[8]"
         style={{ backgroundColor: "#FF4573" }}
@@ -85,9 +89,9 @@ export default function Engines() {
           className="size-[250vw] md:size-[400vw] absolute bottom-0 rounded-full z-[8]"
           style={{ backgroundColor: "#FF4573" }}
         />
-        <h1 className="h-fit text-white font-semibold max-w-80 text-center text-2xl mb-2 md:text-3xl lg:text-5xl md:max-w-fit md:mt-3 z-10">
+        <h2 className="h-fit text-white font-semibold max-w-80 text-center text-2xl mb-2 md:text-3xl lg:text-5xl md:max-w-fit md:mt-3 z-10">
           {t("title")}
-        </h1>
+        </h2>
       </div>
       <div className="flex flex-1 relative md:justify-center mt-12 sm:mt-6">
         <Image
@@ -96,9 +100,9 @@ export default function Engines() {
           className="size-[127px] md:size-32 lg:size-36 landing-engine landing-right-engines absolute -ml-14 md:-ml-36 md:mt-0"
         width={127} height={127} />
         <div className="flex flex-col absolute md:items-end ml-64 md:mt-4 md:-ml-40 lg:-ml-80 landing-text landing-right opacity-0 gap-1">
-          <h1 className="font-semibold text-lg md:text-xl lg:text-3xl md:text-right">
+          <h3 className="font-semibold text-lg md:text-xl lg:text-3xl md:text-right">
             {t("updateData.title")}
-          </h1>
+          </h3>
           <p className="text-base md:text-lg lg:text-xl w-56 md:w-48 md:text-right">
             {t("updateData.description")}
           </p>
@@ -109,9 +113,9 @@ export default function Engines() {
           className="size-[153px] md:size-44 lg:size-48 landing-engine landing-left-engines absolute mt-[86px] ml-2 md:mt-[104px] md:-ml-10 lg:mt-[114px] lg:-ml-12"
         width={153} height={153} />
         <div className="flex flex-col absolute mt-40 ml-5 md:mt-32 md:ml-20 lg:ml-36 landing-text landing-left gap-1">
-          <h1 className="font-semibold text-lg md:text-xl lg:text-3xl md:-ml-2">
+          <h3 className="font-semibold text-lg md:text-xl lg:text-3xl md:-ml-2">
             {t("earnPoints.title")}
-          </h1>
+          </h3>
           <p className="text-base md:text-lg lg:text-xl w-52 lg:w-72">
             {t("earnPoints.description")}
           </p>
@@ -132,9 +136,9 @@ export default function Engines() {
           className="size-[150px] md:size-[118px] lg:size-40 landing-engine landing-left-engines absolute mt-[295px] ml-16 md:mt-[306px] md:ml-[210px] lg:mt-[300px] lg:ml-[360px]"
         width={150} height={150} />
         <div className="flex flex-col absolute mt-[300px] ml-16 md:mt-[320px] md:ml-[240px] lg:mt-[320px] lg:ml-[460px] landing-text landing-left opacity-0 gap-1">
-          <h1 className="font-semibold text-lg md:text-xl lg:text-3xl -ml-2">
+          <h3 className="font-semibold text-lg md:text-xl lg:text-3xl -ml-2">
             {t("checkBalance.title")}
-          </h1>
+          </h3>
           <p className="text-base md:text-lg lg:text-xl w-40 md:w-60">
             {t("checkBalance.description")}
           </p>
@@ -145,9 +149,9 @@ export default function Engines() {
           className="size-[156px] md:size-40 lg:size-48 landing-engine landing-left-engines absolute mt-[295px] -ml-20 md:mt-[340px] md:-ml-8 lg:mt-[325px]"
         width={156} height={156} />
         <div className="flex flex-col sm:w-64 md:w-96 gap-1 absolute md:items-end mt-[440px] ml-[285px] md:mt-[380px] md:ml-[-260px] lg:mt-[380px] lg:-ml-80 landing-text landing-right opacity-0">
-          <h1 className="font-semibold text-lg md:text-xl lg:text-3xl md:text-right lg:mr-2">
+          <h3 className="font-semibold text-lg md:text-xl lg:text-3xl md:text-right lg:mr-2">
             {t("browseCatalog.title")}
-          </h1>
+          </h3>
           <p className="text-base md:text-lg lg:text-xl w-56 md:w-56 lg:w-[290px] md:text-right">
             {t("browseCatalog.description")}
           </p>
@@ -158,9 +162,9 @@ export default function Engines() {
           className="md:size-[135px] size-[100px] landing-engine landing-right-engines absolute mt-[417px] ml-9 md:mt-[480px] md:-ml-16 lg:mt-[500px] lg:-ml-8"
         width={135} height={135} />
         <div className="flex flex-col absolute mt-[600px] ml-16 md:mt-[500px] md:ml-10 lg:mt-[520px] lg:ml-20 landing-text landing-left opacity-0 gap-1">
-          <h1 className="font-semibold text-lg md:text-xl lg:text-3xl">
+          <h3 className="font-semibold text-lg md:text-xl lg:text-3xl">
             {t("claimReward.title")}
-          </h1>
+          </h3>
           <p className="text-base md:text-lg lg:text-xl w-40 md:w-64 md:ml-2">
             {t("claimReward.description")}
           </p>

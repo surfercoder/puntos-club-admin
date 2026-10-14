@@ -9,7 +9,16 @@ const ADMIN_PORTAL_ROLES = ["admin", "owner", "collaborator"];
 // Rutas que no exigen sesión ni rol de portal: públicas, el flujo de auth
 // (incluye la recuperación de contraseña de los cajeros) y el alta de owners.
 // /legal es público por obligación: Google Play abre la Política sin sesión.
-const OPEN_PATHS = ["/auth", "/api", "/legal", "/mobile-apps", "/owner/onboarding", "/login"];
+// robots.txt y sitemap.xml también: si redirigen al login, Google no los lee.
+const OPEN_PATHS = [
+  "/auth",
+  "/api",
+  "/legal",
+  "/mobile-apps",
+  "/owner/onboarding",
+  "/robots.txt",
+  "/sitemap.xml",
+];
 const isOpenPath = (pathname: string) =>
   pathname === "/" || OPEN_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 

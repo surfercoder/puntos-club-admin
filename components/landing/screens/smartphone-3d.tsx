@@ -14,9 +14,9 @@ import { TextureLoader, Mesh } from "three";
 import type { MeshStandardMaterial } from "three";
 
 const textures = [
-  "/images/Login1.jpg",
-  "/images/Login2.png",
-  "/images/Login3.jpg",
+  "/images/app-beneficiario-home.jpg",
+  "/images/app-beneficiario-explorar.jpg",
+  "/images/app-beneficiario-historial.jpg",
 ];
 
 function subscribeToResize(callback: () => void) {

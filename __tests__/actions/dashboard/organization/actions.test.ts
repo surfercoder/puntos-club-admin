@@ -1,3 +1,9 @@
+const mockEnforcePlanLimit = jest.fn((..._args: unknown[]): Promise<unknown> => Promise.resolve(null));
+const mockHasPlanFeature = jest.fn((..._args: unknown[]) => Promise.resolve(true));
+jest.mock('@/lib/plans/usage', () => ({
+  enforcePlanLimit: (...args: unknown[]) => mockEnforcePlanLimit(...args),
+  hasPlanFeature: (...args: unknown[]) => mockHasPlanFeature(...args),
+}));
 jest.mock('next/cache', () => ({ revalidatePath: jest.fn() }));
 jest.mock('next/navigation', () => ({ redirect: jest.fn() }));
 jest.mock('next/headers', () => ({
@@ -273,9 +279,21 @@ describe('updateOrganizationVisibility', () => {
     // First single() call is the membership check, second is the update
     mockSupabase.single
       .mockReturnValueOnce({ data: { id: 10 }, error: null }) // membership found
+      .mockReturnValueOnce({ data: { is_public: true }, error: null }) // was public: plan check
       .mockReturnValueOnce({ data: { id: '1', name: 'Test Org', is_public: false }, error: null }); // update
     const result = await updateOrganizationVisibility('1', false);
     expect(result).toEqual({ data: { id: '1', name: 'Test Org', is_public: false }, error: null });
+  });
+
+  it('el toggle de visibilidad tampoco deja pasar a privado sin el flag', async () => {
+    (isAdmin as jest.Mock).mockReturnValue(false);
+    (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, role: { name: 'owner' } });
+    mockSupabase.single
+      .mockReturnValueOnce({ data: { id: 10 }, error: null })
+      .mockReturnValueOnce({ data: { is_public: true }, error: null });
+    mockEnforcePlanLimit.mockResolvedValueOnce({ status: 'error', message: 'no incluido', fieldErrors: {} });
+    const result = await updateOrganizationVisibility('1', false);
+    expect(result).toEqual({ error: 'no incluido' });
   });
 
   it('should return forbidden for non-admin without membership', async () => {
@@ -332,6 +350,25 @@ describe('updateClubProfile', () => {
     (hasOwnerPermissions as jest.Mock).mockReturnValue(true);
     (getCurrentUser as jest.Mock).mockResolvedValue({ id: 1, organization_id: 5 });
     mockSupabase.eq.mockReturnValue({ error: null });
+  });
+
+  it('no deja pasar a privado si el plan no incluye club privado', async () => {
+    mockSupabase.eq.mockReturnValueOnce(mockSupabase);
+    mockSupabase.single.mockReturnValueOnce({ data: { is_public: true }, error: null });
+    mockEnforcePlanLimit.mockResolvedValueOnce({ status: 'error', message: 'no incluido', fieldErrors: {} });
+    const result = await updateClubProfile('5', { ...profile, is_public: false });
+    expect(result).toEqual({ error: 'no incluido' });
+    expect(mockEnforcePlanLimit).toHaveBeenCalledWith(5, 'private_club');
+    expect(mockSupabase.update).not.toHaveBeenCalled();
+  });
+
+  it('un club que ya era privado sigue guardando aunque el plan no lo incluya', async () => {
+    mockEnforcePlanLimit.mockClear();
+    mockSupabase.eq.mockReturnValueOnce(mockSupabase);
+    mockSupabase.single.mockReturnValueOnce({ data: { is_public: false }, error: null });
+    const result = await updateClubProfile('5', { ...profile, is_public: false });
+    expect(result).toEqual({ error: null });
+    expect(mockEnforcePlanLimit).not.toHaveBeenCalled();
   });
 
   it('trims the invitation code and saves the profile', async () => {

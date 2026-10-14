@@ -15,7 +15,7 @@ export async function PublicHeader() {
         <Link href="/" aria-label="Puntos Club" className="flex items-center gap-2.5 lg:gap-3.5">
           <Image
             src="/images/logos/LogoImage.png"
-            alt=""
+            alt="Puntos Club"
             width={318}
             height={318}
             priority

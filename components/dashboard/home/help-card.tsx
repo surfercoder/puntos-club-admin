@@ -26,7 +26,6 @@ export function HelpCard() {
         </button>
       </div>
       <Clubi
-        accent="#FF4573"
         className="pointer-events-none absolute -right-2 bottom-0 h-[124px] w-[112px]"
       />
     </section>

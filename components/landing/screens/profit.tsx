@@ -167,12 +167,12 @@ export default function Profit() {
   return (
     <div className="flex flex-col h-[90vh] md:h-[92vh] items-center justify-center">
       <div className="flex h-fit justify-center overflow-hidden">
-        <h1
+        <h2
           ref={titleRef}
           className="w-fit h-fit border-solid border border-t-0 border-opacity-10 rounded-xl rounded-t-none py-5 px-6 text-2xl md:text-3xl lg:text-4xl font-semibold"
         >
           {t("sectionTitle")}
-        </h1>
+        </h2>
       </div>
       <div className="flex flex-1 h-full items-center justify-center sm:mt-8">
         <svg

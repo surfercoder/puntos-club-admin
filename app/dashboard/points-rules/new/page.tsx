@@ -2,8 +2,10 @@ import { getTranslations } from "next-intl/server";
 
 import { CampaignForm } from "@/components/dashboard/points-rules/campaign-form";
 import { CampaignPageHeader } from "@/components/dashboard/points-rules/campaign-page-header";
+import { PlanFeatureLocked } from "@/components/dashboard/plan/plan-feature-locked";
 import { getActiveOrgIdFilter } from "@/lib/auth/get-active-org-id";
 import { getCurrentUser } from "@/lib/auth/get-current-user";
+import { hasPlanFeature } from "@/lib/plans/usage";
 import { createClient } from "@/lib/supabase/server";
 
 export default async function NewCampaignPage() {
@@ -16,6 +18,10 @@ export default async function NewCampaignPage() {
 
   if (!orgIdFilter) {
     return <p className="text-sm text-muted-foreground">{t("noOrganization")}</p>;
+  }
+
+  if (!(await hasPlanFeature(orgIdFilter, "campaigns"))) {
+    return <PlanFeatureLocked feature="campaigns" />;
   }
 
   const { data: branchRows } = await supabase

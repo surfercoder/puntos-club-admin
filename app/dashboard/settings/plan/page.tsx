@@ -26,7 +26,7 @@ export default async function PlanSettingsPage() {
           <p className="mt-2 text-sm text-muted-foreground">{t('description')}</p>
         </div>
         <div className="flex items-center gap-4">
-          <Clubi accent="#FF4573" className="h-24 w-20 shrink-0" />
+          <Clubi className="h-24 w-20 shrink-0" />
           <p className="max-w-xs rounded-xl bg-brand-pink/5 p-4 text-sm">
             <span className="block font-semibold text-brand-pink">{t('clubi.greeting')}</span>
             <span className="mt-1 block text-xs text-muted-foreground">{t('clubi.body')}</span>

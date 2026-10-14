@@ -111,9 +111,12 @@ type Toggles = {
 export function ClubProfileForm({
   organization,
   address,
+  privateClubAllowed = true,
 }: {
   organization: Organization;
   address?: ClubProfileFormAddress | null;
+  /** El plan no incluye club privado: la opción se ve, pero no se puede elegir. */
+  privateClubAllowed?: boolean;
 }) {
   const t = useTranslations("Dashboard.clubProfile");
   const tCommon = useTranslations("Common");
@@ -225,18 +228,24 @@ export function ClubProfileForm({
             <p className="mt-1 text-sm text-muted-foreground">{t("visibility.description")}</p>
 
             <div className="mt-4 grid gap-3 sm:grid-cols-2">
-              {[true, false].map((isPublic) => (
+              {[true, false].map((isPublic) => {
+                // Un club que ya era privado y bajó de plan conserva la opción.
+                const locked = !isPublic && !privateClubAllowed && organization.is_public !== false;
+                return (
                 <label
                   key={String(isPublic)}
-                  className={`flex cursor-pointer items-start gap-3 rounded-xl border p-4 transition-colors ${
-                    toggles.is_public === isPublic
-                      ? "border-brand-violet bg-brand-violet/5"
-                      : "hover:bg-accent"
+                  className={`flex items-start gap-3 rounded-xl border p-4 transition-colors ${
+                    locked
+                      ? "cursor-not-allowed opacity-60"
+                      : toggles.is_public === isPublic
+                        ? "cursor-pointer border-brand-violet bg-brand-violet/5"
+                        : "cursor-pointer hover:bg-accent"
                   }`}
                 >
                   <input
                     checked={toggles.is_public === isPublic}
                     className="mt-0.5 size-4 accent-[var(--brand-violet)]"
+                    disabled={locked}
                     name="visibility"
                     onChange={() => toggle("is_public", isPublic)}
                     type="radio"
@@ -253,9 +262,15 @@ export function ClubProfileForm({
                           : "visibility.privateDescription",
                       )}
                     </span>
+                    {locked && (
+                      <span className="mt-1 block text-xs font-medium text-brand-violet">
+                        {t("visibility.privateLocked")}
+                      </span>
+                    )}
                   </span>
                 </label>
-              ))}
+                );
+              })}
             </div>
 
             <p className="mt-4 rounded-lg bg-brand-blue/5 p-3 text-xs text-muted-foreground">

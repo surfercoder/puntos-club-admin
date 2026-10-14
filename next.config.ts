@@ -7,6 +7,11 @@ const withNextIntl = createNextIntlPlugin("./i18n/request.ts");
 const nextConfig: NextConfig = {
   reactStrictMode: true,
 
+  // Google todavia tiene indexada la URL vieja del login.
+  async redirects() {
+    return [{ source: "/login", destination: "/auth/login", statusCode: 301 }];
+  },
+
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [

@@ -52,14 +52,14 @@ describe('lib/mercadopago/client', () => {
       id: 'advance',
       name: 'Plan Advance',
       mpPlanIdEnvVar: 'MP_PLAN_ID_ADVANCE',
-      amount: 50,
+      amount: 3999,
       currency: 'ARS',
     });
     expect(PLAN_CONFIG.pro).toEqual({
       id: 'pro',
       name: 'Plan Pro',
       mpPlanIdEnvVar: 'MP_PLAN_ID_PRO',
-      amount: 89,
+      amount: 14990,
       currency: 'ARS',
     });
   });

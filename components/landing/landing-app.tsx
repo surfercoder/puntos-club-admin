@@ -4,6 +4,8 @@ import Footer from "@/components/landing/components/footer";
 import ContactForm from "@/components/landing/screens/contact-form";
 import OperationSteps from "@/components/landing/screens/operation-steps";
 import Profit from "@/components/landing/screens/profit";
+import Plans from "@/components/landing/screens/plans";
+import type { PlanLimitsByPlan } from "@/components/plan/plan-cards";
 import { useState, useRef, useEffect } from "react";
 import { registerSlideAnimation } from "@/components/landing/animations/slide";
 import { useGSAP } from "@gsap/react";
@@ -17,7 +19,7 @@ import { CallToAction } from "@/components/landing/components/call-to-action";
 
 gsap.registerPlugin(useGSAP, ScrollTrigger);
 
-export function LandingApp() {
+export function LandingApp({ planLimits = null }: { planLimits?: PlanLimitsByPlan | null }) {
   const weDoRef = useRef<HTMLDivElement | null>(null);
   const operationStepsRef = useRef<HTMLDivElement | null>(null);
   const lineRef = useRef<HTMLDivElement | null>(null);
@@ -32,10 +34,12 @@ export function LandingApp() {
 
   const handleAnimationEnd = () => {
     setAnimationComplete(true);
-    // Wait two frames so the conditional children (WeDo, OperationSteps, ...)
-    // have mounted and their refs are populated before wiring up scroll triggers.
+    // Wait two frames so the conditional ParallaxSection has mounted before
+    // wiring up scroll triggers.
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
+        // Las secciones montaron con el body bloqueado por el loader: recalcular posiciones.
+        ScrollTrigger.refresh();
         if (weDoRef.current) {
           const weDotrigger = ScrollTrigger.create({
             trigger: weDoRef.current,
@@ -146,48 +150,49 @@ export function LandingApp() {
         {animationComplete && <ParallaxSection />}
       </div>
 
-      {animationComplete && (
-        <div className="bg-background overflow-x-hidden flex flex-col items-center">
-          <div className="h-[20vh]"></div>
-          <div
-            ref={weDoRef}
-            className="flex w-full justify-center -translate-y-full mt-10"
-          >
-            <WeDo />
-          </div>
-          <div
-            ref={operationStepsRef}
-            className="flex w-full justify-center mt-5"
-          >
-            <OperationSteps />
-          </div>
-          <Engines />
-          <div
-            className="w-full h-6 mt-12"
-            style={{
-              background:
-                "linear-gradient(to right, #FD7E14, #FF4573, #31A1D6)",
-            }}
-          ></div>
-          <Profit />
-          <div
-            ref={lineRef}
-            className="w-full h-6 mt-12"
-            style={{
-              background:
-                "linear-gradient(to right, #FD7E14, #FF4573, #31A1D6)",
-            }}
-          ></div>
-          <div ref={contactFormRef} className="w-full -translate-x-full">
-            <ContactForm
-              setCircleRef={(index, el) => {
-                circleRefs.current[index] = el;
-              }}
-            />
-          </div>
-          <Footer />
+      {/* El contenido se renderiza siempre (tambien en el HTML del servidor) para
+          que Google lo lea; la animacion solo decide cuando se ve. */}
+      <div className="bg-background overflow-x-hidden flex flex-col items-center">
+        <div className="h-[20vh]"></div>
+        <div
+          ref={weDoRef}
+          className="flex w-full justify-center -translate-y-full mt-10"
+        >
+          <WeDo />
         </div>
-      )}
+        <div
+          ref={operationStepsRef}
+          className="flex w-full justify-center mt-5"
+        >
+          <OperationSteps />
+        </div>
+        <Engines />
+        <div
+          className="w-full h-6 mt-12"
+          style={{
+            background:
+              "linear-gradient(to right, #FD7E14, #FF4573, #31A1D6)",
+          }}
+        ></div>
+        <Profit />
+        {planLimits && <Plans limits={planLimits} />}
+        <div
+          ref={lineRef}
+          className="w-full h-6 mt-12"
+          style={{
+            background:
+              "linear-gradient(to right, #FD7E14, #FF4573, #31A1D6)",
+          }}
+        ></div>
+        <div ref={contactFormRef} className="w-full -translate-x-full">
+          <ContactForm
+            setCircleRef={(index, el) => {
+              circleRefs.current[index] = el;
+            }}
+          />
+        </div>
+        <Footer />
+      </div>
     </>
   );
 }

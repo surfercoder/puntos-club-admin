@@ -8,6 +8,7 @@ import { getCurrentUser } from "@/lib/auth/get-current-user";
 import { requireUser } from "@/lib/auth/require-user";
 import { errorText, translateError } from '@/lib/error-handler';
 import { AppError } from '@/lib/errors';
+import { enforcePlanLimit } from '@/lib/plans/usage';
 
 export interface PointsRuleInput {
   name: string;
@@ -137,6 +138,12 @@ export async function createPointsRule(input: PointsRuleInput) {
         success: false,
         error: await errorText('organization.noActive'),
       };
+    }
+
+    // La regla madre la tienen todos los planes; las campañas, no.
+    if (!input.is_default) {
+      const limitError = await enforcePlanLimit(activeOrgIdNumber, 'campaigns');
+      if (limitError) return { success: false, error: limitError.message };
     }
 
     const supabase = await createClient();
@@ -332,6 +339,20 @@ export async function togglePointsRuleStatus(id: number, is_active: boolean) {
     await requireUser();
 
     const supabase = await createClient();
+
+    // Reactivar una campaña después de bajar a un plan sin campañas queda
+    // bloqueado; apagarla, nunca.
+    if (is_active) {
+      const { data: rule } = await supabase
+        .from("points_rule")
+        .select("is_default, organization_id")
+        .eq("id", id)
+        .single();
+      if (rule && !rule.is_default) {
+        const limitError = await enforcePlanLimit(Number(rule.organization_id), 'campaigns');
+        if (limitError) return { success: false, error: limitError.message };
+      }
+    }
 
     const { data, error } = await supabase
       .from("points_rule")

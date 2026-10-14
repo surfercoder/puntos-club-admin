@@ -12,6 +12,7 @@ import {
   checkPlanLimit,
   enforcePlanLimit,
   getAllPlanLimits,
+  hasPlanFeature,
 } from '@/lib/plans/usage';
 
 describe('getOrganizationUsageSummary', () => {
@@ -142,5 +143,30 @@ describe('getAllPlanLimits', () => {
 
     const result = await getAllPlanLimits();
     expect(result).toBeNull();
+  });
+});
+
+describe('flags del plan', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('enforcePlanLimit dice "no incluido" para un flag, no "límite alcanzado"', async () => {
+    mockRpc.mockResolvedValue({
+      data: { allowed: false, current_usage: 0, limit_value: 0, plan: 'trial' },
+      error: null,
+    });
+    const result = await enforcePlanLimit(1, 'campaigns');
+    expect(result?.message).toBe('Campañas no está incluido en tu plan trial. Actualiza tu plan para usarlo.');
+  });
+
+  it('hasPlanFeature lee allowed', async () => {
+    mockRpc.mockResolvedValue({ data: { allowed: false }, error: null });
+    await expect(hasPlanFeature(1, 'beneficiary_map')).resolves.toBe(false);
+    mockRpc.mockResolvedValue({ data: { allowed: true }, error: null });
+    await expect(hasPlanFeature(1, 'beneficiary_map')).resolves.toBe(true);
+  });
+
+  it('hasPlanFeature falla abierto si no hay respuesta', async () => {
+    mockRpc.mockResolvedValue({ data: null, error: { message: 'fail' } });
+    await expect(hasPlanFeature(1, 'private_club')).resolves.toBe(true);
   });
 });

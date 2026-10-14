@@ -14,7 +14,7 @@ export function ClubiSidebar({ step }: { step: number }) {
   return (
     <aside className="space-y-4">
       <div className="flex justify-center">
-        <Clubi accent="#FF4573" className="h-40 w-36" />
+        <Clubi className="h-40 w-36" />
       </div>
 
       <div className="rounded-xl bg-brand-pink/5 p-5">

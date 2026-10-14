@@ -142,6 +142,19 @@ describe('ClubProfileForm', () => {
     );
   });
 
+  it('sin el flag la opción privada queda deshabilitada', () => {
+    render(<ClubProfileForm organization={organization} privateClubAllowed={false} />);
+    expect(screen.getAllByRole('radio')[1]).toBeDisabled();
+    expect(screen.getByText('visibility.privateLocked')).toBeTruthy();
+  });
+
+  it('un club que ya era privado conserva la opción aunque baje de plan', () => {
+    render(
+      <ClubProfileForm organization={{ ...organization, is_public: false }} privateClubAllowed={false} />,
+    );
+    expect(screen.getAllByRole('radio')[1]).not.toBeDisabled();
+  });
+
   it('flips the club settings switches', async () => {
     const { container } = render(<ClubProfileForm organization={organization} />);
     fireEvent.click(screen.getByLabelText('settings.allowNewMembers'));

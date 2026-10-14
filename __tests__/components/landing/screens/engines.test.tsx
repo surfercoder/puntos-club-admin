@@ -67,7 +67,7 @@ describe("Engines", () => {
 
   it("renders the title", () => {
     render(<Engines />);
-    const heading = document.querySelector("h1");
+    const heading = document.querySelector("h2");
     expect(heading).toBeInTheDocument();
   });
 

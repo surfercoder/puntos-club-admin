@@ -6,6 +6,12 @@ const order = jest.fn(() => Promise.resolve({ data: branchRows, error: null }));
 const branchBuilder: Record<string, unknown> = {};
 Object.assign(branchBuilder, { select: () => branchBuilder, eq: () => branchBuilder, order });
 
+const mockEnforcePlanLimit = jest.fn((..._args: unknown[]): Promise<unknown> => Promise.resolve(null));
+const mockHasPlanFeature = jest.fn((..._args: unknown[]) => Promise.resolve(true));
+jest.mock('@/lib/plans/usage', () => ({
+  enforcePlanLimit: (...args: unknown[]) => mockEnforcePlanLimit(...args),
+  hasPlanFeature: (...args: unknown[]) => mockHasPlanFeature(...args),
+}));
 jest.mock('@/lib/supabase/server', () => ({
   createClient: jest.fn(() => Promise.resolve({ from: () => branchBuilder })),
 }));
@@ -19,6 +25,9 @@ jest.mock('@/lib/auth/get-active-org-id', () => ({
 jest.mock('next/link', () => ({
   __esModule: true,
   default: ({ children, href }: any) => <a href={href}>{children}</a>,
+}));
+jest.mock('@/components/dashboard/plan/plan-feature-locked', () => ({
+  PlanFeatureLocked: ({ feature }: { feature: string }) => <div data-testid="locked">{feature}</div>,
 }));
 jest.mock('@/components/dashboard/points-rules/campaign-form', () => ({
   CampaignForm: ({ branches }: { branches: unknown }) => (
@@ -50,5 +59,12 @@ describe('NewCampaignPage', () => {
   it('asks for an organization when none is active', async () => {
     getActiveOrgIdFilter.mockResolvedValue(null);
     expect(await render()).toContain('noOrganization');
+  });
+
+  it('sin el flag de campañas muestra el aviso en vez del formulario', async () => {
+    mockHasPlanFeature.mockResolvedValueOnce(false);
+    const html = await render();
+    expect(html).toContain('data-testid="locked"');
+    expect(html).not.toContain('campaign-form');
   });
 });

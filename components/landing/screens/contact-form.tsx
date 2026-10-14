@@ -7,6 +7,7 @@ import { PhoneNumberField } from "@/components/landing/components/phone-number-f
 import type { ContactFormValues } from "@/schemas/contact.schema";
 import { ContactSchema, contactFieldSchemas } from "@/schemas/contact.schema";
 import { sendContactEmail } from "@/actions/contact/send-contact-email";
+import { trackEvent } from "@/lib/track-event";
 import { gsap } from "gsap";
 import { useGSAP } from "@gsap/react";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -146,6 +147,8 @@ const ContactForm = ({
     const emailResult = await sendContactEmail(result.data);
 
     if (emailResult.success) {
+      // Conversion "formulario enviado" en GA4.
+      trackEvent("generate_lead");
       dispatch({ type: "SUBMIT_SUCCESS", message: t("success") });
     } else {
       dispatch({ type: "SUBMIT_ERROR", message: t("error") });
@@ -167,8 +170,15 @@ const ContactForm = ({
           <p className="font-light text-base lg:text-lg text-center md:text-start">
             {t("subtitle")}
           </p>
+          <a
+            href="mailto:hola@puntosclub.com.ar"
+            className="font-medium text-base lg:text-lg text-center md:text-start text-brand-pink hover:underline"
+          >
+            hola@puntosclub.com.ar
+          </a>
         </div>
         <form
+          method="post"
           onSubmit={handleSubmit}
           className="grid grid-cols-1 w-[85%] md:w-full md:grid-cols-2 gap-7 mx-auto py-10 rounded-lg"
         >

@@ -24,7 +24,13 @@ jest.mock('@/components/public-header', () => ({
 }));
 
 jest.mock('@/components/landing/landing-app', () => ({
-  LandingApp: () => <div data-testid="landing-app">LandingApp</div>,
+  LandingApp: ({ planLimits }: { planLimits: unknown }) => (
+    <div data-testid="landing-app">{JSON.stringify(planLimits)}</div>
+  ),
+}));
+
+jest.mock('@/lib/plans/public-limits', () => ({
+  getPublicPlanLimits: jest.fn(() => Promise.resolve({ trial: { branches: 1 } })),
 }));
 
 
@@ -33,10 +39,10 @@ describe('Home page', () => {
     expect(typeof Home).toBe('function');
   });
 
-  it('renders PublicHeader and LandingApp', () => {
-    render(<Home />);
+  it('renders PublicHeader and LandingApp with the public plan limits', async () => {
+    render(await Home());
     expect(screen.getByTestId('public-header')).toBeInTheDocument();
-    expect(screen.getByTestId('landing-app')).toBeInTheDocument();
+    expect(screen.getByTestId('landing-app')).toHaveTextContent('{"trial":{"branches":1}}');
   });
 
   it('generateMetadata returns correct metadata', async () => {

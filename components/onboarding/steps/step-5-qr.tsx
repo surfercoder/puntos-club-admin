@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { QRPreviewCard } from '@/components/dashboard/qr/qr-preview-card';
 import { AppDownloadQRCards } from '@/components/mobile-apps/app-download-qr-cards';
 import { completeOnboarding } from '@/actions/onboarding/actions';
+import { trackEvent } from '@/lib/track-event';
 import type { OnboardingStep2Data, OnboardingStep4Data } from '@/actions/onboarding/actions';
 
 interface Step5Props {
@@ -39,6 +40,8 @@ async function runCreation(
 ): Promise<State> {
   try {
     const result = await completeOnboarding({ step2, plan, mpPreapprovalId: mpPreapprovalId ?? undefined, step4 });
+    // Conversion "registro completado" en GA4 (nombre de evento recomendado por Google).
+    if (result.success && result.data) trackEvent('sign_up');
     return result.success && result.data
       ? { status: 'success', organizationId: result.data.organizationId, orgName: result.data.orgName }
       : { status: 'error', message: result.error ?? tErrors('unexpected') };

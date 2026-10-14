@@ -104,7 +104,7 @@ describe("Profit", () => {
 
   it("renders the section title", () => {
     const { container } = render(<Profit />);
-    const title = container.querySelector("h1");
+    const title = container.querySelector("h2");
     expect(title).toBeInTheDocument();
   });
 

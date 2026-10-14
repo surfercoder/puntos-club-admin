@@ -50,6 +50,19 @@ export const PLAN_FEATURE_ORDER: PlanFeatureKey[] = [
   ...PLAN_FLAG_ORDER,
 ];
 
+/** Filas de `plan_limits` → plan -> feature -> limit_value */
+export function groupPlanLimits(
+  rows: { plan: string; feature: string; limit_value: number }[]
+): Record<PlanType, Record<PlanFeatureKey, number>> {
+  const result = {} as Record<PlanType, Record<PlanFeatureKey, number>>;
+  for (const row of rows) {
+    const plan = row.plan as PlanType;
+    if (!result[plan]) result[plan] = {} as Record<PlanFeatureKey, number>;
+    result[plan][row.feature as PlanFeatureKey] = row.limit_value;
+  }
+  return result;
+}
+
 export function isQuotaFeature(feature: PlanFeatureKey): feature is PlanQuotaKey {
   return PLAN_QUOTA_ORDER.some((quota) => quota === feature);
 }
@@ -106,11 +119,11 @@ export const PLAN_DISPLAY_NAMES: Record<PlanType, string> = {
   enterprise: 'Plan Enterprise',
 };
 
-/** Precio mensual en USD. null = se vende por contacto comercial. */
+/** Precio mensual en ARS. null = se vende por contacto comercial. */
 export const PLAN_PRICES: Record<PlanType, number | null> = {
   trial:      0,
-  advance:    50,
-  pro:        89,
+  advance:    3999,
+  pro:        14990,
   enterprise: null,
 };
 

@@ -79,6 +79,14 @@ describe("Loader", () => {
     expect(container.querySelector("#title")).toBeInTheDocument();
   });
 
+  // SEO: la home tiene un unico H1 y es el slogan, no la marca.
+  it("uses the slogan as the page h1", () => {
+    const { container } = render(<Loader onAnimationEnd={onAnimationEnd} />);
+    const h1s = container.querySelectorAll("h1");
+    expect(h1s).toHaveLength(1);
+    expect(h1s[0].id).toBe("slogan");
+  });
+
   it("renders the Gift component", () => {
     const { getByTestId } = render(<Loader onAnimationEnd={onAnimationEnd} />);
     expect(getByTestId("gift-svg")).toBeInTheDocument();

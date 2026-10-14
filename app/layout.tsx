@@ -10,24 +10,18 @@ import { Toaster } from "@/components/ui/sonner";
 import { GoogleMapsProvider } from "@/components/providers/google-maps-provider";
 import { StaleDeploymentReload } from "@/components/providers/stale-deployment-reload";
 import { env } from "@/lib/env";
+import { SITE_URL } from "@/lib/site-url";
+import Script from "next/script";
 
-/* c8 ignore start */
-const defaultUrl = process.env.VERCEL_URL
-  ? `https://${process.env.VERCEL_URL}`
-  : "http://localhost:3001";
-
-// `new URL` throws on malformed input; guard it. `defaultUrl` is always
-// well-formed in practice (VERCEL_URL or localhost), so the fallback is
-// unreachable — it lives inside the c8-ignore block to keep coverage intact.
-const metadataBase = URL.canParse(defaultUrl) ? new URL(defaultUrl) : undefined;
-/* c8 ignore stop */
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID;
 
 export async function generateMetadata(): Promise<Metadata> {
   const t = await getTranslations("Metadata");
   return {
-    metadataBase,
+    metadataBase: new URL(SITE_URL),
     title: t("appTitle"),
     description: t("appDescription"),
+    openGraph: { siteName: "Puntos Club", locale: "es_AR", type: "website" },
   };
 }
 
@@ -41,6 +35,12 @@ export default async function RootLayout({
   return (
     <html lang={locale} suppressHydrationWarning>
       <body className="antialiased">
+        {/* GTM (y GA4 adentro) solo carga si el ID esta configurado en Vercel. */}
+        {GTM_ID && (
+          <Script id="gtm" strategy="afterInteractive">
+            {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${GTM_ID}');`}
+          </Script>
+        )}
         <StaleDeploymentReload />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <ThemeProvider

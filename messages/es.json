@@ -1,27 +1,27 @@
 {
   "Metadata": {
-    "appTitle": "Puntos Club Admin",
-    "appDescription": "Portal de administración de Puntos Club",
+    "appTitle": "Puntos Club",
+    "appDescription": "Programa de fidelización con puntos para comercios.",
     "dashboardTitle": "Panel",
     "dashboardDescription": "Panel de administración de Puntos Club",
     "homeTitle": "Puntos Club - Programa de fidelización para tu negocio",
-    "homeDescription": "Crea tu programa de puntos y fideliza a tus clientes con Puntos Club.",
+    "homeDescription": "Creá el programa de puntos de tu negocio: premiá a tus clientes, aumentá la recompra y medí cada resultado. Empezá gratis y armá tu club en pocos minutos.",
     "dashboardTemplate": "{page} | Panel",
     "onboardingTitle": "Registro de Propietario - Puntos Club",
-    "onboardingDescription": "Crea tu cuenta como propietario de negocio en Puntos Club. Configura tu organización, productos y empieza a fidelizar a tus clientes con puntos de recompensa.",
+    "onboardingDescription": "Creá tu cuenta de propietario en Puntos Club. Configurá tu organización y tus productos, y empezá a fidelizar a tus clientes con puntos.",
     "qrTitle": "Código QR | Panel",
     "qrDescription": "Código QR de tu organización para que los clientes se unan al programa de puntos",
     "mobileAppsTitle": "Apps Móviles - Puntos Club",
-    "mobileAppsDescription": "Descarga las apps móviles de Puntos Club para Android"
+    "mobileAppsDescription": "Descargá las apps móviles de Puntos Club para Android"
   },
   "MobileApps": {
     "title": "Apps Móviles",
-    "subtitle": "Descarga las apps de Puntos Club para Android escaneando los códigos QR.",
+    "subtitle": "Descargá las apps de Puntos Club para Android escaneando los códigos QR.",
     "puntosClubTitle": "PuntosClub",
     "puntosClubDescription": "App móvil para beneficiarios.",
     "puntosClubCajaTitle": "PuntosClubCaja",
     "puntosClubCajaDescription": "App móvil para cajeros.",
-    "scanToDownload": "Escanea este código QR para descargar",
+    "scanToDownload": "Escaneá este código QR para descargar",
     "download": "Descargar APK",
     "androidOnly": "Estas apps están disponibles actualmente solo para Android. Soporte para iOS próximamente."
   },
@@ -69,14 +69,14 @@
     "imageUpload": {
       "upload": "Subir imagen",
       "fileSizeError": "El tamaño del archivo debe ser menor a {maxSize}MB",
-      "selectImageFile": "Por favor selecciona un archivo de imagen",
+      "selectImageFile": "Por favor seleccioná un archivo de imagen",
       "uploadFailed": "Error al subir",
       "uploadSuccess": "Imagen subida correctamente",
       "uploadError": "Error al subir la imagen",
       "removeSuccess": "Imagen eliminada",
       "removeError": "Error al eliminar la imagen",
       "uploading": "Subiendo...",
-      "clickToUpload": "Haz clic para subir imagen",
+      "clickToUpload": "Hacé clic para subir una imagen",
       "maxSize": "Tamaño máximo: {maxSize}MB",
       "remove": "Eliminar imagen"
     },
@@ -117,16 +117,16 @@
   "Auth": {
     "login": {
       "title": "Iniciar sesión",
-      "description": "Ingresa tu correo electrónico para acceder a tu cuenta",
+      "description": "Ingresá tu correo electrónico para acceder a tu cuenta",
       "forgotPassword": "¿Olvidaste tu contraseña?",
       "noAccount": "¿Aún no tenés cuenta?",
       "signUpLink": "Unirse ahora",
       "submitting": "Iniciando sesión...",
-      "noPermission": "No tienes permisos para acceder al portal de administración.",
+      "noPermission": "No tenés permisos para acceder al portal de administración.",
       "showPassword": "Mostrar contraseña",
       "hidePassword": "Ocultar contraseña",
       "pageTitle": "Iniciar sesión - Puntos Club Admin",
-      "pageDescription": "Inicia sesión en tu cuenta"
+      "pageDescription": "Iniciá sesión en tu cuenta"
     },
     "signUp": {
       "title": "Registrarse",
@@ -135,7 +135,7 @@
       "lastNamePlaceholder": "García",
       "repeatPassword": "Repetir contraseña",
       "submitting": "Creando cuenta...",
-      "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+      "alreadyHaveAccount": "¿Ya tenés una cuenta?",
       "loginLink": "Iniciar sesión",
       "pageTitle": "Registrarse - Puntos Club Admin",
       "pageDescription": "Crear una nueva cuenta de administrador"
@@ -150,7 +150,7 @@
     "forgotPassword": {
       "title": "¿Olvidaste tu contraseña?",
       "description": "No te preocupes, sucede. Ingresá tu correo y te enviaremos un enlace para restablecerla.",
-      "successTitle": "Revisa tu correo",
+      "successTitle": "Revisá tu correo",
       "successMessage": "Si te registraste con correo y contraseña, recibirás un correo para restablecer tu contraseña.",
       "submitButton": "Enviar enlace de recuperación",
       "submitting": "Enviando...",
@@ -162,7 +162,7 @@
     },
     "updatePassword": {
       "title": "Restablecer contraseña",
-      "description": "Por favor ingresa tu nueva contraseña.",
+      "description": "Por favor ingresá tu nueva contraseña.",
       "newPassword": "Nueva contraseña",
       "newPasswordPlaceholder": "Nueva contraseña",
       "submitButton": "Guardar nueva contraseña",
@@ -174,7 +174,7 @@
     },
     "emailConfirmed": {
       "title": "Cuenta confirmada",
-      "message": "Tu cuenta fue confirmada exitosamente. ¡Bienvenido/a a PuntosClub! Ya puedes iniciar sesión y empezar a usar la app.",
+      "message": "Tu cuenta fue confirmada exitosamente. ¡Bienvenido/a a PuntosClub! Ya podés iniciar sesión y empezar a usar la app.",
       "openApp": "Abrir PuntosClub",
       "openAppFallback": "Si el boton no funciona, abre la app manualmente desde tu dispositivo.",
       "pageTitle": "Email Confirmado | Puntos Club",
@@ -896,7 +896,9 @@
       "limitReachedTitle": "Límite de plan alcanzado",
       "limitReachedDescription": "Has alcanzado el límite de tu {plan}. Mejora tu plan para continuar creando recursos.",
       "goBack": "Volver",
-      "upgradeSuffix": "para aumentar estos límites."
+      "upgradeSuffix": "para aumentar estos límites.",
+      "featureLockedTitle": "{feature} no está incluido en tu plan",
+      "featureLockedDescription": "Tu plan actual no incluye {feature}. Mejorá tu plan para usarlo."
     },
     "planSettings": {
       "title": "Elegí el plan ideal para tu club de puntos",
@@ -1899,6 +1901,7 @@
         "publicDescription": "Tu club es visible para todos los usuarios que exploran la app.",
         "private": "Privado",
         "privateDescription": "Tu club solo puede ser accedido mediante invitación o código QR.",
+        "privateLocked": "No incluido en tu plan actual",
         "qrNote": "El acceso por código QR siempre está disponible, independientemente de la visibilidad que elijas."
       },
       "general": {
@@ -1987,12 +1990,12 @@
         "qr": "Tu QR"
       },
       "stepDescriptions": {
-        "personalInfo": "Crea tu cuenta personal",
-        "business": "Configura tu organización",
-        "plan": "Elige el plan ideal",
+        "personalInfo": "Creá tu cuenta personal",
+        "business": "Configurá tu organización",
+        "plan": "Elegí el plan ideal",
         "catalog": "Define tus premios",
         "terms": "Lee y acepta los términos",
-        "qr": "Comparte tu código QR"
+        "qr": "Compartí tu código QR"
       }
     },
     "step1": {
@@ -2006,15 +2009,15 @@
       "lastNameRequired": "El apellido es requerido",
       "minPassword": "Mínimo 8 caracteres",
       "submitButton": "Crear cuenta y verificar email",
-      "termsNote": "Al registrarte, aceptas nuestros Términos de servicio y Política de privacidad.",
-      "checkEmail": "¡Revisa tu email!",
+      "termsNote": "Al registrarte, aceptás nuestros Términos de servicio y Política de privacidad.",
+      "checkEmail": "¡Revisá tu email!",
       "confirmationSent": "Enviamos un enlace de confirmación a",
       "noEmailReceived": "¿No recibiste el email?",
       "useDifferentEmail": "Usar otro email",
       "creating": "Creando cuenta...",
-      "genericError": "Ocurrió un error. Por favor intenta de nuevo.",
-      "spamNote": "Revisa tu carpeta de spam o correo no deseado.",
-      "passwordHint": "Usa al menos 8 caracteres con una mezcla de letras y números.",
+      "genericError": "Ocurrió un error. Por favor intentá de nuevo.",
+      "spamNote": "Revisá tu carpeta de spam o correo no deseado.",
+      "passwordHint": "Usá al menos 8 caracteres con una mezcla de letras y números.",
       "passwordWeak": "La contraseña no cumple todos los requisitos",
       "passwordStrength": {
         "minLength": "Al menos 8 caracteres",
@@ -2100,7 +2103,7 @@
         "account_manager": "Account Manager"
       },
       "allPlansInclude": "Todos los planes incluyen soporte por email.",
-      "changePlanAnytime": "Puedes cambiar de plan en cualquier momento.",
+      "changePlanAnytime": "Podés cambiar de plan en cualquier momento.",
       "securePayment": "El pago se procesa de forma segura a través de Mercado Pago.",
       "continueWith": "Continuar con {plan}",
       "selectedPlan": "Plan seleccionado",
@@ -2123,7 +2126,7 @@
       "initialStock": "Stock inicial",
       "addReward": "Agregar otro premio a esta categoría",
       "addCategory": "Agregar otra categoría",
-      "validationError": "Agrega al menos una categoría con un producto.",
+      "validationError": "Agregá al menos una categoría con un producto.",
       "productCount": "Premios: {current} / {max}",
       "limitReached": "Alcanzaste el límite de {max} premios de tu {plan}. Para agregar más, podés cambiar de plan."
     },
@@ -2655,6 +2658,10 @@
       "terms": "Términos y condiciones",
       "privacy": "Política de privacidad",
       "copyright": "©2019-{year} Puntos Club"
+    },
+    "plans": {
+      "title": "Planes",
+      "subtitle": "Empezá gratis y crecé a tu ritmo. Elegí un plan y armá tu club en minutos."
     }
   },
   "LanguageSwitcher": {

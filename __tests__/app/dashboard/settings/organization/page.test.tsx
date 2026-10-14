@@ -2,6 +2,12 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 const mockRedirect = jest.fn();
+const mockEnforcePlanLimit = jest.fn((..._args: unknown[]): Promise<unknown> => Promise.resolve(null));
+const mockHasPlanFeature = jest.fn((..._args: unknown[]) => Promise.resolve(true));
+jest.mock('@/lib/plans/usage', () => ({
+  enforcePlanLimit: (...args: unknown[]) => mockEnforcePlanLimit(...args),
+  hasPlanFeature: (...args: unknown[]) => mockHasPlanFeature(...args),
+}));
 jest.mock('next/navigation', () => ({ redirect: (...args: any[]) => mockRedirect(...args) }));
 jest.mock('next/headers', () => ({
   cookies: jest.fn(() => Promise.resolve({ get: jest.fn(() => ({ value: '5' })) })),
@@ -23,6 +29,7 @@ jest.mock('@/components/dashboard/organization/club-profile-form', () => ({
       data-testid="club-profile-form"
       data-org-id={props.organization.id}
       data-street={props.address?.street}
+      data-private-allowed={String(props.privateClubAllowed)}
     />
   ),
 }));
@@ -54,6 +61,12 @@ describe('OrgSettingsPage', () => {
     expect(getByTestId('club-profile-form')).toHaveAttribute('data-org-id', '5');
     expect(getByTestId('club-profile-form')).toHaveAttribute('data-street', 'Belgrano');
     expect(getByTestId('gift')).toBeTruthy();
+  });
+
+  it('le pasa al formulario si el plan incluye club privado', async () => {
+    mockHasPlanFeature.mockResolvedValueOnce(false);
+    const { getByTestId } = render(await OrgSettingsPage());
+    expect(getByTestId('club-profile-form')).toHaveAttribute('data-private-allowed', 'false');
   });
 
   it('redirects when user is not authorized (not owner/admin)', async () => {

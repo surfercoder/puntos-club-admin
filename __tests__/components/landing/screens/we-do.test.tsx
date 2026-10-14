@@ -54,7 +54,7 @@ describe("WeDo", () => {
 
   it("renders the title heading", () => {
     const { container } = render(<WeDo />);
-    const heading = container.querySelector("h1");
+    const heading = container.querySelector("h2");
     expect(heading).toBeInTheDocument();
   });
 

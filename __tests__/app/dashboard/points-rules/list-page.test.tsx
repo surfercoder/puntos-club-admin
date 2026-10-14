@@ -2,6 +2,18 @@ import PointsRulesPage from '@/app/dashboard/points-rules/page';
 
 const getAllPointsRules = jest.fn();
 
+const mockEnforcePlanLimit = jest.fn((..._args: unknown[]): Promise<unknown> => Promise.resolve(null));
+const mockHasPlanFeature = jest.fn((..._args: unknown[]) => Promise.resolve(true));
+jest.mock('@/lib/plans/usage', () => ({
+  enforcePlanLimit: (...args: unknown[]) => mockEnforcePlanLimit(...args),
+  hasPlanFeature: (...args: unknown[]) => mockHasPlanFeature(...args),
+}));
+const mockOrgIdFilter = jest.fn((): Promise<number | null> => Promise.resolve(1));
+jest.mock('@/lib/auth/get-current-user', () => ({ getCurrentUser: jest.fn(() => Promise.resolve({ id: 1 })) }));
+jest.mock('@/lib/auth/get-active-org-id', () => ({ getActiveOrgIdFilter: () => mockOrgIdFilter() }));
+jest.mock('@/components/dashboard/plan/plan-feature-locked', () => ({
+  PlanFeatureLocked: ({ feature }: { feature: string }) => <div data-testid="locked">{feature}</div>,
+}));
 jest.mock('@/actions/dashboard/points-rules/actions', () => ({
   getAllPointsRules: (...args: unknown[]) => getAllPointsRules(...args),
 }));
@@ -184,5 +196,22 @@ describe('PointsRulesPage', () => {
   it('honours the tab in the query string and ignores junk', async () => {
     expect(await renderPage('finished')).toContain('data-tab="finished"');
     expect(await renderPage('nope')).toContain('data-tab="active"');
+  });
+
+  it('sin el flag de campañas esconde Crear y muestra el aviso', async () => {
+    getAllPointsRules.mockResolvedValue({ success: true, data: [] });
+    mockHasPlanFeature.mockResolvedValueOnce(false);
+    const html = await renderPage();
+    expect(html).toContain('data-testid="locked"');
+    expect(html).not.toContain('href="/dashboard/points-rules/new"');
+  });
+
+  it('el superadmin sin org activa no consulta el plan', async () => {
+    getAllPointsRules.mockResolvedValue({ success: true, data: [] });
+    mockOrgIdFilter.mockResolvedValueOnce(null);
+    mockHasPlanFeature.mockClear();
+    const html = await renderPage();
+    expect(mockHasPlanFeature).not.toHaveBeenCalled();
+    expect(html).toContain('href="/dashboard/points-rules/new"');
   });
 });

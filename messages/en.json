@@ -1,11 +1,11 @@
 {
   "Metadata": {
-    "appTitle": "Puntos Club Admin",
-    "appDescription": "Puntos Club Administration Portal",
+    "appTitle": "Puntos Club",
+    "appDescription": "Points-based loyalty program for businesses.",
     "dashboardTitle": "Dashboard",
     "dashboardDescription": "Puntos Club Administration Dashboard",
     "homeTitle": "Puntos Club - Loyalty program for your business",
-    "homeDescription": "Create your points program and retain your customers with Puntos Club.",
+    "homeDescription": "Build your business's points program: reward your customers, increase repeat purchases and measure every result. Start free and set up your club in minutes.",
     "dashboardTemplate": "{page} | Dashboard",
     "onboardingTitle": "Owner Registration - Puntos Club",
     "onboardingDescription": "Create your business owner account on Puntos Club. Set up your organization, products, and start retaining your customers with reward points.",
@@ -896,7 +896,9 @@
       "limitReachedTitle": "Plan limit reached",
       "limitReachedDescription": "You have reached the limit of your {plan}. Upgrade your plan to continue creating resources.",
       "goBack": "Go back",
-      "upgradeSuffix": "to increase these limits."
+      "upgradeSuffix": "to increase these limits.",
+      "featureLockedTitle": "{feature} is not included in your plan",
+      "featureLockedDescription": "Your current plan does not include {feature}. Upgrade your plan to use it."
     },
     "planSettings": {
       "title": "Pick the right plan for your points club",
@@ -1899,6 +1901,7 @@
         "publicDescription": "Your club is visible to everyone browsing the app.",
         "private": "Private",
         "privateDescription": "Your club can only be reached by invitation or QR code.",
+        "privateLocked": "Not included in your current plan",
         "qrNote": "QR access always works, whatever visibility you choose."
       },
       "general": {
@@ -2655,6 +2658,10 @@
       "terms": "Terms and conditions",
       "privacy": "Privacy policy",
       "copyright": "©2019-{year} Puntos Club"
+    },
+    "plans": {
+      "title": "Plans",
+      "subtitle": "Start for free and grow at your own pace. Pick a plan and set up your club in minutes."
     }
   },
   "LanguageSwitcher": {

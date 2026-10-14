@@ -6,6 +6,12 @@ const mockSelect = jest.fn().mockResolvedValue({ data: [], error: null });
 const mockEq = jest.fn().mockResolvedValue({ data: [], error: null });
 const mockFrom = jest.fn(() => ({ select: mockSelect, eq: mockEq }));
 
+const mockEnforcePlanLimit = jest.fn((..._args: unknown[]): Promise<unknown> => Promise.resolve(null));
+const mockHasPlanFeature = jest.fn((..._args: unknown[]) => Promise.resolve(true));
+jest.mock('@/lib/plans/usage', () => ({
+  enforcePlanLimit: (...args: unknown[]) => mockEnforcePlanLimit(...args),
+  hasPlanFeature: (...args: unknown[]) => mockHasPlanFeature(...args),
+}));
 jest.mock('next-intl/server', () => ({ getTranslations: jest.fn(() => Promise.resolve((key: string) => key)) }));
 jest.mock('next/headers', () => ({ cookies: jest.fn(() => Promise.resolve({ get: jest.fn(() => ({ value: '1' })) })) }));
 jest.mock('@/lib/supabase/server', () => ({
@@ -21,7 +27,12 @@ jest.mock('@/components/dashboard/plan/plan-usage-badge', () => ({ PlanUsageBadg
 jest.mock('@/components/dashboard/beneficiary/hide-button', () => ({ HideButton: () => <div /> }));
 jest.mock('@/components/dashboard/beneficiary/beneficiary-filters', () => ({ BeneficiaryFilters: () => <div /> }));
 jest.mock('@/components/dashboard/beneficiary/beneficiary-stats', () => ({ BeneficiaryStats: () => <div /> }));
-jest.mock('@/components/dashboard/beneficiary/beneficiary-heatmap', () => ({ BeneficiaryHeatmap: () => <div /> }));
+jest.mock('@/components/dashboard/beneficiary/beneficiary-heatmap', () => ({
+  BeneficiaryHeatmap: ({ points }: { points: unknown[] }) => <div data-testid="heatmap" data-count={points.length} />,
+}));
+jest.mock('@/components/dashboard/plan/plan-feature-locked', () => ({
+  PlanFeatureLocked: () => <div data-testid="map-locked" />,
+}));
 jest.mock('@/components/dashboard/shared/excel-export-button', () => ({ ExcelExportButton: () => <div /> }));
 jest.mock('@/components/dashboard/shared/table-pagination', () => ({ TablePagination: () => <div /> }));
 jest.mock('@/components/ui/button', () => ({ Button: ({ children }: { children: React.ReactNode }) => <button>{children}</button> }));
@@ -398,5 +409,23 @@ describe('BeneficiaryListPage PII', () => {
     expect(screen.getByText('ben@test.com')).toBeInTheDocument();
     expect(screen.getByText('2615464612')).toBeInTheDocument();
     expect(screen.getByText('31011953')).toBeInTheDocument();
+  });
+});
+
+describe('BeneficiaryListPage mapa según el plan', () => {
+  it('sin el flag no manda coordenadas y muestra el aviso', async () => {
+    const { isAdmin } = require('@/lib/auth/roles');
+    const { getActiveOrgIdFilter } = require('@/lib/auth/get-active-org-id');
+    isAdmin.mockReturnValueOnce(false);
+    getActiveOrgIdFilter.mockResolvedValueOnce(1);
+    mockHasPlanFeature.mockResolvedValueOnce(false);
+    const mockEqOrg = jest.fn().mockResolvedValue({ data: [], error: null });
+    mockFrom.mockReturnValueOnce({ select: jest.fn(() => ({ eq: mockEqOrg })) });
+    const html = require('react-dom/server').renderToStaticMarkup(
+      await BeneficiaryListPage({ searchParams: Promise.resolve({}) }),
+    );
+    expect(mockHasPlanFeature).toHaveBeenCalledWith(1, 'beneficiary_map');
+    expect(html).toContain('map-locked');
+    expect(html).not.toContain('data-testid="heatmap"');
   });
 });

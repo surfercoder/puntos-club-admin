@@ -64,8 +64,8 @@ describe('Step3Plan', () => {
     expect(screen.getByText('advancePlan')).toBeInTheDocument();
     expect(screen.getByText('proPlan')).toBeInTheDocument();
     expect(screen.getByText('enterprisePlan')).toBeInTheDocument();
-    expect(screen.getByText('$50')).toBeInTheDocument();
-    expect(screen.getByText('$89')).toBeInTheDocument();
+    expect(screen.getByText('$3.999')).toBeInTheDocument();
+    expect(screen.getByText('$14.990')).toBeInTheDocument();
     // Enterprise no tiene precio de lista
     expect(screen.getByText('customPriceLabel')).toBeInTheDocument();
     expect(screen.getByText('popularBadge')).toBeInTheDocument();

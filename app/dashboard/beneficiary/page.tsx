@@ -11,6 +11,8 @@ import { BeneficiaryStats } from '@/components/dashboard/beneficiary/beneficiary
 import DeleteModal from '@/components/dashboard/beneficiary/delete-modal';
 import { HideButton } from '@/components/dashboard/beneficiary/hide-button';
 import { PlanLimitCreateButton } from '@/components/dashboard/plan/plan-limit-create-button';
+import { PlanFeatureLocked } from '@/components/dashboard/plan/plan-feature-locked';
+import { hasPlanFeature } from '@/lib/plans/usage';
 import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
 import { ExcelExportButton } from '@/components/dashboard/shared/excel-export-button';
@@ -339,7 +341,9 @@ export default async function BeneficiaryListPage({ searchParams }: PageProps) {
   const page = parsePage(params.page, totalPages);
   const visible = filtered.slice((page - 1) * perPage, page * perPage);
 
-  const mapPoints: BeneficiaryPoint[] = rows.flatMap((r) =>
+  // Las coordenadas no salen del servidor si el plan no incluye el mapa.
+  const mapAllowed = !orgIdFilter || (await hasPlanFeature(orgIdFilter, 'beneficiary_map'));
+  const mapPoints: BeneficiaryPoint[] = !mapAllowed ? [] : rows.flatMap((r) =>
     typeof r.latitude === 'number' && typeof r.longitude === 'number'
       ? [{ latitude: r.latitude, longitude: r.longitude, registrationDate: r.registration_date }]
       : [],
@@ -455,7 +459,11 @@ export default async function BeneficiaryListPage({ searchParams }: PageProps) {
           </div>
         </div>
 
-        <BeneficiaryHeatmap points={mapPoints} />
+        {mapAllowed ? (
+          <BeneficiaryHeatmap points={mapPoints} />
+        ) : (
+          <PlanFeatureLocked feature="beneficiary_map" />
+        )}
       </div>
     </div>
   );

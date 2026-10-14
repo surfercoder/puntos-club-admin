@@ -95,7 +95,7 @@ function PlanCard({ plan, limits, isSelected, isCurrent, onSelect, popular }: Pl
   const price = PLAN_PRICES[plan];
 
   const priceLabel =
-    price === null ? t('customPriceLabel') : price === 0 ? t('freePriceLabel') : `$${price}`;
+    price === null ? t('customPriceLabel') : price === 0 ? t('freePriceLabel') : `$${price.toLocaleString('es-AR')}`;
   const priceNote =
     price === null ? undefined : price === 0 ? t('trialPriceNote') : t('paidPriceNote');
 

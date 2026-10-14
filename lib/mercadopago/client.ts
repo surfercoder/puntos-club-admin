@@ -1,5 +1,7 @@
 import MercadoPago from 'mercadopago';
 
+import { PLAN_PRICES } from '@/lib/plans/config';
+
 let _client: MercadoPago | null = null;
 
 export function getMercadoPagoClient(): MercadoPago {
@@ -28,14 +30,14 @@ export const PLAN_CONFIG: Record<PlanId, PlanConfig> = {
     id: 'advance',
     name: 'Plan Advance',
     mpPlanIdEnvVar: 'MP_PLAN_ID_ADVANCE',
-    amount: 50,
+    amount: PLAN_PRICES.advance as number,
     currency: 'ARS',
   },
   pro: {
     id: 'pro',
     name: 'Plan Pro',
     mpPlanIdEnvVar: 'MP_PLAN_ID_PRO',
-    amount: 89,
+    amount: PLAN_PRICES.pro as number,
     currency: 'ARS',
   },
 };

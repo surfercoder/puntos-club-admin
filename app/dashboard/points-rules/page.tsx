@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server";
 
 import { getAllPointsRules } from "@/actions/dashboard/points-rules/actions";
 import { Clubi } from "@/components/dashboard/home/clubi";
+import { PlanFeatureLocked } from "@/components/dashboard/plan/plan-feature-locked";
 import {
   CampaignsCard,
   type Campaign,
@@ -12,6 +13,9 @@ import {
   MotherRuleCard,
   type MotherRule,
 } from "@/components/dashboard/points-rules/mother-rule-card";
+import { getActiveOrgIdFilter } from "@/lib/auth/get-active-org-id";
+import { getCurrentUser } from "@/lib/auth/get-current-user";
+import { hasPlanFeature } from "@/lib/plans/usage";
 import { CAMPAIGN_TABS, type CampaignTab } from "@/lib/utils";
 
 const NUMBER_FORMATTER = new Intl.NumberFormat("es-AR");
@@ -54,13 +58,17 @@ export default async function PointsRulesPage({
 }: {
   searchParams: Promise<{ tab?: string }>;
 }) {
-  const [t, tMother, tCampaigns, params, result] = await Promise.all([
+  const [t, tMother, tCampaigns, params, result, currentUser] = await Promise.all([
     getTranslations("PointsRules"),
     getTranslations("PointsRules.mother"),
     getTranslations("PointsRules.campaigns"),
     searchParams,
     getAllPointsRules(),
+    getCurrentUser(),
   ]);
+  // Sin org activa (superadmin mirando todo) no hay plan que limite.
+  const orgIdFilter = await getActiveOrgIdFilter(currentUser);
+  const campaignsAllowed = !orgIdFilter || (await hasPlanFeature(orgIdFilter, "campaigns"));
 
   const rules = (result.success ? (result.data ?? []) : []) as unknown as RuleRow[];
   const today = new Date();
@@ -145,15 +153,19 @@ export default async function PointsRulesPage({
           <h1 className="text-3xl font-bold tracking-tight">{t("title")}</h1>
           <p className="text-sm text-muted-foreground">{t("description")}</p>
         </div>
-        <Link
-          href="/dashboard/points-rules/new"
-          className="brand-cta inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-medium"
-        >
-          {t("createButton")}
-        </Link>
+        {campaignsAllowed && (
+          <Link
+            href="/dashboard/points-rules/new"
+            className="brand-cta inline-flex h-10 items-center gap-2 rounded-lg px-4 text-sm font-medium"
+          >
+            {t("createButton")}
+          </Link>
+        )}
       </div>
 
       <MotherRuleCard rule={mother} />
+
+      {!campaignsAllowed && <PlanFeatureLocked feature="campaigns" />}
 
       <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0">
@@ -189,18 +201,18 @@ export default async function PointsRulesPage({
       </div>
 
       <section className="flex flex-wrap items-center gap-4 rounded-xl border bg-card p-5 shadow-sm">
-        <Clubi accent="#FF4573" className="h-16 w-14 shrink-0" />
+        <Clubi className="h-16 w-14 shrink-0" />
         <div className="min-w-0 flex-1">
           <p className="text-sm font-semibold">{t("help.title")}</p>
           <p className="text-xs text-muted-foreground">{t("help.body")}</p>
         </div>
-        <Link
+        {campaignsAllowed && <Link
           href="/dashboard/points-rules/new"
           className="inline-flex h-9 items-center gap-2 rounded-lg border bg-card px-4 text-sm font-medium transition-colors hover:bg-accent"
         >
           <BookOpen className="size-4" />
           {t("help.cta")}
-        </Link>
+        </Link>}
       </section>
     </div>
   );

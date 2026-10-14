@@ -10,6 +10,7 @@ import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { requireUser } from '@/lib/auth/require-user';
 import { AppError } from '@/lib/errors';
 import { errorText, translateError } from '@/lib/error-handler';
+import { enforcePlanLimit } from '@/lib/plans/usage';
 
 export async function createOrganization(input: Organization) {
   await requireUser();
@@ -150,6 +151,25 @@ export async function getOrganizationAddress(organizationId: string) {
   return { data, error };
 }
 
+/**
+ * Pasar a club privado pide el flag `private_club` del plan. Un club que ya
+ * era privado y bajó de plan sigue pudiendo guardar sin que lo obliguemos a
+ * abrirse: sólo se frena el cambio de público a privado.
+ */
+async function privateClubPlanError(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  id: string,
+): Promise<string | null> {
+  const { data: current } = await supabase
+    .from('organization')
+    .select('is_public')
+    .eq('id', id)
+    .single();
+  if (current?.is_public === false) return null;
+  const limitError = await enforcePlanLimit(Number(id), 'private_club');
+  return limitError?.message ?? null;
+}
+
 export async function updateOrganizationVisibility(id: string, isPublic: boolean) {
   await requireUser();
   const parsed = OrganizationVisibilitySchema.safeParse({ is_public: isPublic });
@@ -177,6 +197,11 @@ export async function updateOrganizationVisibility(id: string, isPublic: boolean
     if (!membership) {
       return { error: await errorText('db.forbidden') };
     }
+  }
+
+  if (!parsed.data.is_public && !isAdmin(currentUser)) {
+    const planError = await privateClubPlanError(supabase, id);
+    if (planError) return { error: planError };
   }
 
   const { data, error } = await supabase
@@ -285,6 +310,12 @@ export async function updateClubProfile(id: string, input: ClubProfileInput) {
   const { address, ...orgFields } = parsed.data;
 
   const supabase = await createClient();
+
+  if (!orgFields.is_public) {
+    const planError = await privateClubPlanError(supabase, id);
+    if (planError) return { error: planError };
+  }
+
   const { error } = await supabase
     .from('organization')
     .update({

@@ -4,11 +4,12 @@ import { createClient } from '@/lib/supabase/server';
 import type {
   OrganizationUsageSummary,
   PlanFeatureKey,
+  PlanFlagKey,
   PlanLimitCheckResult,
   PlanType,
 } from '@/types/plan';
 import type { ActionState } from '@/lib/error-handler';
-import { PLAN_FEATURE_LABELS } from './config';
+import { PLAN_FEATURE_LABELS, groupPlanLimits, isQuotaFeature } from './config';
 
 /**
  * Fetches the full usage summary for an organization via the
@@ -55,15 +56,7 @@ export async function getAllPlanLimits(): Promise<Record<PlanType, Record<PlanFe
     .select('plan, feature, limit_value');
 
   if (error || !data) return null;
-
-  const result = {} as Record<PlanType, Record<PlanFeatureKey, number>>;
-  for (const row of data) {
-    const plan = row.plan as PlanType;
-    const feature = row.feature as PlanFeatureKey;
-    if (!result[plan]) result[plan] = {} as Record<PlanFeatureKey, number>;
-    result[plan][feature] = row.limit_value;
-  }
-  return result;
+  return groupPlanLimits(data);
 }
 
 /**
@@ -91,10 +84,22 @@ export async function enforcePlanLimit(
     const label = PLAN_FEATURE_LABELS[feature];
     return {
       status: 'error' as const,
-      message: `Has alcanzado el límite de ${label} (${result.current_usage}/${result.limit_value}) para tu plan ${result.plan}. Actualiza tu plan para continuar.`,
+      message: isQuotaFeature(feature)
+        ? `Has alcanzado el límite de ${label} (${result.current_usage}/${result.limit_value}) para tu plan ${result.plan}. Actualiza tu plan para continuar.`
+        : `${label} no está incluido en tu plan ${result.plan}. Actualiza tu plan para usarlo.`,
       fieldErrors: {},
     };
   }
 
   return null;
+}
+
+/**
+ * Flags (1 = incluido / 0 = no): check_plan_limit los responde con
+ * `allowed`, porque el uso de un flag siempre es 0. Falla abierto como
+ * enforcePlanLimit.
+ */
+export async function hasPlanFeature(orgId: number, feature: PlanFlagKey): Promise<boolean> {
+  const result = await checkPlanLimit(orgId, feature);
+  return result?.allowed ?? true;
 }

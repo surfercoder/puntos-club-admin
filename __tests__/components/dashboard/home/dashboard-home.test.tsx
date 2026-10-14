@@ -46,15 +46,14 @@ describe('GiftIllustration', () => {
 });
 
 describe('Clubi', () => {
-  it('renders with the default accent', () => {
+  it('renders the mascot png', () => {
     const { container } = render(<Clubi />);
-    expect(container.querySelector('svg')).toBeInTheDocument();
+    expect(container.querySelector('img')?.getAttribute('src')).toContain('clubi.png');
   });
 
-  it('accepts a custom accent and class', () => {
-    const { container } = render(<Clubi accent="#000000" className="w-8" />);
-    expect(container.querySelector('svg')).toHaveClass('w-8');
-    expect(container.querySelector('[fill="#000000"]')).not.toBeNull();
+  it('forwards the class', () => {
+    const { container } = render(<Clubi className="w-8" />);
+    expect(container.querySelector('img')).toHaveClass('w-8', 'object-contain');
   });
 });
 

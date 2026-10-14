@@ -169,7 +169,8 @@ describe('lib/supabase/middleware updateSession', () => {
   it.each([
     ['/api/beneficiaries'],
     ['/'],
-    ['/login'],
+    ['/robots.txt'],
+    ['/sitemap.xml'],
     ['/auth/callback'],
     ['/owner/onboarding'],
     ['/mobile-apps'],

@@ -10,6 +10,7 @@ import {
 } from "@/components/dashboard/organization/club-profile-form"
 import { getCurrentUser } from "@/lib/auth/get-current-user"
 import { hasOwnerPermissions } from "@/lib/auth/roles"
+import { hasPlanFeature } from "@/lib/plans/usage"
 import type { Organization } from "@/types/organization"
 
 export default async function OrgSettingsPage() {
@@ -30,9 +31,10 @@ export default async function OrgSettingsPage() {
     redirect("/dashboard")
   }
 
-  const [{ data: org, error }, { data: address }] = await Promise.all([
+  const [{ data: org, error }, { data: address }, privateClubAllowed] = await Promise.all([
     getOrganizationSettings(activeOrgId),
     getOrganizationAddress(activeOrgId),
+    hasPlanFeature(Number(activeOrgId), "private_club"),
   ])
 
   if (error || !org) {
@@ -52,6 +54,7 @@ export default async function OrgSettingsPage() {
       <ClubProfileForm
         address={address as ClubProfileFormAddress | null}
         organization={org as unknown as Organization}
+        privateClubAllowed={privateClubAllowed}
       />
     </div>
   )

@@ -89,6 +89,11 @@ jest.mock("@/components/landing/screens/profit", () => ({
   default: () => <div data-testid="profit" />,
 }));
 
+jest.mock("@/components/landing/screens/plans", () => ({
+  __esModule: true,
+  default: () => <div data-testid="plans" />,
+}));
+
 jest.mock("@/components/landing/screens/we-do", () => ({
   __esModule: true,
   default: () => <div data-testid="we-do" />,
@@ -159,14 +164,16 @@ describe("LandingApp", () => {
     expect(getByTestId("loader")).toBeInTheDocument();
   });
 
-  it("does not render content sections before animation completes", () => {
-    const { queryByTestId } = render(<LandingApp />);
-    expect(queryByTestId("we-do")).not.toBeInTheDocument();
-    expect(queryByTestId("operation-steps")).not.toBeInTheDocument();
-    expect(queryByTestId("engines")).not.toBeInTheDocument();
-    expect(queryByTestId("profit")).not.toBeInTheDocument();
-    expect(queryByTestId("contact-form")).not.toBeInTheDocument();
-    expect(queryByTestId("footer")).not.toBeInTheDocument();
+  // SEO: el contenido tiene que estar en el HTML del servidor, sin esperar la animacion.
+  it("renders content sections before animation completes", () => {
+    const { getByTestId, queryByTestId } = render(<LandingApp />);
+    expect(getByTestId("we-do")).toBeInTheDocument();
+    expect(getByTestId("operation-steps")).toBeInTheDocument();
+    expect(getByTestId("engines")).toBeInTheDocument();
+    expect(getByTestId("profit")).toBeInTheDocument();
+    expect(getByTestId("contact-form")).toBeInTheDocument();
+    expect(getByTestId("footer")).toBeInTheDocument();
+    expect(queryByTestId("parallax-section")).not.toBeInTheDocument();
   });
 
   it("shows loader wrapper with opacity-100 before animation completes", () => {
@@ -196,8 +203,19 @@ describe("LandingApp", () => {
       expect(result!.getByTestId("operation-steps")).toBeInTheDocument();
       expect(result!.getByTestId("engines")).toBeInTheDocument();
       expect(result!.getByTestId("profit")).toBeInTheDocument();
+      expect(result!.queryByTestId("plans")).not.toBeInTheDocument();
       expect(result!.getByTestId("contact-form")).toBeInTheDocument();
       expect(result!.getByTestId("footer")).toBeInTheDocument();
+    });
+
+    it("renders the plans grid only when plan limits are provided", async () => {
+      let result: ReturnType<typeof render>;
+      await act(async () => {
+        result = render(<LandingApp planLimits={{} as never} />);
+      });
+      await waitFor(() => {
+        expect(result.getByTestId("plans")).toBeInTheDocument();
+      });
     });
 
     it("applies opacity-0 and pointer-events-none to loader wrapper when animation completes", async () => {

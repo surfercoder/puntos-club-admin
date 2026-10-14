@@ -1,3 +1,9 @@
+const mockEnforcePlanLimit = jest.fn((..._args: unknown[]): Promise<unknown> => Promise.resolve(null));
+const mockHasPlanFeature = jest.fn((..._args: unknown[]) => Promise.resolve(true));
+jest.mock('@/lib/plans/usage', () => ({
+  enforcePlanLimit: (...args: unknown[]) => mockEnforcePlanLimit(...args),
+  hasPlanFeature: (...args: unknown[]) => mockHasPlanFeature(...args),
+}));
 jest.mock('next/cache', () => ({ revalidatePath: jest.fn() }));
 jest.mock('next/navigation', () => ({ redirect: jest.fn() }));
 
@@ -505,5 +511,40 @@ describe('multi-branch campaigns', () => {
 
     expect(result.error).toBe('db.forbidden');
     expect(mockSupabase.update).not.toHaveBeenCalled();
+  });
+});
+
+describe('campañas según el plan', () => {
+  const blocked = { status: 'error', message: 'Campañas no está incluido', fieldErrors: {} };
+
+  it('no deja crear una campaña si el plan no la incluye', async () => {
+    mockEnforcePlanLimit.mockResolvedValueOnce(blocked);
+    const result = await createPointsRule(validRule);
+    expect(result).toEqual({ success: false, error: 'Campañas no está incluido' });
+    expect(mockEnforcePlanLimit).toHaveBeenCalledWith(123, 'campaigns');
+    expect(mockSupabase.insert).not.toHaveBeenCalled();
+  });
+
+  it('la regla madre no pasa por el flag', async () => {
+    mockEnforcePlanLimit.mockClear();
+    await createPointsRule({ ...validRule, is_default: true });
+    expect(mockEnforcePlanLimit).not.toHaveBeenCalled();
+  });
+
+  it('no deja reactivar una campaña si el plan no la incluye', async () => {
+    mockSupabase.single.mockReturnValueOnce({ data: { is_default: false, organization_id: 7 }, error: null });
+    mockEnforcePlanLimit.mockResolvedValueOnce(blocked);
+    const result = await togglePointsRuleStatus(1, true);
+    expect(result).toEqual({ success: false, error: 'Campañas no está incluido' });
+    expect(mockEnforcePlanLimit).toHaveBeenCalledWith(7, 'campaigns');
+    expect(mockSupabase.update).not.toHaveBeenCalled();
+  });
+
+  it('reactivar la regla madre o apagar una campaña no consulta el plan', async () => {
+    mockEnforcePlanLimit.mockClear();
+    mockSupabase.single.mockReturnValueOnce({ data: { is_default: true, organization_id: 7 }, error: null });
+    await togglePointsRuleStatus(1, true);
+    await togglePointsRuleStatus(1, false);
+    expect(mockEnforcePlanLimit).not.toHaveBeenCalled();
   });
 });

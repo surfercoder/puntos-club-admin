@@ -57,8 +57,8 @@ describe('RootLayout', () => {
     expect(metadata.title).toBeDefined();
   });
 
-  it('uses VERCEL_URL when available', async () => {
-    process.env = { ...originalEnv, VERCEL_URL: 'my-app.vercel.app' };
+  it('renders the GTM script when NEXT_PUBLIC_GTM_ID is set', async () => {
+    process.env = { ...originalEnv, NEXT_PUBLIC_GTM_ID: 'GTM-TEST' };
     // Re-import to pick up new env
     jest.resetModules();
     jest.mock('next-intl/server', () => ({
