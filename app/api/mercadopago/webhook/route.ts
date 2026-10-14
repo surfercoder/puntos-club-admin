@@ -5,6 +5,7 @@ import { type NextRequest, NextResponse } from 'next/server';
 import { PreApproval } from 'mercadopago/dist/clients/preApproval';
 import type { PreApprovalResponse } from 'mercadopago/dist/clients/preApproval/commonTypes';
 import { getMercadoPagoClient, PLAN_CONFIG, type PlanId } from '@/lib/mercadopago/client';
+import { activateSubscription } from '@/lib/mercadopago/activate-subscription';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { errorText } from '@/lib/error-handler';
 
@@ -117,7 +118,7 @@ export async function POST(request: NextRequest) {
     // Find the existing subscription record by mp_preapproval_id
     const { data: existing } = await admin
       .from('subscription')
-      .select('id, organization_id, plan')
+      .select('id, organization_id, plan, status')
       .eq('mp_preapproval_id', preapprovalId)
       .maybeSingle();
 
@@ -133,20 +134,32 @@ export async function POST(request: NextRequest) {
         })
         .eq('id', existing.id);
 
-      // If subscription is now authorized, update org plan too
-      if (mappedStatus === 'authorized') {
-        await admin
-          .from('organization')
-          .update({ plan: existing.plan })
-          .eq('id', existing.organization_id);
+      // Activate only on the transition to authorized: monthly payment events also
+      // arrive as 'authorized', and replaying one for an older preapproval would
+      // restore its plan and cancel the newer one.
+      if (mappedStatus === 'authorized' && existing.status !== 'authorized') {
+        await activateSubscription(admin, {
+          organizationId: existing.organization_id,
+          plan: existing.plan,
+          preapprovalId,
+        });
       }
 
-      // If cancelled/paused, revert org to trial
+      // Revert to trial only if nothing else is paying: this event also fires for
+      // the old plan we cancel after a switch and for abandoned checkouts.
       if (mappedStatus === 'cancelled') {
-        await admin
-          .from('organization')
-          .update({ plan: 'trial' })
-          .eq('id', existing.organization_id);
+        const { count } = await admin
+          .from('subscription')
+          .select('id', { count: 'exact', head: true })
+          .eq('organization_id', existing.organization_id)
+          .eq('status', 'authorized');
+
+        if (!count) {
+          await admin
+            .from('organization')
+            .update({ plan: 'trial' })
+            .eq('id', existing.organization_id);
+        }
       }
     } else {
       // Subscription not in our DB yet (edge case: webhook arrived before onboarding step 5)
@@ -180,10 +193,11 @@ export async function POST(request: NextRequest) {
           );
 
           if (mappedStatus === 'authorized') {
-            await admin
-              .from('organization')
-              .update({ plan })
-              .eq('id', appUser.organization_id);
+            await activateSubscription(admin, {
+              organizationId: Number(appUser.organization_id),
+              plan,
+              preapprovalId,
+            });
           }
         }
       }

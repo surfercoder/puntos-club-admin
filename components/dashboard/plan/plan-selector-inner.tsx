@@ -306,15 +306,11 @@ function buildPlanChangeHandlers({
     dispatch({ type: 'SET_LOADING', payload: false });
   };
 
+  // The current plan is NOT cancelled here: activateSubscription cancels it once
+  // the new preapproval is authorized, so backing out of MP keeps the old plan.
   const handleConfirmSwitch = async () => {
     dispatch({ type: 'SET_LOADING', payload: true });
     try {
-      const result = await cancelSubscriptionAction();
-      if (result.error) {
-        toast.error(result.error);
-        dispatch({ type: 'SET_LOADING', payload: false });
-        return;
-      }
       await startCheckoutForSelected(selected, payerEmail, t);
     } catch (err) {
       toast.error(err instanceof Error ? err.message : t('paymentError'));

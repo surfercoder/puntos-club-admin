@@ -915,7 +915,7 @@
       "cancelConfirmTitle": "Cancel your subscription?",
       "cancelConfirmDescription": "Your plan will revert to the trial plan immediately. You'll lose access to paid features and will not be charged again. You can re-subscribe at any time.",
       "switchConfirmTitle": "Switch to {plan}?",
-      "switchConfirmDescription": "Your current paid subscription will be cancelled and you'll be redirected to MercadoPago to authorize the new {plan} plan.",
+      "switchConfirmDescription": "You'll be redirected to MercadoPago to authorize the {plan} plan. Your current plan stays active until you do; only then we cancel it.",
       "keepSubscription": "Keep current plan",
       "confirmCancel": "Yes, cancel",
       "confirmSwitch": "Yes, switch",

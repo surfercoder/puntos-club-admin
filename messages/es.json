@@ -915,7 +915,7 @@
       "cancelConfirmTitle": "¿Cancelar tu suscripción?",
       "cancelConfirmDescription": "Tu plan volverá al plan trial de inmediato. Perderás acceso a las funciones pagas y no se realizarán nuevos cargos. Podés volver a suscribirte cuando quieras.",
       "switchConfirmTitle": "¿Cambiar a {plan}?",
-      "switchConfirmDescription": "Tu suscripción paga actual será cancelada y serás redirigido a MercadoPago para autorizar el nuevo plan {plan}.",
+      "switchConfirmDescription": "Te redirigimos a MercadoPago para autorizar el plan {plan}. Tu plan actual sigue activo hasta que lo autorices; recién ahí lo damos de baja.",
       "keepSubscription": "Mantener plan actual",
       "confirmCancel": "Sí, cancelar",
       "confirmSwitch": "Sí, cambiar",

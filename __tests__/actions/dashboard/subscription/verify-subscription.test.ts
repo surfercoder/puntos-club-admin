@@ -33,6 +33,11 @@ jest.mock('@/lib/mercadopago/client', () => ({
   getMercadoPagoClient: jest.fn(() => ({})),
 }));
 
+const mockActivate = jest.fn().mockResolvedValue(undefined);
+jest.mock('@/lib/mercadopago/activate-subscription', () => ({
+  activateSubscription: (...args: unknown[]) => mockActivate(...args),
+}));
+
 import { verifySubscriptionAction } from '@/actions/dashboard/subscription/verify-subscription';
 
 describe('verifySubscriptionAction', () => {
@@ -81,10 +86,11 @@ describe('verifySubscriptionAction', () => {
     expect(result.status).toBe('authorized');
     expect(result.plan).toBe('pro');
 
-    expect(mockAdminSupabase.from).toHaveBeenCalledWith('organization');
-    expect(mockAdminSupabase.update).toHaveBeenCalledWith(
-      expect.objectContaining({ plan: 'pro' })
-    );
+    expect(mockActivate).toHaveBeenCalledWith(mockAdminSupabase, {
+      organizationId: 5,
+      plan: 'pro',
+      preapprovalId: 'pa_123',
+    });
   });
 
   it('falls back to external_reference when no existing subscription', async () => {

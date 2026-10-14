@@ -4,7 +4,13 @@ const mockGet = jest.fn();
 const mockMaybeSingle = jest.fn();
 const mockUpdateEq = jest.fn().mockResolvedValue({});
 const mockUpsert = jest.fn().mockResolvedValue({});
+const mockAuthorizedCount = jest.fn(() => 0);
+const mockActivate = jest.fn().mockResolvedValue(undefined);
 const updatesByTable: Record<string, unknown[]> = {};
+
+jest.mock('@/lib/mercadopago/activate-subscription', () => ({
+  activateSubscription: (...args: unknown[]) => mockActivate(...args),
+}));
 
 jest.mock('@/lib/mercadopago/client', () => ({
   getMercadoPagoClient: jest.fn(() => ({})),
@@ -26,9 +32,11 @@ jest.mock('@/lib/supabase/admin', () => ({
       select: jest.fn(() => ({
         eq: jest.fn(() => ({
           maybeSingle: mockMaybeSingle,
-          eq: jest.fn(() => ({
-            maybeSingle: mockMaybeSingle,
-          })),
+          eq: jest.fn(() =>
+            Object.assign(Promise.resolve({ count: mockAuthorizedCount() }), {
+              maybeSingle: mockMaybeSingle,
+            })
+          ),
         })),
       })),
       update: jest.fn((payload: unknown) => {
@@ -63,6 +71,7 @@ describe('MercadoPago Webhook Route', () => {
       payer_email: 'test@test.com',
     });
     mockMaybeSingle.mockResolvedValue({ data: null });
+    mockAuthorizedCount.mockReturnValue(0);
   });
 
   afterAll(() => {
@@ -131,6 +140,17 @@ describe('MercadoPago Webhook Route', () => {
     expect(updatesByTable.organization).toEqual([{ plan: 'trial' }]);
   });
 
+  it('cancelled webhook keeps the org plan when another subscription is still authorized', async () => {
+    // e.g. the old Pro preapproval we cancel after the owner authorized Advance
+    mockGet.mockResolvedValueOnce({ status: 'cancelled', external_reference: 'u1|pro' });
+    mockMaybeSingle.mockResolvedValueOnce({ data: { id: 1, organization_id: 42, plan: 'pro' } });
+    mockAuthorizedCount.mockReturnValueOnce(1);
+
+    await POST(makeRequest({ type: 'subscription_preapproval', data: { id: 'pa_old' } }));
+
+    expect(updatesByTable.organization).toBeUndefined();
+  });
+
   it('authorized webhook writes the resolved plan onto the organization table', async () => {
     mockGet.mockResolvedValueOnce({
       status: 'authorized',
@@ -143,7 +163,21 @@ describe('MercadoPago Webhook Route', () => {
 
     await POST(makeRequest({ type: 'subscription_preapproval', data: { id: 'pa_aut' } }));
 
-    expect(updatesByTable.organization).toEqual([{ plan: 'advance' }]);
+    expect(mockActivate).toHaveBeenCalledWith(expect.anything(), {
+      organizationId: 7,
+      plan: 'advance',
+      preapprovalId: 'pa_aut',
+    });
+  });
+
+  it('repeated authorized webhook (monthly payment) does NOT re-activate the subscription', async () => {
+    mockMaybeSingle.mockResolvedValueOnce({
+      data: { id: 1, organization_id: 7, plan: 'pro', status: 'authorized' },
+    });
+
+    await POST(makeRequest({ type: 'subscription_preapproval', data: { id: 'pa_old' } }));
+
+    expect(mockActivate).not.toHaveBeenCalled();
   });
 
   it('paused webhook updates the subscription row but does NOT revert the org plan', async () => {

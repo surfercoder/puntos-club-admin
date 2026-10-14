@@ -747,7 +747,8 @@ describe('PlanSelector', () => {
       expect(screen.getByText('confirmSwitch')).toBeInTheDocument();
     });
 
-    it('cancels current plan then redirects to MercadoPago on confirmation', async () => {
+    it('redirects to MercadoPago WITHOUT cancelling the current plan', async () => {
+      // Regression: cancelling first left Pro orgs on trial when they backed out of MP.
       const { cancelSubscriptionAction } = require('@/actions/dashboard/subscription/cancel-subscription');
 
       (global.fetch as jest.Mock).mockResolvedValue({
@@ -767,32 +768,11 @@ describe('PlanSelector', () => {
       });
 
       await waitFor(() => {
-        expect(cancelSubscriptionAction).toHaveBeenCalled();
         expect(global.fetch).toHaveBeenCalledWith('/api/mercadopago/create-subscription', expect.objectContaining({
           method: 'POST',
         }));
       });
-    });
-
-    it('shows error toast and does not call MP when cancel returns an error', async () => {
-      const { cancelSubscriptionAction } = require('@/actions/dashboard/subscription/cancel-subscription');
-      (cancelSubscriptionAction as jest.Mock).mockResolvedValueOnce({ error: 'cannot cancel' });
-
-      await act(async () => { render(<PlanSelector />); });
-
-      fireEvent.click(screen.getByText('advancePlan'));
-      await act(async () => {
-        fireEvent.click(screen.getByText(/switchToPlan/));
-      });
-
-      await act(async () => {
-        fireEvent.click(screen.getByText('confirmSwitch'));
-      });
-
-      await waitFor(() => {
-        expect(toast.error).toHaveBeenCalledWith('cannot cancel');
-      });
-      expect(global.fetch).not.toHaveBeenCalled();
+      expect(cancelSubscriptionAction).not.toHaveBeenCalled();
     });
 
     it('shows error toast when MercadoPago fetch throws an Error', async () => {
@@ -834,11 +814,7 @@ describe('PlanSelector', () => {
     });
 
     it('shows the switching loading label while the request is in flight', async () => {
-      const { cancelSubscriptionAction } = require('@/actions/dashboard/subscription/cancel-subscription');
-      let resolveCancel: (value: { success: true }) => void = () => {};
-      (cancelSubscriptionAction as jest.Mock).mockReturnValueOnce(
-        new Promise<{ success: true }>((res) => { resolveCancel = res; })
-      );
+      (global.fetch as jest.Mock).mockReturnValueOnce(new Promise(() => {}));
 
       await act(async () => { render(<PlanSelector />); });
 
@@ -852,10 +828,6 @@ describe('PlanSelector', () => {
       });
 
       expect(screen.getByText('switchingPlan')).toBeInTheDocument();
-
-      await act(async () => {
-        resolveCancel({ success: true });
-      });
     });
   });
 });

@@ -4,6 +4,7 @@ import { PreApproval } from 'mercadopago/dist/clients/preApproval';
 import type { PreApprovalResponse } from 'mercadopago/dist/clients/preApproval/commonTypes';
 import { getMercadoPagoClient, type PlanId } from '@/lib/mercadopago/client';
 import { createClient } from '@/lib/supabase/server';
+import { activateSubscription } from '@/lib/mercadopago/activate-subscription';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { errorText } from '@/lib/error-handler';
 
@@ -58,10 +59,11 @@ export async function verifySubscriptionAction(
         .eq('id', existing.id);
 
       if (mappedStatus === 'authorized') {
-        await admin
-          .from('organization')
-          .update({ plan: existing.plan })
-          .eq('id', existing.organization_id);
+        await activateSubscription(admin, {
+          organizationId: existing.organization_id,
+          plan: existing.plan,
+          preapprovalId,
+        });
       }
 
       return { status: mappedStatus, plan: existing.plan };
