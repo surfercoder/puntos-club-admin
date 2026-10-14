@@ -94,6 +94,11 @@ jest.mock("@/components/landing/screens/plans", () => ({
   default: () => <div data-testid="plans" />,
 }));
 
+jest.mock("@/components/landing/screens/apps", () => ({
+  __esModule: true,
+  default: () => <div data-testid="apps" />,
+}));
+
 jest.mock("@/components/landing/screens/we-do", () => ({
   __esModule: true,
   default: () => <div data-testid="we-do" />,
@@ -171,6 +176,7 @@ describe("LandingApp", () => {
     expect(getByTestId("operation-steps")).toBeInTheDocument();
     expect(getByTestId("engines")).toBeInTheDocument();
     expect(getByTestId("profit")).toBeInTheDocument();
+    expect(getByTestId("apps")).toBeInTheDocument();
     expect(getByTestId("contact-form")).toBeInTheDocument();
     expect(getByTestId("footer")).toBeInTheDocument();
     expect(queryByTestId("parallax-section")).not.toBeInTheDocument();

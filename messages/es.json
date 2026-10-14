@@ -23,7 +23,8 @@
     "puntosClubCajaDescription": "App móvil para cajeros.",
     "scanToDownload": "Escaneá este código QR para descargar",
     "download": "Descargar APK",
-    "androidOnly": "Estas apps están disponibles actualmente solo para Android. Soporte para iOS próximamente."
+    "androidOnly": "Estas apps están disponibles actualmente solo para Android. Soporte para iOS próximamente.",
+    "openWeb": "Usar desde el navegador"
   },
   "Common": {
     "cancel": "Cancelar",
@@ -2662,6 +2663,10 @@
     "plans": {
       "title": "Planes",
       "subtitle": "Empezá gratis y crecé a tu ritmo. Elegí un plan y armá tu club en minutos."
+    },
+    "apps": {
+      "title": "Nuestras apps",
+      "subtitle": "Tus clientes suman y canjean puntos desde el celular; tus cajeros cargan las ventas. Bajá la app para Android o usala desde el navegador, sin instalar nada."
     }
   },
   "LanguageSwitcher": {

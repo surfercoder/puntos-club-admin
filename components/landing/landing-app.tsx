@@ -5,6 +5,7 @@ import ContactForm from "@/components/landing/screens/contact-form";
 import OperationSteps from "@/components/landing/screens/operation-steps";
 import Profit from "@/components/landing/screens/profit";
 import Plans from "@/components/landing/screens/plans";
+import Apps from "@/components/landing/screens/apps";
 import type { PlanLimitsByPlan } from "@/components/plan/plan-cards";
 import { useState, useRef, useEffect } from "react";
 import { registerSlideAnimation } from "@/components/landing/animations/slide";
@@ -176,6 +177,7 @@ export function LandingApp({ planLimits = null }: { planLimits?: PlanLimitsByPla
         ></div>
         <Profit />
         {planLimits && <Plans limits={planLimits} />}
+        <Apps />
         <div
           ref={lineRef}
           className="w-full h-6 mt-12"

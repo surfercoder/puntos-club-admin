@@ -6,6 +6,7 @@ jest.mock('qrcode.react', () => ({ QRCodeSVG: (props: Record<string, unknown>) =
 jest.mock('lucide-react', () => ({
   Smartphone: () => <svg data-testid="smartphone-icon" />,
   Download: () => <svg data-testid="download-icon" />,
+  Globe: () => <svg data-testid="globe-icon" />,
   Printer: () => <svg data-testid="printer-icon" />,
   Share2: () => <svg data-testid="share-icon" />,
 }));

@@ -3,7 +3,7 @@
 import { useRef } from 'react';
 import Image from 'next/image';
 import { QRCodeSVG } from 'qrcode.react';
-import { Download, Printer, Share2 } from 'lucide-react';
+import { Download, Globe, Printer, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 
@@ -14,7 +14,9 @@ import {
   PUNTOS_CLUB_APK_URL,
   PUNTOS_CLUB_CAJA_APK_URL,
   PUNTOS_CLUB_CAJA_LOGO,
+  PUNTOS_CLUB_CAJA_WEB_URL,
   PUNTOS_CLUB_LOGO,
+  PUNTOS_CLUB_WEB_URL,
 } from '@/lib/mobile-apps';
 
 const apps = [
@@ -22,6 +24,7 @@ const apps = [
     titleKey: 'puntosClubTitle',
     descriptionKey: 'puntosClubDescription',
     url: PUNTOS_CLUB_APK_URL,
+    webUrl: PUNTOS_CLUB_WEB_URL,
     logo: PUNTOS_CLUB_LOGO,
     fileName: 'qr-puntosclub.png',
   },
@@ -29,6 +32,7 @@ const apps = [
     titleKey: 'puntosClubCajaTitle',
     descriptionKey: 'puntosClubCajaDescription',
     url: PUNTOS_CLUB_CAJA_APK_URL,
+    webUrl: PUNTOS_CLUB_CAJA_WEB_URL,
     logo: PUNTOS_CLUB_CAJA_LOGO,
     fileName: 'qr-puntosclub-caja.png',
   },
@@ -189,6 +193,12 @@ function AppQRCard({ app }: { app: (typeof apps)[number] }) {
           <a href={app.url} target="_blank" rel="noopener noreferrer">
             <Download className="mr-2 size-4" />
             {t('download')}
+          </a>
+        </Button>
+        <Button asChild variant="outline" className="w-full">
+          <a href={app.webUrl} target="_blank" rel="noopener noreferrer">
+            <Globe className="mr-2 size-4" />
+            {t('openWeb')}
           </a>
         </Button>
       </CardContent>

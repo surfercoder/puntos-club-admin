@@ -95,6 +95,12 @@ describe('AppDownloadQRCards', () => {
     expect(screen.getAllByRole('button')).toHaveLength(6);
   });
 
+  it('links each app to its web version', () => {
+    render(<AppDownloadQRCards />);
+    const hrefs = screen.getAllByRole('link', { name: 'openWeb' }).map((a) => a.getAttribute('href'));
+    expect(hrefs).toEqual(['https://puntos-club-web.vercel.app', 'https://puntos-club-caja-web.vercel.app']);
+  });
+
   it('downloads the QR image on download click', async () => {
     render(<AppDownloadQRCards />);
     await act(async () => {

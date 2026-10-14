@@ -23,7 +23,8 @@
     "puntosClubCajaDescription": "Mobile app for cashiers.",
     "scanToDownload": "Scan this QR code to download",
     "download": "Download APK",
-    "androidOnly": "These apps are currently available for Android only. iOS support coming soon."
+    "androidOnly": "These apps are currently available for Android only. iOS support coming soon.",
+    "openWeb": "Use in the browser"
   },
   "Common": {
     "cancel": "Cancel",
@@ -2662,6 +2663,10 @@
     "plans": {
       "title": "Plans",
       "subtitle": "Start for free and grow at your own pace. Pick a plan and set up your club in minutes."
+    },
+    "apps": {
+      "title": "Our apps",
+      "subtitle": "Your customers earn and redeem points from their phones; your cashiers register sales. Get the Android app or use it in the browser, no install needed."
     }
   },
   "LanguageSwitcher": {
