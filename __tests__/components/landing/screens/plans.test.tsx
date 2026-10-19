@@ -22,10 +22,9 @@ describe("Plans", () => {
     (useRouter as jest.Mock).mockReturnValue({ push });
   });
 
-  it("renders the section title and subtitle", () => {
+  it("renders the section title", () => {
     render(<Plans limits={limits} />);
     expect(screen.getByText("title")).toBeInTheDocument();
-    expect(screen.getByText("subtitle")).toBeInTheDocument();
   });
 
   it("stores the chosen plan for onboarding step 3 and navigates there", () => {

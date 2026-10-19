@@ -2074,10 +2074,8 @@
       "proPlan": "Plan Pro",
       "enterprisePlan": "Plan Enterprise",
       "freePriceLabel": "Gratis",
-      "customPriceLabel": "A medida",
-      "trialPriceNote": "por 3 meses",
+      "trialPriceNote": "para siempre",
       "paidPriceNote": "por mes",
-      "popularBadge": "Popular",
       "unlimited": "Sin límite",
       "features": {
         "beneficiaries": "Beneficiarios",
@@ -2088,9 +2086,9 @@
         "collaborators": "Colaboradores",
         "beneficiary_map": "Mapa de beneficiarios",
         "exports": "Exportaciones",
-        "private_club": "Club privado",
+        "private_club": "Opción de club privado",
         "virtual_cashier": "Cajero virtual",
-        "campaigns": "Campañas",
+        "campaigns": "Campañas promocionales",
         "api": "API",
         "webhooks": "Webhooks",
         "sso": "SSO",
@@ -2115,7 +2113,17 @@
       "payerEmailHelp": "Puede ser distinto a tu email de registro. Debe coincidir con la cuenta de Mercado Pago con la que vas a pagar (por ejemplo, la de tesorería o pagos).",
       "payerEmailPlaceholder": "pagos@tuempresa.com",
       "payerEmailInvalid": "Ingresá un email de pago válido",
-      "enterpriseOnboardingNote": "El plan Enterprise lo activamos con vos: creá tu cuenta en Trial y nuestro equipo te contacta para armarlo a medida."
+      "plansTitle": "Elegí el plan ideal",
+      "plansTitleHighlight": "para tu negocio",
+      "plansSubtitle": "Todas las herramientas que necesitás para crear tu club de puntos, fidelizar a tus clientes y hacer crecer tu negocio.",
+      "discountBadge": "50% OFF",
+      "discountNote": "por 12 meses",
+      "cta": {
+        "trial": "Comenzar gratis",
+        "advance": "Quiero mi plan Advance",
+        "pro": "Quiero mi plan Pro"
+      },
+      "notificationsNote": "Las notificaciones incluidas se otorgan por única vez y no se renuevan mensualmente. Próximamente podrás adquirir paquetes adicionales."
     },
     "step4": {
       "categoryName": "Nombre de la categoría",
@@ -2661,8 +2669,7 @@
       "copyright": "©2019-{year} Puntos Club"
     },
     "plans": {
-      "title": "Planes",
-      "subtitle": "Empezá gratis y crecé a tu ritmo. Elegí un plan y armá tu club en minutos."
+      "title": "Planes"
     },
     "apps": {
       "title": "Nuestras apps",

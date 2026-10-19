@@ -122,10 +122,34 @@ export const PLAN_DISPLAY_NAMES: Record<PlanType, string> = {
 /** Precio mensual en ARS. null = se vende por contacto comercial. */
 export const PLAN_PRICES: Record<PlanType, number | null> = {
   trial:      0,
-  advance:    3999,
-  pro:        14990,
+  advance:    12499,
+  pro:        31200,
   enterprise: null,
 };
+
+/** Precio de lista tachado en las tarjetas. Sólo se muestra: MP cobra PLAN_PRICES. */
+export const PLAN_LIST_PRICES: Partial<Record<PlanType, number>> = {
+  advance: 24999,
+  pro:     62400,
+};
+
+/** Planes que muestran las tarjetas. Enterprise se vende por contacto y no aparece. */
+export const PLAN_CARD_ORDER = ['trial', 'advance', 'pro'] as const satisfies readonly PlanType[];
+export type PlanCardType = (typeof PLAN_CARD_ORDER)[number];
+
+/** Filas de las tarjetas, en el orden curado del diseño */
+export const PLAN_CARD_FEATURES = [
+  'beneficiaries',
+  'redeemable_products',
+  'push_notifications_monthly',
+  'cashiers',
+  'branches',
+  'collaborators',
+  'beneficiary_map',
+  'private_club',
+  'campaigns',
+] as const satisfies readonly PlanFeatureKey[];
+export type PlanCardFeature = (typeof PLAN_CARD_FEATURES)[number];
 
 /** Planes que se pagan con Mercado Pago (los que tienen precio > 0) */
 export function isPaidPlan(plan: PlanType): boolean {
@@ -140,9 +164,9 @@ export function isContactSalesPlan(plan: PlanType): boolean {
 
 /** Color de marca por plan. Las clases de Tailwind viven en los mapas de la UI. */
 export const PLAN_COLORS: Record<PlanType, string> = {
-  trial:      'green',
-  advance:    'blue',
-  pro:        'pink',
+  trial:      'blue',
+  advance:    'orange',
+  pro:        'green',
   enterprise: 'violet',
 };
 
@@ -153,6 +177,7 @@ export function planColor(plan: PlanType): string {
 export const planButtonColorMap: Record<string, string> = {
   green:  'bg-brand-green hover:bg-brand-green/90 text-white',
   blue:   'bg-brand-blue hover:bg-brand-blue/90 text-white',
+  orange: 'bg-brand-orange hover:bg-brand-orange/90 text-white',
   pink:   'bg-brand-pink hover:bg-brand-pink/90 text-white',
   violet: 'bg-brand-violet hover:bg-brand-violet/90 text-white',
 };

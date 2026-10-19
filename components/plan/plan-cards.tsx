@@ -1,54 +1,93 @@
 'use client';
 
-import { Building2, Check, Rocket, Star, Zap } from 'lucide-react';
+import {
+  ArrowRight,
+  Bell,
+  Check,
+  Crown,
+  Gift,
+  Lock,
+  MapPinned,
+  Megaphone,
+  Star,
+  Store,
+  Users,
+  UsersRound,
+  Wallet,
+  Zap,
+} from 'lucide-react';
 import { useLocale, useTranslations } from 'next-intl';
 
+import { Clubi } from '@/components/dashboard/home/clubi';
 import { cn } from '@/lib/utils';
 import {
-  PLAN_FEATURE_ORDER,
-  PLAN_ORDER,
+  PLAN_CARD_FEATURES,
+  PLAN_CARD_ORDER,
+  PLAN_LIST_PRICES,
   PLAN_PRICES,
   UNLIMITED,
   isQuotaFeature,
-  planColor,
+  type PlanCardFeature,
+  type PlanCardType,
 } from '@/lib/plans/config';
 import type { PlanFeatureKey, PlanType } from '@/types/plan';
 
-/** Icono por plan — la única parte que no sale de la base. */
-const PLAN_ICONS: Record<PlanType, React.ComponentType<{ className?: string }>> = {
-  trial:      Star,
-  advance:    Zap,
-  pro:        Rocket,
-  enterprise: Building2,
+type Icon = React.ComponentType<{ className?: string }>;
+
+const FEATURE_ICONS: Record<PlanCardFeature, Icon> = {
+  beneficiaries:              Users,
+  redeemable_products:        Gift,
+  push_notifications_monthly: Bell,
+  cashiers:                   Wallet,
+  branches:                   Store,
+  collaborators:              UsersRound,
+  beneficiary_map:            MapPinned,
+  private_club:               Lock,
+  campaigns:                  Megaphone,
 };
 
-const selectedMap: Record<string, string> = {
-  green:  'border-brand-green bg-brand-green/10',
-  blue:   'border-brand-blue bg-brand-blue/10',
-  pink:   'border-brand-pink bg-brand-pink/10',
-  violet: 'border-brand-violet bg-brand-violet/10',
+/** Estilo por plan — la única parte que no sale de la base. */
+const PLAN_STYLES: Record<PlanCardType, {
+  icon: Icon;
+  card: string;
+  iconBox: string;
+  price: string;
+  badge: string;
+  cta: string;
+  ring: string;
+}> = {
+  trial: {
+    icon: Star,
+    card: 'bg-brand-blue/5 border-brand-blue/20',
+    iconBox: 'bg-brand-blue/15 text-brand-blue',
+    price: 'text-foreground',
+    badge: 'bg-brand-blue text-white',
+    cta: 'border-2 border-brand-blue bg-background text-brand-blue hover:bg-brand-blue/10',
+    ring: 'ring-brand-blue',
+  },
+  advance: {
+    icon: Zap,
+    card: 'bg-brand-orange/5 border-brand-orange/20',
+    iconBox: 'bg-brand-orange/15 text-brand-orange',
+    price: 'text-brand-orange',
+    badge: 'bg-brand-orange text-white',
+    cta: 'bg-brand-orange text-white hover:bg-brand-orange/90',
+    ring: 'ring-brand-orange',
+  },
+  pro: {
+    icon: Crown,
+    card: 'bg-brand-green/5 border-brand-green/20',
+    iconBox: 'bg-brand-green/15 text-brand-green',
+    price: 'text-brand-green',
+    badge: 'bg-brand-green text-white',
+    cta: 'bg-brand-green text-white hover:bg-brand-green/90',
+    ring: 'ring-brand-green',
+  },
 };
 
-const iconColorMap: Record<string, string> = {
-  green:  'text-brand-green bg-brand-green/15',
-  blue:   'text-brand-blue bg-brand-blue/15',
-  pink:   'text-brand-pink bg-brand-pink/15',
-  violet: 'text-brand-violet bg-brand-violet/15',
-};
-
-const badgeColorMap: Record<string, string> = {
-  green:  'bg-brand-green/15 text-brand-green',
-  blue:   'bg-brand-blue/15 text-brand-blue',
-  pink:   'bg-brand-pink/15 text-brand-pink',
-  violet: 'bg-brand-violet/15 text-brand-violet',
-};
-
-const currentPlanBadgeMap: Record<string, string> = {
-  green:  'bg-brand-green text-white',
-  blue:   'bg-brand-blue text-white',
-  pink:   'bg-brand-pink text-white',
-  violet: 'bg-brand-violet text-white',
-};
+// Cabecera y filas con alto fijo: la columna de etiquetas se alinea con las tarjetas.
+const HEADER_H = 'lg:h-40';
+const ROW = 'flex h-11 items-center border-b border-border/60 px-3 last:border-0';
 
 export type PlanLimitsByPlan = Record<PlanType, Record<PlanFeatureKey, number>>;
 
@@ -65,104 +104,135 @@ function FeatureValue({
 
   if (!isQuotaFeature(feature)) {
     return value && value > 0 ? (
-      <Check className="size-3.5 text-brand-green" />
+      <Check className="size-5 text-brand-green" strokeWidth={3} />
     ) : (
-      <span className="text-muted-foreground text-[10px]">-</span>
+      <span className="text-muted-foreground">-</span>
     );
   }
+  // El español no agrupa 4 cifras por defecto; el diseño pide "1.000".
   return (
-    <span className="text-[11px] font-medium">
-      {value === UNLIMITED ? unlimitedLabel : (value ?? 0).toLocaleString(locale)}
+    <span className="font-semibold">
+      {value === UNLIMITED ? unlimitedLabel : (value ?? 0).toLocaleString(locale, { useGrouping: 'always' })}
     </span>
   );
 }
 
+function FeatureLabel({ feature }: { feature: PlanCardFeature }) {
+  const t = useTranslations('Onboarding.step3');
+  const Icon = FEATURE_ICONS[feature];
+  return (
+    <span className="flex items-center gap-3 text-sm text-muted-foreground">
+      <Icon className="size-4 shrink-0 text-foreground" />
+      {t(`features.${feature}`)}
+    </span>
+  );
+}
+
+const formatArs = (n: number, locale: string) => `$${n.toLocaleString(locale, { useGrouping: 'always' })}`;
+
 interface PlanCardProps {
-  plan: PlanType;
+  plan: PlanCardType;
   limits: Record<PlanFeatureKey, number> | undefined;
   isSelected: boolean;
   isCurrent: boolean;
   onSelect: () => void;
-  /** Etiqueta "Popular" — se muestra en el plan que la reciba */
-  popular?: boolean;
 }
 
-function PlanCard({ plan, limits, isSelected, isCurrent, onSelect, popular }: PlanCardProps) {
+function PlanCard({ plan, limits, isSelected, isCurrent, onSelect }: PlanCardProps) {
   const t = useTranslations('Onboarding.step3');
   const tSettings = useTranslations('Dashboard.planSettings');
-  const Icon = PLAN_ICONS[plan];
-  const color = planColor(plan);
-  const price = PLAN_PRICES[plan];
+  const locale = useLocale();
+  const style = PLAN_STYLES[plan];
+  const Icon = style.icon;
+  const price = PLAN_PRICES[plan] as number;
+  const listPrice = PLAN_LIST_PRICES[plan];
 
-  const priceLabel =
-    price === null ? t('customPriceLabel') : price === 0 ? t('freePriceLabel') : `$${price.toLocaleString('es-AR')}`;
-  const priceNote =
-    price === null ? undefined : price === 0 ? t('trialPriceNote') : t('paidPriceNote');
+  const ctaLabel = isCurrent
+    ? tSettings('currentPlan')
+    : isSelected
+      ? t('selectedPlan')
+      : t(`cta.${plan}`);
 
   return (
-    <button
-      type="button"
-      aria-pressed={isSelected}
-      onClick={onSelect}
+    <div
       className={cn(
-        'relative flex flex-col rounded-lg border-2 p-3 text-left transition-all focus:outline-none focus:ring-2 focus:ring-offset-1 cursor-pointer',
-        isSelected ? selectedMap[color] : 'border-border hover:border-muted-foreground/30'
+        'relative flex flex-col rounded-2xl border p-3 transition-shadow',
+        style.card,
+        isSelected && cn('ring-2 ring-offset-2 ring-offset-background', style.ring)
       )}
     >
+      {/* Clubi saluda asomado sobre Pro, como en el diseño. Sólo con la grilla en fila. */}
+      {plan === 'pro' && (
+        <div className="pointer-events-none absolute -top-[92px] left-4 hidden h-[92px] w-[140px] overflow-hidden lg:block">
+          <Clubi className="w-full" />
+        </div>
+      )}
       {isCurrent && (
         <span
           className={cn(
-            'absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-0.5 text-[10px] font-semibold',
-            currentPlanBadgeMap[color]
+            'absolute -top-2.5 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-2.5 py-0.5 text-[10px] font-semibold',
+            style.badge
           )}
         >
           {tSettings('currentPlan')}
         </span>
       )}
-      {!isCurrent && popular && (
-        <span
-          className={cn(
-            'absolute -top-2 left-1/2 -translate-x-1/2 rounded-full px-2.5 py-0.5 text-[10px] font-semibold',
-            badgeColorMap[color]
-          )}
-        >
-          {t('popularBadge')}
-        </span>
-      )}
 
-      <div className="flex items-center gap-2 mb-2">
-        <div className={cn('rounded-md p-1.5', iconColorMap[color])}>
-          <Icon className="size-4" />
-        </div>
-        <div>
-          <p className="text-sm font-semibold text-foreground leading-tight">{t(`${plan}Plan`)}</p>
-          <div className="flex items-baseline gap-1">
-            <span className="text-lg font-bold text-foreground">{priceLabel}</span>
-            {priceNote && <span className="text-[10px] text-muted-foreground">{priceNote}</span>}
+      <div className={cn('flex flex-col gap-2 p-2', HEADER_H)}>
+        <div className="flex items-start gap-3">
+          <div className={cn('flex size-12 shrink-0 items-center justify-center rounded-full', style.iconBox)}>
+            <Icon className="size-6" />
           </div>
+          <p className="whitespace-nowrap pt-3 text-base font-bold leading-tight text-foreground">
+            {t(`${plan}Plan`)}
+          </p>
+          {/* Cuelga del borde superior para no robarle ancho al nombre del plan. */}
+          {listPrice && (
+            <div className={cn('absolute -top-4 right-3 rounded-lg px-2 py-1 text-center leading-none shadow-sm', style.badge)}>
+              <p className="text-sm font-extrabold">{t('discountBadge')}</p>
+              <p className="mt-0.5 text-[9px] font-medium">{t('discountNote')}</p>
+            </div>
+          )}
+        </div>
+        <div className="text-center">
+          {listPrice && (
+            <p className="text-sm font-semibold text-muted-foreground line-through">{formatArs(listPrice, locale)}</p>
+          )}
+          <p className={cn('text-3xl font-extrabold leading-tight', style.price)}>
+            {price === 0 ? t('freePriceLabel') : formatArs(price, locale)}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {price === 0 ? t('trialPriceNote') : t('paidPriceNote')}
+          </p>
         </div>
       </div>
 
-      <ul className="space-y-1 flex-1">
-        {PLAN_FEATURE_ORDER.map((feature) => (
-          <li key={feature} className="flex items-center justify-between gap-1">
-            <span className="text-[11px] text-muted-foreground">{t(`features.${feature}`)}</span>
-            <FeatureValue
-              feature={feature}
-              value={limits?.[feature]}
-              unlimitedLabel={t('unlimited')}
-            />
+      <ul className="flex-1 rounded-xl bg-background/70">
+        {PLAN_CARD_FEATURES.map((feature) => (
+          <li key={feature} className={cn(ROW, 'justify-between gap-2 lg:justify-center')}>
+            <span className="lg:sr-only">
+              <FeatureLabel feature={feature} />
+            </span>
+            <FeatureValue feature={feature} value={limits?.[feature]} unlimitedLabel={t('unlimited')} />
           </li>
         ))}
       </ul>
 
-      {isSelected && (
-        <div className="mt-2 flex items-center gap-1.5 text-[11px] font-medium text-brand-green">
-          <Check className="size-3.5" />
-          {isCurrent ? tSettings('currentPlan') : t('selectedPlan')}
-        </div>
-      )}
-    </button>
+      <button
+        type="button"
+        aria-pressed={isSelected}
+        onClick={onSelect}
+        className={cn(
+          'mt-3 flex h-12 cursor-pointer items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+          style.cta,
+          style.ring
+        )}
+      >
+        {isSelected && <Check className="size-4" />}
+        {ctaLabel}
+        {!isSelected && <ArrowRight className="size-4" />}
+      </button>
+    </div>
   );
 }
 
@@ -174,23 +244,50 @@ interface PlanCardsProps {
 }
 
 /**
- * Las cuatro tarjetas de planes. Valores y features salen de `plan_limits`:
- * cambiar un plan es cambiar la base, no este archivo.
+ * La grilla de planes del diseño curado (Trial, Advance, Pro). Los valores salen
+ * de `plan_limits`; los precios, de PLAN_PRICES / PLAN_LIST_PRICES.
  */
 export function PlanCards({ limits, selected, currentPlan = null, onSelect }: PlanCardsProps) {
+  const t = useTranslations('Onboarding.step3');
+
+  const heading = (
+    <div>
+      <h3 className="text-2xl font-extrabold leading-tight text-foreground xl:text-3xl">
+        {t('plansTitle')} <span className="text-brand-pink">{t('plansTitleHighlight')}</span>
+      </h3>
+      <p className="mt-2 text-sm text-muted-foreground">{t('plansSubtitle')}</p>
+    </div>
+  );
+
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
-      {PLAN_ORDER.map((plan) => (
-        <PlanCard
-          key={plan}
-          plan={plan}
-          limits={limits?.[plan]}
-          isSelected={selected === plan}
-          isCurrent={currentPlan === plan}
-          onSelect={() => onSelect(plan)}
-          popular={plan === 'advance'}
-        />
-      ))}
+    <div className="space-y-4">
+      <div className="lg:hidden">{heading}</div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[1.15fr_repeat(3,1fr)] lg:gap-3 lg:pt-20">
+        <div className="hidden lg:flex lg:flex-col lg:py-3">
+          <div className={cn('flex flex-col justify-end pb-3', HEADER_H)}>{heading}</div>
+          <ul className="rounded-xl border border-border/60 bg-background/70">
+            {PLAN_CARD_FEATURES.map((feature) => (
+              <li key={feature} className={ROW}>
+                <FeatureLabel feature={feature} />
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {PLAN_CARD_ORDER.map((plan) => (
+          <PlanCard
+            key={plan}
+            plan={plan}
+            limits={limits?.[plan]}
+            isSelected={selected === plan}
+            isCurrent={currentPlan === plan}
+            onSelect={() => onSelect(plan)}
+          />
+        ))}
+      </div>
+
+      <p className="text-center text-xs text-muted-foreground">{t('notificationsNote')}</p>
     </div>
   );
 }

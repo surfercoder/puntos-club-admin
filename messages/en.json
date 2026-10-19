@@ -2074,10 +2074,8 @@
       "proPlan": "Pro Plan",
       "enterprisePlan": "Enterprise Plan",
       "freePriceLabel": "Free",
-      "customPriceLabel": "Custom",
-      "trialPriceNote": "for 3 months",
+      "trialPriceNote": "forever",
       "paidPriceNote": "per month",
-      "popularBadge": "Popular",
       "unlimited": "Unlimited",
       "features": {
         "beneficiaries": "Beneficiaries",
@@ -2088,9 +2086,9 @@
         "collaborators": "Collaborators",
         "beneficiary_map": "Beneficiary map",
         "exports": "Exports",
-        "private_club": "Private club",
+        "private_club": "Private club option",
         "virtual_cashier": "Virtual cashier",
-        "campaigns": "Campaigns",
+        "campaigns": "Promotional campaigns",
         "api": "API",
         "webhooks": "Webhooks",
         "sso": "SSO",
@@ -2115,7 +2113,17 @@
       "payerEmailHelp": "It can be different from your registration email. It must match the Mercado Pago account you'll pay with (e.g. your treasury or billing account).",
       "payerEmailPlaceholder": "billing@yourcompany.com",
       "payerEmailInvalid": "Enter a valid payment email",
-      "enterpriseOnboardingNote": "Enterprise is set up with you: create your account on Trial and our team will reach out to tailor it."
+      "plansTitle": "Choose the right plan",
+      "plansTitleHighlight": "for your business",
+      "plansSubtitle": "Every tool you need to build your points club, keep your customers coming back and grow your business.",
+      "discountBadge": "50% OFF",
+      "discountNote": "for 12 months",
+      "cta": {
+        "trial": "Start for free",
+        "advance": "Get the Advance plan",
+        "pro": "Get the Pro plan"
+      },
+      "notificationsNote": "Included notifications are granted once and do not renew monthly. Additional packs will be available soon."
     },
     "step4": {
       "categoryName": "Category name",
@@ -2661,8 +2669,7 @@
       "copyright": "©2019-{year} Puntos Club"
     },
     "plans": {
-      "title": "Plans",
-      "subtitle": "Start for free and grow at your own pace. Pick a plan and set up your club in minutes."
+      "title": "Plans"
     },
     "apps": {
       "title": "Our apps",

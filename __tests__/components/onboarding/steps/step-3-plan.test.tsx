@@ -33,8 +33,8 @@ const renderStep = (props: Partial<React.ComponentProps<typeof Step3Plan>> = {})
   return { onNext, onBack };
 };
 
-const selectPlan = (name: 'trialPlan' | 'advancePlan' | 'proPlan' | 'enterprisePlan') =>
-  fireEvent.click(screen.getByText(name).closest('button') as HTMLElement);
+const selectPlan = (plan: 'trial' | 'advance' | 'pro') =>
+  fireEvent.click(screen.getByRole('button', { name: `cta.${plan}` }));
 
 const continueButton = () => screen.getByRole('button', { name: /continueWith/ });
 
@@ -57,31 +57,25 @@ describe('Step3Plan', () => {
     consoleError.mockRestore();
   });
 
-  it('renders the four plans with their prices', () => {
+  it('renders the three plans of the curated design with their prices', () => {
     renderStep();
 
     expect(screen.getByText('trialPlan')).toBeInTheDocument();
     expect(screen.getByText('advancePlan')).toBeInTheDocument();
     expect(screen.getByText('proPlan')).toBeInTheDocument();
-    expect(screen.getByText('enterprisePlan')).toBeInTheDocument();
-    expect(screen.getByText('$3.999')).toBeInTheDocument();
-    expect(screen.getByText('$14.990')).toBeInTheDocument();
-    // Enterprise no tiene precio de lista
-    expect(screen.getByText('customPriceLabel')).toBeInTheDocument();
-    expect(screen.getByText('popularBadge')).toBeInTheDocument();
+    // Enterprise se vende por contacto: no aparece en las tarjetas.
+    expect(screen.queryByText('enterprisePlan')).not.toBeInTheDocument();
+    expect(screen.getByText('$12.499')).toBeInTheDocument();
+    expect(screen.getByText('$31.200')).toBeInTheDocument();
+    // Precio de lista tachado y nota de notificaciones
+    expect(screen.getByText('$24.999')).toBeInTheDocument();
+    expect(screen.getByText('$62.400')).toBeInTheDocument();
+    expect(screen.getByText('notificationsNote')).toBeInTheDocument();
   });
 
-  it('sends Enterprise to sales: the account starts on trial', () => {
-    const { onNext } = renderStep();
-
-    selectPlan('enterprisePlan');
-    expect(screen.getByText('enterpriseOnboardingNote')).toBeInTheDocument();
-    expect(screen.queryByLabelText('payerEmailLabel')).not.toBeInTheDocument();
+  it('ignores a stored enterprise id and falls back to trial', () => {
+    renderStep({ initialPlan: 'enterprise' });
     expect(continueButton()).toHaveTextContent('trialPlan');
-
-    fireEvent.click(continueButton());
-    expect(onNext).toHaveBeenCalledWith('trial');
-    expect(global.fetch).not.toHaveBeenCalled();
   });
 
   it('shows the unlimited label instead of a number', async () => {
@@ -125,7 +119,7 @@ describe('Step3Plan', () => {
     renderStep();
     expect(screen.queryByLabelText('payerEmailLabel')).not.toBeInTheDocument();
 
-    selectPlan('advancePlan');
+    selectPlan('advance');
     expect(screen.getByLabelText('payerEmailLabel')).toBeInTheDocument();
     expect(screen.getByText('securePayment')).toBeInTheDocument();
   });

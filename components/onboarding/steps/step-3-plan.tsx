@@ -11,8 +11,7 @@ import { toast } from 'sonner';
 
 import { PlanCards, type PlanLimitsByPlan } from '@/components/plan/plan-cards';
 import {
-  PLAN_ORDER,
-  isContactSalesPlan,
+  PLAN_CARD_ORDER,
   isPaidPlan,
   planButtonColorMap,
   planColor,
@@ -34,7 +33,7 @@ export function Step3Plan({ onNext, onBack, initialPlan = 'trial', userEmail = '
   const tCommon = useTranslations('Common');
   // initialPlan viene de localStorage: puede traer un id de una versión vieja.
   const [selected, setSelected] = useState<PlanType>(
-    () => PLAN_ORDER.find((plan) => plan === initialPlan) ?? PLAN_ORDER[0]
+    () => PLAN_CARD_ORDER.find((plan) => plan === initialPlan) ?? PLAN_CARD_ORDER[0]
   );
   const [loading, setLoading] = useState(false);
   const [payerEmail, setPayerEmail] = useState<string>(() => userEmail);
@@ -47,14 +46,8 @@ export function Step3Plan({ onNext, onBack, initialPlan = 'trial', userEmail = '
   }, []);
 
   const isPaid = isPaidPlan(selected);
-  // Enterprise no se autogestiona: la cuenta arranca en Trial y sigue comercial.
-  const isContactSales = isContactSalesPlan(selected);
 
   const handleContinue = async () => {
-    if (isContactSales) {
-      onNext('trial');
-      return;
-    }
     if (!isPaid) {
       onNext(selected);
       return;
@@ -102,12 +95,6 @@ export function Step3Plan({ onNext, onBack, initialPlan = 'trial', userEmail = '
     <div className="space-y-6">
       <PlanCards limits={planLimits} selected={selected} onSelect={setSelected} />
 
-      {isContactSales && (
-        <p className="mx-auto max-w-md rounded-lg bg-brand-violet/10 p-3 text-center text-xs text-muted-foreground">
-          {t('enterpriseOnboardingNote')}
-        </p>
-      )}
-
       {isPaid && (
         <div className="mx-auto max-w-md space-y-1.5">
           <Label htmlFor="payer-email">{t('payerEmailLabel')}</Label>
@@ -146,7 +133,7 @@ export function Step3Plan({ onNext, onBack, initialPlan = 'trial', userEmail = '
               {t('redirectingToMP')}
             </>
           ) : (
-            t('continueWith', { plan: t(`${isContactSales ? 'trial' : selected}Plan`) })
+            t('continueWith', { plan: t(`${selected}Plan`) })
           )}
         </Button>
       </div>

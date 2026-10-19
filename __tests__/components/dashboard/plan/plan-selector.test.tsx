@@ -107,23 +107,8 @@ describe('PlanSelector', () => {
     expect(screen.getByText('trialPlan')).toBeInTheDocument();
     expect(screen.getByText('advancePlan')).toBeInTheDocument();
     expect(screen.getByText('proPlan')).toBeInTheDocument();
-    expect(screen.getByText('enterprisePlan')).toBeInTheDocument();
-  });
-
-  it('offers contact sales instead of checkout for enterprise', async () => {
-    (usePlanUsage as jest.Mock).mockReturnValue({
-      summary: mockSummary,
-      isLoading: false,
-    });
-
-    await act(async () => { render(<PlanSelector />); });
-    fireEvent.click(screen.getByText('enterprisePlan'));
-
-    const contact = screen.getByText('contactSales').closest('a') as HTMLAnchorElement;
-    expect(contact).toHaveAttribute('href', expect.stringContaining('mailto:'));
-    // Enterprise no pasa por Mercado Pago: ni email de pago ni botón de upgrade
-    expect(screen.queryByLabelText('payerEmailLabel')).not.toBeInTheDocument();
-    expect(screen.queryByText(/upgradeTo/)).not.toBeInTheDocument();
+    // Enterprise se vende por contacto: no tiene tarjeta.
+    expect(screen.queryByText('enterprisePlan')).not.toBeInTheDocument();
   });
 
   it('routes an enterprise org back through sales to change plan', async () => {
@@ -133,7 +118,7 @@ describe('PlanSelector', () => {
     });
 
     await act(async () => { render(<PlanSelector />); });
-    fireEvent.click(screen.getByText('proPlan'));
+    fireEvent.click(screen.getByRole('button', { name: 'cta.pro' }));
 
     expect(screen.getByText('contactSales')).toBeInTheDocument();
     expect(screen.queryByText(/upgradeTo/)).not.toBeInTheDocument();
@@ -160,7 +145,7 @@ describe('PlanSelector', () => {
     await act(async () => { render(<PlanSelector />); });
 
     // Click the advance plan
-    fireEvent.click(screen.getByText('advancePlan'));
+    fireEvent.click(screen.getByRole('button', { name: 'cta.advance' }));
 
     // Should show upgrade button for the newly selected plan (upgrade from trial to advance)
     expect(screen.getByText(/upgradeTo/)).toBeInTheDocument();
@@ -185,7 +170,7 @@ describe('PlanSelector', () => {
     await act(async () => { render(<PlanSelector />); });
 
     // Select advance plan (upgrade from trial)
-    fireEvent.click(screen.getByText('advancePlan'));
+    fireEvent.click(screen.getByRole('button', { name: 'cta.advance' }));
 
     expect(screen.getByText(/upgradeTo/)).toBeInTheDocument();
   });
@@ -198,7 +183,7 @@ describe('PlanSelector', () => {
 
     await act(async () => { render(<PlanSelector />); });
 
-    const advanceCard = screen.getByText('advancePlan').closest('button');
+    const advanceCard = screen.getByRole('button', { name: 'cta.advance' });
     expect(advanceCard).not.toBeNull();
     expect(advanceCard?.getAttribute('type')).toBe('button');
   });
@@ -212,7 +197,7 @@ describe('PlanSelector', () => {
     await act(async () => { render(<PlanSelector />); });
 
     // Select trial plan (downgrade from advance)
-    fireEvent.click(screen.getByText('trialPlan'));
+    fireEvent.click(screen.getByRole('button', { name: 'cta.trial' }));
 
     expect(screen.getByText('cancelSubscription')).toBeInTheDocument();
   });
@@ -254,7 +239,7 @@ describe('PlanSelector', () => {
     await act(async () => { render(<PlanSelector />); });
 
     // Select advance plan (upgrade from trial)
-    fireEvent.click(screen.getByText('advancePlan'));
+    fireEvent.click(screen.getByRole('button', { name: 'cta.advance' }));
 
     const upgradeButton = screen.getByText(/upgradeTo/);
     await act(async () => {
@@ -281,7 +266,7 @@ describe('PlanSelector', () => {
 
     await act(async () => { render(<PlanSelector />); });
 
-    fireEvent.click(screen.getByText('advancePlan'));
+    fireEvent.click(screen.getByRole('button', { name: 'cta.advance' }));
 
     const upgradeButton = screen.getByText(/upgradeTo/);
     await act(async () => {
@@ -306,7 +291,7 @@ describe('PlanSelector', () => {
 
     await act(async () => { render(<PlanSelector />); });
 
-    fireEvent.click(screen.getByText('advancePlan'));
+    fireEvent.click(screen.getByRole('button', { name: 'cta.advance' }));
 
     const upgradeButton = screen.getByText(/upgradeTo/);
     await act(async () => {
@@ -328,7 +313,7 @@ describe('PlanSelector', () => {
 
     await act(async () => { render(<PlanSelector />); });
 
-    fireEvent.click(screen.getByText('advancePlan'));
+    fireEvent.click(screen.getByRole('button', { name: 'cta.advance' }));
 
     const upgradeButton = screen.getByText(/upgradeTo/);
     await act(async () => {
@@ -350,7 +335,7 @@ describe('PlanSelector', () => {
 
     await act(async () => { render(<PlanSelector />); });
 
-    fireEvent.click(screen.getByText('advancePlan'));
+    fireEvent.click(screen.getByRole('button', { name: 'cta.advance' }));
 
     const upgradeButton = screen.getByText(/upgradeTo/);
     await act(async () => {
@@ -371,7 +356,7 @@ describe('PlanSelector', () => {
     await act(async () => { render(<PlanSelector />); });
 
     // Select trial plan (downgrade from pro) - trial is not paid
-    fireEvent.click(screen.getByText('trialPlan'));
+    fireEvent.click(screen.getByRole('button', { name: 'cta.trial' }));
 
     expect(screen.getByText('cancelSubscription')).toBeInTheDocument();
   });
@@ -385,7 +370,7 @@ describe('PlanSelector', () => {
 
     await act(async () => { render(<PlanSelector />); });
 
-    fireEvent.click(screen.getByText('proPlan'));
+    fireEvent.click(screen.getByRole('button', { name: 'cta.pro' }));
 
     expect(screen.getByText(/upgradeTo/)).toBeInTheDocument();
   });
@@ -397,7 +382,7 @@ describe('PlanSelector', () => {
     });
 
     await act(async () => { render(<PlanSelector />); });
-    fireEvent.click(screen.getByText('advancePlan'));
+    fireEvent.click(screen.getByRole('button', { name: 'cta.advance' }));
     expect(screen.getByText(/switchToPlan/)).toBeInTheDocument();
   });
 
@@ -513,7 +498,7 @@ describe('PlanSelector', () => {
 
     await act(async () => { render(<PlanSelector />); });
 
-    fireEvent.click(screen.getByText('advancePlan'));
+    fireEvent.click(screen.getByRole('button', { name: 'cta.advance' }));
 
     const upgradeButton = screen.getByText(/upgradeTo/);
     await act(async () => {
@@ -534,7 +519,7 @@ describe('PlanSelector', () => {
     await act(async () => { render(<PlanSelector />); });
 
     // Select advance plan (upgrade from trial) to reveal the payer email input
-    fireEvent.click(screen.getByText('advancePlan'));
+    fireEvent.click(screen.getByRole('button', { name: 'cta.advance' }));
 
     // Type an invalid email into the payer email field
     fireEvent.change(screen.getByLabelText('payerEmailLabel'), {
@@ -567,7 +552,7 @@ describe('PlanSelector', () => {
     it('opens cancel confirmation dialog when cancel button is clicked', async () => {
       await act(async () => { render(<PlanSelector />); });
 
-      fireEvent.click(screen.getByText('trialPlan'));
+      fireEvent.click(screen.getByRole('button', { name: 'cta.trial' }));
       await act(async () => {
         fireEvent.click(screen.getByText('cancelSubscription'));
       });
@@ -582,7 +567,7 @@ describe('PlanSelector', () => {
 
       await act(async () => { render(<PlanSelector />); });
 
-      fireEvent.click(screen.getByText('trialPlan'));
+      fireEvent.click(screen.getByRole('button', { name: 'cta.trial' }));
       await act(async () => {
         fireEvent.click(screen.getByText('cancelSubscription'));
       });
@@ -604,7 +589,7 @@ describe('PlanSelector', () => {
 
       await act(async () => { render(<PlanSelector />); });
 
-      fireEvent.click(screen.getByText('trialPlan'));
+      fireEvent.click(screen.getByRole('button', { name: 'cta.trial' }));
       await act(async () => {
         fireEvent.click(screen.getByText('cancelSubscription'));
       });
@@ -625,7 +610,7 @@ describe('PlanSelector', () => {
 
       await act(async () => { render(<PlanSelector />); });
 
-      fireEvent.click(screen.getByText('trialPlan'));
+      fireEvent.click(screen.getByRole('button', { name: 'cta.trial' }));
       await act(async () => {
         fireEvent.click(screen.getByText('cancelSubscription'));
       });
@@ -648,7 +633,7 @@ describe('PlanSelector', () => {
 
       await act(async () => { render(<PlanSelector />); });
 
-      fireEvent.click(screen.getByText('trialPlan'));
+      fireEvent.click(screen.getByRole('button', { name: 'cta.trial' }));
       await act(async () => {
         fireEvent.click(screen.getByText('cancelSubscription'));
       });
@@ -667,7 +652,7 @@ describe('PlanSelector', () => {
     it('closes the dialog when onOpenChange is triggered (not loading)', async () => {
       await act(async () => { render(<PlanSelector />); });
 
-      fireEvent.click(screen.getByText('trialPlan'));
+      fireEvent.click(screen.getByRole('button', { name: 'cta.trial' }));
       await act(async () => {
         fireEvent.click(screen.getByText('cancelSubscription'));
       });
@@ -689,7 +674,7 @@ describe('PlanSelector', () => {
 
       await act(async () => { render(<PlanSelector />); });
 
-      fireEvent.click(screen.getByText('trialPlan'));
+      fireEvent.click(screen.getByRole('button', { name: 'cta.trial' }));
       await act(async () => {
         fireEvent.click(screen.getByText('cancelSubscription'));
       });
@@ -709,7 +694,7 @@ describe('PlanSelector', () => {
     it('closes the dialog when the "keep current plan" button is clicked', async () => {
       await act(async () => { render(<PlanSelector />); });
 
-      fireEvent.click(screen.getByText('trialPlan'));
+      fireEvent.click(screen.getByRole('button', { name: 'cta.trial' }));
       await act(async () => {
         fireEvent.click(screen.getByText('cancelSubscription'));
       });
@@ -737,7 +722,7 @@ describe('PlanSelector', () => {
     it('opens switch confirmation dialog when switch button is clicked', async () => {
       await act(async () => { render(<PlanSelector />); });
 
-      fireEvent.click(screen.getByText('advancePlan'));
+      fireEvent.click(screen.getByRole('button', { name: 'cta.advance' }));
       await act(async () => {
         fireEvent.click(screen.getByText(/switchToPlan/));
       });
@@ -758,7 +743,7 @@ describe('PlanSelector', () => {
 
       await act(async () => { render(<PlanSelector />); });
 
-      fireEvent.click(screen.getByText('advancePlan'));
+      fireEvent.click(screen.getByRole('button', { name: 'cta.advance' }));
       await act(async () => {
         fireEvent.click(screen.getByText(/switchToPlan/));
       });
@@ -780,7 +765,7 @@ describe('PlanSelector', () => {
 
       await act(async () => { render(<PlanSelector />); });
 
-      fireEvent.click(screen.getByText('advancePlan'));
+      fireEvent.click(screen.getByRole('button', { name: 'cta.advance' }));
       await act(async () => {
         fireEvent.click(screen.getByText(/switchToPlan/));
       });
@@ -799,7 +784,7 @@ describe('PlanSelector', () => {
 
       await act(async () => { render(<PlanSelector />); });
 
-      fireEvent.click(screen.getByText('advancePlan'));
+      fireEvent.click(screen.getByRole('button', { name: 'cta.advance' }));
       await act(async () => {
         fireEvent.click(screen.getByText(/switchToPlan/));
       });
@@ -818,7 +803,7 @@ describe('PlanSelector', () => {
 
       await act(async () => { render(<PlanSelector />); });
 
-      fireEvent.click(screen.getByText('advancePlan'));
+      fireEvent.click(screen.getByRole('button', { name: 'cta.advance' }));
       await act(async () => {
         fireEvent.click(screen.getByText(/switchToPlan/));
       });
