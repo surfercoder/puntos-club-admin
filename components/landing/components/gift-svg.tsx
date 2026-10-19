@@ -5,14 +5,16 @@ import React from "react";
 export const Gift = ({
   className,
   style,
+  viewBox = "0 0 200 300",
 }: {
   className?: string;
   style?: React.CSSProperties;
+  viewBox?: string;
 }) => {
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 200 300"
+      viewBox={viewBox}
       preserveAspectRatio="xMidYMid meet"
       className={className}
       style={style}

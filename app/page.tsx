@@ -25,7 +25,7 @@ const ORGANIZATION_LD = {
   "@type": "Organization",
   name: "Puntos Club",
   url: SITE_URL,
-  logo: `${SITE_URL}/images/logos/LogoImage.png`,
+  logo: `${SITE_URL}/images/logos/logo-regalo.png`,
   email: "hola@puntosclub.com.ar",
 };
 

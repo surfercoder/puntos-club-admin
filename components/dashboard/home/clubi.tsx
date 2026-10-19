@@ -4,7 +4,7 @@ import Image from "next/image";
 export function Clubi({ className }: { className?: string }) {
   return (
     <Image
-      src="/images/clubi.png"
+      src="/images/clubi-v2.png"
       alt=""
       aria-hidden="true"
       width={542}

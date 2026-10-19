@@ -94,9 +94,11 @@ const Loader: React.FC<LoaderProps> = ({ onAnimationEnd }) => {
         className="loader-bg"
       />
 
+      {/* Misma caja que .loader-bg; el viewBox centra el regalo (sin la sombra): x 43.5-156.5, y 45-143.5. */}
       <Gift
-        className="absolute z-[1] top-[50%] left-[50%] translate-x-[-50%] translate-y-[-50%]"
-        style={{ width: "300px", height: "100vh" }}
+        className="absolute z-[1] top-[35%] left-[50%] translate-x-[-50%] translate-y-[-50%]"
+        style={{ width: "300px", height: "300px" }}
+        viewBox="0 -5.7 200 200"
       />
       <div className="flex flex-col w-full items-center justify-center absolute top-1/2 left-1/2 transform -translate-x-1/2">
         <p

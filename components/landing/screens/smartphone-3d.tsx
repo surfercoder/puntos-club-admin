@@ -14,8 +14,8 @@ import { TextureLoader, Mesh } from "three";
 import type { MeshStandardMaterial } from "three";
 
 const textures = [
-  "/images/app-beneficiario-home.jpg",
-  "/images/app-beneficiario-explorar.jpg",
+  "/images/app-beneficiario-home-v2.jpg",
+  "/images/app-beneficiario-explorar-v2.jpg",
   "/images/app-beneficiario-historial.jpg",
 ];
 

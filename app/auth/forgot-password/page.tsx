@@ -17,7 +17,7 @@ export default function Page() {
     <div className="flex flex-1 items-center justify-center px-6 py-12">
       <div className="relative w-full max-w-[37.5rem]">
         <Image
-          src="/images/forgot-password-mascot.png"
+          src="/images/forgot-password-mascot-v2.png"
           alt=""
           width={365}
           height={534}

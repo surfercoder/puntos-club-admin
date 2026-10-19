@@ -9,5 +9,5 @@ export const PUNTOS_CLUB_WEB_URL = "https://puntos-club-web.vercel.app";
 export const PUNTOS_CLUB_CAJA_WEB_URL = "https://puntos-club-caja-web.vercel.app";
 
 // Logo de cada app (el mismo que se publica en Google Play), para acompanar al QR.
-export const PUNTOS_CLUB_LOGO = "/images/logos/app-puntosclub.png";
-export const PUNTOS_CLUB_CAJA_LOGO = "/images/logos/app-puntosclubcaja.png";
+export const PUNTOS_CLUB_LOGO = "/images/logos/app-puntosclub-v2.png";
+export const PUNTOS_CLUB_CAJA_LOGO = "/images/logos/app-puntosclubcaja-v2.png";

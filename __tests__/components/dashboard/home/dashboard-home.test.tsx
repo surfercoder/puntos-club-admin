@@ -48,7 +48,7 @@ describe('GiftIllustration', () => {
 describe('Clubi', () => {
   it('renders the mascot png', () => {
     const { container } = render(<Clubi />);
-    expect(container.querySelector('img')?.getAttribute('src')).toContain('clubi.png');
+    expect(container.querySelector('img')?.getAttribute('src')).toContain('clubi-v2.png');
   });
 
   it('forwards the class', () => {

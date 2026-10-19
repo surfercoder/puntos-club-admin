@@ -9,11 +9,12 @@ export function GiftIllustration({ className }: { className?: string }) {
       className={className}
     >
       <circle cx="80" cy="60" r="46" fill="var(--brand-blue)" />
-      <rect x="52" y="56" width="56" height="36" rx="5" fill="#F8B93F" />
-      <rect x="52" y="48" width="56" height="14" rx="4" fill="#FFD166" />
-      <rect x="73" y="48" width="14" height="44" fill="var(--brand-pink)" />
+      {/* Regalo de y≈33.2 (moño) a y=86.8 (caja): centrado en el círculo (cy=60). */}
+      <rect x="52" y="50.8" width="56" height="36" rx="5" fill="#F8B93F" />
+      <rect x="52" y="42.8" width="56" height="14" rx="4" fill="#FFD166" />
+      <rect x="73" y="42.8" width="14" height="44" fill="var(--brand-pink)" />
       <path
-        d="M80 48c-8-12-20-12-20-4 0 5 9 6 20 4Zm0 0c8-12 20-12 20-4 0 5-9 6-20 4Z"
+        d="M80 42.8c-8-12-20-12-20-4 0 5 9 6 20 4Zm0 0c8-12 20-12 20-4 0 5-9 6-20 4Z"
         fill="var(--brand-pink)"
       />
       <g fill="var(--brand-pink)" opacity="0.9">

@@ -14,7 +14,7 @@ export async function PublicHeader() {
       <div className="mx-auto flex h-20 max-w-[96rem] items-center justify-between gap-4 px-4 sm:px-6 lg:h-32 lg:px-10">
         <Link href="/" aria-label="Puntos Club" className="flex items-center gap-2.5 lg:gap-3.5">
           <Image
-            src="/images/logos/LogoImage.png"
+            src="/images/logos/logo-regalo.png"
             alt="Puntos Club"
             width={318}
             height={318}

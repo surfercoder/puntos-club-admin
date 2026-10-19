@@ -162,7 +162,7 @@ describe('AppDownloadQRCards', () => {
     const html = mockPrintWindow.document.write.mock.calls[0][0] as string;
     expect(html).toContain('puntosClubTitle');
     expect(mockPrintWindow.document.close).toHaveBeenCalled();
-    expect(logoImg.getAttribute('src')).toBe(`${window.location.origin}/images/logos/app-puntosclub.png`);
+    expect(logoImg.getAttribute('src')).toBe(`${window.location.origin}/images/logos/app-puntosclub-v2.png`);
     expect(mockPrintWindow.focus).toHaveBeenCalled();
 
     jest.advanceTimersByTime(500);
