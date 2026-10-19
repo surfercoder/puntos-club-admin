@@ -1,5 +1,6 @@
 import { PreApproval } from 'mercadopago/dist/clients/preApproval';
 import { getMercadoPagoClient } from '@/lib/mercadopago/client';
+import { PROMO_MONTHS } from '@/lib/plans/config';
 import type { createAdminClient } from '@/lib/supabase/admin';
 
 type AdminClient = ReturnType<typeof createAdminClient>;
@@ -15,6 +16,16 @@ export async function activateSubscription(
   { organizationId, plan, preapprovalId }: { organizationId: number; plan: string; preapprovalId: string }
 ) {
   await admin.from('organization').update({ plan }).eq('id', organizationId);
+
+  // Primer pago de la org: arrancan los 12 meses al 50%. Un cambio de plan
+  // posterior no lo toca (.is null), así la promo no se reinicia.
+  const promoEndsAt = new Date();
+  promoEndsAt.setMonth(promoEndsAt.getMonth() + PROMO_MONTHS);
+  await admin
+    .from('organization')
+    .update({ promo_ends_at: promoEndsAt.toISOString() })
+    .eq('id', organizationId)
+    .is('promo_ends_at', null);
 
   const { data: others } = await admin
     .from('subscription')

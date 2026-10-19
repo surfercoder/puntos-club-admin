@@ -14,10 +14,7 @@ export async function organizationNotificationLimitFormAction(_prevState: Action
     const parsedData = {
       ...formDataObject,
       daily_limit: formDataObject.daily_limit ? Number(formDataObject.daily_limit) : 1,
-      monthly_limit: formDataObject.monthly_limit ? Number(formDataObject.monthly_limit) : 5,
       min_hours_between_notifications: formDataObject.min_hours_between_notifications ? Number(formDataObject.min_hours_between_notifications) : 24,
-      notifications_sent_today: formDataObject.notifications_sent_today ? Number(formDataObject.notifications_sent_today) : 0,
-      notifications_sent_this_month: formDataObject.notifications_sent_this_month ? Number(formDataObject.notifications_sent_this_month) : 0,
     };
 
     const parsed = OrganizationNotificationLimitSchema.safeParse(parsedData);

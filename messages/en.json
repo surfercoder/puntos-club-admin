@@ -588,9 +588,6 @@
         "dailyLimitReached": "You have reached your daily notification limit",
         "dailyLimitDetail": "Daily limit: {limit} notification(s)",
         "dailyLimitAction": "Wait until tomorrow or upgrade your plan to send more notifications.",
-        "monthlyLimitReached": "You have reached your monthly notification limit",
-        "monthlyLimitDetail": "Monthly limit: {limit} notification(s)",
-        "monthlyLimitAction": "Wait until next month or upgrade your plan to send more notifications.",
         "timeRestriction": "You must wait between notifications",
         "timeRestrictionDetail": "Minimum time between notifications: {hours} hour(s)",
         "timeRestrictionAction": "Wait the indicated time or upgrade your plan to reduce the waiting time.",
@@ -598,14 +595,17 @@
         "limitReached": "Limit Reached",
         "plan": "Plan:",
         "today": "Today:",
-        "thisMonth": "This Month:",
         "lastSent": "Last Sent:",
         "timeRemaining": "Time remaining:",
         "nextAvailable": "Next notification available:",
         "dailyReset": "Daily reset:",
-        "monthlyReset": "Monthly reset:",
         "whatToDo": "What to do:",
-        "sent": "sent"
+        "sent": "sent",
+        "creditsExhausted": "You have used all your notifications",
+        "creditsExhaustedDetail": "You had {granted} notification(s) loaded.",
+        "creditsExhaustedAction": "Included notifications do not renew monthly. Additional packs will be available soon.",
+        "balance": "Available:",
+        "balanceDetail": "{remaining} of {granted}"
       },
       "moderation": {
         "contentApproved": "Content Approved",
@@ -633,8 +633,8 @@
         "deliveryRate": "Delivery rate",
         "deliveryRateSubtitle": "Over everything sent",
         "excellent": "Excellent",
-        "remaining": "Left this month",
-        "remainingSubtitle": "Of {limit} in your plan",
+        "remaining": "Available",
+        "remainingSubtitle": "Of {limit} loaded",
         "remainingNoLimit": "No plan limit"
       },
       "filters": {
@@ -1405,11 +1405,11 @@
         "organization": "Organization",
         "planType": "Plan Type",
         "dailyLimit": "Daily Limit",
-        "monthlyLimit": "Monthly Limit",
         "minHoursBetween": "Min. Hours Between Sends",
         "sentToday": "Sent Today",
-        "sentThisMonth": "Sent This Month",
-        "actions": "Actions"
+        "actions": "Actions",
+        "granted": "Notifications loaded",
+        "used": "Used"
       },
       "createTitle": "Create Notification Limit",
       "form": {
@@ -1420,13 +1420,28 @@
         "planLight": "Light",
         "planPro": "Pro",
         "planPremium": "Premium",
-        "defaultLimits": "Default limits: {daily} daily, {monthly} monthly, {minHours}h between notifications",
+        "defaultLimits": "Default limits: {daily} per day, {minHours}h between notifications",
         "dailyLimit": "Daily Limit",
         "dailyLimitPlaceholder": "Enter daily limit",
-        "monthlyLimit": "Monthly Limit",
-        "monthlyLimitPlaceholder": "Enter monthly limit",
         "minHours": "Minimum Hours Between Notifications",
         "minHoursPlaceholder": "Enter minimum hours between notifications"
+      },
+      "credits": {
+        "title": "Notification balance",
+        "balance": "Available: {remaining} of {granted} loaded ({used} used).",
+        "amount": "Amount",
+        "note": "Reason",
+        "notePlaceholder": "E.g.: bonus, pack sold offline",
+        "submit": "Load",
+        "help": "A negative number deducts. Loads cannot be edited or deleted: to fix one, load the difference.",
+        "success": "Notifications loaded",
+        "invalidAmount": "Enter a whole number other than 0",
+        "empty": "No loads yet.",
+        "source": {
+          "plan": "Included in the plan",
+          "admin": "Manual load",
+          "purchase": "Purchased pack"
+        }
       }
     },
     "purchase": {

@@ -5,6 +5,7 @@ import { PreApproval } from 'mercadopago/dist/clients/preApproval';
 import { getMercadoPagoClient, PLAN_CONFIG, type PlanId } from '@/lib/mercadopago/client';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
+import { isPromoActive, planChargeAmount } from '@/lib/plans/config';
 import { errorText } from '@/lib/error-handler';
 
 /**
@@ -59,6 +60,19 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Org del usuario (en el onboarding todavía no existe: arranca en promo).
+    const admin = createAdminClient();
+    const { data: appUser } = await admin
+      .from('app_user')
+      .select('organization_id, organization:organization_id(promo_ends_at)')
+      .eq('auth_user_id', user.id)
+      .maybeSingle();
+
+    // 50% mientras dure la promo de la org; el cron sube el monto al vencer.
+    const org = appUser?.organization as { promo_ends_at: string | null } | { promo_ends_at: string | null }[] | null | undefined;
+    const promoEndsAt = Array.isArray(org) ? org[0]?.promo_ends_at : org?.promo_ends_at;
+    const amount = planChargeAmount(typedPlanId, isPromoActive(promoEndsAt));
+
     const mp = getMercadoPagoClient();
     const preApproval = new PreApproval(mp);
 
@@ -86,21 +100,15 @@ export async function POST(request: NextRequest) {
           frequency: 1,
           frequency_type: 'months',
           start_date: new Date(Date.now() + 5 * 60 * 1000).toISOString(),
-          transaction_amount: config.amount,
+          transaction_amount: amount,
           currency_id: config.currency,
         },
       },
     });
 
     // Persist the subscription record so the webhook can find it later
-    const { data: appUser } = await createAdminClient()
-      .from('app_user')
-      .select('organization_id')
-      .eq('auth_user_id', user.id)
-      .maybeSingle();
-
     if (appUser?.organization_id && subscription.id) {
-      await createAdminClient().from('subscription').upsert(
+      await admin.from('subscription').upsert(
         {
           organization_id: Number(appUser.organization_id),
           mp_preapproval_id: subscription.id,
@@ -110,7 +118,7 @@ export async function POST(request: NextRequest) {
           // Seed with the chosen payer email; the webhook later overwrites it
           // with MP's confirmed value (the account that actually paid).
           payer_email: payerEmail,
-          amount: config.amount,
+          amount,
           currency: config.currency,
         },
         { onConflict: 'mp_preapproval_id' }

@@ -25,6 +25,7 @@ import {
   PLAN_ORDER,
   isContactSalesPlan,
   isPaidPlan,
+  isPromoActive,
   planButtonColorMap,
   planColor,
 } from '@/lib/plans/config';
@@ -490,6 +491,7 @@ export function PlanSelectorInner() {
           limits={planLimits}
           selected={selected}
           currentPlan={currentPlan}
+          promo={isPromoActive(usageSummary?.promo_ends_at)}
           onSelect={(plan) => dispatch({ type: 'SET_SELECTED', payload: plan })}
         />
 

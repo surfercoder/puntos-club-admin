@@ -111,6 +111,32 @@ describe('PlanSelector', () => {
     expect(screen.queryByText('enterprisePlan')).not.toBeInTheDocument();
   });
 
+  it('shows the discounted price with the struck list price while the promo lasts', async () => {
+    (usePlanUsage as jest.Mock).mockReturnValue({
+      summary: { ...mockSummary, promo_ends_at: '2999-01-01T00:00:00Z' },
+      isLoading: false,
+    });
+
+    await act(async () => { render(<PlanSelector />); });
+    expect(screen.getByText('$12.499')).toBeInTheDocument();
+    expect(screen.getByText('$24.999')).toHaveClass('line-through');
+    expect(screen.getAllByText('discountBadge')).toHaveLength(2);
+  });
+
+  it('shows the list price without the promo badge once the org promo expired', async () => {
+    (usePlanUsage as jest.Mock).mockReturnValue({
+      summary: { ...mockSummary, promo_ends_at: '2020-01-01T00:00:00Z' },
+      isLoading: false,
+    });
+
+    await act(async () => { render(<PlanSelector />); });
+    expect(screen.getByText('$24.999')).not.toHaveClass('line-through');
+    expect(screen.getByText('$62.400')).toBeInTheDocument();
+    expect(screen.queryByText('$12.499')).not.toBeInTheDocument();
+    expect(screen.queryByText('discountBadge')).not.toBeInTheDocument();
+    expect(screen.getByText('freePriceLabel')).toBeInTheDocument();
+  });
+
   it('routes an enterprise org back through sales to change plan', async () => {
     (usePlanUsage as jest.Mock).mockReturnValue({
       summary: { ...mockSummary, plan: 'enterprise' },

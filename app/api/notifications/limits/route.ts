@@ -55,7 +55,8 @@ export async function GET(_request: NextRequest) {
           organization_id: appUser.organization_id,
           plan_type: 'free',
           daily_limit: 1,
-          monthly_limit: 5,
+          notifications_granted: 0,
+          notifications_used: 0,
           min_hours_between_notifications: 24,
         },
       });

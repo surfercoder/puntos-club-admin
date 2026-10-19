@@ -127,7 +127,7 @@ export const PLAN_PRICES: Record<PlanType, number | null> = {
   enterprise: null,
 };
 
-/** Precio de lista tachado en las tarjetas. Sólo se muestra: MP cobra PLAN_PRICES. */
+/** Precio de lista: tachado en las tarjetas durante la promo, y lo que cobra MP cuando vence (planChargeAmount). */
 export const PLAN_LIST_PRICES: Partial<Record<PlanType, number>> = {
   advance: 24999,
   pro:     62400,
@@ -150,6 +150,29 @@ export const PLAN_CARD_FEATURES = [
   'campaigns',
 ] as const satisfies readonly PlanFeatureKey[];
 export type PlanCardFeature = (typeof PLAN_CARD_FEATURES)[number];
+
+/** Meses al 50% desde la primera suscripción autorizada de la org. */
+export const PROMO_MONTHS = 12;
+
+/**
+ * Días antes de promo_ends_at en que ya se cobra el precio de lista: el cron
+ * corre una vez por día y MP cobra el día del aniversario, así el pago 13
+ * nunca sale con descuento.
+ */
+export const PROMO_END_MARGIN_DAYS = 3;
+
+/** Sin promo_ends_at la org nunca pagó: la promo arranca con su primer pago. */
+export function isPromoActive(promoEndsAt: string | null | undefined, now: Date = new Date()): boolean {
+  if (!promoEndsAt) return true;
+  const cutoff = new Date(promoEndsAt).getTime() - PROMO_END_MARGIN_DAYS * 24 * 60 * 60 * 1000;
+  return now.getTime() < cutoff;
+}
+
+/** Lo que cobra MP por un plan pago: 50% en promo, precio de lista después. */
+export function planChargeAmount(plan: PlanType, promoActive: boolean): number {
+  const promo = PLAN_PRICES[plan] ?? 0;
+  return promoActive ? promo : PLAN_LIST_PRICES[plan] ?? promo;
+}
 
 /** Planes que se pagan con Mercado Pago (los que tienen precio > 0) */
 export function isPaidPlan(plan: PlanType): boolean {

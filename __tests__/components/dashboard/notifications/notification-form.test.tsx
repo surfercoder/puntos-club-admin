@@ -66,13 +66,12 @@ describe('NotificationForm', () => {
       organization_id: 'org-1',
       plan_type: 'pro' as const,
       daily_limit: 5,
-      monthly_limit: 50,
+      notifications_granted: 50,
       min_hours_between_notifications: 4,
       notifications_sent_today: 1,
-      notifications_sent_this_month: 10,
+      notifications_used: 10,
       last_notification_sent_at: null,
       reset_daily_at: '2024-01-02',
-      reset_monthly_at: '2024-02-01',
       created_at: '2024-01-01',
     };
     render(<NotificationForm {...defaultProps} limits={limits} canSend={true} />);
@@ -85,13 +84,12 @@ describe('NotificationForm', () => {
       organization_id: 'org-1',
       plan_type: 'pro' as const,
       daily_limit: 5,
-      monthly_limit: 50,
+      notifications_granted: 50,
       min_hours_between_notifications: 4,
       notifications_sent_today: 5,
-      notifications_sent_this_month: 10,
+      notifications_used: 10,
       last_notification_sent_at: null,
       reset_daily_at: '2024-01-02',
-      reset_monthly_at: '2024-02-01',
       created_at: '2024-01-01',
     };
     render(<NotificationForm {...defaultProps} limits={limits} canSend={false} />);
@@ -99,23 +97,26 @@ describe('NotificationForm', () => {
     expect(screen.getByText(/dailyLimitReached/)).toBeInTheDocument();
   });
 
-  it('renders monthly limit message when monthly limit hit', () => {
+  it('renders the exhausted-balance message without a reset time', () => {
     const limits = {
       id: '1',
       organization_id: 'org-1',
       plan_type: 'pro' as const,
       daily_limit: 5,
-      monthly_limit: 10,
+      notifications_granted: 10,
       min_hours_between_notifications: 4,
       notifications_sent_today: 1,
-      notifications_sent_this_month: 10,
+      notifications_used: 10,
       last_notification_sent_at: null,
       reset_daily_at: '2024-01-02',
-      reset_monthly_at: '2024-02-01',
       created_at: '2024-01-01',
     };
     render(<NotificationForm {...defaultProps} limits={limits} canSend={false} />);
-    expect(screen.getByText(/monthlyLimitReached/)).toBeInTheDocument();
+    expect(screen.getByText('creditsExhausted')).toBeInTheDocument();
+    expect(screen.getByText('creditsExhaustedDetail')).toBeInTheDocument();
+    expect(screen.getByText(/creditsExhaustedAction/)).toBeInTheDocument();
+    // El saldo no se renueva: no hay cartel de reinicio.
+    expect(screen.queryByText(/dailyReset|monthlyReset/)).not.toBeInTheDocument();
   });
 
   it('renders time restriction message with countdown', () => {
@@ -125,13 +126,12 @@ describe('NotificationForm', () => {
       organization_id: 'org-1',
       plan_type: 'pro' as const,
       daily_limit: 5,
-      monthly_limit: 50,
+      notifications_granted: 50,
       min_hours_between_notifications: 4,
       notifications_sent_today: 1,
-      notifications_sent_this_month: 10,
+      notifications_used: 10,
       last_notification_sent_at: recentTime,
       reset_daily_at: '2024-01-02',
-      reset_monthly_at: '2024-02-01',
       created_at: '2024-01-01',
     };
     render(<NotificationForm {...defaultProps} limits={limits} canSend={false} />);
@@ -145,13 +145,12 @@ describe('NotificationForm', () => {
       organization_id: 'org-1',
       plan_type: 'pro' as const,
       daily_limit: 5,
-      monthly_limit: 50,
+      notifications_granted: 50,
       min_hours_between_notifications: 4,
       notifications_sent_today: 1,
-      notifications_sent_this_month: 10,
+      notifications_used: 10,
       last_notification_sent_at: lastSent,
       reset_daily_at: '2024-01-02',
-      reset_monthly_at: '2024-02-01',
       created_at: '2024-01-01',
     };
     render(<NotificationForm {...defaultProps} limits={limits} canSend={true} />);
@@ -471,13 +470,12 @@ describe('NotificationForm', () => {
       organization_id: 'org-1',
       plan_type: 'pro' as const,
       daily_limit: 5,
-      monthly_limit: 50,
+      notifications_granted: 50,
       min_hours_between_notifications: 4,
       notifications_sent_today: 1,
-      notifications_sent_this_month: 10,
+      notifications_used: 10,
       last_notification_sent_at: recentTime,
       reset_daily_at: '2024-01-02',
-      reset_monthly_at: '2024-02-01',
       created_at: '2024-01-01',
     };
     render(<NotificationForm {...defaultProps} limits={limits} canSend={false} />);
@@ -494,13 +492,12 @@ describe('NotificationForm', () => {
       organization_id: 'org-1',
       plan_type: 'pro' as const,
       daily_limit: 5,
-      monthly_limit: 50,
+      notifications_granted: 50,
       min_hours_between_notifications: 4,
       notifications_sent_today: 1,
-      notifications_sent_this_month: 10,
+      notifications_used: 10,
       last_notification_sent_at: recentTime,
       reset_daily_at: '2024-01-02',
-      reset_monthly_at: '2024-02-01',
       created_at: '2024-01-01',
     };
     render(<NotificationForm {...defaultProps} limits={limits} canSend={false} />);
@@ -517,13 +514,12 @@ describe('NotificationForm', () => {
       organization_id: 'org-1',
       plan_type: 'pro' as const,
       daily_limit: 5,
-      monthly_limit: 50,
+      notifications_granted: 50,
       min_hours_between_notifications: 4,
       notifications_sent_today: 1,
-      notifications_sent_this_month: 10,
+      notifications_used: 10,
       last_notification_sent_at: recentTime,
       reset_daily_at: '2024-01-02',
-      reset_monthly_at: '2024-02-01',
       created_at: '2024-01-01',
     };
     render(<NotificationForm {...defaultProps} limits={limits} canSend={false} />);
@@ -539,13 +535,12 @@ describe('NotificationForm', () => {
       organization_id: 'org-1',
       plan_type: 'pro' as const,
       daily_limit: 5,
-      monthly_limit: 50,
+      notifications_granted: 50,
       min_hours_between_notifications: 4,
       notifications_sent_today: 1,
-      notifications_sent_this_month: 10,
+      notifications_used: 10,
       last_notification_sent_at: oldTime,
       reset_daily_at: '2024-01-02',
-      reset_monthly_at: '2024-02-01',
       created_at: '2024-01-01',
     };
 
@@ -563,13 +558,12 @@ describe('NotificationForm', () => {
       organization_id: 'org-1',
       plan_type: 'pro' as const,
       daily_limit: 5,
-      monthly_limit: 50,
+      notifications_granted: 50,
       min_hours_between_notifications: 4,
       notifications_sent_today: 5,
-      notifications_sent_this_month: 10,
+      notifications_used: 10,
       last_notification_sent_at: null,
       reset_daily_at: '2024-01-02',
-      reset_monthly_at: '2024-02-01',
       created_at: '2024-01-01',
     };
     render(<NotificationForm {...defaultProps} limits={limits} canSend={false} />);
@@ -586,13 +580,12 @@ describe('NotificationForm', () => {
       organization_id: 'org-1',
       plan_type: 'pro' as const,
       daily_limit: 5,
-      monthly_limit: 50,
+      notifications_granted: 50,
       min_hours_between_notifications: 0, // falsy - triggers line 59 return null
       notifications_sent_today: 5,
-      notifications_sent_this_month: 10,
+      notifications_used: 10,
       last_notification_sent_at: recentTime,
       reset_daily_at: '2024-01-02',
-      reset_monthly_at: '2024-02-01',
       created_at: '2024-01-01',
     };
     render(<NotificationForm {...defaultProps} limits={limits} canSend={false} />);

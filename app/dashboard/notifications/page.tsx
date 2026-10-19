@@ -112,16 +112,16 @@ export default async function NotificationsPage({ searchParams }: PageProps) {
   const page = parsePage(params.page, Math.ceil(rows.length / perPage));
   const visible = rows.slice((page - 1) * perPage, page * perPage);
 
-  const monthlyUsage = usage?.features.find((f) => f.feature === 'push_notifications_monthly');
+  const notificationUsage = usage?.features.find((f) => f.feature === 'push_notifications_monthly');
 
   const stats = {
     sent: rows.reduce((sum, r) => sum + (r.sent_count ?? 0), 0),
     delivered: rows.reduce((sum, r) => sum + r.delivered, 0),
     failed: rows.reduce((sum, r) => sum + (r.failed_count ?? 0), 0),
-    remaining: monthlyUsage
-      ? Math.max(0, monthlyUsage.limit_value - monthlyUsage.current_usage)
+    remaining: notificationUsage
+      ? Math.max(0, notificationUsage.limit_value - notificationUsage.current_usage)
       : null,
-    monthlyLimit: monthlyUsage?.limit_value ?? null,
+    granted: notificationUsage?.limit_value ?? null,
   };
 
   const openId = params.open ?? '';

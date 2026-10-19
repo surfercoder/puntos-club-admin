@@ -25,7 +25,7 @@ describe('Notification Limits API Route', () => {
     // First call: app_user lookup
     mockSingle.mockResolvedValueOnce({ data: { organization_id: 1 }, error: null });
     // Second call: limits lookup
-    mockSingle.mockResolvedValueOnce({ data: { plan_type: 'free', daily_limit: 1, monthly_limit: 5 }, error: null });
+    mockSingle.mockResolvedValueOnce({ data: { plan_type: 'free', daily_limit: 1, notifications_granted: 5, notifications_used: 0 }, error: null });
     mockRpc.mockResolvedValue({ data: true });
   });
 
@@ -77,7 +77,8 @@ describe('Notification Limits API Route', () => {
     expect(data.data).toMatchObject({
       plan_type: 'free',
       daily_limit: 1,
-      monthly_limit: 5,
+      notifications_granted: 0,
+      notifications_used: 0,
       min_hours_between_notifications: 24,
     });
     // GET must be side-effect-free: no insert on the no-row path.

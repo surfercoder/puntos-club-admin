@@ -261,6 +261,23 @@ describe('MercadoPago Webhook Route', () => {
     expect(response.status).toBe(200);
   });
 
+  it('stores the amount MP is actually charging for a new subscription, not the promo price', async () => {
+    mockGet.mockResolvedValueOnce({
+      status: 'pending',
+      external_reference: 'u1|advance',
+      payer_email: 'test@test.com',
+      auto_recurring: { transaction_amount: 24999 },
+    });
+    mockMaybeSingle.mockResolvedValueOnce({ data: null });
+    mockMaybeSingle.mockResolvedValueOnce({ data: { organization_id: 1 } });
+
+    await POST(makeRequest({ type: 'subscription_preapproval', data: { id: 'pa_new' } }));
+    expect(mockUpsert).toHaveBeenCalledWith(
+      expect.objectContaining({ amount: 24999 }),
+      { onConflict: 'mp_preapproval_id' },
+    );
+  });
+
   it('handles new subscription when appUser not found', async () => {
     mockGet.mockResolvedValueOnce({
       status: 'authorized',

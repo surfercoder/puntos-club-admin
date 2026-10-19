@@ -186,7 +186,8 @@ export async function POST(request: NextRequest) {
               plan,
               status: mappedStatus,
               payer_email: (subscription.payer_email as string) ?? '',
-              amount: config.amount,
+              // MP sabe si salió con o sin promo; el precio de PLAN_CONFIG es sólo el de promo.
+              amount: subscription.auto_recurring?.transaction_amount ?? config.amount,
               currency: config.currency,
             },
             { onConflict: 'mp_preapproval_id' }

@@ -45,10 +45,10 @@ export default async function OrganizationNotificationLimitsListPage() {
               <TableHead>{t('tableHeaders.organization')}</TableHead>
               <TableHead>{t('tableHeaders.planType')}</TableHead>
               <TableHead>{t('tableHeaders.dailyLimit')}</TableHead>
-              <TableHead>{t('tableHeaders.monthlyLimit')}</TableHead>
+              <TableHead>{t('tableHeaders.granted')}</TableHead>
               <TableHead>{t('tableHeaders.minHoursBetween')}</TableHead>
               <TableHead>{t('tableHeaders.sentToday')}</TableHead>
-              <TableHead>{t('tableHeaders.sentThisMonth')}</TableHead>
+              <TableHead>{t('tableHeaders.used')}</TableHead>
               <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
             </TableRow>
           </TableHeader>
@@ -72,10 +72,10 @@ export default async function OrganizationNotificationLimitsListPage() {
                     </Badge>
                   </TableCell>
                   <TableCell>{limit.daily_limit}</TableCell>
-                  <TableCell>{limit.monthly_limit}</TableCell>
+                  <TableCell>{limit.notifications_granted}</TableCell>
                   <TableCell>{limit.min_hours_between_notifications}h</TableCell>
                   <TableCell>{limit.notifications_sent_today}</TableCell>
-                  <TableCell>{limit.notifications_sent_this_month}</TableCell>
+                  <TableCell>{limit.notifications_used}</TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
                       <Button asChild size="sm" variant="secondary">

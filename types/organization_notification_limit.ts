@@ -5,21 +5,22 @@ export type OrganizationNotificationLimit = {
   organization_id: string;
   plan_type: NotificationPlanType;
   daily_limit: number;
-  monthly_limit: number;
+  /** Total cargado (plan + superadmin + compras). Lo mantiene un trigger sobre notification_credit. */
+  notifications_granted: number;
   min_hours_between_notifications: number;
   notifications_sent_today: number;
-  notifications_sent_this_month: number;
+  /** Envíos descontados del saldo. No se reinicia. */
+  notifications_used: number;
   last_notification_sent_at?: string | null;
   reset_daily_at: string;
-  reset_monthly_at: string;
   created_at: string;
   updated_at: string;
 };
 
 
-export const PLAN_LIMITS: Record<NotificationPlanType, { daily: number; monthly: number; minHours: number }> = {
-  free: { daily: 1, monthly: 5, minHours: 24 },
-  light: { daily: 2, monthly: 15, minHours: 12 },
-  pro: { daily: 3, monthly: 30, minHours: 8 },
-  premium: { daily: 5, monthly: 50, minHours: 4 },
+export const PLAN_LIMITS: Record<NotificationPlanType, { daily: number; minHours: number }> = {
+  free: { daily: 1, minHours: 24 },
+  light: { daily: 2, minHours: 12 },
+  pro: { daily: 3, minHours: 8 },
+  premium: { daily: 5, minHours: 4 },
 };

@@ -12,6 +12,8 @@ import {
   PLAN_PRICES,
   isPaidPlan,
   isQuotaFeature,
+  isPromoActive,
+  planChargeAmount,
 } from '@/lib/plans/config';
 
 const ALL_QUOTAS = [
@@ -129,5 +131,43 @@ describe('isQuotaFeature', () => {
     expect(isQuotaFeature('collaborators')).toBe(true);
     expect(isQuotaFeature('campaigns')).toBe(false);
     expect(isQuotaFeature('sso')).toBe(false);
+  });
+});
+
+describe('isPromoActive', () => {
+  const now = new Date('2026-10-19T12:00:00Z');
+
+  it('is active while the org has never paid (no end date)', () => {
+    expect(isPromoActive(null, now)).toBe(true);
+    expect(isPromoActive(undefined, now)).toBe(true);
+  });
+
+  it('is active well before the end date', () => {
+    expect(isPromoActive('2027-01-01T00:00:00Z', now)).toBe(true);
+  });
+
+  it('ends 3 days before the end date so the 13th charge is at list price', () => {
+    expect(isPromoActive('2026-10-21T12:00:00Z', now)).toBe(false);
+  });
+
+  it('is over once the end date has passed', () => {
+    expect(isPromoActive('2026-01-01T00:00:00Z', now)).toBe(false);
+  });
+
+  it('defaults to the current date', () => {
+    expect(isPromoActive('2000-01-01T00:00:00Z')).toBe(false);
+  });
+});
+
+describe('planChargeAmount', () => {
+  it('charges the promo price during the promo and the list price after', () => {
+    expect(planChargeAmount('advance', true)).toBe(12499);
+    expect(planChargeAmount('advance', false)).toBe(24999);
+    expect(planChargeAmount('pro', false)).toBe(62400);
+  });
+
+  it('keeps the promo price for a plan without a list price', () => {
+    expect(planChargeAmount('trial', false)).toBe(0);
+    expect(planChargeAmount('enterprise', true)).toBe(0);
   });
 });

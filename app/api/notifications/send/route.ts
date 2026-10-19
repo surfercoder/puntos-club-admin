@@ -109,7 +109,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Enforce monthly push notification quota
+    // El saldo de notificaciones no se renueva: cargado - usado
     const limitResult = await checkPlanLimit(
       notification.organization_id as number,
       'push_notifications_monthly'
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           success: false,
-          error: `Has alcanzado el límite de notificaciones mensuales (${limitResult.current_usage}/${limitResult.limit_value}) para tu plan ${limitResult.plan}. Actualiza tu plan para continuar.`,
+          error: `Usaste todas tus notificaciones (${limitResult.current_usage}/${limitResult.limit_value}). No se renuevan por mes: pronto vas a poder comprar paquetes adicionales.`,
           limit: limitResult,
         },
         { status: 429 }

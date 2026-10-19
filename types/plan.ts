@@ -42,6 +42,8 @@ export type FeatureUsage = {
 
 export type OrganizationUsageSummary = {
   plan: PlanType;
+  /** Fin de los 12 meses al 50%; null si la org nunca pagó. */
+  promo_ends_at?: string | null;
   features: FeatureUsage[];
 };
 

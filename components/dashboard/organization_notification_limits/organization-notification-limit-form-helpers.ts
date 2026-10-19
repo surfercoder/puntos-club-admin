@@ -10,8 +10,6 @@ export function resolveNotificationLimitDefaults(
     /* c8 ignore next */
     dailyLimit: organizationNotificationLimit?.daily_limit ?? planLimits?.daily ?? 1,
     /* c8 ignore next */
-    monthlyLimit: organizationNotificationLimit?.monthly_limit ?? planLimits?.monthly ?? 5,
-    /* c8 ignore next */
     minHours: organizationNotificationLimit?.min_hours_between_notifications ?? planLimits?.minHours ?? 24,
   };
 }
@@ -22,10 +20,6 @@ export function buildNotificationLimitPayload(formDataObject: Record<string, For
   return {
     ...formDataObject,
     daily_limit: formDataObject.daily_limit ? Number(formDataObject.daily_limit) : 1,
-    monthly_limit: formDataObject.monthly_limit ? Number(formDataObject.monthly_limit) : 5,
     min_hours_between_notifications: formDataObject.min_hours_between_notifications ? Number(formDataObject.min_hours_between_notifications) : 24,
-    /* c8 ignore next 2 */
-    notifications_sent_today: formDataObject.notifications_sent_today ? Number(formDataObject.notifications_sent_today) : 0,
-    notifications_sent_this_month: formDataObject.notifications_sent_this_month ? Number(formDataObject.notifications_sent_this_month) : 0,
   };
 }

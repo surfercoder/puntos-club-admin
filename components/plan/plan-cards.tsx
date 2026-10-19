@@ -27,6 +27,7 @@ import {
   PLAN_PRICES,
   UNLIMITED,
   isQuotaFeature,
+  planChargeAmount,
   type PlanCardFeature,
   type PlanCardType,
 } from '@/lib/plans/config';
@@ -135,17 +136,19 @@ interface PlanCardProps {
   limits: Record<PlanFeatureKey, number> | undefined;
   isSelected: boolean;
   isCurrent: boolean;
+  promo: boolean;
   onSelect: () => void;
 }
 
-function PlanCard({ plan, limits, isSelected, isCurrent, onSelect }: PlanCardProps) {
+function PlanCard({ plan, limits, isSelected, isCurrent, promo, onSelect }: PlanCardProps) {
   const t = useTranslations('Onboarding.step3');
   const tSettings = useTranslations('Dashboard.planSettings');
   const locale = useLocale();
   const style = PLAN_STYLES[plan];
   const Icon = style.icon;
-  const price = PLAN_PRICES[plan] as number;
-  const listPrice = PLAN_LIST_PRICES[plan];
+  // Sin promo (la de la org ya venció) se muestra el precio de lista, sin cartel.
+  const listPrice = promo ? PLAN_LIST_PRICES[plan] : undefined;
+  const price = promo ? (PLAN_PRICES[plan] as number) : planChargeAmount(plan, false);
 
   const ctaLabel = isCurrent
     ? tSettings('currentPlan')
@@ -240,6 +243,8 @@ interface PlanCardsProps {
   limits: PlanLimitsByPlan | null;
   selected: PlanType | null;
   currentPlan?: PlanType | null;
+  /** false cuando la promo de la org ya venció (Ajustes): muestra el precio de lista. */
+  promo?: boolean;
   onSelect: (plan: PlanType) => void;
 }
 
@@ -247,7 +252,7 @@ interface PlanCardsProps {
  * La grilla de planes del diseño curado (Trial, Advance, Pro). Los valores salen
  * de `plan_limits`; los precios, de PLAN_PRICES / PLAN_LIST_PRICES.
  */
-export function PlanCards({ limits, selected, currentPlan = null, onSelect }: PlanCardsProps) {
+export function PlanCards({ limits, selected, currentPlan = null, promo = true, onSelect }: PlanCardsProps) {
   const t = useTranslations('Onboarding.step3');
 
   const heading = (
@@ -282,6 +287,7 @@ export function PlanCards({ limits, selected, currentPlan = null, onSelect }: Pl
             limits={limits?.[plan]}
             isSelected={selected === plan}
             isCurrent={currentPlan === plan}
+            promo={promo}
             onSelect={() => onSelect(plan)}
           />
         ))}

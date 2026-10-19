@@ -35,13 +35,14 @@ function useRestrictionReason(limits: OrganizationNotificationLimit) {
     };
   }
 
-  if (limits.notifications_sent_this_month >= limits.monthly_limit) {
+  // El saldo no se renueva: no hay hora de reinicio que mostrar.
+  if (limits.notifications_used >= limits.notifications_granted) {
     return {
-      type: 'monthly_limit' as const,
-      message: t('monthlyLimitReached'),
-      detail: t('monthlyLimitDetail', { limit: limits.monthly_limit }),
-      action: t('monthlyLimitAction'),
-      resetTime: new Date(limits.reset_monthly_at),
+      type: 'credits_exhausted' as const,
+      message: t('creditsExhausted'),
+      detail: t('creditsExhaustedDetail', { granted: limits.notifications_granted }),
+      action: t('creditsExhaustedAction'),
+      resetTime: undefined as Date | undefined,
       nextAvailable: undefined as Date | undefined,
     };
   }
@@ -100,7 +101,7 @@ export default function NotificationLimitsPanel({ limits, canSend, timeRemaining
               <strong>{t('today')}</strong> {limits.notifications_sent_today} / {limits.daily_limit} {t('sent')}
             </p>
             <p>
-              <strong>{t('thisMonth')}</strong> {limits.notifications_sent_this_month} / {limits.monthly_limit} {t('sent')}
+              <strong>{t('balance')}</strong> {t('balanceDetail', { remaining: Math.max(0, limits.notifications_granted - limits.notifications_used), granted: limits.notifications_granted })}
             </p>
             {limits.last_notification_sent_at && (
               <p>
@@ -133,14 +134,6 @@ export default function NotificationLimitsPanel({ limits, canSend, timeRemaining
                   <div className="bg-yellow-100 rounded-md p-2 mt-2">
                     <p className="text-xs text-yellow-700">
                       ⏱️ {t('dailyReset')} {resetTimeDisplay}
-                    </p>
-                  </div>
-                )}
-
-                {restrictionReason.type === 'monthly_limit' && (
-                  <div className="bg-yellow-100 rounded-md p-2 mt-2">
-                    <p className="text-xs text-yellow-700">
-                      ⏱️ {t('monthlyReset')} {resetTimeDisplay}
                     </p>
                   </div>
                 )}

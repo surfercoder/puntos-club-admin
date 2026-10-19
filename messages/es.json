@@ -588,9 +588,6 @@
         "dailyLimitReached": "Has alcanzado tu límite diario de notificaciones",
         "dailyLimitDetail": "Límite diario: {limit} notificación(es)",
         "dailyLimitAction": "Espera hasta mañana o actualiza tu plan para enviar más notificaciones.",
-        "monthlyLimitReached": "Has alcanzado tu límite mensual de notificaciones",
-        "monthlyLimitDetail": "Límite mensual: {limit} notificación(es)",
-        "monthlyLimitAction": "Espera hasta el próximo mes o actualiza tu plan para enviar más notificaciones.",
         "timeRestriction": "Debes esperar entre notificaciones",
         "timeRestrictionDetail": "Tiempo mínimo entre notificaciones: {hours} hora(s)",
         "timeRestrictionAction": "Espera el tiempo indicado o actualiza tu plan para reducir el tiempo de espera.",
@@ -598,14 +595,17 @@
         "limitReached": "Límite Alcanzado",
         "plan": "Plan:",
         "today": "Hoy:",
-        "thisMonth": "Este Mes:",
         "lastSent": "Última Enviada:",
         "timeRemaining": "Tiempo restante:",
         "nextAvailable": "Próxima notificación disponible:",
         "dailyReset": "Reinicio diario:",
-        "monthlyReset": "Reinicio mensual:",
         "whatToDo": "Qué hacer:",
-        "sent": "enviada(s)"
+        "sent": "enviada(s)",
+        "creditsExhausted": "Usaste todas tus notificaciones",
+        "creditsExhaustedDetail": "Tenías {granted} notificación(es) cargadas.",
+        "creditsExhaustedAction": "Las notificaciones incluidas no se renuevan por mes. Próximamente vas a poder comprar paquetes adicionales.",
+        "balance": "Disponibles:",
+        "balanceDetail": "{remaining} de {granted}"
       },
       "moderation": {
         "contentApproved": "Contenido Aprobado",
@@ -633,8 +633,8 @@
         "deliveryRate": "Tasa de entrega",
         "deliveryRateSubtitle": "Sobre el total enviado",
         "excellent": "Excelente",
-        "remaining": "Disponibles este mes",
-        "remainingSubtitle": "De {limit} de tu plan",
+        "remaining": "Disponibles",
+        "remainingSubtitle": "De {limit} cargadas",
         "remainingNoLimit": "Sin límite de plan"
       },
       "filters": {
@@ -1405,11 +1405,11 @@
         "organization": "Organización",
         "planType": "Tipo de Plan",
         "dailyLimit": "Límite Diario",
-        "monthlyLimit": "Límite Mensual",
         "minHoursBetween": "Horas Mín. Entre Envíos",
         "sentToday": "Enviadas Hoy",
-        "sentThisMonth": "Enviadas Este Mes",
-        "actions": "Acciones"
+        "actions": "Acciones",
+        "granted": "Notificaciones cargadas",
+        "used": "Usadas"
       },
       "createTitle": "Crear Límite de Notificaciones",
       "form": {
@@ -1420,13 +1420,28 @@
         "planLight": "Light",
         "planPro": "Pro",
         "planPremium": "Premium",
-        "defaultLimits": "Límites por defecto: {daily} diarias, {monthly} mensuales, {minHours}h entre notificaciones",
+        "defaultLimits": "Límites por defecto: {daily} diarias, {minHours}h entre notificaciones",
         "dailyLimit": "Límite Diario",
         "dailyLimitPlaceholder": "Ingresa el límite diario",
-        "monthlyLimit": "Límite Mensual",
-        "monthlyLimitPlaceholder": "Ingresa el límite mensual",
         "minHours": "Horas Mínimas Entre Notificaciones",
         "minHoursPlaceholder": "Ingresa las horas mínimas entre notificaciones"
+      },
+      "credits": {
+        "title": "Saldo de notificaciones",
+        "balance": "Disponibles: {remaining} de {granted} cargadas ({used} usadas).",
+        "amount": "Cantidad",
+        "note": "Motivo",
+        "notePlaceholder": "Ej.: bonificación, paquete vendido por fuera",
+        "submit": "Cargar",
+        "help": "Un número negativo descuenta. Las cargas no se editan ni se borran: para corregir, cargá la diferencia.",
+        "success": "Notificaciones cargadas",
+        "invalidAmount": "Ingresá un número entero distinto de 0",
+        "empty": "Sin cargas todavía.",
+        "source": {
+          "plan": "Incluidas en el plan",
+          "admin": "Carga manual",
+          "purchase": "Paquete comprado"
+        }
       }
     },
     "purchase": {

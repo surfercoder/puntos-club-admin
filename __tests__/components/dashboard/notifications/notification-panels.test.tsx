@@ -15,7 +15,7 @@ describe('NotificationStats', () => {
   it('renders the five cards and marks a healthy delivery rate as excellent', () => {
     const { container } = render(
       <NotificationStats
-        data={{ sent: 100, delivered: 98, failed: 2, remaining: 49, monthlyLimit: 50 }}
+        data={{ sent: 100, delivered: 98, failed: 2, remaining: 49, granted: 50 }}
       />,
     );
     expect(container.querySelectorAll('.rounded-xl.border')).toHaveLength(5);
@@ -26,7 +26,7 @@ describe('NotificationStats', () => {
   it('does not divide by zero before the first send', () => {
     render(
       <NotificationStats
-        data={{ sent: 0, delivered: 0, failed: 0, remaining: null, monthlyLimit: null }}
+        data={{ sent: 0, delivered: 0, failed: 0, remaining: null, granted: null }}
       />,
     );
     expect(screen.getByText('0%')).toBeInTheDocument();
@@ -37,7 +37,7 @@ describe('NotificationStats', () => {
   it('calls a poor delivery rate what it is', () => {
     render(
       <NotificationStats
-        data={{ sent: 100, delivered: 40, failed: 60, remaining: 0, monthlyLimit: 50 }}
+        data={{ sent: 100, delivered: 40, failed: 60, remaining: 0, granted: 50 }}
       />,
     );
     expect(screen.getByText('deliveryRateSubtitle')).toBeInTheDocument();

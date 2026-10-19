@@ -12,7 +12,7 @@ export type NotificationStatsData = {
   delivered: number;
   failed: number;
   remaining: number | null;
-  monthlyLimit: number | null;
+  granted: number | null;
 };
 
 function percentage(part: number, whole: number) {
@@ -61,9 +61,9 @@ export function NotificationStats({ data }: { data: NotificationStatsData }) {
         title={t("remaining")}
         value={data.remaining === null ? "—" : NUMBER_FORMATTER.format(data.remaining)}
         subtitle={
-          data.monthlyLimit === null
+          data.granted === null
             ? t("remainingNoLimit")
-            : t("remainingSubtitle", { limit: NUMBER_FORMATTER.format(data.monthlyLimit) })
+            : t("remainingSubtitle", { limit: NUMBER_FORMATTER.format(data.granted) })
         }
         icon={Wallet}
         tint="bg-brand-blue/10 text-brand-blue"

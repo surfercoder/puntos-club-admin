@@ -350,4 +350,51 @@ describe('MercadoPago Create Subscription Route', () => {
     expect(response.status).toBe(500);
     expect(data.error).toContain('ngrok');
   });
+
+  describe('promo pricing', () => {
+    function mockOrg(organization: unknown) {
+      const mockUpsert = jest.fn().mockResolvedValue({ data: null, error: null });
+      const { createAdminClient } = require('@/lib/supabase/admin');
+      createAdminClient.mockReturnValueOnce({
+        from: jest.fn(() => ({
+          select: jest.fn().mockReturnThis(),
+          eq: jest.fn().mockReturnThis(),
+          maybeSingle: jest.fn().mockResolvedValue({ data: { organization_id: 42, organization } }),
+          upsert: mockUpsert,
+        })),
+      });
+      return mockUpsert;
+    }
+
+    const request = {
+      json: () => Promise.resolve({ planId: 'advance' }),
+      headers: { get: () => null },
+    } as any;
+
+    it('charges the 50% price to an org that never paid', async () => {
+      const mockUpsert = mockOrg({ promo_ends_at: null });
+      await POST(request);
+      expect(mockCreate.mock.calls[0][0].body.auto_recurring.transaction_amount).toBe(12499);
+      expect(mockUpsert).toHaveBeenCalledWith(expect.objectContaining({ amount: 12499 }), expect.anything());
+    });
+
+    it('charges the list price once the org promo expired', async () => {
+      const mockUpsert = mockOrg({ promo_ends_at: '2020-01-01T00:00:00Z' });
+      await POST(request);
+      expect(mockCreate.mock.calls[0][0].body.auto_recurring.transaction_amount).toBe(24999);
+      expect(mockUpsert).toHaveBeenCalledWith(expect.objectContaining({ amount: 24999 }), expect.anything());
+    });
+
+    it('reads promo_ends_at when the join comes back as an array', async () => {
+      mockOrg([{ promo_ends_at: '2020-01-01T00:00:00Z' }]);
+      await POST(request);
+      expect(mockCreate.mock.calls[0][0].body.auto_recurring.transaction_amount).toBe(24999);
+    });
+
+    it('keeps the promo when the joined array is empty', async () => {
+      mockOrg([]);
+      await POST(request);
+      expect(mockCreate.mock.calls[0][0].body.auto_recurring.transaction_amount).toBe(12499);
+    });
+  });
 });

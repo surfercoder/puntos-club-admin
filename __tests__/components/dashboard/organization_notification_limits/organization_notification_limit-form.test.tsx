@@ -78,8 +78,9 @@ describe('OrganizationNotificationLimitForm', () => {
     expect(screen.getByText('form.organizationLabel')).toBeInTheDocument();
     expect(screen.getByText('form.planType')).toBeInTheDocument();
     expect(screen.getByText('form.dailyLimit')).toBeInTheDocument();
-    expect(screen.getByText('form.monthlyLimit')).toBeInTheDocument();
     expect(screen.getByText('form.minHours')).toBeInTheDocument();
+    // El saldo no se edita acá: se carga desde la tarjeta de créditos.
+    expect(screen.queryByText('form.monthlyLimit')).not.toBeInTheDocument();
   });
 
   it('renders correct submit button text in create mode', () => {
@@ -94,13 +95,12 @@ describe('OrganizationNotificationLimitForm', () => {
       organization_id: 'org-1',
       plan_type: 'pro' as const,
       daily_limit: 5,
-      monthly_limit: 50,
+      notifications_granted: 50,
       min_hours_between_notifications: 4,
       notifications_sent_today: 0,
-      notifications_sent_this_month: 0,
+      notifications_used: 0,
       last_notification_sent_at: null,
       reset_daily_at: '2024-01-02',
-      reset_monthly_at: '2024-02-01',
       created_at: '2024-01-01',
     };
 
@@ -246,13 +246,12 @@ describe('OrganizationNotificationLimitForm', () => {
       organization_id: 'org-1',
       plan_type: 'pro' as const,
       daily_limit: 5,
-      monthly_limit: 50,
+      notifications_granted: 50,
       min_hours_between_notifications: 4,
       notifications_sent_today: 0,
-      notifications_sent_this_month: 0,
+      notifications_used: 0,
       last_notification_sent_at: null,
       reset_daily_at: '2024-01-02',
-      reset_monthly_at: '2024-02-01',
       created_at: '2024-01-01',
     };
 
@@ -276,7 +275,7 @@ describe('OrganizationNotificationLimitForm', () => {
   });
 
   // -- Cover handleSubmit with falsy number fields (lines 70-74 branches) --
-  it('handles submission with empty daily_limit, monthly_limit, and min_hours fields', () => {
+  it('handles submission with empty daily_limit and min_hours fields', () => {
     render(<OrganizationNotificationLimitForm organizations={mockOrganizations} />);
 
     // Select an organization
@@ -285,11 +284,9 @@ describe('OrganizationNotificationLimitForm', () => {
 
     // Clear the numeric fields to test the falsy branch (Number('') = 0, which is falsy)
     const dailyInput = screen.getByLabelText('form.dailyLimit');
-    const monthlyInput = screen.getByLabelText('form.monthlyLimit');
     const minHoursInput = screen.getByLabelText('form.minHours');
 
     fireEvent.change(dailyInput, { target: { value: '' } });
-    fireEvent.change(monthlyInput, { target: { value: '' } });
     fireEvent.change(minHoursInput, { target: { value: '' } });
 
     const form = screen.getByRole('button', { name: 'create' }).closest('form')!;
@@ -303,12 +300,10 @@ describe('OrganizationNotificationLimitForm', () => {
     // Default plan is 'free', so planLimits should be PLAN_LIMITS.free
     // The inputs should have default values from the plan limits
     const dailyInput = screen.getByLabelText('form.dailyLimit') as HTMLInputElement;
-    const monthlyInput = screen.getByLabelText('form.monthlyLimit') as HTMLInputElement;
     const minHoursInput = screen.getByLabelText('form.minHours') as HTMLInputElement;
 
     // These should have values (either from planLimits or fallback defaults)
     expect(dailyInput.value).toBeTruthy();
-    expect(monthlyInput.value).toBeTruthy();
     expect(minHoursInput.value).toBeTruthy();
   });
 
@@ -334,7 +329,6 @@ describe('OrganizationNotificationLimitForm', () => {
           organization_id: ['Org required'],
           plan_type: ['Plan required'],
           daily_limit: ['Daily required'],
-          monthly_limit: ['Monthly required'],
           min_hours_between_notifications: ['Hours required'],
         },
       },
@@ -346,7 +340,6 @@ describe('OrganizationNotificationLimitForm', () => {
 
     expect(screen.getByText('Org required')).toBeInTheDocument();
     expect(screen.getByText('Daily required')).toBeInTheDocument();
-    expect(screen.getByText('Monthly required')).toBeInTheDocument();
     expect(screen.getByText('Hours required')).toBeInTheDocument();
   });
 
@@ -370,13 +363,12 @@ describe('OrganizationNotificationLimitForm', () => {
       organization_id: 'org-1',
       plan_type: 'pro' as const,
       daily_limit: 10,
-      monthly_limit: 100,
+      notifications_granted: 100,
       min_hours_between_notifications: 2,
       notifications_sent_today: 3,
-      notifications_sent_this_month: 15,
+      notifications_used: 15,
       last_notification_sent_at: null,
       reset_daily_at: '2024-01-02',
-      reset_monthly_at: '2024-02-01',
       created_at: '2024-01-01',
     };
 
@@ -390,14 +382,12 @@ describe('OrganizationNotificationLimitForm', () => {
     // The inputs should show the existing values, not the planLimits fallback
     const dailyInput = screen.getByLabelText('form.dailyLimit') as HTMLInputElement;
     expect(dailyInput.value).toBe('10');
-    const monthlyInput = screen.getByLabelText('form.monthlyLimit') as HTMLInputElement;
-    expect(monthlyInput.value).toBe('100');
     const minHoursInput = screen.getByLabelText('form.minHours') as HTMLInputElement;
     expect(minHoursInput.value).toBe('2');
   });
 
   // -- Cover handleSubmit with truthy number fields (lines 70-74 truthy branch) --
-  it('handles submission with valid number values in daily_limit, monthly_limit, min_hours', () => {
+  it('handles submission with valid number values in daily_limit, min_hours', () => {
     render(<OrganizationNotificationLimitForm organizations={mockOrganizations} />);
 
     const orgSelect = screen.getByLabelText('form.organizationLabel');
@@ -405,11 +395,9 @@ describe('OrganizationNotificationLimitForm', () => {
 
     // Set the numeric fields to valid non-zero values (truthy branch of Number())
     const dailyInput = screen.getByLabelText('form.dailyLimit');
-    const monthlyInput = screen.getByLabelText('form.monthlyLimit');
     const minHoursInput = screen.getByLabelText('form.minHours');
 
     fireEvent.change(dailyInput, { target: { value: '5' } });
-    fireEvent.change(monthlyInput, { target: { value: '50' } });
     fireEvent.change(minHoursInput, { target: { value: '4' } });
 
     const form = screen.getByRole('button', { name: 'create' }).closest('form')!;

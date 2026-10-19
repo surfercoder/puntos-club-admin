@@ -10,12 +10,10 @@ describe('OrganizationNotificationLimitSchema', () => {
       const result = OrganizationNotificationLimitSchema.safeParse(validInput);
       expect(result.success).toBe(true);
       if (result.success) {
+        expect(result.data).not.toHaveProperty('monthly_limit');
         expect(result.data.plan_type).toBe('free');
         expect(result.data.daily_limit).toBe(1);
-        expect(result.data.monthly_limit).toBe(5);
         expect(result.data.min_hours_between_notifications).toBe(24);
-        expect(result.data.notifications_sent_today).toBe(0);
-        expect(result.data.notifications_sent_this_month).toBe(0);
       }
     });
 
@@ -25,13 +23,9 @@ describe('OrganizationNotificationLimitSchema', () => {
         id: 'limit-1',
         plan_type: 'premium',
         daily_limit: 100,
-        monthly_limit: 1000,
         min_hours_between_notifications: 1,
-        notifications_sent_today: 5,
-        notifications_sent_this_month: 50,
         last_notification_sent_at: '2024-01-01T12:00:00Z',
         reset_daily_at: '2024-01-02T00:00:00Z',
-        reset_monthly_at: '2024-02-01T00:00:00Z',
         created_at: '2024-01-01',
         updated_at: '2024-01-15',
       });
@@ -87,23 +81,8 @@ describe('OrganizationNotificationLimitSchema', () => {
       expect(result.success).toBe(false);
     });
 
-    it('should reject monthly_limit less than 1', () => {
-      const result = OrganizationNotificationLimitSchema.safeParse({ ...validInput, monthly_limit: 0 });
-      expect(result.success).toBe(false);
-    });
-
     it('should reject min_hours_between_notifications less than 1', () => {
       const result = OrganizationNotificationLimitSchema.safeParse({ ...validInput, min_hours_between_notifications: 0 });
-      expect(result.success).toBe(false);
-    });
-
-    it('should reject negative notifications_sent_today', () => {
-      const result = OrganizationNotificationLimitSchema.safeParse({ ...validInput, notifications_sent_today: -1 });
-      expect(result.success).toBe(false);
-    });
-
-    it('should reject negative notifications_sent_this_month', () => {
-      const result = OrganizationNotificationLimitSchema.safeParse({ ...validInput, notifications_sent_this_month: -1 });
       expect(result.success).toBe(false);
     });
 

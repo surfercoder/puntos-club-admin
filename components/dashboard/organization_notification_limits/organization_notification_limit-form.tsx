@@ -97,7 +97,7 @@ export default function OrganizationNotificationLimitForm({
         </NativeSelectField>
         {planLimits && (
           <p className="text-sm text-muted-foreground mt-1">
-            {t('form.defaultLimits', { daily: planLimits.daily, monthly: planLimits.monthly, minHours: planLimits.minHours })}
+            {t('form.defaultLimits', { daily: planLimits.daily, minHours: planLimits.minHours })}
           </p>
         )}
       </div>
@@ -108,15 +108,6 @@ export default function OrganizationNotificationLimitForm({
         label={t('form.dailyLimit')}
         name="daily_limit"
         placeholder={t('form.dailyLimitPlaceholder')}
-        type="number"
-      />
-
-      <TextFormField
-        actionState={validation ?? actionState}
-        defaultValue={defaults.monthlyLimit}
-        label={t('form.monthlyLimit')}
-        name="monthly_limit"
-        placeholder={t('form.monthlyLimitPlaceholder')}
         type="number"
       />
 

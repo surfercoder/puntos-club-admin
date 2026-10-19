@@ -17,11 +17,18 @@ const mockSupabase = {
   auth: { getUser: jest.fn(() => ({ data: { user: { id: 'auth-1' } }, error: null })) },
 };
 jest.mock('@/lib/supabase/admin', () => ({ createAdminClient: jest.fn(() => mockSupabase) }));
+jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => mockSupabase) }));
+const mockGetCurrentUser = jest.fn((): unknown => ({ id: 7, role: { name: 'admin' } }));
+jest.mock('@/lib/auth/get-current-user', () => ({ getCurrentUser: () => mockGetCurrentUser() }));
+const mockIsAdmin = jest.fn(() => true);
+jest.mock('@/lib/auth/roles', () => ({ isAdmin: () => mockIsAdmin() }));
 
+import { revalidatePath } from 'next/cache';
 import {
   createOrganizationNotificationLimit,
   updateOrganizationNotificationLimit,
   deleteOrganizationNotificationLimit,
+  grantNotificationCredits,
 } from '@/actions/dashboard/organization_notification_limits/actions';
 
 beforeEach(() => {
@@ -39,11 +46,11 @@ const validInput = {
   organization_id: '10',
   plan_type: 'free' as const,
   daily_limit: 5,
-  monthly_limit: 20,
+  notifications_granted: 20,
   min_hours_between_notifications: 12,
   notifications_sent_today: 0,
-  notifications_sent_this_month: 0,
-};
+  notifications_used: 0,
+} as never;
 
 describe('createOrganizationNotificationLimit', () => {
   it('should create successfully', async () => {
@@ -53,7 +60,7 @@ describe('createOrganizationNotificationLimit', () => {
   });
 
   it('should return field errors on invalid input', async () => {
-    const result = await createOrganizationNotificationLimit({ ...validInput, organization_id: '' });
+    const result = await createOrganizationNotificationLimit({ ...(validInput as object), organization_id: '' } as never);
     expect(result.error).toHaveProperty('fieldErrors');
   });
 
@@ -72,7 +79,7 @@ describe('updateOrganizationNotificationLimit', () => {
   });
 
   it('should return field errors on invalid input', async () => {
-    const result = await updateOrganizationNotificationLimit('1', { ...validInput, organization_id: '' });
+    const result = await updateOrganizationNotificationLimit('1', { ...(validInput as object), organization_id: '' } as never);
     expect(result.error).toHaveProperty('fieldErrors');
   });
 });
@@ -85,7 +92,7 @@ describe('createOrganizationNotificationLimit - empty path validation', () => {
       success: false,
       error: { issues: [{ path: [], message: 'Root' }] },
     }));
-    const result = await createOrganizationNotificationLimit({ ...validInput, organization_id: '' });
+    const result = await createOrganizationNotificationLimit({ ...(validInput as object), organization_id: '' } as never);
     expect((result.error as { fieldErrors: Record<string, string> }).fieldErrors).toEqual({});
     schema.safeParse = orig;
   });
@@ -99,7 +106,7 @@ describe('updateOrganizationNotificationLimit - empty path validation', () => {
       success: false,
       error: { issues: [{ path: [], message: 'Root' }] },
     }));
-    const result = await updateOrganizationNotificationLimit('1', { ...validInput, organization_id: '' });
+    const result = await updateOrganizationNotificationLimit('1', { ...(validInput as object), organization_id: '' } as never);
     expect((result.error as { fieldErrors: Record<string, string> }).fieldErrors).toEqual({});
     schema.safeParse = orig;
   });
@@ -116,5 +123,53 @@ describe('deleteOrganizationNotificationLimit', () => {
     mockSupabase.eq.mockReturnValue({ error: { message: 'Error' } });
     const result = await deleteOrganizationNotificationLimit('1');
     expect(result.error).toEqual({ message: 'Error' });
+  });
+});
+
+describe('grantNotificationCredits', () => {
+  beforeEach(() => {
+    mockIsAdmin.mockReturnValue(true);
+    mockGetCurrentUser.mockReturnValue({ id: 7, role: { name: 'admin' } });
+  });
+
+  it('rejects a non-admin without touching the db', async () => {
+    mockIsAdmin.mockReturnValue(false);
+    expect(await grantNotificationCredits('3', 10, '')).toEqual({ error: 'db.forbidden' });
+    expect(mockSupabase.insert).not.toHaveBeenCalled();
+  });
+
+  it.each([0, 1.5, Number.NaN])('rejects the amount %p', async (amount) => {
+    expect(await grantNotificationCredits('3', amount, '')).toEqual({ error: 'db.forbidden' });
+    expect(mockSupabase.insert).not.toHaveBeenCalled();
+  });
+
+  it('inserts an admin credit with the trimmed note and revalidates', async () => {
+    mockSupabase.insert.mockReturnValue({ error: null } as never);
+    expect(await grantNotificationCredits('3', -5, '  regalo  ')).toEqual({ error: null });
+    expect(mockSupabase.from).toHaveBeenCalledWith('notification_credit');
+    expect(mockSupabase.insert).toHaveBeenCalledWith({
+      organization_id: 3,
+      amount: -5,
+      source: 'admin',
+      note: 'regalo',
+      created_by: 7,
+    });
+    expect(revalidatePath).toHaveBeenCalledWith('/dashboard/organization_notification_limits');
+  });
+
+  it('stores a blank note as null and a missing user id as null', async () => {
+    mockGetCurrentUser.mockReturnValue(null);
+    mockSupabase.insert.mockReturnValue({ error: null } as never);
+    await grantNotificationCredits('3', 10, '   ');
+    expect(mockSupabase.insert).toHaveBeenCalledWith(
+      expect.objectContaining({ note: null, created_by: null }),
+    );
+  });
+
+  it('returns the translated error when the insert fails', async () => {
+    mockSupabase.insert.mockReturnValue({ error: { message: 'denied', code: '42501' } } as never);
+    const result = await grantNotificationCredits('3', 10, '');
+    expect(typeof result.error).toBe('string');
+    expect(revalidatePath).not.toHaveBeenCalled();
   });
 });
