@@ -78,7 +78,8 @@
       "removeError": "Failed to remove image",
       "uploading": "Uploading...",
       "clickToUpload": "Click to upload image",
-      "maxSize": "Max size: {maxSize}MB",
+      "formats": "JPEG, PNG, WebP · Max {maxSize}MB",
+      "autoResize": "Resized automatically to {size}×{size} px (1:1). Upload a square image to avoid borders.",
       "remove": "Remove image"
     },
     "passwordStrength": {
@@ -1930,7 +1931,7 @@
         "industry": "Industry (optional)",
         "industryPlaceholder": "Select an industry",
         "logo": "Organization logo",
-        "logoHint": "Recommended: PNG or JPG. Max 2MB. Suggested size 512x512px.",
+        "logoHint": "Square, 512×512 px or larger. Resized automatically on upload; a PNG with a transparent background looks best.",
         "businessName": "Legal name (optional)",
         "taxId": "Tax ID (optional)",
         "publicHint": "This field is shown on your company's public profile in the beneficiary app."
@@ -2063,7 +2064,7 @@
       "taxId": "Tax ID",
       "taxIdPlaceholder": "e.g. 12-3456789",
       "businessLogo": "Business logo",
-      "logoHint": "PNG or JPG, maximum 2MB. We recommend a square image.",
+      "logoHint": "Square, 512×512 px or larger. Resized automatically on upload; a PNG with a transparent background looks best.",
       "branchName": "Branch name",
       "branchNamePlaceholder": "e.g. Downtown Branch",
       "branchAddress": "First branch address",

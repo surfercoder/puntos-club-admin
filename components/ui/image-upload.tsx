@@ -7,6 +7,10 @@ import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { LOGO_IMAGE_SIZE, normalizeProductImage } from '@/lib/utils/normalize-product-image';
+
+// Igual que en premios: sin GIF, la normalizacion a WebP se queda con el primer frame.
+const SUPPORTED_IMAGE_TYPES = new Set(['image/jpeg', 'image/jpg', 'image/png', 'image/webp']);
 
 interface ImageUploadProps {
   value?: string | null;
@@ -77,21 +81,23 @@ function ImageDropzone({
   uploadLabel,
   uploadingLabel,
   clickToUploadLabel,
-  maxSizeLabel,
+  formatsLabel,
+  autoResizeLabel,
   onClick,
 }: {
   uploading: boolean;
   uploadLabel: string;
   uploadingLabel: string;
   clickToUploadLabel: string;
-  maxSizeLabel: string;
+  formatsLabel: string;
+  autoResizeLabel: string;
   onClick: () => void;
 }) {
   return (
     <button
       type="button"
       aria-label={uploadLabel}
-      className="flex w-full max-w-xs cursor-pointer flex-col items-center justify-center rounded-lg border-2 border-dashed border-muted-foreground/25 bg-muted/50 p-8 transition-colors hover:border-muted-foreground/50 hover:bg-muted"
+      className="flex w-full max-w-xs cursor-pointer flex-col items-center justify-center rounded-lg text-center border-2 border-dashed border-muted-foreground/25 bg-muted/50 p-8 transition-colors hover:border-muted-foreground/50 hover:bg-muted"
       onClick={onClick}
     >
       {uploading ? (
@@ -106,7 +112,8 @@ function ImageDropzone({
           </div>
           <div className="mt-4 flex flex-col items-center gap-1">
             <p className="text-sm font-medium">{clickToUploadLabel}</p>
-            <p className="text-xs text-muted-foreground">{maxSizeLabel}</p>
+            <p className="text-xs text-muted-foreground">{formatsLabel}</p>
+            <p className="text-[11px] text-muted-foreground">{autoResizeLabel}</p>
           </div>
           <Upload className="mt-2 size-4 text-muted-foreground" />
         </>
@@ -120,7 +127,7 @@ export function ImageUpload({
   onChange,
   bucket,
   path = '',
-  accept = 'image/*',
+  accept = [...SUPPORTED_IMAGE_TYPES].join(','),
   maxSizeMB = 5,
   disabled = false,
   aspectRatio = 'auto',
@@ -141,7 +148,7 @@ export function ImageUpload({
       return;
     }
 
-    if (!file.type.startsWith('image/')) {
+    if (!SUPPORTED_IMAGE_TYPES.has(file.type)) {
       toast.error(t('selectImageFile'));
       return;
     }
@@ -149,7 +156,7 @@ export function ImageUpload({
     setUploading(true);
 
     const formData = new FormData();
-    formData.append('file', file);
+    formData.append('file', await normalizeProductImage(file, LOGO_IMAGE_SIZE, LOGO_IMAGE_SIZE));
     formData.append('bucket', bucket);
     if (path) formData.append('path', path);
 
@@ -222,7 +229,8 @@ export function ImageUpload({
       ) : (
         <ImageDropzone
           clickToUploadLabel={t('clickToUpload')}
-          maxSizeLabel={t('maxSize', { maxSize: maxSizeMB })}
+          autoResizeLabel={t('autoResize', { size: LOGO_IMAGE_SIZE })}
+          formatsLabel={t('formats', { maxSize: maxSizeMB })}
           uploadLabel={t('upload')}
           uploading={uploading}
           uploadingLabel={t('uploading')}

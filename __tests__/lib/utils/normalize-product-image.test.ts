@@ -50,6 +50,18 @@ describe('normalizeProductImage', () => {
     expect(drawImage).toHaveBeenCalledWith(expect.anything(), 0, 187.5, 1200, 300);
   });
 
+  it('letterboxes a wide logo into a centred square canvas', async () => {
+    (globalThis as { createImageBitmap: jest.Mock }).createImageBitmap.mockResolvedValue({
+      width: 1024,
+      height: 512,
+      close,
+    });
+
+    await normalizeProductImage(source, 512, 512);
+
+    expect(drawImage).toHaveBeenCalledWith(expect.anything(), 0, 128, 512, 256);
+  });
+
   it('keeps the original file when the canvas has no 2d context', async () => {
     context = null;
     expect(await normalizeProductImage(source)).toBe(source);

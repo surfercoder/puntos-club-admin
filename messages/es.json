@@ -78,7 +78,8 @@
       "removeError": "Error al eliminar la imagen",
       "uploading": "Subiendo...",
       "clickToUpload": "Hacé clic para subir una imagen",
-      "maxSize": "Tamaño máximo: {maxSize}MB",
+      "formats": "JPEG, PNG, WebP · Máx {maxSize}MB",
+      "autoResize": "Se ajusta sola a {size}×{size} px (1:1). Usá una imagen cuadrada para que no queden bordes.",
       "remove": "Eliminar imagen"
     },
     "passwordStrength": {
@@ -1930,7 +1931,7 @@
         "industry": "Rubro / Industria (opcional)",
         "industryPlaceholder": "Seleccionar rubro",
         "logo": "Logo de la organización",
-        "logoHint": "Recomendado: PNG o JPG. Máx. 2MB. Tamaño sugerido 512x512px.",
+        "logoHint": "Cuadrado, de 512×512 px o más. Se ajusta solo al subirlo; un PNG con fondo transparente queda mejor.",
         "businessName": "Razón social (opcional)",
         "taxId": "CUIT / Identificación fiscal (opcional)",
         "publicHint": "Este dato se muestra en el perfil público de tu empresa, dentro de la app de beneficiarios."
@@ -2063,7 +2064,7 @@
       "taxId": "CUIT / RUT / NIF",
       "taxIdPlaceholder": "Ej: 20-12345678-9",
       "businessLogo": "Logo del negocio",
-      "logoHint": "PNG o JPG, máximo 2MB. Recomendamos una imagen cuadrada.",
+      "logoHint": "Cuadrado, de 512×512 px o más. Se ajusta solo al subirlo; un PNG con fondo transparente queda mejor.",
       "branchName": "Nombre de la sucursal",
       "branchNamePlaceholder": "Ej: Sucursal Centro",
       "branchAddress": "Dirección de la primera sucursal",

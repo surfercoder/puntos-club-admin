@@ -103,6 +103,22 @@ describe('ImageUpload', () => {
     expect(global.fetch).not.toHaveBeenCalled();
   });
 
+  it('rejects a GIF, which would lose its animation when normalized', async () => {
+    render(<ImageUpload bucket="logos" onChange={jest.fn()} />);
+    const gif = new File(['x'], 'logo.gif', { type: 'image/gif' });
+
+    fireEvent.change(fileInput(), { target: { files: [gif] } });
+
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('selectImageFile'));
+    expect(global.fetch).not.toHaveBeenCalled();
+  });
+
+  it('shows the formats and the target size inside the dropzone', () => {
+    render(<ImageUpload bucket="logos" onChange={jest.fn()} />);
+    expect(screen.getByText('formats')).toBeInTheDocument();
+    expect(screen.getByText('autoResize')).toBeInTheDocument();
+  });
+
   it('surfaces the server error message when the upload fails', async () => {
     mockFetch(jest.fn().mockResolvedValue({ ok: false, json: async () => ({ error: 'Bucket lleno' }) }));
     render(<ImageUpload bucket="logos" onChange={jest.fn()} />);
