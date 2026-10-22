@@ -10,7 +10,7 @@ import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { requireUser } from '@/lib/auth/require-user';
 import { AppError } from '@/lib/errors';
 import { errorText, translateError } from '@/lib/error-handler';
-import { enforcePlanLimit } from '@/lib/plans/usage';
+import { enforcePlanLimit, hasPlanFeature } from '@/lib/plans/usage';
 
 export async function createOrganization(input: Organization) {
   await requireUser();
@@ -129,7 +129,7 @@ export async function getOrganizationSettings(id: string) {
   const { data, error } = await supabase
     .from('organization')
     .select(
-      'id, name, business_name, tax_id, logo_url, is_public, timezone, description, contact_email, contact_phone, website, industry, invitation_code, welcome_message, points_label, allow_new_members, requires_approval, email_notifications, show_in_explore',
+      'id, name, business_name, tax_id, logo_url, brand_color, is_public, timezone, description, contact_email, contact_phone, website, industry, invitation_code, welcome_message, points_label, allow_new_members, requires_approval, email_notifications, show_in_explore',
     )
     .eq('id', id)
     .single();
@@ -307,9 +307,16 @@ export async function updateClubProfile(id: string, input: ClubProfileInput) {
   if (!parsed.success) {
     return { error: await errorText('db.invalidValue') };
   }
-  const { address, ...orgFields } = parsed.data;
+  const { address, brand_color, ...orgFields } = parsed.data;
 
   const supabase = await createClient();
+
+  // Sin white_label el color no se escribe, pero tampoco se borra: bajar de
+  // plan no le apaga la marca a nadie, solo le impide cambiarla.
+  const brandField =
+    brand_color !== undefined && (await hasPlanFeature(Number(id), 'white_label'))
+      ? { brand_color }
+      : {};
 
   if (!orgFields.is_public) {
     const planError = await privateClubPlanError(supabase, id);
@@ -320,6 +327,7 @@ export async function updateClubProfile(id: string, input: ClubProfileInput) {
     .from('organization')
     .update({
       ...orgFields,
+      ...brandField,
       invitation_code: orgFields.invitation_code?.trim() || null,
     })
     .eq('id', id);

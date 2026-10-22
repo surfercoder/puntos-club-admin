@@ -91,7 +91,7 @@ export const PLAN_FEATURE_LABELS: Record<PlanFeatureKey, string> = {
   api:                        'API',
   webhooks:                   'Webhooks',
   sso:                        'SSO',
-  white_label:                'White Label',
+  white_label:                'Colores de tu marca en la app',
   advanced_roles:             'Roles avanzados',
   audit:                      'Auditoría',
   erp_integration:            'Integración ERP',

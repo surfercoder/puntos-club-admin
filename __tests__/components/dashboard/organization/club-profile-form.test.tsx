@@ -358,3 +358,144 @@ describe('ClubProfileForm', () => {
     }
   });
 });
+
+describe('ClubProfileForm — color de marca', () => {
+  // jsdom no carga imágenes ni dibuja en canvas: el logo "carga" en un
+  // microtask (o falla si la URL dice broken) y el canvas devuelve `pixels`.
+  let pixels: number[] = [];
+  let context: 'ok' | 'none' | 'throws' = 'ok';
+
+  class MockImage {
+    onload: (() => void) | null = null;
+    onerror: (() => void) | null = null;
+    crossOrigin = '';
+    set src(url: string) {
+      queueMicrotask(() => (url.includes('broken') ? this.onerror?.() : this.onload?.()));
+    }
+  }
+
+  const red = [215, 20, 26, 255];
+  const blue = [20, 40, 200, 255];
+
+  // restoreMocks del jest.config deshace el spy después de cada test.
+  beforeEach(() => {
+    (global as any).Image = MockImage;
+    jest.spyOn(HTMLCanvasElement.prototype, 'getContext').mockImplementation((() => {
+      if (context === 'none') return null;
+      return {
+        drawImage: jest.fn(),
+        getImageData: () => {
+          if (context === 'throws') throw new Error('tainted');
+          return { data: new Uint8ClampedArray(pixels) };
+        },
+      };
+    }) as any);
+    jest.clearAllMocks();
+    updateClubProfile.mockResolvedValue({ error: null });
+    pixels = [...red, ...red, ...blue];
+    context = 'ok';
+  });
+
+  const withLogo = (extra: Partial<Organization> = {}) =>
+    ({ ...organization, logo_url: 'https://cdn/one.png', ...extra }) as Organization;
+
+  const savedColor = async (container: HTMLElement) => {
+    submit(container);
+    await waitFor(() => expect(updateClubProfile).toHaveBeenCalled());
+    return updateClubProfile.mock.calls.at(-1)[1].brand_color;
+  };
+
+  it('asks for a logo when there is none', () => {
+    render(<ClubProfileForm organization={organization} />);
+    expect(screen.getByText('noLogo')).toBeInTheDocument();
+  });
+
+  it('loads exactly what is saved: no color stays no color', async () => {
+    const { container } = render(<ClubProfileForm organization={withLogo()} />);
+    await screen.findByRole('radio', { name: /#D7141A/ });
+    expect(screen.getByRole('radio', { name: /none/ })).toHaveAttribute('aria-checked', 'true');
+    expect(screen.queryByText('previewHeader')).not.toBeInTheDocument();
+    expect(await savedColor(container)).toBeNull();
+  });
+
+  it('saves the swatch the owner picks', async () => {
+    const { container } = render(<ClubProfileForm organization={withLogo()} />);
+    fireEvent.click(await screen.findByRole('radio', { name: /#D7141A/ }));
+    expect(await savedColor(container)).toBe('#D7141A');
+  });
+
+  it('keeps a saved color that is still in the logo', async () => {
+    const { container } = render(<ClubProfileForm organization={withLogo({ brand_color: '#1428C8' })} />);
+    await screen.findByRole('radio', { name: /#D7141A/ });
+    expect(screen.getByRole('radio', { name: /#1428C8/ })).toHaveAttribute('aria-checked', 'true');
+    expect(await savedColor(container)).toBe('#1428C8');
+  });
+
+  it('shows a saved color missing from the logo as a selected swatch', async () => {
+    const { container } = render(<ClubProfileForm organization={withLogo({ brand_color: '#00FF00' })} />);
+    await screen.findByRole('radio', { name: /#D7141A/ });
+    expect(screen.getByRole('radio', { name: /#00FF00/ })).toHaveAttribute('aria-checked', 'true');
+    expect(await savedColor(container)).toBe('#00FF00');
+  });
+
+  it('proposes the dominant color of a logo uploaded in the session and previews it', async () => {
+    const { container } = render(<ClubProfileForm organization={withLogo()} />);
+    await screen.findByRole('radio', { name: /#D7141A/ });
+    pixels = [...blue];
+    fireEvent.click(screen.getByTestId('logo'));
+    await waitFor(() =>
+      expect(screen.getByRole('radio', { name: /#1428C8/ })).toHaveAttribute('aria-checked', 'true'),
+    );
+    expect(screen.getByText('previewHeader')).toBeInTheDocument();
+    expect(await savedColor(container)).toBe('#1428C8');
+  });
+
+  it('keeps the chosen color when the new logo still has it', async () => {
+    const { container } = render(<ClubProfileForm organization={withLogo({ brand_color: '#1428C8' })} />);
+    await screen.findByRole('radio', { name: /#D7141A/ });
+    fireEvent.click(screen.getByTestId('logo'));
+    await waitFor(() => expect(screen.getByTestId('logo')).toHaveTextContent('https://cdn/logo.png'));
+    await act(async () => {});
+    expect(await savedColor(container)).toBe('#1428C8');
+  });
+
+  it.each([
+    ['the logo fails to load', 'https://cdn/broken.png', 'ok'],
+    ['the canvas has no 2d context', 'https://cdn/one.png', 'none'],
+    ['the canvas is tainted by CORS', 'https://cdn/one.png', 'throws'],
+  ] as const)('explains it cannot read the colors when %s', async (_, url, mode) => {
+    context = mode;
+    const { container } = render(<ClubProfileForm organization={withLogo({ logo_url: url })} />);
+    expect(await screen.findByText('noColors')).toBeInTheDocument();
+    expect(await savedColor(container)).toBeNull();
+  });
+
+  it('keeps the saved color when a new logo has no readable colors', async () => {
+    const { container } = render(<ClubProfileForm organization={withLogo({ brand_color: '#1428C8' })} />);
+    await screen.findByRole('radio', { name: /#D7141A/ });
+    context = 'throws';
+    fireEvent.click(screen.getByTestId('logo'));
+    await waitFor(() => expect(screen.queryByRole('radio', { name: /#D7141A/ })).not.toBeInTheDocument());
+    expect(await savedColor(container)).toBe('#1428C8');
+  });
+
+  it('ignores a logo that finishes loading after unmount', async () => {
+    const { unmount } = render(<ClubProfileForm organization={withLogo()} />);
+    unmount();
+    const { unmount: unmountBroken } = render(
+      <ClubProfileForm organization={withLogo({ logo_url: 'https://cdn/broken.png' })} />,
+    );
+    unmountBroken();
+    await act(async () => {});
+  });
+
+  it('shows the plan lock instead and never sends the color', async () => {
+    const { container } = render(
+      <ClubProfileForm brandingLocked={<p>locked</p>} organization={withLogo({ brand_color: '#1428C8' })} />,
+    );
+    expect(screen.getByText('locked')).toBeInTheDocument();
+    submit(container);
+    await waitFor(() => expect(updateClubProfile).toHaveBeenCalled());
+    expect(updateClubProfile.mock.calls[0][1]).not.toHaveProperty('brand_color');
+  });
+});

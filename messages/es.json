@@ -1979,6 +1979,16 @@
         "city": "Ciudad",
         "state": "Provincia",
         "zip_code": "Código postal"
+      },
+      "brand": {
+        "title": "Color de marca",
+        "description": "Las pantallas de tu club en la app de beneficiarios toman este color. Elegí uno de los colores de tu logo: el resto de la paleta la armamos nosotros para que combine y se lea bien.",
+        "none": "Colores de Puntos Club",
+        "noLogo": "Subí el logo de tu club para elegir un color de marca.",
+        "noColors": "No pudimos leer los colores de tu logo. Probá subiéndolo de nuevo.",
+        "previewHeader": "Tu club",
+        "previewPoints": "Tus puntos disponibles",
+        "previewPill": "Historial"
       }
     },
     "help": {
@@ -2107,7 +2117,7 @@
         "api": "API",
         "webhooks": "Webhooks",
         "sso": "SSO",
-        "white_label": "White Label",
+        "white_label": "Colores de tu marca en la app",
         "advanced_roles": "Roles avanzados",
         "audit": "Auditoría",
         "erp_integration": "Integración ERP",

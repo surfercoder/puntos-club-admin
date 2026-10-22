@@ -4,6 +4,7 @@ import { getTranslations } from "next-intl/server"
 
 import { getOrganizationAddress, getOrganizationSettings } from "@/actions/dashboard/organization/actions"
 import { GiftIllustration } from "@/components/dashboard/home/gift-illustration"
+import { PlanFeatureLocked } from "@/components/dashboard/plan/plan-feature-locked"
 import {
   ClubProfileForm,
   type ClubProfileFormAddress,
@@ -31,11 +32,13 @@ export default async function OrgSettingsPage() {
     redirect("/dashboard")
   }
 
-  const [{ data: org, error }, { data: address }, privateClubAllowed] = await Promise.all([
-    getOrganizationSettings(activeOrgId),
-    getOrganizationAddress(activeOrgId),
-    hasPlanFeature(Number(activeOrgId), "private_club"),
-  ])
+  const [{ data: org, error }, { data: address }, privateClubAllowed, brandingAllowed] =
+    await Promise.all([
+      getOrganizationSettings(activeOrgId),
+      getOrganizationAddress(activeOrgId),
+      hasPlanFeature(Number(activeOrgId), "private_club"),
+      hasPlanFeature(Number(activeOrgId), "white_label"),
+    ])
 
   if (error || !org) {
     redirect("/dashboard")
@@ -55,6 +58,7 @@ export default async function OrgSettingsPage() {
         address={address as ClubProfileFormAddress | null}
         organization={org as unknown as Organization}
         privateClubAllowed={privateClubAllowed}
+        brandingLocked={brandingAllowed ? null : <PlanFeatureLocked feature="white_label" />}
       />
     </div>
   )

@@ -379,6 +379,28 @@ describe('updateClubProfile', () => {
     );
   });
 
+  it('saves the brand color when the plan includes white_label', async () => {
+    await updateClubProfile('5', { ...profile, brand_color: '#D7141A' });
+    expect(mockHasPlanFeature).toHaveBeenCalledWith(5, 'white_label');
+    expect(mockSupabase.update).toHaveBeenCalledWith(
+      expect.objectContaining({ brand_color: '#D7141A' }),
+    );
+  });
+
+  // Bajar de plan no borra el color: solo impide cambiarlo.
+  it('ignores the brand color when the plan does not include white_label', async () => {
+    mockHasPlanFeature.mockResolvedValueOnce(false);
+    await updateClubProfile('5', { ...profile, brand_color: null });
+    const written = (mockSupabase.update as jest.Mock).mock.calls.at(-1)?.[0];
+    expect(written).not.toHaveProperty('brand_color');
+  });
+
+  it('rejects a brand color that is not #RRGGBB', async () => {
+    const result = await updateClubProfile('5', { ...profile, brand_color: 'red' });
+    expect(result.error).toBeTruthy();
+    expect(mockSupabase.update).not.toHaveBeenCalled();
+  });
+
   it('stores a null code when it is blank', async () => {
     await updateClubProfile('5', { ...profile, invitation_code: '   ' });
     expect(mockSupabase.update).toHaveBeenCalledWith(

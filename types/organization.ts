@@ -7,6 +7,7 @@ export type Organization = {
   tax_id?: string | null;
   public_info?: string | null;
   logo_url?: string | null;
+  brand_color?: string | null;
   creation_date: string;
   plan: PlanType;
   trial_started_at?: string | null;

@@ -1979,6 +1979,16 @@
         "city": "City",
         "state": "State",
         "zip_code": "Zip code"
+      },
+      "brand": {
+        "title": "Brand color",
+        "description": "Your club's screens in the member app use this color. Pick one of your logo's colors: we build the rest of the palette so it matches and stays readable.",
+        "none": "Puntos Club colors",
+        "noLogo": "Upload your club's logo to pick a brand color.",
+        "noColors": "We couldn't read your logo's colors. Try uploading it again.",
+        "previewHeader": "Your club",
+        "previewPoints": "Your available points",
+        "previewPill": "History"
       }
     },
     "help": {
@@ -2107,7 +2117,7 @@
         "api": "API",
         "webhooks": "Webhooks",
         "sso": "SSO",
-        "white_label": "White Label",
+        "white_label": "Your brand colors in the app",
         "advanced_roles": "Advanced roles",
         "audit": "Audit log",
         "erp_integration": "ERP integration",

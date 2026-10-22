@@ -46,6 +46,7 @@ export const ClubProfileSchema = z.object({
   website: z.string().nullable(),
   industry: z.string().nullable(),
   logo_url: z.string().nullable(),
+  brand_color: z.string().regex(/^#[0-9A-F]{6}$/).nullable().optional(),
   is_public: z.boolean(),
   show_in_explore: z.boolean(),
   allow_new_members: z.boolean(),

@@ -11,6 +11,7 @@ import {
   Globe,
   Lock,
   Mail,
+  Palette,
   Phone,
   Save,
   Settings,
@@ -21,7 +22,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState, useTransition } from "react";
+import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
@@ -49,6 +50,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { brandPalette, dominantColors } from "@/lib/brand-palette";
 import type { Organization } from "@/types/organization";
 
 const INDUSTRIES = ["retail", "gastronomy", "services", "health", "beauty", "other"] as const;
@@ -112,11 +114,14 @@ export function ClubProfileForm({
   organization,
   address,
   privateClubAllowed = true,
+  brandingLocked = null,
 }: {
   organization: Organization;
   address?: ClubProfileFormAddress | null;
   /** El plan no incluye club privado: la opción se ve, pero no se puede elegir. */
   privateClubAllowed?: boolean;
+  /** El plan no incluye white_label: se muestra esto en lugar del color de marca. */
+  brandingLocked?: React.ReactNode;
 }) {
   const t = useTranslations("Dashboard.clubProfile");
   const tCommon = useTranslations("Common");
@@ -124,6 +129,7 @@ export function ClubProfileForm({
   const [pending, startTransition] = useTransition();
 
   const [logoUrl, setLogoUrl] = useState(organization.logo_url ?? null);
+  const [brandColor, setBrandColor] = useState(organization.brand_color ?? null);
   const [toggles, setToggles] = useState<Toggles>({
     is_public: organization.is_public ?? true,
     show_in_explore: organization.show_in_explore ?? true,
@@ -182,6 +188,7 @@ export function ClubProfileForm({
         website: text("website"),
         industry: industry || null,
         logo_url: logoUrl,
+        ...(brandingLocked ? {} : { brand_color: brandColor }),
         invitation_code: invitationCode.trim() || null,
         welcome_message: text("welcome_message"),
         points_label: pointsLabel,
@@ -285,6 +292,14 @@ export function ClubProfileForm({
             onLogoChange={setLogoUrl}
             organization={organization}
           />
+
+          {brandingLocked ?? (
+            <BrandColorSection
+              logoUrl={logoUrl}
+              onChange={setBrandColor}
+              value={brandColor}
+            />
+          )}
 
           <section className="rounded-xl border bg-card p-5 shadow-sm">
             <h2 className="flex items-center gap-2 text-base font-semibold">
@@ -555,6 +570,138 @@ function GeneralSection({
           />
         </div>
       </div>
+    </section>
+  );
+}
+
+/**
+ * Color de marca para las pantallas del club en las apps de beneficiario.
+ * El owner elige entre los colores de su logo, nunca uno libre: la paleta
+ * completa la arma brandPalette y así siempre combina.
+ */
+function BrandColorSection({
+  logoUrl,
+  onChange,
+  value,
+}: {
+  logoUrl: string | null;
+  onChange: React.Dispatch<React.SetStateAction<string | null>>;
+  value: string | null;
+}) {
+  const t = useTranslations("Dashboard.clubProfile.brand");
+  const [colors, setColors] = useState<string[] | null>(null);
+  // El form arranca mostrando exactamente lo guardado: solo un logo subido en
+  // esta sesión propone color.
+  const savedLogo = useRef(logoUrl);
+
+  // Lee los colores del logo en el navegador: canvas de 64x64 y
+  // dominantColors. Un logo de otro dominio sin CORS ensucia el canvas y
+  // getImageData tira; en ese caso no hay colores para elegir.
+  useEffect(() => {
+    if (!logoUrl) {
+      setColors([]);
+      return;
+    }
+    let cancelled = false;
+    const img = new Image();
+    img.crossOrigin = "anonymous";
+    img.onload = () => {
+      let loaded: string[] = [];
+      try {
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = 64;
+        const ctx = canvas.getContext("2d");
+        if (ctx) {
+          ctx.drawImage(img, 0, 0, 64, 64);
+          loaded = dominantColors(ctx.getImageData(0, 0, 64, 64).data);
+        }
+      } catch {
+        /* canvas sucio por CORS */
+      }
+      if (cancelled) return;
+      setColors(loaded);
+      // Logo nuevo: se mantiene el color si sigue en el logo, si no se
+      // propone el primero. Sin colores no se toca nada.
+      if (!loaded.length || logoUrl === savedLogo.current) return;
+      onChange((current) => (current && loaded.includes(current) ? current : loaded[0]));
+    };
+    img.onerror = () => !cancelled && setColors([]);
+    img.src = logoUrl;
+    return () => {
+      cancelled = true;
+    };
+  }, [logoUrl, onChange]);
+
+  const palette = brandPalette(value);
+  // Un color guardado que no sale del logo actual se muestra igual,
+  // seleccionado, para que el form no lo cambie solo.
+  const swatches = [...(colors ?? [])];
+  if (value && !swatches.includes(value)) swatches.push(value);
+
+  return (
+    <section className="rounded-xl border bg-card p-5 shadow-sm">
+      <h2 className="flex items-center gap-2 text-base font-semibold">
+        <span className="grid size-8 place-items-center rounded-lg bg-brand-violet/10 text-brand-violet">
+          <Palette className="size-4" />
+        </span>
+        {t("title")}
+      </h2>
+      <p className="mt-1 text-sm text-muted-foreground">{t("description")}</p>
+
+      {!logoUrl || (colors?.length === 0 && !value) ? (
+        <p className="mt-4 rounded-lg bg-muted p-3 text-xs text-muted-foreground">
+          {t(logoUrl ? "noColors" : "noLogo")}
+        </p>
+      ) : (
+        <div className="mt-4 flex flex-wrap items-start gap-6">
+          <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={t("title")}>
+            {[...swatches, null].map((color) => (
+              <button
+                aria-checked={value === color}
+                className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-xs font-medium transition-colors ${
+                  value === color ? "border-brand-violet bg-brand-violet/5" : "hover:bg-accent"
+                }`}
+                key={color ?? "none"}
+                onClick={() => onChange(color)}
+                role="radio"
+                type="button"
+              >
+                <span
+                  className="size-5 rounded-full border"
+                  style={{ background: color ?? "linear-gradient(135deg, #7539F9, #FD66AC)" }}
+                />
+                {color ?? t("none")}
+              </button>
+            ))}
+          </div>
+
+          {palette && (
+            <div aria-hidden className="w-44 overflow-hidden rounded-xl border text-white shadow-sm">
+              <div
+                className="px-3 py-2 text-xs font-semibold"
+                style={{ background: `linear-gradient(to right, ${palette.headerGrad.join(", ")})` }}
+              >
+                {t("previewHeader")}
+              </div>
+              <div className="bg-white p-2">
+                <div
+                  className="rounded-lg px-3 py-2"
+                  style={{ background: `linear-gradient(to right, ${palette.pointsGrad.join(", ")})` }}
+                >
+                  <p className="text-[10px] opacity-90">{t("previewPoints")}</p>
+                  <p className="text-lg font-bold leading-tight">9.500</p>
+                </div>
+                <p
+                  className="mt-2 rounded-md py-1 text-center text-[10px] font-semibold"
+                  style={{ background: palette.violetSoft, color: palette.violet }}
+                >
+                  {t("previewPill")}
+                </p>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
     </section>
   );
 }
