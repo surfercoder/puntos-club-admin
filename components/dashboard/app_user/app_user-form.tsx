@@ -64,7 +64,7 @@ function RoleSelectField({
   t: Translate;
 }) {
   return (
-    <div className="flex-1">
+    <div>
       <Label htmlFor="role_id">{t('form.roleLabel')}</Label>
       <Select value={roleId} onValueChange={setRoleId} name="role_id">
         <SelectTrigger
@@ -107,15 +107,15 @@ function CashierAppQr({ show }: { show: boolean }) {
       href={PUNTOS_CLUB_CAJA_APK_URL}
       target="_blank"
       rel="noopener noreferrer"
-      className="flex shrink-0 flex-col items-center rounded-lg border p-2"
+      className="flex flex-col items-center justify-center gap-4 rounded-lg border p-4 sm:flex-row sm:gap-6"
     >
-      <Image alt="" aria-hidden className="mb-1" height={32} src={PUNTOS_CLUB_CAJA_LOGO} width={32} />
-      <div className="rounded-md border-2 border-primary bg-white p-1.5">
-        <QRCodeSVG value={PUNTOS_CLUB_CAJA_APK_URL} size={96} bgColor="#ffffff" fgColor="#31A1D6" level="M" />
+      <div className="rounded-md border-2 border-primary bg-white p-2">
+        <QRCodeSVG value={PUNTOS_CLUB_CAJA_APK_URL} size={144} bgColor="#ffffff" fgColor="#31A1D6" level="M" />
       </div>
-      <span className="mt-1 max-w-28 text-center text-[10px] leading-tight text-muted-foreground">
-        {t('form.cashierAppQr')}
-      </span>
+      <div className="flex max-w-56 flex-col items-center gap-2 text-center">
+        <Image alt="" aria-hidden height={48} src={PUNTOS_CLUB_CAJA_LOGO} width={48} />
+        <span className="text-sm text-muted-foreground">{t('form.cashierAppQr')}</span>
+      </div>
     </a>
   );
 }
@@ -353,23 +353,21 @@ export default function AppUserForm({
     <form action={formAction} className="space-y-4" onSubmit={handleSubmit}>
       {appUser?.id && <input name="id" type="hidden" value={appUser.id} />}
 
-      <div className="flex flex-wrap items-start gap-4">
-        {lockedRoleName ? (
-          <input name="role_id" type="hidden" value={roleId} />
-        ) : (
-          <RoleSelectField
-            actionState={currentActionState}
-            currentRoleId={appUser?.role_id}
-            isAtLimit={isAtLimit}
-            roleId={roleId}
-            roles={roles}
-            setRoleId={setRoleId}
-            t={t}
-          />
-        )}
+      {lockedRoleName ? (
+        <input name="role_id" type="hidden" value={roleId} />
+      ) : (
+        <RoleSelectField
+          actionState={currentActionState}
+          currentRoleId={appUser?.role_id}
+          isAtLimit={isAtLimit}
+          roleId={roleId}
+          roles={roles}
+          setRoleId={setRoleId}
+          t={t}
+        />
+      )}
 
-        <CashierAppQr show={isCashierSelected && !lockedRoleName} />
-      </div>
+      <CashierAppQr show={isCashierSelected && !lockedRoleName} />
 
       <CashierAppInfo show={isCashierSelected} />
 
