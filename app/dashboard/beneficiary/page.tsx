@@ -409,54 +409,52 @@ export default async function BeneficiaryListPage({ searchParams }: PageProps) {
 
       <BeneficiaryStats data={stats} />
 
-      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_380px]">
-        <div className="min-w-0 space-y-4">
-          <BeneficiaryFilters values={filters} namesOnly={!showPii} />
+      <div className="space-y-4">
+        <BeneficiaryFilters values={filters} namesOnly={!showPii} />
 
-          <div className="rounded-xl border bg-card shadow-sm">
-            <p className="px-4 py-3 text-xs text-muted-foreground">
-              {t('showing', { shown: visible.length, total: filtered.length })}
-            </p>
-            <Table className="text-[13px]">
-              <TableHeader>
-                <TableRow>
-                  <TableHead>{t('tableHeaders.name')}</TableHead>
-                  {showPii && (
-                    <>
-                      <TableHead>{t('tableHeaders.email')}</TableHead>
-                      <TableHead>{t('tableHeaders.phone')}</TableHead>
-                      <TableHead>{t('tableHeaders.document')}</TableHead>
-                    </>
-                  )}
-                  <TableHead>{t('tableHeaders.availablePoints')}</TableHead>
-                  <TableHead>{t('tableHeaders.registrationDate')}</TableHead>
-                  <TableHead>{t('tableHeaders.pointsStatus')}</TableHead>
-                  <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {visible.length > 0 ? (
-                  visible.map((beneficiary) => (
-                    <BeneficiaryTableRow
-                      key={beneficiary.id}
-                      beneficiary={beneficiary}
-                      showPii={showPii}
-                      userIsAdmin={userIsAdmin}
-                      hideOrganizationId={hideOrganizationId}
-                      labels={rowLabels}
-                    />
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell className="py-8 text-center" colSpan={showPii ? 8 : 5}>
-                      {t('empty')}
-                    </TableCell>
-                  </TableRow>
+        <div className="rounded-xl border bg-card shadow-sm">
+          <p className="px-4 py-3 text-xs text-muted-foreground">
+            {t('showing', { shown: visible.length, total: filtered.length })}
+          </p>
+          <Table className="text-[13px]">
+            <TableHeader>
+              <TableRow>
+                <TableHead>{t('tableHeaders.name')}</TableHead>
+                {showPii && (
+                  <>
+                    <TableHead>{t('tableHeaders.email')}</TableHead>
+                    <TableHead>{t('tableHeaders.phone')}</TableHead>
+                    <TableHead>{t('tableHeaders.document')}</TableHead>
+                  </>
                 )}
-              </TableBody>
-            </Table>
-            <TablePagination total={filtered.length} page={page} perPage={perPage} />
-          </div>
+                <TableHead>{t('tableHeaders.availablePoints')}</TableHead>
+                <TableHead>{t('tableHeaders.registrationDate')}</TableHead>
+                <TableHead>{t('tableHeaders.pointsStatus')}</TableHead>
+                <TableHead className="text-right">{t('tableHeaders.actions')}</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {visible.length > 0 ? (
+                visible.map((beneficiary) => (
+                  <BeneficiaryTableRow
+                    key={beneficiary.id}
+                    beneficiary={beneficiary}
+                    showPii={showPii}
+                    userIsAdmin={userIsAdmin}
+                    hideOrganizationId={hideOrganizationId}
+                    labels={rowLabels}
+                  />
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell className="py-8 text-center" colSpan={showPii ? 8 : 5}>
+                    {t('empty')}
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+          <TablePagination total={filtered.length} page={page} perPage={perPage} />
         </div>
 
         {mapAllowed ? (

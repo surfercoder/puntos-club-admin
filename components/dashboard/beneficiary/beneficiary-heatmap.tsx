@@ -129,7 +129,7 @@ export function BeneficiaryHeatmap({ points }: { points: BeneficiaryPoint[] }) {
         </Select>
       </div>
 
-      <div className="relative h-[290px] overflow-hidden rounded-lg border bg-muted">
+      <div className="relative h-[360px] overflow-hidden rounded-lg border bg-muted md:h-[520px]">
         <div ref={containerRef} className="size-full" />
         {status !== "ready" && (
           <p className="absolute inset-0 grid place-items-center p-6 text-center text-sm text-muted-foreground">
