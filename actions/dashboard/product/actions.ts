@@ -146,11 +146,34 @@ export async function deleteProduct(id: string) {
   return { error };
 }
 
+export async function reorderProducts(productIds: string[]) {
+  await requireUser();
+
+  const [supabase, activeOrgIdNumber] = await Promise.all([createClient(), getMutationOrgId()]);
+
+  if (!activeOrgIdNumber) {
+    return { error: new AppError('organization.noActive') };
+  }
+
+  const { error } = await supabase.rpc('reorder_products', {
+    p_organization_id: activeOrgIdNumber,
+    p_product_ids: productIds.map(Number),
+  });
+
+  return { error };
+}
+
 export async function getProducts() {
   const [supabase, currentUser] = await Promise.all([createClient(), getCurrentUser()]);
   const orgIdFilter = await getActiveOrgIdFilter(currentUser);
 
-  let query = supabase.from('product').select('*').order('name');
+  // Mismo orden que el catálogo de las apps: el que eligió el owner, y los
+  // productos que nunca se reordenaron (sort_order NULL) al final, por puntos.
+  let query = supabase
+    .from('product')
+    .select('*')
+    .order('sort_order', { ascending: true, nullsFirst: false })
+    .order('required_points', { ascending: true });
   if (orgIdFilter) {
     query = query.eq('organization_id', orgIdFilter);
   }

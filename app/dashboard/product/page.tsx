@@ -5,6 +5,7 @@ import { getTranslations } from 'next-intl/server';
 
 import { getProducts } from '@/actions/dashboard/product/actions';
 import DeleteModal from '@/components/dashboard/product/delete-modal';
+import { SortableProductRows } from '@/components/dashboard/product/sortable-product-rows';
 import { PlanLimitCreateButton } from '@/components/dashboard/plan/plan-limit-create-button';
 import { PlanUsageBadge } from '@/components/dashboard/plan/plan-usage-badge';
 import { PlanUsageBanner } from '@/components/dashboard/plan/plan-usage-banner';
@@ -52,6 +53,7 @@ export default async function ProductListPage() {
         <Table>
           <ListTableHeader
             columns={[
+              { label: '', className: 'w-8' },
               { label: t('tableHeaders.images') },
               { label: t('tableHeaders.name') },
               { label: t('tableHeaders.description') },
@@ -62,67 +64,72 @@ export default async function ProductListPage() {
           />
           <TableBody>
             {data && data.length > 0 ? (
-              data.map((product: Product) => (
-                <TableRow key={product.id}>
-                  <TableCell>
-                    <div className="flex gap-1">
-                      {product.image_urls && product.image_urls.length > 0 ? (
-                        product.image_urls.map((url, index) => (
-                          <div
-                            key={url}
-                            className="relative size-12 rounded border overflow-hidden bg-muted"
-                          >
-                            <Image
-                              src={url}
-                              alt={`${product.name} image ${index + 1}`}
-                              fill
-                              className="object-cover"
-                              sizes="48px"
+              <SortableProductRows
+                rows={data.map((product: Product) => ({
+                  id: String(product.id),
+                  cells: (
+                      <>
+                        <TableCell>
+                          <div className="flex gap-1">
+                            {product.image_urls && product.image_urls.length > 0 ? (
+                              product.image_urls.map((url, index) => (
+                                <div
+                                  key={url}
+                                  className="relative size-12 rounded border overflow-hidden bg-muted"
+                                >
+                                  <Image
+                                    src={url}
+                                    alt={`${product.name} image ${index + 1}`}
+                                    fill
+                                    className="object-cover"
+                                    sizes="48px"
+                                  />
+                                </div>
+                              ))
+                            ) : (
+                              <div className="size-12 rounded border bg-muted flex items-center justify-center">
+                                <ImageIcon className="size-5 text-muted-foreground" />
+                              </div>
+                            )}
+                          </div>
+                        </TableCell>
+                        <TableCell className="font-medium">
+                          {product.name}
+                        </TableCell>
+                        <TableCell
+                          className="max-w-[160px] truncate md:max-w-[240px] lg:max-w-[320px]"
+                          title={product.description || undefined}
+                        >
+                          {product.description || 'N/A'}
+                        </TableCell>
+                        <TableCell>{product.required_points}</TableCell>
+                        <TableCell>
+                          {product.stock > 0 ? (
+                            product.stock
+                          ) : (
+                            <span className="text-muted-foreground">{t('outOfStock')}</span>
+                          )}
+                        </TableCell>
+                        <TableCell className="text-right">
+                          <div className="flex items-center justify-end gap-2">
+                            <Button asChild size="sm" variant="secondary">
+                              <Link href={`/dashboard/product/edit/${product.id}`}>
+                                <Pencil className="size-4" />
+                              </Link>
+                            </Button>
+                            <DeleteModal
+                              productId={product.id}
+                              productName={product.name}
                             />
                           </div>
-                        ))
-                      ) : (
-                        <div className="size-12 rounded border bg-muted flex items-center justify-center">
-                          <ImageIcon className="size-5 text-muted-foreground" />
-                        </div>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell className="font-medium">
-                    {product.name}
-                  </TableCell>
-                  <TableCell
-                    className="max-w-[160px] truncate md:max-w-[240px] lg:max-w-[320px]"
-                    title={product.description || undefined}
-                  >
-                    {product.description || 'N/A'}
-                  </TableCell>
-                  <TableCell>{product.required_points}</TableCell>
-                  <TableCell>
-                    {product.stock > 0 ? (
-                      product.stock
-                    ) : (
-                      <span className="text-muted-foreground">{t('outOfStock')}</span>
-                    )}
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-2">
-                      <Button asChild size="sm" variant="secondary">
-                        <Link href={`/dashboard/product/edit/${product.id}`}>
-                          <Pencil className="size-4" />
-                        </Link>
-                      </Button>
-                      <DeleteModal
-                        productId={product.id}
-                        productName={product.name}
-                      />
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))
+                        </TableCell>
+                      </>
+                  ),
+                }))}
+              />
             ) : (
               <TableRow>
-                <TableCell className="text-center py-4" colSpan={6}>{t('empty')}</TableCell>
+                <TableCell className="text-center py-4" colSpan={7}>{t('empty')}</TableCell>
               </TableRow>
             )}
           </TableBody>

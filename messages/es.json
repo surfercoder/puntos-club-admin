@@ -1239,6 +1239,10 @@
         "addImage": "Agregar imagen"
       },
       "outOfStock": "Sin stock",
+      "reorder": {
+        "handle": "Arrastrá para cambiar el orden en el catálogo",
+        "error": "No se pudo guardar el orden del catálogo"
+      },
       "preview": {
         "title": "Vista previa del producto",
         "placeholderName": "Nombre del producto",

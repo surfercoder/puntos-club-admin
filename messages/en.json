@@ -1239,6 +1239,10 @@
         "addImage": "Add image"
       },
       "outOfStock": "Out of stock",
+      "reorder": {
+        "handle": "Drag to change the catalog order",
+        "error": "Couldn't save the catalog order"
+      },
       "preview": {
         "title": "Product preview",
         "placeholderName": "Product name",

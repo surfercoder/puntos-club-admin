@@ -43,6 +43,7 @@ import {
   deleteProduct,
   getProducts,
   getProduct,
+  reorderProducts,
 } from '@/actions/dashboard/product/actions';
 import { enforcePlanLimit } from '@/lib/plans/usage';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
@@ -191,12 +192,39 @@ describe('deleteProduct', () => {
   });
 });
 
+describe('reorderProducts', () => {
+  it('should send the whole list, as numbers, scoped to the active org', async () => {
+    const result = await reorderProducts(['3', '1', '2']);
+    expect(mockSupabase.rpc).toHaveBeenCalledWith('reorder_products', {
+      p_organization_id: 123,
+      p_product_ids: [3, 1, 2],
+    });
+    expect(result.error).toBeNull();
+  });
+
+  it('should return error when neither the cookie nor the user has an org', async () => {
+    mockCookieStore.get.mockReturnValue(undefined);
+    (getCurrentUser as jest.Mock).mockReturnValue({ id: 1, organization_id: null });
+    const result = await reorderProducts(['1']);
+    expect(result.error?.message).toBe('organization.noActive');
+    expect(mockSupabase.rpc).not.toHaveBeenCalledWith('reorder_products', expect.anything());
+  });
+
+  it('should return supabase error on failure', async () => {
+    mockSupabase.rpc.mockReturnValueOnce({ data: null, error: { message: 'DB error' } } as never);
+    const result = await reorderProducts(['1']);
+    expect(result.error).toEqual({ message: 'DB error' });
+  });
+});
+
 describe('getProducts', () => {
   it('should list products unscoped for admins', async () => {
-    mockSupabase.order.mockReturnValue({ data: [{ id: '1' }], error: null });
+    mockSupabase.order.mockReturnValueOnce(mockSupabase).mockReturnValueOnce({ data: [{ id: '1' }], error: null });
     const result = await getProducts();
     expect(mockSupabase.from).toHaveBeenCalledWith('product');
-    expect(mockSupabase.order).toHaveBeenCalledWith('name');
+    // Mismo orden que el catálogo de las apps: el del owner, y los nuevos al final por puntos.
+    expect(mockSupabase.order).toHaveBeenNthCalledWith(1, 'sort_order', { ascending: true, nullsFirst: false });
+    expect(mockSupabase.order).toHaveBeenNthCalledWith(2, 'required_points', { ascending: true });
     // Admins see every org, so no organization_id filter is applied.
     expect(mockSupabase.eq).not.toHaveBeenCalledWith('organization_id', expect.anything());
     expect(result.data).toEqual([{ id: '1' }]);
