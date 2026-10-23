@@ -26,6 +26,8 @@ import { useEffect, useRef, useState, useTransition } from "react";
 import { toast } from "sonner";
 import { useTranslations } from "next-intl";
 
+import { INDUSTRIES } from "@/lib/industries";
+
 import { updateClubProfile } from "@/actions/dashboard/organization/actions";
 import {
   GoogleAddressAutocomplete,
@@ -53,7 +55,6 @@ import {
 import { brandPalette, dominantColors } from "@/lib/brand-palette";
 import type { Organization } from "@/types/organization";
 
-const INDUSTRIES = ["retail", "gastronomy", "services", "health", "beauty", "other"] as const;
 const POINT_LABELS = ["puntos", "estrellas", "monedas"] as const;
 const ADDRESS_FIELDS = [
   { key: "street", autoComplete: "address-line1" },
@@ -547,6 +548,10 @@ function GeneralSection({
                   {t(`industries.${option}`)}
                 </SelectItem>
               ))}
+              {/* Texto libre cargado en el onboarding: se muestra tal cual para no perderlo. */}
+              {industry && !(INDUSTRIES as readonly string[]).includes(industry) && (
+                <SelectItem value={industry}>{industry}</SelectItem>
+              )}
             </SelectContent>
           </Select>
         </div>

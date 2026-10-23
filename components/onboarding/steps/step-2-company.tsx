@@ -13,6 +13,7 @@ import type { GoogleAddressComponents } from '@/components/ui/google-address-aut
 import { checkOrgNameAvailable, type OnboardingStep2Data } from '@/actions/onboarding/actions';
 import { PasswordStrengthChecklist } from '@/components/onboarding/password-strength-checklist';
 import { allRulesPass } from '@/components/onboarding/password-rules';
+import { INDUSTRIES } from '@/lib/industries';
 
 // ── State & Reducer ──────────────────────────────────────────────────────────
 
@@ -20,6 +21,7 @@ interface Step2State {
   orgName: string;
   businessName: string;
   taxId: string;
+  industry: string;
   logoUrl: string | null;
   branchName: string;
   branchPhone: string;
@@ -52,10 +54,13 @@ function reducer(state: Step2State, action: Step2Action): Step2State {
 }
 
 function buildInitialState(initialData?: OnboardingStep2Data | null): Step2State {
+  // Se guarda el código si coincide con un rubro sugerido; el input muestra lo que se escribió.
+  // ponytail: al volver al paso se ve el código ("retail") en vez del label; el submit lo vuelve a reconocer.
   return {
     orgName: initialData?.org.name ?? '',
     businessName: initialData?.org.business_name ?? '',
     taxId: initialData?.org.tax_id ?? '',
+    industry: initialData?.org.industry ?? '',
     logoUrl: initialData?.org.logo_url ?? null,
     branchName: initialData?.branch.name ?? '',
     branchPhone: initialData?.branch.phone ?? '',
@@ -279,6 +284,7 @@ interface Step2Props {
 export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
   const t = useTranslations('Onboarding.step2');
   const tCommon = useTranslations('Common');
+  const tIndustries = useTranslations('Dashboard.clubProfile.industries');
   const [state, dispatch] = useReducer(reducer, initialData, buildInitialState);
   const [nameStatus, setNameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
 
@@ -310,10 +316,14 @@ export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
     state.showCashier &&
     (state.cashierEmail || state.cashierPassword || state.cashierFirstName || state.cashierLastName);
 
+  const toIndustry = (value: string) =>
+    INDUSTRIES.find((code) => code === value || tIndustries(code).toLowerCase() === value.toLowerCase()) ?? value;
+
   const validate = () => {
     const errs: Record<string, string> = {};
     if (!state.orgName.trim()) errs.orgName = t('validation.businessNameRequired');
     else if (nameStatus === 'taken') errs.orgName = t('validation.businessNameTaken');
+    if (!state.industry.trim()) errs.industry = t('validation.industryRequired');
     if (!state.branchName.trim()) errs.branchName = t('validation.branchNameRequired');
     if (!state.address) errs.address = t('validation.branchAddressRequired');
     if (cashierHasData) {
@@ -343,6 +353,7 @@ export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
         name: state.orgName.trim(),
         business_name: state.businessName.trim() || undefined,
         tax_id: state.taxId.trim() || undefined,
+        industry: toIndustry(state.industry.trim()),
         logo_url: state.logoUrl || undefined,
       },
       address: {
@@ -402,6 +413,25 @@ export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
         {nameStatus === 'taken' && !state.errors.orgName && (
           <p className="text-xs text-destructive">{t('validation.businessNameTaken')}</p>
         )}
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="industry">
+          {t('industry')} <span className="text-destructive">*</span>
+        </Label>
+        <Input
+          id="industry"
+          list="industry-options"
+          placeholder={t('industryPlaceholder')}
+          value={state.industry}
+          onChange={setText('industry')}
+        />
+        <datalist id="industry-options">
+          {INDUSTRIES.map((code) => (
+            <option key={code} value={tIndustries(code)} />
+          ))}
+        </datalist>
+        {state.errors.industry && <p className="text-xs text-destructive">{state.errors.industry}</p>}
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

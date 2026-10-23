@@ -63,6 +63,7 @@ const submit = () => fireEvent.submit(document.querySelector('form') as HTMLForm
 
 const fillRequired = () => {
   fireEvent.change(screen.getByLabelText(/businessName/), { target: { value: 'Kiosco Ana' } });
+  fireEvent.change(screen.getByLabelText(/^industry/), { target: { value: 'Ferretería' } });
   fireEvent.change(screen.getByLabelText(/branchName/), { target: { value: 'Centro' } });
   fireEvent.click(screen.getByTestId('pick-place'));
 };
@@ -151,6 +152,7 @@ describe('Step2Company', () => {
     submit();
 
     expect(screen.getByText('validation.businessNameRequired')).toBeInTheDocument();
+    expect(screen.getByText('validation.industryRequired')).toBeInTheDocument();
     expect(screen.getByText('validation.branchNameRequired')).toBeInTheDocument();
     expect(screen.getByText('validation.branchAddressRequired')).toBeInTheDocument();
     expect(onNext).not.toHaveBeenCalled();
@@ -169,7 +171,7 @@ describe('Step2Company', () => {
     submit();
 
     expect(onNext).toHaveBeenCalledWith({
-      org: { name: 'Kiosco Ana', business_name: undefined, tax_id: undefined, logo_url: undefined },
+      org: { name: 'Kiosco Ana', business_name: undefined, tax_id: undefined, industry: 'Ferretería', logo_url: undefined },
       address: {
         street: 'Av. Corrientes',
         number: '1234',
@@ -201,9 +203,25 @@ describe('Step2Company', () => {
       name: 'Kiosco Ana',
       business_name: 'Ana SRL',
       tax_id: '20-1',
+      industry: 'Ferretería',
       logo_url: 'https://cdn/logo.png',
     });
     expect(onNext.mock.calls[0][0].branch.phone).toBe('1122');
+  });
+
+  it('guarda el codigo cuando el rubro coincide con una sugerencia', () => {
+    const { onNext } = renderStep();
+    fillRequired();
+    fireEvent.change(screen.getByLabelText(/^industry/), { target: { value: ' GASTRONOMY ' } });
+
+    submit();
+
+    expect(onNext.mock.calls[0][0].org.industry).toBe('gastronomy');
+  });
+
+  it('restaura el rubro guardado', () => {
+    renderStep({ initialData: { ...savedData, org: { name: 'Kiosco Ana', industry: 'Ferretería' } } as never });
+    expect(screen.getByLabelText(/^industry/)).toHaveValue('Ferretería');
   });
 
   it('goes back to the previous step', () => {

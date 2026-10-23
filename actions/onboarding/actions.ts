@@ -11,6 +11,7 @@ export interface OnboardingOrgInput {
   name: string;
   business_name?: string;
   tax_id?: string;
+  industry?: string;
   logo_url?: string;
 }
 
@@ -157,6 +158,7 @@ export async function completeOnboarding(input: {
         name: input.step2.org.name,
         business_name: input.step2.org.business_name || null,
         tax_id: input.step2.org.tax_id || null,
+        industry: input.step2.org.industry || null,
         logo_url: input.step2.org.logo_url || null,
         plan,
         trial_started_at: plan === 'trial' ? new Date().toISOString() : null,

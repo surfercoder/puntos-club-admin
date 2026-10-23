@@ -2067,6 +2067,8 @@
       "legalNamePlaceholder": "Ej: Café Central S.A.",
       "taxId": "CUIT / RUT / NIF",
       "taxIdPlaceholder": "Ej: 20-12345678-9",
+      "industry": "Rubro",
+      "industryPlaceholder": "Elegí o escribí el rubro",
       "businessLogo": "Logo del negocio",
       "logoHint": "Cuadrado, de 512×512 px o más. Se ajusta solo al subirlo; un PNG con fondo transparente queda mejor.",
       "branchName": "Nombre de la sucursal",
@@ -2087,6 +2089,7 @@
       "confirmPassword": "Confirmar contraseña",
       "confirmPasswordPlaceholder": "Repite la contraseña",
       "validation": {
+        "industryRequired": "El rubro es requerido",
         "businessNameRequired": "El nombre del negocio es requerido",
         "businessNameTaken": "Ya existe una empresa con ese nombre. Probá con otro, por ejemplo agregando la ciudad o el barrio.",
         "branchNameRequired": "El nombre de la sucursal es requerido",

@@ -2067,6 +2067,8 @@
       "legalNamePlaceholder": "e.g. Central Café Inc.",
       "taxId": "Tax ID",
       "taxIdPlaceholder": "e.g. 12-3456789",
+      "industry": "Industry",
+      "industryPlaceholder": "Pick or type your industry",
       "businessLogo": "Business logo",
       "logoHint": "Square, 512×512 px or larger. Resized automatically on upload; a PNG with a transparent background looks best.",
       "branchName": "Branch name",
@@ -2087,6 +2089,7 @@
       "confirmPassword": "Confirm password",
       "confirmPasswordPlaceholder": "Repeat the password",
       "validation": {
+        "industryRequired": "Industry is required",
         "businessNameRequired": "Business name is required",
         "businessNameTaken": "A business with that name already exists. Try another one, for example adding the city or neighborhood.",
         "branchNameRequired": "Branch name is required",
