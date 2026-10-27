@@ -4,14 +4,12 @@ import * as React from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 
-import Link from "next/link";
-import { Bell } from "lucide-react";
-
 import { AppSidebar } from "@/components/app-sidebar";
 import { DashboardFooter } from "@/components/dashboard-footer";
 import { DashboardTour } from "@/components/dashboard/tour/dashboard-tour";
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { LanguageSwitcher } from "@/components/language-switcher";
+import { NotificationBell } from "@/components/notification-bell";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { PlanUsageProvider } from "@/components/providers/plan-usage-provider";
 import {
@@ -51,7 +49,7 @@ const KNOWN_SEGMENTS = [
   "notifications", "organization", "organization_notification_limits",
   "points-rules", "product", "profile", "purchase", "push_notifications", "mother",
   "push_tokens", "redemption", "user-role", "users", "qr", "cashiers", "collaborators",
-  "settings", "organization-settings", "help",
+  "settings", "organization-settings", "help", "messages", "broadcasts",
 ] as const;
 
 type KnownSegment = typeof KNOWN_SEGMENTS[number];
@@ -218,13 +216,7 @@ export function DashboardShell({
               </Breadcrumb>
               <div className="ml-auto flex items-center gap-1">
                 <FeedbackDialog userEmail={user.email} userName={user.name} />
-                <Link
-                  href="/dashboard/notifications"
-                  aria-label={tBreadcrumb("notifications")}
-                  className="inline-flex size-9 items-center justify-center rounded-md text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-                >
-                  <Bell className="size-[18px]" />
-                </Link>
+                <NotificationBell isPlatform={portalMode === "admin"} activeOrgId={activeOrgId} />
                 <LanguageSwitcher />
                 <ThemeToggle />
               </div>

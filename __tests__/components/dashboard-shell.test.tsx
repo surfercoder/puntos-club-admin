@@ -44,6 +44,12 @@ jest.mock('@/components/feedback-dialog', () => ({
   FeedbackDialog: () => <div data-testid="feedback-dialog">Feedback</div>,
 }));
 
+jest.mock('@/components/notification-bell', () => ({
+  NotificationBell: (props: { isPlatform: boolean; activeOrgId: string | null }) => (
+    <div data-testid="notification-bell" data-platform={String(props.isPlatform)} />
+  ),
+}));
+
 jest.mock('@/components/theme-toggle', () => ({
   ThemeToggle: () => <div data-testid="theme-toggle">Theme</div>,
 }));

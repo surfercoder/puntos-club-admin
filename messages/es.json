@@ -256,7 +256,9 @@
     "profile": "Perfil",
     "myQrs": "Mis QRs",
     "notificationsAndComms": "Notificaciones y comunicación",
-    "help": "Ayuda y aprendizaje"
+    "help": "Ayuda y aprendizaje",
+    "platformMessages": "Mensajes a organizaciones",
+    "platformBroadcasts": "Comunicados a beneficiarios"
   },
   "Breadcrumb": {
     "panel": "Panel",
@@ -292,7 +294,9 @@
     "mother": "Regla madre",
     "cashiers": "Cajeros",
     "collaborators": "Colaboradores",
-    "help": "Ayuda y aprendizaje"
+    "help": "Ayuda y aprendizaje",
+    "messages": "Mensajes",
+    "broadcasts": "Comunicados"
   },
   "Dashboard": {
     "analytics": {
@@ -2008,6 +2012,46 @@
           "description": "Guía completa para configurar tu club, cargar premios, asignar puntos y gestionar canjes."
         }
       }
+    },
+    "platformMessages": {
+      "adminTitle": "Mensajes a organizaciones",
+      "adminDescription": "Escribile a una organización o a todas. Las respuestas llegan acá y a tu campanita.",
+      "ownerTitle": "Mensajes de Puntos Club",
+      "ownerDescription": "Novedades y avisos del equipo de Puntos Club. Podés responder desde acá.",
+      "newMessage": "Nuevo mensaje",
+      "toLabel": "Para",
+      "toPlaceholder": "Elegí una organización",
+      "toAll": "Todas las organizaciones",
+      "bodyLabel": "Mensaje",
+      "bodyPlaceholder": "Escribí tu mensaje…",
+      "send": "Enviar",
+      "sending": "Enviando…",
+      "emptyInbox": "Todavía no hay conversaciones.",
+      "emptyThread": "Todavía no hay mensajes en esta conversación.",
+      "backToInbox": "Volver a la bandeja",
+      "you": "Vos",
+      "platformName": "Puntos Club",
+      "orgTeam": "Equipo de la organización",
+      "noOrganization": "Elegí una organización para ver sus mensajes."
+    },
+    "platformBroadcasts": {
+      "title": "Comunicados a beneficiarios",
+      "description": "Push a todos los beneficiarios con la app instalada, sin importar qué clubes sigan. No descuenta del saldo de ninguna organización.",
+      "titleLabel": "Título",
+      "titlePlaceholder": "Ej.: Nueva versión disponible",
+      "bodyLabel": "Mensaje",
+      "bodyPlaceholder": "Ej.: Actualizá la app para seguir sumando puntos.",
+      "confirm": "Entiendo que se envía ahora a todos los dispositivos activos ({count}) y no se puede deshacer.",
+      "send": "Enviar a todos",
+      "sending": "Enviando…",
+      "empty": "Todavía no se envió ningún comunicado.",
+      "table": {
+        "title": "Título",
+        "body": "Mensaje",
+        "sent": "Entregados",
+        "failed": "Fallidos",
+        "date": "Fecha"
+      }
     }
   },
   "Onboarding": {
@@ -2957,7 +3001,9 @@
     "subscriptionCreated": "Se creó la suscripción correctamente.",
     "subscriptionUpdated": "Se actualizó la suscripción correctamente.",
     "userRoleCreated": "Se creó el rol correctamente.",
-    "userRoleUpdated": "Se actualizó el rol correctamente."
+    "userRoleUpdated": "Se actualizó el rol correctamente.",
+    "platformMessageSent": "Mensaje enviado.",
+    "platformBroadcastSent": "Comunicado enviado: {sent} entregados, {failed} fallidos."
   },
   "Validation": {
     "addressRequired": "Elegí una dirección.",
@@ -2991,7 +3037,10 @@
     "streetRequired": "Ingresá la calle.",
     "titleRequired": "Ingresá un título.",
     "userRequired": "Elegí un usuario.",
-    "zipRequired": "Ingresá el código postal."
+    "zipRequired": "Ingresá el código postal.",
+    "titleTooLong": "El título no puede superar los 65 caracteres.",
+    "bodyTooLong": "El mensaje no puede superar los 240 caracteres.",
+    "messageTooLong": "El mensaje no puede superar los 2000 caracteres."
   },
   "CrudPages": {
     "createOrganizationPlanLimit": "Crear límite del plan de la organización",
@@ -3006,5 +3055,14 @@
     "editPushToken": "Editar token push",
     "editSubscription": "Editar suscripción",
     "editUserRole": "Editar rol"
+  },
+  "NotificationBell": {
+    "aria": "Mensajes",
+    "ariaUnread": "Mensajes, {count} sin leer",
+    "ownerTitle": "Mensajes de Puntos Club",
+    "adminTitle": "Respuestas de las organizaciones",
+    "platformName": "Puntos Club",
+    "empty": "No hay mensajes todavía.",
+    "seeAll": "Ver todos los mensajes"
   }
 }

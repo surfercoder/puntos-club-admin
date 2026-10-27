@@ -256,7 +256,9 @@
     "profile": "Profile",
     "myQrs": "My QRs",
     "notificationsAndComms": "Notifications & communication",
-    "help": "Help & learning"
+    "help": "Help & learning",
+    "platformMessages": "Messages to organizations",
+    "platformBroadcasts": "Beneficiary announcements"
   },
   "Breadcrumb": {
     "panel": "Dashboard",
@@ -292,7 +294,9 @@
     "mother": "Base rule",
     "cashiers": "Cashiers",
     "collaborators": "Collaborators",
-    "help": "Help & learning"
+    "help": "Help & learning",
+    "messages": "Messages",
+    "broadcasts": "Announcements"
   },
   "Dashboard": {
     "analytics": {
@@ -2008,6 +2012,46 @@
           "description": "Complete guide to set up your club, load rewards, assign points and manage redemptions."
         }
       }
+    },
+    "platformMessages": {
+      "adminTitle": "Messages to organizations",
+      "adminDescription": "Write to one organization or to all of them. Replies show up here and in your bell.",
+      "ownerTitle": "Messages from Puntos Club",
+      "ownerDescription": "News and notices from the Puntos Club team. You can reply from here.",
+      "newMessage": "New message",
+      "toLabel": "To",
+      "toPlaceholder": "Choose an organization",
+      "toAll": "All organizations",
+      "bodyLabel": "Message",
+      "bodyPlaceholder": "Write your message…",
+      "send": "Send",
+      "sending": "Sending…",
+      "emptyInbox": "No conversations yet.",
+      "emptyThread": "No messages in this conversation yet.",
+      "backToInbox": "Back to inbox",
+      "you": "You",
+      "platformName": "Puntos Club",
+      "orgTeam": "Organization team",
+      "noOrganization": "Choose an organization to see its messages."
+    },
+    "platformBroadcasts": {
+      "title": "Beneficiary announcements",
+      "description": "Push to every beneficiary with the app installed, regardless of which clubs they follow. It does not use any organization's balance.",
+      "titleLabel": "Title",
+      "titlePlaceholder": "E.g.: New version available",
+      "bodyLabel": "Message",
+      "bodyPlaceholder": "E.g.: Update the app to keep earning points.",
+      "confirm": "I understand this is sent now to every active device ({count}) and cannot be undone.",
+      "send": "Send to everyone",
+      "sending": "Sending…",
+      "empty": "No announcements sent yet.",
+      "table": {
+        "title": "Title",
+        "body": "Message",
+        "sent": "Delivered",
+        "failed": "Failed",
+        "date": "Date"
+      }
     }
   },
   "Onboarding": {
@@ -2957,7 +3001,9 @@
     "subscriptionCreated": "Subscription created successfully.",
     "subscriptionUpdated": "Subscription updated successfully.",
     "userRoleCreated": "Role created successfully.",
-    "userRoleUpdated": "Role updated successfully."
+    "userRoleUpdated": "Role updated successfully.",
+    "platformMessageSent": "Message sent.",
+    "platformBroadcastSent": "Announcement sent: {sent} delivered, {failed} failed."
   },
   "Validation": {
     "addressRequired": "Pick an address.",
@@ -2991,7 +3037,10 @@
     "streetRequired": "Enter the street.",
     "titleRequired": "Enter a title.",
     "userRequired": "Pick a user.",
-    "zipRequired": "Enter the ZIP code."
+    "zipRequired": "Enter the ZIP code.",
+    "titleTooLong": "The title cannot be longer than 65 characters.",
+    "bodyTooLong": "The message cannot be longer than 240 characters.",
+    "messageTooLong": "The message cannot be longer than 2000 characters."
   },
   "CrudPages": {
     "createOrganizationPlanLimit": "Create organization plan limit",
@@ -3006,5 +3055,14 @@
     "editPushToken": "Edit push token",
     "editSubscription": "Edit subscription",
     "editUserRole": "Edit role"
+  },
+  "NotificationBell": {
+    "aria": "Messages",
+    "ariaUnread": "Messages, {count} unread",
+    "ownerTitle": "Messages from Puntos Club",
+    "adminTitle": "Replies from organizations",
+    "platformName": "Puntos Club",
+    "empty": "No messages yet.",
+    "seeAll": "See all messages"
   }
 }
