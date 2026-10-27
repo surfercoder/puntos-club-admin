@@ -5,6 +5,7 @@ import { Building2, Check, ChevronDown, ChevronUp, Eye, EyeOff, Info, Loader2, P
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ImageUpload } from '@/components/ui/image-upload';
@@ -23,6 +24,7 @@ interface Step2State {
   taxId: string;
   industry: string;
   logoUrl: string | null;
+  adultsOnly: boolean;
   branchName: string;
   branchPhone: string;
   address: GoogleAddressComponents | null;
@@ -39,7 +41,7 @@ interface Step2State {
 
 type Step2Action =
   | { type: 'SET_FIELD'; field: keyof Step2State; value: Step2State[keyof Step2State] }
-  | { type: 'TOGGLE'; field: 'showCashier' | 'showPassword' | 'showConfirmPassword' }
+  | { type: 'TOGGLE'; field: 'adultsOnly' | 'showCashier' | 'showPassword' | 'showConfirmPassword' }
   | { type: 'SET_ERRORS'; errors: Record<string, string> };
 
 function reducer(state: Step2State, action: Step2Action): Step2State {
@@ -62,6 +64,7 @@ function buildInitialState(initialData?: OnboardingStep2Data | null): Step2State
     taxId: initialData?.org.tax_id ?? '',
     industry: initialData?.org.industry ?? '',
     logoUrl: initialData?.org.logo_url ?? null,
+    adultsOnly: initialData?.org.adults_only ?? false,
     branchName: initialData?.branch.name ?? '',
     branchPhone: initialData?.branch.phone ?? '',
     address: initialData?.address
@@ -355,6 +358,7 @@ export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
         tax_id: state.taxId.trim() || undefined,
         industry: toIndustry(state.industry.trim()),
         logo_url: state.logoUrl || undefined,
+        adults_only: state.adultsOnly,
       },
       address: {
         street: state.address!.street,
@@ -432,6 +436,19 @@ export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
           ))}
         </datalist>
         {state.errors.industry && <p className="text-xs text-destructive">{state.errors.industry}</p>}
+      </div>
+
+      <div className="flex items-start gap-2">
+        <Checkbox
+          id="adultsOnly"
+          checked={state.adultsOnly}
+          onCheckedChange={() => dispatch({ type: 'TOGGLE', field: 'adultsOnly' })}
+          className="mt-0.5"
+        />
+        <div className="space-y-1">
+          <Label htmlFor="adultsOnly" className="cursor-pointer">{t('adultsOnly')}</Label>
+          <p className="text-xs text-muted-foreground">{t('adultsOnlyHint')}</p>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">

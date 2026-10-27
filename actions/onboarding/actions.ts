@@ -13,6 +13,8 @@ export interface OnboardingOrgInput {
   tax_id?: string;
   industry?: string;
   logo_url?: string;
+  /** Club para mayores de 18: las apps preguntan la edad antes de unirse. */
+  adults_only?: boolean;
 }
 
 export interface OnboardingAddressInput {
@@ -160,6 +162,7 @@ export async function completeOnboarding(input: {
         tax_id: input.step2.org.tax_id || null,
         industry: input.step2.org.industry || null,
         logo_url: input.step2.org.logo_url || null,
+        adults_only: input.step2.org.adults_only ?? false,
         plan,
         trial_started_at: plan === 'trial' ? new Date().toISOString() : null,
       })

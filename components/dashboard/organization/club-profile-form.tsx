@@ -9,6 +9,7 @@ import {
   Copy,
   Eye,
   Globe,
+  IdCard,
   Lock,
   Mail,
   Palette,
@@ -109,6 +110,7 @@ type Toggles = {
   allow_new_members: boolean;
   requires_approval: boolean;
   email_notifications: boolean;
+  adults_only: boolean;
 };
 
 export function ClubProfileForm({
@@ -137,6 +139,7 @@ export function ClubProfileForm({
     allow_new_members: organization.allow_new_members ?? true,
     requires_approval: organization.requires_approval ?? false,
     email_notifications: organization.email_notifications ?? true,
+    adults_only: organization.adults_only ?? false,
   });
   const [invitationCode, setInvitationCode] = useState(organization.invitation_code ?? "");
   const [pointsLabel, setPointsLabel] = useState(organization.points_label ?? "puntos");
@@ -337,6 +340,21 @@ export function ClubProfileForm({
                 ))}
               </div>
             </div>
+          </section>
+
+          {/* Fuera del bloque oculto: el owner tiene que poder cambiarlo después del onboarding. */}
+          <section className="rounded-xl border bg-card p-5 shadow-sm">
+            <SettingRow
+              description={t("settings.adultsOnlyHint")}
+              icon={IdCard}
+              title={t("settings.adultsOnly")}
+            >
+              <Switch
+                aria-label={t("settings.adultsOnly")}
+                checked={toggles.adults_only}
+                onCheckedChange={(value) => toggle("adults_only", value)}
+              />
+            </SettingRow>
           </section>
         </div>
 

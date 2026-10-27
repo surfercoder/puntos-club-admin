@@ -340,6 +340,7 @@ describe('updateClubProfile', () => {
     allow_new_members: true,
     requires_approval: false,
     email_notifications: true,
+    adults_only: false,
     invitation_code: '  ONESTORE  ',
     welcome_message: null,
     points_label: 'puntos',

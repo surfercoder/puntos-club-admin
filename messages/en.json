@@ -1971,6 +1971,8 @@
         "emailNotificationsHint": "Get important updates about your club's activity.",
         "showInExplore": "Show the club in \"Explore\"",
         "showInExploreHint": "Your club appears among the featured organizations.",
+        "adultsOnly": "Adults-only club (18+)",
+        "adultsOnlyHint": "Before joining, the apps ask each person whether they are 18 or older. If they answer no, they can't join.",
         "timezone": "Time zone",
         "timezoneHint": "Set the time zone for your club."
       },
@@ -2069,6 +2071,8 @@
       "taxIdPlaceholder": "e.g. 12-3456789",
       "industry": "Industry",
       "industryPlaceholder": "Pick or type your industry",
+      "adultsOnly": "This club is for adults only (18+)",
+      "adultsOnlyHint": "For example, if you sell alcoholic drinks. Before joining, the apps ask each person whether they are 18 or older.",
       "businessLogo": "Business logo",
       "logoHint": "Square, 512×512 px or larger. Resized automatically on upload; a PNG with a transparent background looks best.",
       "branchName": "Branch name",

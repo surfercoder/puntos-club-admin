@@ -171,7 +171,7 @@ describe('Step2Company', () => {
     submit();
 
     expect(onNext).toHaveBeenCalledWith({
-      org: { name: 'Kiosco Ana', business_name: undefined, tax_id: undefined, industry: 'Ferretería', logo_url: undefined },
+      org: { name: 'Kiosco Ana', business_name: undefined, tax_id: undefined, industry: 'Ferretería', logo_url: undefined, adults_only: false },
       address: {
         street: 'Av. Corrientes',
         number: '1234',
@@ -196,6 +196,7 @@ describe('Step2Company', () => {
     fireEvent.change(screen.getByLabelText(/taxId/), { target: { value: '  20-1  ' } });
     fireEvent.change(screen.getByLabelText(/branchPhone/), { target: { value: '  1122  ' } });
     fireEvent.click(screen.getByRole('button', { name: 'set-logo' }));
+    fireEvent.click(screen.getByRole('checkbox', { name: /adultsOnly/ }));
 
     submit();
 
@@ -205,6 +206,7 @@ describe('Step2Company', () => {
       tax_id: '20-1',
       industry: 'Ferretería',
       logo_url: 'https://cdn/logo.png',
+      adults_only: true,
     });
     expect(onNext.mock.calls[0][0].branch.phone).toBe('1122');
   });

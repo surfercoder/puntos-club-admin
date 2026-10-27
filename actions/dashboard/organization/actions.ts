@@ -129,7 +129,7 @@ export async function getOrganizationSettings(id: string) {
   const { data, error } = await supabase
     .from('organization')
     .select(
-      'id, name, business_name, tax_id, logo_url, brand_color, is_public, timezone, description, contact_email, contact_phone, website, industry, invitation_code, welcome_message, points_label, allow_new_members, requires_approval, email_notifications, show_in_explore',
+      'id, name, business_name, tax_id, logo_url, brand_color, is_public, timezone, description, contact_email, contact_phone, website, industry, invitation_code, welcome_message, points_label, allow_new_members, requires_approval, email_notifications, show_in_explore, adults_only',
     )
     .eq('id', id)
     .single();
@@ -280,6 +280,7 @@ export type ClubProfileInput = {
   allow_new_members: boolean;
   requires_approval: boolean;
   email_notifications: boolean;
+  adults_only: boolean;
   invitation_code: string | null;
   welcome_message: string | null;
   points_label: string;

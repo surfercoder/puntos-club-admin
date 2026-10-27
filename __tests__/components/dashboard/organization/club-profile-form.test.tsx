@@ -161,6 +161,9 @@ describe('ClubProfileForm', () => {
     fireEvent.click(screen.getByLabelText('settings.requiresApproval'));
     fireEvent.click(screen.getByLabelText('settings.emailNotifications'));
     fireEvent.click(screen.getByLabelText('settings.showInExplore'));
+    // El resto de los ajustes vive oculto; este no, el owner lo cambia después del onboarding.
+    expect(screen.getByLabelText('settings.adultsOnly')).toBeVisible();
+    fireEvent.click(screen.getByLabelText('settings.adultsOnly'));
     submit(container);
 
     await waitFor(() =>
@@ -171,6 +174,7 @@ describe('ClubProfileForm', () => {
           requires_approval: true,
           email_notifications: false,
           show_in_explore: false,
+          adults_only: true,
         }),
       ),
     );

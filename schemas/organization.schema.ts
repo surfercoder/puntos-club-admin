@@ -52,6 +52,7 @@ export const ClubProfileSchema = z.object({
   allow_new_members: z.boolean(),
   requires_approval: z.boolean(),
   email_notifications: z.boolean(),
+  adults_only: z.boolean(),
   invitation_code: z.string().nullable(),
   welcome_message: z.string().nullable(),
   points_label: z.string(),

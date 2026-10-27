@@ -25,6 +25,7 @@ export type Organization = {
   requires_approval?: boolean;
   email_notifications?: boolean;
   show_in_explore?: boolean;
+  adults_only?: boolean;
   timezone?: string | null;
 };
 

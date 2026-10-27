@@ -1971,6 +1971,8 @@
         "emailNotificationsHint": "Recibí notificaciones importantes sobre la actividad del club.",
         "showInExplore": "Mostrar club en la sección \"Explorar\"",
         "showInExploreHint": "Tu club aparecerá en la sección de organizaciones destacadas.",
+        "adultsOnly": "Club para mayores de 18",
+        "adultsOnlyHint": "Antes de unirse, las apps le preguntan a cada persona si es mayor de 18 años. Si responde que no, no se suma.",
         "timezone": "Zona horaria",
         "timezoneHint": "Configura la zona horaria para tu club."
       },
@@ -2069,6 +2071,8 @@
       "taxIdPlaceholder": "Ej: 20-12345678-9",
       "industry": "Rubro",
       "industryPlaceholder": "Elegí o escribí el rubro",
+      "adultsOnly": "Es un club para mayores de 18",
+      "adultsOnlyHint": "Por ejemplo, si vendés bebidas alcohólicas. Antes de unirse, las apps le preguntan a cada persona si es mayor de 18 años.",
       "businessLogo": "Logo del negocio",
       "logoHint": "Cuadrado, de 512×512 px o más. Se ajusta solo al subirlo; un PNG con fondo transparente queda mejor.",
       "branchName": "Nombre de la sucursal",
