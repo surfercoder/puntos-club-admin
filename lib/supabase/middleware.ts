@@ -108,6 +108,12 @@ export async function updateSession(request: NextRequest) {
     if (error) {
       return redirectTo("/auth/error");
     }
+    // Owner a medio onboarding: tiene sesión pero todavía no app_user. Desloguearlo
+    // acá mataba la sesión con un simple prefetch de "Iniciar sesión" del header
+    // (/auth/login → /dashboard) y el paso final fallaba con "No hay una sesión activa".
+    if (!data && user.user_metadata?.onboarding) {
+      return redirectTo("/owner/onboarding", "?step=2");
+    }
     const role = (data?.role as unknown as { name: string } | null)?.name;
     if (!role || !ADMIN_PORTAL_ROLES.includes(role)) {
       await supabase.auth.signOut({ scope: "local" });

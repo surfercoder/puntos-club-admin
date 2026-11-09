@@ -71,6 +71,19 @@ describe('checkAdminPortalAccess', () => {
     expect(mockSupabase.update).toHaveBeenCalledWith({ auth_user_id: 'auth-1' });
   });
 
+  it('lets an owner mid-onboarding in without signing out', async () => {
+    mockSupabase.auth.getUser.mockReturnValue({
+      data: { user: { id: 'auth-1', email: 'test@test.com', user_metadata: { onboarding: true } } },
+      error: null,
+    });
+    mockSupabase.single
+      .mockReturnValueOnce({ data: null, error: { message: 'Not found' } })
+      .mockReturnValueOnce({ data: null, error: { message: 'Not found' } });
+    const result = await checkAdminPortalAccess();
+    expect(result).toEqual({ allowed: true, role: null, error: null });
+    expect(mockSupabase.auth.signOut).not.toHaveBeenCalled();
+  });
+
   it('should sign out and deny access when no app_user found', async () => {
     mockSupabase.single
       .mockReturnValueOnce({ data: null, error: { message: 'Not found' } })

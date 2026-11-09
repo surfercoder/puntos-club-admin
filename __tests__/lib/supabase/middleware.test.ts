@@ -55,7 +55,7 @@ const buildRequest = (pathname: string) =>
 
 const mockSignOut = jest.fn();
 
-const mockUser = (user: { id: string } | null, role: string | null = 'owner', error: unknown = null) => {
+const mockUser = (user: { id: string; user_metadata?: Record<string, unknown> } | null, role: string | null = 'owner', error: unknown = null) => {
   (createServerClient as jest.Mock).mockReturnValue({
     auth: { getUser: jest.fn().mockResolvedValue({ data: { user } }), signOut: mockSignOut },
     from: jest.fn(() => ({
@@ -144,6 +144,15 @@ describe('lib/supabase/middleware updateSession', () => {
     const result = await updateSession(buildRequest('/dashboard/app_user'));
     expect(result).toEqual(expect.objectContaining({ kind: 'redirect:/auth/error' }));
     expect(mockSignOut).toHaveBeenCalledWith({ scope: 'local' });
+  });
+
+  // Ticket: el prefetch de "Iniciar sesión" (/auth/login → /dashboard) deslogueaba
+  // al owner a medio onboarding y el paso final fallaba sin sesión.
+  it('sends an owner mid-onboarding back to the wizard without signing out', async () => {
+    mockUser({ id: 'user-1', user_metadata: { onboarding: true } }, null);
+    const result = await updateSession(buildRequest('/dashboard'));
+    expect(result).toEqual(expect.objectContaining({ kind: 'redirect:/owner/onboarding' }));
+    expect(mockSignOut).not.toHaveBeenCalled();
   });
 
   it('blocks without signing out when the role lookup fails', async () => {

@@ -29,12 +29,11 @@ export function esc(value: string): string {
 
 /**
  * Las imágenes de un email tienen que ser absolutas: no hay página que resuelva
- * rutas relativas. El fallback es el host de la app y no www.puntosclub.com.ar
- * porque la landing no sirve `/images/*`: ahí el logo sale 404 y el mail llega
- * con el cuadradito roto.
+ * rutas relativas. www.puntosclub.com.ar es el mismo proyecto que la app y sirve
+ * `/images/email/*`.
  */
 const EMAIL_BASE_URL = (
-  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://puntos-club-admin.vercel.app'
+  process.env.NEXT_PUBLIC_SITE_URL ?? 'https://www.puntosclub.com.ar'
 ).replace(/\/+$/, '');
 
 const BRAND = {

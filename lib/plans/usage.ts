@@ -6,10 +6,9 @@ import type {
   PlanFeatureKey,
   PlanFlagKey,
   PlanLimitCheckResult,
-  PlanType,
 } from '@/types/plan';
 import type { ActionState } from '@/lib/error-handler';
-import { PLAN_FEATURE_LABELS, groupPlanLimits, isQuotaFeature } from './config';
+import { PLAN_FEATURE_LABELS, isQuotaFeature } from './config';
 
 /**
  * Fetches the full usage summary for an organization via the
@@ -43,20 +42,6 @@ export async function checkPlanLimit(
 
   if (error || !data) return null;
   return data as PlanLimitCheckResult;
-}
-
-/**
- * Fetches all plan limits from the `plan_limits` table.
- * Returns a map of plan -> feature -> limit_value.
- */
-export async function getAllPlanLimits(): Promise<Record<PlanType, Record<PlanFeatureKey, number>> | null> {
-  const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('plan_limits')
-    .select('plan, feature, limit_value');
-
-  if (error || !data) return null;
-  return groupPlanLimits(data);
 }
 
 /**

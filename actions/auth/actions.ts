@@ -53,6 +53,12 @@ export async function checkAdminPortalAccess(): Promise<{
     }
   }
 
+  // Owner que no terminó el onboarding: el login lo deja pasar y el proxy lo
+  // manda de vuelta al wizard en vez de dejarlo sin forma de retomar.
+  if (!appUser && user.user_metadata?.onboarding) {
+    return { allowed: true, role: null, error: null };
+  }
+
   if (!appUser) {
     // Sign out the user since they don't have access
     await supabase.auth.signOut();

@@ -19,7 +19,7 @@ export default async function PlanSettingsPage() {
   const userName = `${user?.first_name ?? ''} ${user?.last_name ?? ''}`.trim() || user?.email || 'User';
 
   return (
-    <div className="space-y-6">
+    <div className="@container space-y-6">
       <div className="grid items-center gap-6 rounded-xl border bg-card p-6 shadow-sm lg:grid-cols-[minmax(0,1fr)_auto]">
         <div className="min-w-0">
           <h1 className="text-3xl font-bold tracking-tight">{t('title')}</h1>
@@ -50,7 +50,8 @@ export default async function PlanSettingsPage() {
         ))}
       </section>
 
-      <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1fr)_360px]">
+      {/* La grilla de planes necesita ~900px para ir en fila: la columna lateral pasa abajo hasta tenerlos. */}
+      <div className="grid items-start gap-4 @[80rem]:grid-cols-[minmax(0,1fr)_360px]">
         <div className="min-w-0">
           <PlanSelector />
         </div>

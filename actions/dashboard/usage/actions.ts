@@ -4,8 +4,8 @@ import { createClient } from '@/lib/supabase/server';
 import {
   getOrganizationUsageSummary,
   checkPlanLimit,
-  getAllPlanLimits,
 } from '@/lib/plans/usage';
+import { getPublicPlanLimits } from '@/lib/plans/public-limits';
 import type { PlanFeatureKey } from '@/types/plan';
 
 /**
@@ -42,8 +42,10 @@ export async function getUsageSummaryAction() {
  * Returns all plan limits from the database (for all plans).
  * Used to display plan comparison cards with up-to-date values.
  */
+// Con service role: en un onboarding nuevo todavía no hay sesión y la RLS
+// de plan_limits devolvía vacío (la grilla mostraba todo en 0).
 export async function getAllPlanLimitsAction() {
-  return getAllPlanLimits();
+  return getPublicPlanLimits();
 }
 
 /**

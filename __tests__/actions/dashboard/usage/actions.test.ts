@@ -25,11 +25,14 @@ jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => mockSupa
 jest.mock('@/lib/plans/usage', () => ({
   getOrganizationUsageSummary: jest.fn(() => ({ plan: 'trial', features: {} })),
   checkPlanLimit: jest.fn(() => ({ allowed: true })),
-  getAllPlanLimits: jest.fn(() => ({ trial: { branches: 1 } })),
+}));
+jest.mock('@/lib/plans/public-limits', () => ({
+  getPublicPlanLimits: jest.fn(() => ({ trial: { branches: 1 } })),
 }));
 
 import { getUsageSummaryAction, checkFeatureLimitAction, getAllPlanLimitsAction } from '@/actions/dashboard/usage/actions';
-import { getOrganizationUsageSummary, checkPlanLimit, getAllPlanLimits } from '@/lib/plans/usage';
+import { getOrganizationUsageSummary, checkPlanLimit } from '@/lib/plans/usage';
+import { getPublicPlanLimits } from '@/lib/plans/public-limits';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -89,7 +92,7 @@ describe('checkFeatureLimitAction', () => {
 describe('getAllPlanLimitsAction', () => {
   it('should return all plan limits', async () => {
     const result = await getAllPlanLimitsAction();
-    expect(getAllPlanLimits).toHaveBeenCalled();
+    expect(getPublicPlanLimits).toHaveBeenCalled();
     expect(result).toEqual({ trial: { branches: 1 } });
   });
 });

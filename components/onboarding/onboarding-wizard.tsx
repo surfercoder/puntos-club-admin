@@ -243,8 +243,9 @@ export function OnboardingWizard({
 
   const currentStepInfo = steps[currentStep - 1];
 
-  // Términos ocupa todo el ancho: es el único paso sin acompañamiento de Clubi.
-  const showClubi = currentStep !== 5;
+  // Plan y Términos ocupan todo el ancho: la grilla de planes no entra al lado de Clubi
+  // (y ya lo trae asomado sobre Pro).
+  const showClubi = currentStep !== 3 && currentStep !== 5;
 
   return (
     <div className={`mx-auto px-4 py-8 sm:px-6 ${currentStep === 3 ? 'max-w-6xl' : showClubi ? 'max-w-5xl' : 'max-w-3xl'}`}>

@@ -87,7 +87,7 @@ const PLAN_STYLES: Record<PlanCardType, {
 };
 
 // Cabecera y filas con alto fijo: la columna de etiquetas se alinea con las tarjetas.
-const HEADER_H = 'lg:h-40';
+const HEADER_H = '@4xl:h-40';
 const ROW = 'flex h-11 items-center border-b border-border/60 px-3 last:border-0';
 
 export type PlanLimitsByPlan = Record<PlanType, Record<PlanFeatureKey, number>>;
@@ -164,9 +164,9 @@ function PlanCard({ plan, limits, isSelected, isCurrent, promo, onSelect }: Plan
         isSelected && cn('ring-2 ring-offset-2 ring-offset-background', style.ring)
       )}
     >
-      {/* Clubi saluda asomado sobre Pro, como en el diseño. Sólo con la grilla en fila. */}
+      {/* Clubi saluda asomado sobre Pro, como en el diseño. Sólo con la grilla en fila (según el ancho del contenedor, no de la pantalla). */}
       {plan === 'pro' && (
-        <div className="pointer-events-none absolute -top-[92px] left-4 hidden h-[92px] w-[140px] overflow-hidden lg:block">
+        <div className="pointer-events-none absolute -top-[92px] left-4 hidden h-[92px] w-[140px] overflow-hidden @4xl:block">
           <Clubi className="w-full" />
         </div>
       )}
@@ -212,8 +212,8 @@ function PlanCard({ plan, limits, isSelected, isCurrent, promo, onSelect }: Plan
 
       <ul className="flex-1 rounded-xl bg-background/70">
         {PLAN_CARD_FEATURES.map((feature) => (
-          <li key={feature} className={cn(ROW, 'justify-between gap-2 lg:justify-center')}>
-            <span className="lg:sr-only">
+          <li key={feature} className={cn(ROW, 'justify-between gap-2 @4xl:justify-center')}>
+            <span className="@4xl:sr-only">
               <FeatureLabel feature={feature} />
             </span>
             <FeatureValue feature={feature} value={limits?.[feature]} unlimitedLabel={t('unlimited')} />
@@ -257,7 +257,7 @@ export function PlanCards({ limits, selected, currentPlan = null, promo = true, 
 
   const heading = (
     <div>
-      <h3 className="text-2xl font-extrabold leading-tight text-foreground xl:text-3xl">
+      <h3 className="text-2xl font-extrabold leading-tight text-foreground @5xl:text-3xl">
         {t('plansTitle')} <span className="text-brand-pink">{t('plansTitleHighlight')}</span>
       </h3>
       <p className="mt-2 text-sm text-muted-foreground">{t('plansSubtitle')}</p>
@@ -265,11 +265,11 @@ export function PlanCards({ limits, selected, currentPlan = null, promo = true, 
   );
 
   return (
-    <div className="space-y-4">
-      <div className="lg:hidden">{heading}</div>
+    <div className="@container space-y-4">
+      <div className="@4xl:hidden">{heading}</div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-[1.15fr_repeat(3,1fr)] lg:gap-3 lg:pt-20">
-        <div className="hidden lg:flex lg:flex-col lg:py-3">
+      <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-[1.15fr_repeat(3,1fr)] @4xl:gap-3 @4xl:pt-20">
+        <div className="hidden @4xl:flex @4xl:flex-col @4xl:py-3">
           <div className={cn('flex flex-col justify-end pb-3', HEADER_H)}>{heading}</div>
           <ul className="rounded-xl border border-border/60 bg-background/70">
             {PLAN_CARD_FEATURES.map((feature) => (
