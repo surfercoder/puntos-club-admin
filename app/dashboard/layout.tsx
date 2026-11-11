@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 
 import { DashboardShell } from '@/components/dashboard-shell'
+import { InstallPrompt } from '@/components/install-prompt'
 import { getCurrentUser } from '@/lib/auth/get-current-user'
 import { hasOwnerPermissions, isAdmin } from '@/lib/auth/roles'
 import { getOrganizationUsageSummary } from '@/lib/plans/usage'
@@ -118,6 +119,7 @@ export default async function DashboardLayout({
         initialPlanUsage={initialPlanUsage}
       >
         {children}
+        <InstallPrompt />
       </DashboardShell>
     )
   }
@@ -134,6 +136,7 @@ export default async function DashboardLayout({
       portalMode="org"
     >
       {children}
+      <InstallPrompt />
     </DashboardShell>
   )
 }

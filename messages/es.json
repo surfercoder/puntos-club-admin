@@ -3064,5 +3064,29 @@
     "platformName": "Puntos Club",
     "empty": "No hay mensajes todavía.",
     "seeAll": "Ver todos los mensajes"
+  },
+  "InstallPrompt": {
+    "badge": "Panel para comercios",
+    "title": "Instalá\nel panel en",
+    "titleAccent": "tu celular",
+    "subtitle": "Seguí tu club, tus clientes y tus campañas desde cualquier lugar.",
+    "easy": "Es muy fácil",
+    "ios": {
+      "step1Lead": "Tocá el ícono",
+      "step1": "Compartir",
+      "step2Lead": "Seleccioná",
+      "step2": "“Agregar a inicio”"
+    },
+    "android": {
+      "step1Lead": "Abrí el menú",
+      "step1": "del navegador ⋮",
+      "step2Lead": "Seleccioná",
+      "step2": "“Instalar app”"
+    },
+    "step3Lead": "¡Listo!",
+    "step3": "Ya tenés tu panel de",
+    "cta": "Instalar app",
+    "gotIt": "Entendido",
+    "footer": "Así lo tendrás siempre a mano"
   }
 }

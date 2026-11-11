@@ -3064,5 +3064,29 @@
     "platformName": "Puntos Club",
     "empty": "No messages yet.",
     "seeAll": "See all messages"
+  },
+  "InstallPrompt": {
+    "badge": "Panel for businesses",
+    "title": "Install\nthe panel on",
+    "titleAccent": "your phone",
+    "subtitle": "Follow your club, customers and campaigns from anywhere.",
+    "easy": "It's easy",
+    "ios": {
+      "step1Lead": "Tap the",
+      "step1": "Share icon",
+      "step2Lead": "Choose",
+      "step2": "“Add to Home Screen”"
+    },
+    "android": {
+      "step1Lead": "Open the",
+      "step1": "browser menu ⋮",
+      "step2Lead": "Choose",
+      "step2": "“Install app”"
+    },
+    "step3Lead": "Done!",
+    "step3": "Your panel is ready:",
+    "cta": "Install app",
+    "gotIt": "Got it",
+    "footer": "Always at hand"
   }
 }

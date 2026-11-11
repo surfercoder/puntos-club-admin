@@ -22,6 +22,9 @@ export async function generateMetadata(): Promise<Metadata> {
     title: t("appTitle"),
     description: t("appDescription"),
     openGraph: { siteName: "Puntos Club", locale: "es_AR", type: "website" },
+    // iOS no lee el manifest para esto: sin el meta abre el acceso directo en
+    // Safari con barra de navegador en vez de pantalla completa.
+    appleWebApp: { capable: true, title: "Puntos Club", statusBarStyle: "default" },
   };
 }
 
