@@ -53,6 +53,10 @@
   --color-brand-orange: var(--brand-orange);
   --color-brand-green: var(--brand-green);
   --color-brand-violet: var(--brand-violet);
+  /* Sitio público (mockups del 11/11/2026): tinta, azul de CTA y rosa de resaltado */
+  --color-sitio-ink: #16163f;
+  --color-sitio-blue: #0062fe;
+  --color-sitio-pink: #fe0e61;
   /* Success semantic color (maps to brand-green) */
   --color-success: var(--brand-green);
   --color-success-foreground: #FFFFFF;

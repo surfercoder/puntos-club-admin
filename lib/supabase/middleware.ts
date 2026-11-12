@@ -13,9 +13,14 @@ const ADMIN_PORTAL_ROLES = ["admin", "owner", "collaborator"];
 const OPEN_PATHS = [
   "/auth",
   "/api",
+  "/beneficios",
+  "/como-funciona",
+  "/contacto",
   "/legal",
   "/mobile-apps",
   "/owner/onboarding",
+  "/planes",
+  "/preguntas-frecuentes",
   "/robots.txt",
   "/sitemap.xml",
 ];

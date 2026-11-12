@@ -12,7 +12,7 @@ export function PuntosClubWordmark({ className }: { className?: string }) {
 }
 
 export function DashboardFooter() {
-  const t = useTranslations("Landing.footer");
+  const t = useTranslations("Site.footer");
   const tFooter = useTranslations("Dashboard.home.footer");
   const year = new Date().getFullYear();
 

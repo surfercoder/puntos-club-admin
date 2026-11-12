@@ -12,7 +12,17 @@
     "qrTitle": "QR Code | Dashboard",
     "qrDescription": "Your organization's QR code for customers to join the loyalty program",
     "mobileAppsTitle": "Mobile Apps - Puntos Club",
-    "mobileAppsDescription": "Download the Puntos Club mobile apps for Android"
+    "mobileAppsDescription": "Download the Puntos Club mobile apps for Android",
+    "howTitle": "How it works - Puntos Club",
+    "howDescription": "Create your points club in 4 simple steps: register your business, set up your points, add members and measure results.",
+    "plansTitle": "Plans and pricing - Puntos Club",
+    "plansDescription": "Compare the Puntos Club Trial, Advance and Pro plans. Start free forever and grow when you need to.",
+    "benefitsTitle": "Benefits - Puntos Club",
+    "benefitsDescription": "Build customer loyalty, increase sales and manage your whole points club from one place.",
+    "faqTitle": "FAQ - Puntos Club",
+    "faqDescription": "Answers about Puntos Club plans, pricing, features, members and billing.",
+    "contactTitle": "Request a demo - Puntos Club",
+    "contactDescription": "Request a free Puntos Club demo and discover how to create your business's points club."
   },
   "MobileApps": {
     "title": "Mobile Apps",
@@ -2627,136 +2637,6 @@
     "ctaButton": "Create my loyalty program",
     "footerCopyright": "© {year} Puntos Club. All rights reserved."
   },
-  "Landing": {
-    "loader": {
-      "slogan": "Create your own benefits club"
-    },
-    "weDo": {
-      "title": "THIS IS WHAT WE DO",
-      "descriptionPrefix": "Puntos Club",
-      "description": "is a platform designed for businesses looking to build customer loyalty. Through a points system, they can reward their customers for their loyalty."
-    },
-    "callToAction": "Scroll down to discover more",
-    "engines": {
-      "title": "And your beneficiaries will be able to ...",
-      "updateData": {
-        "title": "Update their data",
-        "description": "Keep their information up to date."
-      },
-      "earnPoints": {
-        "title": "Earn points",
-        "description": "Accumulate points for their loyalty."
-      },
-      "checkBalance": {
-        "title": "Check their balance",
-        "description": "View their available points."
-      },
-      "browseCatalog": {
-        "title": "Browse the catalog",
-        "description": "Explore the variety of products and rewards available to redeem."
-      },
-      "claimReward": {
-        "title": "Claim their reward",
-        "description": "Choose their reward and redeem it with their points."
-      }
-    },
-    "profit": {
-      "sectionTitle": "Benefits",
-      "title1": "Brand identity",
-      "title2": "Customer loyalty",
-      "title3": "Campaign management",
-      "title4": "Total control",
-      "title5": "Audience management",
-      "desc1": "Customize the platform with your\ncompany's colors and logo.",
-      "desc2": "Build stronger bonds and reward them\nwith products your customers love.",
-      "desc3": "Improve your repurchase rate and\ncustomer retention.",
-      "desc4": "Manage rewards and campaigns\nfrom your control panel.\nData collection through reports.",
-      "desc5": "Communicate with your customers\nwithout intermediaries."
-    },
-    "steps": {
-      "0": {
-        "title": "Customize your platform",
-        "content": "You can customize your points platform capturing the essence of your brand, with your colors and logo.",
-        "highlightedWord": "platform"
-      },
-      "1": {
-        "title": "Create your rewards",
-        "content": "Create your own catalog to reward your customers.",
-        "highlightedWord": "rewards"
-      },
-      "2": {
-        "title": "Choose your plan",
-        "content": "Select the option that best suits your business.",
-        "highlightedWord": "plan"
-      },
-      "3": {
-        "title": "Set up your business",
-        "content": "Branches and/or Collaborators (Checkout line, Administration, etc.)",
-        "highlightedWord": "Set up"
-      },
-      "4": {
-        "title": "Invite your beneficiaries",
-        "content": "Invite your customers to join your club so they can redeem rewards within the app.",
-        "highlightedWord": "beneficiaries"
-      },
-      "5": {
-        "title": "Manage from the Control Panel",
-        "content": "Visualize consumer behavior.\nControl actions taken by your collaborators.",
-        "highlightedWord": "Control Panel"
-      },
-      "6": {
-        "title": "Communicate with your beneficiaries",
-        "content": "Send push notifications with news, campaigns and more.",
-        "highlightedWord": "Communicate"
-      }
-    },
-    "parallax": {
-      "message1": "Build customer loyalty, boost your results",
-      "message2": "Reward performance, multiply success",
-      "message3": "Transform your goals into rewards"
-    },
-    "contact": {
-      "title": "Let's chat!",
-      "subtitle": "Contact us and discover how we can help you create a loyalty program tailored to your business.",
-      "firstName": "First name",
-      "lastName": "Last name",
-      "email": "Email",
-      "phone": "Phone",
-      "business": "Business name",
-      "message": "Message",
-      "submit": "Send message",
-      "loading": "Loading...",
-      "success": "The message was sent successfully. We will be in touch shortly.",
-      "error": "An error occurred while sending the message. Please try again.",
-      "validation": {
-        "firstNameRequired": "First name is required",
-        "firstNameMinLength": "First name must be at least 2 characters",
-        "lastNameRequired": "Last name is required",
-        "lastNameMinLength": "Last name must be at least 2 characters",
-        "emailRequired": "Email is required",
-        "emailInvalid": "Email is not valid",
-        "phoneRequired": "Phone number is required",
-        "phoneNoLetters": "Phone number cannot contain letters",
-        "phoneMinLength": "Phone number must be at least 11 characters",
-        "businessRequired": "Business name is required",
-        "businessMinLength": "Business name must be at least 4 characters",
-        "messageRequired": "Message is required",
-        "messageMinLength": "Please write a longer message"
-      }
-    },
-    "footer": {
-      "terms": "Terms and conditions",
-      "privacy": "Privacy policy",
-      "copyright": "©2019-{year} Puntos Club"
-    },
-    "plans": {
-      "title": "Plans"
-    },
-    "apps": {
-      "title": "Our apps",
-      "subtitle": "Your customers earn and redeem points from their phones; your cashiers register sales. Get the Android app or use it in the browser, no install needed."
-    }
-  },
   "LanguageSwitcher": {
     "label": "Language",
     "es": "Español",
@@ -3088,5 +2968,282 @@
     "cta": "Install app",
     "gotIt": "Got it",
     "footer": "Always at hand"
+  },
+  "Site": {
+    "tagline": "Create your own rewards club",
+    "nav": {
+      "howItWorks": "How it works",
+      "plans": "Plans",
+      "benefits": "Benefits",
+      "faq": "FAQ",
+      "requestDemo": "Request a demo",
+      "signIn": "Sign in",
+      "openMenu": "Open menu"
+    },
+    "footer": {
+      "terms": "Terms and conditions",
+      "privacy": "Privacy policy",
+      "contact": "Contact",
+      "copyright": "©2019-{year} Puntos Club"
+    },
+    "dashboard": {
+      "plan": "Pro plan",
+      "menu": {
+        "dashboard": "Dashboard",
+        "beneficiaries": "Members",
+        "redemptions": "Redemptions",
+        "products": "Products",
+        "reports": "Reports"
+      },
+      "beneficiaries": "Members",
+      "redemptions": "Redemptions",
+      "growth": "Growth",
+      "pointsRedeemed": "Points redeemed",
+      "lastMonths": "Last 6 months",
+      "topRewards": "Top redeemed rewards",
+      "redemptionsCount": "{count} redemptions"
+    },
+    "plans": {
+      "beneficiaries": "{n, plural, one {<b>{count}</b> member} other {<b>{count}</b> members}}",
+      "beneficiariesUnlimited": "Unlimited members",
+      "redeemable_productsUnlimited": "Unlimited catalog rewards",
+      "push_notifications_monthlyUnlimited": "Unlimited notifications",
+      "cashiersUnlimited": "Unlimited cashiers",
+      "branchesUnlimited": "Unlimited branches",
+      "redeemable_products": "{n, plural, one {<b>{count}</b> catalog reward} other {<b>{count}</b> catalog rewards}}",
+      "push_notifications_monthly": "<b>{count}</b> notifications included",
+      "cashiers": "{n, plural, one {<b>{count}</b> cashier} other {<b>{count}</b> cashiers}}",
+      "branches": "{n, plural, one {<b>{count}</b> branch} other {<b>{count}</b> branches}}",
+      "beneficiary_map": "Members map",
+      "private_club": "Private club option",
+      "campaigns": "Promotional campaigns",
+      "white_label": "Custom environment colors"
+    },
+    "home": {
+      "title": "Create your own rewards club and <hl>grow your business!</hl>",
+      "ctaDemo": "I want a free demo",
+      "ctaHow": "See how it works",
+      "feature1": "<b>Earn points</b> on your purchases",
+      "feature2": "<b>Reward customers</b> with amazing prizes",
+      "feature3": "<b>Measure results</b> and grow your business",
+      "feature4": "<b>Build loyalty</b> and manage your community easily",
+      "plansTitle": "Choose the right plan for <hl>your business</hl>",
+      "howTitle": "How does <hl>Puntos Club</hl> work?",
+      "step1Title": "Create your points club",
+      "step1Text": "Set up your business, benefits and rewards.",
+      "step2Title": "Bring in your customers",
+      "step2Text": "Invite your customers and start earning points.",
+      "step3Title": "Grow your business",
+      "step3Text": "Build loyalty, increase purchases and measure results."
+    },
+    "how": {
+      "pill": "How it works",
+      "title": "Create your points club in <hl>simple steps</hl>",
+      "subtitle": "An easy, fast solution designed to help you build customer loyalty and grow your business.",
+      "cta": "Request a free demo",
+      "stepsTitle": "How does <hl>Puntos Club</hl> work?",
+      "stepsSubtitle": "Launch your points club in 4 simple steps.",
+      "step1Title": "Create your club",
+      "step1Text": "Register your business, add your information and give your club its identity.",
+      "step2Title": "Set up your points",
+      "step2Text": "Define how points are earned, which actions generate them and which rewards you offer.",
+      "step3Title": "Add members",
+      "step3Text": "Invite your customers to join your club with a link, a QR code or at your store.",
+      "step4Title": "Build loyalty and grow your business",
+      "step4Text": "Reward their purchases, launch campaigns and measure results in real time.",
+      "toolsTitle": "Everything you need to manage <hl>your points club</hl>",
+      "tool1": "Add rewards and redemptions",
+      "tool2": "Manage your members",
+      "tool3": "Track results and growth",
+      "tool4": "Launch promotional campaigns",
+      "tool5": "Customize your club <small>(Pro plan)</small>",
+      "tool6": "Keep your customers informed",
+      "ctaTitle": "Ready to create your <hl>rewards club?</hl>",
+      "ctaText": "Start today and discover how easy it is to build customer loyalty with Puntos Club."
+    },
+    "benefits": {
+      "pill": "Benefits",
+      "title": "More than points, <hl>real results</hl> for your business",
+      "subtitle": "Build customer loyalty, increase sales and manage everything from one place.",
+      "cta": "I want a free demo",
+      "mainTitle": "The main benefits for <hl>your business</hl>",
+      "card1Title": "Grow your business",
+      "card1Text": "Increase purchase frequency and average ticket with rewards that motivate.",
+      "card2Title": "Win back customers",
+      "card2Text": "Reconnect with customers who haven't bought in a while and bring them back.",
+      "card3Title": "Drive more purchases",
+      "card3Text": "Reward your customers, launch promotions and create new sales opportunities.",
+      "card4Title": "Manage your club from one place",
+      "card4Text": "Manage points, customers, redemptions, promotions and results simply and centrally.",
+      "whyTitle": "Why choose Puntos <hl>Club</hl>?",
+      "why1": "Real, measurable <b>loyalty</b>.",
+      "why2": "More <b>sales</b> and repeat customers.",
+      "why3": "<b>Direct communication</b> with your customers.",
+      "why4": "A <b>simple</b>, intuitive, always-available platform.",
+      "why5": "Plans that <b>adapt</b> to your business.",
+      "ctaTitle": "Start enjoying <hl>all the benefits</hl> today",
+      "ctaText": "Create your points club and take your business to the next level."
+    },
+    "faq": {
+      "pill": "FAQ",
+      "title": "Questions about <hl>Puntos Club?</hl>",
+      "subtitle": "Here you'll find answers to the most common questions, so you can create your rewards club with all the information you need.",
+      "cta": "Request a free demo",
+      "exploreTitle": "Browse questions by topic",
+      "listTitle": "Frequently asked questions",
+      "categories": {
+        "plans": "Plans and pricing",
+        "features": "Features",
+        "club": "Club management",
+        "beneficiaries": "Members",
+        "billing": "Payments and billing",
+        "other": "Other"
+      },
+      "q1": {
+        "q": "Which plans does Puntos Club offer?",
+        "a": "Puntos Club offers three plans designed to grow with your business: Trial, Advance and Pro.\nThe Trial plan is free forever and lets you start with the essential tools. Advance expands your club's capacity and adds more features. Pro is designed for businesses looking for more capacity, advanced tools and customization options.\nYou can check what each one includes in our <plans>Plans</plans> section."
+      },
+      "q2": {
+        "q": "How much does each plan cost?",
+        "a": "We have three options:\n• Trial: free forever.\n• Advance: {advance} per month for the first 12 months, a 50% discount on its {advanceList} price.\n• Pro: {pro} per month for the first 12 months, a 50% discount on its {proList} price.\nThe Advance and Pro discounts are part of our launch promotion."
+      },
+      "q3": {
+        "q": "Can I change plans later?",
+        "a": "Of course! Puntos Club is designed to grow with your business.\nYou can start on the Trial plan and move to Advance or Pro when you need more members, branches, cashiers or features.\nThat way, your points club evolves as your customer community grows."
+      },
+      "q4": {
+        "q": "Does the Trial plan cost anything?",
+        "a": "No! The Trial plan is completely free and has no time limit.\nYou can create your points club, register up to 100 members, offer 3 rewards in your catalog, have 1 cashier and 1 branch, and use 200 included notifications.\nIt's a great way to start building customer loyalty without any upfront investment."
+      },
+      "q5": {
+        "q": "Is there a trial period?",
+        "a": "We have something better! With our Trial plan you can use Puntos Club for free forever, within that plan's limits.\nYou don't need to sign up for a paid plan to get to know the platform and create your first points club.\nWhen your business needs more tools or capacity, you can consider our Advance and Pro plans."
+      },
+      "q6": {
+        "q": "What can I do with Puntos Club?",
+        "a": "Puntos Club lets you create and manage your own points club to reward your customers and strengthen your relationship with them.\nFrom a single platform you can manage members, set up point-earning rules, create rewards, manage redemptions, send notifications and review your club's activity.\nAll designed to make customer loyalty easier."
+      },
+      "q7": {
+        "q": "Can I create my own rewards and redemptions?",
+        "a": "Yes! You decide which rewards to offer your customers.\nYou can build a rewards catalog with products, discounts or perks from your business and set how many points a member needs for each reward.\nThat way, your loyalty program fits your business goals."
+      },
+      "q8": {
+        "q": "Can I send notifications to my customers?",
+        "a": "Yes! Puntos Club lets you reach your club's members through notifications.\nUse them to share news, promotions, special benefits or to encourage customers to come back.\nEach plan includes a set number of notifications you can use over the life of your club: 200 on Trial, 2,000 on Advance and 5,000 on Pro."
+      },
+      "q9": {
+        "q": "Can I run promotional campaigns with points?",
+        "a": "Yes! Puntos Club includes tools to create promotional campaigns that encourage specific customer actions.\nFor example, you can use points to boost purchases, recognize loyalty or run special promotions.\nAdvanced promotional campaigns are included in the Pro plan. Some special mass-campaign formats may be offered as additional services."
+      },
+      "q10": {
+        "q": "Does the platform include reports and statistics?",
+        "a": "Yes! Puntos Club has tools to review your club's activity.\nYou can see point movements, completed redemptions and member participation, among other available data.\nThis information helps you understand how your rewards program is performing and make decisions to keep growing."
+      },
+      "q11": {
+        "q": "How do I create my points club?",
+        "a": "It's very simple! First you register your business on Puntos Club and complete your organization's information.\nThen you can set up the rules for awarding points, create your rewards catalog and get your club ready for members.\nYou don't need to build your own app or have advanced technical knowledge."
+      },
+      "q12": {
+        "q": "Can I customize my club's look?",
+        "a": "Yes! You can set up your club's identity with your business information, such as its name and the visual elements available on the platform.\nIn addition, Pro plan Owners can choose certain environment colors, so the member experience better matches their own brand.\nThat way, your points club feels more and more like part of your business."
+      },
+      "q13": {
+        "q": "What customization options does the Pro plan have?",
+        "a": "The Pro plan adds a special feature that lets you select certain colors of your club's visual environment.\nThis helps you adapt the platform's look to your business identity, offering your members a more personalized experience.\nCustomization is done within the color options available in Puntos Club."
+      },
+      "q14": {
+        "q": "Can I manage more than one branch?",
+        "a": "Absolutely! Puntos Club is built for businesses with one or several branches.\nThe number available depends on your plan:\n• Trial: 1 branch.\n• Advance: up to 10 branches.\n• Pro: up to 50 branches.\nThat way, you can run your points program from one centralized platform."
+      },
+      "q15": {
+        "q": "Can I invite other collaborators to manage the club?",
+        "a": "Yes! Depending on your plan, you can add collaborators to help you manage your club.\nThe Advance plan allows 1 collaborator, while the Pro plan allows unlimited collaborators.\nThis is especially useful for businesses that need to share administrative tasks across several people."
+      },
+      "q16": {
+        "q": "Who are the members?",
+        "a": "Members are the customers who take part in the points clubs created by businesses that use Puntos Club.\nThey can earn points, check their balance, discover rewards and redeem them according to each club's conditions.\nBest of all, they can access different rewards clubs from one place."
+      },
+      "q17": {
+        "q": "How do my customers join the club?",
+        "a": "Your customers can join your club through the sign-up and invitation options available in Puntos Club.\nFor example, you can give them access with a QR code so they can register and start participating.\nOnce they join, they can access your business's benefits and start earning points."
+      },
+      "q18": {
+        "q": "What can they redeem points for?",
+        "a": "For the rewards you choose to offer!\nAs an Owner, you can create a rewards catalog for your members and set the point value of each reward.\nYou can offer products, discounts, experiences or special perks, depending on your business.\nEach club manages its own rewards and redemption conditions."
+      },
+      "q19": {
+        "q": "Can they see their balance and activity?",
+        "a": "Yes! Members can check their points information from their Puntos Club account.\nThis lets them see their balance and follow their activity in the club.\nTransparency builds trust and motivates customers to keep earning points toward their next reward."
+      },
+      "q20": {
+        "q": "Do they need to download an app?",
+        "a": "They don't need to download an app from a store!\nPuntos Club offers a web experience that members can access from their phone's browser.\nThey can also add a shortcut to their device's home screen to open it easily, just like a regular app."
+      },
+      "q21": {
+        "q": "Which payment methods do you accept?",
+        "a": "Puntos Club offers subscription plans for businesses that want to expand their club's features and capacity.\nAvailable payment methods are shown when you sign up for the service.\nIf you'd like to know the available options before subscribing, you can contact our sales team."
+      },
+      "q22": {
+        "q": "How does billing work?",
+        "a": "Puntos Club paid plans have a monthly price, based on the plan you choose and current promotions.\nBilling information and terms are shown during the subscription process.\nIf you need help with your business's billing, our team can help."
+      },
+      "q23": {
+        "q": "Do prices include taxes?",
+        "a": "Published prices are our plans' commercial prices.\nBefore confirming your subscription, you can review the billing terms and any applicable taxes under current regulations.\nIf you need a quote or specific information for your business, you can request it from our team."
+      },
+      "q24": {
+        "q": "Can I cancel the service?",
+        "a": "Yes. If at any point you decide to stop using a paid plan, you can request to cancel the service.\nOur team will let you know the procedure and the terms that apply to your subscription.\nWe want you to choose Puntos Club for the value it brings to your business."
+      },
+      "q25": {
+        "q": "Do I need technical knowledge to use Puntos Club?",
+        "a": "No! Puntos Club is designed so any business can create and manage its own points club easily.\nThe platform has intuitive tools to set up rewards, manage members, handle points and review results.\nYou don't need to know how to code or hire a developer to get started."
+      },
+      "q26": {
+        "q": "Do you offer support and training?",
+        "a": "Puntos Club offers guidance to help you learn and use the platform's features.\nYou can contact our team to resolve questions and get guidance on how the service works.\nAvailable support channels and formats are shared according to the service terms."
+      },
+      "q27": {
+        "q": "Can I integrate Puntos Club with other systems?",
+        "a": "Puntos Club works as a standalone platform to manage your loyalty program.\nIf your business needs to connect it with a sales, billing or other system, you can ask our team to evaluate the technical options available.\nCompatibility and integrations are analyzed case by case."
+      },
+      "q28": {
+        "q": "How can I contact the Puntos Club team?",
+        "a": "We'd love to help!\nYou can visit puntosclub.com.ar and use our contact channels to reach the team.\nYou can also <demo>request a demo</demo> to see how the platform works and find out which plan best fits your business."
+      },
+      "moreTitle": "Still have <hl>questions?</hl>",
+      "moreText": "Our team is here to help you choose the best option for your business.",
+      "moreDemo": "Request a demo",
+      "moreAdvisor": "Talk to an advisor"
+    },
+    "contact": {
+      "pill": "Request a demo",
+      "title": "Get your <hl>free demo</hl>",
+      "subtitle": "Tell us about your business and we'll show you how to create a loyalty program tailored to it.",
+      "firstName": "First name",
+      "lastName": "Last name",
+      "email": "Email",
+      "phone": "Phone",
+      "business": "Company name",
+      "message": "Message",
+      "submit": "Send message",
+      "loading": "Sending...",
+      "success": "Your message was sent successfully. We'll get back to you shortly.",
+      "error": "Something went wrong sending your message. Please try again.",
+      "orWrite": "Or write to us at",
+      "validation": {
+        "firstNameRequired": "First name is required",
+        "firstNameMinLength": "First name must be at least 2 characters",
+        "lastNameRequired": "Last name is required",
+        "lastNameMinLength": "Last name must be at least 2 characters",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Email is not valid",
+        "phoneRequired": "Phone number is required",
+        "phoneNoLetters": "Phone number can't contain letters",
+        "phoneMinLength": "Phone number must be at least 10 characters",
+        "messageRequired": "Message is required",
+        "messageMinLength": "Please write a longer message"
+      }
+    }
   }
 }
