@@ -71,7 +71,7 @@ export default async function Home() {
               {t("ctaDemo")}
             </Cta>
             <Cta
-              href="/como-funciona"
+              href="#video"
               variant="outline"
               arrow={false}
               className="h-14 border-sitio-ink/80 px-8 text-xl font-medium"
@@ -100,6 +100,25 @@ export default async function Home() {
             </li>
           ))}
         </ul>
+      </section>
+
+      {/* Video: a la vista y con play manual; en un popup los clientes lo cerraban sin verlo. */}
+      <section id="video" className="relative mx-auto max-w-5xl scroll-mt-28 px-4 py-12 sm:px-6 lg:px-10">
+        <Blob className="top-1/3 -left-24 h-72 w-[30rem] bg-[#d9e8ff]/70" />
+        <div className="relative mx-auto mb-8 w-fit">
+          <SectionTitle className="text-center">{t.rich("videoTitle", rich)}</SectionTitle>
+          <Sparks className="absolute -top-6 -right-12 size-12 rotate-12" />
+        </div>
+        {/* youtube-nocookie: no deja cookies hasta que le dan play y la vista igual cuenta. */}
+        <iframe
+          src="https://www.youtube-nocookie.com/embed/Bpd916s3U0s?rel=0"
+          title={t("videoTitlePlain")}
+          loading="lazy"
+          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          referrerPolicy="strict-origin-when-cross-origin"
+          allowFullScreen
+          className="aspect-video w-full rounded-3xl bg-sitio-ink shadow-[0_24px_48px_-24px_rgba(80,40,90,0.55)] ring-1 ring-[#f1e3ea]"
+        />
       </section>
 
       {/* Planes */}

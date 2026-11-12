@@ -43,6 +43,7 @@ describe("sitio público", () => {
     expect(screen.getByText("home-plans")).toBeInTheDocument();
     expect(container.querySelector('script[type="application/ld+json"]')).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
+    expect(container.querySelector('iframe[src*="youtube-nocookie.com/embed/Bpd916s3U0s"]')).toBeInTheDocument();
     unmount();
 
     (getPublicPlanLimits as jest.Mock).mockResolvedValueOnce(null);
