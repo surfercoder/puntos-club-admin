@@ -148,6 +148,7 @@ export const PLAN_CARD_FEATURES = [
   'beneficiary_map',
   'private_club',
   'campaigns',
+  'white_label',
 ] as const satisfies readonly PlanFeatureKey[];
 export type PlanCardFeature = (typeof PLAN_CARD_FEATURES)[number];
 

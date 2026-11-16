@@ -2181,7 +2181,7 @@
         "api": "API",
         "webhooks": "Webhooks",
         "sso": "SSO",
-        "white_label": "Colores de tu marca en la app",
+        "white_label": "Personalización de colores del entorno",
         "advanced_roles": "Roles avanzados",
         "audit": "Auditoría",
         "erp_integration": "Integración ERP",

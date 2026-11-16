@@ -40,7 +40,7 @@ jest.mock('@/actions/dashboard/usage/actions', () => ({
   getAllPlanLimitsAction: jest.fn().mockResolvedValue({
     trial: { beneficiaries: 100, push_notifications_monthly: 200, cashiers: 1, branches: 1, collaborators: 0, redeemable_products: 2, campaigns: 0 },
     advance: { beneficiaries: 1000, push_notifications_monthly: 2000, cashiers: 10, branches: 10, collaborators: 1, redeemable_products: 6, campaigns: 0 },
-    pro: { beneficiaries: -1, push_notifications_monthly: 5000, cashiers: 50, branches: 50, collaborators: -1, redeemable_products: 20, campaigns: 1 },
+    pro: { beneficiaries: -1, push_notifications_monthly: 5000, cashiers: 50, branches: 50, collaborators: -1, redeemable_products: 20, campaigns: 1, white_label: 1 },
     enterprise: { beneficiaries: -1, push_notifications_monthly: 10000, cashiers: -1, branches: -1, collaborators: -1, redeemable_products: -1, campaigns: 1 },
   }),
 }));
@@ -121,6 +121,8 @@ describe('PlanSelector', () => {
     expect(screen.getByText('$12.499')).toBeInTheDocument();
     expect(screen.getByText('$24.999')).toHaveClass('line-through');
     expect(screen.getAllByText('discountBadge')).toHaveLength(2);
+    // Etiqueta en la columna + sr-only en las 3 tarjetas + el resaltado con nombre en Pro.
+    expect(screen.getAllByText('features.white_label')).toHaveLength(5);
   });
 
   it('shows the list price without the promo badge once the org promo expired', async () => {

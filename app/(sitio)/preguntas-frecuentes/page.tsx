@@ -44,11 +44,11 @@ export default async function PreguntasFrecuentesPage() {
         art={
           <>
             <Image
-              src="/images/sitio/clubi-chau.png"
+              src="/images/sitio/clubi-saluda-parado.png"
               alt=""
-              width={253}
-              height={270}
-              className="mx-auto w-44 lg:absolute lg:bottom-0 lg:left-10 lg:w-56"
+              width={247}
+              height={314}
+              className="mx-auto -mb-10 w-36 lg:absolute lg:bottom-0 lg:left-14 lg:mb-0 lg:w-48"
             />
             <div className="absolute top-8 right-10 hidden w-24 lg:block">
               <Image src="/images/sitio/burbuja-chat.png" alt="" width={92} height={71} className="w-full" />

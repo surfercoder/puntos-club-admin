@@ -12,8 +12,6 @@ import {
 } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
-import { Sparks } from "@/components/sitio/ui";
-
 const BARS = [18, 22, 26, 30, 40, 44, 50, 46, 58, 66, 82];
 
 /** Panel del admin dibujado en HTML (nítido a cualquier escala) con Clubi saludando adelante. */
@@ -105,7 +103,6 @@ export async function HeroDashboard() {
         priority
         className="absolute bottom-[-8%] -left-[4%] w-[47%] drop-shadow-[0_18px_20px_rgba(160,40,90,0.18)]"
       />
-      <Sparks className="absolute top-0 left-[4%] size-12" />
     </div>
   );
 }

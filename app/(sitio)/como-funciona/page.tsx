@@ -108,9 +108,9 @@ export default async function ComoFuncionaPage() {
       <CtaBand
         className="lg:pr-80"
         art={
-          <div className="relative mx-auto w-48 lg:absolute lg:right-14 lg:bottom-0 lg:w-56">
+          <div className="relative mx-auto -mb-10 w-48 lg:absolute lg:right-14 lg:bottom-0 lg:mb-0 lg:w-56">
             <Sparks className="absolute top-2 -left-10 size-12 -scale-x-100" />
-            <Image src="/images/sitio/clubi-asoma.png" alt="" width={202} height={210} className="w-full" />
+            <Image src="/images/sitio/clubi-cabeza.png" alt="" width={277} height={311} className="w-full" />
           </div>
         }
       >

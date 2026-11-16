@@ -9,6 +9,7 @@ import {
   Lock,
   MapPinned,
   Megaphone,
+  Palette,
   Star,
   Store,
   Users,
@@ -45,7 +46,11 @@ const FEATURE_ICONS: Record<PlanCardFeature, Icon> = {
   beneficiary_map:            MapPinned,
   private_club:               Lock,
   campaigns:                  Megaphone,
+  white_label:                Palette,
 };
+
+/** La fila que el mockup resalta: rosa en la etiqueta y, donde está incluida, verde con su nombre. */
+const HIGHLIGHTED: PlanCardFeature = 'white_label';
 
 /** Estilo por plan — la única parte que no sale de la base. Colores del mockup curado. */
 const PLAN_STYLES: Record<PlanCardType, {
@@ -105,7 +110,16 @@ function FeatureValue({
   unlimitedLabel: string;
 }) {
   const locale = useLocale();
+  const t = useTranslations('Onboarding.step3');
 
+  if (feature === HIGHLIGHTED && value && value > 0) {
+    return (
+      <span className="flex items-center gap-2 rounded-xl bg-[#0a9d47]/12 px-3 py-1 text-xs leading-tight text-foreground/80 @[84rem]:gap-4 @[84rem]:px-6 @[84rem]:text-[17px]">
+        <Check className="size-5 shrink-0 text-[#0a9d47] @[84rem]:size-7" strokeWidth={3} />
+        <span className="hidden @4xl:inline">{t(`features.${HIGHLIGHTED}`)}</span>
+      </span>
+    );
+  }
   if (!isQuotaFeature(feature)) {
     return value && value > 0 ? (
       <Check className="size-5 text-[#0a9d47] @[84rem]:size-7" strokeWidth={3} />
@@ -305,9 +319,18 @@ export function PlanCards({ limits, selected, currentPlan = null, promo = true, 
           <div className={cn('flex flex-col justify-end pb-3 @[84rem]:justify-start', HEADER_H)}>{heading}</div>
           <ul className="rounded-xl border border-border/60 bg-background/70 @[84rem]:rounded-2xl @[84rem]:border-0 @[84rem]:bg-background/85 @[84rem]:shadow-[0_8px_24px_-16px_rgba(80,40,90,0.25)]">
             {PLAN_CARD_FEATURES.map((feature) => (
-              <li key={feature} className={cn(ROW, '@[84rem]:border-0 @[84rem]:px-0')}>
+              <li
+                key={feature}
+                className={cn(ROW, '@[84rem]:border-0 @[84rem]:px-0', feature === HIGHLIGHTED && 'rounded-xl bg-brand-pink/8')}
+              >
                 {/* En grande el ícono va en su propia celda y la línea arranca después, como en el mockup. */}
-                <span className="flex h-full flex-1 items-center @[84rem]:ml-[62px] @[84rem]:border-b @[84rem]:border-border/60 @[84rem]:[li:last-child>&]:border-0">
+                <span
+                  className={cn(
+                    'flex h-full flex-1 items-center @[84rem]:ml-[62px] @[84rem]:border-b @[84rem]:border-border/60 @[84rem]:[li:last-child>&]:border-0',
+                    // El mockup corta en "colores / del entorno".
+                    feature === HIGHLIGHTED && '@[84rem]:pr-16'
+                  )}
+                >
                   <FeatureLabel feature={feature} />
                 </span>
               </li>
