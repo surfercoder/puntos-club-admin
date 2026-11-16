@@ -2841,6 +2841,10 @@
       "noBucket": "Falta indicar el destino del archivo.",
       "noFile": "Elegí un archivo para subir.",
       "pathRequired": "Faltan datos del archivo."
+    },
+    "contact": {
+      "invalidData": "Revisá los datos del formulario e intentá de nuevo.",
+      "sendFailed": "No pudimos enviar tu consulta. Intentá nuevamente."
     }
   },
   "Actions": {
@@ -2977,7 +2981,8 @@
     "footer": {
       "terms": "Términos y condiciones",
       "privacy": "Política de privacidad",
-      "copyright": "©2019-{year} Puntos Club"
+      "copyright": "©2019-{year} Puntos Club",
+      "contact": "Contacto"
     },
     "dashboard": {
       "plan": "Plan Pro",
@@ -3210,6 +3215,33 @@
       "moreText": "Nuestro equipo está para ayudarte a elegir la mejor opción para tu negocio.",
       "moreDemo": "Solicitar una demo",
       "moreAdvisor": "Contactar con un asesor"
+    },
+    "contact": {
+      "pill": "Contacto",
+      "title": "¿Tenés alguna <hl>consulta?</hl>",
+      "subtitle": "Estamos para ayudarte.",
+      "subtitle2": "Escribinos y nuestro equipo te va a responder a la brevedad.",
+      "name": "Nombre y apellido",
+      "email": "Correo electrónico",
+      "phone": "Teléfono",
+      "business": "Nombre de la empresa",
+      "message": "¿En qué podemos ayudarte?",
+      "messagePlaceholder": "Contanos tu consulta o comentario...",
+      "optional": "(opcional)",
+      "submit": "Enviar consulta",
+      "loading": "Enviando...",
+      "success": "Tu consulta fue enviada con éxito. Te vamos a responder a la brevedad.",
+      "error": "Ocurrió un error al enviar tu consulta. Por favor intentá de nuevo.",
+      "validation": {
+        "nameRequired": "El nombre y apellido es obligatorio",
+        "nameMinLength": "El nombre debe tener al menos 2 caracteres",
+        "emailRequired": "El correo electrónico es obligatorio",
+        "emailInvalid": "El correo electrónico no es válido",
+        "phoneNoLetters": "El número de teléfono no puede contener letras",
+        "phoneMinLength": "El número de teléfono debe tener al menos 10 caracteres",
+        "messageRequired": "Contanos en qué podemos ayudarte",
+        "messageMinLength": "Por favor, escribí un mensaje más largo"
+      }
     }
   }
 }

@@ -16,6 +16,7 @@ jest.mock("@/components/sitio/site-footer", () => ({ SiteFooter: () => <footer>f
 jest.mock("@/components/sitio/hero-dashboard", () => ({ HeroDashboard: () => <div>hero-dashboard</div> }));
 jest.mock("@/components/sitio/home-plans", () => ({ HomePlans: () => <div>home-plans</div> }));
 jest.mock("@/components/sitio/plans-table", () => ({ PlansTable: () => <div>plans-table</div> }));
+jest.mock("@/components/sitio/contact-form", () => ({ ContactForm: () => <form>contact-form</form> }));
 jest.mock("@/components/sitio/faq-explorer", () => ({ FaqExplorer: () => <div>faq-explorer</div> }));
 jest.mock("@/lib/plans/public-limits", () => ({ getPublicPlanLimits: jest.fn() }));
 
@@ -42,6 +43,8 @@ describe("sitio público", () => {
     expect(container.querySelector('script[type="application/ld+json"]')).toBeInTheDocument();
     expect(screen.getAllByRole("heading", { level: 1 })).toHaveLength(1);
     expect(container.querySelector('iframe[src*="youtube-nocookie.com/embed/Bpd916s3U0s"]')).toBeInTheDocument();
+    // El form de contacto cierra la home (antes era /contacto).
+    expect(container.querySelector("#contacto")).toContainElement(screen.getByText("contact-form"));
     unmount();
 
     (getPublicPlanLimits as jest.Mock).mockResolvedValueOnce(null);

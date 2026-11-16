@@ -144,6 +144,7 @@ describe("SiteHeader y SiteFooter", () => {
     render(await SiteFooter());
     expect(screen.getByRole("link", { name: "footer.terms" })).toHaveAttribute("href", "/legal/terminos");
     expect(screen.getByRole("link", { name: "footer.privacy" })).toHaveAttribute("href", "/legal/privacidad");
+    expect(screen.getByRole("link", { name: "footer.contact" })).toHaveAttribute("href", "/#contacto");
     expect(screen.getByTestId("language-switcher")).toBeInTheDocument();
   });
 });

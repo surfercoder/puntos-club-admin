@@ -7,5 +7,5 @@ export const rich = {
   small: (chunks: ReactNode) => <span className="text-[0.85em] font-normal">{chunks}</span>,
 };
 
-/** Destino de todos los "Solicitar demo": el alta del owner, sin form de contacto. */
+/** Destino de todos los "Solicitar demo": el alta del owner (las consultas van al form de la home). */
 export const DEMO_HREF = "/owner/onboarding";

@@ -17,9 +17,14 @@ export function Sparks({ className }: { className?: string }) {
   );
 }
 
-export function Pill({ children }: { children: ReactNode }) {
+export function Pill({ children, className }: { children: ReactNode; className?: string }) {
   return (
-    <span className="inline-flex rounded-full border-2 border-[#7FE0B8] bg-[#C8F5E3] px-5 py-1.5 text-lg font-bold text-[#04603A] lg:text-xl">
+    <span
+      className={cn(
+        "inline-flex rounded-full border-2 border-[#7FE0B8] bg-[#C8F5E3] px-5 py-1.5 text-lg font-bold text-[#04603A] lg:text-xl",
+        className
+      )}
+    >
       {children}
     </span>
   );

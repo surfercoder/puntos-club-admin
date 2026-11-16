@@ -3,9 +3,10 @@ import Image from "next/image";
 import { ArrowRight, BarChart3, Gift, Laptop, Play, Star, Users } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 
+import { ContactForm } from "@/components/sitio/contact-form";
 import { HeroDashboard } from "@/components/sitio/hero-dashboard";
 import { HomePlans } from "@/components/sitio/home-plans";
-import { Blob, Cta, SectionTitle, Sparks } from "@/components/sitio/ui";
+import { Blob, Cta, Pill, SectionTitle, Sparks } from "@/components/sitio/ui";
 import { DEMO_HREF, rich } from "@/components/sitio/rich";
 import { getPublicPlanLimits } from "@/lib/plans/public-limits";
 import { SITE_URL } from "@/lib/site-url";
@@ -48,7 +49,11 @@ const STEPS = [
 ] as const;
 
 export default async function Home() {
-  const [t, planLimits] = await Promise.all([getTranslations("Site.home"), getPublicPlanLimits()]);
+  const [t, tc, planLimits] = await Promise.all([
+    getTranslations("Site.home"),
+    getTranslations("Site.contact"),
+    getPublicPlanLimits(),
+  ]);
 
   return (
     <>
@@ -162,6 +167,34 @@ export default async function Home() {
             <Sparks className="absolute top-6 -left-8 size-12 -scale-x-100" />
             <Image src="/images/sitio/clubi-pulgar.png" alt="Clubi" width={225} height={248} className="w-full" />
           </div>
+        </div>
+      </section>
+
+      {/* Contacto: el form que antes vivía en /contacto, al cierre de la home (pedido de CJ). */}
+      <section
+        id="contacto"
+        className="relative mx-auto grid max-w-7xl scroll-mt-24 gap-10 px-4 pt-14 pb-16 sm:px-6 lg:grid-cols-[minmax(0,35fr)_minmax(0,61fr)] lg:gap-12 lg:px-10 lg:pt-16"
+      >
+        <Blob className="top-0 right-0 h-80 w-[44rem] bg-[#ffd3e5]/80" />
+        <Blob className="bottom-24 -left-24 h-96 w-80 bg-[#ffd9e8]/80" />
+        <Blob className="-right-16 -bottom-10 h-56 w-96 bg-[#fff1c9]/80" />
+        <div className="flex flex-col">
+          <Pill className="w-fit border-0 bg-[#fdd2e0] px-7 py-2 text-sitio-ink lg:text-[1.6rem]">{tc("pill")}</Pill>
+          <h2 className="relative mt-6 w-fit text-[2.75rem] leading-[1.02] font-extrabold tracking-[-0.03em] text-sitio-ink sm:text-[3.25rem] lg:text-[3.45rem] [&_span]:block">
+            {tc.rich("title", rich)}
+            <Sparks className="absolute top-[54%] left-[75%] size-12 rotate-45 lg:size-14" />
+          </h2>
+          <p className="mt-5 max-w-[24rem] text-xl leading-snug lg:text-[1.55rem]">
+            {tc("subtitle")} <br />
+            {tc("subtitle2")}
+          </p>
+          <div className="relative mt-6 w-72 self-center sm:w-80 lg:mt-auto lg:w-[24.5rem] lg:self-start">
+            <Sparks className="absolute top-6 right-1 size-14" />
+            <Image src="/images/sitio/clubi-contacto.png" alt="" width={463} height={454} className="w-full" />
+          </div>
+        </div>
+        <div className="self-start rounded-[2rem] bg-white p-6 shadow-[0_24px_60px_-30px_rgba(160,60,110,0.35)] ring-1 ring-[#f5e1ea] sm:p-10 lg:mt-8 lg:px-10 lg:pt-12 lg:pb-12">
+          <ContactForm />
         </div>
       </section>
     </>

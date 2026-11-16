@@ -2841,6 +2841,10 @@
       "noBucket": "The upload destination is missing.",
       "noFile": "Pick a file to upload.",
       "pathRequired": "Some file details are missing."
+    },
+    "contact": {
+      "invalidData": "Check the form details and try again.",
+      "sendFailed": "We couldn't send your message. Please try again."
     }
   },
   "Actions": {
@@ -2977,7 +2981,8 @@
     "footer": {
       "terms": "Terms and conditions",
       "privacy": "Privacy policy",
-      "copyright": "©2019-{year} Puntos Club"
+      "copyright": "©2019-{year} Puntos Club",
+      "contact": "Contact"
     },
     "dashboard": {
       "plan": "Pro plan",
@@ -3210,6 +3215,33 @@
       "moreText": "Our team is here to help you choose the best option for your business.",
       "moreDemo": "Request a demo",
       "moreAdvisor": "Talk to an advisor"
+    },
+    "contact": {
+      "pill": "Contact",
+      "title": "Do you have a <hl>question?</hl>",
+      "subtitle": "We're here to help.",
+      "subtitle2": "Write to us and our team will get back to you shortly.",
+      "name": "Full name",
+      "email": "Email",
+      "phone": "Phone",
+      "business": "Company name",
+      "message": "How can we help you?",
+      "messagePlaceholder": "Tell us your question or comment...",
+      "optional": "(optional)",
+      "submit": "Send message",
+      "loading": "Sending...",
+      "success": "Your message was sent successfully. We'll get back to you shortly.",
+      "error": "Something went wrong sending your message. Please try again.",
+      "validation": {
+        "nameRequired": "Full name is required",
+        "nameMinLength": "Name must be at least 2 characters",
+        "emailRequired": "Email is required",
+        "emailInvalid": "Email is not valid",
+        "phoneNoLetters": "Phone number can't contain letters",
+        "phoneMinLength": "Phone number must be at least 10 characters",
+        "messageRequired": "Tell us how we can help you",
+        "messageMinLength": "Please write a longer message"
+      }
     }
   }
 }

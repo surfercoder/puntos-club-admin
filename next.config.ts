@@ -13,8 +13,8 @@ const nextConfig: NextConfig = {
   async redirects() {
     return [
       { source: "/login", destination: "/auth/login", statusCode: 301 },
-      // El form de demo se sacó: el link viejo (y Google) cae directo en el alta.
-      { source: "/contacto", destination: "/owner/onboarding", statusCode: 301 },
+      // El form de contacto vive al final de la home: el link viejo (y Google) cae ahí.
+      { source: "/contacto", destination: "/#contacto", statusCode: 301 },
     ];
   },
 
