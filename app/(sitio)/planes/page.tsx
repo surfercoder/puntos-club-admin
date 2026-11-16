@@ -17,7 +17,7 @@ export default async function PlanesPage() {
   if (!limits) notFound();
 
   return (
-    <section className="relative mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-10 lg:py-14">
+    <section className="relative mx-auto max-w-[96rem] px-4 py-10 sm:px-6 lg:px-6 lg:py-14">
       <Blob className="top-0 -left-20 h-80 w-80 bg-[#d6e8ff]/80" />
       <Blob className="top-20 right-0 h-96 w-[30rem] bg-[#ffd3e5]/70" />
       <h1 className="sr-only">{(await getTranslations("Site.nav"))("plans")}</h1>

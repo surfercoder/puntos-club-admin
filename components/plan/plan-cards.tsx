@@ -47,7 +47,7 @@ const FEATURE_ICONS: Record<PlanCardFeature, Icon> = {
   campaigns:                  Megaphone,
 };
 
-/** Estilo por plan — la única parte que no sale de la base. */
+/** Estilo por plan — la única parte que no sale de la base. Colores del mockup curado. */
 const PLAN_STYLES: Record<PlanCardType, {
   icon: Icon;
   card: string;
@@ -59,36 +59,39 @@ const PLAN_STYLES: Record<PlanCardType, {
 }> = {
   trial: {
     icon: Star,
-    card: 'bg-brand-blue/5 border-brand-blue/20',
-    iconBox: 'bg-brand-blue/15 text-brand-blue',
+    card: 'bg-[color-mix(in_srgb,var(--color-sitio-blue)_7%,var(--background))] border-sitio-blue/15',
+    iconBox: 'bg-sitio-blue/12 text-sitio-blue',
     price: 'text-foreground',
-    badge: 'bg-brand-blue text-white',
-    cta: 'border-2 border-brand-blue bg-background text-brand-blue hover:bg-brand-blue/10',
-    ring: 'ring-brand-blue',
+    badge: 'bg-sitio-blue text-white',
+    cta: 'border-[1.5px] border-sitio-blue bg-background text-sitio-blue hover:bg-sitio-blue/10',
+    ring: 'ring-sitio-blue',
   },
   advance: {
     icon: Zap,
-    card: 'bg-brand-orange/5 border-brand-orange/20',
-    iconBox: 'bg-brand-orange/15 text-brand-orange',
-    price: 'text-brand-orange',
-    badge: 'bg-brand-orange text-white',
-    cta: 'bg-brand-orange text-white hover:bg-brand-orange/90',
-    ring: 'ring-brand-orange',
+    card: 'bg-[color-mix(in_srgb,#ff5a1f_8%,var(--background))] border-[#ff5a1f]/15',
+    iconBox: 'bg-[#ff8a1f]/20 text-[#ff8a1f]',
+    price: 'text-[#ff4f17]',
+    badge: 'bg-[#ff5a1f] text-white',
+    cta: 'bg-[#ff5a1f] text-white hover:bg-[#ec4a10]',
+    ring: 'ring-[#ff5a1f]',
   },
   pro: {
     icon: Crown,
-    card: 'bg-brand-green/5 border-brand-green/20',
-    iconBox: 'bg-brand-green/15 text-brand-green',
-    price: 'text-brand-green',
-    badge: 'bg-brand-green text-white',
-    cta: 'bg-brand-green text-white hover:bg-brand-green/90',
-    ring: 'ring-brand-green',
+    card: 'bg-[color-mix(in_srgb,#0a9d47_8%,var(--background))] border-[#0a9d47]/15',
+    iconBox: 'bg-[#0a9d47]/15 text-[#0a9d47]',
+    price: 'text-[#049d44]',
+    badge: 'bg-[#0a9d47] text-white',
+    cta: 'bg-[#0a9d47] text-white hover:bg-[#08883d]',
+    ring: 'ring-[#0a9d47]',
   },
 };
 
 // Cabecera y filas con alto fijo: la columna de etiquetas se alinea con las tarjetas.
-const HEADER_H = '@4xl:h-40';
-const ROW = 'flex h-11 items-center border-b border-border/60 px-3 last:border-0';
+// Desde @[84rem] (la página /planes) van las medidas del mockup en px; más angosto
+// (onboarding, Ajustes) la misma grilla en chico.
+const HEADER_H = '@4xl:h-40 @[84rem]:h-[189px]';
+const ROW_H = 'h-11 @[84rem]:h-[50px]';
+const ROW = cn('flex items-center border-b border-border/60 px-3 last:border-0', ROW_H);
 
 export type PlanLimitsByPlan = Record<PlanType, Record<PlanFeatureKey, number>>;
 
@@ -105,14 +108,14 @@ function FeatureValue({
 
   if (!isQuotaFeature(feature)) {
     return value && value > 0 ? (
-      <Check className="size-5 text-brand-green" strokeWidth={3} />
+      <Check className="size-5 text-[#0a9d47] @[84rem]:size-7" strokeWidth={3} />
     ) : (
       <span className="text-muted-foreground">-</span>
     );
   }
   // El español no agrupa 4 cifras por defecto; el diseño pide "1.000".
   return (
-    <span className="font-semibold">
+    <span className="font-semibold @[84rem]:text-lg">
       {value === UNLIMITED ? unlimitedLabel : (value ?? 0).toLocaleString(locale, { useGrouping: 'always' })}
     </span>
   );
@@ -122,8 +125,8 @@ function FeatureLabel({ feature }: { feature: PlanCardFeature }) {
   const t = useTranslations('Onboarding.step3');
   const Icon = FEATURE_ICONS[feature];
   return (
-    <span className="flex items-center gap-3 text-sm text-muted-foreground">
-      <Icon className="size-4 shrink-0 text-foreground" />
+    <span className="flex items-center gap-3 text-sm text-foreground/80 @[84rem]:gap-[34px] @[84rem]:text-[17px]">
+      <Icon className="size-4 shrink-0 text-foreground @[84rem]:-ml-[42px] @[84rem]:size-[26px]" />
       {t(`features.${feature}`)}
     </span>
   );
@@ -159,7 +162,7 @@ function PlanCard({ plan, limits, isSelected, isCurrent, promo, onSelect }: Plan
   return (
     <div
       className={cn(
-        'relative flex flex-col rounded-2xl border p-3 transition-shadow',
+        'relative flex flex-col rounded-2xl border p-3 transition-shadow @[84rem]:rounded-[22px] @[84rem]:p-3.5',
         style.card,
         isSelected && cn('ring-2 ring-offset-2 ring-offset-background', style.ring)
       )}
@@ -181,36 +184,63 @@ function PlanCard({ plan, limits, isSelected, isCurrent, promo, onSelect }: Plan
         </span>
       )}
 
-      <div className={cn('flex flex-col gap-2 p-2', HEADER_H)}>
-        <div className="flex items-start gap-3">
-          <div className={cn('flex size-12 shrink-0 items-center justify-center rounded-full', style.iconBox)}>
-            <Icon className="size-6" />
+      {/* Cartel "50% OFF": en chico cuelga del borde para no robarle ancho al nombre; en grande va adentro, como globo. */}
+      {listPrice && (
+        <div
+          className={cn(
+            'absolute -top-4 right-3 rounded-lg px-2 py-1 text-center leading-none shadow-sm',
+            '@[84rem]:top-7 @[84rem]:right-2.5 @[84rem]:w-[81px] @[84rem]:rounded-[10px] @[84rem]:px-1 @[84rem]:py-2.5',
+            style.badge
+          )}
+        >
+          <p className="text-sm font-extrabold @[84rem]:text-[26px] @[84rem]:leading-[1.1]">
+            {/* En grande el ancho fijo de 81px parte "50% OFF" en dos renglones solo. */}
+            {t('discountBadge')}
+          </p>
+          <p className="mt-0.5 text-[9px] font-medium @[84rem]:mt-1.5 @[84rem]:text-[11px]">{t('discountNote')}</p>
+          <span className={cn('absolute -bottom-1.5 right-3 hidden size-3 rotate-45 @[84rem]:block', style.badge)} />
+        </div>
+      )}
+
+      <div className={cn('flex flex-col p-2 @[84rem]:px-3 @[84rem]:pt-3.5', HEADER_H)}>
+        <div className="flex items-start gap-3 @[84rem]:gap-4">
+          <div className={cn('flex size-12 shrink-0 items-center justify-center rounded-full @[84rem]:size-[84px]', style.iconBox)}>
+            <Icon className="size-6 @[84rem]:size-10" />
           </div>
-          <p className="whitespace-nowrap pt-3 text-base font-bold leading-tight text-foreground">
-            {t(`${plan}Plan`)}
-          </p>
-          {/* Cuelga del borde superior para no robarle ancho al nombre del plan. */}
-          {listPrice && (
-            <div className={cn('absolute -top-4 right-3 rounded-lg px-2 py-1 text-center leading-none shadow-sm', style.badge)}>
-              <p className="text-sm font-extrabold">{t('discountBadge')}</p>
-              <p className="mt-0.5 text-[9px] font-medium">{t('discountNote')}</p>
-            </div>
-          )}
+          <div className={cn('flex flex-col pt-3 @[84rem]:pt-2.5', price === 0 && 'items-center')}>
+            <p className="whitespace-nowrap text-base font-bold leading-tight text-foreground @[84rem]:text-[21px]">
+              {t(`${plan}Plan`)}
+            </p>
+            {listPrice && (
+              <p className="text-sm font-semibold text-muted-foreground line-through @[84rem]:mt-2.5 @[84rem]:text-[21px]">
+                {formatArs(listPrice, locale)}
+              </p>
+            )}
+            {price === 0 && (
+              <>
+                <p className={cn('text-3xl font-extrabold leading-tight @[84rem]:text-[44px] @[84rem]:leading-[1.2]', style.price)}>
+                  {t('freePriceLabel')}
+                </p>
+                <p className="text-xs text-muted-foreground @[84rem]:text-lg @[84rem]:leading-tight @[84rem]:text-foreground/80">
+                  {t('trialPriceNote')}
+                </p>
+              </>
+            )}
+          </div>
         </div>
-        <div className="text-center">
-          {listPrice && (
-            <p className="text-sm font-semibold text-muted-foreground line-through">{formatArs(listPrice, locale)}</p>
-          )}
-          <p className={cn('text-3xl font-extrabold leading-tight', style.price)}>
-            {price === 0 ? t('freePriceLabel') : formatArs(price, locale)}
-          </p>
-          <p className="text-xs text-muted-foreground">
-            {price === 0 ? t('trialPriceNote') : t('paidPriceNote')}
-          </p>
-        </div>
+        {price > 0 && (
+          <div className="mt-1 text-center @[84rem]:-mt-1">
+            <p className={cn('text-3xl font-extrabold leading-tight tracking-tight @[84rem]:text-[48px] @[84rem]:leading-[1.1]', style.price)}>
+              {formatArs(price, locale)}
+            </p>
+            <p className="text-xs text-muted-foreground @[84rem]:text-lg @[84rem]:leading-tight @[84rem]:text-foreground/80">
+              {t('paidPriceNote')}
+            </p>
+          </div>
+        )}
       </div>
 
-      <ul className="flex-1 rounded-xl bg-background/70">
+      <ul className="flex-1 rounded-xl bg-background/70 @[84rem]:rounded-2xl">
         {PLAN_CARD_FEATURES.map((feature) => (
           <li key={feature} className={cn(ROW, 'justify-between gap-2 @4xl:justify-center')}>
             <span className="@4xl:sr-only">
@@ -226,14 +256,14 @@ function PlanCard({ plan, limits, isSelected, isCurrent, promo, onSelect }: Plan
         aria-pressed={isSelected}
         onClick={onSelect}
         className={cn(
-          'mt-3 flex h-12 cursor-pointer items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+          'mt-3 flex h-12 cursor-pointer items-center justify-center gap-2 rounded-xl text-sm font-semibold transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 @[84rem]:h-[60px] @[84rem]:rounded-2xl @[84rem]:text-[19px]',
           style.cta,
           style.ring
         )}
       >
         {isSelected && <Check className="size-4" />}
         {ctaLabel}
-        {!isSelected && <ArrowRight className="size-4" />}
+        {!isSelected && <ArrowRight className="size-4 @[84rem]:ml-1 @[84rem]:size-5" />}
       </button>
     </div>
   );
@@ -256,11 +286,13 @@ export function PlanCards({ limits, selected, currentPlan = null, promo = true, 
   const t = useTranslations('Onboarding.step3');
 
   const heading = (
-    <div>
-      <h3 className="text-2xl font-extrabold leading-tight text-foreground @5xl:text-3xl">
+    <div className="@[84rem]:-mt-4">
+      <h3 className="text-2xl font-extrabold leading-tight text-foreground @5xl:text-3xl @[84rem]:text-[38px] @[84rem]:leading-[1.12]">
         {t('plansTitle')} <span className="text-brand-pink">{t('plansTitleHighlight')}</span>
       </h3>
-      <p className="mt-2 text-sm text-muted-foreground">{t('plansSubtitle')}</p>
+      <p className="mt-2 text-sm text-muted-foreground @[84rem]:mt-4 @[84rem]:max-w-[358px] @[84rem]:text-lg @[84rem]:leading-[25px] @[84rem]:text-foreground/85">
+        {t('plansSubtitle')}
+      </p>
     </div>
   );
 
@@ -268,13 +300,16 @@ export function PlanCards({ limits, selected, currentPlan = null, promo = true, 
     <div className="@container space-y-4">
       <div className="@4xl:hidden">{heading}</div>
 
-      <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-[1.15fr_repeat(3,1fr)] @4xl:gap-3 @4xl:pt-20">
+      <div className="grid grid-cols-1 gap-4 @xl:grid-cols-2 @4xl:grid-cols-[1.15fr_repeat(3,1fr)] @4xl:gap-3 @4xl:pt-20 @[84rem]:grid-cols-[373fr_322fr_370fr_368fr] @[84rem]:gap-2.5">
         <div className="hidden @4xl:flex @4xl:flex-col @4xl:py-3">
-          <div className={cn('flex flex-col justify-end pb-3', HEADER_H)}>{heading}</div>
-          <ul className="rounded-xl border border-border/60 bg-background/70">
+          <div className={cn('flex flex-col justify-end pb-3 @[84rem]:justify-start', HEADER_H)}>{heading}</div>
+          <ul className="rounded-xl border border-border/60 bg-background/70 @[84rem]:rounded-2xl @[84rem]:border-0 @[84rem]:bg-background/85 @[84rem]:shadow-[0_8px_24px_-16px_rgba(80,40,90,0.25)]">
             {PLAN_CARD_FEATURES.map((feature) => (
-              <li key={feature} className={ROW}>
-                <FeatureLabel feature={feature} />
+              <li key={feature} className={cn(ROW, '@[84rem]:border-0 @[84rem]:px-0')}>
+                {/* En grande el ícono va en su propia celda y la línea arranca después, como en el mockup. */}
+                <span className="flex h-full flex-1 items-center @[84rem]:ml-[62px] @[84rem]:border-b @[84rem]:border-border/60 @[84rem]:[li:last-child>&]:border-0">
+                  <FeatureLabel feature={feature} />
+                </span>
               </li>
             ))}
           </ul>
