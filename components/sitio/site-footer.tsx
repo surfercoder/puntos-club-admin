@@ -11,7 +11,6 @@ export async function SiteFooter() {
     { href: "/planes", label: t("nav.plans") },
     { href: "/beneficios", label: t("nav.benefits") },
     { href: "/preguntas-frecuentes", label: t("nav.faq") },
-    { href: "/contacto", label: t("footer.contact") },
   ];
 
   return (

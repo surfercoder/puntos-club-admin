@@ -4,6 +4,7 @@ import Link from "next/link";
 import { ChevronDown, CreditCard, Gift, Rocket, Settings, Store, Users } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 
+import { DEMO_HREF } from "@/components/sitio/rich";
 import { SectionTitle, Sparks } from "@/components/sitio/ui";
 import { PLAN_LIST_PRICES, PLAN_PRICES } from "@/lib/plans/config";
 import { cn } from "@/lib/utils";
@@ -40,7 +41,7 @@ export function FaqExplorer() {
       </Link>
     ),
     demo: (c: React.ReactNode) => (
-      <Link href="/contacto" className="text-sitio-pink underline">
+      <Link href={DEMO_HREF} className="text-sitio-pink underline">
         {c}
       </Link>
     ),

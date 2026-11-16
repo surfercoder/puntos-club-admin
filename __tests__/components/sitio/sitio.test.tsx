@@ -137,7 +137,7 @@ describe("SiteHeader y SiteFooter", () => {
     render(await SiteHeader());
     expect(screen.getAllByRole("link", { name: "nav.plans" })[0]).toHaveAttribute("href", "/planes");
     expect(screen.getAllByRole("link", { name: "nav.signIn" })[0]).toHaveAttribute("href", "/auth/login");
-    expect(screen.getAllByRole("link", { name: "nav.requestDemo" })[0]).toHaveAttribute("href", "/contacto");
+    expect(screen.getAllByRole("link", { name: "nav.requestDemo" })[0]).toHaveAttribute("href", "/owner/onboarding");
   });
 
   it("el footer tiene los legales y el selector de idioma", async () => {
@@ -213,7 +213,7 @@ describe("FaqExplorer", () => {
     expect(billing.open).toBe(true);
     // Los links de las respuestas (etiquetas plans y demo).
     expect(screen.getAllByRole("link", { name: "plans" })[0]).toHaveAttribute("href", "/planes");
-    expect(screen.getAllByRole("link", { name: "demo" })[0]).toHaveAttribute("href", "/contacto");
+    expect(screen.getAllByRole("link", { name: "demo" })[0]).toHaveAttribute("href", "/owner/onboarding");
   });
 
   it("el chip no rompe si la categoría no está en el DOM", () => {

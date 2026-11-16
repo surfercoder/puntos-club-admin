@@ -6,7 +6,6 @@ import SitioLayout from "@/app/(sitio)/layout";
 import Home, { generateMetadata as homeMeta } from "@/app/(sitio)/page";
 import BeneficiosPage, { generateMetadata as benefitsMeta } from "@/app/(sitio)/beneficios/page";
 import ComoFuncionaPage, { generateMetadata as howMeta } from "@/app/(sitio)/como-funciona/page";
-import ContactoPage, { generateMetadata as contactMeta } from "@/app/(sitio)/contacto/page";
 import PlanesPage, { generateMetadata as plansMeta } from "@/app/(sitio)/planes/page";
 import PreguntasFrecuentesPage, { generateMetadata as faqMeta } from "@/app/(sitio)/preguntas-frecuentes/page";
 import { getPublicPlanLimits } from "@/lib/plans/public-limits";
@@ -18,7 +17,6 @@ jest.mock("@/components/sitio/hero-dashboard", () => ({ HeroDashboard: () => <di
 jest.mock("@/components/sitio/home-plans", () => ({ HomePlans: () => <div>home-plans</div> }));
 jest.mock("@/components/sitio/plans-table", () => ({ PlansTable: () => <div>plans-table</div> }));
 jest.mock("@/components/sitio/faq-explorer", () => ({ FaqExplorer: () => <div>faq-explorer</div> }));
-jest.mock("@/components/sitio/contact-form", () => ({ ContactForm: () => <form>contact-form</form> }));
 jest.mock("@/lib/plans/public-limits", () => ({ getPublicPlanLimits: jest.fn() }));
 
 beforeEach(() => {
@@ -66,7 +64,6 @@ describe("sitio público", () => {
     ["como-funciona", ComoFuncionaPage, "hero-dashboard"],
     ["beneficios", BeneficiosPage, "ctaTitle"],
     ["preguntas-frecuentes", PreguntasFrecuentesPage, "faq-explorer"],
-    ["contacto", ContactoPage, "contact-form"],
   ])("renderiza /%s", async (_path, Page, marker) => {
     render(await Page());
     expect(screen.getByText(marker)).toBeInTheDocument();
@@ -79,7 +76,6 @@ describe("sitio público", () => {
     [plansMeta, "/planes"],
     [benefitsMeta, "/beneficios"],
     [faqMeta, "/preguntas-frecuentes"],
-    [contactMeta, "/contacto"],
   ])("metadata con canonical %#", async (meta, canonical) => {
     const m = await meta();
     expect(m.title).toBeDefined();

@@ -15,7 +15,6 @@ const OPEN_PATHS = [
   "/api",
   "/beneficios",
   "/como-funciona",
-  "/contacto",
   "/legal",
   "/mobile-apps",
   "/owner/onboarding",

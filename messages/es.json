@@ -20,9 +20,7 @@
     "benefitsTitle": "Beneficios - Puntos Club",
     "benefitsDescription": "Fidelizá a tus clientes, aumentá las ventas y gestioná todo tu club de puntos desde un solo lugar.",
     "faqTitle": "Preguntas frecuentes - Puntos Club",
-    "faqDescription": "Respuestas sobre planes, precios, funcionalidades, beneficiarios y facturación de Puntos Club.",
-    "contactTitle": "Solicitar demo - Puntos Club",
-    "contactDescription": "Pedí una demo gratuita de Puntos Club y descubrí cómo crear el club de puntos de tu negocio."
+    "faqDescription": "Respuestas sobre planes, precios, funcionalidades, beneficiarios y facturación de Puntos Club."
   },
   "MobileApps": {
     "title": "Apps Móviles",
@@ -2819,10 +2817,6 @@
     "pointsRule": {
       "fieldsRequired": "Faltan datos de la regla. Revisá el formulario."
     },
-    "contact": {
-      "invalidData": "Revisá los datos del formulario e intentá de nuevo.",
-      "sendFailed": "No pudimos enviar tu consulta. Intentá nuevamente."
-    },
     "feedback": {
       "messageRequired": "Escribí tu mensaje antes de enviarlo.",
       "sendFailed": "No pudimos enviar tu feedback. Intentá nuevamente."
@@ -2983,7 +2977,6 @@
     "footer": {
       "terms": "Términos y condiciones",
       "privacy": "Política de privacidad",
-      "contact": "Contacto",
       "copyright": "©2019-{year} Puntos Club"
     },
     "dashboard": {
@@ -3217,35 +3210,6 @@
       "moreText": "Nuestro equipo está para ayudarte a elegir la mejor opción para tu negocio.",
       "moreDemo": "Solicitar una demo",
       "moreAdvisor": "Contactar con un asesor"
-    },
-    "contact": {
-      "pill": "Solicitar demo",
-      "title": "Pedí tu <hl>demo gratuita</hl>",
-      "subtitle": "Contanos sobre tu negocio y te mostramos cómo crear un programa de fidelización hecho a medida.",
-      "firstName": "Nombre",
-      "lastName": "Apellido",
-      "email": "Correo electrónico",
-      "phone": "Teléfono",
-      "business": "Nombre de la empresa",
-      "message": "Mensaje",
-      "submit": "Enviar mensaje",
-      "loading": "Enviando...",
-      "success": "El mensaje fue enviado con éxito. Nos estaremos comunicando a la brevedad.",
-      "error": "Ocurrió un error al enviar el mensaje. Por favor intentá de nuevo.",
-      "orWrite": "O escribinos a",
-      "validation": {
-        "firstNameRequired": "El nombre es obligatorio",
-        "firstNameMinLength": "El nombre debe tener al menos 2 caracteres",
-        "lastNameRequired": "El apellido es obligatorio",
-        "lastNameMinLength": "El apellido debe tener al menos 2 caracteres",
-        "emailRequired": "El correo electrónico es obligatorio",
-        "emailInvalid": "El correo electrónico no es válido",
-        "phoneRequired": "El número de teléfono es obligatorio",
-        "phoneNoLetters": "El número de teléfono no puede contener letras",
-        "phoneMinLength": "El número de teléfono debe tener al menos 10 caracteres",
-        "messageRequired": "El mensaje es obligatorio",
-        "messageMinLength": "Por favor, escribí un mensaje más largo"
-      }
     }
   }
 }

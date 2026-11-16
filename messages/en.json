@@ -20,9 +20,7 @@
     "benefitsTitle": "Benefits - Puntos Club",
     "benefitsDescription": "Build customer loyalty, increase sales and manage your whole points club from one place.",
     "faqTitle": "FAQ - Puntos Club",
-    "faqDescription": "Answers about Puntos Club plans, pricing, features, members and billing.",
-    "contactTitle": "Request a demo - Puntos Club",
-    "contactDescription": "Request a free Puntos Club demo and discover how to create your business's points club."
+    "faqDescription": "Answers about Puntos Club plans, pricing, features, members and billing."
   },
   "MobileApps": {
     "title": "Mobile Apps",
@@ -2819,10 +2817,6 @@
     "pointsRule": {
       "fieldsRequired": "Some rule details are missing. Check the form."
     },
-    "contact": {
-      "invalidData": "Check the form details and try again.",
-      "sendFailed": "We couldn't send your message. Please try again."
-    },
     "feedback": {
       "messageRequired": "Write your message before sending it.",
       "sendFailed": "We couldn't send your feedback. Please try again."
@@ -2983,7 +2977,6 @@
     "footer": {
       "terms": "Terms and conditions",
       "privacy": "Privacy policy",
-      "contact": "Contact",
       "copyright": "©2019-{year} Puntos Club"
     },
     "dashboard": {
@@ -3217,35 +3210,6 @@
       "moreText": "Our team is here to help you choose the best option for your business.",
       "moreDemo": "Request a demo",
       "moreAdvisor": "Talk to an advisor"
-    },
-    "contact": {
-      "pill": "Request a demo",
-      "title": "Get your <hl>free demo</hl>",
-      "subtitle": "Tell us about your business and we'll show you how to create a loyalty program tailored to it.",
-      "firstName": "First name",
-      "lastName": "Last name",
-      "email": "Email",
-      "phone": "Phone",
-      "business": "Company name",
-      "message": "Message",
-      "submit": "Send message",
-      "loading": "Sending...",
-      "success": "Your message was sent successfully. We'll get back to you shortly.",
-      "error": "Something went wrong sending your message. Please try again.",
-      "orWrite": "Or write to us at",
-      "validation": {
-        "firstNameRequired": "First name is required",
-        "firstNameMinLength": "First name must be at least 2 characters",
-        "lastNameRequired": "Last name is required",
-        "lastNameMinLength": "Last name must be at least 2 characters",
-        "emailRequired": "Email is required",
-        "emailInvalid": "Email is not valid",
-        "phoneRequired": "Phone number is required",
-        "phoneNoLetters": "Phone number can't contain letters",
-        "phoneMinLength": "Phone number must be at least 10 characters",
-        "messageRequired": "Message is required",
-        "messageMinLength": "Please write a longer message"
-      }
     }
   }
 }

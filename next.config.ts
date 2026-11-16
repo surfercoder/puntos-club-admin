@@ -11,7 +11,11 @@ const nextConfig: NextConfig = {
 
   // Google todavia tiene indexada la URL vieja del login.
   async redirects() {
-    return [{ source: "/login", destination: "/auth/login", statusCode: 301 }];
+    return [
+      { source: "/login", destination: "/auth/login", statusCode: 301 },
+      // El form de demo se sacó: el link viejo (y Google) cae directo en el alta.
+      { source: "/contacto", destination: "/owner/onboarding", statusCode: 301 },
+    ];
   },
 
   // caja-web llama a estos avisos desde el navegador, en otro origen: sin CORS el

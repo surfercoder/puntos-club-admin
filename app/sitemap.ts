@@ -5,7 +5,7 @@ import { SITE_URL } from "@/lib/site-url";
 export default function sitemap(): MetadataRoute.Sitemap {
   return [
     { url: SITE_URL, changeFrequency: "weekly", priority: 1 },
-    ...["como-funciona", "planes", "beneficios", "preguntas-frecuentes", "contacto"].map((path) => ({
+    ...["como-funciona", "planes", "beneficios", "preguntas-frecuentes"].map((path) => ({
       url: `${SITE_URL}/${path}`,
       changeFrequency: "monthly" as const,
       priority: 0.8,
