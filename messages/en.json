@@ -2845,6 +2845,12 @@
     "contact": {
       "invalidData": "Check the form details and try again.",
       "sendFailed": "We couldn't send your message. Please try again."
+    },
+    "clubi": {
+      "dailyLimit": "You reached today's limit of questions to Clubi. See you tomorrow 💖",
+      "failed": "Clubi could not answer. Please try again.",
+      "invalidMessage": "Write a question of up to 500 characters.",
+      "notConfigured": "Clubi is not available yet."
     }
   },
   "Actions": {
@@ -3243,5 +3249,18 @@
         "messageMinLength": "Please write a longer message"
       }
     }
+  },
+  "Clubi": {
+    "open": "Open chat with Clubi",
+    "close": "Close chat",
+    "online": "Online",
+    "greeting": "Hi! I'm Clubi 🎁 How can I help you today?",
+    "placeholder": "Type your question...",
+    "send": "Send",
+    "thinking": "Let me think...",
+    "suggestion1": "Which rewards are redeemed the most?",
+    "suggestion2": "How are my customers doing this month?",
+    "suggestion3": "How do I create a campaign?",
+    "error": "I could not connect. Check your connection and try again."
   }
 }

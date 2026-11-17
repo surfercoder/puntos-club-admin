@@ -2845,6 +2845,12 @@
     "contact": {
       "invalidData": "Revisá los datos del formulario e intentá de nuevo.",
       "sendFailed": "No pudimos enviar tu consulta. Intentá nuevamente."
+    },
+    "clubi": {
+      "dailyLimit": "Llegaste al límite de consultas a Clubi por hoy. Mañana seguimos 💖",
+      "failed": "Clubi no pudo responder. Intentá nuevamente.",
+      "invalidMessage": "Escribí una consulta de hasta 500 caracteres.",
+      "notConfigured": "Clubi todavía no está disponible."
     }
   },
   "Actions": {
@@ -3243,5 +3249,18 @@
         "messageMinLength": "Por favor, escribí un mensaje más largo"
       }
     }
+  },
+  "Clubi": {
+    "open": "Abrir chat con Clubi",
+    "close": "Cerrar chat",
+    "online": "En línea",
+    "greeting": "¡Hola! Soy Clubi 🎁 ¿En qué puedo ayudarte hoy?",
+    "placeholder": "Escribí tu consulta...",
+    "send": "Enviar",
+    "thinking": "Déjame pensar...",
+    "suggestion1": "¿Cuáles son los premios más canjeados?",
+    "suggestion2": "¿Cómo vienen mis clientes este mes?",
+    "suggestion3": "¿Cómo creo una campaña?",
+    "error": "No pude conectarme. Revisá tu conexión e intentá de nuevo."
   }
 }

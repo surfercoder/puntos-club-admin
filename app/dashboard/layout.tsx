@@ -2,6 +2,7 @@ import type { Metadata } from 'next'
 import { redirect } from 'next/navigation'
 import { getTranslations } from 'next-intl/server'
 
+import { ClubiChat } from '@/components/clubi-chat'
 import { DashboardShell } from '@/components/dashboard-shell'
 import { InstallPrompt } from '@/components/install-prompt'
 import { getCurrentUser } from '@/lib/auth/get-current-user'
@@ -81,6 +82,10 @@ async function resolveOwnerOrgs(
   return orgs.length ? orgs : singleOrgFallback(currentUser.organization)
 }
 
+// Plan usage server-side so it's available on first render (no flash)
+const loadPlanUsage = (user: AppUserWithRelations) =>
+  user.organization_id ? getOrganizationUsageSummary(Number(user.organization_id)) : null
+
 export default async function DashboardLayout({
   children,
 }: {
@@ -100,13 +105,7 @@ export default async function DashboardLayout({
   if (currentUser && hasOwnerPermissions(currentUser)) {
     const orgs = await resolveOwnerOrgs(supabase, currentUser)
 
-    // Fetch plan usage server-side so it's available on first render (no flash)
-    const orgIdForUsage = currentUser.organization_id
-      ? Number(currentUser.organization_id)
-      : null
-    const initialPlanUsage = orgIdForUsage
-      ? await getOrganizationUsageSummary(orgIdForUsage)
-      : null
+    const initialPlanUsage = await loadPlanUsage(currentUser)
 
     return (
       <DashboardShell
@@ -120,6 +119,7 @@ export default async function DashboardLayout({
       >
         {children}
         <InstallPrompt />
+        {isAdmin(currentUser) ? null : <ClubiChat />}
       </DashboardShell>
     )
   }
