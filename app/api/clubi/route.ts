@@ -5,6 +5,8 @@ import { askClubi } from '@/lib/ai/clubi';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { hasOwnerPermissions } from '@/lib/auth/roles';
 import { errorText } from '@/lib/error-handler';
+import { hasClubiChat } from '@/lib/plans/config';
+import { getOrganizationUsageSummary } from '@/lib/plans/usage';
 import { createClient } from '@/lib/supabase/server';
 
 // ponytail: tope fijo por usuario y por dia; pasarlo a plan_limits si algun plan necesita otro numero.
@@ -32,6 +34,10 @@ export async function POST(request: NextRequest) {
   }
   if (!hasOwnerPermissions(currentUser) || !currentUser.organization_id) {
     return NextResponse.json({ error: await errorText('auth.onlyOwnersAdmins') }, { status: 403 });
+  }
+  const usage = await getOrganizationUsageSummary(Number(currentUser.organization_id));
+  if (!hasClubiChat(usage?.plan)) {
+    return NextResponse.json({ error: await errorText('clubi.planNotIncluded') }, { status: 403 });
   }
   if (!process.env.ANTHROPIC_API_KEY) {
     return NextResponse.json({ error: await errorText('clubi.notConfigured') }, { status: 503 });

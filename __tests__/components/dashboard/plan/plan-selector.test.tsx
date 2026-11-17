@@ -425,11 +425,16 @@ describe('PlanSelector', () => {
       invalidate: jest.fn(),
     });
 
+    const refresh = jest.fn();
+    const { useRouter } = require('next/navigation');
+    (useRouter as jest.Mock).mockReturnValue({ refresh });
+
     await act(async () => { render(<PlanSelector />); });
 
     await waitFor(() => {
       expect(verifySubscriptionAction).toHaveBeenCalledWith('test-123');
       expect(toast.success).toHaveBeenCalledWith('planUpgraded');
+      expect(refresh).toHaveBeenCalled();
     });
 
     window.history.replaceState(null, '', '/');

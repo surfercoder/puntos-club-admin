@@ -2850,7 +2850,8 @@
       "dailyLimit": "You reached today's limit of questions to Clubi. See you tomorrow 💖",
       "failed": "Clubi could not answer. Please try again.",
       "invalidMessage": "Write a question of up to 500 characters.",
-      "notConfigured": "Clubi is not available yet."
+      "notConfigured": "Clubi is not available yet.",
+      "planNotIncluded": "Clubi is included in the Pro plan."
     }
   },
   "Actions": {

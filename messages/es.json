@@ -2850,7 +2850,8 @@
       "dailyLimit": "Llegaste al límite de consultas a Clubi por hoy. Mañana seguimos 💖",
       "failed": "Clubi no pudo responder. Intentá nuevamente.",
       "invalidMessage": "Escribí una consulta de hasta 500 caracteres.",
-      "notConfigured": "Clubi todavía no está disponible."
+      "notConfigured": "Clubi todavía no está disponible.",
+      "planNotIncluded": "Clubi está incluido en el plan Pro."
     }
   },
   "Actions": {

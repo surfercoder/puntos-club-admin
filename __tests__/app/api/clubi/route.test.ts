@@ -5,9 +5,13 @@ const mockGetCurrentUser = jest.fn();
 const mockHasOwner = jest.fn();
 const mockInsert = jest.fn();
 let mockCount: number | null = 0;
+let mockPlan: string | null = 'pro';
 
 jest.mock('@/lib/ai/clubi', () => ({ askClubi: (...a: unknown[]) => mockAskClubi(...a) }));
 jest.mock('@/lib/auth/get-current-user', () => ({ getCurrentUser: () => mockGetCurrentUser() }));
+jest.mock('@/lib/plans/usage', () => ({
+  getOrganizationUsageSummary: async () => (mockPlan ? { plan: mockPlan, features: [] } : null),
+}));
 jest.mock('@/lib/auth/roles', () => ({ hasOwnerPermissions: (u: unknown) => mockHasOwner(u) }));
 jest.mock('@/lib/supabase/server', () => ({
   createClient: jest.fn(async () => ({
@@ -33,6 +37,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   process.env.ANTHROPIC_API_KEY = 'k';
   mockCount = 0;
+  mockPlan = 'pro';
   mockGetCurrentUser.mockResolvedValue(owner);
   mockHasOwner.mockReturnValue(true);
   mockAskClubi.mockResolvedValue({ text: 'respuesta', inputTokens: 10, outputTokens: 5 });
@@ -57,6 +62,17 @@ describe('POST /api/clubi', () => {
   it('403 si no tiene org', async () => {
     mockGetCurrentUser.mockResolvedValue({ ...owner, organization_id: null });
     expect((await call(ask())).status).toBe(403);
+  });
+
+  it.each(['trial', 'advance', null])('403 con plan %s', async (plan) => {
+    mockPlan = plan;
+    expect(await call(ask())).toEqual({ status: 403, data: { error: 'clubi.planNotIncluded' } });
+    expect(mockAskClubi).not.toHaveBeenCalled();
+  });
+
+  it('enterprise también puede', async () => {
+    mockPlan = 'enterprise';
+    expect((await call(ask())).status).toBe(200);
   });
 
   it('503 sin API key', async () => {

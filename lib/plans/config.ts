@@ -14,6 +14,14 @@ export const PLAN_ORDER: PlanType[] = ['trial', 'advance', 'pro', 'enterprise'];
 
 export const TOP_PLAN: PlanType = PLAN_ORDER[PLAN_ORDER.length - 1];
 
+/**
+ * Chat con Clubi: Pro y superiores (decision de los socios, 17/11/2026).
+ * Sin plan conocido no se muestra: cada pregunta consume tokens de Claude.
+ */
+export function hasClubiChat(plan: PlanType | null | undefined): boolean {
+  return !!plan && PLAN_ORDER.indexOf(plan) >= PLAN_ORDER.indexOf('pro');
+}
+
 /** Cuotas contables, en el orden en que se muestran */
 export const PLAN_QUOTA_ORDER: PlanQuotaKey[] = [
   'beneficiaries',

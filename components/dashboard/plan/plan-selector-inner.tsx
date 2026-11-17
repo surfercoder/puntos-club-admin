@@ -2,6 +2,7 @@
 
 import { useEffect, useReducer, useRef, useState } from 'react';
 import { ArrowRight, Loader2 } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
 
@@ -390,6 +391,7 @@ export function PlanSelectorInner() {
   const t = useTranslations('Onboarding.step3');
   const tSettings = useTranslations('Dashboard.planSettings');
   const { summary: usageSummary, isLoading: fetching, invalidate } = usePlanUsage();
+  const router = useRouter();
   const currentPlan = usageSummary?.plan ?? null;
   const [state, dispatch] = useReducer(changePlanReducer, initialChangePlanState);
   const { selected, loading, confirmAction } = state;
@@ -432,6 +434,8 @@ export function PlanSelectorInner() {
         if (data.status === 'authorized') {
           toast.success(tSettings('planUpgraded'));
           invalidate();
+          // El layout del server decide qué se muestra según el plan (p. ej. Clubi): re-renderizarlo.
+          router.refresh();
         } else if (data.status === 'pending') {
           toast.info(tSettings('paymentPending'));
         }
@@ -447,7 +451,7 @@ export function PlanSelectorInner() {
 
     verify();
     return () => { cancelled = true; };
-  }, [invalidate, tSettings]);
+  }, [invalidate, router, tSettings]);
 
   // Sync selected with current plan when data loads
   if (selected === null && currentPlan !== null) {

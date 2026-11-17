@@ -7,6 +7,7 @@ import { DashboardShell } from '@/components/dashboard-shell'
 import { InstallPrompt } from '@/components/install-prompt'
 import { getCurrentUser } from '@/lib/auth/get-current-user'
 import { hasOwnerPermissions, isAdmin } from '@/lib/auth/roles'
+import { hasClubiChat } from '@/lib/plans/config'
 import { getOrganizationUsageSummary } from '@/lib/plans/usage'
 import { createClient } from '@/lib/supabase/server'
 import type { AppUserWithRelations } from '@/types/app_user'
@@ -119,7 +120,7 @@ export default async function DashboardLayout({
       >
         {children}
         <InstallPrompt />
-        {isAdmin(currentUser) ? null : <ClubiChat />}
+        {!isAdmin(currentUser) && hasClubiChat(initialPlanUsage?.plan) ? <ClubiChat /> : null}
       </DashboardShell>
     )
   }

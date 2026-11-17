@@ -159,6 +159,37 @@ describe('DashboardLayout', () => {
     expect(result).toBeTruthy();
   });
 
+  it.each([
+    ['pro', true],
+    ['enterprise', true],
+    ['advance', false],
+    ['trial', false],
+  ])('Clubi con plan %s: %s', async (plan, visible) => {
+    getCurrentUser.mockResolvedValue({
+      id: '1', first_name: 'John', last_name: 'Doe', email: 'john@test.com',
+      role: { name: 'owner' }, organization_id: '10',
+      organization: { id: '10', name: 'Test Org', logo_url: null }, tour_completed: true,
+    });
+    isOwner.mockReturnValue(true);
+    isAdmin.mockReturnValue(false);
+    isCollaborator.mockReturnValue(false);
+    mockFrom.mockReturnValue({
+      select: jest.fn().mockReturnValue({
+        eq: jest.fn().mockReturnValue({
+          eq: jest.fn().mockReturnValue({
+            data: [{ organization: { id: '10', name: 'Test Org', logo_url: null } }],
+            error: null,
+          }),
+        }),
+      }),
+    });
+    getOrganizationUsageSummary.mockResolvedValue({ plan, features: [] });
+
+    const result = await DashboardLayout({ children: <div>Child</div> });
+    const children = (result as React.ReactElement<{ children: unknown[] }>).props.children;
+    expect(Boolean(children[2])).toBe(visible);
+  });
+
   it('renders DashboardShell for admin role', async () => {
     const user = {
       id: '1',
