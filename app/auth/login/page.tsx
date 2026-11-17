@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 
@@ -14,29 +13,33 @@ export async function generateMetadata(): Promise<Metadata> {
 }
 
 export default async function Page() {
-  const t = await getTranslations("Auth.login");
-
   return (
     <div className="flex flex-1 items-center justify-center px-6 py-12">
+      {/* Fondo del mockup de CJ: manchas medidas sobre la imagen de 1536x1024, ancladas a las esquinas. */}
+      <div
+        id="login-bg"
+        aria-hidden
+        className="pointer-events-none fixed inset-0 -z-10 dark:hidden"
+        style={{
+          background: [
+            "radial-gradient(circle at right -64px top -150px, #FEDFEF 420px, transparent 470px)",
+            "radial-gradient(circle at right -24px top 700px, #FDF2D0 150px, transparent 190px)",
+            "radial-gradient(circle at left 20px bottom -106px, #FEDFEF 300px, transparent 345px)",
+            "radial-gradient(circle at right -104px bottom -136px, #FEDFEF 290px, transparent 335px)",
+            "#FEF1F7",
+          ].join(", "),
+        }}
+      />
       <div className="relative w-full max-w-[35.375rem]">
         <Image
-          src="/images/login-mascot.png"
+          src="/images/login-clubi.png"
           alt=""
-          width={254}
-          height={628}
+          width={313}
+          height={539}
           priority
-          className="pointer-events-none absolute -top-10 right-full hidden max-w-none select-none xl:block"
+          className="pointer-events-none absolute top-[2.1875rem] -left-[17.8125rem] z-10 hidden max-w-none select-none xl:block"
         />
         <LoginForm />
-        <p className="mt-[2.375rem] flex flex-wrap items-center justify-center gap-x-11 gap-y-2 text-lg font-medium sm:text-[1.1875rem]">
-          {t("noAccount")}
-          <Link
-            href="/owner/onboarding"
-            className="font-bold text-brand-pink underline-offset-4 hover:underline"
-          >
-            {t("signUpLink")}
-          </Link>
-        </p>
       </div>
     </div>
   );

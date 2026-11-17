@@ -2,10 +2,10 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useReducer } from "react";
+import { useReducer, useRef } from "react";
 import { useTranslations } from "next-intl";
 
-import { Eye, EyeOff } from "lucide-react";
+import { ArrowRight, Eye, EyeOff, LockKeyhole, Mail } from "lucide-react";
 
 import { signInAdminPortal } from "@/actions/auth/actions";
 import { Button } from "@/components/ui/button";
@@ -83,9 +83,13 @@ export function LoginForm({
   const [state, dispatch] = useReducer(loginFormReducer, initialState);
   const { email, password, error, fieldErrors, isLoading, showPassword } = state;
   const { push, refresh } = useRouter();
+  // El disabled del botón llega recién en el próximo render: el ref corta un
+  // segundo Enter o doble click que entre antes.
+  const submittingRef = useRef(false);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (submittingRef.current) return;
     dispatch({ type: "CLEAR_ERRORS" });
 
     const result = LoginSchema.safeParse({ email, password });
@@ -96,6 +100,7 @@ export function LoginForm({
       return;
     }
 
+    submittingRef.current = true;
     dispatch({ type: "SET_IS_LOADING", payload: true });
 
     const loginResult = await signInAdminPortal(email, password).then(
@@ -106,17 +111,20 @@ export function LoginForm({
       }),
     );
 
-    if (!loginResult.ok) {
-      dispatch({ type: "SET_ERROR", payload: loginResult.error });
-    } else if (loginResult.result.success) {
+    if (loginResult.ok && loginResult.result.success) {
+      // Queda deshabilitado hasta que el dashboard reemplace la pantalla.
       push("/dashboard");
       refresh();
-    } else {
-      dispatch({
-        type: "SET_ERROR",
-        payload: loginResult.result.error || t("noPermission"),
-      });
+      return;
     }
+
+    dispatch({
+      type: "SET_ERROR",
+      payload: loginResult.ok
+        ? loginResult.result.error || t("noPermission")
+        : loginResult.error,
+    });
+    submittingRef.current = false;
     dispatch({ type: "SET_IS_LOADING", payload: false });
   };
 
@@ -136,16 +144,19 @@ export function LoginForm({
           <Label htmlFor="email" className="text-lg font-semibold sm:text-[1.1875rem]">
             {tCommon("email")}
           </Label>
-          <Input
-            id="email"
-            onChange={(e) => dispatch({ type: "SET_EMAIL", payload: e.target.value })}
-            placeholder={tCommon("emailPlaceholder")}
-            type="email"
-            value={email}
-            aria-invalid={!!fieldErrors.email}
-            aria-describedby="email-error"
-            className={INPUT_CLASS}
-          />
+          <div className="relative">
+            <Mail aria-hidden className="pointer-events-none absolute left-6 top-1/2 size-6 -translate-y-1/2 text-muted-foreground" />
+            <Input
+              id="email"
+              onChange={(e) => dispatch({ type: "SET_EMAIL", payload: e.target.value })}
+              placeholder={t("emailPlaceholder")}
+              type="email"
+              value={email}
+              aria-invalid={!!fieldErrors.email}
+              aria-describedby="email-error"
+              className={cn(INPUT_CLASS, "pl-16")}
+            />
+          </div>
           {fieldErrors.email && (
             <p id="email-error" className="text-destructive text-sm">
               {fieldErrors.email}
@@ -165,6 +176,7 @@ export function LoginForm({
             </Link>
           </div>
           <div className="relative">
+            <LockKeyhole aria-hidden className="pointer-events-none absolute left-6 top-1/2 size-6 -translate-y-1/2 text-muted-foreground" />
             <Input
               id="password"
               onChange={(e) => dispatch({ type: "SET_PASSWORD", payload: e.target.value })}
@@ -172,7 +184,7 @@ export function LoginForm({
               value={password}
               aria-invalid={!!fieldErrors.password}
               aria-describedby="password-error"
-              className={cn(INPUT_CLASS, "pr-14")}
+              className={cn(INPUT_CLASS, "pl-16 pr-14")}
             />
             <button
               type="button"
@@ -191,13 +203,24 @@ export function LoginForm({
         </div>
         {error && <p className="mt-4 text-sm text-destructive">{error}</p>}
         <Button
-          className={cn("mt-8", AUTH_SUBMIT_CLASS)}
+          className={cn("mt-8", AUTH_SUBMIT_CLASS, "rounded-full")}
           disabled={isLoading}
+          aria-busy={isLoading}
           type="submit"
         >
           {isLoading ? t("submitting") : t("title")}
+          {!isLoading && <ArrowRight className="size-6" />}
         </Button>
       </form>
+      <p className="mt-9 flex flex-wrap items-center justify-center gap-x-11 gap-y-2 border-t pt-8 text-lg font-medium sm:text-[1.1875rem]">
+        {t("noAccount")}
+        <Link
+          href="/owner/onboarding"
+          className="font-bold text-brand-pink underline underline-offset-4"
+        >
+          {t("signUpLink")}
+        </Link>
+      </p>
     </div>
   );
 }

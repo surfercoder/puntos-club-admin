@@ -10,7 +10,9 @@ export async function PublicHeader() {
   const t = await getTranslations("HomePage");
 
   return (
-    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
+    // Sobre el fondo con manchas del login el tinte corta la mancha en una
+    // línea recta; ahí queda solo el blur.
+    <header className="sticky top-0 z-50 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 [body:has(#login-bg)_&]:bg-transparent">
       <div className="mx-auto flex h-20 max-w-[96rem] items-center justify-between gap-4 px-4 sm:px-6 lg:h-32 lg:px-10">
         <Link href="/" aria-label="Puntos Club" className="flex items-center gap-2.5 lg:gap-3.5">
           <Image

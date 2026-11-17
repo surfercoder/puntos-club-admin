@@ -128,6 +128,7 @@
     "login": {
       "title": "Sign in",
       "description": "Enter your email address to access your account",
+      "emailPlaceholder": "youremail@puntosclub.com.ar",
       "forgotPassword": "Forgot your password?",
       "noAccount": "Don't have an account yet?",
       "signUpLink": "Join now",

@@ -128,6 +128,7 @@
     "login": {
       "title": "Iniciar sesión",
       "description": "Ingresá tu correo electrónico para acceder a tu cuenta",
+      "emailPlaceholder": "tuemail@puntosclub.com.ar",
       "forgotPassword": "¿Olvidaste tu contraseña?",
       "noAccount": "¿Aún no tenés cuenta?",
       "signUpLink": "Unirse ahora",

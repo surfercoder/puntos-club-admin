@@ -145,7 +145,7 @@ describe('LoginForm', () => {
       expect(screen.getByRole('button', { name: /submitting/i })).toBeDisabled();
     });
 
-    resolveLogin!({ success: true });
+    resolveLogin!({ success: false, error: 'Invalid credentials' });
 
     await waitFor(() => {
       expect(screen.getByRole('button', { name: 'title' })).not.toBeDisabled();
@@ -182,5 +182,25 @@ describe('LoginForm', () => {
     const state = { email: '', password: '', error: null, fieldErrors: {}, isLoading: false, showPassword: false };
     const result = capturedReducer!(state, { type: 'UNKNOWN_ACTION' });
     expect(result).toBe(state);
+  });
+  it('sends a single request when the form is submitted twice in a row', async () => {
+    (signInAdminPortal as jest.Mock).mockClear().mockResolvedValue({ success: true });
+
+    render(<LoginForm />);
+    fireEvent.change(screen.getByLabelText('email'), { target: { value: 'test@test.com' } });
+    fireEvent.change(screen.getByLabelText('password'), { target: { value: 'password123' } });
+    const form = screen.getByRole('button', { name: 'title' }).closest('form')!;
+    fireEvent.submit(form);
+    fireEvent.submit(form);
+
+    await waitFor(() => expect(mockPush).toHaveBeenCalledWith('/dashboard'));
+    expect(signInAdminPortal).toHaveBeenCalledTimes(1);
+    // Sigue deshabilitado mientras navega al dashboard.
+    expect(screen.getByRole('button', { name: 'submitting' })).toBeDisabled();
+  });
+
+  it('renders the sign up link inside the card', () => {
+    render(<LoginForm />);
+    expect(screen.getByRole('link', { name: 'signUpLink' })).toHaveAttribute('href', '/owner/onboarding');
   });
 });
