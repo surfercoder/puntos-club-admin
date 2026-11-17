@@ -38,7 +38,7 @@ export function LanguageSwitcher({ className }: { className?: string }) {
       <SelectTrigger
         size="sm"
         className={cn(
-          "h-8 w-auto gap-1.5 border-none bg-transparent px-2 shadow-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-0 dark:bg-transparent dark:hover:bg-accent",
+          "h-8 w-auto gap-1.5 border-none bg-transparent px-2 shadow-none hover:bg-accent hover:text-accent-foreground focus-visible:ring-0",
           className,
         )}
         aria-label={t("label")}

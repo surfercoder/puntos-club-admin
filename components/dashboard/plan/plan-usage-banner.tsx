@@ -60,8 +60,8 @@ export function PlanUsageBanner({ features, className }: PlanUsageBannerProps) {
       className={cn(
         'relative rounded-lg border px-4 py-3',
         hasAtLimit
-          ? 'border-red-200 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-950/40 dark:text-red-200'
-          : 'border-amber-200 bg-amber-50 text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200',
+          ? 'border-red-200 bg-red-50 text-red-900'
+          : 'border-amber-200 bg-amber-50 text-amber-900',
         className
       )}
       role="alert"

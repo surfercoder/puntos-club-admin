@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { ThemeProvider } from "next-themes";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 
@@ -36,7 +35,7 @@ export default async function RootLayout({
   const [locale, messages] = await Promise.all([getLocale(), getMessages()]);
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale}>
       <body className="antialiased">
         {/* GTM (y GA4 adentro) solo carga si el ID esta configurado en Vercel. */}
         {GTM_ID && (
@@ -46,19 +45,12 @@ export default async function RootLayout({
         )}
         <StaleDeploymentReload />
         <NextIntlClientProvider locale={locale} messages={messages}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            disableTransitionOnChange
-            enableSystem
-          >
-            <GoogleMapsProvider apiKey={env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
-              {children}
-              <Toaster />
-              <Analytics />
-              <SpeedInsights />
-            </GoogleMapsProvider>
-          </ThemeProvider>
+          <GoogleMapsProvider apiKey={env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
+            {children}
+            <Toaster />
+            <Analytics />
+            <SpeedInsights />
+          </GoogleMapsProvider>
         </NextIntlClientProvider>
       </body>
     </html>

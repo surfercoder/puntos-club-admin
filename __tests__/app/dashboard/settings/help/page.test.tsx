@@ -11,7 +11,7 @@ describe('HelpPage', () => {
     render(await HelpPage());
 
     const link = screen.getByRole('link', { name: /download/i });
-    expect(link).toHaveAttribute('href', '/manuals/Manual_PuntosClub_Owner_v1.docx');
+    expect(link).toHaveAttribute('href', '/manuals/Manual_PuntosClub_Owner_v2.docx');
     expect(link).toHaveAttribute('download');
     expect(screen.getByText('manuals.owner.title')).toBeInTheDocument();
   });

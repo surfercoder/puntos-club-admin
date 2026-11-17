@@ -46,7 +46,7 @@ function Step1CompletedView({
       <div className="flex items-center gap-3 rounded-xl border border-brand-green/30 bg-brand-green/10 px-4 py-3">
         <ShieldCheck className="size-5 shrink-0 text-brand-green" />
         <div>
-          <p className="text-sm font-semibold text-brand-green dark:text-brand-green">
+          <p className="text-sm font-semibold text-brand-green">
             {t('emailVerified')}
           </p>
           <p className="text-xs text-brand-green/80">

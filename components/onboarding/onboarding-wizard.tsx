@@ -73,8 +73,8 @@ function StepNav({ steps, currentStep, canNavigateToStep, onGoToStep }: {
                 <span className={cn(
                   'flex size-9 items-center justify-center rounded-full border-2 transition-all',
                   isCompleted ? 'border-primary bg-primary text-primary-foreground'
-                    : isCurrent ? 'border-primary bg-white dark:bg-card text-primary'
-                    : 'border-muted-foreground/30 bg-white dark:bg-card text-muted-foreground/50'
+                    : isCurrent ? 'border-primary bg-white text-primary'
+                    : 'border-muted-foreground/30 bg-white text-muted-foreground/50'
                 )}>
                   {isCompleted ? <Check className="size-4" /> : <Icon className="size-4" />}
                 </span>

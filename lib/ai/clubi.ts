@@ -9,6 +9,7 @@ import {
   getTopProducts,
 } from '@/actions/dashboard/analytics/actions';
 import { CLUBI_MANUAL } from '@/lib/ai/clubi-manual';
+import { OWNER_MANUAL } from '@/lib/ai/owner-manual';
 import { createClient } from '@/lib/supabase/server';
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
@@ -37,8 +38,17 @@ ESTILO:
 - Texto plano: sin markdown, sin tablas, sin encabezados. Para pasos usá líneas que empiecen con "1.", "2.", etc. Podés usar algún emoji con moderación.
 - Si algo no está documentado, decilo y sugerí contactar a soporte desde el botón de ayuda/feedback del panel.
 
+MANUAL DEL OWNER:
+- Es el mismo manual que el usuario puede descargar en Configuración → Ayuda y aprendizaje. Si la respuesta sale de ahí, al final indicá en una línea dónde ampliarlo con el número y título de la sección, por ejemplo: "Lo tenés en el Manual del Owner, sección 7.5 Crear una nueva sucursal (Configuración → Ayuda y aprendizaje)."
+- No copies secciones enteras: resumí lo que pregunta y derivá al manual para el detalle.
+- Corrección al manual: el Color de marca (sección 6.4.1) está disponible en los planes Pro y Enterprise, no solo en Pro.
+- Corrección al manual: los colaboradores no se pueden desactivar ni deshabilitar (secciones 8.9 y 8.11). La única forma de quitarle el acceso a un colaborador es eliminarlo.
+
 MANUAL DE INTELIGENCIA DE CLUBI (fuente de verdad sobre el producto):
-${CLUBI_MANUAL}`;
+${CLUBI_MANUAL}
+
+MANUAL DEL OWNER (texto completo):
+${OWNER_MANUAL}`;
 
 // Strict no acepta minimum/maximum: el rango 1-12 lo impone clampMonths.
 const months = { type: 'integer', description: 'Cantidad de meses hacia atrás, incluido el actual (1 a 12).' } as const;

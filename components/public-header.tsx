@@ -4,7 +4,6 @@ import { getTranslations } from "next-intl/server";
 
 import { Button } from "@/components/ui/button";
 import { LanguageSwitcher } from "@/components/language-switcher";
-import { ThemeToggle } from "@/components/theme-toggle";
 
 export async function PublicHeader() {
   const t = await getTranslations("HomePage");
@@ -29,7 +28,6 @@ export async function PublicHeader() {
         </Link>
         <nav className="flex items-center gap-2 lg:gap-4">
           <LanguageSwitcher className="hidden sm:flex lg:h-10 lg:px-3 lg:[&_span]:text-base" />
-          <ThemeToggle className="lg:size-11" iconClassName="lg:size-8" />
           <span aria-hidden className="mx-1 hidden h-6 w-px bg-border sm:block lg:mx-6 lg:h-9" />
           <Button variant="ghost" size="sm" className="lg:h-10 lg:px-4 lg:text-[1.1875rem]" asChild>
             <Link href="/auth/login">{t("signIn")}</Link>

@@ -19,7 +19,7 @@ export default async function Page() {
       <div
         id="login-bg"
         aria-hidden
-        className="pointer-events-none fixed inset-0 -z-10 dark:hidden"
+        className="pointer-events-none fixed inset-0 -z-10"
         style={{
           background: [
             "radial-gradient(circle at right -64px top -150px, #FEDFEF 420px, transparent 470px)",

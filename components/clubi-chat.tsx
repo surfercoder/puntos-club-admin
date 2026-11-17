@@ -73,7 +73,7 @@ export function ClubiChat() {
       {open ? (
         <section
           aria-label="Clubi"
-          className="fixed bottom-24 right-4 z-50 flex h-[min(560px,calc(100dvh-8rem))] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-3xl border bg-background shadow-2xl"
+          className="fixed bottom-28 right-4 z-50 flex h-[min(560px,calc(100dvh-9rem))] w-[min(380px,calc(100vw-2rem))] flex-col overflow-hidden rounded-3xl border bg-background shadow-2xl"
         >
           <header className="flex items-center gap-3 bg-[var(--brand-pink)] px-4 py-3 text-white">
             <Avatar size={40} />
@@ -158,7 +158,7 @@ export function ClubiChat() {
         onClick={() => setOpen((v) => !v)}
         aria-label={open ? t("close") : t("open")}
         aria-expanded={open}
-        className="fixed bottom-4 right-4 z-50 flex h-16 w-16 items-end justify-center overflow-hidden rounded-full border-4 border-white bg-[var(--brand-pink)] shadow-xl transition-transform hover:scale-105"
+        className="fixed bottom-4 right-4 z-50 flex h-20 w-20 items-end justify-center overflow-hidden rounded-full border-4 border-white bg-[var(--brand-pink)] shadow-xl transition-transform hover:scale-105"
       >
         <Image src={FACE} alt="" width={277} height={311} className="h-auto w-[88%]" />
       </button>

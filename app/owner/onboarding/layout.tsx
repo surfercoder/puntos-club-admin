@@ -14,7 +14,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function OnboardingLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="flex min-h-svh flex-col bg-gradient-to-br from-secondary via-background to-accent dark:from-background dark:via-background dark:to-background">
+    <div className="flex min-h-svh flex-col bg-gradient-to-br from-secondary via-background to-accent">
       <PublicHeader />
       <main className="flex-1">{children}</main>
     </div>

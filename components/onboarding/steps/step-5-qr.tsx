@@ -84,7 +84,7 @@ function ErrorScreen({
 }) {
   return (
     <div className="flex flex-col items-center gap-6 py-10 text-center">
-      <div className="flex size-20 items-center justify-center rounded-full bg-red-100 dark:bg-red-900/30">
+      <div className="flex size-20 items-center justify-center rounded-full bg-red-100">
         <AlertCircle className="size-10 text-red-600" />
       </div>
       <div className="space-y-2">

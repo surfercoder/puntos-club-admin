@@ -260,7 +260,7 @@ function CaptchaVerification({ status, error, onSuccess, onError, onExpire, reca
       </div>
 
       {error && (
-        <p className="text-xs text-red-600 dark:text-red-400 flex items-center gap-1">
+        <p className="text-xs text-red-600 flex items-center gap-1">
           <span>⚠</span> {error}
         </p>
       )}

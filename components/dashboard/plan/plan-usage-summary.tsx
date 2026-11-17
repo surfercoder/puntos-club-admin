@@ -42,8 +42,8 @@ function usageColor(pct: number, isAtLimit: boolean): string {
 }
 
 function textColor(pct: number, isAtLimit: boolean): string {
-  if (isAtLimit)  return 'text-red-600 dark:text-red-400';
-  if (pct >= 80)  return 'text-amber-600 dark:text-amber-400';
+  if (isAtLimit)  return 'text-red-600';
+  if (pct >= 80)  return 'text-amber-600';
   return 'text-muted-foreground';
 }
 

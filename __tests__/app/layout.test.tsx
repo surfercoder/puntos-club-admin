@@ -7,10 +7,6 @@ jest.mock('next-intl/server', () => ({
 }));
 
 
-jest.mock('next-themes', () => ({
-  ThemeProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
-
 jest.mock('next-intl', () => ({
   NextIntlClientProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
 }));
@@ -64,9 +60,6 @@ describe('RootLayout', () => {
     jest.mock('next-intl/server', () => ({
       getLocale: jest.fn(() => Promise.resolve('es')),
       getMessages: jest.fn(() => Promise.resolve({})),
-    }));
-    jest.mock('next-themes', () => ({
-      ThemeProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
     }));
     jest.mock('next-intl', () => ({
       NextIntlClientProvider: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,

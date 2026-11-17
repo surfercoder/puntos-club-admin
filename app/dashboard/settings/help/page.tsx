@@ -4,7 +4,7 @@ import { getTranslations } from 'next-intl/server';
 // Los manuales se sirven estaticos desde /public/manuals. Para sumar otro:
 // copiar el archivo ahi, agregar la entrada aca y las traducciones en es/en.
 const MANUALS = [
-  { key: 'owner', file: '/manuals/Manual_PuntosClub_Owner_v1.docx', format: 'DOCX' },
+  { key: 'owner', file: '/manuals/Manual_PuntosClub_Owner_v2.docx', format: 'DOCX' },
 ] as const;
 
 export default async function HelpPage() {

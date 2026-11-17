@@ -10,7 +10,6 @@ import { DashboardTour } from "@/components/dashboard/tour/dashboard-tour";
 import { FeedbackDialog } from "@/components/feedback-dialog";
 import { LanguageSwitcher } from "@/components/language-switcher";
 import { NotificationBell } from "@/components/notification-bell";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { PlanUsageProvider } from "@/components/providers/plan-usage-provider";
 import {
   Breadcrumb,
@@ -218,7 +217,6 @@ export function DashboardShell({
                 <FeedbackDialog userEmail={user.email} userName={user.name} />
                 <NotificationBell isPlatform={portalMode === "admin"} activeOrgId={activeOrgId} />
                 <LanguageSwitcher />
-                <ThemeToggle />
               </div>
             </div>
           </header>
