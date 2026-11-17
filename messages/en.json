@@ -3105,11 +3105,11 @@
       },
       "q2": {
         "q": "How much does each plan cost?",
-        "a": "We have three options:\n• Trial: free forever.\n• Advance: {advance} per month for the first 12 months, a 50% discount on its {advanceList} price.\n• Pro: {pro} per month for the first 12 months, a 50% discount on its {proList} price.\nThe Advance and Pro discounts are part of our launch promotion."
+        "a": "You can see what each plan costs in our <plans>Plans</plans> section.\nThe Advance and Pro discounts are part of our launch promotion, for a limited time."
       },
       "q3": {
         "q": "Can I change plans later?",
-        "a": "Of course! Puntos Club is designed to grow with your business.\nYou can start on the Trial plan and move to Advance or Pro when you need more members, branches, cashiers or features.\nThat way, your points club evolves as your customer community grows."
+        "a": "Of course! Puntos Club is designed to grow with your business.\nYou can start on the Trial plan and move to <plans>Advance or Pro</plans> when you need more members, branches, cashiers or features.\nThat way, your points club can evolve as your customer community grows."
       },
       "q4": {
         "q": "Does the Trial plan cost anything?",
@@ -3117,7 +3117,7 @@
       },
       "q5": {
         "q": "Is there a trial period?",
-        "a": "We have something better! With our Trial plan you can use Puntos Club for free forever, within that plan's limits.\nYou don't need to sign up for a paid plan to get to know the platform and create your first points club.\nWhen your business needs more tools or capacity, you can consider our Advance and Pro plans."
+        "a": "We have something better! With our Trial plan you can use Puntos Club free forever, within that plan's limits.\nYou don't need a paid plan to get to know the platform and create your first points club.\nWhen your business needs more tools or capacity, you can consider our <plans>Advance and Pro</plans> plans."
       },
       "q6": {
         "q": "What can I do with Puntos Club?",
@@ -3133,7 +3133,7 @@
       },
       "q9": {
         "q": "Can I run promotional campaigns with points?",
-        "a": "Yes! Puntos Club includes tools to create promotional campaigns that encourage specific customer actions.\nFor example, you can use points to boost purchases, recognize loyalty or run special promotions.\nAdvanced promotional campaigns are included in the Pro plan. Some special mass-campaign formats may be offered as additional services."
+        "a": "Yes! Puntos Club includes tools to create promotional campaigns that encourage specific customer actions.\nFor example, you can use points to drive purchases, reward loyalty or run special promotions.\nAdvanced promotional campaigns are included in the <plans>Pro</plans> plan. Some special mass-campaign formats may be offered as additional services."
       },
       "q10": {
         "q": "Does the platform include reports and statistics?",
@@ -3141,11 +3141,11 @@
       },
       "q11": {
         "q": "How do I create my points club?",
-        "a": "It's very simple! First you register your business on Puntos Club and complete your organization's information.\nThen you can set up the rules for awarding points, create your rewards catalog and get your club ready for members.\nYou don't need to build your own app or have advanced technical knowledge."
+        "a": "It's very simple! First you <demo>register your business</demo> on Puntos Club and fill in your organization's information.\nThen you can set up the rules for awarding points, create your rewards catalog and get your club ready for members.\nYou don't need to build your own app or have advanced technical knowledge."
       },
       "q12": {
         "q": "Can I customize my club's look?",
-        "a": "Yes! You can set up your club's identity with your business information, such as its name and the visual elements available on the platform.\nIn addition, Pro plan Owners can choose certain environment colors, so the member experience better matches their own brand.\nThat way, your points club feels more and more like part of your business."
+        "a": "Yes! You can set up your club's identity with your business information: logo, name and your logo's colors.\nIn addition, <plans>Pro</plans> plan Owners can choose certain environment colors, so the member experience better matches their own brand.\nThat way, your points club feels more and more like part of your business."
       },
       "q13": {
         "q": "What customization options does the Pro plan have?",
@@ -3153,11 +3153,11 @@
       },
       "q14": {
         "q": "Can I manage more than one branch?",
-        "a": "Absolutely! Puntos Club is built for businesses with one or several branches.\nThe number available depends on your plan:\n• Trial: 1 branch.\n• Advance: up to 10 branches.\n• Pro: up to 50 branches.\nThat way, you can run your points program from one centralized platform."
+        "a": "Of course! Puntos Club is ready for businesses with one or several branches.\nThe number available depends on <plans>your plan</plans>:\n• Trial: 1 branch.\n• Advance: up to 10 branches.\n• Pro: up to 50 branches.\nThat way, you can manage your points program from one centralized platform."
       },
       "q15": {
         "q": "Can I invite other collaborators to manage the club?",
-        "a": "Yes! Depending on your plan, you can add collaborators to help you manage your club.\nThe Advance plan allows 1 collaborator, while the Pro plan allows unlimited collaborators.\nThis is especially useful for businesses that need to share administrative tasks across several people."
+        "a": "Yes! Depending on <plans>your plan</plans>, you can add collaborators to help you manage your club.\nThe Advance plan allows 1 collaborator, while the Pro plan allows unlimited collaborators.\nThis is especially useful for businesses that need to share admin tasks among different people."
       },
       "q16": {
         "q": "Who are the members?",
@@ -3165,7 +3165,7 @@
       },
       "q17": {
         "q": "How do my customers join the club?",
-        "a": "Your customers can join your club through the sign-up and invitation options available in Puntos Club.\nFor example, you can give them access with a QR code so they can register and start participating.\nOnce they join, they can access your business's benefits and start earning points."
+        "a": "Your customers can join your club by signing up in the Puntos Club app.\nFor example, you can point them to the <play>Play Store</play> with a QR code so they can register and start participating.\nOnce they join, they can access your business's benefits and start earning points."
       },
       "q18": {
         "q": "What can they redeem points for?",
@@ -3181,19 +3181,19 @@
       },
       "q21": {
         "q": "Which payment methods do you accept?",
-        "a": "Puntos Club offers subscription plans for businesses that want to expand their club's features and capacity.\nAvailable payment methods are shown when you sign up for the service.\nIf you'd like to know the available options before subscribing, you can contact our sales team."
+        "a": "Puntos Club offers subscription plans.\nAvailable payment methods are shown when you sign up for the service.\nIf you'd like to know the available options before subscribing, you can contact our <contact>sales team</contact>."
       },
       "q22": {
         "q": "How does billing work?",
-        "a": "Puntos Club paid plans have a monthly price, based on the plan you choose and current promotions.\nBilling information and terms are shown during the subscription process.\nIf you need help with your business's billing, our team can help."
+        "a": "Puntos Club paid plans have a monthly price, based on <plans>the plan you choose</plans> and current promotions.\nBilling is done monthly using the information you already entered in your profile.\nIf you need help with your business's billing, <contact>our team</contact> can help."
       },
       "q23": {
         "q": "Do prices include taxes?",
-        "a": "Published prices are our plans' commercial prices.\nBefore confirming your subscription, you can review the billing terms and any applicable taxes under current regulations.\nIf you need a quote or specific information for your business, you can request it from our team."
+        "a": "Published prices include VAT (IVA).\nBefore confirming your subscription, you can review the billing terms and any applicable taxes under current regulations.\nIf you need a quote or specific information for your business, you can request it from <contact>our team</contact>."
       },
       "q24": {
         "q": "Can I cancel the service?",
-        "a": "Yes. If at any point you decide to stop using a paid plan, you can request to cancel the service.\nOur team will let you know the procedure and the terms that apply to your subscription.\nWe want you to choose Puntos Club for the value it brings to your business."
+        "a": "Yes. If at any point you decide to stop using a paid plan, you can <contact>request to cancel the service</contact>.\nOur team will explain the procedure and the terms that apply to your subscription.\nWe want you to choose Puntos Club for the value it brings to your business."
       },
       "q25": {
         "q": "Do I need technical knowledge to use Puntos Club?",
@@ -3201,15 +3201,15 @@
       },
       "q26": {
         "q": "Do you offer support and training?",
-        "a": "Puntos Club offers guidance to help you learn and use the platform's features.\nYou can contact our team to resolve questions and get guidance on how the service works.\nAvailable support channels and formats are shared according to the service terms."
+        "a": "Puntos Club offers support to help you learn and use the platform's features.\nYou can contact <contact>our team</contact> to resolve questions and get guidance on how the service works.\nAvailable support channels and formats are shown according to the service terms."
       },
       "q27": {
         "q": "Can I integrate Puntos Club with other systems?",
-        "a": "Puntos Club works as a standalone platform to manage your loyalty program.\nIf your business needs to connect it with a sales, billing or other system, you can ask our team to evaluate the technical options available.\nCompatibility and integrations are analyzed case by case."
+        "a": "Puntos Club works as a standalone platform to manage your loyalty program.\nIf your business needs to connect it with a sales, billing or other system, you can check with <contact>our team</contact> to evaluate the available technical options.\nCompatibility and integrations need to be analyzed case by case."
       },
       "q28": {
         "q": "How can I contact the Puntos Club team?",
-        "a": "We'd love to help!\nYou can visit puntosclub.com.ar and use our contact channels to reach the team.\nYou can also <demo>request a demo</demo> to see how the platform works and find out which plan best fits your business."
+        "a": "We'd love to help!\nYou can visit <site>puntosclub.com.ar</site> and use our <contact>contact channels</contact> to reach the team.\nYou can also <demo>request a demo</demo> to see how the platform works and find out which plan best fits your business."
       },
       "moreTitle": "Still have <hl>questions?</hl>",
       "moreText": "Our team is here to help you choose the best option for your business.",

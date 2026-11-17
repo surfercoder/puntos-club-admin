@@ -174,6 +174,40 @@ describe('DashboardTour', () => {
     expect(mockTour.cancel).toHaveBeenCalled();
   });
 
+  it('does not build the tour when unmounted before Shepherd finishes loading', async () => {
+    const Shepherd = jest.requireMock('shepherd.js').default;
+    const { unmount } = render(
+      <DashboardTour userRole="owner" userId="user-1" tourCompleted={false} />
+    );
+    unmount();
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      jest.advanceTimersByTime(800);
+    });
+    expect(Shepherd.Tour).not.toHaveBeenCalled();
+    expect(mockTour.start).not.toHaveBeenCalled();
+  });
+
+  it('still builds the tour under Strict Mode effect replay', async () => {
+    const { StrictMode } = jest.requireActual('react');
+    const Shepherd = jest.requireMock('shepherd.js').default;
+    render(
+      <StrictMode>
+        <DashboardTour userRole="owner" userId="user-1" tourCompleted={false} />
+      </StrictMode>
+    );
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+    act(() => {
+      jest.advanceTimersByTime(800);
+    });
+    expect(Shepherd.Tour).toHaveBeenCalledTimes(1);
+    expect(mockTour.start).toHaveBeenCalled();
+  });
+
   it('cleans up timeout on unmount before it fires', async () => {
     let unmount: () => void;
 
@@ -199,7 +233,7 @@ describe('DashboardTour', () => {
     // but the key thing is it doesn't crash
   });
 
-  it('does not re-initialize tour on re-render (line 22 initialized.current guard)', async () => {
+  it('rebuilds the tour cleanly when the effect re-runs', async () => {
     const { rerender } = await act(async () => {
       return render(
         <DashboardTour userRole="owner" userId="user-1" tourCompleted={false} />
@@ -224,8 +258,10 @@ describe('DashboardTour', () => {
       await Promise.resolve();
     });
 
-    // addSteps should still be called only once (initialized.current guard prevents re-init)
-    expect(mockTour.addSteps).toHaveBeenCalledTimes(1);
+    // El mock de useTranslations devuelve un t nuevo por render, así que el efecto
+    // se re-ejecuta: el cleanup cancela el tour viejo y se arma uno nuevo.
+    expect(mockTour.cancel).toHaveBeenCalled();
+    expect(mockTour.addSteps).toHaveBeenCalledTimes(2);
   });
 
   it('generates progress dots in step text (lines 154-160)', async () => {

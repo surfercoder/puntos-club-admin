@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import { useTranslations } from "next-intl";
 import { completeTour } from "@/actions/dashboard/tour/actions";
 import type { Tour, StepOptions } from "shepherd.js";
@@ -30,16 +30,15 @@ interface DashboardTourProps {
 
 export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTourProps) {
   const t = useTranslations("Tour");
-  const initialized = useRef(false);
-
+  // El setTimeout vive dentro de initTour (async) y el cleanup de abajo lo
+  // libera con clearTimeout(timer) + el flag cancelled; el matcher de la regla
+  // no ve esa relación (falso positivo caso 2 de su doc).
+  // react-doctor-disable-next-line react-doctor/effect-needs-cleanup
   useEffect(() => {
     if (userRole !== "owner" && userRole !== "collaborator") return;
-    if (initialized.current) return;
-
-    initialized.current = true;
-
     let tour: Tour | null = null;
     let timer: ReturnType<typeof setTimeout> | undefined;
+    let cancelled = false;
     const restart = () => tour?.start();
     window.addEventListener(START_TOUR_EVENT, restart);
 
@@ -49,6 +48,8 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
 
     const initTour = async () => {
       const Shepherd = await loadShepherd();
+      // Si el efecto se limpió mientras cargaba Shepherd, no crear tour ni timer.
+      if (cancelled) return;
 
       const localTour: Tour = new Shepherd.Tour({
         useModalOverlay: true,
@@ -191,6 +192,7 @@ export function DashboardTour({ userRole, userId, tourCompleted }: DashboardTour
     initTour().catch(console.error);
 
     return () => {
+      cancelled = true;
       window.removeEventListener(START_TOUR_EVENT, restart);
       clearTimeout(timer);
       safeCancelTour(tour);

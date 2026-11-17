@@ -212,9 +212,15 @@ describe("FaqExplorer", () => {
     expect(billing.open).toBe(false);
     fireEvent.click(screen.getByRole("link", { name: "categories.billing" }));
     expect(billing.open).toBe(true);
-    // Los links de las respuestas (etiquetas plans y demo).
+    // Los links de las respuestas.
     expect(screen.getAllByRole("link", { name: "plans" })[0]).toHaveAttribute("href", "/planes");
     expect(screen.getAllByRole("link", { name: "demo" })[0]).toHaveAttribute("href", "/owner/onboarding");
+    expect(screen.getAllByRole("link", { name: "contact" })[0]).toHaveAttribute("href", "/#contacto");
+    expect(screen.getAllByRole("link", { name: "site" })[0]).toHaveAttribute("href", "/");
+    expect(screen.getAllByRole("link", { name: "play" })[0]).toHaveAttribute(
+      "href",
+      "https://play.google.com/store/apps/details?id=com.agustincassani.PuntosClub",
+    );
   });
 
   it("el chip no rompe si la categoría no está en el DOM", () => {

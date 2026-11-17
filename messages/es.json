@@ -3105,11 +3105,11 @@
       },
       "q2": {
         "q": "¿Cuánto cuesta cada plan?",
-        "a": "Tenemos tres opciones:\n• Trial: gratis para siempre.\n• Advance: {advance} por mes durante los primeros 12 meses, con un 50% de descuento sobre su precio de {advanceList}.\n• Pro: {pro} por mes durante los primeros 12 meses, con un 50% de descuento sobre su precio de {proList}.\nLos descuentos de Advance y Pro forman parte de nuestra promoción de lanzamiento."
+        "a": "Podés ver el costo de cada plan en nuestra sección de <plans>Planes</plans>.\nLos descuentos de Advance y Pro forman parte de nuestra promoción de lanzamiento, por tiempo limitado."
       },
       "q3": {
         "q": "¿Puedo cambiar de plan más adelante?",
-        "a": "¡Claro! Puntos Club está pensado para crecer junto con tu negocio.\nPodés comenzar con el plan Trial y pasar a Advance o Pro cuando necesites más beneficiarios, sucursales, cajeros o funcionalidades.\nAsí, tu club de puntos puede evolucionar a medida que crece tu comunidad de clientes."
+        "a": "¡Claro! Puntos Club está pensado para crecer junto con tu negocio.\nPodés comenzar con el plan Trial y pasar a <plans>Advance o Pro</plans> cuando necesites más beneficiarios, sucursales, cajeros o funcionalidades.\nAsí, tu club de puntos puede evolucionar a medida que crece tu comunidad de clientes."
       },
       "q4": {
         "q": "¿El plan Trial tiene algún costo?",
@@ -3117,7 +3117,7 @@
       },
       "q5": {
         "q": "¿Hay un período de prueba?",
-        "a": "¡Tenemos algo mejor! Con nuestro plan Trial podés utilizar Puntos Club gratis para siempre, dentro de los límites de ese plan.\nNo necesitás contratar un plan pago para comenzar a conocer la plataforma y crear tu primer club de puntos.\nCuando tu negocio necesite más herramientas o capacidad, podrás evaluar nuestros planes Advance y Pro."
+        "a": "¡Tenemos algo mejor! Con nuestro plan Trial podés utilizar Puntos Club gratis para siempre, dentro de los límites de ese plan.\nNo necesitás contratar un plan pago para comenzar a conocer la plataforma y crear tu primer club de puntos.\nCuando tu negocio necesite más herramientas o capacidad, podrás evaluar nuestros planes <plans>Advance y Pro</plans>."
       },
       "q6": {
         "q": "¿Qué puedo hacer con Puntos Club?",
@@ -3133,7 +3133,7 @@
       },
       "q9": {
         "q": "¿Puedo hacer campañas promocionales con puntos?",
-        "a": "¡Sí! Puntos Club contempla herramientas para crear campañas promocionales que te permitan incentivar determinadas acciones de tus clientes.\nPor ejemplo, podés utilizar puntos para impulsar compras, reconocer la fidelidad o desarrollar promociones especiales.\nLas campañas promocionales avanzadas están contempladas en el plan Pro. Algunas modalidades especiales de campañas masivas podrán ofrecerse como servicios adicionales."
+        "a": "¡Sí! Puntos Club contempla herramientas para crear campañas promocionales que te permitan incentivar determinadas acciones de tus clientes.\nPor ejemplo, podés utilizar puntos para impulsar compras, reconocer la fidelidad o desarrollar promociones especiales.\nLas campañas promocionales avanzadas están contempladas en el plan <plans>Pro</plans>. Algunas modalidades especiales de campañas masivas podrán ofrecerse como servicios adicionales."
       },
       "q10": {
         "q": "¿La plataforma incluye reportes y estadísticas?",
@@ -3141,11 +3141,11 @@
       },
       "q11": {
         "q": "¿Cómo creo mi club de puntos?",
-        "a": "¡Es muy sencillo! Primero registrás tu negocio en Puntos Club y completás la información de tu organización.\nLuego podés configurar las reglas para otorgar puntos, crear tu catálogo de premios y preparar tu club para recibir beneficiarios.\nNo necesitás desarrollar una aplicación propia ni contar con conocimientos técnicos avanzados."
+        "a": "¡Es muy sencillo! Primero <demo>registrás tu negocio</demo> en Puntos Club y completás la información de tu organización.\nLuego podés configurar las reglas para otorgar puntos, crear tu catálogo de premios y preparar tu club para recibir beneficiarios.\nNo necesitás desarrollar una aplicación propia ni contar con conocimientos técnicos avanzados."
       },
       "q12": {
         "q": "¿Puedo personalizar la imagen de mi club?",
-        "a": "¡Sí! Podés configurar la identidad de tu club con información de tu negocio, como su nombre y elementos visuales disponibles en la plataforma.\nAdemás, los Owners del plan Pro pueden elegir determinados colores del entorno, logrando que la experiencia de sus beneficiarios se identifique mejor con su propia marca.\nAsí, tu club de puntos se siente cada vez más parte de tu negocio."
+        "a": "¡Sí! Podés configurar la identidad de tu club con la información de tu negocio: logo, nombre y los colores de tu logo.\nAdemás, los Owners del plan <plans>Pro</plans> pueden elegir determinados colores del entorno, logrando que la experiencia de sus beneficiarios se identifique mejor con su propia marca.\nAsí, tu club de puntos se siente cada vez más parte de tu negocio."
       },
       "q13": {
         "q": "¿Qué opciones de personalización tiene el plan Pro?",
@@ -3153,11 +3153,11 @@
       },
       "q14": {
         "q": "¿Puedo gestionar más de una sucursal?",
-        "a": "¡Por supuesto! Puntos Club está preparado para negocios que trabajan con una o varias sucursales.\nLa cantidad disponible depende del plan contratado:\n• Trial: 1 sucursal.\n• Advance: hasta 10 sucursales.\n• Pro: hasta 50 sucursales.\nDe esta manera, podés administrar tu programa de puntos desde una plataforma centralizada."
+        "a": "¡Por supuesto! Puntos Club está preparado para negocios que trabajan con una o varias sucursales.\nLa cantidad disponible depende del <plans>plan contratado</plans>:\n• Trial: 1 sucursal.\n• Advance: hasta 10 sucursales.\n• Pro: hasta 50 sucursales.\nDe esta manera, podés administrar tu programa de puntos desde una plataforma centralizada."
       },
       "q15": {
         "q": "¿Puedo invitar a otros colaboradores a administrar el club?",
-        "a": "¡Sí! Según tu plan, podés incorporar colaboradores para ayudarte con la gestión de tu club.\nEl plan Advance permite contar con 1 colaborador, mientras que el plan Pro contempla colaboradores sin límite de cantidad.\nEsta funcionalidad es especialmente útil para negocios que necesitan distribuir tareas administrativas entre distintas personas."
+        "a": "¡Sí! Según <plans>tu plan</plans>, podés incorporar colaboradores para ayudarte con la gestión de tu club.\nEl plan Advance permite contar con 1 colaborador, mientras que el plan Pro contempla colaboradores sin límite de cantidad.\nEsta funcionalidad es especialmente útil para negocios que necesitan distribuir tareas administrativas entre distintas personas."
       },
       "q16": {
         "q": "¿Quiénes son los beneficiarios?",
@@ -3165,7 +3165,7 @@
       },
       "q17": {
         "q": "¿Cómo se unen mis clientes al club?",
-        "a": "Tus clientes pueden incorporarse a tu club mediante los mecanismos de registro e invitación disponibles en Puntos Club.\nPor ejemplo, podés facilitarles el acceso mediante un código QR para que se registren y comiencen a participar.\nUna vez incorporados, podrán acceder a los beneficios de tu negocio y empezar a acumular puntos."
+        "a": "Tus clientes pueden incorporarse a tu club registrándose en la app de Puntos Club.\nPor ejemplo, podés facilitarles el acceso a <play>Play Store</play> mediante un código QR para que se registren y comiencen a participar.\nUna vez incorporados, podrán acceder a los beneficios de tu negocio y empezar a acumular puntos."
       },
       "q18": {
         "q": "¿En qué pueden canjear los puntos?",
@@ -3181,19 +3181,19 @@
       },
       "q21": {
         "q": "¿Qué medios de pago aceptan?",
-        "a": "Puntos Club ofrece planes de suscripción para negocios que desean ampliar las funcionalidades y la capacidad de sus clubes.\nLos medios de pago disponibles se informan al momento de contratar el servicio.\nSi necesitás conocer las opciones habilitadas antes de suscribirte, podés comunicarte con nuestro equipo comercial."
+        "a": "Puntos Club ofrece planes de suscripción.\nLos medios de pago disponibles se informan al momento de contratar el servicio.\nSi necesitás conocer las opciones habilitadas antes de suscribirte, podés comunicarte con nuestro <contact>equipo comercial</contact>."
       },
       "q22": {
         "q": "¿Cómo se realiza la facturación?",
-        "a": "Los planes pagos de Puntos Club tienen un valor mensual, de acuerdo con el plan contratado y las promociones vigentes.\nLa información de facturación y las condiciones de contratación se presentan durante el proceso de suscripción.\nSi necesitás asistencia con la facturación de tu negocio, nuestro equipo puede ayudarte."
+        "a": "Los planes pagos de Puntos Club tienen un valor mensual, de acuerdo con el <plans>plan contratado</plans> y las promociones vigentes.\nLa facturación se realiza mensualmente utilizando la información que ya cargaste en tu perfil.\nSi necesitás asistencia con la facturación de tu negocio, <contact>nuestro equipo</contact> puede ayudarte."
       },
       "q23": {
         "q": "¿Los precios incluyen impuestos?",
-        "a": "Los valores publicados corresponden a los precios comerciales de nuestros planes.\nAntes de confirmar tu contratación, podrás consultar las condiciones de facturación y los impuestos que correspondan según la normativa aplicable.\nSi necesitás una cotización o información específica para tu negocio, podés solicitarla a nuestro equipo."
+        "a": "Los valores publicados corresponden a los precios con IVA incluido.\nAntes de confirmar tu contratación, podrás consultar las condiciones de facturación y los impuestos que correspondan según la normativa aplicable.\nSi necesitás una cotización o información específica para tu negocio, podés solicitarla a <contact>nuestro equipo</contact>."
       },
       "q24": {
         "q": "¿Puedo solicitar la baja del servicio?",
-        "a": "Sí. Si en algún momento decidís dejar de utilizar un plan pago, podés solicitar la baja del servicio.\nNuestro equipo te informará el procedimiento correspondiente y las condiciones aplicables a tu suscripción.\nQueremos que elijas Puntos Club por el valor que aporta a tu negocio."
+        "a": "Sí. Si en algún momento decidís dejar de utilizar un plan pago, podés <contact>solicitar la baja del servicio</contact>.\nNuestro equipo te informará el procedimiento correspondiente y las condiciones aplicables a tu suscripción.\nQueremos que elijas Puntos Club por el valor que aporta a tu negocio."
       },
       "q25": {
         "q": "¿Necesito conocimientos técnicos para usar Puntos Club?",
@@ -3201,15 +3201,15 @@
       },
       "q26": {
         "q": "¿Cuentan con soporte y capacitación?",
-        "a": "Puntos Club ofrece acompañamiento para ayudarte a conocer y utilizar las funcionalidades de la plataforma.\nPodés comunicarte con nuestro equipo para resolver consultas y recibir orientación sobre el funcionamiento del servicio.\nLos canales y modalidades de asistencia disponibles se informan según las condiciones del servicio."
+        "a": "Puntos Club ofrece acompañamiento para ayudarte a conocer y utilizar las funcionalidades de la plataforma.\nPodés comunicarte con <contact>nuestro equipo</contact> para resolver consultas y recibir orientación sobre el funcionamiento del servicio.\nLos canales y modalidades de asistencia disponibles se informan según las condiciones del servicio."
       },
       "q27": {
         "q": "¿Puedo integrar Puntos Club con otros sistemas?",
-        "a": "Puntos Club funciona como una plataforma independiente para gestionar tu programa de fidelización.\nSi tu negocio necesita conectarla con un sistema de ventas, facturación u otra herramienta, podés consultar con nuestro equipo para evaluar las posibilidades técnicas disponibles.\nLa compatibilidad y las integraciones deben analizarse según cada necesidad."
+        "a": "Puntos Club funciona como una plataforma independiente para gestionar tu programa de fidelización.\nSi tu negocio necesita conectarla con un sistema de ventas, facturación u otra herramienta, podés consultar con <contact>nuestro equipo</contact> para evaluar las posibilidades técnicas disponibles.\nLa compatibilidad y las integraciones deben analizarse según cada necesidad."
       },
       "q28": {
         "q": "¿Cómo puedo contactar al equipo de Puntos Club?",
-        "a": "¡Nos encantaría ayudarte!\nPodés visitar puntosclub.com.ar y utilizar nuestros canales de contacto para comunicarte con el equipo.\nTambién podés <demo>solicitar una demostración</demo> para conocer cómo funciona la plataforma y descubrir qué plan se adapta mejor a tu negocio."
+        "a": "¡Nos encantaría ayudarte!\nPodés visitar <site>puntosclub.com.ar</site> y utilizar nuestros <contact>canales de contacto</contact> para comunicarte con el equipo.\nTambién podés <demo>solicitar una demostración</demo> para conocer cómo funciona la plataforma y descubrir qué plan se adapta mejor a tu negocio."
       },
       "moreTitle": "¿Seguís con <hl>dudas?</hl>",
       "moreText": "Nuestro equipo está para ayudarte a elegir la mejor opción para tu negocio.",

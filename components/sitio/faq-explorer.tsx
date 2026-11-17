@@ -2,11 +2,10 @@
 
 import Link from "next/link";
 import { ChevronDown, CreditCard, Gift, Rocket, Settings, Store, Users } from "lucide-react";
-import { useLocale, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import { DEMO_HREF } from "@/components/sitio/rich";
 import { SectionTitle, Sparks } from "@/components/sitio/ui";
-import { PLAN_LIST_PRICES, PLAN_PRICES } from "@/lib/plans/config";
 import { cn } from "@/lib/utils";
 
 const CATEGORIES = [
@@ -18,6 +17,8 @@ const CATEGORIES = [
   { key: "other", icon: Rocket, color: "text-[#14b866]", head: "bg-[#dcf6e7]", from: 25, to: 28 },
 ] as const;
 
+const PLAY_STORE_URL = "https://play.google.com/store/apps/details?id=com.agustincassani.PuntosClub";
+
 const range = (from: number, to: number) => Array.from({ length: to - from + 1 }, (_, i) => from + i);
 
 // Los chips del mockup no repiten el color de su categoría.
@@ -25,25 +26,20 @@ const CHIP_COLORS = ["text-sitio-pink", "text-[#14b866]", "text-sitio-pink", "te
 
 export function FaqExplorer() {
   const t = useTranslations("Site.faq");
-  const locale = useLocale();
-  const ars = (n: unknown) => `$${Number(n).toLocaleString(locale, { useGrouping: "always" })}`;
-  // Los precios salen de la misma fuente que cobra Mercado Pago.
-  const prices = {
-    advance: ars(PLAN_PRICES.advance),
-    advanceList: ars(PLAN_LIST_PRICES.advance),
-    pro: ars(PLAN_PRICES.pro),
-    proList: ars(PLAN_LIST_PRICES.pro),
-  };
+  const linkTo = (href: string) => (c: React.ReactNode) => (
+    <Link href={href} className="text-sitio-pink underline">
+      {c}
+    </Link>
+  );
   const answerTags = {
-    plans: (c: React.ReactNode) => (
-      <Link href="/planes" className="text-sitio-pink underline">
+    plans: linkTo("/planes"),
+    demo: linkTo(DEMO_HREF),
+    contact: linkTo("/#contacto"),
+    site: linkTo("/"),
+    play: (c: React.ReactNode) => (
+      <a href={PLAY_STORE_URL} target="_blank" rel="noopener noreferrer" className="text-sitio-pink underline">
         {c}
-      </Link>
-    ),
-    demo: (c: React.ReactNode) => (
-      <Link href={DEMO_HREF} className="text-sitio-pink underline">
-        {c}
-      </Link>
+      </a>
     ),
   };
 
@@ -100,7 +96,7 @@ export function FaqExplorer() {
                       <ChevronDown className="size-5 shrink-0 transition-transform group-open/q:rotate-180" />
                     </summary>
                     <p className="mt-1.5 pr-8 leading-relaxed whitespace-pre-line text-[#2c2c4a]">
-                      {t.rich(`q${n}.a`, { ...prices, ...answerTags })}
+                      {t.rich(`q${n}.a`, answerTags)}
                     </p>
                   </details>
                 ))}
