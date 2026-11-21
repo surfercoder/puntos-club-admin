@@ -26,6 +26,27 @@ const OPEN_PATHS = [
 const isOpenPath = (pathname: string) =>
   pathname === "/" || OPEN_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
 
+// Secciones del superadmin. El sidebar solo las esconde; sin esto un owner las
+// abria por URL (y las server actions de esas paginas, varias con service role,
+// quedaban a mano). /dashboard/app_user/edit no entra: el owner edita ahi a sus
+// cajeros y colaboradores.
+const PLATFORM_ONLY_PATHS = [
+  "/dashboard/address",
+  "/dashboard/app_user_organization",
+  "/dashboard/beneficiary_organization",
+  "/dashboard/organization",
+  "/dashboard/organization_notification_limits",
+  "/dashboard/organization_plan_limits",
+  "/dashboard/plan_limits",
+  "/dashboard/push_tokens",
+  "/dashboard/subscription",
+  "/dashboard/user-role",
+];
+const isPlatformOnlyPath = (pathname: string) =>
+  pathname === "/dashboard/app_user" ||
+  pathname.startsWith("/dashboard/app_user/create") ||
+  PLATFORM_ONLY_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));
+
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
     request,
@@ -122,6 +143,9 @@ export async function updateSession(request: NextRequest) {
     if (!role || !ADMIN_PORTAL_ROLES.includes(role)) {
       await supabase.auth.signOut({ scope: "local" });
       return redirectTo("/auth/error", "?reason=no_access");
+    }
+    if (role !== "admin" && isPlatformOnlyPath(request.nextUrl.pathname)) {
+      return redirectTo("/dashboard");
     }
   }
 

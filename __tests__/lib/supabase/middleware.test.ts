@@ -162,6 +162,38 @@ describe('lib/supabase/middleware updateSession', () => {
     expect(mockSignOut).not.toHaveBeenCalled();
   });
 
+  it.each([
+    '/dashboard/organization',
+    '/dashboard/organization/5',
+    '/dashboard/user-role/edit/2',
+    '/dashboard/plan_limits',
+    '/dashboard/app_user',
+    '/dashboard/app_user/create',
+    '/dashboard/address/edit/3',
+  ])('sends an owner away from the superadmin section %s', async (path) => {
+    mockUser({ id: 'user-1' }, 'owner');
+    const result = await updateSession(buildRequest(path));
+    expect(result).toEqual(expect.objectContaining({ kind: 'redirect:/dashboard' }));
+    expect(mockSignOut).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    '/dashboard/app_user/edit/4',
+    '/dashboard/cashiers',
+    '/dashboard/organizations-report',
+    '/dashboard/settings/organization',
+  ])('lets a non-admin (collaborator) into %s', async (path) => {
+    mockUser({ id: 'user-1' }, 'collaborator');
+    const result = await updateSession(buildRequest(path));
+    expect(result).toEqual(expect.objectContaining({ kind: 'next' }));
+  });
+
+  it('lets the platform admin into the superadmin sections', async () => {
+    mockUser({ id: 'user-1' }, 'admin');
+    const result = await updateSession(buildRequest('/dashboard/user-role'));
+    expect(result).toEqual(expect.objectContaining({ kind: 'next' }));
+  });
+
   it('does not treat a path that only shares the prefix as open', async () => {
     mockUser(null);
     const result = await updateSession(buildRequest('/legalese'));
