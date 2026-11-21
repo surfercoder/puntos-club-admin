@@ -6,13 +6,13 @@ import { createAdminClient } from '@/lib/supabase/admin';
 import { createClient } from '@/lib/supabase/server';
 import { OrganizationNotificationLimitSchema } from '@/schemas/organization_notification_limit.schema';
 import type { OrganizationNotificationLimit } from '@/types/organization_notification_limit';
-import { requireUser } from '@/lib/auth/require-user';
+import { requirePlatformAdmin, requireUser } from '@/lib/auth/require-user';
 import { getCurrentUser } from '@/lib/auth/get-current-user';
 import { isAdmin } from '@/lib/auth/roles';
 import { errorText, translateError } from '@/lib/error-handler';
 
 export async function createOrganizationNotificationLimit(input: OrganizationNotificationLimit) {
-  await requireUser();
+  await requirePlatformAdmin();
   const parsed = OrganizationNotificationLimitSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -31,7 +31,7 @@ export async function createOrganizationNotificationLimit(input: OrganizationNot
 }
 
 export async function updateOrganizationNotificationLimit(id: string, input: OrganizationNotificationLimit) {
-  await requireUser();
+  await requirePlatformAdmin();
   const parsed = OrganizationNotificationLimitSchema.safeParse(input);
 
   if (!parsed.success) {
@@ -50,7 +50,7 @@ export async function updateOrganizationNotificationLimit(id: string, input: Org
 }
 
 export async function deleteOrganizationNotificationLimit(id: string) {
-  await requireUser();
+  await requirePlatformAdmin();
   const supabase = createAdminClient();
   const { error } = await supabase.from('organization_notification_limits').delete().eq('id', id);
 

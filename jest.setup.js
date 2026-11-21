@@ -90,6 +90,7 @@ jest.mock('@/lib/supabase/client', () => ({
 // implementation via jest.requireActual.
 jest.mock('@/lib/auth/require-user', () => ({
   requireUser: jest.fn(async () => ({ id: 1, role: { name: 'owner' } })),
+  requirePlatformAdmin: jest.fn(async () => ({ id: 1, role: { name: 'admin' } })),
 }));
 
 // Mock plan-usage-provider

@@ -39,6 +39,10 @@ const mockAdminClient: any = {
   },
 };
 jest.mock('@/lib/supabase/admin', () => ({ createAdminClient: jest.fn(() => mockAdminClient) }));
+const mockGetMutationOrgId = jest.fn(async (): Promise<number | null> => 123);
+jest.mock('@/lib/auth/get-mutation-org-id', () => ({ getMutationOrgId: () => mockGetMutationOrgId() }));
+const mockBelongsToOrg = jest.fn(async (): Promise<boolean> => true);
+jest.mock('@/lib/auth/get-active-org-id', () => ({ belongsToOrg: () => mockBelongsToOrg() }));
 
 import {
   createAppUser,
@@ -71,6 +75,9 @@ beforeEach(() => {
   mockAdminClient.auth.admin.createUser.mockReturnValue({ data: { user: { id: 'auth-new-id' } }, error: null });
   mockAdminClient.auth.admin.updateUserById.mockReturnValue({ data: {}, error: null });
   mockAdminClient.auth.admin.deleteUser.mockReturnValue({ error: null });
+  mockAdminClient.upsert = jest.fn(() => ({ data: null, error: null }));
+  mockGetMutationOrgId.mockResolvedValue(123);
+  mockBelongsToOrg.mockResolvedValue(true);
 });
 
 const validAppUser = {
@@ -85,9 +92,53 @@ const validUpdate = { ...validAppUser, id: '1' };
 
 describe('createAppUser', () => {
   it('should create app user successfully', async () => {
-    const result = await createAppUser(validAppUser);
+    const result = await createAppUser({ ...validAppUser, role_id: '4' });
     expect(mockAdminClient.from).toHaveBeenCalledWith('app_user');
     expect(result.data).toBeDefined();
+  });
+
+  it('crea la membresia del staff nuevo en la org validada', async () => {
+    await createAppUser({ ...validAppUser, role_id: '4' });
+    expect(mockAdminClient.from).toHaveBeenCalledWith('app_user_organization');
+    expect(mockAdminClient.upsert).toHaveBeenCalledWith(
+      { app_user_id: 1, organization_id: 123, is_active: true },
+      { onConflict: 'app_user_id,organization_id' },
+    );
+  });
+
+  it('sin fila insertada no crea membresia', async () => {
+    mockAdminClient.single.mockReturnValueOnce({ data: null, error: { message: 'boom' } });
+    await createAppUser({ ...validAppUser, role_id: '4' });
+    expect(mockAdminClient.upsert).not.toHaveBeenCalled();
+  });
+
+  it.each(['admin', 'owner'])('un owner no puede crear un %s', async (role) => {
+    mockSupabase.single.mockReturnValueOnce({ data: { id: '1', name: role }, error: null });
+    const result = await createAppUser({ ...validAppUser, role_id: '1' });
+    expect(result.error?.message).toBe('db.forbidden');
+    expect(mockAdminClient.auth.admin.createUser).not.toHaveBeenCalled();
+  });
+
+  it('un owner sin membresia activa en la org no crea staff', async () => {
+    mockBelongsToOrg.mockResolvedValueOnce(false);
+    const result = await createAppUser({ ...validAppUser, role_id: '4' });
+    expect(result.error?.message).toBe('db.forbidden');
+    expect(mockAdminClient.auth.admin.createUser).not.toHaveBeenCalled();
+  });
+
+  it('si falla la membresia no informa exito', async () => {
+    mockAdminClient.upsert.mockReturnValueOnce({ data: null, error: { message: 'boom' } });
+    const result = await createAppUser({ ...validAppUser, role_id: '4' });
+    expect(result.data).toBeNull();
+    expect(result.error).toEqual({ message: 'boom' });
+  });
+
+  it('un cajero no puede crear staff', async () => {
+    const { requireUser } = require('@/lib/auth/require-user');
+    requireUser.mockResolvedValueOnce({ id: 9, role: { name: 'cashier' } });
+    const result = await createAppUser({ ...validAppUser, role_id: '4' });
+    expect(result.error?.message).toBe('db.forbidden');
+    expect(mockAdminClient.auth.admin.createUser).not.toHaveBeenCalled();
   });
 
   it('should return field errors on invalid input', async () => {
@@ -108,24 +159,24 @@ describe('createAppUser', () => {
     expect(result).toEqual({ data: null, error: { message: 'unexpected' } });
   });
 
-  it('should not enforce plan limit when role lookup returns non-mapped role', async () => {
-    mockSupabase.single.mockReturnValueOnce({ data: { id: '1', name: 'admin' }, error: null })
-      .mockReturnValue({ data: { id: '1' }, error: null });
-    const result = await createAppUser({ ...validAppUser, role_id: '5' });
+  it('el superadmin puede crear un rol sin cupo de plan', async () => {
+    const { requireUser } = require('@/lib/auth/require-user');
+    requireUser.mockResolvedValueOnce({ id: 1, role: { name: 'admin' } });
+    mockSupabase.single.mockReturnValueOnce({ data: { id: '1', name: 'owner' }, error: null });
+    const result = await createAppUser({ ...validAppUser, role_id: '2' });
     expect(enforcePlanLimit).not.toHaveBeenCalled();
     expect(result.data).toBeDefined();
   });
 
-  it('should skip plan limit when no role_id', async () => {
+  it('sin role_id no crea nada', async () => {
     const result = await createAppUser(validAppUser);
-    expect(enforcePlanLimit).not.toHaveBeenCalled();
-    expect(result.data).toBeDefined();
+    expect(result.error?.message).toBe('db.forbidden');
+    expect(mockAdminClient.auth.admin.createUser).not.toHaveBeenCalled();
   });
 
   it('should return error when no active organization', async () => {
-    const { cookies } = require('next/headers');
-    cookies.mockReturnValueOnce({ get: jest.fn(() => undefined), set: jest.fn() });
-    const result = await createAppUser(validAppUser);
+    mockGetMutationOrgId.mockResolvedValueOnce(null);
+    const result = await createAppUser({ ...validAppUser, role_id: '4' });
     expect(result.error?.message).toBe('organization.noActive');
   });
 
@@ -141,12 +192,11 @@ describe('createAppUser', () => {
     schema.safeParse = orig;
   });
 
-  it('should skip plan limit when roleData.name is null', async () => {
-    mockSupabase.single.mockReturnValueOnce({ data: { id: '1', name: null }, error: null })
-      .mockReturnValue({ data: { id: '1' }, error: null });
+  it('un rol que no se encuentra se rechaza', async () => {
+    mockSupabase.single.mockReturnValueOnce({ data: { id: '1', name: null }, error: null });
     const result = await createAppUser({ ...validAppUser, role_id: '5' });
     expect(enforcePlanLimit).not.toHaveBeenCalled();
-    expect(result.data).toBeDefined();
+    expect(result.error?.message).toBe('db.forbidden');
   });
 
   it('should proceed with insert when enforcePlanLimit returns null for collaborator', async () => {
@@ -219,12 +269,6 @@ describe('createAppUser', () => {
     expect(result.error).toHaveProperty('fieldErrors');
   });
 
-  it('should handle NaN active_org_id cookie', async () => {
-    const { cookies } = require('next/headers');
-    cookies.mockReturnValueOnce({ get: jest.fn(() => ({ value: 'not-a-number' })), set: jest.fn() });
-    const result = await createAppUser(validAppUser);
-    expect(result.error?.message).toBe('organization.noActive');
-  });
 });
 
 describe('updateAppUser', () => {
@@ -283,6 +327,24 @@ describe('updateAppUser', () => {
     const result = await updateAppUser('1', { ...validUpdate, password: 'Newpass123!', email: 'new@example.com' });
     expect(mockAdminClient.auth.admin.updateUserById).toHaveBeenCalledWith('existing-auth-id', { password: 'Newpass123!', email: 'new@example.com' });
     expect(result.data).toBeDefined();
+  });
+
+  it('un owner no puede cambiar la clave de un admin de plataforma', async () => {
+    mockSupabase.single
+      .mockReturnValueOnce({ data: { auth_user_id: 'admin-auth', role_id: '1', role: { name: 'admin' } }, error: null });
+    const result = await updateAppUser('1', { ...validUpdate, password: 'Newpass123!' });
+    expect(result.error?.message).toBe('db.forbidden');
+    expect(mockAdminClient.auth.admin.updateUserById).not.toHaveBeenCalled();
+  });
+
+  it('un admin de plataforma si puede cambiar la clave de otro admin', async () => {
+    const { requireUser } = require('@/lib/auth/require-user');
+    requireUser.mockResolvedValueOnce({ id: 1, role: { name: 'admin' } });
+    mockSupabase.single
+      .mockReturnValueOnce({ data: { auth_user_id: 'admin-auth', role_id: '1', role: [{ name: 'admin' }] }, error: null })
+      .mockReturnValue({ data: { id: '1' }, error: null });
+    await updateAppUser('1', { ...validUpdate, password: 'Newpass123!' });
+    expect(mockAdminClient.auth.admin.updateUserById).toHaveBeenCalled();
   });
 
   it('should return error when auth user update fails', async () => {

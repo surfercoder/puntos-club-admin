@@ -1,8 +1,10 @@
 "use server";
 
-import { cookies } from 'next/headers';
-
 import { requireUser } from '@/lib/auth/require-user';
+import { getMutationOrgId } from '@/lib/auth/get-mutation-org-id';
+import { belongsToOrg } from '@/lib/auth/get-active-org-id';
+import { getAssignableRoles, isAdmin, USER_ROLES } from '@/lib/auth/roles';
+import type { UserRoleType } from '@/types/user_role';
 import { createClient } from '@/lib/supabase/server';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { AppUserSchema, type AppUserInput } from '@/schemas/app_user.schema';
@@ -11,8 +13,18 @@ import type { PlanFeatureKey } from '@/types/plan';
 import { translateError } from '@/lib/error-handler';
 import { AppError } from '@/lib/errors';
 
+// Resolve role name (used for plan limits and auth metadata)
+async function resolveRoleName(
+  supabase: Awaited<ReturnType<typeof createClient>>,
+  roleId: string | null | undefined,
+): Promise<string | null> {
+  if (!roleId) {return null;}
+  const { data } = await supabase.from('user_role').select('name').eq('id', roleId).single();
+  return data?.name ?? null;
+}
+
 export async function createAppUser(input: AppUserInput) {
-  await requireUser();
+  const currentUser = await requireUser();
 
   // `id` lo asigna la base. Si llegara desde el cliente, el schema lo leería como
   // "esto es una edición" y dejaría pasar un alta sin contraseña, además de dejar
@@ -30,37 +42,40 @@ export async function createAppUser(input: AppUserInput) {
   }
 
   const supabase = await createClient();
-  const cookieStore = await cookies();
-  const activeOrgId = cookieStore.get('active_org_id')?.value;
-  const parsedOrgId = activeOrgId ? parseInt(activeOrgId, 10) : NaN;
-  const activeOrgIdNumber = Number.isFinite(parsedOrgId) ? parsedOrgId : null;
+  // El alta va con la service role (RLS no la frena): la org sale validada
+  // contra la membresia, no de la cookie cruda, y el rol tiene que ser uno de
+  // los que el que llama puede asignar. Sin esto un owner (o un cajero llamando
+  // la server action) se creaba un admin de plataforma o staff en otra org.
+  const [activeOrgIdNumber, roleName] = await Promise.all([
+    getMutationOrgId(),
+    resolveRoleName(supabase, parsed.data.role_id),
+  ]);
 
   if (!activeOrgIdNumber) {
     return { data: null, error: new AppError('organization.noActive') };
   }
 
-  // Resolve role name (used for plan limits and auth metadata)
-  let roleName: string | null = null;
-  if (parsed.data.role_id) {
-    const { data: roleData } = await supabase
-      .from('user_role')
-      .select('name')
-      .eq('id', parsed.data.role_id)
-      .single();
-    roleName = roleData?.name ?? null;
+  // getMutationOrgId cae a la org de origen sin mirar la membresia: un owner
+  // dado de baja (is_active=false) no puede crearse un colaborador para volver.
+  if (!isAdmin(currentUser) && !(await belongsToOrg(currentUser.id, activeOrgIdNumber))) {
+    return { data: null, error: new AppError('db.forbidden') };
+  }
 
-    // Enforce cashier / collaborator quotas before inserting
-    const roleFeatureMap: Record<string, PlanFeatureKey> = {
-      cashier:      'cashiers',
-      collaborator: 'collaborators',
-    };
-    const feature = roleName ? roleFeatureMap[roleName] : undefined;
+  if (!roleName || !getAssignableRoles(currentUser).includes(roleName as UserRoleType)) {
+    return { data: null, error: new AppError('db.forbidden') };
+  }
 
-    if (feature) {
-      const limitError = await enforcePlanLimit(activeOrgIdNumber, feature);
-      if (limitError) {
-        return { data: null, error: { message: await translateError(limitError) } };
-      }
+  // Enforce cashier / collaborator quotas before inserting
+  const roleFeatureMap: Record<string, PlanFeatureKey> = {
+    cashier:      'cashiers',
+    collaborator: 'collaborators',
+  };
+  const feature = roleFeatureMap[roleName];
+
+  if (feature) {
+    const limitError = await enforcePlanLimit(activeOrgIdNumber, feature);
+    if (limitError) {
+      return { data: null, error: { message: await translateError(limitError) } };
     }
   }
 
@@ -103,11 +118,25 @@ export async function createAppUser(input: AppUserInput) {
     .select()
     .single();
 
+  // La membresia es lo que mira RLS (private.can_manage_org): sin ella un
+  // colaborador nuevo no veria nada de su org hasta que el layout la autocree.
+  if (data) {
+    const { error: membershipError } = await adminClient.from('app_user_organization').upsert(
+      { app_user_id: Number(data.id), organization_id: activeOrgIdNumber, is_active: true },
+      { onConflict: 'app_user_id,organization_id' },
+    );
+    // El usuario ya existe (Auth + perfil): no se reintenta el alta; el layout
+    // autocrea la membresia en su primer ingreso, pero no se informa exito.
+    if (membershipError) {
+      return { data: null, error: { message: await translateError(membershipError) } };
+    }
+  }
+
   return { data, error };
 }
 
 export async function updateAppUser(id: string, input: AppUserInput) {
-  await requireUser();
+  const currentUser = await requireUser();
 
   const parsed = AppUserSchema.safeParse(input);
 
@@ -131,9 +160,18 @@ export async function updateAppUser(id: string, input: AppUserInput) {
   if (updateData.password || updateData.email) {
     const { data: existingUser } = await supabase
       .from('app_user')
-      .select('auth_user_id, email, role_id, first_name, last_name')
+      .select('auth_user_id, email, role_id, first_name, last_name, role:user_role(name)')
       .eq('id', id)
       .single();
+
+    // El cambio de clave/correo va con la service role: un owner no puede
+    // tocar la cuenta de un admin de plataforma aunque RLS le muestre la fila.
+    // PostgREST devuelve la relacion many-to-one como objeto; el tipo inferido
+    // dice array. flat() cubre las dos formas.
+    const targetIsAdmin = [existingUser?.role].flat().some((r) => r?.name === USER_ROLES.ADMIN);
+    if (!isAdmin(currentUser) && targetIsAdmin) {
+      return { data: null, error: new AppError('db.forbidden') };
+    }
 
     const adminClient = createAdminClient();
 
