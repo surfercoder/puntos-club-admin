@@ -2,53 +2,18 @@ import { render } from '@testing-library/react';
 import MobileAppsPage, { generateMetadata } from '@/app/mobile-apps/page';
 
 jest.mock('next-intl/server', () => ({ getTranslations: jest.fn(() => Promise.resolve((key: string) => key)) }));
-jest.mock('qrcode.react', () => ({ QRCodeSVG: (props: Record<string, unknown>) => <svg data-testid="qr" data-value={props.value as string} /> }));
-jest.mock('lucide-react', () => ({
-  Smartphone: () => <svg data-testid="smartphone-icon" />,
-  Download: () => <svg data-testid="download-icon" />,
-  Globe: () => <svg data-testid="globe-icon" />,
-  Printer: () => <svg data-testid="printer-icon" />,
-  Share2: () => <svg data-testid="share-icon" />,
-}));
-jest.mock('@/components/ui/button', () => ({
-  Button: ({ children, ...props }: { children: React.ReactNode } & Record<string, unknown>) => <button {...props}>{children}</button>,
-}));
-jest.mock('@/components/ui/card', () => ({
-  Card: ({ children, ...props }: { children: React.ReactNode } & Record<string, unknown>) => <div {...props}>{children}</div>,
-  CardContent: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  CardHeader: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-  CardTitle: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-}));
+jest.mock('@/components/mobile-apps/app-download-qr-cards', () => ({ AppDownloadQRCards: () => <div data-testid="app-qr-cards" /> }));
 
 describe('MobileAppsPage', () => {
-  it('exports a default async function', () => {
-    expect(typeof MobileAppsPage).toBe('function');
-  });
-
-  it('renders without crashing', async () => {
-    const result = await MobileAppsPage();
-    expect(result).toBeTruthy();
-  });
-
-  it('renders all content elements', async () => {
-    const jsx = await MobileAppsPage();
-    const { container } = render(jsx);
+  it('renders the header and the app QR cards', async () => {
+    const { container, getByTestId } = render(await MobileAppsPage());
     expect(container.textContent).toContain('title');
     expect(container.textContent).toContain('subtitle');
-    expect(container.textContent).toContain('scanToDownload');
-    expect(container.textContent).toContain('androidOnly');
+    expect(getByTestId('app-qr-cards')).toBeInTheDocument();
   });
 
-  it('renders a QR code for each app', async () => {
-    const jsx = await MobileAppsPage();
-    const { getAllByTestId } = render(jsx);
-    const qrCodes = getAllByTestId('qr');
-    expect(qrCodes).toHaveLength(2);
-  });
-
-  it('generateMetadata returns correct metadata', async () => {
+  it('generateMetadata returns title and description', async () => {
     const metadata = await generateMetadata();
-    expect(metadata).toBeDefined();
     expect(metadata.title).toBeDefined();
     expect(metadata.description).toBeDefined();
   });

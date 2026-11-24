@@ -2,281 +2,96 @@ import { render, screen, fireEvent, waitFor, act } from '@testing-library/react'
 import { toast } from 'sonner';
 
 jest.mock('next-intl', () => ({
-  useTranslations: jest.fn(() => {
-    const t = (key: string) => key;
-    t.rich = (key: string) => key;
-    t.raw = () => ({});
-    t.has = () => true;
-    return t;
-  }),
-  useLocale: jest.fn(() => 'es'),
+  useTranslations: jest.fn(() => (key: string) => key),
 }));
 
-jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn(), info: jest.fn() } }));
+jest.mock('sonner', () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
 
 jest.mock('qrcode.react', () => ({
-  QRCodeSVG: (props: { value: string }) => (
-    <svg data-testid="qr-code" data-value={props.value}>QR</svg>
-  ),
+  QRCodeSVG: (props: { value: string }) => <svg data-testid="qr-code" data-value={props.value} />,
 }));
 
 import { AppDownloadQRCards } from '@/components/mobile-apps/app-download-qr-cards';
+import { PUNTOS_CLUB_CAJA_WEB_URL, PUNTOS_CLUB_PLAY_URL, PUNTOS_CLUB_WEB_URL } from '@/lib/mobile-apps';
 
-// Canvas + Image + serializer mocks so qrToPngBlob runs without a real canvas.
-const mockCtx = {
-  fillStyle: '',
-  font: '',
-  textAlign: '',
-  fillRect: jest.fn(),
-  drawImage: jest.fn(),
-  fillText: jest.fn(),
-};
-const mockToBlob = jest.fn();
-const mockCanvas = {
-  width: 0,
-  height: 0,
-  getContext: jest.fn(() => mockCtx),
-  toBlob: mockToBlob,
-};
+const writeText = jest.fn();
+Object.defineProperty(navigator, 'clipboard', { value: { writeText }, configurable: true });
 
-let decodeShouldFail = false;
-const originalImage = window.Image;
-const originalShare = navigator.share;
-const originalCanShare = navigator.canShare;
-const origCreateElement = document.createElement.bind(document);
-let mockAnchorClick: jest.Mock;
-
-(global as unknown as Record<string, unknown>).XMLSerializer = jest.fn(() => ({
-  serializeToString: () => '<svg>mock</svg>',
-}));
-
-beforeEach(() => {
-  jest.clearAllMocks();
-  decodeShouldFail = false;
-  mockCanvas.getContext.mockReturnValue(mockCtx);
-  mockToBlob.mockImplementation((cb: (b: Blob | null) => void) =>
-    cb(new Blob(['mock'], { type: 'image/png' })),
-  );
-
-  (window as unknown as Record<string, unknown>).Image = jest.fn(() => ({
-    src: '',
-    decode: () => (decodeShouldFail ? Promise.reject(new Error('fail')) : Promise.resolve()),
-  }));
-
-  mockAnchorClick = jest.fn();
-  jest.spyOn(document, 'createElement').mockImplementation((tag: string, options?: ElementCreationOptions) => {
-    if (tag === 'canvas') return mockCanvas as unknown as HTMLCanvasElement;
-    const el = origCreateElement(tag, options);
-    if (tag === 'a') el.click = mockAnchorClick;
-    return el;
-  });
-
-  URL.createObjectURL = jest.fn(() => 'blob:url');
-  URL.revokeObjectURL = jest.fn();
-});
-
-afterEach(() => {
-  (window as unknown as Record<string, unknown>).Image = originalImage;
-  Object.defineProperty(navigator, 'share', { value: originalShare, writable: true, configurable: true });
-  Object.defineProperty(navigator, 'canShare', { value: originalCanShare, writable: true, configurable: true });
-  jest.restoreAllMocks();
-});
-
-// Buttons per card: [download, print, share]. Two cards => 6 buttons.
-const btn = (name: 'download' | 'print' | 'share') =>
-  ({ download: 0, print: 1, share: 2 }[name]);
+beforeEach(() => jest.clearAllMocks());
 
 describe('AppDownloadQRCards', () => {
-  it('renders both app cards with QR codes and action buttons', () => {
+  it('renders Play + web QRs for both apps with the real URLs', () => {
     render(<AppDownloadQRCards />);
-    expect(screen.getAllByTestId('qr-code')).toHaveLength(2);
-    expect(screen.getByText('puntosClubTitle')).toBeInTheDocument();
-    expect(screen.getByText('puntosClubCajaTitle')).toBeInTheDocument();
-    expect(screen.getAllByRole('button')).toHaveLength(6);
+    const values = screen.getAllByTestId('qr-code').map((el) => el.getAttribute('data-value'));
+    // Caja todavia no esta en Play: su QR de Play es un placeholder tapado.
+    expect(values).toEqual([PUNTOS_CLUB_PLAY_URL, PUNTOS_CLUB_WEB_URL, PUNTOS_CLUB_CAJA_WEB_URL, PUNTOS_CLUB_CAJA_WEB_URL]);
+    expect(values.some((v) => v?.includes('drive.google.com'))).toBe(false);
+    expect(screen.getByText('soon')).toBeInTheDocument();
+    expect(screen.getByText('playSoonHint')).toBeInTheDocument();
+    expect(screen.getByText('puntosClubCajaWebHint')).toBeInTheDocument();
   });
 
-  it('links each app to its web version', () => {
+  it('links every available QR to its URL and leaves the "coming soon" one inert', () => {
     render(<AppDownloadQRCards />);
-    const hrefs = screen.getAllByRole('link', { name: 'openWeb' }).map((a) => a.getAttribute('href'));
-    expect(hrefs).toEqual(['https://puntos-club-web.vercel.app', 'https://puntos-club-caja-web.vercel.app']);
+    const links = screen.getAllByRole('link', { name: 'openLink' }).map((a) => a.getAttribute('href'));
+    expect(links).toEqual([PUNTOS_CLUB_PLAY_URL, PUNTOS_CLUB_WEB_URL, PUNTOS_CLUB_CAJA_WEB_URL]);
   });
 
-  it('downloads the QR image on download click', async () => {
+  it('disables printing only for the "coming soon" Play QR', () => {
     render(<AppDownloadQRCards />);
-    await act(async () => {
-      fireEvent.click(screen.getAllByRole('button')[btn('download')]);
-    });
-    await waitFor(() => {
-      expect(mockAnchorClick).toHaveBeenCalled();
-      expect(toast.success).toHaveBeenCalledWith('download');
-      expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:url');
-    });
+    const print = screen.getAllByRole('button', { name: /printQr/ });
+    expect(print.map((b) => (b as HTMLButtonElement).disabled)).toEqual([false, false, true, false]);
   });
 
-  it('does not download when SVG image fails to decode', async () => {
-    decodeShouldFail = true;
+  it('copies the web app link', async () => {
+    writeText.mockResolvedValueOnce(undefined);
     render(<AppDownloadQRCards />);
-    await act(async () => {
-      fireEvent.click(screen.getAllByRole('button')[btn('download')]);
-    });
-    await waitFor(() => {
-      expect(toast.success).not.toHaveBeenCalled();
-    });
+    fireEvent.click(screen.getAllByRole('button', { name: /copyLink/ })[1]);
+    await waitFor(() => expect(toast.success).toHaveBeenCalledWith('linkCopied'));
+    expect(writeText).toHaveBeenCalledWith(PUNTOS_CLUB_CAJA_WEB_URL);
   });
 
-  it('does not download when canvas context is unavailable', async () => {
-    mockCanvas.getContext.mockReturnValueOnce(null);
+  it('shows an error when the clipboard rejects', async () => {
+    writeText.mockRejectedValueOnce(new Error('denied'));
     render(<AppDownloadQRCards />);
-    await act(async () => {
-      fireEvent.click(screen.getAllByRole('button')[btn('download')]);
-    });
-    await waitFor(() => {
-      expect(toast.success).not.toHaveBeenCalled();
-    });
+    fireEvent.click(screen.getAllByRole('button', { name: /copyLink/ })[0]);
+    await waitFor(() => expect(toast.error).toHaveBeenCalledWith('copyError'));
   });
 
-  it('does nothing on download when no SVG found', async () => {
-    const { container } = render(<AppDownloadQRCards />);
-    container.querySelectorAll('svg').forEach((s) => s.remove());
-    await act(async () => {
-      fireEvent.click(screen.getAllByRole('button')[btn('download')]);
-    });
-    await waitFor(() => {
-      expect(toast.success).not.toHaveBeenCalled();
-    });
-  });
-
-  it('opens a print window and prints', () => {
-    const logoImg = document.createElement('img');
-    const mockPrintWindow = {
-      document: { write: jest.fn(), close: jest.fn(), images: [logoImg] },
+  it('opens a print window with the QR and the app logo', () => {
+    jest.useFakeTimers();
+    const img = { src: '' };
+    const printWindow = {
+      document: { write: jest.fn(), close: jest.fn(), images: [img] },
       focus: jest.fn(),
       print: jest.fn(),
     };
-    jest.spyOn(window, 'open').mockReturnValue(mockPrintWindow as unknown as Window);
-    jest.useFakeTimers();
-
+    const open = jest.spyOn(window, 'open').mockReturnValue(printWindow as unknown as Window);
     render(<AppDownloadQRCards />);
-    fireEvent.click(screen.getAllByRole('button')[btn('print')]);
-
-    const html = mockPrintWindow.document.write.mock.calls[0][0] as string;
-    expect(html).toContain('puntosClubTitle');
-    expect(mockPrintWindow.document.close).toHaveBeenCalled();
-    expect(logoImg.getAttribute('src')).toBe(`${window.location.origin}/images/logos/app-puntosclub-v2.png`);
-    expect(mockPrintWindow.focus).toHaveBeenCalled();
-
-    jest.advanceTimersByTime(500);
-    expect(mockPrintWindow.print).toHaveBeenCalled();
+    fireEvent.click(screen.getAllByRole('button', { name: /printQr/ })[0]);
+    expect(printWindow.document.write).toHaveBeenCalledWith(expect.stringContaining('data-value="' + PUNTOS_CLUB_PLAY_URL));
+    expect(img.src).toContain('/images/logos/app-puntosclub-v2.png');
+    act(() => jest.advanceTimersByTime(500));
+    expect(printWindow.print).toHaveBeenCalled();
+    open.mockRestore();
     jest.useRealTimers();
   });
 
-  it('shows error toast when print window cannot be opened', () => {
-    jest.spyOn(window, 'open').mockReturnValue(null);
+  it('does nothing when the QR svg is not mounted', () => {
+    const open = jest.spyOn(window, 'open');
     render(<AppDownloadQRCards />);
-    fireEvent.click(screen.getAllByRole('button')[btn('print')]);
+    const qs = jest.spyOn(Element.prototype, 'querySelector').mockReturnValue(null);
+    fireEvent.click(screen.getAllByRole('button', { name: /printQr/ })[0]);
+    qs.mockRestore();
+    expect(open).not.toHaveBeenCalled();
+    open.mockRestore();
+  });
+
+  it('toasts when the print popup is blocked', () => {
+    const open = jest.spyOn(window, 'open').mockReturnValue(null);
+    render(<AppDownloadQRCards />);
+    fireEvent.click(screen.getAllByRole('button', { name: /printQr/ })[1]);
     expect(toast.error).toHaveBeenCalledWith('printError');
-  });
-
-  it('does nothing on print when no SVG found', () => {
-    jest.spyOn(window, 'open');
-    const { container } = render(<AppDownloadQRCards />);
-    container.querySelectorAll('svg').forEach((s) => s.remove());
-    fireEvent.click(screen.getAllByRole('button')[btn('print')]);
-    expect(window.open).not.toHaveBeenCalled();
-  });
-
-  it('shares with files when canShare supports files', async () => {
-    const mockShare = jest.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'share', { value: mockShare, writable: true, configurable: true });
-    Object.defineProperty(navigator, 'canShare', { value: jest.fn(() => true), writable: true, configurable: true });
-
-    render(<AppDownloadQRCards />);
-    await act(async () => {
-      fireEvent.click(screen.getAllByRole('button')[btn('share')]);
-    });
-    await waitFor(() => {
-      expect(mockShare).toHaveBeenCalledWith(expect.objectContaining({ files: expect.any(Array) }));
-    });
-  });
-
-  it('catches error when sharing with files (user cancelled)', async () => {
-    const mockShare = jest.fn().mockRejectedValue(new Error('cancelled'));
-    Object.defineProperty(navigator, 'share', { value: mockShare, writable: true, configurable: true });
-    Object.defineProperty(navigator, 'canShare', { value: jest.fn(() => true), writable: true, configurable: true });
-
-    render(<AppDownloadQRCards />);
-    await act(async () => {
-      fireEvent.click(screen.getAllByRole('button')[btn('share')]);
-    });
-    await waitFor(() => {
-      expect(mockShare).toHaveBeenCalled();
-    });
-  });
-
-  it('shares without files when canShare returns false', async () => {
-    const mockShare = jest.fn().mockResolvedValue(undefined);
-    Object.defineProperty(navigator, 'share', { value: mockShare, writable: true, configurable: true });
-    Object.defineProperty(navigator, 'canShare', { value: jest.fn(() => false), writable: true, configurable: true });
-
-    render(<AppDownloadQRCards />);
-    await act(async () => {
-      fireEvent.click(screen.getAllByRole('button')[btn('share')]);
-    });
-    await waitFor(() => {
-      expect(mockShare.mock.calls[0][0].files).toBeUndefined();
-    });
-  });
-
-  it('catches error when sharing without files (user cancelled)', async () => {
-    const mockShare = jest.fn().mockRejectedValue(new Error('cancelled'));
-    Object.defineProperty(navigator, 'share', { value: mockShare, writable: true, configurable: true });
-    Object.defineProperty(navigator, 'canShare', { value: undefined, writable: true, configurable: true });
-
-    render(<AppDownloadQRCards />);
-    await act(async () => {
-      fireEvent.click(screen.getAllByRole('button')[btn('share')]);
-    });
-    await waitFor(() => {
-      expect(mockShare).toHaveBeenCalled();
-    });
-  });
-
-  it('falls back to toast.info when navigator.share is undefined', async () => {
-    Object.defineProperty(navigator, 'share', { value: undefined, writable: true, configurable: true });
-
-    render(<AppDownloadQRCards />);
-    await act(async () => {
-      fireEvent.click(screen.getAllByRole('button')[btn('share')]);
-    });
-    await waitFor(() => {
-      expect(toast.info).toHaveBeenCalledWith('download');
-    });
-  });
-
-  it('does not share when blob is null', async () => {
-    mockToBlob.mockImplementation((cb: (b: Blob | null) => void) => cb(null));
-    Object.defineProperty(navigator, 'share', { value: undefined, writable: true, configurable: true });
-
-    render(<AppDownloadQRCards />);
-    await act(async () => {
-      fireEvent.click(screen.getAllByRole('button')[btn('share')]);
-    });
-    await waitFor(() => {
-      expect(toast.info).not.toHaveBeenCalled();
-    });
-  });
-
-  it('does nothing on share when no SVG found', async () => {
-    const mockShare = jest.fn();
-    Object.defineProperty(navigator, 'share', { value: mockShare, writable: true, configurable: true });
-
-    const { container } = render(<AppDownloadQRCards />);
-    container.querySelectorAll('svg').forEach((s) => s.remove());
-    await act(async () => {
-      fireEvent.click(screen.getAllByRole('button')[btn('share')]);
-    });
-    await waitFor(() => {
-      expect(mockShare).not.toHaveBeenCalled();
-    });
+    open.mockRestore();
   });
 });

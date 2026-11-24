@@ -1,221 +1,191 @@
 'use client';
 
-import { useRef } from 'react';
+import { useRef, type RefObject } from 'react';
 import Image from 'next/image';
 import { QRCodeSVG } from 'qrcode.react';
-import { Download, Globe, Printer, Share2 } from 'lucide-react';
+import { Link2, Monitor, Printer } from 'lucide-react';
 import { toast } from 'sonner';
 import { useTranslations } from 'next-intl';
 
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 import {
-  PUNTOS_CLUB_APK_URL,
-  PUNTOS_CLUB_CAJA_APK_URL,
   PUNTOS_CLUB_CAJA_LOGO,
   PUNTOS_CLUB_CAJA_WEB_URL,
   PUNTOS_CLUB_LOGO,
+  PUNTOS_CLUB_PLAY_URL,
   PUNTOS_CLUB_WEB_URL,
 } from '@/lib/mobile-apps';
 
+// playUrl null = todavia no tiene ficha publica en Play: el QR sale tapado con "Próximamente".
 const apps = [
   {
-    titleKey: 'puntosClubTitle',
-    descriptionKey: 'puntosClubDescription',
-    url: PUNTOS_CLUB_APK_URL,
-    webUrl: PUNTOS_CLUB_WEB_URL,
+    key: 'puntosClub',
     logo: PUNTOS_CLUB_LOGO,
-    fileName: 'qr-puntosclub.png',
+    playUrl: PUNTOS_CLUB_PLAY_URL,
+    webUrl: PUNTOS_CLUB_WEB_URL,
+    color: '#FF4573',
+    panel: 'border-brand-pink/30 bg-brand-pink/5',
+    tile: 'bg-brand-pink/10',
+    text: 'text-brand-pink',
+    badge: 'bg-brand-pink/15 text-brand-pink',
   },
   {
-    titleKey: 'puntosClubCajaTitle',
-    descriptionKey: 'puntosClubCajaDescription',
-    url: PUNTOS_CLUB_CAJA_APK_URL,
-    webUrl: PUNTOS_CLUB_CAJA_WEB_URL,
+    key: 'puntosClubCaja',
     logo: PUNTOS_CLUB_CAJA_LOGO,
-    fileName: 'qr-puntosclub-caja.png',
+    playUrl: null,
+    webUrl: PUNTOS_CLUB_CAJA_WEB_URL,
+    color: '#4BB562',
+    panel: 'border-brand-green/30 bg-brand-green/5',
+    tile: 'bg-brand-green/10',
+    text: 'text-brand-green',
+    badge: 'bg-brand-green text-white',
   },
 ] as const;
 
-// Carga una imagen ya decodificada; null si falla (el PNG/impresion sigue sin ella).
-async function loadImage(src: string): Promise<HTMLImageElement | null> {
-  const img = new window.Image();
-  img.src = src;
-  try {
-    await img.decode();
-    return img;
-  } catch {
-    return null;
-  }
-}
+type App = (typeof apps)[number];
 
-// Renders the app logo + QR (with a title label under it) to a PNG blob for download/share.
-async function qrToPngBlob(svgEl: SVGSVGElement, label: string, logo: string): Promise<Blob | null> {
-  const qrSize = 400;
-  const padding = 40;
-  const logoSize = 120;
-  const labelHeight = 56;
-  const width = qrSize + padding * 2;
-  const height = logoSize + padding + qrSize + padding * 2 + labelHeight;
-
-  const canvas = document.createElement('canvas');
-  canvas.width = width;
-  canvas.height = height;
-  const ctx = canvas.getContext('2d');
-  if (!ctx) return null;
-
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, width, height);
-
-  const logoImg = await loadImage(logo);
-  if (logoImg) ctx.drawImage(logoImg, (width - logoSize) / 2, padding, logoSize, logoSize);
-
-  const svgData = new XMLSerializer().serializeToString(svgEl);
-  // Data URI needs no revoke; avoids an object URL kept alive across the decode await.
-  const img = await loadImage(`data:image/svg+xml;charset=utf-8,${encodeURIComponent(svgData)}`);
-  if (!img) return null;
-  const qrTop = padding + logoSize + padding;
-  ctx.drawImage(img, padding, qrTop, qrSize, qrSize);
-
-  ctx.fillStyle = '#1A1A2E';
-  ctx.font = 'bold 26px system-ui, -apple-system, sans-serif';
-  ctx.textAlign = 'center';
-  ctx.fillText(label, width / 2, qrTop + qrSize + 36);
-
-  return new Promise((resolve) => canvas.toBlob((b) => resolve(b), 'image/png'));
-}
-
-function AppQRCard({ app }: { app: (typeof apps)[number] }) {
-  const t = useTranslations('MobileApps');
-  // Reuse the org QR action labels so all cards read identically.
-  const tActions = useTranslations('Dashboard.qr.display');
-  const qrContainerRef = useRef<HTMLDivElement>(null);
-  const title = t(app.titleKey);
-
-  const handleDownload = async () => {
-    const svgEl = qrContainerRef.current?.querySelector('svg');
-    if (!svgEl) return;
-    const blob = await qrToPngBlob(svgEl, title, app.logo);
-    if (!blob) return;
-
-    const downloadUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = downloadUrl;
-    a.download = app.fileName;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(downloadUrl);
-    toast.success(tActions('download'));
-  };
-
-  const handlePrint = () => {
-    const svgEl = qrContainerRef.current?.querySelector('svg');
-    if (!svgEl) return;
-    const svgData = svgEl.outerHTML;
-    const printWindow = window.open('', '_blank');
-    if (!printWindow) {
-      toast.error(tActions('printError'));
-      return;
-    }
-    printWindow.document.write(`<!DOCTYPE html><html><head><title>QR - ${title}</title><style>body{margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui,sans-serif;background:white}.container{text-align:center;padding:40px}.logo{width:96px;height:96px;display:block;margin:0 auto 16px}.brand{font-size:14px;color:#FF4573;margin-bottom:16px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}.qr-wrapper{display:inline-block;padding:16px;border:3px solid #31A1D6;border-radius:12px}.app-name{font-size:24px;font-weight:bold;color:#1A1A2E;margin-top:20px}.tagline{font-size:14px;color:#6b7280;margin-top:8px}svg{display:block}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body><div class="container"><img class="logo" alt=""><div class="brand">Puntos Club</div><div class="qr-wrapper">${svgData}</div><div class="app-name">${title}</div><div class="tagline">${t('scanToDownload')}</div></div></body></html>`);
-    printWindow.document.close();
-    // El src va por propiedad y no interpolado en el HTML: no es un sink de inyeccion.
-    printWindow.document.images[0].src = `${window.location.origin}${app.logo}`;
-    printWindow.focus();
-    setTimeout(() => printWindow.print(), 500);
-  };
-
-  const handleShare = async () => {
-    const svgEl = qrContainerRef.current?.querySelector('svg');
-    if (!svgEl) return;
-    const blob = await qrToPngBlob(svgEl, title, app.logo);
-    if (!blob) return;
-
-    const file = new File([blob], app.fileName, { type: 'image/png' });
-
-    if (navigator.share && navigator.canShare?.({ files: [file] })) {
-      try {
-        await navigator.share({ title: `${title} - Puntos Club`, text: t('scanToDownload'), files: [file] });
-      } catch {
-        // User cancelled
-      }
-    } else if (navigator.share) {
-      try {
-        await navigator.share({ title: `${title} - Puntos Club`, text: t('scanToDownload') });
-      } catch {
-        // User cancelled
-      }
-    } else {
-      toast.info(tActions('download'));
-    }
-  };
-
+function PlayIcon({ className }: { className?: string }) {
   return (
-    <Card className="flex flex-col items-center">
-      <CardHeader className="w-full pb-3 text-center">
-        <Image alt="" aria-hidden className="mx-auto mb-2" height={64} src={app.logo} width={64} />
-        <CardTitle className="text-xl">{title}</CardTitle>
-        <p className="text-sm text-muted-foreground">{t(app.descriptionKey)}</p>
-      </CardHeader>
-      <CardContent className="flex w-full flex-col items-center gap-4">
-        <div ref={qrContainerRef} className="rounded-2xl border-4 border-primary bg-white p-6 shadow-md">
-          <QRCodeSVG
-            value={app.url}
-            size={200}
-            bgColor="#ffffff"
-            fgColor="#31A1D6"
-            level="H"
-            includeMargin={false}
-          />
-        </div>
-        <p className="text-xs text-muted-foreground">{t('scanToDownload')}</p>
-
-        <div className="flex w-full items-center justify-center gap-2">
-          {[
-            { icon: Download, label: tActions('download'), onClick: handleDownload },
-            { icon: Printer, label: tActions('print'), onClick: handlePrint },
-            { icon: Share2, label: tActions('share'), onClick: handleShare },
-          ].map(({ icon: Icon, label, onClick }) => (
-            <Tooltip key={label}>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="icon" onClick={onClick} aria-label={label}>
-                  <Icon className="size-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{label}</TooltipContent>
-            </Tooltip>
-          ))}
-        </div>
-
-        <Button asChild className="w-full sm:hidden">
-          <a href={app.url} target="_blank" rel="noopener noreferrer">
-            <Download className="mr-2 size-4" />
-            {t('download')}
-          </a>
-        </Button>
-        <Button asChild variant="outline" className="w-full">
-          <a href={app.webUrl} target="_blank" rel="noopener noreferrer">
-            <Globe className="mr-2 size-4" />
-            {t('openWeb')}
-          </a>
-        </Button>
-      </CardContent>
-    </Card>
+    <svg aria-hidden className={className} viewBox="0 0 24 24">
+      <path d="M4 2.5 14.5 12 4 21.5c-.3-.2-.5-.6-.5-1v-17c0-.4.2-.8.5-1Z" fill="#00D7FE" />
+      <path d="m17.6 9-3.1 3L4 2.5c.2-.1.6-.1.9.1L17.6 9Z" fill="#32BB5D" />
+      <path d="m17.6 15-12.7 6.4c-.3.2-.7.2-.9.1L14.5 12l3.1 3Z" fill="#F33A49" />
+      <path d="m21.3 13.1-3.7 1.9-3.1-3 3.1-3 3.7 1.9c.8.5.8 1.7 0 2.2Z" fill="#FFC900" />
+    </svg>
   );
 }
 
-// The download QRs for the beneficiary + cashier apps. Shown on the mobile-apps page,
-// the dashboard QR page, and the last onboarding step.
-export function AppDownloadQRCards() {
-  return (
-    <TooltipProvider>
-      <div className="grid gap-8 sm:grid-cols-2">
-        {apps.map((app) => (
-          <AppQRCard key={app.titleKey} app={app} />
-        ))}
+// Claves de i18n de cada tile: la web siempre tiene link; Play puede estar "Próximamente".
+function tileKeys(app: App, kind: 'play' | 'web', soon: boolean) {
+  if (kind === 'web') return { subtitle: 'webSubtitle', hint: `${app.key}WebHint` } as const;
+  return soon ? ({ subtitle: 'playSoonSubtitle', hint: 'playSoonHint' } as const) : ({ subtitle: 'playSubtitle', hint: 'playHint' } as const);
+}
+
+// Abre una ventana con el QR listo para imprimir. false = el navegador bloqueo el popup.
+function printQr(svgEl: SVGSVGElement, app: App, appTitle: string, tagline: string) {
+  const printWindow = window.open('', '_blank');
+  if (!printWindow) return false;
+  printWindow.document.write(`<!DOCTYPE html><html><head><title>QR - ${appTitle}</title><style>body{margin:0;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:system-ui,sans-serif;background:white}.container{text-align:center;padding:40px}.logo{width:96px;height:96px;display:block;margin:0 auto 16px}.brand{font-size:14px;color:#FF4573;margin-bottom:16px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}.qr-wrapper{display:inline-block;padding:16px;border:3px solid ${app.color};border-radius:12px}.app-name{font-size:24px;font-weight:bold;color:#1A1A2E;margin-top:20px}.tagline{font-size:14px;color:#6b7280;margin-top:8px}svg{display:block}@media print{body{-webkit-print-color-adjust:exact;print-color-adjust:exact}}</style></head><body><div class="container"><img class="logo" alt=""><div class="brand">Puntos Club</div><div class="qr-wrapper">${svgEl.outerHTML}</div><div class="app-name">${appTitle}</div><div class="tagline">${tagline}</div></div></body></html>`);
+  printWindow.document.close();
+  // El src va por propiedad y no interpolado en el HTML: no es un sink de inyeccion.
+  printWindow.document.images[0].src = `${window.location.origin}${app.logo}`;
+  printWindow.focus();
+  setTimeout(() => printWindow.print(), 500);
+  return true;
+}
+
+function QRBox({ app, url, qrRef }: { app: App; url: string | null; qrRef: RefObject<HTMLDivElement | null> }) {
+  const t = useTranslations('MobileApps');
+  if (url === null) {
+    return (
+      <div ref={qrRef} className="relative rounded-xl border-2 border-muted-foreground/40 bg-white p-3">
+        <QRCodeSVG value={app.webUrl} size={144} fgColor="#9ca3af" level="H" className="opacity-40 blur-[2px]" />
+        <span className="absolute inset-x-0 top-1/2 -translate-y-1/2 -rotate-12 rounded-full bg-muted py-1 text-sm font-bold text-muted-foreground shadow">
+          {t('soon')}
+        </span>
       </div>
-    </TooltipProvider>
+    );
+  }
+  return (
+    <div ref={qrRef} className="relative rounded-xl border-2 bg-white p-3" style={{ borderColor: app.color }}>
+      <a href={url} target="_blank" rel="noopener noreferrer" aria-label={t('openLink')}>
+        <QRCodeSVG value={url} size={144} fgColor={app.color} level="H" />
+      </a>
+    </div>
+  );
+}
+
+function QRTile({
+  app,
+  appTitle,
+  url,
+  kind,
+}: {
+  app: App;
+  appTitle: string;
+  url: string | null;
+  kind: 'play' | 'web';
+}) {
+  const t = useTranslations('MobileApps');
+  const tActions = useTranslations('Dashboard.qr.display');
+  const qrRef = useRef<HTMLDivElement>(null);
+  const soon = url === null;
+  const keys = tileKeys(app, kind, soon);
+  const title = t(kind === 'play' ? 'playTitle' : 'webTitle');
+  const subtitle = t(keys.subtitle);
+
+  const handlePrint = () => {
+    const svgEl = qrRef.current?.querySelector('svg');
+    if (svgEl && !printQr(svgEl, app, appTitle, `${title} ${subtitle}`)) toast.error(tActions('printError'));
+  };
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(url as string);
+      toast.success(t('linkCopied'));
+    } catch {
+      toast.error(t('copyError'));
+    }
+  };
+
+  return (
+    <div className="flex flex-col items-center gap-4 text-center">
+      <div className={cn('flex min-h-20 w-full items-center justify-center gap-3 rounded-xl px-3 py-2', soon ? 'bg-muted' : app.tile)}>
+        {kind === 'play' ? <PlayIcon className="size-7 shrink-0" /> : <Monitor className={cn('size-7 shrink-0', app.text)} />}
+        <div className="text-left leading-tight">
+          <p className="text-sm font-semibold">{title}</p>
+          <p className="text-sm">{subtitle}</p>
+        </div>
+      </div>
+
+      <QRBox app={app} url={url} qrRef={qrRef} />
+
+      <div className="flex flex-wrap justify-center gap-2">
+        <Button type="button" variant="outline" size="sm" disabled={soon} onClick={handlePrint} className={cn(!soon && app.text)}>
+          <Printer className="size-4" />
+          {t('printQr')}
+        </Button>
+        {kind === 'web' && (
+          <Button type="button" variant="outline" size="sm" onClick={handleCopy} className={app.text}>
+            <Link2 className="size-4" />
+            {t('copyLink')}
+          </Button>
+        )}
+      </div>
+
+      <p className="text-sm text-muted-foreground">{t(keys.hint)}</p>
+    </div>
+  );
+}
+
+// Los QR de las apps de beneficiario y caja (Play Store + web app). Se muestran en
+// /dashboard/qr, en /mobile-apps y en el ultimo paso del onboarding.
+export function AppDownloadQRCards() {
+  const t = useTranslations('MobileApps');
+  return (
+    <div className="grid gap-6 xl:grid-cols-2">
+      {apps.map((app) => {
+        const title = t(`${app.key}Title`);
+        return (
+          <section key={app.key} className={cn('rounded-2xl border p-4 sm:p-6', app.panel)}>
+            <header className="mb-5 flex items-center gap-4">
+              <Image alt="" aria-hidden height={64} src={app.logo} width={64} className="shrink-0 rounded-full" />
+              <div>
+                <h3 className="text-2xl font-bold">{title}</h3>
+                <span className={cn('mt-1 inline-block rounded-full px-3 py-0.5 text-sm font-semibold', app.badge)}>
+                  {t(`${app.key}Badge`)}
+                </span>
+                <p className="mt-2 text-sm text-muted-foreground">{t(`${app.key}Description`)}</p>
+              </div>
+            </header>
+            <div className="grid gap-6 rounded-xl bg-card p-4 sm:grid-cols-2 sm:divide-x">
+              <QRTile app={app} appTitle={title} url={app.playUrl} kind="play" />
+              <QRTile app={app} appTitle={title} url={app.webUrl} kind="web" />
+            </div>
+          </section>
+        );
+      })}
+    </div>
   );
 }

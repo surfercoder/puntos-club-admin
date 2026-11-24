@@ -16,7 +16,7 @@ export default async function MobileAppsPage() {
   const t = await getTranslations("MobileApps");
 
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12 sm:px-6">
+    <div className="mx-auto max-w-6xl px-4 py-12 sm:px-6">
       <div className="mb-10 text-center">
         <div className="mb-4 flex justify-center">
           <div className="rounded-full bg-primary/10 p-3">
@@ -28,10 +28,6 @@ export default async function MobileAppsPage() {
       </div>
 
       <AppDownloadQRCards />
-
-      <p className="mt-8 text-center text-sm text-muted-foreground">
-        {t("androidOnly")}
-      </p>
     </div>
   );
 }

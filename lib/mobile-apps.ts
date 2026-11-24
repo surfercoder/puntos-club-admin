@@ -1,6 +1,9 @@
-// Google Drive APK download links for the Puntos Club mobile apps.
-export const PUNTOS_CLUB_APK_URL =
-  "https://drive.google.com/file/d/1fP-gdgReUgrcm9tYcJKa_4z5voJoEBsa/view?usp=drive_link";
+// Ficha publica de Google Play de la app de beneficiarios (en produccion desde 20/11/2026).
+export const PUNTOS_CLUB_PLAY_URL =
+  "https://play.google.com/store/apps/details?id=com.agustincassani.PuntosClub";
+
+// Caja sigue en testing interno: los testers la bajan del APK de Drive hasta que
+// tenga ficha publica. Entonces pasar a play.google.com/store/apps/details?id=com.agustincassani.PuntosClubCaja.
 export const PUNTOS_CLUB_CAJA_APK_URL =
   "https://drive.google.com/file/d/1ohALzgEOYxCeb4AJYyEiFUm0xsTV-3B2/view?usp=drive_link";
 
