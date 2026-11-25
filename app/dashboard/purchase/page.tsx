@@ -61,6 +61,8 @@ function unique(list: (FilterOption | null)[]) {
 type PurchaseRow = {
   id: string;
   purchaseNumber: string;
+  // Nro. de transacción/comprobante que carga el cajero para conciliar.
+  reference: string | null;
   date: string;
   beneficiaryId: string;
   beneficiaryName: string | null;
@@ -80,7 +82,12 @@ function PurchaseTableRow(
 ) {
   return (
     <TableRow className={row.cancelled ? 'text-muted-foreground line-through' : undefined}>
-      <TableCell className="font-mono font-medium">{row.purchaseNumber}</TableCell>
+      <TableCell>
+        <span className="block font-mono font-medium">{row.purchaseNumber}</span>
+        {row.reference && (
+          <span className="block text-xs text-muted-foreground">{row.reference}</span>
+        )}
+      </TableCell>
       <TableCell>
         <span suppressHydrationWarning className="block">
           {formatDateOnly(row.date, 'es-AR', {
@@ -175,6 +182,7 @@ type PurchaseFiltersValue = ReturnType<typeof parsePurchaseFilters>;
 type RawPurchaseRow = {
   id: unknown;
   purchase_number: unknown;
+  external_reference?: unknown;
   purchase_date: unknown;
   beneficiary_id: unknown;
   cashier_id: unknown;
@@ -196,6 +204,7 @@ function mapPurchaseRows(data: RawPurchaseRow[]): PurchaseRow[] {
     return {
       id: String(purchase.id),
       purchaseNumber: purchase.purchase_number as string,
+      reference: (purchase.external_reference as string | null | undefined) ?? null,
       date: purchase.purchase_date as string,
       beneficiaryId: String(purchase.beneficiary_id ?? ''),
       beneficiaryName: personName(beneficiary),
@@ -217,7 +226,7 @@ function filterPurchaseRows(rows: PurchaseRow[], filters: PurchaseFiltersValue) 
   const range = POINT_RANGES.find((r) => r.key === filters.points);
   return rows.filter((row) => {
     if (needle) {
-      const haystack = [row.purchaseNumber, row.beneficiaryName, row.cashierName, row.branchName]
+      const haystack = [row.purchaseNumber, row.reference, row.beneficiaryName, row.cashierName, row.branchName]
         .filter(Boolean).join(' ').toLowerCase();
       if (!haystack.includes(needle)) return false;
     }
@@ -352,6 +361,7 @@ export default async function PurchaseListPage({ searchParams }: PageProps) {
             label={tCommon('export')}
             headers={[
               t('tableHeaders.purchaseNumber'),
+              t('tableHeaders.reference'),
               t('tableHeaders.date'),
               t('tableHeaders.beneficiary'),
               t('tableHeaders.cashier'),
@@ -361,7 +371,7 @@ export default async function PurchaseListPage({ searchParams }: PageProps) {
               t('tableHeaders.status'),
             ]}
             rows={filtered.map((r) => [
-              r.purchaseNumber, r.date, r.beneficiaryName, r.cashierName,
+              r.purchaseNumber, r.reference, r.date, r.beneficiaryName, r.cashierName,
               r.branchName, r.amount, r.points,
               r.cancelled ? t('cancelledBadge') : t('activeBadge'),
             ])}

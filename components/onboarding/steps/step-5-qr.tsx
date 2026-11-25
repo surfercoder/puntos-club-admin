@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import { QRPreviewCard } from '@/components/dashboard/qr/qr-preview-card';
 import { AppDownloadQRCards } from '@/components/mobile-apps/app-download-qr-cards';
 import { completeOnboarding } from '@/actions/onboarding/actions';
+import { orgJoinUrl } from '@/lib/mobile-apps';
 import { trackEvent } from '@/lib/track-event';
 import type { OnboardingStep2Data, OnboardingStep4Data } from '@/actions/onboarding/actions';
 
@@ -135,7 +136,7 @@ function QRSuccessView({
   onFinish: () => void;
   t: ReturnType<typeof useTranslations>;
 }) {
-  const qrData = JSON.stringify({ type: 'organization', id: organizationId, name: orgName });
+  const qrData = orgJoinUrl(organizationId);
 
   return (
     <div className="space-y-8">

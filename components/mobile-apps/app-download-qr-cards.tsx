@@ -22,6 +22,7 @@ const apps = [
   {
     key: 'puntosClub',
     logo: PUNTOS_CLUB_LOGO,
+    mascot: '/images/qr/clubi-beneficiario.png',
     playUrl: PUNTOS_CLUB_PLAY_URL,
     webUrl: PUNTOS_CLUB_WEB_URL,
     color: '#FF4573',
@@ -33,6 +34,7 @@ const apps = [
   {
     key: 'puntosClubCaja',
     logo: PUNTOS_CLUB_CAJA_LOGO,
+    mascot: '/images/qr/clubi-caja.png',
     playUrl: null,
     webUrl: PUNTOS_CLUB_CAJA_WEB_URL,
     color: '#4BB562',
@@ -170,6 +172,8 @@ export function AppDownloadQRCards() {
         return (
           <section key={app.key} className={cn('rounded-2xl border p-4 sm:p-6', app.panel)}>
             <header className="mb-5 flex items-center gap-4">
+              {/* Clubi apoyado sobre la card blanca de los QR, como en el mockup. */}
+              <Image alt="" aria-hidden height={160} src={app.mascot} width={140} className="-mb-5 hidden h-40 w-auto shrink-0 self-end sm:block" />
               <Image alt="" aria-hidden height={64} src={app.logo} width={64} className="shrink-0 rounded-full" />
               <div>
                 <h3 className="text-2xl font-bold">{title}</h3>

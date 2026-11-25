@@ -1,4 +1,4 @@
-import { ShieldAlert } from 'lucide-react';
+import { Lightbulb, QrCode, ShieldAlert } from 'lucide-react';
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { redirect } from 'next/navigation';
@@ -72,19 +72,45 @@ export default async function QRPage() {
         <p className="mt-1 text-sm text-muted-foreground">{t('description')}</p>
       </div>
 
+      <div className="grid gap-6 rounded-2xl border bg-brand-violet/5 p-5 md:grid-cols-2 md:divide-x">
+        <div className="flex items-center gap-4">
+          <span className="flex size-16 shrink-0 items-center justify-center rounded-full bg-brand-violet/15">
+            <QrCode className="size-8 text-brand-violet" />
+          </span>
+          <div>
+            <p className="text-lg font-bold">{t('intro.title')}</p>
+            <p className="text-sm text-muted-foreground">{t('intro.body')}</p>
+          </div>
+        </div>
+        <div className="flex gap-3 md:pl-6">
+          <Lightbulb className="size-6 shrink-0 text-amber-500" />
+          <div>
+            <p className="font-bold">{t('intro.tipsTitle')}</p>
+            <ul className="mt-1 space-y-1 text-sm text-muted-foreground">
+              {(['tip1', 'tip2', 'tip3'] as const).map((k) => (
+                <li key={k} className="flex gap-2">
+                  <span className="mt-1.5 size-2 shrink-0 rounded-full bg-brand-green" />
+                  {t(`intro.${k}`)}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <section className="space-y-3">
+        <h2 className="text-lg font-medium tracking-tight">{t('downloadSectionTitle')}</h2>
+        <AppDownloadQRCards />
+      </section>
+
       <section className="space-y-3">
         <h2 className="text-lg font-medium tracking-tight">{t('orgSectionTitle')}</h2>
-        {/* OrgQRDisplay ya trae la guía de uso y los consejos: no los repetimos acá. */}
+        {/* Abajo de todo a pedido de CJ (ticket "pagina pos publicación en play store"). OrgQRDisplay ya trae la guía de uso y los consejos: no los repetimos acá. */}
         <OrgQRDisplay
           organizationId={Number(org.id)}
           organizationName={org.name}
           logoUrl={org.logo_url}
         />
-      </section>
-
-      <section className="space-y-3">
-        <h2 className="text-lg font-medium tracking-tight">{t('downloadSectionTitle')}</h2>
-        <AppDownloadQRCards />
       </section>
 
       <p className="flex items-start gap-3 rounded-xl border bg-brand-violet/5 p-5 text-sm">

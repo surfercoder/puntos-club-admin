@@ -115,9 +115,6 @@ describe('OrgQRDisplay', () => {
     render(<OrgQRDisplay {...defaultProps} />);
 
     const qrCode = screen.getByTestId('qr-code');
-    const qrData = JSON.parse(qrCode.getAttribute('data-value') || '{}');
-    expect(qrData.type).toBe('organization');
-    expect(qrData.id).toBe(1);
-    expect(qrData.name).toBe('Test Organization');
+    expect(qrCode.getAttribute('data-value')).toBe('https://www.puntosclub.com.ar/unirse/1');
   });
 });

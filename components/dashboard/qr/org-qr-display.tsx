@@ -1,5 +1,7 @@
 'use client';
 
+import { orgJoinUrl } from '@/lib/mobile-apps';
+
 import { QRPreviewCard } from './qr-preview-card';
 import { QRHowItWorksCard, QRTipsCard } from './qr-info-cards';
 
@@ -10,11 +12,7 @@ interface OrgQRDisplayProps {
 }
 
 export function OrgQRDisplay({ organizationId, organizationName, logoUrl }: OrgQRDisplayProps) {
-  const qrData = JSON.stringify({
-    type: 'organization',
-    id: organizationId,
-    name: organizationName,
-  });
+  const qrData = orgJoinUrl(organizationId);
 
   return (
     <div className="grid gap-6 lg:grid-cols-2">

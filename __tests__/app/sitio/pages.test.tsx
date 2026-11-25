@@ -8,6 +8,7 @@ import BeneficiosPage, { generateMetadata as benefitsMeta } from "@/app/(sitio)/
 import ComoFuncionaPage, { generateMetadata as howMeta } from "@/app/(sitio)/como-funciona/page";
 import PlanesPage, { generateMetadata as plansMeta } from "@/app/(sitio)/planes/page";
 import PreguntasFrecuentesPage, { generateMetadata as faqMeta } from "@/app/(sitio)/preguntas-frecuentes/page";
+import UnirsePage, { generateMetadata as joinMeta } from "@/app/(sitio)/unirse/[id]/page";
 import { getPublicPlanLimits } from "@/lib/plans/public-limits";
 
 // Los hijos async (server components) no se pueden renderizar con RTL: tienen sus propios tests.
@@ -83,5 +84,23 @@ describe("sitio público", () => {
     const m = await meta();
     expect(m.title).toBeDefined();
     expect(m.alternates?.canonical).toBe(canonical);
+  });
+
+  it("/unirse/[id] manda a Play, abre la app o la web con el id, y no se indexa", async () => {
+    render(await UnirsePage({ params: Promise.resolve({ id: "12" }) }));
+    expect(screen.getByRole("link", { name: "play" })).toHaveAttribute(
+      "href",
+      "https://play.google.com/store/apps/details?id=com.agustincassani.PuntosClub"
+    );
+    expect(screen.getByRole("link", { name: "haveApp" })).toHaveAttribute("href", "puntosclub://unirse/12");
+    expect(screen.getByRole("link", { name: "web" }).getAttribute("href")).toMatch(/\/scan-organization\?orgId=12$/);
+    expect(await joinMeta()).toMatchObject({ title: "joinTitle", robots: { index: false } });
+  });
+
+  it("/unirse con un id que no es numero da 404", async () => {
+    (notFound as unknown as jest.Mock).mockImplementationOnce(() => {
+      throw new Error("NEXT_NOT_FOUND");
+    });
+    await expect(UnirsePage({ params: Promise.resolve({ id: "abc" }) })).rejects.toThrow("NEXT_NOT_FOUND");
   });
 });

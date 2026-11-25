@@ -1,0 +1,12 @@
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.agustincassani.PuntosClub",
+      "sha256_cert_fingerprints": [
+        "00:94:88:7E:77:14:10:D1:77:CD:31:50:55:EF:4C:58:B0:15:73:24:50:C7:FD:86:63:43:45:31:EA:32:10:A2"
+      ]
+    }
+  }
+]

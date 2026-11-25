@@ -20,7 +20,9 @@
     "benefitsTitle": "Benefits - Puntos Club",
     "benefitsDescription": "Build customer loyalty, increase sales and manage your whole points club from one place.",
     "faqTitle": "FAQ - Puntos Club",
-    "faqDescription": "Answers about Puntos Club plans, pricing, features, members and billing."
+    "faqDescription": "Answers about Puntos Club plans, pricing, features, members and billing.",
+    "joinTitle": "Join the club - Puntos Club",
+    "joinDescription": "Get Puntos Club to join the club and earn points on every purchase."
   },
   "MobileApps": {
     "title": "Mobile Apps",
@@ -275,7 +277,7 @@
     "generalSettings": "General settings",
     "pointsRulesAndCampaigns": "Campaigns",
     "profile": "Profile",
-    "myQrs": "My QRs",
+    "myQrs": "Apps & QRs",
     "notificationsAndComms": "Notifications & communication",
     "help": "Help & learning",
     "platformMessages": "Messages to organizations",
@@ -878,9 +880,9 @@
       }
     },
     "qr": {
-      "title": "QR Codes",
-      "description": "Share your organization QR so customers can follow you, plus the QR codes to download the apps.",
-      "orgSectionTitle": "Your organization QR",
+      "title": "Apps & QRs",
+      "description": "Generate and download the QR codes so your customers and your team can access the PuntosClub apps.",
+      "orgSectionTitle": "Your organization main QR",
       "downloadSectionTitle": "Download the apps",
       "noOrg": "No active organization found.",
       "createOrg": "Create organization",
@@ -894,14 +896,14 @@
         "step1Title": "Show the QR",
         "step1Description": "Present this code to your customers at your store or point of sale.",
         "step2Title": "Customer scans",
-        "step2Description": "The customer opens the PuntosClub app and scans the QR code.",
+        "step2Description": "The customer scans the code with their phone camera: if they have the app they join instantly, otherwise it takes them to download it.",
         "step3Title": "Earn points",
         "step3Description": "The customer automatically earns points with each purchase.",
         "tipsTitle": "💡 Tips to maximize usage",
         "tip1": "Place the QR in visible spots: counter, table, entrance.",
         "tip2": "Print multiple copies for different points in the store.",
         "tip3": "Share the digital QR on social media or WhatsApp.",
-        "printTagline": "Scan with the PuntosClub app to join and earn points on every purchase",
+        "printTagline": "Scan with your phone camera to join and earn points on every purchase",
         "printFooter": "puntosclub.app · Loyalty program",
         "printError": "Could not open print window. Please check that pop-ups are not blocked.",
         "shareText": "Join {name} on Puntos Club and earn points on every purchase."
@@ -909,6 +911,14 @@
       "important": {
         "title": "Good to know",
         "body": "QR codes are unique to your organization. If you need them regenerated, contact our support team."
+      },
+      "intro": {
+        "title": "What are these QR codes for?",
+        "body": "Make it easy to reach the PuntosClub apps from any device, depending on the type of user.",
+        "tipsTitle": "Recommendations",
+        "tip1": "Print the QR codes and place them in your store (counter, tables, entrance, etc).",
+        "tip2": "Share them over WhatsApp, email or social media too.",
+        "tip3": "Use the Play Store QR for people who prefer installing the app."
       }
     },
     "plan": {
@@ -1484,6 +1494,7 @@
       "empty": "No operations found.",
       "tableHeaders": {
         "purchaseNumber": "Operation #",
+        "reference": "Receipt",
         "date": "Date",
         "beneficiary": "Beneficiary",
         "cashier": "Cashier",
@@ -1561,7 +1572,7 @@
       },
       "filters": {
         "search": "Search",
-        "searchPlaceholder": "Operation, beneficiary, cashier, branch...",
+        "searchPlaceholder": "Operation, receipt, beneficiary, cashier, branch...",
         "from": "Date from",
         "to": "Date to",
         "branch": "Branch",
@@ -2268,7 +2279,7 @@
       "share": "Share",
       "howToUseQR": "How to use the QR?",
       "step1": "Show the QR to your customers at the point of sale",
-      "step2": "The customer scans with the PuntosClub app",
+      "step2": "The customer scans it with their phone camera",
       "step3": "Done! The customer earns points automatically",
       "shareText": "Join {name} on Puntos Club and earn points on every purchase.",
       "viewQRInPanel": "View QR in dashboard",
@@ -3262,6 +3273,14 @@
         "messageRequired": "Tell us how we can help you",
         "messageMinLength": "Please write a longer message"
       }
+    },
+    "join": {
+      "pill": "You've been invited to a club",
+      "title": "Join and earn points on every purchase",
+      "subtitle": "To join you need the Puntos Club app. Download it for free, then scan the store's QR again: it adds you to the club instantly.",
+      "play": "Get it on Google Play",
+      "haveApp": "I already have the app",
+      "web": "On an iPhone or a computer? Join from the web"
     }
   },
   "Clubi": {

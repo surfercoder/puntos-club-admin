@@ -20,7 +20,9 @@
     "benefitsTitle": "Beneficios - Puntos Club",
     "benefitsDescription": "Fidelizá a tus clientes, aumentá las ventas y gestioná todo tu club de puntos desde un solo lugar.",
     "faqTitle": "Preguntas frecuentes - Puntos Club",
-    "faqDescription": "Respuestas sobre planes, precios, funcionalidades, beneficiarios y facturación de Puntos Club."
+    "faqDescription": "Respuestas sobre planes, precios, funcionalidades, beneficiarios y facturación de Puntos Club.",
+    "joinTitle": "Unite al club - Puntos Club",
+    "joinDescription": "Bajá Puntos Club para sumarte al club y ganar puntos en cada compra."
   },
   "MobileApps": {
     "title": "Apps Móviles",
@@ -275,7 +277,7 @@
     "generalSettings": "Configuración general",
     "pointsRulesAndCampaigns": "Campañas",
     "profile": "Perfil",
-    "myQrs": "Mis QRs",
+    "myQrs": "APPs y QRs",
     "notificationsAndComms": "Notificaciones y comunicación",
     "help": "Ayuda y aprendizaje",
     "platformMessages": "Mensajes a organizaciones",
@@ -878,9 +880,9 @@
       }
     },
     "qr": {
-      "title": "Códigos QR",
-      "description": "Compartí el QR de tu organización para que tus clientes te sigan, y los QR para descargar las apps.",
-      "orgSectionTitle": "QR de tu organización",
+      "title": "APPs y QRs",
+      "description": "Generá y descargá los códigos QR para que tus clientes y tu equipo accedan a las apps de PuntosClub.",
+      "orgSectionTitle": "QR principal de tu organización",
       "downloadSectionTitle": "Descargá las apps",
       "noOrg": "No se encontró ninguna organización activa.",
       "createOrg": "Crear organización",
@@ -894,14 +896,14 @@
         "step1Title": "Muestra el QR",
         "step1Description": "Presenta este código a tus clientes en tu local o punto de venta.",
         "step2Title": "El cliente escanea",
-        "step2Description": "El cliente abre la app PuntosClub y escanea el código QR.",
+        "step2Description": "El cliente escanea el código con la cámara del celular: si tiene la app se une al instante, y si no, lo lleva a descargarla.",
         "step3Title": "Acumula puntos",
         "step3Description": "El cliente acumula puntos automáticamente con cada compra.",
         "tipsTitle": "💡 Consejos para maximizar el uso",
         "tip1": "Coloca el QR en lugares visibles: mostrador, mesa, entrada.",
         "tip2": "Imprime múltiples copias para distintos puntos del local.",
         "tip3": "Comparte el QR digital por redes sociales o WhatsApp.",
-        "printTagline": "Escanea con la app PuntosClub para unirte y ganar puntos en cada compra",
+        "printTagline": "Escaneá con la cámara del celular para unirte y ganar puntos en cada compra",
         "printFooter": "puntosclub.app · Programa de fidelización",
         "printError": "No se pudo abrir la ventana de impresión. Verifica que no estén bloqueados los pop-ups.",
         "shareText": "Unite a {name} en Puntos Club y acumula puntos en cada compra."
@@ -909,6 +911,14 @@
       "important": {
         "title": "Importante",
         "body": "Los códigos QR son únicos para tu organización. Si necesitás regenerarlos, contactá a nuestro equipo de soporte."
+      },
+      "intro": {
+        "title": "¿Para qué sirven estos QR?",
+        "body": "Facilitá el acceso a las apps de PuntosClub desde cualquier dispositivo, según el tipo de usuario.",
+        "tipsTitle": "Recomendaciones",
+        "tip1": "Imprimí los QR y colocalos en tu local (mostrador, mesas, entrada, etc).",
+        "tip2": "Compartilos también por WhatsApp, email o redes sociales.",
+        "tip3": "Usá el QR de descarga en Play Store para quienes prefieren instalar la app."
       }
     },
     "plan": {
@@ -1484,6 +1494,7 @@
       "empty": "No se encontraron operaciones.",
       "tableHeaders": {
         "purchaseNumber": "Operación #",
+        "reference": "Comprobante",
         "date": "Fecha",
         "beneficiary": "Beneficiario",
         "cashier": "Cajero",
@@ -1561,7 +1572,7 @@
       },
       "filters": {
         "search": "Buscar",
-        "searchPlaceholder": "Operación, beneficiario, cajero, sucursal...",
+        "searchPlaceholder": "Operación, comprobante, beneficiario, cajero, sucursal...",
         "from": "Fecha desde",
         "to": "Fecha hasta",
         "branch": "Sucursal",
@@ -2268,7 +2279,7 @@
       "share": "Compartir",
       "howToUseQR": "¿Cómo usar el QR?",
       "step1": "Muestra el QR a tus clientes en el punto de venta",
-      "step2": "El cliente escanea con la app PuntosClub",
+      "step2": "El cliente lo escanea con la cámara del celular",
       "step3": "¡Listo! El cliente acumula puntos automáticamente",
       "shareText": "Unite a {name} en Puntos Club y acumula puntos en cada compra.",
       "viewQRInPanel": "Ver QR en el panel",
@@ -3262,6 +3273,14 @@
         "messageRequired": "Contanos en qué podemos ayudarte",
         "messageMinLength": "Por favor, escribí un mensaje más largo"
       }
+    },
+    "join": {
+      "pill": "Te invitaron a un club",
+      "title": "Sumate y ganá puntos en cada compra",
+      "subtitle": "Para unirte necesitás la app Puntos Club. Bajala gratis y después volvé a escanear el QR del local: te suma al club al instante.",
+      "play": "Descargar en Google Play",
+      "haveApp": "Ya tengo la app",
+      "web": "¿Tenés iPhone o estás en la compu? Unite desde la web"
     }
   },
   "Clubi": {

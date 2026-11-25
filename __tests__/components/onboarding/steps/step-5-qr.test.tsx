@@ -90,15 +90,11 @@ describe('Step5QR', () => {
     expect(onCreationComplete).toHaveBeenCalledTimes(1);
   });
 
-  it('encodes the organization identity into the QR payload', async () => {
+  it('encodes the org join link into the QR', async () => {
     renderStep();
 
     const qr = await screen.findByTestId('qr-preview');
-    expect(JSON.parse(qr.textContent as string)).toEqual({
-      type: 'organization',
-      id: 7,
-      name: 'Kiosco Ana',
-    });
+    expect(qr.textContent).toBe('https://www.puntosclub.com.ar/unirse/7');
   });
 
   it('normalises a null preapproval id to undefined for the action', async () => {

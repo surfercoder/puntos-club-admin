@@ -10,7 +10,10 @@ const ADMIN_PORTAL_ROLES = ["admin", "owner", "collaborator"];
 // (incluye la recuperación de contraseña de los cajeros) y el alta de owners.
 // /legal es público por obligación: Google Play abre la Política sin sesión.
 // robots.txt y sitemap.xml también: si redirigen al login, Google no los lee.
+// /unirse y /.well-known son del QR de la org: el link lo abre cualquiera que
+// escanee, y Android baja assetlinks.json sin sesion para verificar el App Link.
 const OPEN_PATHS = [
+  "/.well-known",
   "/auth",
   "/api",
   "/beneficios",
@@ -22,6 +25,7 @@ const OPEN_PATHS = [
   "/preguntas-frecuentes",
   "/robots.txt",
   "/sitemap.xml",
+  "/unirse",
 ];
 const isOpenPath = (pathname: string) =>
   pathname === "/" || OPEN_PATHS.some((p) => pathname === p || pathname.startsWith(`${p}/`));

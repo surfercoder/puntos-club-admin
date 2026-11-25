@@ -204,6 +204,13 @@ describe('PurchaseListPage filters', () => {
     expect(await renderWith({ q: 'zzz' }, [sale])).toBeTruthy();
   });
 
+  it('shows the receipt number and finds the sale by it', async () => {
+    const withRef = { ...sale, external_reference: 'TKT-4455' };
+    await renderWith({ q: 'tkt-4455' }, [withRef, assignment]);
+    expect(screen.getByText('TKT-4455')).toBeInTheDocument();
+    expect(screen.queryByText('PUR-010')).not.toBeInTheDocument();
+  });
+
   it('splits sales from manual point assignments', async () => {
     expect(await renderWith({ type: 'sale' }, [sale, assignment])).toBeTruthy();
     expect(await renderWith({ type: 'assignment' }, [sale, assignment])).toBeTruthy();
