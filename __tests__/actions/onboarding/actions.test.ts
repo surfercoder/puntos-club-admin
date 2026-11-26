@@ -73,6 +73,17 @@ describe('completeOnboarding', () => {
     expect(result.data).toBeDefined();
   });
 
+  it('keeps the idempotent return on retry even if the cashier has the owner email', async () => {
+    mockSupabase.maybeSingle
+      .mockReturnValueOnce({ data: { id: 10, organization_id: 5 }, error: null })
+      .mockReturnValueOnce({ data: { id: 20 }, error: null });
+    mockSupabase.single.mockReturnValueOnce({ data: { name: 'Existing Org' }, error: null });
+    const result = await completeOnboarding({
+      step2: { ...step2Data, cashier: { email: 'Owner@Test.com', password: 'pass123' } },
+    });
+    expect(result.success).toBe(true);
+  });
+
   it('should return error when not authenticated', async () => {
     mockSupabase.auth.getUser.mockReturnValue({ data: { user: null }, error: { message: 'No session' } });
     const result = await completeOnboarding({ step2: step2Data });
@@ -286,6 +297,15 @@ describe('completeOnboarding', () => {
       .mockReturnValueOnce({ data: { id: 5 }, error: null }); // cashier app_user
     const result = await completeOnboarding({ step2: step2WithCashier });
     expect(result.success).toBe(true);
+  });
+
+  it('rejects a cashier with the owner email before creating anything', async () => {
+    const result = await completeOnboarding({
+      step2: { ...step2Data, cashier: { email: 'Owner@Test.com', password: 'pass123' } },
+    });
+    expect(result).toEqual({ success: false, error: 'onboarding.cashierEmailSameAsOwner' });
+    expect(mockSupabase.insert).not.toHaveBeenCalled();
+    expect(mockSupabase.auth.admin.createUser).not.toHaveBeenCalled();
   });
 
   it('should skip cashier app_user creation when auth user creation fails', async () => {

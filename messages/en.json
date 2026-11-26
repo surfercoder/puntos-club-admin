@@ -2176,6 +2176,7 @@
         "branchAddressRequired": "Branch address is required",
         "cashierEmailRequired": "Cashier email is required",
         "cashierEmailInvalid": "Invalid email address",
+        "cashierEmailSameAsOwner": "The cashier email must be different from yours: one account can't be both owner and cashier.",
         "passwordRequired": "Password is required",
         "passwordWeak": "Password doesn't meet all requirements",
         "passwordsMismatch": "Passwords do not match"
@@ -2813,6 +2814,7 @@
     "onboarding": {
       "addressCreateFailed": "We couldn't create the address. Please try again.",
       "appUserCreateFailed": "We couldn't create your user profile. Please try again.",
+      "cashierEmailSameAsOwner": "The cashier email must be different from yours: one account can't be both owner and cashier.",
       "branchCreateFailed": "We couldn't create the branch. Please try again.",
       "emailSendFailed": "We couldn't send the verification email. Please try again.",
       "orgCreateFailed": "We couldn't create the organization. Please try again.",

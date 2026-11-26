@@ -282,9 +282,10 @@ interface Step2Props {
   onNext: (data: OnboardingStep2Data) => void;
   onBack: () => void;
   initialData?: OnboardingStep2Data | null;
+  ownerEmail?: string;
 }
 
-export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
+export function Step2Company({ onNext, onBack, initialData, ownerEmail }: Step2Props) {
   const t = useTranslations('Onboarding.step2');
   const tCommon = useTranslations('Common');
   const tIndustries = useTranslations('Dashboard.clubProfile.industries');
@@ -333,6 +334,9 @@ export function Step2Company({ onNext, onBack, initialData }: Step2Props) {
       if (!state.cashierEmail.trim()) errs.cashierEmail = t('validation.cashierEmailRequired');
       else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(state.cashierEmail))
         errs.cashierEmail = t('validation.cashierEmailInvalid');
+      // auth.users es uno solo: con el email del dueño el alta del cajero falla y no hay cajero.
+      else if (ownerEmail && state.cashierEmail.trim().toLowerCase() === ownerEmail.trim().toLowerCase())
+        errs.cashierEmail = t('validation.cashierEmailSameAsOwner');
       if (!state.cashierPassword) errs.cashierPassword = t('validation.passwordRequired');
       else if (!allRulesPass(state.cashierPassword))
         errs.cashierPassword = t('validation.passwordWeak');

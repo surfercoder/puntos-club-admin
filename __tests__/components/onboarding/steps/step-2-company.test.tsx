@@ -309,6 +309,18 @@ describe('Step2Company', () => {
     expect(onNext).not.toHaveBeenCalled();
   });
 
+  it('rejects the owner email as cashier email', () => {
+    const { onNext } = renderStep({ ownerEmail: 'Dueno@Test.com' });
+    fillRequired();
+    openCashier();
+    fillCashier({ email: 'dueno@test.com ' });
+
+    submit();
+
+    expect(screen.getByText('validation.cashierEmailSameAsOwner')).toBeInTheDocument();
+    expect(onNext).not.toHaveBeenCalled();
+  });
+
   it('rejects a weak cashier password', () => {
     const { onNext } = renderStep();
     fillRequired();

@@ -151,6 +151,14 @@ export async function completeOnboarding(input: {
       };
     }
 
+    // Antes de crear nada (y después del return idempotente, así un reintento
+    // sigue andando): auth.users es compartido, así que el cajero con el email
+    // del dueño fallaba en createUser y el paso 10 lo salteaba en silencio.
+    const cashierEmail = input.step2.cashier?.email?.trim().toLowerCase();
+    if (cashierEmail && cashierEmail === user.email?.toLowerCase()) {
+      return { success: false, error: await errorText('onboarding.cashierEmailSameAsOwner') };
+    }
+
     const plan = input.plan ?? 'trial';
 
     // ── 1. Create organization ────────────────────────────────────────────────

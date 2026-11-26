@@ -194,6 +194,7 @@ export function OnboardingWizard({
             onNext={(data) => dispatch({ type: 'COMPLETE_STEP2', data })}
             onBack={() => goToStep(1)}
             initialData={step2Data}
+            ownerEmail={step1Data?.email}
           />
         );
       case 3:
