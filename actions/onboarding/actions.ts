@@ -92,7 +92,9 @@ export async function checkOrgNameAvailable(
 
 /**
  * ¿El email ya tiene cuenta en auth.users (compartido por las tres apps)?
- * 'unknown' sin sesion o si no se pudo consultar.
+ * 'unknown' sin sesion, si no se pudo consultar, o si quien pregunta no esta
+ * en pleno onboarding (ya tiene org o es beneficiario): asi la action no sirve
+ * para enumerar emails. user_metadata.role_name no alcanza, lo edita el usuario.
  */
 export async function checkEmailAvailable(
   email: string
@@ -103,7 +105,15 @@ export async function checkEmailAvailable(
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return 'unknown';
 
-  const { data, error } = await createAdminClient().rpc('email_in_use', { p_email: email });
+  const adminClient = createAdminClient();
+  const [appUserRes, beneficiaryRes] = await Promise.all([
+    adminClient.from('app_user').select('organization_id').eq('auth_user_id', user.id).maybeSingle(),
+    adminClient.from('beneficiary').select('id').eq('auth_user_id', user.id).maybeSingle(),
+  ]);
+  if (appUserRes.error || beneficiaryRes.error) return 'unknown';
+  if (appUserRes.data?.organization_id || beneficiaryRes.data) return 'unknown';
+
+  const { data, error } = await adminClient.rpc('email_in_use', { p_email: email });
   if (error) return 'unknown';
   return data ? 'taken' : 'available';
 }

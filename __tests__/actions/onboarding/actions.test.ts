@@ -776,6 +776,29 @@ describe('checkEmailAvailable', () => {
     mockSupabase.rpc.mockReturnValueOnce({ data: null, error: { message: 'boom' } });
     expect(await checkEmailAvailable('otro@test.com')).toBe('unknown');
   });
+
+  it('no responde a un dueño que ya tiene org', async () => {
+    mockSupabase.maybeSingle.mockReturnValueOnce({ data: { organization_id: 5 }, error: null });
+    expect(await checkEmailAvailable('otro@test.com')).toBe('unknown');
+    expect(mockSupabase.rpc).not.toHaveBeenCalled();
+  });
+
+  it('no responde a un beneficiario', async () => {
+    mockSupabase.maybeSingle
+      .mockReturnValueOnce({ data: null, error: null })
+      .mockReturnValueOnce({ data: { id: 9 }, error: null });
+    expect(await checkEmailAvailable('otro@test.com')).toBe('unknown');
+    expect(mockSupabase.rpc).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [{ data: null, error: { message: 'boom' } }, { data: null, error: null }],
+    [{ data: null, error: null }, { data: null, error: { message: 'boom' } }],
+  ])('no consulta la RPC si falla una de las verificaciones', async (appUser, beneficiary) => {
+    mockSupabase.maybeSingle.mockReturnValueOnce(appUser).mockReturnValueOnce(beneficiary);
+    expect(await checkEmailAvailable('otro@test.com')).toBe('unknown');
+    expect(mockSupabase.rpc).not.toHaveBeenCalled();
+  });
 });
 
 describe('checkOrgNameAvailable', () => {
