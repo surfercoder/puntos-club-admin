@@ -124,6 +124,18 @@ describe('InstallPrompt', () => {
     expect(dialogOpen()).toBeNull();
   });
 
+  it('usa el evento que llego antes de montar (landing o login, sin recargar)', async () => {
+    setup();
+    const prompt = jest.fn().mockResolvedValue({ outcome: 'accepted' });
+    (window as { __installEvent?: unknown }).__installEvent = { prompt };
+    render(<InstallPrompt />);
+
+    await userEvent.click(screen.getByRole('button', { name: /cta/ }));
+    expect(prompt).toHaveBeenCalled();
+    expect((window as { __installEvent?: unknown }).__installEvent).toBeNull();
+    expect(dialogOpen()).toBeNull();
+  });
+
   it('la X y Escape la cierran; un click adentro no', async () => {
     setup();
     const second = render(<InstallPrompt />);

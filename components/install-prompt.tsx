@@ -144,6 +144,10 @@ function InstallDialog({
   // Escucha solo con la tarjeta abierta: en la compu, o ya descartada, el
   // navegador conserva su propia UI de instalacion.
   React.useEffect(() => {
+    // El evento suele haber llegado antes (lo guarda el script del layout raiz).
+    const early = (window as { __installEvent?: InstallEvent | null })
+      .__installEvent;
+    if (early) setInstallEvent(early);
     const onPrompt = (event: Event) => {
       event.preventDefault();
       setInstallEvent(event as InstallEvent);
@@ -153,7 +157,11 @@ function InstallDialog({
   }, []);
 
   const install = async () => {
-    if (installEvent) await installEvent.prompt();
+    if (installEvent) {
+      // prompt() sirve una sola vez por evento.
+      (window as { __installEvent?: InstallEvent | null }).__installEvent = null;
+      await installEvent.prompt();
+    }
     onClose();
   };
   const circle =

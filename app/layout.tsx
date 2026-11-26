@@ -43,6 +43,15 @@ export default async function RootLayout({
             {`(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src='https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);})(window,document,'script','dataLayer','${GTM_ID}');`}
           </Script>
         )}
+        {/* Chrome dispara beforeinstallprompt una sola vez por documento, casi
+            siempre en la landing o el login: al /dashboard se llega sin recargar
+            y la tarjeta de InstallPrompt se quedaba sin evento ("Entendido" no
+            instalaba nada). Se guarda aca, antes de hidratar, para que la use.
+            Con la tarjeta ya descartada no se frena la promo del navegador
+            (misma clave que DISMISSED_KEY en install-prompt.tsx). */}
+        <Script id="install-event" strategy="beforeInteractive">
+          {`addEventListener('beforeinstallprompt',function(e){try{if(localStorage.getItem('install-prompt-dismissed'))return}catch(_){}e.preventDefault();window.__installEvent=e});addEventListener('appinstalled',function(){window.__installEvent=null})`}
+        </Script>
         <StaleDeploymentReload />
         <NextIntlClientProvider locale={locale} messages={messages}>
           <GoogleMapsProvider apiKey={env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY}>
