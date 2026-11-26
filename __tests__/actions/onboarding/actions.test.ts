@@ -1,4 +1,7 @@
 jest.mock('next/cache', () => ({ revalidatePath: jest.fn() }));
+jest.mock('next/server', () => ({ after: (fn: () => void) => fn() }));
+const mockNotifyNewClub = jest.fn();
+jest.mock('@/lib/notify-new-club', () => ({ notifyNewClub: (...a: unknown[]) => mockNotifyNewClub(...a) }));
 jest.mock('next/navigation', () => ({ redirect: jest.fn() }));
 jest.mock('next/headers', () => ({
   cookies: jest.fn(() => ({ get: jest.fn(() => ({ value: '123' })), set: jest.fn() })),
@@ -105,6 +108,29 @@ describe('completeOnboarding', () => {
 
     const result = await completeOnboarding({ step2: step2Data });
     expect(result.success).toBe(true);
+  });
+
+  it('notifies the team with the owner data after a new club is created', async () => {
+    const result = await completeOnboarding({
+      step2: { ...step2Data, org: { name: 'My Org', tax_id: '20-1-3' }, branch: { name: 'Main Branch', phone: '11 5555' } },
+    });
+    expect(result.success).toBe(true);
+    expect(mockNotifyNewClub).toHaveBeenCalledWith(expect.objectContaining({
+      ownerName: 'Test Owner',
+      ownerEmail: 'owner@test.com',
+      taxId: '20-1-3',
+      phone: '11 5555',
+      plan: 'trial',
+      address: 'Main 100, BA, CABA (1000)',
+    }));
+  });
+
+  it('does not notify on an idempotent retry', async () => {
+    mockSupabase.maybeSingle
+      .mockReturnValueOnce({ data: { id: 10, organization_id: 5 }, error: null })
+      .mockReturnValueOnce({ data: { id: 20 }, error: null });
+    await completeOnboarding({ step2: step2Data });
+    expect(mockNotifyNewClub).not.toHaveBeenCalled();
   });
 
   it('should return error on org creation failure', async () => {

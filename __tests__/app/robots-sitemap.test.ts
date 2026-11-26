@@ -5,6 +5,9 @@ describe('robots y sitemap', () => {
   it('no bloquea las rutas publicas y apunta al sitemap del dominio real', () => {
     const r = robots();
     expect(r.rules).toEqual(expect.objectContaining({ allow: '/' }));
+    expect(r.rules).toEqual(
+      expect.objectContaining({ userAgent: expect.arrayContaining(['OAI-SearchBot']) }),
+    );
     expect(JSON.stringify(r.rules)).not.toMatch(/"\/auth|"\/owner/);
     expect(r.sitemap).toBe('https://www.puntosclub.com.ar/sitemap.xml');
   });

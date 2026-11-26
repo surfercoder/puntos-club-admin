@@ -1,6 +1,8 @@
 'use server';
 
+import { after } from 'next/server';
 import { createClient } from '@/lib/supabase/server';
+import { notifyNewClub } from '@/lib/notify-new-club';
 import { createAdminClient } from '@/lib/supabase/admin';
 import { errorText, translateError } from '@/lib/error-handler';
 import { PLAN_PRICES } from '@/lib/plans/config';
@@ -486,6 +488,23 @@ export async function completeOnboarding(input: {
         }
       }
     }
+
+    // ── 11. Aviso interno para postventa (no bloquea ni rompe el alta) ──────
+    const { org, address, branch } = input.step2;
+    after(() =>
+      notifyNewClub({
+        ownerName: [metadata.first_name, metadata.last_name].filter(Boolean).join(' '),
+        ownerEmail: user.email /* c8 ignore next */ ?? '',
+        orgName: orgData.name,
+        businessName: org.business_name,
+        taxId: org.tax_id,
+        industry: org.industry,
+        plan,
+        branchName: branchData.name,
+        phone: branch.phone,
+        address: `${address.street} ${address.number}, ${address.city}, ${address.state} (${address.zip_code})`,
+      })
+    );
 
     return {
       success: true,
