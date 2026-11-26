@@ -2177,6 +2177,7 @@
         "cashierEmailRequired": "El email del cajero es requerido",
         "cashierEmailInvalid": "El email no es válido",
         "cashierEmailSameAsOwner": "El email del cajero tiene que ser distinto al tuyo: una misma cuenta no puede ser dueño y cajero.",
+        "cashierEmailTaken": "Ya existe una cuenta con ese email. Usá otro para el cajero.",
         "passwordRequired": "La contraseña es requerida",
         "passwordWeak": "La contraseña no cumple todos los requisitos",
         "passwordsMismatch": "Las contraseñas no coinciden"
@@ -2815,6 +2816,7 @@
       "addressCreateFailed": "No pudimos crear la dirección. Intentá nuevamente.",
       "appUserCreateFailed": "No pudimos crear tu perfil de usuario. Intentá nuevamente.",
       "cashierEmailSameAsOwner": "El email del cajero tiene que ser distinto al tuyo: una misma cuenta no puede ser dueño y cajero.",
+      "cashierEmailTaken": "Ya existe una cuenta con ese email. Usá otro para el cajero.",
       "branchCreateFailed": "No pudimos crear la sucursal. Intentá nuevamente.",
       "emailSendFailed": "No pudimos enviar el email de verificación. Intentá nuevamente.",
       "orgCreateFailed": "No pudimos crear la organización. Intentá nuevamente.",

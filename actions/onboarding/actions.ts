@@ -88,6 +88,26 @@ export async function checkOrgNameAvailable(
   return data ? 'taken' : 'available';
 }
 
+// ─── Email del cajero disponible ──────────────────────────────────────────────
+
+/**
+ * ¿El email ya tiene cuenta en auth.users (compartido por las tres apps)?
+ * 'unknown' sin sesion o si no se pudo consultar.
+ */
+export async function checkEmailAvailable(
+  email: string
+): Promise<'available' | 'taken' | 'unknown'> {
+  if (!email.trim()) return 'unknown';
+
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return 'unknown';
+
+  const { data, error } = await createAdminClient().rpc('email_in_use', { p_email: email });
+  if (error) return 'unknown';
+  return data ? 'taken' : 'available';
+}
+
 // ─── Atomic onboarding action ─────────────────────────────────────────────────
 
 /**
@@ -157,6 +177,12 @@ export async function completeOnboarding(input: {
     const cashierEmail = input.step2.cashier?.email?.trim().toLowerCase();
     if (cashierEmail && cashierEmail === user.email?.toLowerCase()) {
       return { success: false, error: await errorText('onboarding.cashierEmailSameAsOwner') };
+    }
+    if (cashierEmail) {
+      const { data: emailTaken } = await adminClient.rpc('email_in_use', { p_email: cashierEmail });
+      if (emailTaken) {
+        return { success: false, error: await errorText('onboarding.cashierEmailTaken') };
+      }
     }
 
     const plan = input.plan ?? 'trial';

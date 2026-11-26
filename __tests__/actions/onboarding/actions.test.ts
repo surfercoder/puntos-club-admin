@@ -31,7 +31,7 @@ const mockSupabase = {
 jest.mock('@/lib/supabase/server', () => ({ createClient: jest.fn(() => mockSupabase) }));
 jest.mock('@/lib/supabase/admin', () => ({ createAdminClient: jest.fn(() => mockSupabase) }));
 
-import { checkOrgNameAvailable, completeOnboarding, getOnboardingStatus } from '@/actions/onboarding/actions';
+import { checkEmailAvailable, checkOrgNameAvailable, completeOnboarding, getOnboardingStatus } from '@/actions/onboarding/actions';
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -306,6 +306,16 @@ describe('completeOnboarding', () => {
     expect(result).toEqual({ success: false, error: 'onboarding.cashierEmailSameAsOwner' });
     expect(mockSupabase.insert).not.toHaveBeenCalled();
     expect(mockSupabase.auth.admin.createUser).not.toHaveBeenCalled();
+  });
+
+  it('rejects a cashier whose email already has an account before creating anything', async () => {
+    mockSupabase.rpc.mockReturnValueOnce({ data: true, error: null });
+    const result = await completeOnboarding({
+      step2: { ...step2Data, cashier: { email: ' Otro@Test.com ', password: 'pass123' } },
+    });
+    expect(result).toEqual({ success: false, error: 'onboarding.cashierEmailTaken' });
+    expect(mockSupabase.rpc).toHaveBeenCalledWith('email_in_use', { p_email: 'otro@test.com' });
+    expect(mockSupabase.insert).not.toHaveBeenCalled();
   });
 
   it('should skip cashier app_user creation when auth user creation fails', async () => {
@@ -736,6 +746,35 @@ describe('getOnboardingStatus', () => {
     const result = await getOnboardingStatus();
     expect(result.status).toBe('error');
     expect(result.error).toBe('unexpected');
+  });
+});
+
+describe('checkEmailAvailable', () => {
+  it('reporta email tomado', async () => {
+    mockSupabase.rpc.mockReturnValueOnce({ data: true, error: null });
+    expect(await checkEmailAvailable('otro@test.com')).toBe('taken');
+    expect(mockSupabase.rpc).toHaveBeenCalledWith('email_in_use', { p_email: 'otro@test.com' });
+  });
+
+  it('reporta email disponible', async () => {
+    mockSupabase.rpc.mockReturnValueOnce({ data: false, error: null });
+    expect(await checkEmailAvailable('nuevo@test.com')).toBe('available');
+  });
+
+  it('no consulta con el email vacio', async () => {
+    expect(await checkEmailAvailable('  ')).toBe('unknown');
+    expect(mockSupabase.rpc).not.toHaveBeenCalled();
+  });
+
+  it('no consulta sin sesion', async () => {
+    mockSupabase.auth.getUser.mockReturnValueOnce({ data: { user: null }, error: null });
+    expect(await checkEmailAvailable('otro@test.com')).toBe('unknown');
+    expect(mockSupabase.rpc).not.toHaveBeenCalled();
+  });
+
+  it('no bloquea si la consulta falla', async () => {
+    mockSupabase.rpc.mockReturnValueOnce({ data: null, error: { message: 'boom' } });
+    expect(await checkEmailAvailable('otro@test.com')).toBe('unknown');
   });
 });
 

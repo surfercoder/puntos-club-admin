@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { ImageUpload } from '@/components/ui/image-upload';
 import { GoogleAddressAutocomplete } from '@/components/ui/google-address-autocomplete';
 import type { GoogleAddressComponents } from '@/components/ui/google-address-autocomplete';
-import { checkOrgNameAvailable, type OnboardingStep2Data } from '@/actions/onboarding/actions';
+import { checkEmailAvailable, checkOrgNameAvailable, type OnboardingStep2Data } from '@/actions/onboarding/actions';
 import { PasswordStrengthChecklist } from '@/components/onboarding/password-strength-checklist';
 import { allRulesPass } from '@/components/onboarding/password-rules';
 import { INDUSTRIES } from '@/lib/industries';
@@ -291,6 +291,7 @@ export function Step2Company({ onNext, onBack, initialData, ownerEmail }: Step2P
   const tIndustries = useTranslations('Dashboard.clubProfile.industries');
   const [state, dispatch] = useReducer(reducer, initialData, buildInitialState);
   const [nameStatus, setNameStatus] = useState<'idle' | 'checking' | 'available' | 'taken'>('idle');
+  const [checkingEmail, setCheckingEmail] = useState(false);
 
   // Dos clubes con el mismo nombre confunden al beneficiario, asi que se avisa
   // mientras se escribe en vez de fallar recien al crear la organizacion.
@@ -346,12 +347,25 @@ export function Step2Company({ onNext, onBack, initialData, ownerEmail }: Step2P
     return errs;
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const validationErrors = validate();
     if (Object.keys(validationErrors).length > 0) {
       dispatch({ type: 'SET_ERRORS', errors: validationErrors });
       return;
+    }
+    // El email del cajero no puede tener cuenta en ninguna de las tres apps
+    // (auth.users es uno solo): si no, el alta falla al final y no hay cajero.
+    // 'unknown' deja seguir; completeOnboarding vuelve a chequear antes de crear nada.
+    if (cashierHasData) {
+      setCheckingEmail(true);
+      // Si la server action falla, se trata como 'unknown' y no queda trabado el boton.
+      const emailStatus = await checkEmailAvailable(state.cashierEmail.trim()).catch(() => 'unknown' as const);
+      setCheckingEmail(false);
+      if (emailStatus === 'taken') {
+        dispatch({ type: 'SET_ERRORS', errors: { cashierEmail: t('validation.cashierEmailTaken') } });
+        return;
+      }
     }
     dispatch({ type: 'SET_ERRORS', errors: {} });
 
@@ -392,7 +406,9 @@ export function Step2Company({ onNext, onBack, initialData, ownerEmail }: Step2P
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit}>
+      {/* Bloquea campos y Volver mientras se chequea el email: si no, onNext sale con datos viejos. */}
+      <fieldset disabled={checkingEmail} className="min-w-0 space-y-6">
       <div className="space-y-2">
         <Label htmlFor="orgName">
           {t('businessName')} <span className="text-destructive">*</span>
@@ -534,6 +550,7 @@ export function Step2Company({ onNext, onBack, initialData, ownerEmail }: Step2P
           {tCommon('continue')}
         </Button>
       </div>
+      </fieldset>
     </form>
   );
 }

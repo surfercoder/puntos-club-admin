@@ -34,8 +34,10 @@ jest.mock('@/components/ui/google-address-autocomplete', () => ({
 }));
 // El chequeo de nombre pega al servidor; aca se controla la respuesta.
 const mockCheckOrgName = jest.fn(() => Promise.resolve('available'));
+const mockCheckEmail = jest.fn(() => Promise.resolve('available'));
 jest.mock('@/actions/onboarding/actions', () => ({
   checkOrgNameAvailable: (name: string) => mockCheckOrgName(name),
+  checkEmailAvailable: (email: string) => mockCheckEmail(email),
 }));
 jest.mock('@/components/ui/image-upload', () => ({
   ImageUpload: ({ value, onChange }: { value: string | null; onChange: (u: string | null) => void }) => (
@@ -252,7 +254,7 @@ describe('Step2Company', () => {
     expect(onNext.mock.calls[0][0].cashier).toBeUndefined();
   });
 
-  it('submits the cashier once it is filled in', () => {
+  it('submits the cashier once it is filled in', async () => {
     const { onNext } = renderStep();
     fillRequired();
     openCashier();
@@ -262,6 +264,7 @@ describe('Step2Company', () => {
 
     submit();
 
+    await waitFor(() => expect(onNext).toHaveBeenCalled());
     expect(onNext.mock.calls[0][0].cashier).toEqual({
       email: 'caja@example.com',
       password: VALID_PASSWORD,
@@ -270,7 +273,7 @@ describe('Step2Company', () => {
     });
   });
 
-  it('omits the cashier name fields when left blank', () => {
+  it('omits the cashier name fields when left blank', async () => {
     const { onNext } = renderStep();
     fillRequired();
     openCashier();
@@ -278,6 +281,7 @@ describe('Step2Company', () => {
 
     submit();
 
+    await waitFor(() => expect(onNext).toHaveBeenCalled());
     expect(onNext.mock.calls[0][0].cashier).toMatchObject({
       first_name: undefined,
       last_name: undefined,
@@ -319,6 +323,60 @@ describe('Step2Company', () => {
 
     expect(screen.getByText('validation.cashierEmailSameAsOwner')).toBeInTheDocument();
     expect(onNext).not.toHaveBeenCalled();
+  });
+
+  it('rejects a cashier email that already has an account', async () => {
+    mockCheckEmail.mockResolvedValueOnce('taken');
+    const { onNext } = renderStep();
+    fillRequired();
+    openCashier();
+    fillCashier({ email: 'otro@test.com' });
+
+    submit();
+
+    expect(await screen.findByText('validation.cashierEmailTaken')).toBeInTheDocument();
+    expect(mockCheckEmail).toHaveBeenCalledWith('otro@test.com');
+    expect(onNext).not.toHaveBeenCalled();
+  });
+
+  it('lets the cashier through when the email check is unknown', async () => {
+    mockCheckEmail.mockResolvedValueOnce('unknown');
+    const { onNext } = renderStep();
+    fillRequired();
+    openCashier();
+    fillCashier({});
+
+    submit();
+
+    await waitFor(() => expect(onNext).toHaveBeenCalled());
+  });
+
+  it('lets the cashier through when the email check rejects', async () => {
+    mockCheckEmail.mockRejectedValueOnce(new Error('network'));
+    const { onNext } = renderStep();
+    fillRequired();
+    openCashier();
+    fillCashier({});
+
+    submit();
+
+    await waitFor(() => expect(onNext).toHaveBeenCalled());
+  });
+
+  it('locks the form while the email check is pending', async () => {
+    let resolveCheck: (value: string) => void = () => {};
+    mockCheckEmail.mockReturnValueOnce(new Promise((resolve) => { resolveCheck = resolve; }));
+    const { onNext } = renderStep();
+    fillRequired();
+    openCashier();
+    fillCashier({});
+
+    submit();
+
+    expect(await screen.findByRole('button', { name: 'back' })).toBeDisabled();
+    resolveCheck('available');
+    await waitFor(() => expect(onNext).toHaveBeenCalled());
+    expect(screen.getByRole('button', { name: 'back' })).toBeEnabled();
   });
 
   it('rejects a weak cashier password', () => {
